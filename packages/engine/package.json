@@ -1,0 +1,72 @@
+{
+  "name": "stackmate",
+  "version": "0.1.0",
+  "author": "Fotis Alexandrou (@falexandrou)",
+  "bin": {
+    "stackmate": "./bin/run"
+  },
+  "bugs": "https://github.com/stackmate-io/stackmate-ce/issues",
+  "dependencies": {
+    "@cdktf/provider-aws": "^1.0.107",
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/plugin-help": "^3",
+    "cdktf": "^0.4.1",
+    "chalk": "^4.1.1",
+    "constructs": "^3.3.91",
+    "lodash": "^4.17.21",
+    "tslib": "^1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "@types/chai": "^4.2.21",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^10",
+    "chai": "^4.3.4",
+    "eslint": "^5.13",
+    "eslint-config-oclif": "^3.1",
+    "eslint-config-oclif-typescript": "^0.1",
+    "globby": "^10",
+    "mocha": "^5.2.0",
+    "nyc": "^14",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://stackmate.io",
+  "keywords": [
+    "stackmate",
+    "aws",
+    "cloud",
+    "terraform",
+    "provisioning"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "stackmate",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "https://github.com/stackmate-io/stackmate-ce.git",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "lint": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "TS_NODE_PROJECT='./tests/tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
+    "test:ci": "npm run lint && npm run test",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "types": "lib/index.d.ts"
+}

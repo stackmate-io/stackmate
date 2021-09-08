@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig",
+  "include": [
+    "../src/**/*"
+  ],
+  "compilerOptions": {
+    "baseUrl": "../src",
+    "rootDir": "../src",
+    "noEmit": true,
+    "lib": [
+      "ES2017"
+    ]
+  },
+  "references": [{
+    "path": ".."
+  }]
+}
