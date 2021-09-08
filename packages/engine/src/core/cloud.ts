@@ -1,28 +1,33 @@
-import { ICloudManager, IStack, IService } from 'interfaces';
+import { CloudManager, EnvironmentStack, CloudService } from 'interfaces';
 import { ConstructorOf, ProviderChoice, RegionList, ServiceAttributes, ServiceList, ServiceMapping, ServiceTypeChoice } from 'types';
 
-abstract class Cloud implements ICloudManager {
+abstract class Cloud implements CloudManager {
   abstract readonly provider: ProviderChoice;
-  abstract readonly regions: RegionList;
-  abstract readonly serviceMapping: ServiceMapping;
-  protected abstract prerequisites: Array<IService>;
 
-  readonly stack: IStack;
+  abstract readonly regions: RegionList;
+
+  abstract readonly serviceMapping: ServiceMapping;
+
+  protected abstract prerequisites: Array<CloudService>;
+
+  readonly stack: EnvironmentStack;
+
   readonly region: string;
+
   readonly defaults: object; // todo
 
   private _services: ServiceList = new Map();
 
   abstract init(): void;
 
-  constructor(region: string, stack: IStack, defaults = {}) { // todo: defaults
+  constructor(region: string, stack: EnvironmentStack, defaults = {}) { // todo: defaults
     this.region = region;
     this.defaults = {};
     this.stack = stack;
     this.init();
   }
 
-  protected getServiceClass(type: ServiceTypeChoice, attrs: ServiceAttributes): ConstructorOf<IService> {
+  protected getServiceClass(type: ServiceTypeChoice): ConstructorOf<CloudService> {
     if (!type) {
       throw new Error('Invalid type specified');
     }
@@ -36,8 +41,8 @@ abstract class Cloud implements ICloudManager {
     return serviceClass;
   }
 
-  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): IService {
-    const ServiceClass = this.getServiceClass(type, attrs);
+  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): CloudService {
+    const ServiceClass = this.getServiceClass(type);
 
     const service = new ServiceClass(name, attrs, this.stack);
 
@@ -51,12 +56,12 @@ abstract class Cloud implements ICloudManager {
   prepare() {
     // Main service provisions
     this._services.forEach(
-      (service) => service.provision(),
+      service => service.provision(),
     );
 
     // Process the services associations, after all service provisions are in place
     this._services.forEach((service) => {
-      const associated = service.associations.map(name => {
+      const associated = service.associations.map((name) => {
         const association = this._services.get(name);
 
         if (!association) {

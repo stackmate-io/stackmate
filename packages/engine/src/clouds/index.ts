@@ -1,9 +1,9 @@
 import { PROVIDER } from 'core/constants';
 import { ProviderChoice } from 'types';
 import { AwsCloud } from 'clouds/aws';
-import { ICloudManager, IStack } from 'interfaces';
+import { CloudManager, EnvironmentStack } from 'interfaces';
 
-export const getCloudManager = (provider: ProviderChoice, region: string, stack: IStack, defaults = {}): ICloudManager => {
+export const getCloudManager = (provider: ProviderChoice, region: string, stack: EnvironmentStack, defaults = {}): CloudManager => {
   if (provider === PROVIDER.AWS) {
     return new AwsCloud(region, stack, defaults);
   }

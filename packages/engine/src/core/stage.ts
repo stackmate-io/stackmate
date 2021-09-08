@@ -1,14 +1,14 @@
 import Stack from 'core/stack';
-import { ICloudManager, IStack } from 'interfaces';
+import { CloudManager, EnvironmentStack } from 'interfaces';
 import { ServiceDeclaration, ProviderChoice } from 'types';
 import { getCloudManager } from 'clouds';
 
 class Stage {
   public name: string;
 
-  public stack: IStack;
+  public stack: EnvironmentStack;
 
-  private _clouds: Map<string, ICloudManager> = new Map();
+  private _clouds: Map<string, CloudManager> = new Map();
 
   constructor(name: string, services: Array<ServiceDeclaration>) { // cleanup
     this.name = name;
@@ -16,7 +16,7 @@ class Stage {
     this.processServices(services);
   }
 
-  getCloud(provider: ProviderChoice, region: string): ICloudManager {
+  getCloud(provider: ProviderChoice, region: string): CloudManager {
     const key = `${provider}-${region}`;
 
     if (!this._clouds.has(key)) {
@@ -35,7 +35,7 @@ class Stage {
   }
 
   protected prepare() {
-    this._clouds.forEach((cloud) => cloud.prepare());
+    this._clouds.forEach(cloud => cloud.prepare());
   }
 
   async deploy() {

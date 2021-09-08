@@ -1,7 +1,7 @@
 import { SERVICE_TYPE } from 'core/constants';
 import AwsService from 'clouds/aws/services/base';
 import { ServiceTypeChoice } from 'types';
-import { IService } from 'interfaces';
+import { CloudService } from 'interfaces';
 
 abstract class AwsRdsInstanceService extends AwsService {
 }
@@ -13,7 +13,7 @@ class AwsMysqlService extends AwsRdsInstanceService {
     // Add instance
   }
 
-  associate(associations: Array<IService>) {
+  associate(associations: Array<CloudService>) {
   }
 }
 
@@ -24,10 +24,9 @@ class AwsPostgresqlService extends AwsRdsInstanceService {
     // Add instance
   }
 
-  associate(associations: Array<IService>) {
+  associate(associations: Array<CloudService>) {
   }
 }
-
 
 export {
   AwsMysqlService,

@@ -1,20 +1,20 @@
 import { Construct } from 'constructs';
 
 import {
-  ServiceAttributes, ServiceAssociation,
-  ServiceMapping, ServiceTypeChoice, ProviderChoice, ServiceAssociationDeclarations, RegionList,
+  ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
+  ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
 } from 'types';
 
-export interface ICloudManager {
+export interface CloudManager {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
   init(): void;
   prepare(): void;
-  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): IService;
+  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): CloudService;
 }
 
-export interface IService {
+export interface CloudService {
   readonly name: string;
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
@@ -22,11 +22,11 @@ export interface IService {
   validate(): void;
   requires(): Array<ServiceAssociation>;
   provision(): void;
-  associate(associations: Array<IService>): void;
-};
+  associate(associations: Array<CloudService>): void;
+}
 
-export interface IStack extends Construct {
+export interface EnvironmentStack extends Construct {
   readonly name: string;
   readonly scope: Construct;
   readonly defaults: object;
-};
+}

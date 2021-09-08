@@ -1,8 +1,8 @@
 import { App as TerraformApp, TerraformStack } from 'cdktf';
 import { Construct } from 'constructs';
-import { IStack } from 'interfaces';
+import { EnvironmentStack } from 'interfaces';
 
-class Stack extends TerraformStack implements IStack {
+class Stack extends TerraformStack implements EnvironmentStack {
   readonly name: string;
 
   readonly scope: Construct;
@@ -17,7 +17,7 @@ class Stack extends TerraformStack implements IStack {
     this.name = name;
   }
 
-  static factory(name: string, defaults: object = {}): IStack {
+  static factory(name: string, defaults: object = {}): EnvironmentStack {
     return new Stack(new TerraformApp(), name, defaults);
   }
 }

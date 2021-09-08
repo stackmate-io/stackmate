@@ -1,8 +1,8 @@
-import { IStack, IService } from 'interfaces';
 import { isEmpty } from 'lodash';
+import { EnvironmentStack, CloudService } from 'interfaces';
 import { ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ProviderChoice, ServiceAssociationDeclarations } from 'types';
 
-abstract class Service implements IService {
+abstract class Service implements CloudService {
   abstract readonly type: ServiceTypeChoice;
 
   abstract readonly provider: ProviderChoice;
@@ -13,12 +13,12 @@ abstract class Service implements IService {
 
   public attributes: ServiceAttributes;
 
-  private _stack: any;
+  protected readonly stack: EnvironmentStack;
 
-  constructor(name: string, attributes: ServiceAttributes, stack: IStack) {
+  constructor(name: string, attributes: ServiceAttributes, stack: EnvironmentStack) {
     this.name = name;
     this.attributes = attributes;
-    this._stack = stack;
+    this.stack = stack;
 
     this.validate();
   }
@@ -27,7 +27,7 @@ abstract class Service implements IService {
 
   abstract provision(): void;
 
-  associate(associations: Array<IService>): void {
+  associate(associations: Array<CloudService>): void {
     if (isEmpty(associations)) {
       return;
     }

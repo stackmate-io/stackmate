@@ -1,5 +1,5 @@
 export const PROVIDER = {
-  AWS: 'aws'
+  AWS: 'aws',
 } as const;
 
 export const SERVICE_TYPE = {
