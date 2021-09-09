@@ -1,7 +1,8 @@
+import { isEmpty, toPairs } from 'lodash';
 import { CloudStack, CloudService } from 'interfaces';
 import {
-  ServiceAttributes, ServiceAssociation, ServiceTypeChoice,
-  ProviderChoice, ServiceAssociationDeclarations, CloudPrerequisites, ServiceList,
+  ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ServiceList,
+  ProviderChoice, ServiceAssociationDeclarations, CloudPrerequisites, RegionList,
 } from 'types';
 
 abstract class Service implements CloudService {
@@ -11,15 +12,15 @@ abstract class Service implements CloudService {
   public name: string;
 
   /**
+   * @var {String} region the region the service operates in
+   */
+  private _region: string;
+
+  /**
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
   public links: ServiceAssociationDeclarations = [];
-
-  /**
-   * @var {ServiceAttributes} attributes the service's attributes
-   */
-  public attributes: ServiceAttributes;
 
   /**
    * @var {CloudStack} stack the stack that the service is provisioned against
@@ -38,6 +39,11 @@ abstract class Service implements CloudService {
    *  }];
    */
   readonly associations: Array<ServiceAssociation> = [];
+
+  /**
+   * @var {Array<String>} regions the regions that the service is available in
+   */
+  abstract readonly regions: RegionList;
 
   /**
    * @var {String} type the service's type
@@ -59,11 +65,39 @@ abstract class Service implements CloudService {
    */
   abstract provision(): void;
 
-  constructor(name: string, attributes: ServiceAttributes, stack: CloudStack, dependencies: CloudPrerequisites) {
-    this.name = name;
-    this.attributes = attributes;
+  constructor(stack: CloudStack) {
     this.stack = stack;
-    this.dependencies = dependencies;
+  }
+
+  /**
+   * Sets the attributes for the service
+   *
+   * @param {Object} attributes the attributes to set to the service
+   */
+  public set attributes(attributes: ServiceAttributes) {
+    toPairs(attributes).filter(
+      ([key]) => this.hasOwnProperty(key),
+    ).forEach(
+      ([key, value]) => ((<any>this)[key] = value),
+    );
+  }
+
+  /**
+   * @returns {String} the cloud region that the service operates in
+   */
+  public get region(): string {
+    return this._region;
+  }
+
+  /**
+   * @param {String} region the region for the service
+   */
+  public set region(region: string) {
+    if (region && !isEmpty(this.regions) && !Object.values(this.regions).includes(region)) {
+      throw new Error(`Region ${region} is not supported `);
+    }
+
+    this._region = region;
   }
 
   /**
@@ -76,6 +110,11 @@ abstract class Service implements CloudService {
     // overload this function in services that it's required to parse the cloud dependencies
   }
 
+  /**
+   * Associates the current service with the ones mentioned in the `links` section
+   *
+   * @param {Map} services the service registry to look up for associations
+   */
   public link(services: ServiceList) {
     this.links.forEach((name) => {
       // Get the service mentioned in the `links` section of the attributes

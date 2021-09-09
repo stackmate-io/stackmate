@@ -12,8 +12,6 @@ abstract class Cloud implements CloudManager {
 
   readonly stack: CloudStack;
 
-  readonly region: string;
-
   readonly defaults: object; // todo
 
   /**
@@ -21,13 +19,37 @@ abstract class Cloud implements CloudManager {
    */
   private _services: ServiceList = new Map();
 
+  /**
+   * @var {String} _region the provider's region
+   * @private
+   */
+  private _region: string;
+
   abstract init(): void;
 
   constructor(region: string, stack: CloudStack, defaults = {}) { // todo: defaults
-    this.region = region;
-    this.defaults = defaults;
     this.stack = stack;
+    this.defaults = defaults;
+    this.region = region;
     this.init();
+  }
+
+  /**
+   * @returns {String} the region for the cloud provider
+   */
+  public get region(): string {
+    return this._region;
+  }
+
+  /**
+   * @param {String} region the region for the cloud provider
+   */
+  public set region(region: string) {
+    if (!region || !Object.values(this.regions)) {
+      throw new Error(`Invalid region ${region} for provider ${this.provider}`);
+    }
+
+    this._region = region;
   }
 
   /**
@@ -58,10 +80,14 @@ abstract class Cloud implements CloudManager {
    * @param {ServiceAttributes} attrs the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): CloudService {
+  register(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService {
     const ServiceClass = this.getServiceClass(type);
 
-    const service = new ServiceClass(name, attrs, this.stack, this.prerequisites);
+    const service = new ServiceClass(this.stack);
+
+    service.attributes = attributes;
+    service.dependencies = this.prerequisites;
+    service.validate();
 
     this._services.set(service.name, service);
 

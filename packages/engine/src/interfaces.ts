@@ -12,7 +12,7 @@ export interface CloudManager {
   readonly serviceMapping: ServiceMapping;
   init(): void;
   prepare(): void;
-  register(type: ServiceTypeChoice, name: string, attrs: ServiceAttributes): CloudService;
+  register(type: ServiceTypeChoice, attrs: ServiceAttributes): CloudService;
 }
 
 export interface CloudService {
@@ -20,7 +20,9 @@ export interface CloudService {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
+  readonly regions: RegionList;
   links: ServiceAssociationDeclarations;
+  set attributes(attributes: ServiceAttributes);
   set dependencies(dependencies: CloudPrerequisites);
   validate(): void;
   provision(): void;

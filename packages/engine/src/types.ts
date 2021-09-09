@@ -18,13 +18,13 @@ export type ServiceAssociation = {
 };
 
 export type ServiceBaseAttributes = {
-  name: string;
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  region: string;
 }
 
 export type ServiceAttributes = {
+  name: string;
+  region: string;
   links?: ServiceAssociationDeclarations;
 };
 

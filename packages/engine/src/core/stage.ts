@@ -44,10 +44,9 @@ class Stage {
   }
 
   protected processServices(serviceAttributes: Array<ServiceDeclaration> = []) {
-    serviceAttributes.forEach((attrs: ServiceDeclaration) => {
-      const { provider, region, name, type, ...attributes } = attrs;
-
-      this.getCloud(provider, region).register(type, name, attributes);
+    serviceAttributes.forEach((attributes: ServiceDeclaration) => {
+      const { provider, region, name, type, ...rest } = attributes;
+      this.getCloud(provider, region).register(type, { name, region, ...rest });
     });
   }
 
