@@ -12,32 +12,28 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceAssociationDeclarations = Array<string>;
 export type EnvironmentVariablesDeclaration = Record<string, string|number>;
 
-/*
-- name: django-app-mysql-db
-  type: mysql
-  version: 5.7
-  size: db.t3.micro
-  storage: 100
-  databases:
-    - djangoapp
-*/
-
-export type ServiceAttributes = {
-  associations?: ServiceAssociationDeclarations;
-};
-
 export type ServiceAssociation = {
   lookup: ConstructorOf<CloudService>;
-  onRegister: (a: Array<CloudService>) => void;
+  handler: (a: CloudService) => void;
 };
 
-export type ServiceDeclaration = {
+export type ServiceBaseAttributes = {
   name: string;
   provider: ProviderChoice;
   type: ServiceTypeChoice;
   region: string;
-} & ServiceAttributes;
+}
+
+export type ServiceAttributes = {
+  links?: ServiceAssociationDeclarations;
+};
+
+export type ServiceDeclaration = ServiceBaseAttributes & ServiceAttributes;
 
 export type ServiceList = Map<string, CloudService>;
+
 export type ServiceMapping = Map<ServiceTypeChoice, ConstructorOf<CloudService>>;
+
 export type RegionList = { [name: string]: string };
+
+export type CloudPrerequisites = { [name: string]: CloudService };

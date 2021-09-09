@@ -1,13 +1,23 @@
 import Stack from 'core/stack';
-import { CloudManager, EnvironmentStack } from 'interfaces';
+import { CloudManager, CloudStack } from 'interfaces';
 import { ServiceDeclaration, ProviderChoice } from 'types';
 import { getCloudManager } from 'clouds';
 
 class Stage {
+  /**
+   * @var {String} name the name for the stage
+   */
   public name: string;
 
-  public stack: EnvironmentStack;
+  /**
+   * @var {CloudStack} stack the stack to use to provision the services with
+   */
+  public stack: CloudStack;
 
+  /**
+   * @var {Map} _clouds a collection of the cloud managers that have been instantiated for the stage
+   * @private
+   */
   private _clouds: Map<string, CloudManager> = new Map();
 
   constructor(name: string, services: Array<ServiceDeclaration>) { // cleanup
@@ -16,6 +26,13 @@ class Stage {
     this.processServices(services);
   }
 
+  /**
+   * Returns a cloud manager based on a provider name and region
+   *
+   * @param {ProviderChoice} provider string the provider for the cloud manager
+   * @param {String} region string the cloud region to use
+   * @returns {CloudManager} the cloud manager for the specified provider & region
+   */
   getCloud(provider: ProviderChoice, region: string): CloudManager {
     const key = `${provider}-${region}`;
 
@@ -38,14 +55,23 @@ class Stage {
     this._clouds.forEach(cloud => cloud.prepare());
   }
 
+  /**
+   * Deploys the stage
+   */
   async deploy() {
     this.prepare();
   }
 
+  /**
+   * Destroys the stage
+   */
   async destroy() {
     this.prepare();
   }
 
+  /**
+   * Returns the state of the resources for the stage
+   */
   async state() {
     this.prepare();
   }

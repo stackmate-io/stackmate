@@ -2,8 +2,7 @@ import { AwsProvider } from '@cdktf/provider-aws';
 
 import Cloud from 'core/cloud';
 import { PROVIDER, SERVICE_TYPE } from 'core/constants';
-import { CloudService } from 'interfaces';
-import { ProviderChoice, RegionList, ServiceMapping } from 'types';
+import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from 'types';
 import { AWS_REGIONS } from 'clouds/aws/constants';
 import { AwsMysqlService, AwsPostgresqlService } from 'clouds/aws/services/rds';
 import { AwsVpcService } from 'clouds/aws/services/vpc';
@@ -21,16 +20,18 @@ class AwsCloud extends Cloud {
 
   readonly serviceMapping: ServiceMapping = AWS_SERVICE_MAPPING;
 
-  protected prerequisites: Array<CloudService> = [];
+  protected prerequisites: CloudPrerequisites = {};
 
-  private _cloudProvider: AwsProvider;
+  private _cloudProvider: AwsProvider; // tslint-disable-line: 6133
 
   init(): void {
-    this._cloudProvider = new AwsProvider(this.stack, PROVIDER.AWS, { region: this.region });
+    this._cloudProvider = new AwsProvider(this.stack, PROVIDER.AWS, {
+      region: this.region,
+    });
 
-    this.prerequisites = [
-      new AwsVpcService('my-stage-vpc', {}, this.stack),
-    ];
+    this.prerequisites = {
+      vpc: new AwsVpcService('my-stage-vpc', {}, this.stack),
+    };
   }
 }
 

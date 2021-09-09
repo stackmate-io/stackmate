@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
+  CloudPrerequisites, ServiceList,
 } from 'types';
 
 export interface CloudManager {
@@ -18,15 +19,37 @@ export interface CloudService {
   readonly name: string;
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
-  associations: ServiceAssociationDeclarations;
+  readonly associations: Array<ServiceAssociation>;
+  links: ServiceAssociationDeclarations;
+  set dependencies(dependencies: CloudPrerequisites);
   validate(): void;
-  requires(): Array<ServiceAssociation>;
   provision(): void;
-  associate(associations: Array<CloudService>): void;
+  link(associations: ServiceList): void;
 }
 
-export interface EnvironmentStack extends Construct {
+export interface CloudStack extends Construct {
   readonly name: string;
   readonly scope: Construct;
   readonly defaults: object;
+}
+
+export interface Sizeable {
+  size: string;
+  sizes: Array<string>;
+  validations: Required<{ size: number }>;
+}
+
+export interface Storable {
+  storage: number;
+  validations: Required<{ storage: number }>;
+}
+
+export interface Mountable {
+  volumes: string; // TODO
+  valdations: Required<{ storage: number }>;
+}
+
+export interface MultiNode {
+  nodes: number; // TODO
+  valdations: Required<{ nodes: number }>;
 }

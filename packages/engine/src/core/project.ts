@@ -6,8 +6,7 @@ class Project {
   }
 
   public getStage(name: string): Stage {
-    const serviceDeclarations = {};
-    return new Stage(name, serviceDeclarations);
+    return new Stage(name, {});
   }
 
   public validate() {
@@ -17,8 +16,8 @@ class Project {
 /*
 Usage:
 const project = new Project(cfg, state);
-const stage = project.getStage('production');
-await stage.deploy();
+project.stage('production');
+await project.deploy();
 */
 
 export default Project;
