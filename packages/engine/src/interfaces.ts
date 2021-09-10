@@ -24,9 +24,9 @@ export interface CloudService {
   links: ServiceAssociationDeclarations;
   set attributes(attributes: ServiceAttributes);
   set dependencies(dependencies: CloudPrerequisites);
+  link(target: CloudService): void;
   validate(): void;
   provision(): void;
-  link(associations: ServiceList): void;
 }
 
 export interface CloudStack extends Construct {

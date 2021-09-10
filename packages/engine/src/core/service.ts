@@ -14,7 +14,7 @@ abstract class Service implements CloudService {
   /**
    * @var {String} region the region the service operates in
    */
-  private _region: string;
+  public region: string;
 
   /**
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
@@ -83,24 +83,6 @@ abstract class Service implements CloudService {
   }
 
   /**
-   * @returns {String} the cloud region that the service operates in
-   */
-  public get region(): string {
-    return this._region;
-  }
-
-  /**
-   * @param {String} region the region for the service
-   */
-  public set region(region: string) {
-    if (region && !isEmpty(this.regions) && !Object.values(this.regions).includes(region)) {
-      throw new Error(`Region ${region} is not supported `);
-    }
-
-    this._region = region;
-  }
-
-  /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
    * from the cloud provider's default privisions. (eg. the VPC id from the AWS cloud provider)
    *
@@ -113,27 +95,23 @@ abstract class Service implements CloudService {
   /**
    * Associates the current service with the ones mentioned in the `links` section
    *
-   * @param {Map} services the service registry to look up for associations
+   * @param {Service} target the service to link the current service with
    */
-  public link(services: ServiceList) {
-    this.links.forEach((name) => {
-      // Get the service mentioned in the `links` section of the attributes
-      const target = services.get(name);
+  public link(target: Service) {
+    // Find an appropriate handler & run it
+    const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
 
-      if (!target) {
-        throw new Error(`Service named ${name} was not found`);
-      }
-
-      // Find an appropriate handler & run it
-      const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
-
-      if (handler) {
-        handler.call(this, target);
-      }
-    });
+    if (handler) {
+      handler.call(this, target);
+    }
   }
 
   validate(): void {
+    // if (region && !isEmpty(this.regions) && !Object.values(this.regions).includes(region)) {
+    //   throw new Error(
+    //     `Service ${this.type} on ${this.provider} does not support the ${region} region`,
+    //   );
+    // }
   }
 }
 

@@ -20,10 +20,9 @@ class Stage {
    */
   private _clouds: Map<string, CloudManager> = new Map();
 
-  constructor(name: string, services: Array<ServiceDeclaration>) { // cleanup
+  constructor(name: string) {
     this.name = name;
     this.stack = Stack.factory(name);
-    this.processServices(services);
   }
 
   /**
@@ -43,12 +42,18 @@ class Stage {
     return this._clouds.get(key)!;
   }
 
+  public addService(attributes: ServiceDeclaration) {
+    const { provider, region, name, type, ...rest } = attributes;
+
+    this.getCloud(provider, region).register(type, { name, region, ...rest });
+  }
+
+  /*
   protected processServices(serviceAttributes: Array<ServiceDeclaration> = []) {
     serviceAttributes.forEach((attributes: ServiceDeclaration) => {
-      const { provider, region, name, type, ...rest } = attributes;
-      this.getCloud(provider, region).register(type, { name, region, ...rest });
     });
   }
+  */
 
   protected prepare() {
     this._clouds.forEach(cloud => cloud.prepare());

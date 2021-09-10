@@ -59,7 +59,7 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "https://github.com/stackmate-io/stackmate-ce.git",
+  "repository": "https://github.com/stackmate-io/stackmate-ce",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint . --ext .ts --config .eslintrc",
