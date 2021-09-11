@@ -55,29 +55,8 @@ class Stage {
   }
   */
 
-  protected prepare() {
+  public prepare() {
     this._clouds.forEach(cloud => cloud.prepare());
-  }
-
-  /**
-   * Deploys the stage
-   */
-  async deploy() {
-    this.prepare();
-  }
-
-  /**
-   * Destroys the stage
-   */
-  async destroy() {
-    this.prepare();
-  }
-
-  /**
-   * Returns the state of the resources for the stage
-   */
-  async state() {
-    this.prepare();
   }
 }
 

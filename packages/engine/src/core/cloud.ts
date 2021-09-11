@@ -83,9 +83,7 @@ abstract class Cloud implements CloudManager {
   register(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService {
     const ServiceClass = this.getServiceClass(type);
 
-    const service = new ServiceClass(this.stack);
-
-    service.attributes = attributes;
+    const service = new ServiceClass(this.stack, attributes);
     service.dependencies = this.prerequisites;
     service.validate();
 
@@ -102,7 +100,7 @@ abstract class Cloud implements CloudManager {
     this._services.forEach(service => service.provision());
 
     // Process the services associations, after all service provisions are in place
-    this._services.forEach(service => service.link(this._services));
+    // this._services.forEach(service => service.link(this._services));
   }
 }
 

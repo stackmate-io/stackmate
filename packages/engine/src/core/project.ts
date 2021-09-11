@@ -1,23 +1,48 @@
 import Stage from 'core/stage';
 
 class Project {
-  constructor(configFilePath, stateFilePath) {
-    this.validate();
+  stage: Stage;
+
+  constructor(configFilePath) {
   }
 
-  public getStage(name: string): Stage {
-    return new Stage(name, {});
+  async load() {
+    // load configuration file
+    // normalize configuration file (apply default attributes & overrides to the stages)
+    // load state file
+    // load the vault
   }
 
-  public validate() {
+  useStage(name: string): Stage {
+    // populate the stage
+    // validate
+  }
+
+  validate() {
+  }
+
+  async deploy(stage: string) {
+    this.useStage(stage).prepare();
+  }
+
+  async destroy(stage: string) {
+    this.useStage(stage).prepare();
+  }
+
+  async state(stage: string) {
+    this.useStage(stage);
+  }
+
+  async vault() {
+  }
+
+  static async factory() {
   }
 }
 
 /*
 Usage:
-const project = new Project(cfg, state);
-project.stage('production');
-await project.deploy();
+await Project.load(cfg, state).deploy('production');
 */
 
 export default Project;

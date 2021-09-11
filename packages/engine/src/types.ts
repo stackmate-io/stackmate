@@ -9,7 +9,7 @@ export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 
 // Config file types
-export type ServiceAssociationDeclarations = Array<string>;
+export type ServiceAssociationDeclarations = Set<string>;
 export type EnvironmentVariablesDeclaration = Record<string, string|number>;
 
 export type ServiceAssociation = {

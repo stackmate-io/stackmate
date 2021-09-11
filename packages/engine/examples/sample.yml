@@ -1,0 +1,98 @@
+---
+name: sample-app-sinatra
+# The default cloud provider to use
+provider: aws
+# The default region to deploy to
+region: eu-central-1
+
+# TODO:
+# Where to store the state by default in the user's home directory
+# state:
+#   storage: s3
+#   path: s3://stackmate-sample-state.s3.eu-central-1.amazonaws.com
+
+# TODO:
+# Where to store the credentials
+# vault:
+#   storage: file
+#   path: ~/.stackmate/test123.yml.enc
+#   # storage: github # todo
+
+# Environment variables to use
+# TODO
+# environment:
+#   aws:
+#     keyid: STACKMATE_KEY_TEST
+#     secret: STACKMATE_SECRET_TEST
+#   # TODO
+#   # vault:
+#   #   token: GITHUB_TOKEN
+#   # state:
+#   #   username: ABC
+#   #   password: OBB
+
+stages:
+  production:
+    application:
+      type: application
+      size: t2.nano
+      storage: 20
+      volumes:
+        - size: 30
+          name: test-volume
+          mount: /var/www/test
+      links:
+        - database
+
+    database:
+      type: mysql
+      size: db.t2.nano
+      storage: 30
+      credentials:
+        username: vault:dbusername
+        password: vault:dbpassword
+      root:
+        username: vault:rootusername
+        password: vault:rootpassword
+
+    loadbalancer:
+      type: loadbalancer
+      source: application
+
+    routing:
+      type: routing
+      domains:
+        - name: sinatra.ezploy.eu
+          service: loadbalancer
+        - name: www.sinatra.ezploy.eu
+          type: CNAME
+          value: sinatra.ezploy.eu
+        - name: database.sinatra.ezploy.eu
+          service: database
+
+    certificates:
+      type: ssl
+      domains:
+        - sinatra.ezploy.eu
+        - *.sinatra.ezploy.eu
+
+  # Environment overrides - staging
+  staging:
+    from: production
+    skip:
+      - routing
+      - certificates
+    application:
+      size: t2.large
+
+  # Environment overrides - staging2
+  staging2:
+    from: staging
+    application:
+      size: t2.xlarge
+
+# Optional
+defaults:
+  aws:
+    vpc-cidr: 10.0.0.0/16
+    vpc-prefix: my-project-vpc

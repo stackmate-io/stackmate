@@ -20,7 +20,7 @@ abstract class Service implements CloudService {
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  public links: ServiceAssociationDeclarations = [];
+  public links: ServiceAssociationDeclarations = new Set();
 
   /**
    * @var {CloudStack} stack the stack that the service is provisioned against
@@ -65,8 +65,9 @@ abstract class Service implements CloudService {
    */
   abstract provision(): void;
 
-  constructor(stack: CloudStack) {
+  constructor(stack: CloudStack, attributes: ServiceAttributes) {
     this.stack = stack;
+    this.attributes = attributes;
   }
 
   /**

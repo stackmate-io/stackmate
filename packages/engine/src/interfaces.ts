@@ -55,3 +55,13 @@ export interface MultiNode {
   nodes: number; // TODO
   valdations: Required<{ nodes: number }>;
 }
+
+export interface Authenticatable {
+  credentials: number; // TODO
+  validations: Required<{ credentials: number }>
+}
+
+export interface Rootable {
+  root: number; // TOOD
+  validations: Required<{ root: number }>
+}
