@@ -1,4 +1,4 @@
-import { ProviderChoice, RegionList } from 'types';
+import { RegionList } from 'types';
 
 export const PROVIDER = {
   AWS: 'aws',

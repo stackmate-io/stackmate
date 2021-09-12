@@ -21,10 +21,6 @@ class Project {
 
   useStage(name: string): Stage {
     // populate the stage
-    // validate
-  }
-
-  validate() {
   }
 
   async deploy(stage: string) {

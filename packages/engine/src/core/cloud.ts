@@ -76,8 +76,7 @@ abstract class Cloud implements CloudManager {
    * Registers a service in the cloud services registry
    *
    * @param {ServiceTypeChoice} type the type of the service to register
-   * @param {String} name the name of the service to register
-   * @param {ServiceAttributes} attrs the service's attributes
+   * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
   register(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService {

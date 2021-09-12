@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
-  CloudPrerequisites, ServiceList,
+  CloudPrerequisites, Validations,
 } from 'types';
 
 export interface CloudManager {
@@ -22,8 +22,8 @@ export interface CloudService {
   readonly associations: Array<ServiceAssociation>;
   readonly regions: RegionList;
   links: ServiceAssociationDeclarations;
-  set attributes(attributes: ServiceAttributes);
-  set dependencies(dependencies: CloudPrerequisites);
+  attributes: ServiceAttributes;
+  dependencies: CloudPrerequisites;
   link(target: CloudService): void;
   validate(): void;
   provision(): void;
@@ -35,33 +35,37 @@ export interface CloudStack extends Construct {
   readonly defaults: object;
 }
 
-export interface Sizeable {
+export interface Validatable {
+  validate(): void;
+  validations(): Validations;
+}
+
+export interface Sizeable extends Validatable {
   size: string;
-  sizes: Array<string>;
-  validations: Required<{ size: number }>;
+  validations(): Required<{ size: object }>;
 }
 
-export interface Storable {
+export interface Storable extends Validatable {
   storage: number;
-  validations: Required<{ storage: number }>;
+  validations(): Required<{ storage: object }>;
 }
 
-export interface Mountable {
+export interface Mountable extends Validatable {
   volumes: string; // TODO
-  valdations: Required<{ storage: number }>;
+  valdations(): Required<{ volumes: object }>;
 }
 
-export interface MultiNode {
+export interface MultiNode extends Validatable {
   nodes: number; // TODO
-  valdations: Required<{ nodes: number }>;
+  valdations(): Required<{ nodes: object }>;
 }
 
-export interface Authenticatable {
+export interface Authenticatable extends Validatable {
   credentials: number; // TODO
-  validations: Required<{ credentials: number }>
+  validations(): Required<{ credentials: object }>;
 }
 
-export interface Rootable {
+export interface Rootable extends Validatable {
   root: number; // TOOD
-  validations: Required<{ root: number }>
+  validations(): Required<{ root: object }>;
 }

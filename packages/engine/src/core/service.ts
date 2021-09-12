@@ -1,8 +1,8 @@
-import { isEmpty, toPairs } from 'lodash';
+import { toPairs } from 'lodash';
 import { CloudStack, CloudService } from 'interfaces';
 import {
-  ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ServiceList,
-  ProviderChoice, ServiceAssociationDeclarations, CloudPrerequisites, RegionList,
+  ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ServiceAssociationDeclarations,
+  ProviderChoice, CloudPrerequisites, RegionList,
 } from 'types';
 
 abstract class Service implements CloudService {
@@ -79,7 +79,9 @@ abstract class Service implements CloudService {
     toPairs(attributes).filter(
       ([key]) => this.hasOwnProperty(key),
     ).forEach(
-      ([key, value]) => ((<any>this)[key] = value),
+      ([key, value]) => {
+        (this as any)[key] = value;
+      },
     );
   }
 

@@ -39,26 +39,26 @@ export type RegionList = { [name: string]: string };
 export type CloudPrerequisites = { [name: string]: CloudService };
 
 export type AwsDefaults = {
-  "vpc-cidr"?: string,
-  "vpc-prefix"?: string,
+  'vpc-cidr'?: string;
+  'vpc-prefix'?: string;
 };
 
 export type ConfigurationFileContents = {
-  provider?: string,
-  region?: string,
+  provider?: string;
+  region?: string;
   stages?: {
     [name: string]: {
-      from?: string,
-      skip?: Array<string>,
-      provider?: string,
-      region?: string,
-    },
-  },
+      from?: string;
+      skip?: Array<string>;
+      provider?: string;
+      region?: string;
+    };
+  };
   defaults?: {
-    aws?: AwsDefaults,
-  },
+    aws?: AwsDefaults;
+  };
 };
 
 export type Validations = {
-  [name: string]: object,
+  [name: string]: object;
 };

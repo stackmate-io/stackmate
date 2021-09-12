@@ -5,8 +5,9 @@ import YAML from 'yaml';
 
 import { PROVIDER, SERVICE_TYPE } from 'core/constants';
 import { ConfigurationFileContents, ProviderChoice, Validations } from 'types';
+import { Validatable } from 'interfaces';
 
-class Configuration {
+class Configuration implements Validatable {
   /**
    * @var {Object} contents the configuration file's contents;
    */
@@ -33,7 +34,7 @@ class Configuration {
    *
    * @returns {Validations} the list of validations to use for the config file
    */
-  protected validations(): Validations {
+  validations(): Validations {
     const providers = Object.values(PROVIDER);
 
     validate.validators.validateStages = (stages: any) => {
@@ -46,7 +47,7 @@ class Configuration {
       }
 
       const stagesHaveServiceTypesDefined = Object.values(stages).every(
-        (stage) => (has(stage, 'type') && Object.values(SERVICE_TYPE).includes(stage.type)),
+        stage => (has(stage, 'type') && Object.values(SERVICE_TYPE).includes(stage.type)),
       );
 
       if (!stagesHaveServiceTypesDefined) {
@@ -60,7 +61,7 @@ class Configuration {
         return;
       }
 
-      if (!isObject(defaults) || Object.keys(defaults).some((prov) => !providers.includes(prov as ProviderChoice))) {
+      if (!isObject(defaults) || Object.keys(defaults).some(prov => !providers.includes(prov as ProviderChoice))) {
         return 'The "defaults" entry should contain valid cloud providers in the mapping';
       }
     };
@@ -73,12 +74,12 @@ class Configuration {
       },
       provider: {
         presence: {
-          message: `A default cloud provider should be specified`,
+          message: 'A default cloud provider should be specified',
         },
         inclusion: {
           within: providers,
           message: `The default cloud provider is invalid. Available options are ${providers.join(', ')}`,
-        }
+        },
       },
       region: {
         presence: {
@@ -136,20 +137,23 @@ class Configuration {
 
   /**
    * Loads a configuration file
+   *
+   * @param {String} path the path to load the configuration from
+   * @returns {Configuration} the project configuration, validated and normalized
    */
   static async load(path: string) {
     let fileContents;
 
     try {
       fileContents = readFileSync(path);
-    } catch (err) {
-      throw new Error(`The path for the configuration file specified is invalid`);
+    } catch (error) {
+      throw new Error('The path for the configuration file specified is invalid');
     }
 
     let contents;
     try {
       contents = YAML.parse(fileContents.toString());
-    } catch (err) {
+    } catch (error) {
       throw new Error('The configuration file should be a valid YAML file');
     }
 

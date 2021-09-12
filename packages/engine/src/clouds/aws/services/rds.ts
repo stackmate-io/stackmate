@@ -1,8 +1,6 @@
-import { CloudService } from 'interfaces';
-import { CloudPrerequisites, ServiceTypeChoice } from 'types';
+import { ServiceTypeChoice } from 'types';
 import { SERVICE_TYPE } from 'core/constants';
 import AwsService from 'clouds/aws/services/base';
-import { AwsVpcService } from 'clouds/aws/services/vpc';
 import { RdsCluster } from '@cdktf/provider-aws';
 
 abstract class AwsRdsInstanceService extends AwsService {

@@ -120,8 +120,8 @@ class Registry {
   /**
    * Links two services together
    *
-   * @param serviceName the service name to link
-   * @param linkedServiceName the target service to link the previous service to
+   * @param {String} serviceName the service name to link
+   * @param {String} linkedServiceName the target service to link the previous service to
    */
   link(serviceName: string, linkedServiceName: string): void {
     const source = this.get(serviceName);
