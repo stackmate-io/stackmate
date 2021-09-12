@@ -1,5 +1,7 @@
+import { readFileSync } from 'fs';
 import { clone, has, isEmpty, isObject, merge, omit } from 'lodash';
 import validate from 'validate.js';
+import YAML from 'yaml';
 
 import { PROVIDER, SERVICE_TYPE } from 'core/constants';
 import { ConfigurationFileContents, ProviderChoice, Validations } from 'types';
@@ -130,6 +132,32 @@ class Configuration {
         });
       }
     });
+  }
+
+  /**
+   * Loads a configuration file
+   */
+  static async load(path: string) {
+    let fileContents;
+
+    try {
+      fileContents = readFileSync(path);
+    } catch (err) {
+      throw new Error(`The path for the configuration file specified is invalid`);
+    }
+
+    let contents;
+    try {
+      contents = YAML.parse(fileContents.toString());
+    } catch (err) {
+      throw new Error('The configuration file should be a valid YAML file');
+    }
+
+    if (!contents || !isObject(contents)) {
+      throw new Error('The configuaration file’s content is invalid');
+    }
+
+    return new Configuration(contents as ConfigurationFileContents);
   }
 }
 

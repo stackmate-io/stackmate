@@ -2,17 +2,18 @@ import Stage from 'core/stage';
 import Configuration from 'core/configuration';
 
 class Project {
+  path: string;
+
   stage: Stage;
 
   configuration: Configuration;
 
   constructor(path: string) {
-    this.configuration = new Configuration(path);
+    this.path;
   }
 
   async load() {
-    await this.configuration.load();
-
+    // this.configuration = new Configuration(path);
     // load state file
     // load the vault
     // apply vault credentials to services
