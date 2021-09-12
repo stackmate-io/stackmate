@@ -44,10 +44,12 @@ export type AwsDefaults = {
 };
 
 export type ConfigurationFileContents = {
+  name?: string,
   provider?: string;
   region?: string;
   stages?: {
     [name: string]: {
+      type: ServiceTypeChoice,
       from?: string;
       skip?: Array<string>;
       provider?: string;

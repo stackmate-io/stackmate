@@ -6,6 +6,7 @@ import YAML from 'yaml';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 import { ConfigurationFileContents, ProviderChoice, Validations } from '@stackmate/types';
 import { Validatable } from '@stackmate/interfaces';
+import { ValidationError } from '@stackmate/core/errors';
 
 class Configuration implements Validatable {
   /**
@@ -24,9 +25,13 @@ class Configuration implements Validatable {
    * The subsequent service values will be validated during service initialization.
    */
   validate() {
-    validate.validate(this.contents, this.validations(), {
+    const errors = validate.validate(this.contents, this.validations(), {
       fullMessages: false,
     });
+
+    if (errors) {
+      throw new ValidationError('The project’s configuration is not valid', errors);
+    }
   }
 
   /**
@@ -81,6 +86,7 @@ class Configuration implements Validatable {
     return {
       name: {
         presence: {
+          allowEmpty: false,
           message: 'You have to provide a name for the project',
         },
       },
@@ -99,10 +105,6 @@ class Configuration implements Validatable {
         },
       },
       stages: {
-        presence: {
-          allowEmpty: false,
-          message: 'You need to provide a list of stages for the project',
-        },
         validateStages: true,
       },
       defaults: {
