@@ -1,6 +1,7 @@
 import { App as TerraformApp, TerraformStack } from 'cdktf';
 import { Construct } from 'constructs';
-import { CloudStack } from 'interfaces';
+
+import { CloudStack } from '@stackmate/interfaces';
 
 class Stack extends TerraformStack implements CloudStack {
   readonly name: string;

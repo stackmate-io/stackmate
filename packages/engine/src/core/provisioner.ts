@@ -1,5 +1,5 @@
-import { CloudManager, CloudStack } from 'interfaces';
-import Registry from './registry';
+import { CloudManager, CloudStack } from '@stackmate/interfaces';
+import Registry from '@stackmate/core/registry';
 
 class Provisioner {
   protected registry: Registry;

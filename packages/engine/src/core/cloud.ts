@@ -1,5 +1,5 @@
-import { CloudManager, CloudStack, CloudService } from 'interfaces';
-import { CloudPrerequisites, ConstructorOf, ProviderChoice, RegionList, ServiceAttributes, ServiceList, ServiceMapping, ServiceTypeChoice } from 'types';
+import { CloudManager, CloudStack, CloudService } from '@stackmate/interfaces';
+import { CloudPrerequisites, ConstructorOf, ProviderChoice, RegionList, ServiceAttributes, ServiceList, ServiceMapping, ServiceTypeChoice } from '@stackmate/types';
 
 abstract class Cloud implements CloudManager {
   abstract readonly provider: ProviderChoice;

@@ -1,7 +1,7 @@
-import { PROVIDER } from 'core/constants';
-import { ProviderChoice } from 'types';
-import { AwsCloud } from 'clouds/aws';
-import { CloudManager, CloudStack } from 'interfaces';
+import { PROVIDER } from '@stackmate/core/constants';
+import { ProviderChoice } from '@stackmate/types';
+import { AwsCloud } from '@stackmate/clouds/aws';
+import { CloudManager, CloudStack } from '@stackmate/interfaces';
 
 export const getCloudManager = (provider: ProviderChoice, region: string, stack: CloudStack, defaults = {}): CloudManager => {
   if (!provider || !Object.values(PROVIDER).includes(provider)) {

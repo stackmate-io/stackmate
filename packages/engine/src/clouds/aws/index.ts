@@ -1,10 +1,10 @@
 import { AwsProvider } from '@cdktf/provider-aws';
 
-import Cloud from 'core/cloud';
-import { PROVIDER, SERVICE_TYPE, AWS_REGIONS } from 'core/constants';
-import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from 'types';
-import { AwsMysqlService, AwsPostgresqlService } from 'clouds/aws/services/rds';
-import { AwsVpcService } from 'clouds/aws/services/vpc';
+import Cloud from '@stackmate/core/cloud';
+import { PROVIDER, SERVICE_TYPE, AWS_REGIONS } from '@stackmate/core/constants';
+import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
+import { AwsMysqlService, AwsPostgresqlService } from '@stackmate/clouds/aws/services/rds';
+import { AwsVpcService } from '@stackmate/clouds/aws/services/vpc';
 
 export const AWS_SERVICE_MAPPING: ServiceMapping = new Map([
   [SERVICE_TYPE.MYSQL, AwsMysqlService],

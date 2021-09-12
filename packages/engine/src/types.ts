@@ -1,5 +1,5 @@
-import { CloudService } from 'interfaces';
-import { PROVIDER, SERVICE_TYPE } from 'core/constants';
+import { CloudService } from '@stackmate/interfaces';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 
 // Generic types
 export type ConstructorOf<T> = { new(...args: any[]): T };

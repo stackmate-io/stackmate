@@ -1,7 +1,7 @@
-import Service from 'core/service';
-import { AwsVpcService } from 'clouds/aws/services/vpc';
-import { ProviderChoice, RegionList } from 'types';
-import { PROVIDER, AWS_REGIONS } from 'core/constants';
+import Service from '@stackmate/core/service';
+import { AwsVpcService } from '@stackmate/clouds/aws/services/vpc';
+import { ProviderChoice, RegionList } from '@stackmate/types';
+import { PROVIDER, AWS_REGIONS } from '@stackmate/core/constants';
 
 abstract class AwsService extends Service {
   readonly provider: ProviderChoice = PROVIDER.AWS;

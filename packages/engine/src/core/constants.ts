@@ -1,4 +1,4 @@
-import { RegionList } from 'types';
+import { RegionList } from '@stackmate/types';
 
 export const PROVIDER = {
   AWS: 'aws',

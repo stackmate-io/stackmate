@@ -1,8 +1,9 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws';
 import { Token } from 'cdktf';
-import { SERVICE_TYPE } from 'core/constants';
-import AwsService from 'clouds/aws/services/base';
-import { ServiceTypeChoice } from 'types';
+
+import { SERVICE_TYPE } from '@stackmate/core/constants';
+import AwsService from '@stackmate/clouds/aws/services/base';
+import { ServiceTypeChoice } from '@stackmate/types';
 
 class AwsVpcService extends AwsService {
   readonly type: ServiceTypeChoice = SERVICE_TYPE.NETWORKING;

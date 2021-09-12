@@ -1,9 +1,9 @@
 import { toPairs } from 'lodash';
-import { CloudStack, CloudService } from 'interfaces';
+import { CloudStack, CloudService } from '@stackmate/interfaces';
 import {
   ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ServiceAssociationDeclarations,
   ProviderChoice, CloudPrerequisites, RegionList,
-} from 'types';
+} from '@stackmate/types';
 
 abstract class Service implements CloudService {
   /**

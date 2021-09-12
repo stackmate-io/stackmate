@@ -1,7 +1,8 @@
-import { ServiceTypeChoice } from 'types';
-import { SERVICE_TYPE } from 'core/constants';
-import AwsService from 'clouds/aws/services/base';
 import { RdsCluster } from '@cdktf/provider-aws';
+
+import { ServiceTypeChoice } from '@stackmate/types';
+import { SERVICE_TYPE } from '@stackmate/core/constants';
+import AwsService from '@stackmate/clouds/aws/services/base';
 
 abstract class AwsRdsInstanceService extends AwsService {
 }

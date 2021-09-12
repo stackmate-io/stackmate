@@ -1,5 +1,5 @@
-import Stage from 'core/stage';
-import Configuration from 'core/configuration';
+import Stage from '@stackmate/core/stage';
+import Configuration from '@stackmate/core/configuration';
 
 class Project {
   path: string;

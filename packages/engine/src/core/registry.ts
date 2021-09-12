@@ -1,4 +1,4 @@
-import { CloudService } from 'interfaces';
+import { CloudService } from '@stackmate/interfaces';
 
 /**
  * Service registry. Handles Services being added to the stack

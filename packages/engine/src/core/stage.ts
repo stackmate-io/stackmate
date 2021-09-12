@@ -1,7 +1,7 @@
-import Stack from 'core/stack';
-import { CloudManager, CloudStack } from 'interfaces';
-import { ServiceDeclaration, ProviderChoice } from 'types';
-import { getCloudManager } from 'clouds';
+import Stack from '@stackmate/core/stack';
+import { CloudManager, CloudStack } from '@stackmate/interfaces';
+import { ServiceDeclaration, ProviderChoice } from '@stackmate/types';
+import { getCloudManager } from '@stackmate/clouds';
 
 class Stage {
   /**

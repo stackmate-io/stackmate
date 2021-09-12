@@ -4,7 +4,7 @@ import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
   CloudPrerequisites, Validations,
-} from 'types';
+} from '@stackmate/types';
 
 export interface CloudManager {
   readonly provider: ProviderChoice;
