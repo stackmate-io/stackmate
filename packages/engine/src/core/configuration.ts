@@ -3,9 +3,9 @@ import { clone, has, isEmpty, isObject, merge, omit } from 'lodash';
 import validate from 'validate.js';
 import YAML from 'yaml';
 
-import { PROVIDER, SERVICE_TYPE } from 'core/constants';
-import { ConfigurationFileContents, ProviderChoice, Validations } from 'types';
-import { Validatable } from 'interfaces';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
+import { ConfigurationFileContents, ProviderChoice, Validations } from '@stackmate/types';
+import { Validatable } from '@stackmate/interfaces';
 
 class Configuration implements Validatable {
   /**
@@ -37,6 +37,12 @@ class Configuration implements Validatable {
   validations(): Validations {
     const providers = Object.values(PROVIDER);
 
+    /**
+     * Validates the project's stages
+     *
+     * @param {Object} stages The stages configuration
+     * @returns {String|undefined} The validation error message (if any)
+     */
     validate.validators.validateStages = (stages: any) => {
       if (isEmpty(stages)) {
         return 'You have to provide a set of stages for the project';
@@ -55,6 +61,12 @@ class Configuration implements Validatable {
       }
     };
 
+    /**
+     * Validates the project's defaults
+     *
+     * @param {Object} defaults the defaults to validate
+     * @returns {String|undefined} the validation error message (if any)
+     */
     validate.validators.validateDefaults = (defaults: any) => {
       // Allow defaults not being defined or empty objects
       if (!defaults || (isObject(defaults) && isEmpty(defaults))) {

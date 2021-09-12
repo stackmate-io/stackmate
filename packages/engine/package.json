@@ -62,11 +62,15 @@
     ]
   },
   "repository": "https://github.com/stackmate-io/stackmate-ce",
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  },
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "TS_NODE_PROJECT='./tests/tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
+    "test": "TS_NODE_PROJECT='./tsconfig.test.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
     "test:ci": "npm run lint && npm run test",
     "version": "oclif-dev readme && git add README.md"
   },
