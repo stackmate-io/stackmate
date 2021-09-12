@@ -1,8 +1,7 @@
 import Service from 'core/service';
 import { AwsVpcService } from 'clouds/aws/services/vpc';
 import { ProviderChoice, RegionList } from 'types';
-import { PROVIDER } from 'core/constants';
-import { AWS_REGIONS } from 'clouds/aws/constants';
+import { PROVIDER, AWS_REGIONS } from 'core/constants';
 
 abstract class AwsService extends Service {
   readonly provider: ProviderChoice = PROVIDER.AWS;

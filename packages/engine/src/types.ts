@@ -37,3 +37,28 @@ export type ServiceMapping = Map<ServiceTypeChoice, ConstructorOf<CloudService>>
 export type RegionList = { [name: string]: string };
 
 export type CloudPrerequisites = { [name: string]: CloudService };
+
+export type AwsDefaults = {
+  "vpc-cidr"?: string,
+  "vpc-prefix"?: string,
+};
+
+export type ConfigurationFileContents = {
+  provider?: string,
+  region?: string,
+  stages?: {
+    [name: string]: {
+      from?: string,
+      skip?: Array<string>,
+      provider?: string,
+      region?: string,
+    },
+  },
+  defaults?: {
+    aws?: AwsDefaults,
+  },
+};
+
+export type Validations = {
+  [name: string]: object,
+};

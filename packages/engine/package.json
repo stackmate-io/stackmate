@@ -15,7 +15,8 @@
     "chalk": "^4.1.1",
     "constructs": "^3.3.91",
     "lodash": "^4.17.21",
-    "tslib": "^1"
+    "tslib": "^1",
+    "validate.js": "^0.13.1"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",

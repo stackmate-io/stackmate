@@ -1,16 +1,21 @@
 import Stage from 'core/stage';
+import Configuration from 'core/configuration';
 
 class Project {
   stage: Stage;
 
-  constructor(configFilePath) {
+  configuration: Configuration;
+
+  constructor(path: string) {
+    this.configuration = new Configuration(path);
   }
 
   async load() {
-    // load configuration file
-    // normalize configuration file (apply default attributes & overrides to the stages)
+    await this.configuration.load();
+
     // load state file
     // load the vault
+    // apply vault credentials to services
   }
 
   useStage(name: string): Stage {
@@ -36,7 +41,10 @@ class Project {
   async vault() {
   }
 
-  static async factory() {
+  static async factory(path: string) {
+    const project = new Project(path);
+    await project.load();
+    return project;
   }
 }
 

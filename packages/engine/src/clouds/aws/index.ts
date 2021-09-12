@@ -1,9 +1,8 @@
 import { AwsProvider } from '@cdktf/provider-aws';
 
 import Cloud from 'core/cloud';
-import { PROVIDER, SERVICE_TYPE } from 'core/constants';
+import { PROVIDER, SERVICE_TYPE, AWS_REGIONS } from 'core/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from 'types';
-import { AWS_REGIONS } from 'clouds/aws/constants';
 import { AwsMysqlService, AwsPostgresqlService } from 'clouds/aws/services/rds';
 import { AwsVpcService } from 'clouds/aws/services/vpc';
 
