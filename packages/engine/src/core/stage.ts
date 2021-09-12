@@ -43,9 +43,8 @@ class Stage {
   }
 
   public addService(attributes: ServiceDeclaration) {
-    const { provider, region, name, type, ...rest } = attributes;
-
-    this.getCloud(provider, region).register(type, { name, region, ...rest });
+    const { provider, region } = attributes;
+    this.getCloud(provider, region).service(attributes);
   }
 
   /*
@@ -56,7 +55,7 @@ class Stage {
   */
 
   public prepare() {
-    this._clouds.forEach(cloud => cloud.prepare());
+    // this._clouds.forEach(cloud => cloud.prepare());
   }
 }
 

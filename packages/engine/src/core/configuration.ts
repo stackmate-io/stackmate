@@ -1,4 +1,5 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
+import { resolve as resolvePath } from 'path';
 import { clone, has, isEmpty, isObject, merge, omit } from 'lodash';
 import validate from 'validate.js';
 import YAML from 'yaml';
@@ -10,14 +11,41 @@ import { ValidationError } from '@stackmate/core/errors';
 
 class Configuration implements Validatable {
   /**
-   * @var {Object} contents the configuration file's contents;
+   * @var {Object} contents the configuration file's contents
+   * @readonly
    */
-  protected contents: ConfigurationFileContents;
+  readonly contents: ConfigurationFileContents;
 
-  constructor(contents: ConfigurationFileContents = {}) {
+  /**
+   * @var {String} path the path for the configuration file
+   * @readonly
+   */
+  readonly path: string;
+
+  constructor(contents: ConfigurationFileContents = {}, path: string) {
     this.contents = contents;
+    this.path = path;
+
     this.validate();
     this.normalize();
+  }
+
+  /**
+   * Get the attributes for a stage in the project
+   *
+   * @param {String} name the name of the stage to get
+   * @returns {Object} the stage's attributes
+   */
+  stage(name: string) {
+    if (!this.contents.stages) {
+      throw new Error('There aren’t any stages available');
+    }
+
+    if (!this.contents.stages[name]) {
+      throw new Error(`Stage ${name} was not found in the project. Available options are ${Object.keys(this.contents.stages)}`);
+    }
+
+    return this.contents.stages[name];
   }
 
   /**
@@ -155,11 +183,12 @@ class Configuration implements Validatable {
    * @param {String} path the path to load the configuration from
    * @returns {Configuration} the project configuration, validated and normalized
    */
-  static async load(path: string) {
+  static async load(filePath: string) {
     let fileContents;
+    const resolvedPath = resolvePath(filePath);
 
     try {
-      fileContents = readFileSync(path);
+      fileContents = await fs.promises.readFile(resolvedPath);
     } catch (error) {
       throw new Error('The path for the configuration file specified is invalid');
     }
@@ -175,7 +204,7 @@ class Configuration implements Validatable {
       throw new Error('The configuaration file’s content is invalid');
     }
 
-    return new Configuration(contents as ConfigurationFileContents);
+    return new Configuration(contents as ConfigurationFileContents, resolvedPath);
   }
 }
 

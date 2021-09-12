@@ -1,5 +1,5 @@
 import { CloudManager, CloudStack, CloudService } from '@stackmate/interfaces';
-import { CloudPrerequisites, ConstructorOf, ProviderChoice, RegionList, ServiceAttributes, ServiceList, ServiceMapping, ServiceTypeChoice } from '@stackmate/types';
+import { CloudPrerequisites, ProviderChoice, RegionList, ServiceDeclaration, ServiceMapping } from '@stackmate/types';
 
 abstract class Cloud implements CloudManager {
   abstract readonly provider: ProviderChoice;
@@ -13,11 +13,6 @@ abstract class Cloud implements CloudManager {
   readonly stack: CloudStack;
 
   readonly defaults: object; // todo
-
-  /**
-   * @var {Map} _services the services registry
-   */
-  private _services: ServiceList = new Map();
 
   /**
    * @var {String} _region the provider's region
@@ -53,53 +48,24 @@ abstract class Cloud implements CloudManager {
   }
 
   /**
-   * Returns the service class given a specific type
-   *
-   * @param {String} type the type of service class to provide
-   * @returns {CloudService} the class for the service to instantiate
-   */
-  protected getServiceClass(type: ServiceTypeChoice): ConstructorOf<CloudService> {
-    if (!type) {
-      throw new Error('Invalid type specified');
-    }
-
-    const serviceClass = this.serviceMapping.get(type);
-
-    if (!serviceClass) {
-      throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
-    }
-
-    return serviceClass;
-  }
-
-  /**
    * Registers a service in the cloud services registry
    *
    * @param {ServiceTypeChoice} type the type of the service to register
    * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  register(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService {
-    const ServiceClass = this.getServiceClass(type);
+  service(attributes: ServiceDeclaration): CloudService {
+    const { type, ...attrs } = attributes;
+    const ServiceClass = this.serviceMapping.get(type);
+    if (!ServiceClass) {
+      throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
+    }
 
-    const service = new ServiceClass(this.stack, attributes);
+    const service = new ServiceClass(this.stack, attrs);
     service.dependencies = this.prerequisites;
     service.validate();
 
-    this._services.set(service.name, service);
-
     return service;
-  }
-
-  /**
-   * Prepares the cloud provider for an operation
-   */
-  prepare() {
-    // Main service provisions
-    this._services.forEach(service => service.provision());
-
-    // Process the services associations, after all service provisions are in place
-    // this._services.forEach(service => service.link(this._services));
   }
 }
 

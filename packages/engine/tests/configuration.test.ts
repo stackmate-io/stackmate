@@ -5,27 +5,31 @@ import { ConfigurationFileContents } from '../src/types';
 import Configuration from '../src/core/configuration';
 import { ValidationError } from '../src/core/errors';
 
-describe.only('Configuration', () => {
+describe('Configuration', () => {
   describe('validations', () => {
+    const configPath = '/some/path.yml';
+
     it('raises a validation error for an empty configuration', () => {
       let errors;
+      let cfg;
 
       try {
-        new Configuration({});
-      } catch(error) {
+        cfg = new Configuration({}, configPath);
+      } catch (error) {
         expect(error).to.be.an.instanceOf(ValidationError);
         expect(error.message).to.equal('The project’s configuration is not valid');
         errors = error.errors;
       }
 
+      expect(cfg).to.be.undefined;
       expect(errors).to.be.an('Object');
       expect(errors).to.deep.equal({
         name: ['You have to provide a name for the project'],
         provider: ['A default cloud provider should be specified'],
         region: [
-          'A default region (that corresponds to the regions that the default cloud provider provides) should be specified'
+          'A default region (that corresponds to the regions that the default cloud provider provides) should be specified',
         ],
-        stages: ['You have to provide a set of stages for the project']
+        stages: ['You have to provide a set of stages for the project'],
       });
     });
 
@@ -42,15 +46,17 @@ describe.only('Configuration', () => {
       };
 
       let errors;
+      let cfg;
 
       try {
-        new Configuration(invalidConfig as ConfigurationFileContents);
+        cfg = new Configuration(invalidConfig as ConfigurationFileContents, configPath);
       } catch (error) {
         errors = error.errors;
         expect(error).to.be.an.instanceOf(ValidationError);
         expect(error.message).to.equal('The project’s configuration is not valid');
       }
 
+      expect(cfg).to.be.undefined;
       expect(errors).to.be.an('Object');
       expect(errors).to.deep.equal({
         name: ['You have to provide a name for the project'],
@@ -67,11 +73,14 @@ describe.only('Configuration', () => {
         stages: {
           production: {
             type: SERVICE_TYPE.MYSQL,
-          }
+          },
         },
       };
 
-      expect(() => new Configuration(validConfig)).not.to.throw
+      const cfg = new Configuration(validConfig, configPath);
+      expect(cfg).to.be.an.instanceOf(Configuration);
+      expect(cfg.contents).to.deep.equal(validConfig);
+      expect(cfg.path).to.deep.equal(configPath);
     });
   });
 });

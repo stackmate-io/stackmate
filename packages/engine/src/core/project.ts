@@ -2,24 +2,20 @@ import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
 
 class Project {
-  path: string;
+  /**
+   * @var {Configuration} configuration the project's configuration
+   * @readonly
+   */
+  readonly configuration: Configuration;
 
   stage: Stage;
 
-  configuration: Configuration;
-
-  constructor(path: string) {
-    this.path;
-  }
-
-  async load() {
-    // this.configuration = new Configuration(path);
-    // load state file
-    // load the vault
-    // apply vault credentials to services
+  constructor(configuration: Configuration) {
+    this.configuration = configuration;
   }
 
   useStage(name: string): Stage {
+    const services = this.configuration.stage(name);
     // populate the stage
   }
 
@@ -31,16 +27,16 @@ class Project {
     this.useStage(stage).prepare();
   }
 
-  async state(stage: string) {
-    this.useStage(stage);
+  async state(stage: string | null = null) {
+    // this.useStage(stage);
   }
 
   async vault() {
   }
 
-  static async factory(path: string) {
-    const project = new Project(path);
-    await project.load();
+  static async load(path: string) {
+    const config = await Configuration.load(path);
+    const project = new Project(config);
     return project;
   }
 }

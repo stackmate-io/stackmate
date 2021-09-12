@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
-  CloudPrerequisites, Validations,
+  CloudPrerequisites, Validations, ServiceDeclaration,
 } from '@stackmate/types';
 
 export interface CloudManager {
@@ -11,8 +11,7 @@ export interface CloudManager {
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
   init(): void;
-  prepare(): void;
-  register(type: ServiceTypeChoice, attrs: ServiceAttributes): CloudService;
+  service(attributes: ServiceDeclaration): CloudService;
 }
 
 export interface CloudService {
