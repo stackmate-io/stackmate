@@ -1,64 +1,64 @@
 import fs from 'fs';
 import { resolve as resolvePath } from 'path';
-import { clone, has, isEmpty, isObject, merge, omit } from 'lodash';
+import { clone, fromPairs, isEmpty, isObject, merge, omit } from 'lodash';
 import validate from 'validate.js';
 import YAML from 'yaml';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
-import { ConfigurationFileContents, ProviderChoice, Validations } from '@stackmate/types';
+import { ConfigurationFileContents, NormalizedFileContents, ProjectDefaults, ProviderChoice, StagesAttributes, Validations } from '@stackmate/types';
 import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 
 class Configuration implements Validatable {
-  /**
-   * @var {Object} contents the configuration file's contents
-   * @readonly
-   */
-  readonly contents: ConfigurationFileContents;
-
   /**
    * @var {String} path the path for the configuration file
    * @readonly
    */
   readonly path: string;
 
-  constructor(contents: ConfigurationFileContents = {}, path: string) {
-    this.contents = contents;
-    this.path = path;
-
-    this.validate();
-    this.normalize();
-  }
+  /**
+   * @var {String} name the project's name
+   * @readonly
+   */
+  readonly name: string;
 
   /**
-   * Get the attributes for a stage in the project
-   *
-   * @param {String} name the name of the stage to get
-   * @returns {Object} the stage's attributes
+   * @var {Object} defaults the defaults to apply to the project
+   * @readonly
    */
-  stage(name: string) {
-    if (!this.contents.stages) {
-      throw new Error('There aren’t any stages available');
-    }
+  readonly defaults: ProjectDefaults;
 
-    if (!this.contents.stages[name]) {
-      throw new Error(`Stage ${name} was not found in the project. Available options are ${Object.keys(this.contents.stages)}`);
-    }
+  /**
+   * @var {Object} stages the list of stages in the project
+   * @readonly
+   */
+  readonly stages: StagesAttributes;
 
-    return this.contents.stages[name];
+  constructor(contents: ConfigurationFileContents, path: string) {
+    this.validate(contents);
+    this.path = path;
+
+    const { name, stages, defaults } = Configuration.normalize(contents);
+
+    this.name = name;
+    this.stages = stages;
+    this.defaults = defaults;
   }
 
   /**
    * Validates the configuration file's structure.
    * The subsequent service values will be validated during service initialization.
+   *
+   * @param {Object} contents the contents to validate
+   * @throws {ValidationError} when the file structure invalid
    */
-  validate() {
-    const errors = validate.validate(this.contents, this.validations(), {
+  validate(contents: ConfigurationFileContents): void {
+    const errors = validate.validate(contents, this.validations(), {
       fullMessages: false,
     });
 
     if (errors) {
-      throw new ValidationError('The project’s configuration is not valid', errors);
+      throw new ValidationError('The project’s configuration file is not valid', errors);
     }
   }
 
@@ -76,7 +76,7 @@ class Configuration implements Validatable {
      * @param {Object} stages The stages configuration
      * @returns {String|undefined} The validation error message (if any)
      */
-    validate.validators.validateStages = (stages: any) => {
+    validate.validators.validateStages = (stages: StagesAttributes) => {
       if (isEmpty(stages)) {
         return 'You have to provide a set of stages for the project';
       }
@@ -86,7 +86,9 @@ class Configuration implements Validatable {
       }
 
       const stagesHaveServiceTypesDefined = Object.values(stages).every(
-        stage => (has(stage, 'type') && Object.values(SERVICE_TYPE).includes(stage.type)),
+        stage => Object.values(stage).every(
+          srv => Boolean(srv.type) && Object.values(SERVICE_TYPE).includes(srv.type),
+        ),
       );
 
       if (!stagesHaveServiceTypesDefined) {
@@ -100,7 +102,7 @@ class Configuration implements Validatable {
      * @param {Object} defaults the defaults to validate
      * @returns {String|undefined} the validation error message (if any)
      */
-    validate.validators.validateDefaults = (defaults: any) => {
+    validate.validators.validateDefaults = (defaults: ProjectDefaults) => {
       // Allow defaults not being defined or empty objects
       if (!defaults || (isObject(defaults) && isEmpty(defaults))) {
         return;
@@ -143,44 +145,71 @@ class Configuration implements Validatable {
 
   /**
    * Applies arguments in stage services that were skipped for brevity
+   *
+   * @param {Object} contents the file contents that are to be normalized
+   * @returns {Object} the normalized contents
    */
-  normalize() {
-    const { provider, region } = this.contents;
-    Object.keys(this.contents.stages || []).forEach(stageName => {
-      if (!this.contents.stages) {
-        throw new Error('You have to provide a list of stages');
-      }
+  static normalize(contents: ConfigurationFileContents): NormalizedFileContents {
+    const { provider, region, stages, defaults } = contents;
 
-      const declaration = this.contents.stages[stageName];
+    if (!stages) {
+      throw new Error('You have to provide a list of stages');
+    }
 
-      // Assign the default provider to the services that imply it
-      if (!declaration.provider) {
-        Object.assign(declaration, { provider });
-      }
+    // the contents have been validated, so it's safe to cast it as NormalizedFileContents
+    const normalized = clone(omit(contents, 'provider', 'region') as NormalizedFileContents);
 
-      // Assign the default region to the services that imply it
-      if (!declaration.region) {
-        Object.assign(declaration, { region });
-      }
+    const normalizedStages = fromPairs(Object.keys(stages || []).map(stageName => {
+      const {
+        from: copiedStageName = null,
+        skip: skippedServices = [],
+        ...declaration
+      } = stages[stageName];
+
+      let stage = clone(declaration);
 
       // Copy the full attributes to stages that copy each other
-      if (declaration.from) {
+      if (copiedStageName) {
         const source = clone(
           // Omit any services that the copied stage doesn't need
-          omit(this.contents.stages[declaration.from], ...(declaration.skip || []))
+          omit(stages[copiedStageName], ...skippedServices)
         );
 
-        Object.assign(this.contents.stages, {
-          [stageName]: merge(source, omit(declaration, 'from', 'skip')),
-        });
+        stage = merge(omit(source, 'from', 'skip'), declaration);
       }
+
+      Object.keys(stage).forEach(name => {
+        const service = stage[name]!;
+
+        // Apply the service's name
+        Object.assign(service, { name });
+
+        // Apply the service's provider (if not any)
+        if (!service.provider) {
+          Object.assign(service, { provider });
+        }
+
+        // Apply the service's region (if not any)
+        if (!service.region) {
+          Object.assign(service, { region });
+        }
+      });
+
+      return [stageName, stage];
+    }));
+
+    Object.assign(normalized, {
+      stages: normalizedStages,
+      defaults: defaults || {},
     });
+
+    return normalized;
   }
 
   /**
    * Loads a configuration file
    *
-   * @param {String} path the path to load the configuration from
+   * @param {String} filePath the path to load the configuration from
    * @returns {Configuration} the project configuration, validated and normalized
    */
   static async load(filePath: string) {

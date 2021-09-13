@@ -1,11 +1,16 @@
-import { toPairs } from 'lodash';
-import { CloudStack, CloudService } from '@stackmate/interfaces';
+import validate from 'validate.js';
+
+import { CloudStack, CloudService, Validatable } from '@stackmate/interfaces';
+import { ValidationError } from '@stackmate/core/errors';
+import { SERVICE_TYPE } from '@stackmate/core/constants';
 import {
-  ServiceAttributes, ServiceAssociation, ServiceTypeChoice, ServiceAssociationDeclarations,
-  ProviderChoice, CloudPrerequisites, RegionList,
+  Validations, RegionList,
+  ServiceAttributes, ServiceAssociation,
+  ProviderChoice, CloudPrerequisites,
+  ServiceTypeChoice, ServiceAssociationDeclarations,
 } from '@stackmate/types';
 
-abstract class Service implements CloudService {
+abstract class Service implements CloudService, Validatable {
   /**
    * @var {String} name the service's name
    */
@@ -66,6 +71,8 @@ abstract class Service implements CloudService {
   abstract provision(): void;
 
   constructor(stack: CloudStack, attributes: ServiceAttributes) {
+    this.validate(attributes);
+
     this.stack = stack;
     this.attributes = attributes;
   }
@@ -76,13 +83,11 @@ abstract class Service implements CloudService {
    * @param {Object} attributes the attributes to set to the service
    */
   public set attributes(attributes: ServiceAttributes) {
-    toPairs(attributes).filter(
-      ([key]) => this.hasOwnProperty(key),
-    ).forEach(
-      ([key, value]) => {
-        (this as any)[key] = value;
-      },
-    );
+    /*
+    this.attributeNames().forEach(attr => {
+      (this as any)[attr] =  attributes[attr];
+    });
+    */
   }
 
   /**
@@ -109,12 +114,56 @@ abstract class Service implements CloudService {
     }
   }
 
-  validate(): void {
-    // if (region && !isEmpty(this.regions) && !Object.values(this.regions).includes(region)) {
-    //   throw new Error(
-    //     `Service ${this.type} on ${this.provider} does not support the ${region} region`,
-    //   );
-    // }
+  /**
+   * Validates a service's attributes
+   *
+   * @param {Object} attributes the service attributes to validated
+   * @throws {ValidationError} when the attributes are invalid
+   * @void
+   */
+  validate(attributes: ServiceAttributes): void {
+    const errors = validate.validate(attributes, this.validations(), {
+      fullMessages: false,
+    });
+
+    if (errors) {
+      const { name } = attributes;
+      throw new ValidationError(`The configuration for ${name || 'the service'} is invalid`, errors);
+    }
+  }
+
+  validations(): Validations {
+    return {
+      name: {
+        presence: {
+          allowEmpty: false,
+          message: 'Every service should have a name',
+        },
+      },
+      region: {
+        presence: {
+          allowEmpty: false,
+          message: 'A region should be provided',
+        },
+        inclusion: {
+          within: this.regions,
+          message: `The region for this service is invalid. Available options are ${Object.values(this.regions).join(', ')}`,
+        },
+      },
+      type: {
+        presence: {
+          allowEmpty: false,
+          message: 'A type should be provided',
+        },
+        inclusion: {
+          within: Object.values(SERVICE_TYPE),
+          message: `The service type is invalid. Available options are ${Object.values(SERVICE_TYPE).join(', ')}`,
+        },
+      },
+      links: {
+
+      },
+    };
   }
 }
 

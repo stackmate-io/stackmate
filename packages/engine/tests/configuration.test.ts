@@ -17,7 +17,7 @@ describe('Configuration', () => {
         cfg = new Configuration({}, configPath);
       } catch (error) {
         expect(error).to.be.an.instanceOf(ValidationError);
-        expect(error.message).to.equal('The project’s configuration is not valid');
+        expect(error.message).to.equal('The project’s configuration file is not valid');
         errors = error.errors;
       }
 
@@ -40,7 +40,11 @@ describe('Configuration', () => {
         region: 'the-whole-world',
         stages: {
           production: {
-            type: 'fake-service',
+            instance: {
+              provider: 'some-provider',
+              region: 'the-world',
+              type: 'fake-service',
+            },
           },
         },
       };
@@ -53,7 +57,7 @@ describe('Configuration', () => {
       } catch (error) {
         errors = error.errors;
         expect(error).to.be.an.instanceOf(ValidationError);
-        expect(error.message).to.equal('The project’s configuration is not valid');
+        expect(error.message).to.equal('The project’s configuration file is not valid');
       }
 
       expect(cfg).to.be.undefined;
@@ -72,15 +76,28 @@ describe('Configuration', () => {
         region: REGION[PROVIDER.AWS].EU_CENTRAL_1,
         stages: {
           production: {
-            type: SERVICE_TYPE.MYSQL,
+            database: {
+              type: SERVICE_TYPE.MYSQL,
+            },
           },
         },
       };
 
       const cfg = new Configuration(validConfig, configPath);
       expect(cfg).to.be.an.instanceOf(Configuration);
-      expect(cfg.contents).to.deep.equal(validConfig);
       expect(cfg.path).to.deep.equal(configPath);
+      expect(cfg.name).to.deep.equal(validConfig.name);
+      expect(cfg.defaults).to.deep.equal({});
+      expect(cfg.stages).to.deep.equal({
+        production: {
+          database: {
+            name: 'database',
+            provider: PROVIDER.AWS,
+            region: REGION[PROVIDER.AWS].EU_CENTRAL_1,
+            type: SERVICE_TYPE.MYSQL,
+          },
+        },
+      });
     });
   });
 });

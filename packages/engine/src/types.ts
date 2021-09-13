@@ -18,17 +18,22 @@ export type ServiceAssociation = {
 };
 
 export type ServiceBaseAttributes = {
-  provider: ProviderChoice;
   type: ServiceTypeChoice;
+  links?: ServiceAssociationDeclarations;
 }
 
-export type ServiceAttributes = {
-  name: string;
-  region: string;
-  links?: ServiceAssociationDeclarations;
-};
+// Service declaration, as it should be appeared in the configuration file
+export type ServiceDeclaration = {
+  provider?: ProviderChoice;
+  region?: string;
+} & ServiceBaseAttributes;
 
-export type ServiceDeclaration = ServiceBaseAttributes & ServiceAttributes;
+// Service attributes after they have been normalized
+export type ServiceAttributes = {
+  provider: ProviderChoice;
+  region: string;
+  name: string;
+} & ServiceBaseAttributes;
 
 export type ServiceList = Map<string, CloudService>;
 
@@ -38,27 +43,43 @@ export type RegionList = { [name: string]: string };
 
 export type CloudPrerequisites = { [name: string]: CloudService };
 
+export type ProviderDefaults = {
+  [name: string]: string | number;
+}
+
 export type AwsDefaults = {
   'vpc-cidr'?: string;
   'vpc-prefix'?: string;
 };
 
+export type ProjectDefaults = {
+  aws?: AwsDefaults;
+};
+
+export type StageDeclarations = {
+  [name: string]: { from?: string; skip?: Array<string> } & {
+    [srv: string]: ServiceDeclaration;
+  };
+}
+
 export type ConfigurationFileContents = {
   name?: string;
   provider?: string;
   region?: string;
-  stages?: {
-    [name: string]: {
-      type: ServiceTypeChoice;
-      from?: string;
-      skip?: Array<string>;
-      provider?: string;
-      region?: string;
-    };
+  stages?: StageDeclarations;
+  defaults?: ProjectDefaults;
+};
+
+export type StagesAttributes = {
+  [name: string]: {
+    [serviceName: string]: ServiceAttributes;
   };
-  defaults?: {
-    aws?: AwsDefaults;
-  };
+};
+
+export type NormalizedFileContents = {
+  name: string;
+  stages: StagesAttributes;
+  defaults: ProjectDefaults;
 };
 
 export type Validations = {

@@ -21,7 +21,8 @@ class AwsCloud extends Cloud {
 
   protected prerequisites: CloudPrerequisites = {};
 
-  private _cloudProvider: AwsProvider; // tslint-disable-line: 6133
+  // tslint:disable-next-line:ts(6133)
+  private _cloudProvider: AwsProvider;
 
   init(): void {
     this._cloudProvider = new AwsProvider(this.stack, PROVIDER.AWS, {

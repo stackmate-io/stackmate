@@ -1,7 +1,8 @@
 import Stack from '@stackmate/core/stack';
+import Cloud from '@stackmate/core/cloud';
+import Registry from '@stackmate/core/registry';
 import { CloudManager, CloudStack } from '@stackmate/interfaces';
-import { ServiceDeclaration, ProviderChoice } from '@stackmate/types';
-import { getCloudManager } from '@stackmate/clouds';
+import { ProviderChoice, ProjectDefaults, ServiceAttributes } from '@stackmate/types';
 
 class Stage {
   /**
@@ -20,9 +21,22 @@ class Stage {
    */
   private _clouds: Map<string, CloudManager> = new Map();
 
-  constructor(name: string) {
+  /**
+   * @var {Registry} _services the services registry
+   * @private
+   */
+  private _services: Registry = new Registry();
+
+  /**
+   * @var {Object} defaults the defaults to apply to the provisioning
+   * @readonly
+   */
+  readonly defaults: ProjectDefaults;
+
+  constructor(name: string, defaults: ProjectDefaults) {
     this.name = name;
     this.stack = Stack.factory(name);
+    this.defaults = defaults;
   }
 
   /**
@@ -34,28 +48,30 @@ class Stage {
    */
   getCloud(provider: ProviderChoice, region: string): CloudManager {
     const key = `${provider}-${region}`;
-
-    if (!this._clouds.has(key)) {
-      this._clouds.set(key, getCloudManager(provider, region, this.stack));
+    if (this._clouds.has(key)) {
+      return this._clouds.get(key)!;
     }
 
-    return this._clouds.get(key)!;
+    const cloud = Cloud.factory(provider, region, this.stack, this.defaults[provider] || {});
+    this._clouds.set(key, cloud);
+    return cloud;
   }
 
-  public addService(attributes: ServiceDeclaration) {
-    const { provider, region } = attributes;
-    this.getCloud(provider, region).service(attributes);
-  }
+  /**
+   * Populates the services registry
+   *
+   * @param {Array<object>} services the services attributes
+   */
+  public set services(services: { [name: string]: ServiceAttributes }) {
+    Object.keys(services).forEach((name: string) => {
+      const attributes = services[name];
+      const { provider, region } = attributes;
 
-  /*
-  protected processServices(serviceAttributes: Array<ServiceDeclaration> = []) {
-    serviceAttributes.forEach((attributes: ServiceDeclaration) => {
+      const service = this.getCloud(provider, region).service(attributes);
+      service.provision();
+
+      this._services.add(service);
     });
-  }
-  */
-
-  public prepare() {
-    // this._clouds.forEach(cloud => cloud.prepare());
   }
 }
 

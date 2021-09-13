@@ -8,30 +8,23 @@ class Project {
    */
   readonly configuration: Configuration;
 
-  stage: Stage;
+  /**
+   * @var {Stage} stage the active project stage
+   */
+  private _stage: Stage;
 
   constructor(configuration: Configuration) {
     this.configuration = configuration;
   }
 
-  useStage(name: string): Stage {
-    const services = this.configuration.stage(name);
-    // populate the stage
-  }
+  stage(name: string): Stage {
+    if (!this.configuration.stages[name]) {
+      throw new Error(`Stage ${name} was not found in the project. Available options are ${Object.keys(this.configuration.stages)}`);
+    }
 
-  async deploy(stage: string) {
-    this.useStage(stage).prepare();
-  }
-
-  async destroy(stage: string) {
-    this.useStage(stage).prepare();
-  }
-
-  async state(stage: string | null = null) {
-    // this.useStage(stage);
-  }
-
-  async vault() {
+    this._stage = new Stage(name, this.configuration.defaults);
+    this._stage.services = this.configuration.stages[name];
+    return this._stage;
   }
 
   static async load(path: string) {
@@ -43,7 +36,7 @@ class Project {
 
 /*
 Usage:
-await Project.load(cfg, state).deploy('production');
+await Project.load(cfg, state).stage('production').deploy();
 */
 
 export default Project;

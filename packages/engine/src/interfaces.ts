@@ -19,12 +19,10 @@ export interface CloudService {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
-  readonly regions: RegionList;
   links: ServiceAssociationDeclarations;
   attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
-  validate(): void;
   provision(): void;
 }
 
@@ -35,7 +33,7 @@ export interface CloudStack extends Construct {
 }
 
 export interface Validatable {
-  validate(): void;
+  validate(attrs: object): void;
   validations(): Validations;
 }
 
