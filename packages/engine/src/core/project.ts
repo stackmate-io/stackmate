@@ -1,4 +1,4 @@
-import Stage from '@stackmate/core/stage';
+import Provisioner from '@stackmate/core/provisioner';
 import Configuration from '@stackmate/core/configuration';
 
 class Project {
@@ -9,24 +9,51 @@ class Project {
   readonly configuration: Configuration;
 
   /**
-   * @var {Stage} stage the active project stage
+   * @var {Provisioner} _provisioner the project's provisioner
    */
-  private _stage: Stage;
+  private _provisioner: Provisioner;
 
   constructor(configuration: Configuration) {
     this.configuration = configuration;
   }
 
-  stage(name: string): Stage {
-    if (!this.configuration.stages[name]) {
-      throw new Error(`Stage ${name} was not found in the project. Available options are ${Object.keys(this.configuration.stages)}`);
-    }
-
-    this._stage = new Stage(name, this.configuration.defaults);
-    this._stage.services = this.configuration.stages[name];
-    return this._stage;
+  /**
+   * Deploys a stage to the cloud
+   *
+   * @param {String} stageName the stage to deploy
+   * @async
+   */
+  async deploy(stageName: string) {
+    await this.use(stageName).deploy();
   }
 
+  /**
+   * Populates the services in the provisioner
+   *
+   * @param {String} stageName The stage to provision
+   * @returns {Provisioner} the provisioner, having the services populated
+   */
+  protected use(stageName: string): Provisioner {
+    if (!this.configuration.stages[stageName]) {
+      throw new Error(
+        `Stage ${stageName} was not found in the project. Available options are ${Object.keys(this.configuration.stages)}`,
+      );
+    }
+
+    this._provisioner = new Provisioner(
+      stageName, this.configuration.stages[stageName], this.configuration.defaults,
+    );
+
+    return this._provisioner;
+  }
+
+  /**
+   * Loads a project from a given configuration file path
+   *
+   * @param {String} path the path for the configuration file to load
+   * @returns {Project} the project object
+   * @async
+   */
   static async load(path: string) {
     const config = await Configuration.load(path);
     const project = new Project(config);
@@ -36,7 +63,7 @@ class Project {
 
 /*
 Usage:
-await Project.load(cfg, state).stage('production').deploy();
+await Project.load(cfg, state).deploy('production');
 */
 
 export default Project;

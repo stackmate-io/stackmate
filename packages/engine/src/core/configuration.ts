@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { resolve as resolvePath } from 'path';
-import { clone, fromPairs, isEmpty, isObject, merge, omit } from 'lodash';
+import { clone, difference, flatten, fromPairs, isEmpty, isObject, merge, omit, uniq } from 'lodash';
 import validate from 'validate.js';
 import YAML from 'yaml';
 
@@ -93,6 +93,29 @@ class Configuration implements Validatable {
 
       if (!stagesHaveServiceTypesDefined) {
         return 'You have to specify a type for every service in the stages';
+      }
+
+      // Make sure the services are properly linked together
+      const invalidLinks: Array<[string, Array<string>]> = [];
+      Object.keys(stages).forEach(stageName => {
+        const serviceNames = Object.keys(stages[stageName]);
+        const links = uniq(
+          flatten(Object.values(stages[stageName]).map(srv => srv.links || [])),
+        );
+
+        const invalidServices = difference(serviceNames, links);
+
+        if (invalidServices) {
+          invalidLinks.push([stageName, invalidServices]);
+        }
+      });
+
+      if (invalidLinks) {
+        const stageMessages = invalidLinks.map(([stageName, invalidLinks]) => (
+          `Stage ${stageName} has invalid links to ${invalidLinks.join(', ')}`
+        ));
+
+        return `There are invalid services linked with each other: ${stageMessages}. Please check the links section of your services`;
       }
     };
 

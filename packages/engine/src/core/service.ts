@@ -1,16 +1,16 @@
 import validate from 'validate.js';
+import { difference, get, isArray, isString, omit, toPairs } from 'lodash';
 
-import { CloudStack, CloudService, Validatable } from '@stackmate/interfaces';
+import { CloudStack, CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
+import { parseArrayToSet, parseString } from '@stackmate/core/utils';
 import {
-  Validations, RegionList,
-  ServiceAttributes, ServiceAssociation,
-  ProviderChoice, CloudPrerequisites,
-  ServiceTypeChoice, ServiceAssociationDeclarations,
+  Validations, RegionList, ServiceAttributes, ServiceAssociation,
+  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,
 } from '@stackmate/types';
 
-abstract class Service implements CloudService, Validatable {
+abstract class Service implements CloudService, Validatable, AttributeAssignable {
   /**
    * @var {String} name the service's name
    */
@@ -25,7 +25,7 @@ abstract class Service implements CloudService, Validatable {
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  public links: ServiceAssociationDeclarations = new Set();
+  public links: Set<string> = new Set();
 
   /**
    * @var {CloudStack} stack the stack that the service is provisioned against
@@ -44,6 +44,13 @@ abstract class Service implements CloudService, Validatable {
    *  }];
    */
   readonly associations: Array<ServiceAssociation> = [];
+
+  /**
+   * @var {Array<string>} ignoredAttributes the attributes to ignore when populating the service
+   * @protected
+   * @readonly
+   */
+  protected readonly ignoredAttributes = ['provider', 'type'];
 
   /**
    * @var {Array<String>} regions the regions that the service is available in
@@ -78,16 +85,41 @@ abstract class Service implements CloudService, Validatable {
   }
 
   /**
+   * Returns a key => function. THe key describes an acceptable attribute name
+   * and the function is the parser which would return a valid value
+   *
+   * @returns {Objct} the attribute names and their parsers
+   */
+  attributeNames(): AttributeNames {
+    return {
+      name: parseString,
+      region: parseString,
+      links: parseArrayToSet,
+    };
+  }
+
+  /**
    * Sets the attributes for the service
    *
    * @param {Object} attributes the attributes to set to the service
    */
   public set attributes(attributes: ServiceAttributes) {
-    /*
-    this.attributeNames().forEach(attr => {
-      (this as any)[attr] =  attributes[attr];
-    });
-    */
+    const attributeNames = omit(this.attributeNames(), this.ignoredAttributes);
+    const givenKeys = Object.keys(attributes);
+    const acceptedKeys = omit(Object.keys(attributeNames), 'provider', 'type');
+    const invalidKeys = difference(givenKeys, acceptedKeys);
+
+    if (invalidKeys) {
+      throw new Error(
+        `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
+      );
+    }
+
+    toPairs(attributeNames).forEach(
+      ([attributeName, parserFunction]) => {
+        (this as any)[attributeName] = parserFunction.call(this, get(attributes, attributeName));
+      },
+    );
   }
 
   /**
@@ -132,7 +164,18 @@ abstract class Service implements CloudService, Validatable {
     }
   }
 
+  /**
+   * Returns the validations for the service
+   *
+   * @returns {Object} the validations to use
+   */
   validations(): Validations {
+    validate.validators.validateLinks = (links: Array<string>) => {
+      if (!isArray(links) || !links.every(l => isString(l))) {
+        return 'The service contains an invalid entries under “links“';
+      }
+    };
+
     return {
       name: {
         presence: {
@@ -161,7 +204,7 @@ abstract class Service implements CloudService, Validatable {
         },
       },
       links: {
-
+        validateLinks: true,
       },
     };
   }

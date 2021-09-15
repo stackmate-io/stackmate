@@ -21,7 +21,6 @@ class AwsCloud extends Cloud {
 
   protected prerequisites: CloudPrerequisites = {};
 
-  // tslint:disable-next-line:ts(6133)
   private _cloudProvider: AwsProvider;
 
   init(): void {

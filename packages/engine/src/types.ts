@@ -5,11 +5,12 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 export type ConstructorOf<T> = { new(...args: any[]): T };
 export type ValueOf<T> = T[keyof T];
 export type ChoiceOf<T> = T[keyof T];
+export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer OneOf> ? OneOf : never;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 
 // Config file types
-export type ServiceAssociationDeclarations = Set<string>;
+export type ServiceAssociationDeclarations = Array<string>;
 export type EnvironmentVariablesDeclaration = Record<string, string|number>;
 
 export type ServiceAssociation = {
@@ -84,4 +85,8 @@ export type NormalizedFileContents = {
 
 export type Validations = {
   [name: string]: object;
+};
+
+export type AttributeNames = {
+  [name: string]: Function;
 };

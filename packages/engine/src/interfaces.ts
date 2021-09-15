@@ -2,8 +2,7 @@ import { Construct } from 'constructs';
 
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
-  ServiceMapping, ServiceTypeChoice, ServiceAssociationDeclarations,
-  CloudPrerequisites, Validations, ServiceDeclaration,
+  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, ServiceDeclaration, AttributeNames,
 } from '@stackmate/types';
 
 export interface CloudManager {
@@ -19,7 +18,7 @@ export interface CloudService {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
-  links: ServiceAssociationDeclarations;
+  links: Set<string>;
   attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
@@ -37,32 +36,43 @@ export interface Validatable {
   validations(): Validations;
 }
 
-export interface Sizeable extends Validatable {
+export interface AttributeAssignable {
+  attributes: object;
+  attributeNames(): AttributeNames;
+}
+
+export interface Sizeable extends Validatable, AttributeAssignable {
   size: string;
   validations(): Required<{ size: object }>;
+  attributeNames(): Required<{ size: Function }>;
 }
 
-export interface Storable extends Validatable {
+export interface Storable extends Validatable, AttributeAssignable {
   storage: number;
   validations(): Required<{ storage: object }>;
+  attributeNames(): Required<{ storage: Function }>;
 }
 
-export interface Mountable extends Validatable {
+export interface Mountable extends Validatable, AttributeAssignable {
   volumes: string; // TODO
   valdations(): Required<{ volumes: object }>;
+  attributeNames(): Required<{ volumes: Function }>;
 }
 
-export interface MultiNode extends Validatable {
+export interface MultiNode extends Validatable, AttributeAssignable {
   nodes: number; // TODO
   valdations(): Required<{ nodes: object }>;
+  attributeNames(): Required<{ nodes: Function }>;
 }
 
-export interface Authenticatable extends Validatable {
+export interface Authenticatable extends Validatable, AttributeAssignable {
   credentials: number; // TODO
   validations(): Required<{ credentials: object }>;
+  attributeNames(): Required<{ credentials: Function }>;
 }
 
-export interface Rootable extends Validatable {
+export interface Rootable extends Validatable, AttributeAssignable {
   root: number; // TOOD
   validations(): Required<{ root: object }>;
+  attributeNames(): Required<{ root: Function }>;
 }
