@@ -1,19 +1,50 @@
-import { CloudManager, CloudStack, CloudService } from '@stackmate/interfaces';
-import { CloudPrerequisites, ProviderChoice, RegionList, ServiceDeclaration, ServiceMapping, ProviderDefaults, AwsDefaults } from '@stackmate/types';
-import { AwsCloud } from '@stackmate/clouds/aws';
-import { PROVIDER } from '@stackmate/core/constants';
+import { get } from 'lodash';
 
-abstract class Cloud implements CloudManager {
+import { CloudProvider, CloudStack, CloudService } from '@stackmate/interfaces';
+import {
+  CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
+  ProviderDefaults, ServiceConfigurationDeclarationNormalized,
+} from '@stackmate/types';
+
+abstract class Cloud implements CloudProvider {
+  /**
+   * @var {String} provider the provider's name
+   * @abstract
+   * @readonly
+   */
   abstract readonly provider: ProviderChoice;
 
+  /**
+   * @var {Object} regions the regions that the provider can provision resources in
+   * @abstract
+   * @readonly
+   */
   abstract readonly regions: RegionList;
 
+  /**
+   * @var {Object} serviceMapping a key value mapping of {service type => class}
+   * @abstract
+   * @readonly
+   */
   abstract readonly serviceMapping: ServiceMapping;
 
+  /**
+   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
+   * @abstract
+   * @protected
+   */
   protected abstract prerequisites: CloudPrerequisites;
 
+  /**
+   * @var {Stack} stack the stack to use for provisioning
+   * @readonly
+   */
   readonly stack: CloudStack;
 
+  /**
+   * @var {Object} defaults any provider defaults to be used in the resources
+   * @readonly
+   */
   readonly defaults: ProviderDefaults;
 
   /**
@@ -22,9 +53,15 @@ abstract class Cloud implements CloudManager {
    */
   private _region: string;
 
+  /**
+   * Initializes the provider
+   *
+   * @abstract
+   * @void
+   */
   abstract init(): void;
 
-  constructor(region: string, stack: CloudStack, defaults: ProviderDefaults = {}) { // todo: defaults
+  constructor(region: string, stack: CloudStack, defaults: ProviderDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
     this.region = region;
@@ -55,35 +92,16 @@ abstract class Cloud implements CloudManager {
    * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  service(attributes: ServiceDeclaration): CloudService {
-    const { type, ...attrs } = attributes;
+  service(attributes: ServiceConfigurationDeclarationNormalized): CloudService {
+    const { type } = attributes;
 
-    const ServiceClass = this.serviceMapping.get(type);
+    const ServiceClass = get(this.serviceMapping, type, null);
+
     if (!ServiceClass) {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    const service = new ServiceClass(this.stack, attrs);
-    service.dependencies = this.prerequisites;
-
-    return service;
-  }
-
-  /**
-   * Returns a cloud manager based on the provider and region
-   *
-   * @param {String} provider the provider to instantiate
-   * @param {String} region the region for the provider
-   * @param {Stack} stack the stack to provision
-   * @param {Object} defaults any defaults to apply
-   * @returns {Cloud} the cloud provider
-   */
-  static factory(provider: ProviderChoice, region: string, stack: CloudStack, defaults: ProviderDefaults): Cloud {
-    if (provider === PROVIDER.AWS) {
-      return new AwsCloud(region, stack, defaults as AwsDefaults);
-    }
-
-    throw new Error(`Provider ${provider} is not supported, yet`);
+    return new ServiceClass(this.stack, attributes, this.prerequisites);
   }
 }
 

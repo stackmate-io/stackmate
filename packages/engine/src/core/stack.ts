@@ -4,22 +4,33 @@ import { Construct } from 'constructs';
 import { CloudStack } from '@stackmate/interfaces';
 
 class Stack extends TerraformStack implements CloudStack {
+  /**
+   * @var {String} name stack's name
+   * @readonly
+   */
   readonly name: string;
 
+  /**
+   * @var {Construct} scope the terraform app to use
+   * @readonly
+   */
   readonly scope: Construct;
 
-  readonly defaults: object;
-
-  constructor(scope: Construct, name: string, defaults: object) {
+  constructor(name: string, scope: Construct) {
     super(scope, name);
 
-    this.defaults = defaults;
     this.scope = scope;
     this.name = name;
   }
 
-  static factory(name: string, defaults: object = {}): CloudStack {
-    return new Stack(new TerraformApp(), name, defaults);
+  /**
+   * Instantiates a stack
+   *
+   * @param {String} name the name of the stage to use
+   * @returns {CloudStack} the stack
+   */
+  static factory(name: string): CloudStack {
+    return new Stack(name, new TerraformApp());
   }
 }
 

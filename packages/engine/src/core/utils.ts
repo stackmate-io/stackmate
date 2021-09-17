@@ -27,14 +27,14 @@ const parseArrayToSet = (value: Array<any>) => (
  * @returns {Number} the value provided as integer
  */
 const parseInteger = (value: number | string) => (
-  isNumber(value) ? +value : parseInt(value, 10)
+  isNumber(value) ? Number(value) : parseInt(value, 10)
 );
 
 /**
  * Parses a value as boolean
  *
  * @param {Number|String} value the value to parse
- * @returns {Boolean}
+ * @returns {Boolean} the value provided as a boolean
  */
 const parseBoolean = (value: number | string) => (
   Boolean(value)

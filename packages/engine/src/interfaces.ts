@@ -2,15 +2,15 @@ import { Construct } from 'constructs';
 
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
-  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, ServiceDeclaration, AttributeNames,
+  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, AttributeNames,
 } from '@stackmate/types';
 
-export interface CloudManager {
+export interface CloudProvider {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
   init(): void;
-  service(attributes: ServiceDeclaration): CloudService;
+  service(attributes: ServiceAttributes): CloudService;
 }
 
 export interface CloudService {
@@ -28,7 +28,6 @@ export interface CloudService {
 export interface CloudStack extends Construct {
   readonly name: string;
   readonly scope: Construct;
-  readonly defaults: object;
 }
 
 export interface Validatable {
@@ -60,7 +59,7 @@ export interface Mountable extends Validatable, AttributeAssignable {
 }
 
 export interface MultiNode extends Validatable, AttributeAssignable {
-  nodes: number; // TODO
+  nodes: number;
   valdations(): Required<{ nodes: object }>;
   attributeNames(): Required<{ nodes: Function }>;
 }

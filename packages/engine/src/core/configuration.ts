@@ -5,7 +5,7 @@ import validate from 'validate.js';
 import YAML from 'yaml';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
-import { ConfigurationFileContents, NormalizedFileContents, ProjectDefaults, ProviderChoice, StagesAttributes, Validations } from '@stackmate/types';
+import { ConfigurationFileContents, NormalizedFileContents, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, Validations } from '@stackmate/types';
 import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 
@@ -32,7 +32,7 @@ class Configuration implements Validatable {
    * @var {Object} stages the list of stages in the project
    * @readonly
    */
-  readonly stages: StagesAttributes;
+  readonly stages: StagesNormalizedAttributes;
 
   constructor(contents: ConfigurationFileContents, path: string) {
     this.validate(contents);
@@ -76,7 +76,7 @@ class Configuration implements Validatable {
      * @param {Object} stages The stages configuration
      * @returns {String|undefined} The validation error message (if any)
      */
-    validate.validators.validateStages = (stages: StagesAttributes) => {
+    validate.validators.validateStages = (stages: StagesNormalizedAttributes) => {
       if (isEmpty(stages)) {
         return 'You have to provide a set of stages for the project';
       }
@@ -103,16 +103,15 @@ class Configuration implements Validatable {
           flatten(Object.values(stages[stageName]).map(srv => srv.links || [])),
         );
 
-        const invalidServices = difference(serviceNames, links);
-
-        if (invalidServices) {
+        const invalidServices = difference(links, serviceNames);
+        if (!isEmpty(invalidServices)) {
           invalidLinks.push([stageName, invalidServices]);
         }
       });
 
-      if (invalidLinks) {
+      if (!isEmpty(invalidLinks)) {
         const stageMessages = invalidLinks.map(([stageName, invalidLinks]) => (
-          `Stage ${stageName} has invalid links to ${invalidLinks.join(', ')}`
+          `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`
         ));
 
         return `There are invalid services linked with each other: ${stageMessages}. Please check the links section of your services`;

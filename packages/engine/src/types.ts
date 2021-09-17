@@ -1,7 +1,7 @@
 import { CloudService } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 
-// Generic types
+// Utility types
 export type ConstructorOf<T> = { new(...args: any[]): T };
 export type ValueOf<T> = T[keyof T];
 export type ChoiceOf<T> = T[keyof T];
@@ -13,42 +13,48 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceAssociationDeclarations = Array<string>;
 export type EnvironmentVariablesDeclaration = Record<string, string|number>;
 
+export type ServiceConfigurationDeclaration = {
+  type: ServiceTypeChoice;
+  provider?: ProviderChoice;
+  region?: string;
+  links?: ServiceAssociationDeclarations;
+};
+
+export type ServiceConfigurationDeclarationNormalized = {
+  type: ServiceTypeChoice;
+  provider: ProviderChoice;
+  region: string;
+  name: string;
+  links?: ServiceAssociationDeclarations;
+};
+
 export type ServiceAssociation = {
   lookup: ConstructorOf<CloudService>;
   handler: (a: CloudService) => void;
 };
 
-export type ServiceBaseAttributes = {
-  type: ServiceTypeChoice;
-  links?: ServiceAssociationDeclarations;
-}
-
-// Service declaration, as it should be appeared in the configuration file
-export type ServiceDeclaration = {
-  provider?: ProviderChoice;
-  region?: string;
-} & ServiceBaseAttributes;
-
-// Service attributes after they have been normalized
-export type ServiceAttributes = {
-  provider: ProviderChoice;
-  region: string;
-  name: string;
-} & ServiceBaseAttributes;
+// The final attributes that the Service class should expect
+export type ServiceAttributes = Omit<ServiceConfigurationDeclarationNormalized, 'type' | 'provider'>;
 
 export type ServiceList = Map<string, CloudService>;
 
-export type ServiceMapping = Map<ServiceTypeChoice, ConstructorOf<CloudService>>;
+export type ServiceMapping = {
+  [name: string]: ConstructorOf<CloudService>;
+};
 
-export type RegionList = { [name: string]: string };
+export type RegionList = {
+  [name: string]: string;
+};
 
-export type CloudPrerequisites = { [name: string]: CloudService };
+export type CloudPrerequisites = {
+  [name: string]: CloudService;
+};
 
 export type ProviderDefaults = {
   [name: string]: string | number;
 }
 
-export type AwsDefaults = {
+export type AwsDefaults = ProviderDefaults & {
   'vpc-cidr'?: string;
   'vpc-prefix'?: string;
 };
@@ -59,7 +65,7 @@ export type ProjectDefaults = {
 
 export type StageDeclarations = {
   [name: string]: { from?: string; skip?: Array<string> } & {
-    [srv: string]: ServiceDeclaration;
+    [srv: string]: ServiceConfigurationDeclaration;
   };
 }
 
@@ -77,9 +83,15 @@ export type StagesAttributes = {
   };
 };
 
+export type StagesNormalizedAttributes = {
+  [name: string]: {
+    [serviceName: string]: ServiceConfigurationDeclarationNormalized;
+  };
+};
+
 export type NormalizedFileContents = {
   name: string;
-  stages: StagesAttributes;
+  stages: StagesNormalizedAttributes;
   defaults: ProjectDefaults;
 };
 

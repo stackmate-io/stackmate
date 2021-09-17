@@ -18,22 +18,12 @@ class Project {
   }
 
   /**
-   * Deploys a stage to the cloud
-   *
-   * @param {String} stageName the stage to deploy
-   * @async
-   */
-  async deploy(stageName: string) {
-    await this.use(stageName).deploy();
-  }
-
-  /**
    * Populates the services in the provisioner
    *
    * @param {String} stageName The stage to provision
    * @returns {Provisioner} the provisioner, having the services populated
    */
-  protected use(stageName: string): Provisioner {
+  use(stageName: string): Provisioner {
     if (!this.configuration.stages[stageName]) {
       throw new Error(
         `Stage ${stageName} was not found in the project. Available options are ${Object.keys(this.configuration.stages)}`,
@@ -45,6 +35,16 @@ class Project {
     );
 
     return this._provisioner;
+  }
+
+  /**
+   * Deploys a stage to the cloud
+   *
+   * @param {String} stageName the stage to deploy
+   * @async
+   */
+  async deploy(stageName: string) {
+    await this.use(stageName).deploy();
   }
 
   /**
