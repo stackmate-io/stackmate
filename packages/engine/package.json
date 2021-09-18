@@ -1,7 +1,10 @@
 {
   "name": "stackmate",
   "version": "0.1.0",
-  "author": "Fotis Alexandrou (@falexandrou)",
+  "author": {
+    "name": "Fotis Alexandrou (@falexandrou)",
+    "url": "https://www.falexandrou.com"
+  },
   "bin": {
     "stackmate": "./bin/run"
   },
@@ -71,7 +74,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "TS_NODE_PROJECT='./tsconfig.test.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
+    "test": "TS_NODE_PROJECT='./tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
     "test:ci": "npm run lint && npm run test",
     "version": "oclif-dev readme && git add README.md"
   },

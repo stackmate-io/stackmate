@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 
-import { PROVIDER, REGION, SERVICE_TYPE } from '../../src/core/constants';
-import { ConfigurationFileContents } from '../../src/types';
-import Configuration from '../../src/core/configuration';
-import { ValidationError } from '../../src/core/errors';
+import { PROVIDER, REGION, SERVICE_TYPE } from '@stackmate/core/constants';
+import { ConfigurationFileContents } from '@stackmate/types';
+import Configuration from '@stackmate/core/configuration';
+import { ValidationError } from '@stackmate/core/errors';
 
 describe('Configuration', () => {
   describe('validations', () => {

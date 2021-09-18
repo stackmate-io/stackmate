@@ -47,6 +47,7 @@ class Provisioner {
   }
 
   async deploy() {
+    return this.stack.toTerraform();
   }
 }
 

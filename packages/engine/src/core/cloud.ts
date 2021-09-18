@@ -61,11 +61,9 @@ abstract class Cloud implements CloudProvider {
    */
   abstract init(): void;
 
-  constructor(region: string, stack: CloudStack, defaults: ProviderDefaults = {}) {
+  constructor(stack: CloudStack, defaults: ProviderDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
-    this.region = region;
-    this.init();
   }
 
   /**
@@ -79,6 +77,8 @@ abstract class Cloud implements CloudProvider {
    * @param {String} region the region for the cloud provider
    */
   public set region(region: string) {
+    console.log({ provider: this.provider, region, regions: this.regions });
+
     if (!region || !Object.values(this.regions)) {
       throw new Error(`Invalid region ${region} for provider ${this.provider}`);
     }
@@ -101,7 +101,11 @@ abstract class Cloud implements CloudProvider {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    return new ServiceClass(this.stack, attributes, this.prerequisites);
+    const service = new ServiceClass(this.stack);
+    service.dependencies = this.prerequisites;
+    service.attributes = attributes;
+
+    return service;
   }
 }
 

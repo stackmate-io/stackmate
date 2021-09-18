@@ -1,4 +1,5 @@
 import { Construct } from 'constructs';
+import { TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
@@ -25,7 +26,7 @@ export interface CloudService {
   provision(): void;
 }
 
-export interface CloudStack extends Construct {
+export interface CloudStack extends TerraformStack {
   readonly name: string;
   readonly scope: Construct;
 }

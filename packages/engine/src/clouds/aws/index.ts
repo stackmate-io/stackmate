@@ -13,6 +13,10 @@ export const AWS_SERVICE_MAPPING: ServiceMapping = {
 };
 
 class AwsCloud extends Cloud {
+  /**
+   * @var {String} provider the provider's name
+   * @readonly
+   */
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
   readonly regions: RegionList = AWS_REGIONS;
@@ -28,9 +32,11 @@ class AwsCloud extends Cloud {
     });
 
     this.prerequisites = {
-      vpc: new AwsVpcService(this.stack, {
+      vpc: this.service({
+        type: SERVICE_TYPE.NETWORKING,
         name: 'my-vpc',
         region: this.region,
+        provider: PROVIDER.AWS,
       }),
     };
   }

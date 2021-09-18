@@ -77,15 +77,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    */
   abstract provision(): void;
 
-  constructor(stack: CloudStack, attributes: ServiceAttributes, dependencies: CloudPrerequisites | null = null) {
-    this.validate(attributes);
-
+  constructor(stack: CloudStack) {
     this.stack = stack;
-    this.attributes = attributes;
-
-    if (dependencies) {
-      this.dependencies = dependencies;
-    }
   }
 
   /**
@@ -108,6 +101,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @param {Object} attributes the attributes to set to the service
    */
   public set attributes(attributes: ServiceAttributes) {
+    this.validate(attributes);
+
     const attributeNames = omit(this.attributeNames(), this.ignoredAttributes);
     const acceptedKeys = omit(Object.keys(attributeNames), this.ignoredAttributes);
     const invalidKeys = difference(Object.keys(attributes), acceptedKeys);
@@ -123,6 +118,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
         (this as any)[attributeName] = parserFunction.call(this, get(attributes, attributeName));
       },
     );
+
+    this.provision();
   }
 
   /**

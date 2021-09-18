@@ -57,7 +57,7 @@ class Configuration implements Validatable {
       fullMessages: false,
     });
 
-    if (errors) {
+    if (!isEmpty(errors)) {
       throw new ValidationError('The project’s configuration file is not valid', errors);
     }
   }

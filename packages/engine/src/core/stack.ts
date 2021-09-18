@@ -3,6 +3,11 @@ import { Construct } from 'constructs';
 
 import { CloudStack } from '@stackmate/interfaces';
 
+/**
+ * This class is the necessary TerraformStack overload
+ *
+ * @class Stack
+ */
 class Stack extends TerraformStack implements CloudStack {
   /**
    * @var {String} name stack's name
@@ -16,7 +21,7 @@ class Stack extends TerraformStack implements CloudStack {
    */
   readonly scope: Construct;
 
-  constructor(name: string, scope: Construct) {
+  constructor(scope: Construct, name: string) {
     super(scope, name);
 
     this.scope = scope;
@@ -30,7 +35,7 @@ class Stack extends TerraformStack implements CloudStack {
    * @returns {CloudStack} the stack
    */
   static factory(name: string): CloudStack {
-    return new Stack(name, new TerraformApp());
+    return new Stack(new TerraformApp(), name);
   }
 }
 

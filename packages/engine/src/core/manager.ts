@@ -52,11 +52,20 @@ class CloudManager {
    * @returns {CloudProvider} the cloud provider instantiated
    */
   protected instantiate(provider: ProviderChoice, region: string): CloudProvider {
+    let cloud;
+
     if (provider === PROVIDER.AWS) {
-      return new AwsCloud(region, this.stack, get(this.defaults, provider));
+      cloud = new AwsCloud(this.stack, get(this.defaults, provider));
     }
 
-    throw new Error(`Provider ${provider} is not supported, yet`);
+    if (!cloud) {
+      throw new Error(`Provider ${provider} is not supported, yet`);
+    }
+
+    cloud.region = region;
+    cloud.init();
+
+    return cloud;
   }
 }
 
