@@ -36,7 +36,6 @@ class AwsCloud extends Cloud {
         type: SERVICE_TYPE.NETWORKING,
         name: 'my-vpc',
         region: this.region,
-        provider: PROVIDER.AWS,
       }),
     };
   }

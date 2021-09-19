@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import { CloudProvider, CloudStack, CloudService } from '@stackmate/interfaces';
 import {
@@ -77,8 +77,6 @@ abstract class Cloud implements CloudProvider {
    * @param {String} region the region for the cloud provider
    */
   public set region(region: string) {
-    console.log({ provider: this.provider, region, regions: this.regions });
-
     if (!region || !Object.values(this.regions)) {
       throw new Error(`Invalid region ${region} for provider ${this.provider}`);
     }
@@ -92,7 +90,7 @@ abstract class Cloud implements CloudProvider {
    * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  service(attributes: ServiceConfigurationDeclarationNormalized): CloudService {
+  service(attributes: Omit<ServiceConfigurationDeclarationNormalized, 'provider'>): CloudService {
     const { type } = attributes;
 
     const ServiceClass = get(this.serviceMapping, type, null);
@@ -102,8 +100,12 @@ abstract class Cloud implements CloudProvider {
     }
 
     const service = new ServiceClass(this.stack);
-    service.dependencies = this.prerequisites;
     service.attributes = attributes;
+
+    if (!isEmpty(this.prerequisites)) {
+      service.dependencies = this.prerequisites;
+    }
+    service.provision();
 
     return service;
   }

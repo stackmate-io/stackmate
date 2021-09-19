@@ -1,10 +1,10 @@
 import validate from 'validate.js';
-import { difference, get, isArray, isString, omit, toPairs } from 'lodash';
+import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
 
 import { CloudStack, CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
-import { parseArrayToSet, parseString } from '@stackmate/core/utils';
+import { parseArrayToUniqueValues, parseString } from '@stackmate/core/utils';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,
@@ -25,7 +25,7 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  public links: Set<string> = new Set();
+  public links: Array<string> = [];
 
   /**
    * @var {CloudStack} stack the stack that the service is provisioned against
@@ -44,13 +44,6 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    *  }];
    */
   readonly associations: Array<ServiceAssociation> = [];
-
-  /**
-   * @var {Array<string>} ignoredAttributes the attributes to ignore when populating the service
-   * @protected
-   * @readonly
-   */
-  protected readonly ignoredAttributes = ['provider', 'type'];
 
   /**
    * @var {Array<String>} regions the regions that the service is available in
@@ -90,8 +83,10 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
   attributeNames(): AttributeNames {
     return {
       name: parseString,
+      type: parseString,
       region: parseString,
-      links: parseArrayToSet,
+      provider: parseString,
+      links: parseArrayToUniqueValues,
     };
   }
 
@@ -101,25 +96,36 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @param {Object} attributes the attributes to set to the service
    */
   public set attributes(attributes: ServiceAttributes) {
-    this.validate(attributes);
+    const acceptedAttributes = this.attributeNames();
 
-    const attributeNames = omit(this.attributeNames(), this.ignoredAttributes);
-    const acceptedKeys = omit(Object.keys(attributeNames), this.ignoredAttributes);
-    const invalidKeys = difference(Object.keys(attributes), acceptedKeys);
-
-    if (invalidKeys) {
+    // Validate the keys provided first
+    const invalidKeys = difference(Object.keys(attributes), Object.keys(acceptedAttributes));
+    if (!isEmpty(invalidKeys)) {
       throw new Error(
         `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
       );
     }
 
-    toPairs(attributeNames).forEach(
-      ([attributeName, parserFunction]) => {
-        (this as any)[attributeName] = parserFunction.call(this, get(attributes, attributeName));
-      },
+    // Parse & finalize the attributes
+    const parsedAttributes = fromPairs(
+      toPairs(acceptedAttributes).map(
+        ([attributeName, parserFunction]) => {
+          // Where to get the attribute value from:
+          //  in case it's declared in the `attributes` object, use that
+          //  otherwise, use the default value that is set on this object
+          const attributeSource = has(attributes, attributeName) ? attributes : this;
+          return [attributeName, parserFunction.call(this, get(attributeSource, attributeName))];
+        },
+      ),
     );
 
-    this.provision();
+    // Validate the attributes
+    this.validate(parsedAttributes as ServiceAttributes);
+
+    // Validation passed, we can now assign the attributes to the project
+    toPairs(parsedAttributes).forEach(([attributeName, attributeValue]) => {
+      (this as any)[attributeName] = attributeValue;
+    });
   }
 
   /**
@@ -158,9 +164,12 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
       fullMessages: false,
     });
 
-    if (errors) {
+    if (!isEmpty(errors)) {
       const { name } = attributes;
-      throw new ValidationError(`The configuration for ${name || 'the service'} is invalid`, errors);
+      console.log(attributes, errors);
+      throw new ValidationError(
+        `The configuration for ${name || 'the'} service is invalid`, errors,
+      );
     }
   }
 
@@ -171,7 +180,7 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    */
   validations(): Validations {
     validate.validators.validateLinks = (links: Array<string>) => {
-      if (!isArray(links) || !links.every(l => isString(l))) {
+      if (isArray(links) && !links.every(l => isString(l))) {
         return 'The service contains an invalid entries under “links“';
       }
     };
@@ -189,8 +198,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
           message: 'A region should be provided',
         },
         inclusion: {
-          within: this.regions,
-          message: `The region for this service is invalid. Available options are ${Object.values(this.regions).join(', ')}`,
+          within: Object.values(this.regions),
+          message: `The region for this service is invalid. Available options are: ${Object.values(this.regions).join(', ')}`,
         },
       },
       type: {

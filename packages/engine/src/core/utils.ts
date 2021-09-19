@@ -1,4 +1,4 @@
-import { isNumber } from 'lodash';
+import { isArray, isNumber, uniq } from 'lodash';
 
 /**
  * Parses a string
@@ -18,6 +18,16 @@ const parseString = (value: string) => (
  */
 const parseArrayToSet = (value: Array<any>) => (
   new Set(value || [])
+);
+
+/**
+ * Parses an array to an array of unique values
+ *
+ * @param {Array} value the value to make unique
+ * @returns {Array} the value containing only unique entries
+ */
+const parseArrayToUniqueValues = (value: Array<any>) => (
+  isArray(value) ? uniq(value) : []
 );
 
 /**
@@ -45,4 +55,5 @@ export {
   parseInteger,
   parseBoolean,
   parseArrayToSet,
+  parseArrayToUniqueValues,
 };

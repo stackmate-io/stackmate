@@ -19,7 +19,7 @@ export interface CloudService {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
-  links: Set<string>;
+  links: Array<string>;
   attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;

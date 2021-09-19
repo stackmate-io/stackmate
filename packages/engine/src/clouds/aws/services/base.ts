@@ -11,6 +11,8 @@ abstract class AwsService extends Service {
   readonly regions: RegionList = AWS_REGIONS;
 
   public set dependencies({ vpc }: { vpc: AwsVpcService }) {
+    console.log(vpc);
+
     this.vpcId = vpc.id;
   }
 }

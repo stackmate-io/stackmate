@@ -38,11 +38,9 @@ class Provisioner {
     Object.keys(services).forEach((name: string) => {
       const { provider, region } = services[name];
 
-      const service = this.clouds.get(provider, region).service(services[name]);
-
-      service.provision();
-
-      this._services.add(service);
+      this._services.add(
+        this.clouds.get(provider, region).service(services[name]),
+      );
     });
   }
 

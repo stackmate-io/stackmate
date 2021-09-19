@@ -10,7 +10,7 @@ export const fullConfig: ConfigurationFileContents = {
         type: 'mysql',
         size: 'db.t2.large',
         storage: 30,
-        datbase: 'my-super-database',
+        database: 'my_database_name',
       },
     },
   },
