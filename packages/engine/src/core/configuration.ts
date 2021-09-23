@@ -1,21 +1,16 @@
-import fs from 'fs';
-import { resolve as resolvePath } from 'path';
-import { clone, difference, flatten, fromPairs, isEmpty, isObject, merge, omit, uniq } from 'lodash';
+import { clone, difference, flatten, fromPairs, isEmpty, isObject, merge, omit, pick, uniq } from 'lodash';
 import validate from 'validate.js';
-import YAML from 'yaml';
 
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
-import { ConfigurationFileContents, NormalizedFileContents, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, Validations } from '@stackmate/types';
+import File from '@stackmate/core/file';
+import { FORMAT, PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
+import {
+  ConfigurationFileContents, NormalizedFileContents, ProjectDefaults,
+  ProviderChoice, StagesNormalizedAttributes, Validations,
+} from '@stackmate/types';
 
-class Configuration implements Validatable {
-  /**
-   * @var {String} path the path for the configuration file
-   * @readonly
-   */
-  readonly path: string;
-
+class Configuration extends File implements Validatable {
   /**
    * @var {String} name the project's name
    * @readonly
@@ -34,15 +29,22 @@ class Configuration implements Validatable {
    */
   readonly stages: StagesNormalizedAttributes;
 
-  constructor(contents: ConfigurationFileContents, path: string) {
-    this.validate(contents);
-    this.path = path;
+  /**
+   * @var {String} format the file's format (eg. YML, JSON)
+   */
+  format: string = FORMAT.YML;
 
-    const { name, stages, defaults } = Configuration.normalize(contents);
+  async load(): Promise<object> {
+    await super.load();
 
-    this.name = name;
-    this.stages = stages;
-    this.defaults = defaults;
+    this.validate(this.contents);
+
+    // assign the name, stages and defaults to the corresponding attributes
+    Object.assign(
+      this as any, pick(Configuration.normalize(this.contents), 'name', 'stages', 'defaults'),
+    );
+
+    return this.contents;
   }
 
   /**
@@ -226,36 +228,6 @@ class Configuration implements Validatable {
     });
 
     return normalized;
-  }
-
-  /**
-   * Loads a configuration file
-   *
-   * @param {String} filePath the path to load the configuration from
-   * @returns {Configuration} the project configuration, validated and normalized
-   */
-  static async load(filePath: string) {
-    let fileContents;
-    const resolvedPath = resolvePath(filePath);
-
-    try {
-      fileContents = await fs.promises.readFile(resolvedPath);
-    } catch (error) {
-      throw new Error('The path for the configuration file specified is invalid');
-    }
-
-    let contents;
-    try {
-      contents = YAML.parse(fileContents.toString());
-    } catch (error) {
-      throw new Error('The configuration file should be a valid YAML file');
-    }
-
-    if (!contents || !isObject(contents)) {
-      throw new Error('The configuaration file’s content is invalid');
-    }
-
-    return new Configuration(contents as ConfigurationFileContents, resolvedPath);
   }
 }
 

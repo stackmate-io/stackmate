@@ -6,8 +6,13 @@ import { SERVICE_TYPE } from '@stackmate/core/constants';
 import { Sizeable, Storable } from '@stackmate/interfaces';
 import { parseInteger, parseString } from '@stackmate/core/utils';
 import {
-  DEFAULT_INSTANCE_STORAGE, DEFAULT_MYSQL_ENGINE, DEFAULT_POSTGRES_ENGINE,
-  DEFAULT_RDS_INSTANCE_SIZE, RDS_INSTANCE_SIZES, RDS_MYSQL_ENGINES, RDS_POSTGRES_ENGINES,
+  DEFAULT_MYSQL_ENGINE,
+  DEFAULT_POSTGRES_ENGINE,
+  DEFAULT_RDS_INSTANCE_SIZE,
+  DEFAULT_RDS_INSTANCE_STORAGE,
+  RDS_INSTANCE_SIZES,
+  RDS_MYSQL_ENGINES,
+  RDS_POSTGRES_ENGINES,
 } from '@stackmate/clouds/aws/constants';
 
 abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Storable {
@@ -19,7 +24,7 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   /**
    * @var {Number} storage the storage size for the instance
    */
-  storage: number = DEFAULT_INSTANCE_STORAGE;
+  storage: number = DEFAULT_RDS_INSTANCE_STORAGE;
 
   /**
    * @var {String} database the database to create

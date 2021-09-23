@@ -1,7 +1,14 @@
+import path from 'path';
 import Provisioner from '@stackmate/core/provisioner';
 import Configuration from '@stackmate/core/configuration';
+import { STORAGE } from '@stackmate/core/constants';
 
 class Project {
+  /**
+   * @var {String} DEFAULT_PATH the path for the project file to use
+   */
+  static DEFAULT_PATH: string = path.join(process.cwd(), '.stackmate', 'config.yml');
+
   /**
    * @var {Configuration} configuration the project's configuration
    * @readonly
@@ -13,8 +20,21 @@ class Project {
    */
   private _provisioner: Provisioner;
 
-  constructor(configuration: Configuration) {
-    this.configuration = configuration;
+  constructor(path: string = Project.DEFAULT_PATH, storage: string = STORAGE.FILE ) {
+    this.configuration = new Configuration(path, storage);
+  }
+
+  async load() {
+    await this.configuration.load();
+
+    // const {
+    //   state: { path: statePath, storage: stateStorage } = {},
+    //   vault: { path: vaultPath, storage: vaultStorage } = {},
+    // } = this.configuration.contents;
+    //
+    // this.state = new State(statePath, storage);
+    // this.vault = new Vault(vaultPath, storage);
+    // await Promise.all([this.state.load(), this.vault.load()])
   }
 
   /**
@@ -46,24 +66,13 @@ class Project {
   async deploy(stageName: string) {
     await this.use(stageName).deploy();
   }
-
-  /**
-   * Loads a project from a given configuration file path
-   *
-   * @param {String} path the path for the configuration file to load
-   * @returns {Project} the project object
-   * @async
-   */
-  static async load(path: string) {
-    const config = await Configuration.load(path);
-    const project = new Project(config);
-    return project;
-  }
 }
 
 /*
 Usage:
-await Project.load(cfg, state).deploy('production');
+const project = new Project();
+await project.load();
+await project.deploy('production');
 */
 
 export default Project;

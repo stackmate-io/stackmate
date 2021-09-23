@@ -1,17 +1,12 @@
-import { get, has, set } from 'lodash';
+import { get } from 'lodash';
 
 import { PROVIDER } from '@stackmate/core/constants';
 import { CloudProvider, CloudStack } from '@stackmate/interfaces';
 import { ProjectDefaults, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from '@stackmate/clouds/aws';
+import { Cached } from './decorators';
 
 class CloudManager {
-  /**
-   * @var {Map} _clouds a collection of the cloud managers that have been instantiated for the stage
-   * @private
-   */
-  private _clouds: { [name: string]: CloudProvider } = {};
-
   /**
    * @var {Stack} stack the stack to use for cloud provisions
    */
@@ -34,24 +29,8 @@ class CloudManager {
    * @param {String} region string the cloud region to use
    * @returns {CloudProvider} the cloud manager for the specified provider & region
    */
+  @Cached()
   get(provider: ProviderChoice, region: string): CloudProvider {
-    const key = `${provider}-${region}`;
-
-    if (!has(this._clouds, key)) {
-      set(this._clouds, key, this.instantiate(provider, region));
-    }
-
-    return get(this._clouds, key);
-  }
-
-  /**
-   * Instantiate a cloud provider based on its name and region
-   *
-   * @param {String} provider the provider to instantiate (eg. 'aws')
-   * @param {String} region the region for the provider
-   * @returns {CloudProvider} the cloud provider instantiated
-   */
-  protected instantiate(provider: ProviderChoice, region: string): CloudProvider {
     let cloud;
 
     if (provider === PROVIDER.AWS) {

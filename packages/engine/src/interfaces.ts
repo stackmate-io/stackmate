@@ -23,6 +23,7 @@ export interface CloudService {
   attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
+  populate(attributes: ServiceAttributes, dependencies?: CloudPrerequisites): CloudService;
   provision(): void;
 }
 
@@ -75,4 +76,15 @@ export interface Rootable extends Validatable, AttributeAssignable {
   root: number; // TOOD
   validations(): Required<{ root: object }>;
   attributeNames(): Required<{ root: Function }>;
+}
+
+export interface StorageAdapter {
+  readonly path: string;
+  read(): Promise<string>;
+  write(contents: string): Promise<string>;
+}
+
+export interface Formatter {
+  parse(raw: string): Promise<object>;
+  export(parsed: object): Promise<string>;
 }

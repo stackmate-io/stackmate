@@ -1,4 +1,4 @@
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 
 import { CloudProvider, CloudStack, CloudService } from '@stackmate/interfaces';
 import {
@@ -99,15 +99,7 @@ abstract class Cloud implements CloudProvider {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    const service = new ServiceClass(this.stack);
-    service.attributes = attributes;
-
-    if (!isEmpty(this.prerequisites)) {
-      service.dependencies = this.prerequisites;
-    }
-    service.provision();
-
-    return service;
+    return new ServiceClass(this.stack).populate(attributes, this.prerequisites);
   }
 }
 

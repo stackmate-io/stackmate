@@ -32,7 +32,7 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @protected
    * @readonly
    */
-  protected readonly stack: CloudStack;
+  public stack: CloudStack;
 
   /**
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
@@ -72,6 +72,25 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
 
   constructor(stack: CloudStack) {
     this.stack = stack;
+  }
+
+  /**
+   * Populates a service
+   *
+   * @param {Object} attributes the attributes to populate the service with
+   * @param {Object} dependencies the service's dependencies (provided by the cloud provider)
+   * @returns {Service} the service returned
+   */
+  populate(attributes: ServiceAttributes, dependencies: CloudPrerequisites = {}) {
+    this.attributes = attributes;
+
+    if (!isEmpty(dependencies)) {
+      this.dependencies = dependencies;
+    }
+
+    this.provision();
+
+    return this;
   }
 
   /**

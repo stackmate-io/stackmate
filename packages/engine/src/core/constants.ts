@@ -1,4 +1,5 @@
 import { RegionList } from '@stackmate/types';
+import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 
 export const PROVIDER = {
   AWS: 'aws',
@@ -20,10 +21,15 @@ export const SERVICE_TYPE = {
   NETWORKING: 'networking',
 } as const;
 
-export const AWS_REGIONS: RegionList = {
-  EU_CENTRAL_1: 'eu-central-1',
-} as const;
-
 export const REGION: { [name: string]: RegionList } = {
   [PROVIDER.AWS]: AWS_REGIONS,
+} as const;
+
+export const FORMAT: { [name: string]: string } = {
+  YML: 'yml',
+  JSON: 'json',
+} as const;
+
+export const STORAGE: { [name: string]: string } = {
+  FILE: 'file',
 } as const;

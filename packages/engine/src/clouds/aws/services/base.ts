@@ -4,15 +4,25 @@ import { ProviderChoice, RegionList } from '@stackmate/types';
 import { PROVIDER, AWS_REGIONS } from '@stackmate/core/constants';
 
 abstract class AwsService extends Service {
+  /**
+   * @var {String} provider the cloud provider used (eg. AWS)
+   * @readonly
+   */
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
-  protected vpcId: string;
-
+  /**
+   * @var {Object} regions the list of regions available
+   * @readonly
+   */
   readonly regions: RegionList = AWS_REGIONS;
 
-  public set dependencies({ vpc }: { vpc: AwsVpcService }) {
-    console.log(vpc);
+  /**
+   * @var {String} vpcId the vpc id to use in the resources
+   * @protected
+   */
+  protected vpcId: string;
 
+  public set dependencies({ vpc }: { vpc: AwsVpcService }) {
     this.vpcId = vpc.id;
   }
 }

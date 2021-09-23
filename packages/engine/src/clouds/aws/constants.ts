@@ -1,3 +1,9 @@
+import { RegionList } from '@stackmate/types';
+
+export const AWS_REGIONS: RegionList = {
+  EU_CENTRAL_1: 'eu-central-1',
+} as const;
+
 // Defaults
 export const DEFAULT_INSTANCE_STORAGE = 30;
 

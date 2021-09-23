@@ -18,19 +18,6 @@ region: eu-central-1
 #   path: ~/.stackmate/test123.yml.enc
 #   # storage: github # todo
 
-# Environment variables to use
-# TODO
-# environment:
-#   aws:
-#     keyid: STACKMATE_KEY_TEST
-#     secret: STACKMATE_SECRET_TEST
-#   # TODO
-#   # vault:
-#   #   token: GITHUB_TOKEN
-#   # state:
-#   #   username: ABC
-#   #   password: OBB
-
 stages:
   production:
     application:
