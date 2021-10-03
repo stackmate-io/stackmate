@@ -19,7 +19,7 @@ $ npm install -g stackmate
 $ stackmate COMMAND
 running command...
 $ stackmate (-v|--version|version)
-stackmate/0.1.0 darwin-x64 node-v16.4.0
+stackmate/0.1.0 darwin-x64 node-v12.21.0
 $ stackmate --help [COMMAND]
 USAGE
   $ stackmate COMMAND
@@ -28,27 +28,37 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`stackmate deploy [ENVIRONMENT]`](#stackmate-deploy-environment)
+* [`stackmate deploy STAGE`](#stackmate-deploy-stage)
+* [`stackmate destroy STAGE`](#stackmate-destroy-stage)
 * [`stackmate help [COMMAND]`](#stackmate-help-command)
-* [`stackmate init [FILENAME]`](#stackmate-init-filename)
 
-## `stackmate deploy [ENVIRONMENT]`
+## `stackmate deploy STAGE`
 
-imports a docker-compose file and initializes a project based on that
+deploy resources to the cloud
 
 ```
 USAGE
-  $ stackmate deploy [ENVIRONMENT]
+  $ stackmate deploy STAGE
 
 ARGUMENTS
-  ENVIRONMENT  [default: production] the environment to deploy
-
-OPTIONS
-  -a, --application
-  -i, --infrastructure
+  STAGE  the stage to deploy
 ```
 
-_See code: [src/commands/deploy.ts](https://github.com/falexandrou/stackmate-ce/blob/v0.1.0/src/commands/deploy.ts)_
+_See code: [src/commands/deploy.ts](https://github.com/stackmate-io/stackmate-ce/blob/v0.1.0/src/commands/deploy.ts)_
+
+## `stackmate destroy STAGE`
+
+deploy resources to the cloud
+
+```
+USAGE
+  $ stackmate destroy STAGE
+
+ARGUMENTS
+  STAGE  the stage to deploy
+```
+
+_See code: [src/commands/destroy.ts](https://github.com/stackmate-io/stackmate-ce/blob/v0.1.0/src/commands/destroy.ts)_
 
 ## `stackmate help [COMMAND]`
 
@@ -66,18 +76,4 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
-
-## `stackmate init [FILENAME]`
-
-imports a docker-compose file and initializes a project based on that
-
-```
-USAGE
-  $ stackmate init [FILENAME]
-
-ARGUMENTS
-  FILENAME  [default: docker-compose.yml] docker compose file to import
-```
-
-_See code: [src/commands/init.ts](https://github.com/falexandrou/stackmate-ce/blob/v0.1.0/src/commands/init.ts)_
 <!-- commandsstop -->

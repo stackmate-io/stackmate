@@ -1,7 +1,8 @@
 import { AwsProvider } from '@cdktf/provider-aws';
 
 import Cloud from '@stackmate/core/cloud';
-import { PROVIDER, SERVICE_TYPE, AWS_REGIONS } from '@stackmate/core/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
+import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 import { AwsMysqlService, AwsPostgresqlService } from '@stackmate/clouds/aws/services/rds';
 import { AwsVpcService } from '@stackmate/clouds/aws/services/vpc';

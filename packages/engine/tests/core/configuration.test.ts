@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
 import { PROVIDER, REGION, SERVICE_TYPE } from '@stackmate/core/constants';
-import { ConfigurationFileContents } from '@stackmate/types';
-import Configuration from '@stackmate/core/configuration';
+import { ProjectConfiguration } from '@stackmate/types';
+import Configuration from '@stackmate/core/project';
 import { ValidationError } from '@stackmate/core/errors';
 
 describe('Configuration', () => {
@@ -53,7 +53,7 @@ describe('Configuration', () => {
       let cfg;
 
       try {
-        cfg = new Configuration(invalidConfig as ConfigurationFileContents, configPath);
+        cfg = new Configuration(invalidConfig as ProjectConfiguration, configPath);
       } catch (error) {
         errors = error.errors;
         expect(error).to.be.an.instanceOf(ValidationError);
@@ -70,7 +70,7 @@ describe('Configuration', () => {
     });
 
     it('doesn’t raise an error for a valid configuration schema', () => {
-      const validConfig: ConfigurationFileContents = {
+      const validConfig: ProjectConfiguration = {
         name: 'Sample project',
         provider: PROVIDER.AWS,
         region: REGION[PROVIDER.AWS].EU_CENTRAL_1,

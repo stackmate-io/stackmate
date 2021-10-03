@@ -1,6 +1,6 @@
-import { ConfigurationFileContents } from '@stackmate/types';
+import { ProjectConfiguration } from '@stackmate/types';
 
-export const fullConfig: ConfigurationFileContents = {
+export const fullConfig: ProjectConfiguration = {
   name: 'full-config',
   provider: 'aws',
   region: 'eu-central-1',

@@ -15,9 +15,11 @@
     "@oclif/config": "^1",
     "@oclif/plugin-help": "^3",
     "cdktf": "^0.4.1",
+    "cdktf-cli": "^0.6.3",
     "chalk": "^4.1.1",
     "constructs": "^3.3.91",
     "lodash": "^4.17.21",
+    "react": "^17.0.2",
     "tslib": "^1",
     "validate.js": "^0.13.1",
     "yaml": "^1.10.2"
@@ -25,9 +27,12 @@
   "devDependencies": {
     "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
+    "@sinonjs/fake-timers": "6",
     "@types/chai": "^4.2.21",
+    "@types/jsforce": "^1.9.35",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^10",
+    "@types/node": "^16.10.2",
+    "@types/react": "^17.0.26",
     "chai": "^4.3.4",
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
@@ -73,7 +78,9 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "oclif-dev": "node -r tsconfig-paths/register node_modules/.bin/oclif-dev",
+    "cmd": "node -r tsconfig-paths/register ./bin/run",
+    "prepack": "rm -rf lib && tsc --build tsconfig.build.json && yarn oclif-dev manifest && yarn oclif-dev readme",
     "test": "TS_NODE_PROJECT='./tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
     "test:ci": "npm run lint && npm run test",
     "version": "oclif-dev readme && git add README.md"

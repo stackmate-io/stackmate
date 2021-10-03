@@ -1,6 +1,3 @@
-import { Construct } from 'constructs';
-import { TerraformStack } from 'cdktf';
-
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, AttributeNames,
@@ -25,11 +22,6 @@ export interface CloudService {
   link(target: CloudService): void;
   populate(attributes: ServiceAttributes, dependencies?: CloudPrerequisites): CloudService;
   provision(): void;
-}
-
-export interface CloudStack extends TerraformStack {
-  readonly name: string;
-  readonly scope: Construct;
 }
 
 export interface Validatable {

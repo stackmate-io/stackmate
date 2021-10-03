@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import Configuration from '@stackmate/core/configuration';
+import Configuration from '@stackmate/core/project';
 import Provisioner from '@stackmate/core/provisioner';
 import { fullConfig } from 'tests/fixtures';
 

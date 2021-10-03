@@ -3,14 +3,14 @@ import { expect } from 'chai';
 
 import { PROVIDER, REGION, SERVICE_TYPE } from '@stackmate/core/constants';
 import Project from '@stackmate/core/project';
-import Configuration from '@stackmate/core/configuration';
-import { ConfigurationFileContents } from '@stackmate/types';
+import Configuration from '@stackmate/core/project';
+import { ProjectConfiguration } from '@stackmate/types';
 
 describe('Project', () => {
   let configuration: Configuration;
 
   beforeEach(() => {
-    const configContents: ConfigurationFileContents = {
+    const configContents: ProjectConfiguration = {
       name: 'my-project',
       provider: PROVIDER.AWS,
       region: REGION[PROVIDER.AWS].EU_CENTRAL_1,

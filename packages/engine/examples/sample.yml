@@ -20,63 +20,63 @@ region: eu-central-1
 
 stages:
   production:
-    application:
-      type: application
-      size: t2.nano
-      storage: 20
-      volumes:
-        - size: 30
-          name: test-volume
-          mount: /var/www/test
-      links:
-        - database
+    # application:
+    #   type: application
+    #   size: t2.nano
+    #   storage: 20
+    #   volumes:
+    #     - size: 30
+    #       name: test-volume
+    #       mount: /var/www/test
+    #   links:
+    #     - database
 
     database:
       type: mysql
-      size: db.t2.nano
+      size: db2.t3.micro
       storage: 30
-      credentials:
-        username: vault:dbusername
-        password: vault:dbpassword
-      root:
-        username: vault:rootusername
-        password: vault:rootpassword
+      # credentials:
+      #   username: vault:dbusername
+      #   password: vault:dbpassword
+      # root:
+      #   username: vault:rootusername
+      #   password: vault:rootpassword
 
-    loadbalancer:
-      type: loadbalancer
-      source: application
+    # loadbalancer:
+    #   type: loadbalancer
+    #   source: application
 
-    routing:
-      type: routing
-      domains:
-        - name: sinatra.ezploy.eu
-          service: loadbalancer
-        - name: www.sinatra.ezploy.eu
-          type: CNAME
-          value: sinatra.ezploy.eu
-        - name: database.sinatra.ezploy.eu
-          service: database
+    # routing:
+    #   type: routing
+    #   domains:
+    #     - name: sinatra.ezploy.eu
+    #       service: loadbalancer
+    #     - name: www.sinatra.ezploy.eu
+    #       type: CNAME
+    #       value: sinatra.ezploy.eu
+    #     - name: database.sinatra.ezploy.eu
+    #       service: database
 
-    certificates:
-      type: ssl
-      domains:
-        - sinatra.ezploy.eu
-        - *.sinatra.ezploy.eu
+    # certificates:
+    #   type: ssl
+    #   domains:
+    #     - "sinatra.ezploy.eu"
+    #     - "*.sinatra.ezploy.eu"
 
   # Environment overrides - staging
   staging:
     from: production
-    skip:
-      - routing
-      - certificates
-    application:
-      size: t2.large
+    # skip:
+    #   - routing
+    #   - certificates
+    # application:
+    #   size: t2.large
 
   # Environment overrides - staging2
   staging2:
     from: staging
-    application:
-      size: t2.xlarge
+    # application:
+    #   size: t2.xlarge
 
 # Optional
 defaults:

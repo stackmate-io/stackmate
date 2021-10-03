@@ -1,23 +1,24 @@
 import { get } from 'lodash';
+import { Construct } from 'constructs';
 
 import { PROVIDER } from '@stackmate/core/constants';
-import { CloudProvider, CloudStack } from '@stackmate/interfaces';
+import { CloudProvider } from '@stackmate/interfaces';
 import { ProjectDefaults, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from '@stackmate/clouds/aws';
-import { Cached } from './decorators';
+import { Cached } from '@stackmate/core/decorators';
 
 class CloudManager {
   /**
    * @var {Stack} stack the stack to use for cloud provisions
    */
-  readonly stack: CloudStack;
+  readonly stack: Construct;
 
   /**
    * @var {Object} defaults any project defaults to use in cloud providers
    */
   readonly defaults: ProjectDefaults = {};
 
-  constructor(stack: CloudStack, defaults: ProjectDefaults = {}) {
+  constructor(stack: Construct, defaults: ProjectDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
   }

@@ -1,7 +1,8 @@
 import validate from 'validate.js';
+import { Construct } from 'constructs';
 import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
 
-import { CloudStack, CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
+import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/core/utils';
@@ -28,11 +29,11 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
   public links: Array<string> = [];
 
   /**
-   * @var {CloudStack} stack the stack that the service is provisioned against
+   * @var {Construct} stack the stack that the service is provisioned against
    * @protected
    * @readonly
    */
-  public stack: CloudStack;
+  public stack: Construct;
 
   /**
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
@@ -70,7 +71,7 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    */
   abstract provision(): void;
 
-  constructor(stack: CloudStack) {
+  constructor(stack: Construct) {
     this.stack = stack;
   }
 
@@ -185,9 +186,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
 
     if (!isEmpty(errors)) {
       const { name } = attributes;
-      console.log(attributes, errors);
       throw new ValidationError(
-        `The configuration for ${name || 'the'} service is invalid`, errors,
+        `Invalid configuration for the ${name ? `“${name}” ` : ' '}service`, errors,
       );
     }
   }

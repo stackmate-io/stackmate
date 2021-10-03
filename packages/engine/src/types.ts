@@ -69,7 +69,7 @@ export type StageDeclarations = {
   };
 }
 
-export type ConfigurationFileContents = {
+export type ProjectConfiguration = {
   name?: string;
   provider?: string;
   region?: string;
@@ -89,7 +89,11 @@ export type StagesNormalizedAttributes = {
   };
 };
 
-export type NormalizedFileContents = {
+export type NormalizedStages = {
+  [name: string]: ServiceConfigurationDeclarationNormalized;
+};
+
+export type NormalizedProjectConfiguration = {
   name: string;
   stages: StagesNormalizedAttributes;
   defaults: ProjectDefaults;
@@ -101,4 +105,8 @@ export type Validations = {
 
 export type AttributeNames = {
   [name: string]: Function;
+};
+
+export type ValidationErrorList = {
+  [attribute: string]: Array<string>;
 };

@@ -1,5 +1,11 @@
+import os from 'os';
+import path from 'path';
 import { RegionList } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+
+export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), '.stackmate', 'config.yml');
+export const OUTPUT_DIRECTORY = process.env.STACKMATE_OUTPUT || path.join(os.homedir(), '.stackmate');
+export const SYNTH_COMMAND = 'stackmate version';
 
 export const PROVIDER = {
   AWS: 'aws',

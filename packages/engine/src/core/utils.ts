@@ -6,7 +6,7 @@ import { isArray, isNumber, uniq } from 'lodash';
  * @param {String} value the value to parse
  * @returns {String} the parsed value
  */
-const parseString = (value: string) => (
+export const parseString = (value: string) => (
   String(value || '').trim()
 );
 
@@ -16,7 +16,7 @@ const parseString = (value: string) => (
  * @param {Array} value the array value to parse
  * @returns {Set} the set containing the values
  */
-const parseArrayToSet = (value: Array<any>) => (
+export const parseArrayToSet = (value: Array<any>) => (
   new Set(value || [])
 );
 
@@ -26,7 +26,7 @@ const parseArrayToSet = (value: Array<any>) => (
  * @param {Array} value the value to make unique
  * @returns {Array} the value containing only unique entries
  */
-const parseArrayToUniqueValues = (value: Array<any>) => (
+export const parseArrayToUniqueValues = (value: Array<any>) => (
   isArray(value) ? uniq(value) : []
 );
 
@@ -36,7 +36,7 @@ const parseArrayToUniqueValues = (value: Array<any>) => (
  * @param {Number|String} value the value to parse
  * @returns {Number} the value provided as integer
  */
-const parseInteger = (value: number | string) => (
+export const parseInteger = (value: number | string) => (
   isNumber(value) ? Number(value) : parseInt(value, 10)
 );
 
@@ -46,14 +46,6 @@ const parseInteger = (value: number | string) => (
  * @param {Number|String} value the value to parse
  * @returns {Boolean} the value provided as a boolean
  */
-const parseBoolean = (value: number | string) => (
+export const parseBoolean = (value: number | string) => (
   Boolean(value)
 );
-
-export {
-  parseString,
-  parseInteger,
-  parseBoolean,
-  parseArrayToSet,
-  parseArrayToUniqueValues,
-};

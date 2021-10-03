@@ -1,233 +1,109 @@
-import { clone, difference, flatten, fromPairs, isEmpty, isObject, merge, omit, pick, uniq } from 'lodash';
-import validate from 'validate.js';
+import LocalFileAdapter from '@stackmate/core/adapters/storage/local';
+import JsonFormatter from '@stackmate/core/adapters/format/json';
+import YamlFormatter from '@stackmate/core/adapters/format/yml';
+import { FORMAT, STORAGE } from '@stackmate/core/constants';
+import { Cached } from '@stackmate/core/decorators';
+import { Formatter, StorageAdapter } from '@stackmate/interfaces';
 
-import File from '@stackmate/core/file';
-import { FORMAT, PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
-import { Validatable } from '@stackmate/interfaces';
-import { ValidationError } from '@stackmate/core/errors';
-import {
-  ConfigurationFileContents, NormalizedFileContents, ProjectDefaults,
-  ProviderChoice, StagesNormalizedAttributes, Validations,
-} from '@stackmate/types';
-
-class Configuration extends File implements Validatable {
+abstract class Configuration {
   /**
-   * @var {String} name the project's name
-   * @readonly
+   * @var {Object} contents the file's contents in a structured format
    */
-  readonly name: string;
+  contents: object;
 
   /**
-   * @var {Object} defaults the defaults to apply to the project
-   * @readonly
+   * @var {String} path the path to the file
    */
-  readonly defaults: ProjectDefaults;
+  path: string;
 
   /**
-   * @var {Object} stages the list of stages in the project
-   * @readonly
+   * @var {String} storage the storage option (whether local or remote)
    */
-  readonly stages: StagesNormalizedAttributes;
+  storage: string;
 
   /**
    * @var {String} format the file's format (eg. YML, JSON)
    */
-  format: string = FORMAT.YML;
+  abstract format: string;
 
+  /**
+   * @var {Boolean} isWriteable whether we can write to the file
+   * @readonly
+   */
+  readonly isWriteable: boolean = true;
+
+  constructor(path: string, storage: string = STORAGE.FILE) {
+    this.path = path;
+    this.storage = storage;
+  }
+
+  /**
+   * @returns {StorageAdapter} the storage adapter to use
+   * @throws {Error} when the storage option is not valid
+   */
+  @Cached()
+  public get storageAdapter(): StorageAdapter {
+    if (this.storage === STORAGE.FILE) {
+      return new LocalFileAdapter(this.path);
+    }
+
+    throw new Error(`Invalid storage “${this.storage}” specified`);
+  }
+
+  /**
+   * @returns {Formatter} the formatter to use to parse & write the file
+   * @throws {Error} when the format is not valid
+   */
+  @Cached()
+  public get formatter(): Formatter {
+    if (this.format === FORMAT.YML) {
+      return new YamlFormatter();
+    }
+
+    if (this.format === FORMAT.JSON) {
+      return new JsonFormatter();
+    }
+
+    throw new Error(`Invalid format “${this.format}” specified`);
+  }
+
+  /**
+   * Opens, reads and parses the file contents
+   * @returns {Promise<Object>} the parsed file's contents
+   * @async
+   */
   async load(): Promise<object> {
-    await super.load();
+    const rawContents = await this.storageAdapter.read();
+    const parsedContents = await this.formatter.parse(rawContents);
 
-    this.validate(this.contents);
-
-    // assign the name, stages and defaults to the corresponding attributes
-    Object.assign(
-      this as any, pick(Configuration.normalize(this.contents), 'name', 'stages', 'defaults'),
-    );
-
+    this.contents = this.normalize(parsedContents);
     return this.contents;
   }
 
   /**
-   * Validates the configuration file's structure.
-   * The subsequent service values will be validated during service initialization.
+   * Normalizes the configuration file's contents (if necessary)
    *
-   * @param {Object} contents the contents to validate
-   * @throws {ValidationError} when the file structure invalid
+   * @param {Object} contents the contents prior to normalization
+   * @returns {Object} the normalized object
    */
-  validate(contents: ConfigurationFileContents): void {
-    const errors = validate.validate(contents, this.validations(), {
-      fullMessages: false,
-    });
-
-    if (!isEmpty(errors)) {
-      throw new ValidationError('The project’s configuration file is not valid', errors);
-    }
+  normalize(contents: object): object {
+    return contents;
   }
 
   /**
-   * Returns a list of validations to validate the structure of the configuration file with
+   * Writes out the stringified contents in the storage
    *
-   * @returns {Validations} the list of validations to use for the config file
+   * @returns {Promise<String>} the written file's contents
+   * @async
    */
-  validations(): Validations {
-    const providers = Object.values(PROVIDER);
-
-    /**
-     * Validates the project's stages
-     *
-     * @param {Object} stages The stages configuration
-     * @returns {String|undefined} The validation error message (if any)
-     */
-    validate.validators.validateStages = (stages: StagesNormalizedAttributes) => {
-      if (isEmpty(stages)) {
-        return 'You have to provide a set of stages for the project';
-      }
-
-      if (!isObject(stages) || Object.values(stages).some(s => !isObject(s))) {
-        return 'The stages for the project should be an object whose every member is an object';
-      }
-
-      const stagesHaveServiceTypesDefined = Object.values(stages).every(
-        stage => Object.values(stage).every(
-          srv => Boolean(srv.type) && Object.values(SERVICE_TYPE).includes(srv.type),
-        ),
-      );
-
-      if (!stagesHaveServiceTypesDefined) {
-        return 'You have to specify a type for every service in the stages';
-      }
-
-      // Make sure the services are properly linked together
-      const invalidLinks: Array<[string, Array<string>]> = [];
-      Object.keys(stages).forEach(stageName => {
-        const serviceNames = Object.keys(stages[stageName]);
-        const links = uniq(
-          flatten(Object.values(stages[stageName]).map(srv => srv.links || [])),
-        );
-
-        const invalidServices = difference(links, serviceNames);
-        if (!isEmpty(invalidServices)) {
-          invalidLinks.push([stageName, invalidServices]);
-        }
-      });
-
-      if (!isEmpty(invalidLinks)) {
-        const stageMessages = invalidLinks.map(([stageName, invalidLinks]) => (
-          `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`
-        ));
-
-        return `There are invalid services linked with each other: ${stageMessages}. Please check the links section of your services`;
-      }
-    };
-
-    /**
-     * Validates the project's defaults
-     *
-     * @param {Object} defaults the defaults to validate
-     * @returns {String|undefined} the validation error message (if any)
-     */
-    validate.validators.validateDefaults = (defaults: ProjectDefaults) => {
-      // Allow defaults not being defined or empty objects
-      if (!defaults || (isObject(defaults) && isEmpty(defaults))) {
-        return;
-      }
-
-      if (!isObject(defaults) || Object.keys(defaults).some(prov => !providers.includes(prov as ProviderChoice))) {
-        return 'The "defaults" entry should contain valid cloud providers in the mapping';
-      }
-    };
-
-    return {
-      name: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to provide a name for the project',
-        },
-      },
-      provider: {
-        presence: {
-          message: 'A default cloud provider should be specified',
-        },
-        inclusion: {
-          within: providers,
-          message: `The default cloud provider is invalid. Available options are ${providers.join(', ')}`,
-        },
-      },
-      region: {
-        presence: {
-          message: 'A default region (that corresponds to the regions that the default cloud provider provides) should be specified',
-        },
-      },
-      stages: {
-        validateStages: true,
-      },
-      defaults: {
-        validateDefaults: true,
-      },
-    };
-  }
-
-  /**
-   * Applies arguments in stage services that were skipped for brevity
-   *
-   * @param {Object} contents the file contents that are to be normalized
-   * @returns {Object} the normalized contents
-   */
-  static normalize(contents: ConfigurationFileContents): NormalizedFileContents {
-    const { provider, region, stages, defaults } = contents;
-
-    if (!stages) {
-      throw new Error('You have to provide a list of stages');
+  async write(): Promise<string> {
+    if (!this.isWriteable) {
+      throw new Error('File is not writeable');
     }
 
-    // the contents have been validated, so it's safe to cast it as NormalizedFileContents
-    const normalized = clone(omit(contents, 'provider', 'region') as NormalizedFileContents);
+    const stringified = await this.formatter.export(this.contents);
 
-    const normalizedStages = fromPairs(Object.keys(stages || []).map(stageName => {
-      const {
-        from: copiedStageName = null,
-        skip: skippedServices = [],
-        ...declaration
-      } = stages[stageName];
-
-      let stage = clone(declaration);
-
-      // Copy the full attributes to stages that copy each other
-      if (copiedStageName) {
-        const source = clone(
-          // Omit any services that the copied stage doesn't need
-          omit(stages[copiedStageName], ...skippedServices)
-        );
-
-        stage = merge(omit(source, 'from', 'skip'), declaration);
-      }
-
-      Object.keys(stage).forEach(name => {
-        const service = stage[name]!;
-
-        // Apply the service's name
-        Object.assign(service, { name });
-
-        // Apply the service's provider (if not any)
-        if (!service.provider) {
-          Object.assign(service, { provider });
-        }
-
-        // Apply the service's region (if not any)
-        if (!service.region) {
-          Object.assign(service, { region });
-        }
-      });
-
-      return [stageName, stage];
-    }));
-
-    Object.assign(normalized, {
-      stages: normalizedStages,
-      defaults: defaults || {},
-    });
-
-    return normalized;
+    return this.storageAdapter.write(stringified);
   }
 }
 

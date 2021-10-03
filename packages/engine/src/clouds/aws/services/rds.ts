@@ -84,7 +84,7 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
       },
       database: {
         format: {
-          pattern: '[a-z0-9_]+',
+          pattern: '([a-z0-9_]+)?',
           flags: 'i',
           message: 'You can only use letters, numbers and _ for the database name',
         },

@@ -1,9 +1,7 @@
 {
   "extends": "./tsconfig",
-  "include": [
-    "./src/**/*"
-  ],
-  "references": [{
-    "path": "./"
-  }]
+  "exclude": [
+    "tests/**/*",
+    "node_modules/**/*"
+  ]
 }
