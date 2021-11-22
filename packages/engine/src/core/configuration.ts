@@ -1,11 +1,13 @@
-import LocalFileAdapter from '@stackmate/core/adapters/storage/local';
-import JsonFormatter from '@stackmate/core/adapters/format/json';
-import YamlFormatter from '@stackmate/core/adapters/format/yml';
-import { FORMAT, STORAGE } from '@stackmate/core/constants';
-import { Cached } from '@stackmate/core/decorators';
-import { Formatter, StorageAdapter } from '@stackmate/interfaces';
+import { isEmpty, isObject } from 'lodash';
 
-abstract class Configuration {
+import { Cached } from '@stackmate/core/decorators';
+import { FORMAT, STORAGE } from '@stackmate/core/constants';
+import { ConfigurationAttributes } from '@stackmate/types';
+import { JsonFormatter, YamlFormatter } from '@stackmate/core/adapters/formatters';
+import { AwsParameterStore, LocalFileAdapter } from '@stackmate/core/adapters/storage';
+import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
+
+abstract class Configuration implements ConfigurationResource {
   /**
    * @var {Object} contents the file's contents in a structured format
    */
@@ -22,6 +24,16 @@ abstract class Configuration {
   storage: string;
 
   /**
+   * @var {Object} storageOptions any extra options to use for the storage adapter
+   */
+  storageOptions: object = {};
+
+  /**
+   * @var {Object} formatterOptions any extra options to use for the formatter
+   */
+  formatterOptions: object = {};
+
+  /**
    * @var {String} format the file's format (eg. YML, JSON)
    */
   abstract format: string;
@@ -32,9 +44,12 @@ abstract class Configuration {
    */
   readonly isWriteable: boolean = true;
 
-  constructor(path: string, storage: string = STORAGE.FILE) {
-    this.path = path;
+  constructor({ storage, path, storageOptions, formatterOptions }: ConfigurationAttributes = { storage: STORAGE.FILE, path: null }) {
     this.storage = storage;
+
+    if (path) {
+      this.path = path;
+    }
   }
 
   /**
@@ -44,7 +59,11 @@ abstract class Configuration {
   @Cached()
   public get storageAdapter(): StorageAdapter {
     if (this.storage === STORAGE.FILE) {
-      return new LocalFileAdapter(this.path);
+      return new LocalFileAdapter({ path: this.path, ...this.storageOptions });
+    }
+
+    if (this.storage === STORAGE.AWS) {
+      return new AwsParameterStore(this.storageOptions);
     }
 
     throw new Error(`Invalid storage “${this.storage}” specified`);
@@ -96,14 +115,14 @@ abstract class Configuration {
    * @returns {Promise<String>} the written file's contents
    * @async
    */
-  async write(): Promise<string> {
+  async write(): Promise<void> {
     if (!this.isWriteable) {
       throw new Error('File is not writeable');
     }
 
     const stringified = await this.formatter.export(this.contents);
 
-    return this.storageAdapter.write(stringified);
+    await this.storageAdapter.write(stringified);
   }
 }
 

@@ -15,6 +15,7 @@ region: eu-central-1
 # Where to store the credentials
 # vault:
 #   storage: file
+#   key: abc/def
 #   path: ~/.stackmate/test123.yml.enc
 #   # storage: github # todo
 
@@ -33,14 +34,14 @@ stages:
 
     database:
       type: mysql
-      size: db2.t3.micro
+      size: db.t3.medium
       storage: 30
       # credentials:
-      #   username: vault:dbusername
-      #   password: vault:dbpassword
+      #   username: /sample-app-sinatra/production/db-user-username
+      #   password: /sample-app-sinatra/production/db-user-password
       # root:
-      #   username: vault:rootusername
-      #   password: vault:rootpassword
+      #   username: /sample-app-sinatra/production/db-root-username
+      #   password: /sample-app-sinatra/production/db-root-password
 
     # loadbalancer:
     #   type: loadbalancer

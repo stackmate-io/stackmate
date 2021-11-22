@@ -6,8 +6,14 @@ abstract class BaseStorageAdapter implements StorageAdapter {
    */
   readonly path: string;
 
-  constructor(path: string) {
+  /**
+   * @var {Object} options any extra options provided by the parent class
+   */
+  readonly options: object;
+
+  constructor(path: string, options: object = {}) {
     this.path = this.transformPath(path);
+    this.options = options;
   }
 
   /**
@@ -31,7 +37,7 @@ abstract class BaseStorageAdapter implements StorageAdapter {
    * @returns {Promise<String>}
    * @async
    */
-  abstract write(contents: string): Promise<string>;
+  abstract write(contents: string | object): Promise<void>;
 }
 
 export default BaseStorageAdapter;

@@ -1,4 +1,4 @@
-import { RdsCluster } from '@cdktf/provider-aws';
+import { DataAwsSsmParameter, RdsCluster } from '@cdktf/provider-aws';
 
 import AwsService from '@stackmate/clouds/aws/services/base';
 import { OneOf, ServiceTypeChoice } from '@stackmate/types';
@@ -113,6 +113,10 @@ class AwsMysqlService extends AwsRdsInstanceService {
     // Add instance
     this.cluster = new RdsCluster(this.stack, 'my-rds-cluster', {
       vpcSecurityGroupIds: [this.vpcId],
+    });
+
+    const dbuname =  new DataAwsSsmParameter(this.stack, 'my-db-username', {
+      name: 'mydbusername',
     });
   }
 }

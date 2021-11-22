@@ -4,9 +4,10 @@ import Command from '@oclif/command';
 const { Deploy } = require('cdktf-cli/bin/cmds/ui/deploy');
 const { renderInk } = require('cdktf-cli/bin/cmds/helper/render-ink');
 
-import { SYNTH_COMMAND } from '@stackmate/core/constants';
+import { STORAGE, SYNTH_COMMAND } from '@stackmate/core/constants';
 import { WithErrorHandler } from '@stackmate/core/decorators';
 import Provisioner from '@stackmate/core/provisioner';
+import Project from '@stackmate/core/project';
 
 class DeployCommand extends Command {
   static description = 'deploy resources to the cloud';
@@ -19,10 +20,25 @@ class DeployCommand extends Command {
 
   @WithErrorHandler()
   async run() {
-    const file = './examples/sample.yml';
+    const path = './examples/sample.yml';
     const stage = 'production';
 
-    const provisioner = await Provisioner.synth(file, stage);
+    const project = new Project({ path, storage: STORAGE.FILE });
+    await project.load();
+
+    const provisioner = new Provisioner(project, stage);
+
+    // const provisioner = await Provisioner.synth(file, stage);
+    // const provisioner = new Provisioner(project, stage);
+    // const provisioner = new Provisioner(stage);
+    // provisioner.defaults = project.contents.defaults;
+    // provisioner.services = project.stage(stage);
+    // , project.stage(stage), project.contents.defaults,
+    // await provisioner.synth();
+    // await project.load();
+    // await project.verify();
+
+    // const provisioner = await Provisioner.synth(file, stage);
 
     await renderInk(
       React.createElement(Deploy, {

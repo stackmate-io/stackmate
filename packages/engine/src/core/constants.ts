@@ -34,8 +34,10 @@ export const REGION: { [name: string]: RegionList } = {
 export const FORMAT: { [name: string]: string } = {
   YML: 'yml',
   JSON: 'json',
+  RAW: 'raw',
 } as const;
 
 export const STORAGE: { [name: string]: string } = {
   FILE: 'file',
+  AWS: 'aws/ssm/parameter-store',
 } as const;

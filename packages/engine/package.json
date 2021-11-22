@@ -10,6 +10,7 @@
   },
   "bugs": "https://github.com/stackmate-io/stackmate-ce/issues",
   "dependencies": {
+    "@aws-sdk/client-ssm": "^3.37.0",
     "@cdktf/provider-aws": "^1.0.107",
     "@oclif/command": "^1",
     "@oclif/config": "^1",

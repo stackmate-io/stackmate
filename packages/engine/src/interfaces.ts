@@ -1,6 +1,7 @@
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
-  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, AttributeNames,
+  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
+  AttributeNames, StorageChoice, NormalizedStages, NormalizedProjectConfiguration,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -72,11 +73,27 @@ export interface Rootable extends Validatable, AttributeAssignable {
 
 export interface StorageAdapter {
   readonly path: string;
-  read(): Promise<string>;
-  write(contents: string): Promise<string>;
+  read(): Promise<string | object>;
+  write(contents: string | object): Promise<void>;
 }
 
 export interface Formatter {
-  parse(raw: string): Promise<object>;
-  export(parsed: object): Promise<string>;
+  parse(raw: string|object): Promise<object>;
+  export(parsed: object): Promise<string|object>;
+}
+
+export interface ConfigurationResource {
+  storage: StorageChoice;
+  path: string;
+  contents: object;
+  readonly isWriteable: boolean;
+  load(): Promise<object>;
+  normalize(contents: object): object;
+  write(): Promise<void>;
+}
+
+export interface Project extends ConfigurationResource {
+  outputPath: string;
+  contents: NormalizedProjectConfiguration;
+  stage(name: string): NormalizedStages;
 }

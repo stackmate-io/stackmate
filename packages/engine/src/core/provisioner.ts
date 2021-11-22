@@ -1,18 +1,17 @@
-import { join } from 'path';
+import { join as joinPaths } from 'path';
 import { App as TerraformApp, Manifest, TerraformStack } from 'cdktf';
 
 import Registry from '@stackmate/core/registry';
-import { NormalizedStages } from '@stackmate/types';
 import CloudManager from '@stackmate/core/manager';
-import Project from '@stackmate/core/project';
-import { STORAGE } from '@stackmate/core/constants';
+import { NormalizedStages } from '@stackmate/types';
+import { Project } from '@stackmate/interfaces';
 
 class Provisioner {
   /**
    * @var {String} stageName the stage's name
    * @readonly
    */
-  public readonly name: string;
+  public readonly stage: string;
 
   /**
    * @var {App} app the terraform app to synthesize
@@ -37,12 +36,15 @@ class Provisioner {
    */
   public clouds: CloudManager;
 
-  constructor(project: Project, name: string) {
-    this.name = name;
+  constructor(project: Project, stage: string) {
+    this.stage = stage;
+
     this.app = new TerraformApp({ outdir: project.outputPath, stackTraces: false });
-    this.stack = new TerraformStack(this.app, this.name);
-    this.clouds = new CloudManager(this.stack, project.defaults);
-    this.services = project.stage(this.name);
+    this.stack = new TerraformStack(this.app, this.stage);
+
+    const { contents: { defaults: projectDefaults } } = project;
+    this.clouds = new CloudManager(this.stack, projectDefaults);
+    this.services = project.stage(this.stage);
   }
 
   /**
@@ -73,26 +75,9 @@ class Provisioner {
    * @returns {String} returns the stack path for the stage
    */
   public get stackPath(): string {
-    return join(
-      this.rootPath, Manifest.stacksFolder, this.name,
+    return joinPaths(
+      this.rootPath, Manifest.stacksFolder, this.stage,
     );
-  }
-
-  /**
-   * Loads and synthesizes a stack given a project file and a stage
-   *
-   * @param {String} projectFile the project file to load
-   * @param {String} stage the stage to synthesize
-   * @returns {Provisioner} the provisioner instance
-   */
-  static async synth(projectFile: string, stage: string): Promise<Provisioner> {
-    const project = new Project(projectFile, STORAGE.FILE);
-    await project.load();
-
-    const provisioner = new Provisioner(project, stage);
-    provisioner.app.synth();
-
-    return provisioner;
   }
 }
 

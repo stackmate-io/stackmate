@@ -1,13 +1,8 @@
 import { promises as fsPromises } from 'fs';
-import { resolve as resolvePath } from 'path';
 
 import BaseStorageAdapter from '@stackmate/core/adapters/storage/base';
 
-class LocalFileAdapter extends BaseStorageAdapter {
-  transformPath(path: string): string {
-    return resolvePath(path);
-  }
-
+class AwsParameterStore extends BaseStorageAdapter {
   async read(): Promise<string> {
     const contents = await fsPromises.readFile(this.path);
     return contents.toString();
@@ -18,4 +13,4 @@ class LocalFileAdapter extends BaseStorageAdapter {
   }
 }
 
-export default LocalFileAdapter;
+export default AwsParameterStore;

@@ -1,6 +1,6 @@
 import YAML from 'yaml';
 
-import BaseFormatter from '@stackmate/core/adapters/format/base';
+import BaseFormatter from '@stackmate/core/adapters/formatters/base';
 
 class YamlFormatter extends BaseFormatter {
   /**

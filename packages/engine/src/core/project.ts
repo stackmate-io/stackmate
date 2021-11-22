@@ -1,39 +1,23 @@
-import { join as joinPaths } from 'path';
-import { clone, difference, flatten, fromPairs, isEmpty, isObject, kebabCase, merge, omit, pick, uniq } from 'lodash';
 import validate from 'validate.js';
+import { join as joinPaths } from 'path';
+import {
+  clone, difference, flatten, fromPairs, isEmpty, isObject, kebabCase, merge, omit, uniq,
+} from 'lodash';
 
 import Configuration from '@stackmate/core/configuration';
-import { OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
-import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
+import { Validatable, Project as ProjectInterface } from '@stackmate/interfaces';
+import { OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
   ProviderChoice, StagesNormalizedAttributes, Validations, NormalizedStages,
 } from '@stackmate/types';
 
-class Project extends Configuration implements Validatable {
+class Project extends Configuration implements Validatable, ProjectInterface {
   /**
    * @var {Object} contents the file's contents in a structured format
    */
   contents: NormalizedProjectConfiguration;
-
-  /**
-   * @var {String} name the project's name
-   * @readonly
-   */
-  readonly name: string;
-
-  /**
-   * @var {Object} defaults the defaults to apply to the project
-   * @readonly
-   */
-  readonly defaults: ProjectDefaults;
-
-  /**
-   * @var {Object} stages the list of stages in the project
-   * @readonly
-   */
-  readonly stages: StagesNormalizedAttributes;
 
   /**
    * @var {String} format the file's format (eg. YML, JSON)
@@ -44,11 +28,6 @@ class Project extends Configuration implements Validatable {
     await super.load();
 
     this.validate(this.contents);
-
-    // assign the name, stages and defaults to the corresponding attributes
-    Object.assign(
-      this as any, pick(this.contents, 'name', 'stages', 'defaults'),
-    );
 
     return this.contents;
   }
@@ -95,7 +74,6 @@ class Project extends Configuration implements Validatable {
         const stage = stages[stageName];
 
         if (isEmpty(stage)) {
-          console.log({ stage });
           return stageErrors.push(
             `Stage “${stageName}” does not contain any services`,
           );
@@ -279,7 +257,8 @@ class Project extends Configuration implements Validatable {
    * @returns {String} the output path for the generated resources
    */
   public get outputPath() : string {
-    return joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
+    const { name } = this.contents;
+    return joinPaths(OUTPUT_DIRECTORY, kebabCase(name));
   }
 }
 
