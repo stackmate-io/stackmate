@@ -2,7 +2,7 @@ import { isEmpty, isObject } from 'lodash';
 
 import { Cached } from '@stackmate/core/decorators';
 import { FORMAT, STORAGE } from '@stackmate/core/constants';
-import { ConfigurationAttributes } from '@stackmate/types';
+import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOptions, StorageOptions } from '@stackmate/types';
 import { JsonFormatter, YamlFormatter } from '@stackmate/core/adapters/formatters';
 import { AwsParameterStore, LocalFileAdapter } from '@stackmate/core/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
@@ -14,11 +14,6 @@ abstract class Configuration implements ConfigurationResource {
   contents: object;
 
   /**
-   * @var {String} path the path to the file
-   */
-  path: string;
-
-  /**
    * @var {String} storage the storage option (whether local or remote)
    */
   storage: string;
@@ -26,12 +21,7 @@ abstract class Configuration implements ConfigurationResource {
   /**
    * @var {Object} storageOptions any extra options to use for the storage adapter
    */
-  storageOptions: object = {};
-
-  /**
-   * @var {Object} formatterOptions any extra options to use for the formatter
-   */
-  formatterOptions: object = {};
+  storageOptions: StorageOptions = {};
 
   /**
    * @var {String} format the file's format (eg. YML, JSON)
@@ -44,11 +34,11 @@ abstract class Configuration implements ConfigurationResource {
    */
   readonly isWriteable: boolean = true;
 
-  constructor({ storage, path, storageOptions, formatterOptions }: ConfigurationAttributes = { storage: STORAGE.FILE, path: null }) {
+  constructor({ storage, ...storageOptions }: ConfigurationAttributes = { storage: STORAGE.FILE }) {
     this.storage = storage;
 
-    if (path) {
-      this.path = path;
+    if (isObject(storageOptions) && !isEmpty(storageOptions)) {
+      this.storageOptions = storageOptions;
     }
   }
 
@@ -59,11 +49,11 @@ abstract class Configuration implements ConfigurationResource {
   @Cached()
   public get storageAdapter(): StorageAdapter {
     if (this.storage === STORAGE.FILE) {
-      return new LocalFileAdapter({ path: this.path, ...this.storageOptions });
+      return new LocalFileAdapter(this.storageOptions as LocalFileStorageOptions);
     }
 
-    if (this.storage === STORAGE.AWS) {
-      return new AwsParameterStore(this.storageOptions);
+    if (this.storage === STORAGE.AWS_PARAMS) {
+      return new AwsParameterStore(this.storageOptions as AwsParamStorageOptions);
     }
 
     throw new Error(`Invalid storage “${this.storage}” specified`);

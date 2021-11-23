@@ -39,5 +39,5 @@ export const FORMAT: { [name: string]: string } = {
 
 export const STORAGE: { [name: string]: string } = {
   FILE: 'file',
-  AWS: 'aws/ssm/parameter-store',
+  AWS_PARAMS: 'aws/ssm/parameter-store',
 } as const;

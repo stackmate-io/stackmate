@@ -72,7 +72,6 @@ export interface Rootable extends Validatable, AttributeAssignable {
 }
 
 export interface StorageAdapter {
-  readonly path: string;
   read(): Promise<string | object>;
   write(contents: string | object): Promise<void>;
 }
@@ -84,7 +83,6 @@ export interface Formatter {
 
 export interface ConfigurationResource {
   storage: StorageChoice;
-  path: string;
   contents: object;
   readonly isWriteable: boolean;
   load(): Promise<object>;

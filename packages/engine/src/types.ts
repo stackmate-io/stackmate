@@ -112,12 +112,21 @@ export type ValidationErrorList = {
   [attribute: string]: Array<string>;
 };
 
+export type StorageOptions = {};
+export type LocalFileStorageOptions = StorageOptions & {
+  path: string;
+};
+export type AwsParamStorageOptions = StorageOptions & {
+  key: string;
+  region: string;
+}
+
 export type ConfigurationAttributes = {
   storage: StorageChoice;
-  path?: string | null,
 };
 
 export type VaultAttributes = ConfigurationAttributes & {
+  path?: string;
   key?: string;
   region?: string;
 };

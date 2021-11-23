@@ -114,10 +114,6 @@ class AwsMysqlService extends AwsRdsInstanceService {
     this.cluster = new RdsCluster(this.stack, 'my-rds-cluster', {
       vpcSecurityGroupIds: [this.vpcId],
     });
-
-    const dbuname =  new DataAwsSsmParameter(this.stack, 'my-db-username', {
-      name: 'mydbusername',
-    });
   }
 }
 
