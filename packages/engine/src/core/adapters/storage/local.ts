@@ -14,13 +14,11 @@ class LocalFileAdapter extends BaseStorageAdapter {
   constructor(options: LocalFileStorageOptions) {
     super(options);
 
-    const { path } = options;
+    ({ path: this.path } = options);
 
-    if (!path || !isString(path)) {
+    if (!this.path || !isString(this.path)) {
       throw new Error('A path is required');
     }
-
-    this.path = path;
   }
 
   /**

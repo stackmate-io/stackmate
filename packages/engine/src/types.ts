@@ -123,10 +123,10 @@ export type AwsParamStorageOptions = StorageOptions & {
 
 export type ConfigurationAttributes = {
   storage: StorageChoice;
+  path?: string;
 };
 
 export type VaultAttributes = ConfigurationAttributes & {
-  path?: string;
   key?: string;
   region?: string;
 };

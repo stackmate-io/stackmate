@@ -23,9 +23,7 @@ class AwsParameterStore extends BaseStorageAdapter implements Validatable {
 
     this.validate(options);
 
-    const { key, region } = options;
-    this.key = key;
-    this.region = region;
+    ({ key: this.key, region: this.region } = options);
   }
 
   /**

@@ -23,7 +23,7 @@ class DeployCommand extends Command {
     const path = './examples/sample.yml';
     const stage = 'production';
 
-    const project = new Project({ path, storage: STORAGE.FILE });
+    const project = new Project({ storage: STORAGE.FILE, path });
     await project.load();
 
     const provisioner = new Provisioner(project, stage);
