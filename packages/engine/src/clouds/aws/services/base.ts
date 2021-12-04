@@ -23,6 +23,9 @@ abstract class AwsService extends Service {
    */
   protected vpcId: string;
 
+  /**
+   * @param {Object} dependencies the service's dependencies
+   */
   public set dependencies({ vpc }: { vpc: AwsVpcService }) {
     this.vpcId = vpc.id;
   }

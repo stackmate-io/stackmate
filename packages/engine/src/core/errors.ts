@@ -31,3 +31,14 @@ export class ValidationError extends Error {
     return formatted;
   }
 }
+
+export class EnvironmentVariableUndefinedError extends Error {
+  variable: string;
+
+  constructor(variable: string) {
+    const message = `The environment variable ${variable} is undefined and needs to be exported`;
+    super(message);
+
+    this.variable = variable;
+  }
+}

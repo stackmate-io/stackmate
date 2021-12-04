@@ -7,10 +7,10 @@ import {
 import Configuration from '@stackmate/core/configuration';
 import { ValidationError } from '@stackmate/core/errors';
 import { Validatable, Project as ProjectInterface } from '@stackmate/interfaces';
-import { OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE } from '@stackmate/core/constants';
+import { OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/core/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
-  ProviderChoice, StagesNormalizedAttributes, Validations, NormalizedStages,
+  ProviderChoice, StagesNormalizedAttributes, Validations, NormalizedStages, StageDeclarations, VaultConfiguration,
 } from '@stackmate/types';
 
 class Project extends Configuration implements Validatable, ProjectInterface {
@@ -24,6 +24,9 @@ class Project extends Configuration implements Validatable, ProjectInterface {
    */
   format: string = FORMAT.YML;
 
+  /**
+   * @returns {Promise<Object>} the file's contents
+   */
   async load(): Promise<object> {
     await super.load();
 
@@ -56,6 +59,7 @@ class Project extends Configuration implements Validatable, ProjectInterface {
    */
   validations(): Validations {
     const providers = Object.values(PROVIDER);
+    const storageOptions = Object.values(STORAGE);
 
     /**
      * Validates the project's stages
@@ -135,12 +139,29 @@ class Project extends Configuration implements Validatable, ProjectInterface {
       }
     };
 
+    validate.validators.validateVault = () => {
+      /*
+      'vault.storage': {
+        presence: {
+          message: 'The storage type for the credentials vault should be specified',
+        },
+        inclusion: {
+          within: storageOptions,
+          message: 'The storage type specified for the vault is invalid',
+        }
+      },
+      */
+    };
+
     return {
       name: {
         presence: {
           allowEmpty: false,
           message: 'You have to provide a name for the project',
         },
+      },
+      vault: {
+        validateVault: true,
       },
       provider: {
         presence: {
@@ -172,21 +193,62 @@ class Project extends Configuration implements Validatable, ProjectInterface {
    * @returns {Object} the normalized contents
    */
   normalize(contents: ProjectConfiguration): NormalizedProjectConfiguration {
-    const { provider, region, stages, defaults } = contents;
+    // the contents have been validated, so it's safe to cast it as NormalizedProjectConfiguration
+    const normalized = clone(contents) as NormalizedProjectConfiguration;
+    const { vault, provider, region, stages, defaults } = normalized;
 
-    if (!stages) {
-      throw new Error('You have to provide a list of stages');
+    Object.assign(normalized, {
+      stages: this.normalizeStages(stages, provider, region),
+      vault: this.normalizeVault(vault, provider, region),
+      defaults: defaults || {},
+    });
+
+    return normalized;
+  }
+
+  /**
+   * Get the configuration for the stage selected
+   *
+   * @param {String} name the name of the stage to get
+   * @returns {Object} the configuration for the stage
+   */
+  stage(name: string): NormalizedStages {
+    if (!this.contents.stages) {
+      throw new Error('The project doesn’t provide any stages available for deployment');
     }
 
+    if (!this.contents.stages[name]) {
+      throw new Error(
+        `Stage ${name} was not found in the project. Available options are ${Object.keys(this.contents.stages)}`,
+      );
+    }
+
+    return this.contents.stages[name];
+  }
+
+  /**
+   * @returns {String} the output path for the generated resources
+   */
+  public get outputPath() : string {
+    const { name } = this.contents;
+    return joinPaths(OUTPUT_DIRECTORY, kebabCase(name));
+  }
+
+  /**
+   * Normalizes the stages configuration
+   *
+   * @param stages {Object} the stages to normalize
+   * @param provider {String} the project's default provider
+   * @param region {String} the project's default string
+   * @returns {Object} the normalized stages
+   */
+  private normalizeStages(stages: StageDeclarations, provider: ProviderChoice, region: string) {
     const getSourceDeclaration = (source: string): object => {
       const stg = stages[source];
       return stg.from ? getSourceDeclaration(stg.from) : stg;
     };
 
-    // the contents have been validated, so it's safe to cast it as NormalizedProjectConfiguration
-    const normalized = clone(contents) as NormalizedProjectConfiguration;
-
-    const normalizedStages = fromPairs(Object.keys(stages || []).map(stageName => {
+    const normalizedStages = Object.keys(stages || []).map(stageName => {
       const {
         from: copiedStageName = null,
         skip: skippedServices = [],
@@ -223,42 +285,33 @@ class Project extends Configuration implements Validatable, ProjectInterface {
       });
 
       return [stageName, stage];
-    }));
-
-    Object.assign(normalized, {
-      stages: normalizedStages,
-      defaults: defaults || {},
     });
 
-    return normalized;
+    return fromPairs(normalizedStages);
   }
 
   /**
-   * Get the configuration for the stage selected
+   * Normalizes a project's vault configuration
    *
-   * @param {String} name the name of the stage to get
-   * @returns {Object} the configuration for the stage
+   * @param vault {Object} the vault configuration
+   * @param provider {String} the default provider for the project
+   * @param region {String} the default region for the project
+   * @returns {Object} the normalized vault contents
    */
-  stage(name: string): NormalizedStages {
-    if (!this.contents.stages) {
-      throw new Error('The project doesn’t provide any stages available for deployment');
+  private normalizeVault(vault: VaultConfiguration, provider: ProviderChoice, region: string) {
+    const { storage, region: vaultRegion, ...vaultAttrs } = vault;
+
+    const normalizedVault = { storage, region: vaultRegion, ...vaultAttrs };
+
+    if (!storage && provider === PROVIDER.AWS) {
+      Object.assign(normalizedVault, { storage: STORAGE.AWS_PARAMS });
     }
 
-    if (!this.contents.stages[name]) {
-      throw new Error(
-        `Stage ${name} was not found in the project. Available options are ${Object.keys(this.contents.stages)}`,
-      );
+    if (!region) {
+      Object.assign(normalizedVault, { region });
     }
 
-    return this.contents.stages[name];
-  }
-
-  /**
-   * @returns {String} the output path for the generated resources
-   */
-  public get outputPath() : string {
-    const { name } = this.contents;
-    return joinPaths(OUTPUT_DIRECTORY, kebabCase(name));
+    return normalizedVault;
   }
 }
 

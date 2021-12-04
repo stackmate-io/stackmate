@@ -34,7 +34,7 @@ abstract class Cloud implements CloudProvider {
    * @abstract
    * @protected
    */
-  protected abstract prerequisites: CloudPrerequisites;
+  protected abstract get prerequisites(): CloudPrerequisites;
 
   /**
    * @var {Stack} stack the stack to use for provisioning
@@ -78,7 +78,7 @@ abstract class Cloud implements CloudProvider {
    * @param {String} region the region for the cloud provider
    */
   public set region(region: string) {
-    if (!region || !Object.values(this.regions)) {
+    if (!region || !Object.values(this.regions).includes(region)) {
       throw new Error(`Invalid region ${region} for provider ${this.provider}`);
     }
 
@@ -100,7 +100,7 @@ abstract class Cloud implements CloudProvider {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    return new ServiceClass(this.stack).populate(attributes, this.prerequisites);
+    return new ServiceClass(this.stack, this.prerequisites);
   }
 }
 

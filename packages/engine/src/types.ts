@@ -70,9 +70,16 @@ export type StageDeclarations = {
   };
 }
 
+export type VaultConfiguration = {
+  storage: StorageChoice;
+  key?: string;
+  region?: string;
+};
+
 export type ProjectConfiguration = {
   name?: string;
   provider?: string;
+  vault?: VaultConfiguration;
   region?: string;
   stages?: StageDeclarations;
   defaults?: ProjectDefaults;
@@ -96,7 +103,10 @@ export type NormalizedStages = {
 
 export type NormalizedProjectConfiguration = {
   name: string;
+  provider: ProviderChoice,
+  region: string,
   stages: StagesNormalizedAttributes;
+  vault: VaultConfiguration,
   defaults: ProjectDefaults;
 };
 

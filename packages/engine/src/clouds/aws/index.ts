@@ -20,17 +20,27 @@ class AwsCloud extends Cloud {
    */
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
+  /**
+   * @var {Array<String>} regions the regions that the cloud is available in
+   */
   readonly regions: RegionList = AWS_REGIONS;
 
+  /**
+   * @var {Object<[String]: Service>} serviceMapping the mapping from service name to constructor
+   */
   readonly serviceMapping: ServiceMapping = AWS_SERVICE_MAPPING;
 
+  /**
+   * @var {Object} prerequisites the prerequisites for any service provisioned in this cloud
+   */
   protected prerequisites: CloudPrerequisites = {};
 
+  /**
+   *
+   */
   init(): void {
     /* eslint-disable-next-line no-new */
-    new AwsProvider(this.stack, PROVIDER.AWS, {
-      region: this.region,
-    });
+    new AwsProvider(this.stack, PROVIDER.AWS, { region: this.region });
 
     this.prerequisites = {
       vpc: this.service({

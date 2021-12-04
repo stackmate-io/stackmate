@@ -41,3 +41,9 @@ export const STORAGE: { [name: string]: string } = {
   FILE: 'file',
   AWS_PARAMS: 'aws/ssm/parameter-store',
 } as const;
+
+export const ENVIRONMENT_VARIABLE = {
+  AWS_ACCESS_KEY_ID: 'STACKMATE_AWS_ACCESS_KEY_ID',
+  AWS_SECRET_ACCESS_KEY: 'STACKMATE_SECRET_ACCESS_KEY',
+  AWS_SESSION_TOKEN: 'STACKMATE_AWS_SESSION_TOKEN',
+};

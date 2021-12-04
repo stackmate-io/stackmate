@@ -1,11 +1,15 @@
 import { isEmpty } from 'lodash';
+import { SSM } from '@aws-sdk/client-ssm';
+import { Credentials } from '@aws-sdk/types';
 import validate from 'validate.js';
 
 import BaseStorageAdapter from '@stackmate/core/adapters/storage/base';
+import Environment from '@stackmate/core/environment';
 import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { AwsParamStorageOptions, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { Cached } from '@stackmate/core/decorators';
 
 class AwsParameterStore extends BaseStorageAdapter implements Validatable {
   /**
@@ -71,7 +75,20 @@ class AwsParameterStore extends BaseStorageAdapter implements Validatable {
     }
   }
 
+  @Cached()
+  public get client(): SSM {
+    const client = new SSM({
+      region: this.region,
+      credentials: Environment.getAwsCredentials(),
+    });
+
+    return client;
+  }
+
+
   async read(): Promise<object> {
+    const params = await this.client.getParametersByPath({ 'Path': '/manual-testing' });
+    console.log(params);
     return {};
   }
 

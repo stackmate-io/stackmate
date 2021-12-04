@@ -2,6 +2,7 @@ import validate from 'validate.js';
 import { Construct } from 'constructs';
 import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
 
+import Vault from '@stackmate/core/vault';
 import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
@@ -71,26 +72,67 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    */
   abstract provision(): void;
 
-  constructor(stack: Construct) {
+  /**
+   *
+   * @param {Object} stack the terraform stack object
+   * @param {Object} prerequisites any prerequisites by the cloud provider
+   */
+  constructor(stack: Construct, prerequisites: CloudPrerequisites = {}) {
     this.stack = stack;
+
+    if (!isEmpty(prerequisites)) {
+      this.dependencies = prerequisites;
+    }
   }
 
   /**
    * Populates a service
    *
    * @param {Object} attributes the attributes to populate the service with
-   * @param {Object} dependencies the service's dependencies (provided by the cloud provider)
+   * @param {Vault} vault the vault to request credentials from
    * @returns {Service} the service returned
    */
-  populate(attributes: ServiceAttributes, dependencies: CloudPrerequisites = {}) {
-    this.attributes = attributes;
+  populate(attributes: ServiceAttributes, vault: Vault) {
+    const acceptedAttributes = this.attributeNames();
 
-    if (!isEmpty(dependencies)) {
-      this.dependencies = dependencies;
+    // Validate the keys provided first
+    const invalidKeys = difference(Object.keys(attributes), Object.keys(acceptedAttributes));
+    if (!isEmpty(invalidKeys)) {
+      throw new Error(
+        `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
+      );
     }
 
-    this.provision();
+    // Parse & finalize the attributes
+    const parsedAttributes = fromPairs(
+      toPairs(acceptedAttributes).map(
+        ([attributeName, parserFunction]) => {
+          // Where to get the attribute value from:
+          //  in case it's declared in the `attributes` object, use that
+          //  otherwise, use the default value that is set on this object
+          const attributeSource = has(attributes, attributeName) ? attributes : this;
+          return [attributeName, parserFunction.call(this, get(attributeSource, attributeName))];
+        },
+      ),
+    );
 
+    if (this.requiresCredentials) {
+      parsedAttributes.credentials = vault.getCredentials(this.name);
+    }
+
+    if (service.requiresRootCredentials) {
+      service.rootCredentials = this.vault.getRootCredentials(name);
+    }
+
+    // Validate the attributes
+    this.validate(parsedAttributes as ServiceAttributes);
+
+    // Validation passed, we can now assign the attributes to the project
+    toPairs(parsedAttributes).forEach(([attributeName, attributeValue]) => {
+      (this as any)[attributeName] = attributeValue;
+    });
+
+    this.provision();
     return this;
   }
 
@@ -116,36 +158,6 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @param {Object} attributes the attributes to set to the service
    */
   public set attributes(attributes: ServiceAttributes) {
-    const acceptedAttributes = this.attributeNames();
-
-    // Validate the keys provided first
-    const invalidKeys = difference(Object.keys(attributes), Object.keys(acceptedAttributes));
-    if (!isEmpty(invalidKeys)) {
-      throw new Error(
-        `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
-      );
-    }
-
-    // Parse & finalize the attributes
-    const parsedAttributes = fromPairs(
-      toPairs(acceptedAttributes).map(
-        ([attributeName, parserFunction]) => {
-          // Where to get the attribute value from:
-          //  in case it's declared in the `attributes` object, use that
-          //  otherwise, use the default value that is set on this object
-          const attributeSource = has(attributes, attributeName) ? attributes : this;
-          return [attributeName, parserFunction.call(this, get(attributeSource, attributeName))];
-        },
-      ),
-    );
-
-    // Validate the attributes
-    this.validate(parsedAttributes as ServiceAttributes);
-
-    // Validation passed, we can now assign the attributes to the project
-    toPairs(parsedAttributes).forEach(([attributeName, attributeValue]) => {
-      (this as any)[attributeName] = attributeValue;
-    });
   }
 
   /**

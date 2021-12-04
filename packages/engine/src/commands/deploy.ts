@@ -43,7 +43,7 @@ class DeployCommand extends Command {
     await renderInk(
       React.createElement(Deploy, {
         targetStack: stage,
-        targetDir: provisioner.rootPath,
+        targetDir: provisioner.targetPath,
         synthCommand: SYNTH_COMMAND,
         autoApprove: false,
       }),
