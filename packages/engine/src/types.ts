@@ -14,6 +14,11 @@ export type StorageChoice = ChoiceOf<typeof STORAGE>;
 export type ServiceAssociationDeclarations = Array<string>;
 export type EnvironmentVariablesDeclaration = Record<string, string|number>;
 
+export type Credentials = {
+  username?: string;
+  password?: string;
+};
+
 export type ServiceConfigurationDeclaration = {
   type: ServiceTypeChoice;
   provider?: ProviderChoice;
@@ -27,6 +32,8 @@ export type ServiceConfigurationDeclarationNormalized = {
   region: string;
   name: string;
   links?: ServiceAssociationDeclarations;
+  credentials?: Credentials;
+  rootCredentials?: Credentials;
 };
 
 export type ServiceAssociation = {

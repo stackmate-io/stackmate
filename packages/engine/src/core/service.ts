@@ -2,7 +2,6 @@ import validate from 'validate.js';
 import { Construct } from 'constructs';
 import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
 
-import Vault from '@stackmate/core/vault';
 import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
@@ -73,11 +72,12 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
   abstract provision(): void;
 
   /**
-   *
+   * @param {String} name the service's name
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(stack: Construct, prerequisites: CloudPrerequisites = {}) {
+  constructor(name: string, stack: Construct, prerequisites: CloudPrerequisites = {}) {
+    this.name = name;
     this.stack = stack;
 
     if (!isEmpty(prerequisites)) {
@@ -89,10 +89,9 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * Populates a service
    *
    * @param {Object} attributes the attributes to populate the service with
-   * @param {Vault} vault the vault to request credentials from
    * @returns {Service} the service returned
    */
-  populate(attributes: ServiceAttributes, vault: Vault) {
+  populate(attributes: ServiceAttributes): void {
     const acceptedAttributes = this.attributeNames();
 
     // Validate the keys provided first
@@ -116,14 +115,6 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
       ),
     );
 
-    if (this.requiresCredentials) {
-      parsedAttributes.credentials = vault.getCredentials(this.name);
-    }
-
-    if (service.requiresRootCredentials) {
-      service.rootCredentials = this.vault.getRootCredentials(name);
-    }
-
     // Validate the attributes
     this.validate(parsedAttributes as ServiceAttributes);
 
@@ -133,7 +124,6 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
     });
 
     this.provision();
-    return this;
   }
 
   /**

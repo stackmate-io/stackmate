@@ -4,13 +4,15 @@ import {
   clone, difference, flatten, fromPairs, isEmpty, isObject, kebabCase, merge, omit, uniq,
 } from 'lodash';
 
+import Vault from '@stackmate/core/vault';
+import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
 import { ValidationError } from '@stackmate/core/errors';
 import { Validatable, Project as ProjectInterface } from '@stackmate/interfaces';
-import { OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/core/constants';
+import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE, DEFAULT_STAGE } from '@stackmate/core/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
-  ProviderChoice, StagesNormalizedAttributes, Validations, NormalizedStages, StageDeclarations, VaultConfiguration,
+  ProviderChoice, StagesNormalizedAttributes, Validations, StageDeclarations, VaultConfiguration,
 } from '@stackmate/types';
 
 class Project extends Configuration implements Validatable, ProjectInterface {
@@ -207,26 +209,6 @@ class Project extends Configuration implements Validatable, ProjectInterface {
   }
 
   /**
-   * Get the configuration for the stage selected
-   *
-   * @param {String} name the name of the stage to get
-   * @returns {Object} the configuration for the stage
-   */
-  stage(name: string): NormalizedStages {
-    if (!this.contents.stages) {
-      throw new Error('The project doesn’t provide any stages available for deployment');
-    }
-
-    if (!this.contents.stages[name]) {
-      throw new Error(
-        `Stage ${name} was not found in the project. Available options are ${Object.keys(this.contents.stages)}`,
-      );
-    }
-
-    return this.contents.stages[name];
-  }
-
-  /**
    * @returns {String} the output path for the generated resources
    */
   public get outputPath() : string {
@@ -312,6 +294,48 @@ class Project extends Configuration implements Validatable, ProjectInterface {
     }
 
     return normalizedVault;
+  }
+
+  /**
+   * @param {String} path loads and returns a project from a file
+   * @param {String} name the stage's name
+   */
+  static async synthesize(path: string = DEFAULT_PROJECT_FILE, stageName: string = DEFAULT_STAGE): Promise<void> {
+    const project = new Project({ path, storage: STORAGE.FILE })
+    await project.load();
+
+    if (!project.contents.stages) {
+      throw new Error('The project doesn’t provide any stages available for deployment');
+    }
+
+    const {
+      contents: {
+        defaults,
+        stages,
+        name: projectName,
+        stages: { [stageName]: services },
+        vault: { storage: vaultStorage = STORAGE.FILE, ...vaultOptions },
+      },
+    } = project;
+
+    if (!services || isEmpty(services)) {
+      throw new Error(
+        `Stage ${stageName} was not found in the project. Available options are ${Object.keys(stages)}`,
+      );
+    }
+
+    const vaultStorageOptions = {
+      ...(vaultOptions || {}),
+      stage: stageName,
+      project: projectName,
+    };
+
+    const vault = new Vault({ storage: vaultStorage, ...vaultStorageOptions });
+    await vault.load();
+
+    const stage = new Stage(stageName, project.outputPath, defaults)
+    stage.populate(services, vault);
+    stage.synthesize();
   }
 }
 

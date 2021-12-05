@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import { CloudProvider, CloudService } from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
-  ProviderDefaults, ServiceConfigurationDeclarationNormalized,
+  ProviderDefaults, ServiceConfigurationDeclarationNormalized, ServiceTypeChoice,
 } from '@stackmate/types';
 import { Construct } from 'constructs';
 
@@ -91,9 +91,7 @@ abstract class Cloud implements CloudProvider {
    * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  service(attributes: Omit<ServiceConfigurationDeclarationNormalized, 'provider'>): CloudService {
-    const { type } = attributes;
-
+  service(type: ServiceTypeChoice): CloudService {
     const ServiceClass = get(this.serviceMapping, type, null);
 
     if (!ServiceClass) {

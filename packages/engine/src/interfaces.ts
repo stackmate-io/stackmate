@@ -2,6 +2,7 @@ import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
   AttributeNames, StorageChoice, NormalizedStages, NormalizedProjectConfiguration,
+  Credentials,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -9,7 +10,7 @@ export interface CloudProvider {
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
   init(): void;
-  service(attributes: ServiceAttributes): CloudService;
+  service(type: ServiceTypeChoice): CloudService;
 }
 
 export interface CloudService {
@@ -21,8 +22,8 @@ export interface CloudService {
   attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
-  populate(attributes: ServiceAttributes, dependencies?: CloudPrerequisites): CloudService;
   provision(): void;
+  populate(attributes: ServiceAttributes): void;
 }
 
 export interface Validatable {
@@ -66,9 +67,9 @@ export interface Authenticatable extends Validatable, AttributeAssignable {
 }
 
 export interface Rootable extends Validatable, AttributeAssignable {
-  root: number; // TOOD
-  validations(): Required<{ root: object }>;
-  attributeNames(): Required<{ root: Function }>;
+  rootCredentials: number; // TOOD
+  validations(): Required<{ rootCredentials: object }>;
+  attributeNames(): Required<{ rootCredentials: Function }>;
 }
 
 export interface StorageAdapter {
@@ -93,5 +94,9 @@ export interface ConfigurationResource {
 export interface Project extends ConfigurationResource {
   outputPath: string;
   contents: NormalizedProjectConfiguration;
-  stage(name: string): NormalizedStages;
 }
+
+export interface Vault extends ConfigurationResource {
+  credentials(service: string): Credentials;
+  rootCredentials(service: string): Credentials;
+};

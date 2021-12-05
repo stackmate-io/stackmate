@@ -1,6 +1,5 @@
 import { isEmpty } from 'lodash';
 import { SSM } from '@aws-sdk/client-ssm';
-import { Credentials } from '@aws-sdk/types';
 import validate from 'validate.js';
 
 import BaseStorageAdapter from '@stackmate/core/adapters/storage/base';
@@ -84,7 +83,6 @@ class AwsParameterStore extends BaseStorageAdapter implements Validatable {
 
     return client;
   }
-
 
   async read(): Promise<object> {
     const params = await this.client.getParametersByPath({ 'Path': '/manual-testing' });

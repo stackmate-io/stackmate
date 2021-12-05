@@ -13,9 +13,6 @@
     "@aws-sdk/client-ssm": "^3.37.0",
     "@aws-sdk/types": "^3.40.0",
     "@cdktf/provider-aws": "^1.0.107",
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@oclif/plugin-help": "^3",
     "cdktf": "^0.4.1",
     "cdktf-cli": "^0.6.3",
     "chalk": "^4.1.1",
@@ -27,18 +24,15 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@oclif/test": "^1",
     "@sinonjs/fake-timers": "6",
     "@types/chai": "^4.2.21",
     "@types/jsforce": "^1.9.35",
+    "@types/lodash": "^4.14.177",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.10.2",
     "@types/react": "^17.0.26",
     "chai": "^4.3.4",
     "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
     "globby": "^10",
     "mocha": "^5.2.0",
     "nyc": "^14",
@@ -53,7 +47,6 @@
     "/bin",
     "/lib",
     "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
   ],
   "homepage": "https://stackmate.io",
   "keywords": [
