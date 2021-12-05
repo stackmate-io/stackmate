@@ -1,7 +1,3 @@
-import Command from '@oclif/command';
-
-import { ValidationError } from '@stackmate/core/errors';
-
 export const Cached = () => {
   /**
    * @var {Object} _cache the cache object
@@ -28,32 +24,5 @@ export const Cached = () => {
     };
 
     return descriptor.value;
-  };
-};
-
-export const WithErrorHandler = () => {
-  /**
-   * @param {Command} target the command to decorate
-   * @param {String} propertyKey the property key the decorator refers to
-   * @param {PropertyDescriptor} descriptor the property descriptor
-   * @returns {Any} the return value the command originally returned
-   * @throws {Error} when the error is unhandled
-   */
-  return (target: Command, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const fn = descriptor.value;
-
-    descriptor.value = async function (...args: any[]) {
-      try {
-        return await fn.apply(this, args);
-      } catch (error) {
-        if (error instanceof ValidationError) {
-          return target.error(
-            (error as ValidationError).formatted(),
-          );
-        }
-
-        throw error;
-      }
-    };
   };
 };

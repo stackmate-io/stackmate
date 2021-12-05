@@ -61,7 +61,6 @@ class Project extends Configuration implements Validatable, ProjectInterface {
    */
   validations(): Validations {
     const providers = Object.values(PROVIDER);
-    const storageOptions = Object.values(STORAGE);
 
     /**
      * Validates the project's stages
@@ -141,6 +140,7 @@ class Project extends Configuration implements Validatable, ProjectInterface {
       }
     };
 
+    const storageOptions = Object.values(STORAGE);
     validate.validators.validateVault = () => {
       /*
       'vault.storage': {

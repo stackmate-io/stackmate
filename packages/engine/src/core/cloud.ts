@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import { CloudProvider, CloudService } from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
-  ProviderDefaults, ServiceConfigurationDeclarationNormalized, ServiceTypeChoice,
+  ProviderDefaults, ServiceTypeChoice,
 } from '@stackmate/types';
 import { Construct } from 'constructs';
 

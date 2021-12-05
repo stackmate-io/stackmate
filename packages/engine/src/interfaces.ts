@@ -1,8 +1,7 @@
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  AttributeNames, StorageChoice, NormalizedStages, NormalizedProjectConfiguration,
-  Credentials,
+  AttributeNames, StorageChoice, NormalizedProjectConfiguration, Credentials,
 } from '@stackmate/types';
 
 export interface CloudProvider {
