@@ -1,17 +1,16 @@
-import validate from 'validate.js';
 import { Construct } from 'constructs';
-import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
+import { difference, fromPairs, get, has, isEmpty, toPairs } from 'lodash';
 
-import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
-import { ValidationError } from '@stackmate/lib/errors';
+import Entity from '@stackmate/lib/entity';
 import { SERVICE_TYPE } from '@stackmate/constants';
+import { CloudService, AttributeAssignable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/utils';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,
 } from '@stackmate/types';
 
-abstract class Service implements CloudService, Validatable, AttributeAssignable {
+abstract class Service extends Entity implements CloudService, AttributeAssignable {
   /**
    * @var {String} name the service's name
    */
@@ -77,6 +76,8 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
   constructor(name: string, stack: Construct, prerequisites: CloudPrerequisites = {}) {
+    super();
+
     this.name = name;
     this.stack = stack;
 
@@ -175,23 +176,12 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
   }
 
   /**
-   * Validates a service's attributes
-   *
-   * @param {Object} attributes the service attributes to validated
-   * @throws {ValidationError} when the attributes are invalid
-   * @void
+   * @param {ServiceAttributes} attributes the service's attributes
+   * @returns {String} the message to display
    */
-  validate(attributes: ServiceAttributes): void {
-    const errors = validate.validate(attributes, this.validations(), {
-      fullMessages: false,
-    });
-
-    if (!isEmpty(errors)) {
-      const { name } = attributes;
-      throw new ValidationError(
-        `Invalid configuration for the ${name ? `“${name}” ` : ' '}service`, errors,
-      );
-    }
+  public getValidationError(attributes: ServiceAttributes): string {
+    const { name } = attributes;
+    return `Invalid configuration for the ${name ? `“${name}” ` : ' '}service`;
   }
 
   /**
@@ -200,12 +190,6 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
    * @returns {Object} the validations to use
    */
   validations(): Validations {
-    validate.validators.validateLinks = (links: Array<string>) => {
-      if (isArray(links) && !links.every(l => isString(l))) {
-        return 'The service contains an invalid entries under “links“';
-      }
-    };
-
     return {
       name: {
         presence: {
@@ -234,7 +218,7 @@ abstract class Service implements CloudService, Validatable, AttributeAssignable
         },
       },
       links: {
-        validateLinks: true,
+        validateServiceLinks: true,
       },
     };
   }

@@ -1,16 +1,12 @@
-import validate from 'validate.js';
-import { isEmpty } from 'lodash';
 import { SSM } from '@aws-sdk/client-ssm';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import Environment from '@stackmate/lib/environment';
-import { Validatable } from '@stackmate/interfaces';
-import { ValidationError } from '@stackmate/lib/errors';
 import { AwsParamStorageOptions, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Cached } from '@stackmate/lib/decorators';
 
-class AwsParameterStore extends BaseStorageAdapter implements Validatable {
+class AwsParameterStore extends BaseStorageAdapter {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -27,6 +23,14 @@ class AwsParameterStore extends BaseStorageAdapter implements Validatable {
     this.validate(options);
 
     ({ key: this.key, region: this.region } = options);
+  }
+
+  /**
+   * @param {Object} contents the contents to validate
+   * @returns {String} the error message
+   */
+  public getValidationError(contents: AwsParamStorageOptions): string {
+    return 'The “vault” section in the project configuration is invalid';
   }
 
   /**
@@ -55,23 +59,6 @@ class AwsParameterStore extends BaseStorageAdapter implements Validatable {
         },
       },
     };
-  }
-
-  /**
-   * Validates the configuration file's structure.
-   * The subsequent service values will be validated during service initialization.
-   *
-   * @param {Object} contents the contents to validate
-   * @throws {ValidationError} when the file structure invalid
-   */
-  validate(contents: AwsParamStorageOptions): void {
-    const errors = validate.validate(contents, this.validations(), { fullMessages: false });
-
-    if (!isEmpty(errors)) {
-      throw new ValidationError(
-        'The “vault” section in the project configuration is invalid', errors,
-      );
-    }
   }
 
   @Cached()

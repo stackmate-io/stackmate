@@ -60,13 +60,13 @@ export interface MultiNode extends Validatable, AttributeAssignable {
 }
 
 export interface Authenticatable extends Validatable, AttributeAssignable {
-  credentials: number; // TODO
+  credentials: Credentials;
   validations(): Required<{ credentials: object }>;
   attributeNames(): Required<{ credentials: Function }>;
 }
 
 export interface Rootable extends Validatable, AttributeAssignable {
-  rootCredentials: number; // TOOD
+  rootCredentials: Credentials;
   validations(): Required<{ rootCredentials: object }>;
   attributeNames(): Required<{ rootCredentials: Function }>;
 }

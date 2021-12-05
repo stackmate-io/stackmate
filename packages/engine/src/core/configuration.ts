@@ -6,8 +6,9 @@ import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOption
 import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';
 import { AwsParameterStore, LocalFileAdapter } from '@stackmate/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
+import Entity from '@stackmate/lib/entity';
 
-abstract class Configuration implements ConfigurationResource {
+abstract class Configuration extends Entity implements ConfigurationResource {
   /**
    * @var {Object} contents the file's contents in a structured format
    */
@@ -35,6 +36,8 @@ abstract class Configuration implements ConfigurationResource {
   readonly isWriteable: boolean = true;
 
   constructor({ storage, ...storageOptions }: ConfigurationAttributes = { storage: STORAGE.FILE }) {
+    super();
+
     this.storage = storage;
 
     if (isObject(storageOptions) && !isEmpty(storageOptions)) {
