@@ -5,7 +5,7 @@ import { PROVIDER } from '@stackmate/core/constants';
 import { CloudProvider } from '@stackmate/interfaces';
 import { ProjectDefaults, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from '@stackmate/clouds/aws';
-import { Cached } from '@stackmate/core/decorators';
+import { Cached } from '@stackmate/lib/decorators';
 
 class CloudManager {
   /**

@@ -7,7 +7,7 @@ import {
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
-import { ValidationError } from '@stackmate/core/errors';
+import { ValidationError } from '@stackmate/lib/errors';
 import { Validatable, Project as ProjectInterface } from '@stackmate/interfaces';
 import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE, DEFAULT_STAGE } from '@stackmate/core/constants';
 import {

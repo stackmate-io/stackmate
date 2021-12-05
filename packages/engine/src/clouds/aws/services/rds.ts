@@ -4,7 +4,7 @@ import AwsService from '@stackmate/clouds/aws/services/base';
 import { OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
 import { Sizeable, Storable } from '@stackmate/interfaces';
-import { parseInteger, parseString } from '@stackmate/core/utils';
+import { parseInteger, parseString } from '@stackmate/lib/utils';
 import {
   DEFAULT_MYSQL_ENGINE,
   DEFAULT_POSTGRES_ENGINE,

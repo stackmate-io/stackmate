@@ -3,9 +3,9 @@ import { Construct } from 'constructs';
 import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } from 'lodash';
 
 import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
-import { ValidationError } from '@stackmate/core/errors';
+import { ValidationError } from '@stackmate/lib/errors';
 import { SERVICE_TYPE } from '@stackmate/core/constants';
-import { parseArrayToUniqueValues, parseString } from '@stackmate/core/utils';
+import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/utils';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,

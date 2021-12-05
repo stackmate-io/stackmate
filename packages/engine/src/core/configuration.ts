@@ -1,6 +1,6 @@
 import { isEmpty, isObject } from 'lodash';
 
-import { Cached } from '@stackmate/core/decorators';
+import { Cached } from '@stackmate/lib/decorators';
 import { FORMAT, STORAGE } from '@stackmate/core/constants';
 import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOptions, StorageOptions } from '@stackmate/types';
 import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';

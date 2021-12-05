@@ -1,14 +1,14 @@
+import validate from 'validate.js';
 import { isEmpty } from 'lodash';
 import { SSM } from '@aws-sdk/client-ssm';
-import validate from 'validate.js';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
-import Environment from '@stackmate/core/environment';
+import Environment from '@stackmate/lib/environment';
 import { Validatable } from '@stackmate/interfaces';
-import { ValidationError } from '@stackmate/core/errors';
+import { ValidationError } from '@stackmate/lib/errors';
 import { AwsParamStorageOptions, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { Cached } from '@stackmate/core/decorators';
+import { Cached } from '@stackmate/lib/decorators';
 
 class AwsParameterStore extends BaseStorageAdapter implements Validatable {
   /**
