@@ -1,7 +1,7 @@
 import validate from 'validate.js';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
-import { ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
+import { Credentials, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 /**
@@ -69,7 +69,7 @@ const validateStages = (stages: StagesNormalizedAttributes) => {
  * Validates the project's defaults in the configuration file
  *
  * @param {ProjectDefaults} defaults the project's defaults
- * @returns {String|undefined} the error message
+ * @returns {String|undefined} the error message (if any)
  */
 const validateProjectDefaults = (defaults: ProjectDefaults) => {
   // Allow defaults not being defined or empty objects
@@ -91,7 +91,7 @@ const validateProjectDefaults = (defaults: ProjectDefaults) => {
  * Validates the project's vault configuration
  *
  * @param {VaultConfiguration} vault The vault configuration
- * @returns {String|undefined} the error message
+ * @returns {String|undefined} the error message (if any)
  */
 const validateVault = (vault: VaultConfiguration) => {
   if (vault || !isObject(vault) || isEmpty(vault)) {
@@ -116,11 +116,40 @@ const validateVault = (vault: VaultConfiguration) => {
  * Validates the service links in the configuration
  *
  * @param {Array<String>} links the list of links to other services
- * @returns {String|undefined} the error message
+ * @returns {String|undefined} the error message (if any)
  */
 const validateServiceLinks = (links: Array<string>) => {
   if (isArray(links) && !links.every(l => isString(l))) {
     return 'The service contains an invalid entries under “links“';
+  }
+};
+
+/**
+ * Validates credentials
+ *
+ * @param {Credentials} credentials the credentials to validate
+ * @param {Object} options
+ * @param {Boolean} options.requireUserName whether the username is required
+ * @param {Boolean} options.requirePassword whether the password is required
+ * @returns {String|undefined} the error message (if any)
+ */
+const validateCredentials = (
+  credentials: Credentials, { requireUserName = true, requirePassword = true } = {},
+) => {
+  const { username, password } = credentials;
+  const erroredFields = [];
+
+  if (requireUserName && (!username || !isString(username))) {
+    erroredFields.push('username');
+  }
+
+  if (requirePassword && (!password || !isString(password))) {
+    erroredFields.push('password');
+  }
+
+  if (!isEmpty(erroredFields)) {
+    const n = erroredFields.length;
+    return `The “${erroredFields.join('” and “')}” ${n !== 1 ? 'fields are' : 'field is'} invalid`;
   }
 };
 
@@ -129,10 +158,12 @@ Object.assign(validate.validators, {
   validateProjectDefaults,
   validateVault,
   validateServiceLinks,
+  validateCredentials,
 });
 
 export {
   validateStages,
+  validateCredentials,
   validateProjectDefaults,
   validateVault,
   validateServiceLinks,
