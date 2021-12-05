@@ -2,7 +2,7 @@ import { isString } from 'lodash';
 import { promises as fsPromises } from 'fs';
 import { resolve as resolvePath } from 'path';
 
-import BaseStorageAdapter from '@stackmate/core/adapters/storage/base';
+import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import { LocalFileStorageOptions } from '@stackmate/types';
 
 class LocalFileAdapter extends BaseStorageAdapter {

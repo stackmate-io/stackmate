@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash';
 import { SSM } from '@aws-sdk/client-ssm';
 import validate from 'validate.js';
 
-import BaseStorageAdapter from '@stackmate/core/adapters/storage/base';
+import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import Environment from '@stackmate/core/environment';
 import { Validatable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/core/errors';

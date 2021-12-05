@@ -3,8 +3,8 @@ import { isEmpty, isObject } from 'lodash';
 import { Cached } from '@stackmate/core/decorators';
 import { FORMAT, STORAGE } from '@stackmate/core/constants';
 import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOptions, StorageOptions } from '@stackmate/types';
-import { JsonFormatter, YamlFormatter } from '@stackmate/core/adapters/formatters';
-import { AwsParameterStore, LocalFileAdapter } from '@stackmate/core/adapters/storage';
+import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';
+import { AwsParameterStore, LocalFileAdapter } from '@stackmate/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
 
 abstract class Configuration implements ConfigurationResource {

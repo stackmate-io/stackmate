@@ -1,4 +1,4 @@
-import BaseFormatter from '@stackmate/core/adapters/formatters/base';
+import BaseFormatter from '@stackmate/adapters/formatters/base';
 
 class JsonFormatter extends BaseFormatter {
   /**
