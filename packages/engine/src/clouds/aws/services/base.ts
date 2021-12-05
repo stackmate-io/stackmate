@@ -1,7 +1,7 @@
 import Service from '@stackmate/core/service';
 import { AwsVpcService } from '@stackmate/clouds/aws/services/vpc';
 import { ProviderChoice, RegionList } from '@stackmate/types';
-import { PROVIDER } from '@stackmate/core/constants';
+import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 
 abstract class AwsService extends Service {

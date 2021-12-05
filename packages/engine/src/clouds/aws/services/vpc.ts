@@ -1,7 +1,7 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws';
 import { Token } from 'cdktf';
 
-import { SERVICE_TYPE } from '@stackmate/core/constants';
+import { SERVICE_TYPE } from '@stackmate/constants';
 import AwsService from '@stackmate/clouds/aws/services/base';
 import { ServiceTypeChoice } from '@stackmate/types';
 

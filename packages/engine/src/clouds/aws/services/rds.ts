@@ -2,7 +2,7 @@ import { DataAwsSsmParameter, RdsCluster } from '@cdktf/provider-aws';
 
 import AwsService from '@stackmate/clouds/aws/services/base';
 import { OneOf, ServiceTypeChoice } from '@stackmate/types';
-import { SERVICE_TYPE } from '@stackmate/core/constants';
+import { SERVICE_TYPE } from '@stackmate/constants';
 import { Sizeable, Storable } from '@stackmate/interfaces';
 import { parseInteger, parseString } from '@stackmate/lib/utils';
 import {

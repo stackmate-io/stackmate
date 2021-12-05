@@ -4,7 +4,7 @@ import { difference, fromPairs, get, has, isArray, isEmpty, isString, toPairs } 
 
 import { CloudService, Validatable, AttributeAssignable } from '@stackmate/interfaces';
 import { ValidationError } from '@stackmate/lib/errors';
-import { SERVICE_TYPE } from '@stackmate/core/constants';
+import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/utils';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,

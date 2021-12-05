@@ -1,5 +1,5 @@
 import { CloudService } from '@stackmate/interfaces';
-import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/core/constants';
+import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 // Utility types
 export type ConstructorOf<T> = { new(...args: any[]): T };

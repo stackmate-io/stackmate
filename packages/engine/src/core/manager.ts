@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { Construct } from 'constructs';
 
-import { PROVIDER } from '@stackmate/core/constants';
+import { PROVIDER } from '@stackmate/constants';
 import { CloudProvider } from '@stackmate/interfaces';
 import { ProjectDefaults, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from '@stackmate/clouds/aws';

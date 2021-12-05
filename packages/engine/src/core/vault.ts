@@ -1,5 +1,5 @@
 import Configuration from '@stackmate/core/configuration';
-import { FORMAT, STORAGE } from '@stackmate/core/constants';
+import { FORMAT, STORAGE } from '@stackmate/constants';
 import { Vault as VaultInterface } from '@stackmate/interfaces';
 import { Credentials } from '@stackmate/types';
 

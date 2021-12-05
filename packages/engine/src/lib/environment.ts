@@ -1,5 +1,5 @@
 import { EnvironmentVariableUndefinedError } from '@stackmate/lib/errors';
-import { ENVIRONMENT_VARIABLE } from '@stackmate/core/constants';
+import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
 import { Credentials } from '@aws-sdk/types';
 
 class Environment {

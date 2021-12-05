@@ -9,7 +9,7 @@ import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
 import { ValidationError } from '@stackmate/lib/errors';
 import { Validatable, Project as ProjectInterface } from '@stackmate/interfaces';
-import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE, DEFAULT_STAGE } from '@stackmate/core/constants';
+import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, SERVICE_TYPE, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
   ProviderChoice, StagesNormalizedAttributes, Validations, StageDeclarations, VaultConfiguration,
@@ -141,7 +141,10 @@ class Project extends Configuration implements Validatable, ProjectInterface {
     };
 
     const storageOptions = Object.values(STORAGE);
-    validate.validators.validateVault = () => {
+    validate.validators.validateVault = (vault: VaultConfiguration) => {
+      if (vault || !isObject(vault) || isEmpty(vault)) {
+      }
+
       /*
       'vault.storage': {
         presence: {
@@ -161,6 +164,10 @@ class Project extends Configuration implements Validatable, ProjectInterface {
           allowEmpty: false,
           message: 'You have to provide a name for the project',
         },
+        format: {
+          pattern: '[a-z0-9-_.\/]+',
+          message: 'The project name needs to be in URL-friendly format, same as the repository name',
+        }
       },
       vault: {
         validateVault: true,
