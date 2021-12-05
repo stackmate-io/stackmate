@@ -140,22 +140,23 @@ class Project extends Configuration implements Validatable, ProjectInterface {
       }
     };
 
-    const storageOptions = Object.values(STORAGE);
     validate.validators.validateVault = (vault: VaultConfiguration) => {
       if (vault || !isObject(vault) || isEmpty(vault)) {
+        return 'The project does not contain a “vault” section';
       }
 
-      /*
-      'vault.storage': {
-        presence: {
-          message: 'The storage type for the credentials vault should be specified',
-        },
-        inclusion: {
-          within: storageOptions,
-          message: 'The storage type specified for the vault is invalid',
+      const { storage } = vault;
+      if (!storage || !Object.values(STORAGE).includes(storage)) {
+        return 'You have to specify a valid storage for your credentials vault';
+      }
+
+      if (storage === STORAGE.AWS_PARAMS) {
+        const { key, region } = vault;
+
+        if (!key || !region) {
+          return 'The vault needs to have “region” and a “key” ARN to encrypt values';
         }
-      },
-      */
+      }
     };
 
     return {
