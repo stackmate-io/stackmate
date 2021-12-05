@@ -4,7 +4,7 @@ import { difference, fromPairs, get, has, isEmpty, toPairs } from 'lodash';
 import Entity from '@stackmate/lib/entity';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, AttributeAssignable } from '@stackmate/interfaces';
-import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/utils';
+import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,
