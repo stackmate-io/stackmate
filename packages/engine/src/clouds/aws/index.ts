@@ -43,11 +43,7 @@ class AwsCloud extends Cloud {
     new AwsProvider(this.stack, PROVIDER.AWS, { region: this.region });
 
     this.prerequisites = {
-      vpc: this.service({
-        type: SERVICE_TYPE.NETWORKING,
-        name: 'my-vpc',
-        region: this.region,
-      }),
+      vpc: this.service(SERVICE_TYPE.NETWORKING).populate({ name: 'my-vpc', region: this.region }),
     };
   }
 }

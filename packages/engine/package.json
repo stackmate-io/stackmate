@@ -65,8 +65,9 @@
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
     "build": "rm -rf lib && tsc --build tsconfig.build.json",
-    "test": "TS_NODE_PROJECT='./tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
-    "test:ci": "npm run lint && npm run test"
+    "test": "TS_NODE_PROJECT='tests/tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts tests/**/*.test.ts",
+    "test:ci": "npm run lint && npm run test",
+    "test:single": "TS_NODE_PROJECT='tests/tsconfig.json' ./node_modules/.bin/mocha --opts tests/mocha.opts --"
   },
   "types": "lib/index.d.ts"
 }

@@ -66,7 +66,7 @@ class Stage {
    * @param {Array<object>} services the services attributes
    * @param {Vault} vault the stage's credentials vault
    */
-  public populate(services: NormalizedStages, vault: Vault): void {
+  public populate(services: NormalizedStages, vault: Vault): Stage {
     Object.keys(services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = services;
 
@@ -81,6 +81,8 @@ class Stage {
 
       this._services.add(service);
     });
+
+    return this;
   }
 
   /**

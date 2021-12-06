@@ -121,7 +121,7 @@ export type Validations = {
   [name: string]: object;
 };
 
-export type AttributeNames = {
+export type AttributeParsers = {
   [name: string]: Function;
 };
 

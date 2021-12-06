@@ -1,7 +1,7 @@
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  AttributeNames, StorageChoice, NormalizedProjectConfiguration, Credentials,
+  AttributeParsers, StorageChoice, NormalizedProjectConfiguration, Credentials,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -18,11 +18,10 @@ export interface CloudService {
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
   links: Array<string>;
-  attributes: ServiceAttributes;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
   provision(): void;
-  populate(attributes: ServiceAttributes): void;
+  populate(attributes: ServiceAttributes): CloudService;
 }
 
 export interface Validatable {
@@ -30,45 +29,44 @@ export interface Validatable {
   validations(): Validations;
 }
 
-export interface AttributeAssignable {
-  attributes: object;
-  attributeNames(): AttributeNames;
+export interface AttributesAssignable {
+  assignableAttributes(): AttributeParsers;
 }
 
-export interface Sizeable extends Validatable, AttributeAssignable {
+export interface Sizeable extends Validatable, AttributesAssignable {
   size: string;
   validations(): Required<{ size: object }>;
-  attributeNames(): Required<{ size: Function }>;
+  assignableAttributes(): Required<{ size: Function }>;
 }
 
-export interface Storable extends Validatable, AttributeAssignable {
+export interface Storable extends Validatable, AttributesAssignable {
   storage: number;
   validations(): Required<{ storage: object }>;
-  attributeNames(): Required<{ storage: Function }>;
+  assignableAttributes(): Required<{ storage: Function }>;
 }
 
-export interface Mountable extends Validatable, AttributeAssignable {
+export interface Mountable extends Validatable, AttributesAssignable {
   volumes: string; // TODO
   valdations(): Required<{ volumes: object }>;
-  attributeNames(): Required<{ volumes: Function }>;
+  assignableAttributes(): Required<{ volumes: Function }>;
 }
 
-export interface MultiNode extends Validatable, AttributeAssignable {
+export interface MultiNode extends Validatable, AttributesAssignable {
   nodes: number;
   valdations(): Required<{ nodes: object }>;
-  attributeNames(): Required<{ nodes: Function }>;
+  assignableAttributes(): Required<{ nodes: Function }>;
 }
 
-export interface Authenticatable extends Validatable, AttributeAssignable {
+export interface Authenticatable extends Validatable, AttributesAssignable {
   credentials: Credentials;
   validations(): Required<{ credentials: object }>;
-  attributeNames(): Required<{ credentials: Function }>;
+  assignableAttributes(): Required<{ credentials: Function }>;
 }
 
-export interface Rootable extends Validatable, AttributeAssignable {
+export interface Rootable extends Validatable, AttributesAssignable {
   rootCredentials: Credentials;
   validations(): Required<{ rootCredentials: object }>;
-  attributeNames(): Required<{ rootCredentials: Function }>;
+  assignableAttributes(): Required<{ rootCredentials: Function }>;
 }
 
 export interface StorageAdapter {

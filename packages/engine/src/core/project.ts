@@ -230,8 +230,7 @@ class Project extends Configuration implements ProjectInterface {
     const vault = new Vault({ storage: vaultStorage, ...vaultStorageOptions });
     await vault.load();
 
-    const stage = new Stage(stageName, project.outputPath, defaults)
-    stage.populate(services, vault);
+    const stage = new Stage(stageName, project.outputPath, defaults).populate(services, vault);
     stage.synthesize();
   }
 }

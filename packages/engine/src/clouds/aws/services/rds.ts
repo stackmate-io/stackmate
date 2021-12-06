@@ -1,10 +1,10 @@
-import { DataAwsSsmParameter, RdsCluster } from '@cdktf/provider-aws';
+import { RdsCluster } from '@cdktf/provider-aws';
 
 import AwsService from '@stackmate/clouds/aws/services/base';
-import { OneOf, ServiceTypeChoice } from '@stackmate/types';
+import { Credentials, OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { Sizeable, Storable } from '@stackmate/interfaces';
-import { parseInteger, parseString } from '@stackmate/lib/parsers';
+import { Authenticatable, Rootable, Sizeable, Storable } from '@stackmate/interfaces';
+import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
 import {
   DEFAULT_MYSQL_ENGINE,
   DEFAULT_POSTGRES_ENGINE,
@@ -15,7 +15,7 @@ import {
   RDS_POSTGRES_ENGINES,
 } from '@stackmate/clouds/aws/constants';
 
-abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Storable {
+abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Storable, Authenticatable, Rootable {
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -32,6 +32,16 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   database: string;
 
   /**
+   * @var {Credentials} credentials the service's credentials
+   */
+  credentials: Credentials;
+
+  /**
+   * @var {Credentials} rootCredentials the service's root credentials
+   */
+  rootCredentials: Credentials;
+
+  /**
    * @var {String} engine the database engine to use
    */
   abstract engine: OneOf<Array<string>>;
@@ -43,13 +53,15 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
 
   cluster: RdsCluster;
 
-  attributeNames() {
+  assignableAttributes() {
     return {
-      ...super.attributeNames(),
+      ...super.assignableAttributes(),
       size: parseString,
       storage: parseInteger,
       engine: parseString,
       database: parseString,
+      credentials: parseCredentials,
+      rootCredentials: parseCredentials,
     };
   }
 
@@ -88,6 +100,12 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
           flags: 'i',
           message: 'You can only use letters, numbers and _ for the database name',
         },
+      },
+      credentials: {
+        validateCredentials: true,
+      },
+      rootCredentials: {
+        validateCredentials: true,
       },
     };
   }

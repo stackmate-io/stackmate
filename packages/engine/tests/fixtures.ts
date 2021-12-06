@@ -1,4 +1,11 @@
-import { ProjectConfiguration } from '@stackmate/types';
+import { ProjectConfiguration } from '../src/types';
+
+export const mysqlDatabaseConfiguration = {
+  type: 'mysql',
+  size: 'db.t2.large',
+  storage: 30,
+  database: 'my_database_name',
+};
 
 export const fullConfig: ProjectConfiguration = {
   name: 'full-config',
@@ -6,12 +13,7 @@ export const fullConfig: ProjectConfiguration = {
   region: 'eu-central-1',
   stages: {
     production: {
-      database: {
-        type: 'mysql',
-        size: 'db.t2.large',
-        storage: 30,
-        database: 'my_database_name',
-      },
+      database: mysqlDatabaseConfiguration,
     },
   },
   defaults: {

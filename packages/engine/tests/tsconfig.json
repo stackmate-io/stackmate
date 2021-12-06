@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "../lib",
+    "noEmit": true,
+    "rootDir": "../",
+    "paths": {
+      "@stackmate/*": [
+        "../src/*"
+      ]
+    },
+  },
+  "include": [
+    "../src/**/*.ts",
+    "tests/**/*.test.ts"
+  ],
+  "exclude": [
+    "node_modules/**/*"
+  ]
+}

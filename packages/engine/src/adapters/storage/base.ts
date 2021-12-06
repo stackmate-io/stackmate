@@ -16,6 +16,13 @@ abstract class BaseStorageAdapter extends Entity implements StorageAdapter {
   }
 
   /**
+   * @returns {String} the error message to use
+   */
+  getValidationError(contents: object): string {
+    return 'The contents are invalid';
+  }
+
+  /**
    * @returns {Object} the validations to use
    */
   validations(): Validations {

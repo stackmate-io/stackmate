@@ -3,14 +3,14 @@ import { difference, fromPairs, get, has, isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { CloudService, AttributeAssignable } from '@stackmate/interfaces';
+import { CloudService, AttributesAssignable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
-  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeNames,
+  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeParsers,
 } from '@stackmate/types';
 
-abstract class Service extends Entity implements CloudService, AttributeAssignable {
+abstract class Service extends Entity implements CloudService, AttributesAssignable {
   /**
    * @var {String} name the service's name
    */
@@ -92,11 +92,11 @@ abstract class Service extends Entity implements CloudService, AttributeAssignab
    * @param {Object} attributes the attributes to populate the service with
    * @returns {Service} the service returned
    */
-  populate(attributes: ServiceAttributes): void {
-    const acceptedAttributes = this.attributeNames();
+  populate(attributes: ServiceAttributes): CloudService {
+    const assignableAttributes = this.assignableAttributes();
 
     // Validate the keys provided first
-    const invalidKeys = difference(Object.keys(attributes), Object.keys(acceptedAttributes));
+    const invalidKeys = difference(Object.keys(attributes), Object.keys(assignableAttributes));
     if (!isEmpty(invalidKeys)) {
       throw new Error(
         `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
@@ -105,7 +105,7 @@ abstract class Service extends Entity implements CloudService, AttributeAssignab
 
     // Parse & finalize the attributes
     const parsedAttributes = fromPairs(
-      toPairs(acceptedAttributes).map(
+      toPairs(assignableAttributes).map(
         ([attributeName, parserFunction]) => {
           // Where to get the attribute value from:
           //  in case it's declared in the `attributes` object, use that
@@ -125,6 +125,8 @@ abstract class Service extends Entity implements CloudService, AttributeAssignab
     });
 
     this.provision();
+
+    return this;
   }
 
   /**
@@ -133,7 +135,7 @@ abstract class Service extends Entity implements CloudService, AttributeAssignab
    *
    * @returns {Objct} the attribute names and their parsers
    */
-  attributeNames(): AttributeNames {
+  assignableAttributes(): AttributeParsers {
     return {
       name: parseString,
       type: parseString,
@@ -141,14 +143,6 @@ abstract class Service extends Entity implements CloudService, AttributeAssignab
       provider: parseString,
       links: parseArrayToUniqueValues,
     };
-  }
-
-  /**
-   * Sets the attributes for the service
-   *
-   * @param {Object} attributes the attributes to set to the service
-   */
-  public set attributes(attributes: ServiceAttributes) {
   }
 
   /**
