@@ -1,7 +1,7 @@
 import validate from 'validate.js';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
-import { Credentials, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
+import { CredentialsObject, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 /**
@@ -134,7 +134,7 @@ const validateServiceLinks = (links: Array<string>) => {
  * @returns {String|undefined} the error message (if any)
  */
 const validateCredentials = (
-  credentials: Credentials, { requireUserName = true, requirePassword = true } = {},
+  credentials: CredentialsObject, { requireUserName = true, requirePassword = true } = {},
 ) => {
   const { username, password } = credentials;
   const erroredFields = [];

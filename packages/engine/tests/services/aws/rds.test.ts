@@ -17,8 +17,25 @@ describe('AwsMysqlService', () => {
     prerequisites = getAwsPrerequisites({ stack });
   });
 
-  it('instantiates the service', () => {
-    const service = new AwsMysqlService(stack, prerequisites).populate(attributes);
-    expect(service.stage).to.deep.equal(stack.name);
+  describe('populate', () => {
+    let service: AwsMysqlService;
+
+    beforeEach(() => {
+      service = new AwsMysqlService(stack, prerequisites);
+    });
+
+    it('instantiates the service and assigns the attributes correctly', () => {
+      service.populate(attributes);
+
+      // const {
+      //   name, region, /* size, storage, engine, database, */ credentials, rootCredentials,
+      // } = attributes;
+
+      expect(service.name).to.deep.equal(attributes.name);
+      expect(service.region).to.deep.equal(attributes.region);
+      expect(service.stage).to.deep.equal(stack.name);
+      expect(service.credentials).to.be.an('Object');
+      expect(service.rootCredentials).to.be.an('Object');
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { Credentials } from '@stackmate/types';
+import { CredentialsObject } from '@stackmate/types';
 import { isArray, isNumber, isString, uniq } from 'lodash';
 
 /**
@@ -59,7 +59,7 @@ export const parseBoolean = (value: number | string) => (
  * @param {String} credentials.password the credentials password
  * @returns {Credentials}
  */
-export const parseCredentials = ({ username, password }: Credentials) => ({
+export const parseCredentials = ({ username, password }: CredentialsObject) => ({
   username: isString(username) ? username.trim() : null,
   password: isString(password) ? password.trim() : null,
 });

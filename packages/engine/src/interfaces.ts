@@ -4,7 +4,7 @@ import { App as TerraformApp } from 'cdktf';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  AttributeParsers, StorageChoice, NormalizedProjectConfiguration, Credentials,
+  AttributeParsers, StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -22,6 +22,7 @@ export interface CloudService {
   readonly associations: Array<ServiceAssociation>;
   links: Array<string>;
   stage: string;
+  region: string;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
   provision(): void;
@@ -62,13 +63,13 @@ export interface MultiNode extends Validatable, AttributesAssignable {
 }
 
 export interface Authenticatable extends Validatable, AttributesAssignable {
-  credentials: Credentials;
+  credentials: CredentialsObject;
   validations(): Required<{ credentials: object }>;
   assignableAttributes(): Required<{ credentials: Function }>;
 }
 
 export interface Rootable extends Validatable, AttributesAssignable {
-  rootCredentials: Credentials;
+  rootCredentials: CredentialsObject;
   validations(): Required<{ rootCredentials: object }>;
   assignableAttributes(): Required<{ rootCredentials: Function }>;
 }

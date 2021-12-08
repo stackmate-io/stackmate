@@ -1,7 +1,7 @@
 import Configuration from '@stackmate/core/configuration';
 import { FORMAT, STORAGE } from '@stackmate/constants';
 import { Vault as VaultInterface } from '@stackmate/interfaces';
-import { Credentials, Validations } from '@stackmate/types';
+import { CredentialsObject, Validations } from '@stackmate/types';
 
 class Vault extends Configuration implements VaultInterface {
   /**
@@ -33,11 +33,11 @@ class Vault extends Configuration implements VaultInterface {
     return {};
   }
 
-  credentials(service: string): Credentials {
+  credentials(service: string): CredentialsObject {
     return {};
   }
 
-  rootCredentials(service: string): Credentials {
+  rootCredentials(service: string): CredentialsObject {
     return {};
   }
 }

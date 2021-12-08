@@ -1,7 +1,7 @@
 import { RdsCluster } from '@cdktf/provider-aws';
 
 import AwsService from '@stackmate/clouds/aws/services/base';
-import { Credentials, OneOf, ServiceTypeChoice } from '@stackmate/types';
+import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { Authenticatable, Rootable, Sizeable, Storable } from '@stackmate/interfaces';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
@@ -34,12 +34,12 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   /**
    * @var {Credentials} credentials the service's credentials
    */
-  credentials: Credentials = {};
+  credentials: CredentialsObject = {};
 
   /**
    * @var {Credentials} rootCredentials the service's root credentials
    */
-  rootCredentials: Credentials = {};
+  rootCredentials: CredentialsObject = {};
 
   /**
    * @var {String} engine the database engine to use
