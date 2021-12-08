@@ -46,6 +46,7 @@ class AwsParameterStore extends BaseStorageAdapter {
         },
         format: {
           pattern: '^arn:aws:[a-z0-9-]+:[0-9]+/[a-z0-9-]+$',
+          flags: 'i',
           message: 'Please provide a valid KMS ARN (eg. arn:aws:eu-central-1:11111111/abc-123-abc)',
         },
       },

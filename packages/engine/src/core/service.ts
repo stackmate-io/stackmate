@@ -1,7 +1,7 @@
-import { Construct } from 'constructs';
 import { difference, fromPairs, get, has, isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
+import { CloudStack } from '@stackmate/interfaces';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, AttributesAssignable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
@@ -32,7 +32,7 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
    * @protected
    * @readonly
    */
-  public stack: Construct;
+  public stack: CloudStack;
 
   /**
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
@@ -75,10 +75,9 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(name: string, stack: Construct, prerequisites: CloudPrerequisites = {}) {
+  constructor(stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
     super();
 
-    this.name = name;
     this.stack = stack;
 
     if (!isEmpty(prerequisites)) {
@@ -156,6 +155,13 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
   }
 
   /**
+   * @returns {String} the stage's name
+   */
+  public get stage(): string {
+    return this.stack.name;
+  }
+
+  /**
    * Associates the current service with the ones mentioned in the `links` section
    *
    * @param {Service} target the service to link the current service with
@@ -175,7 +181,7 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
    */
   public getValidationError(attributes: ServiceAttributes): string {
     const { name } = attributes;
-    return `Invalid configuration for the ${name ? `“${name}” ` : ' '}service`;
+    return `Invalid configuration for the ${name ? `“${name}”` : ''} ${this.type} service`;
   }
 
   /**

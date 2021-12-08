@@ -34,12 +34,12 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   /**
    * @var {Credentials} credentials the service's credentials
    */
-  credentials: Credentials;
+  credentials: Credentials = {};
 
   /**
    * @var {Credentials} rootCredentials the service's root credentials
    */
-  rootCredentials: Credentials;
+  rootCredentials: Credentials = {};
 
   /**
    * @var {String} engine the database engine to use

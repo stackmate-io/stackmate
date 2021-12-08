@@ -1,9 +1,9 @@
-import { join as joinPaths } from 'path';
-import { App as TerraformApp, Manifest, TerraformStack } from 'cdktf';
+import { omit } from 'lodash';
 
 import Registry from '@stackmate/core/registry';
 import CloudManager from '@stackmate/core/manager';
-import { Vault } from '@stackmate/interfaces';
+import Stack from '@stackmate/core/stack';
+import { Vault, CloudStack } from '@stackmate/interfaces';
 import { NormalizedStages, ProjectDefaults } from '@stackmate/types';
 
 class Stage {
@@ -14,16 +14,10 @@ class Stage {
   public readonly name: string;
 
   /**
-   * @var {App} app the terraform app to synthesize
+   * @var {Stack} stack the stack to use to provision the services with
    * @readonly
    */
-  public readonly app: TerraformApp;
-
-  /**
-   * @var {TerraformStack} stack the stack to use to provision the services with
-   * @readonly
-   */
-  protected readonly stack: TerraformStack;
+  protected readonly stack: CloudStack;
 
   /**
    * @var {CloudManager} clouds the class that handles the cloud services
@@ -38,26 +32,9 @@ class Stage {
 
   constructor(name: string, targetPath: string, defaults: ProjectDefaults = {}) {
     this.name = name;
-    this.app = new TerraformApp({ outdir: targetPath, stackTraces: false });
-    this.stack = new TerraformStack(this.app, this.name);
+    this.stack = new Stack(this.name, targetPath);
     this.clouds = new CloudManager(this.stack, defaults);
     this._services = new Registry();
-  }
-
-  /**
-   * @returns {String} the root path for the stacks to be synthesized
-   */
-  public get targetPath(): string {
-    return this.app.outdir;
-  }
-
-  /**
-   * @returns {String} returns the stack path for the stage
-   */
-  public get stackPath(): string {
-    return joinPaths(
-      this.targetPath, Manifest.stacksFolder, this.name,
-    );
   }
 
   /**
@@ -83,14 +60,6 @@ class Stage {
     });
 
     return this;
-  }
-
-  /**
-   * Synthesizes the application's stack and writes out the corresponding TF files
-   * @void
-   */
-  synthesize(): void {
-    this.app.synth();
   }
 }
 

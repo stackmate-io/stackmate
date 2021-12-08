@@ -1,18 +1,15 @@
-import { App as TerraformApp, TerraformStack } from 'cdktf';
-
+import Stack from '../src/core/stack';
 import { CloudPrerequisites } from '../src/types';
+import { CloudStack } from '../src/interfaces';
 import { AwsVpcService } from '../src/clouds/aws';
+import { awsRegion, stackName, outputPath } from './fixtures';
 
-export const awsRegion = 'eu-central-1';
-
-export const app = new TerraformApp({ outdir: '/tmp/stackmate-tests', stackTraces: true });
-
-export const getMockStack = ({ name = 'test-stack' } = {}): TerraformStack => (
-  new TerraformStack(app, name)
+export const getMockStack = ({ name = stackName } = {}): CloudStack => (
+  new Stack(name, outputPath)
 );
 
 export const getAwsPrerequisites = ({
   stack = getMockStack(), region = awsRegion,
 } = {}): CloudPrerequisites => ({
-  vpc: new AwsVpcService('test-vpc', stack, { name: 'test-vpc', region }),
+  vpc: new AwsVpcService(stack).populate({ name: 'test-vpc', region }),
 });

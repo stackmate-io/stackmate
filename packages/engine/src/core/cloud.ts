@@ -1,11 +1,10 @@
 import { get } from 'lodash';
 
-import { CloudProvider, CloudService } from '@stackmate/interfaces';
+import { CloudProvider, CloudService, CloudStack } from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
   ProviderDefaults, ServiceTypeChoice,
 } from '@stackmate/types';
-import { Construct } from 'constructs';
 
 abstract class Cloud implements CloudProvider {
   /**
@@ -40,7 +39,7 @@ abstract class Cloud implements CloudProvider {
    * @var {Stack} stack the stack to use for provisioning
    * @readonly
    */
-  readonly stack: Construct;
+  readonly stack: CloudStack;
 
   /**
    * @var {Object} defaults any provider defaults to be used in the resources
@@ -62,7 +61,7 @@ abstract class Cloud implements CloudProvider {
    */
   abstract init(): void;
 
-  constructor(stack: Construct, defaults: ProviderDefaults = {}) {
+  constructor(stack: CloudStack, defaults: ProviderDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
   }

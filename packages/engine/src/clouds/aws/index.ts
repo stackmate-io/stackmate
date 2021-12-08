@@ -36,7 +36,8 @@ class AwsCloud extends Cloud {
   protected prerequisites: CloudPrerequisites = {};
 
   /**
-   *
+   * Initializes the cloud provider
+   * @void
    */
   init(): void {
     /* eslint-disable-next-line no-new */

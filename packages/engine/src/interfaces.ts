@@ -1,3 +1,6 @@
+import { Construct } from 'constructs';
+import { App as TerraformApp } from 'cdktf';
+
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
@@ -18,6 +21,7 @@ export interface CloudService {
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
   links: Array<string>;
+  stage: string;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
   provision(): void;
@@ -96,4 +100,12 @@ export interface Project extends ConfigurationResource {
 export interface Vault extends ConfigurationResource {
   credentials(service: string): Credentials;
   rootCredentials(service: string): Credentials;
+};
+
+export interface CloudStack extends Construct {
+  readonly name: string;
+  readonly targetPath: string;
+  readonly app: TerraformApp;
+  path: string;
+  synthesize(): void;
 };

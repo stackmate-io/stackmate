@@ -57,6 +57,7 @@ class Project extends Configuration implements ProjectInterface {
         },
         format: {
           pattern: '[a-z0-9-_.\/]+',
+          flags: 'i',
           message: 'The project name needs to be in URL-friendly format, same as the repository name',
         }
       },
