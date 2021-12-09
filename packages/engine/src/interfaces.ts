@@ -52,13 +52,13 @@ export interface Storable extends Validatable, AttributesParseable {
 
 export interface Mountable extends Validatable, AttributesParseable {
   volumes: string; // TODO
-  valdations(): Validations & Required<{ volumes: object }>;
+  validations(): Validations & Required<{ volumes: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ volumes: string }>;
 }
 
 export interface MultiNode extends Validatable, AttributesParseable {
   nodes: number;
-  valdations(): Validations & Required<{ nodes: object }>;
+  validations(): Validations & Required<{ nodes: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ nodes: number }>;
 }
 

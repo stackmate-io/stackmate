@@ -146,6 +146,7 @@ export type VaultAttributes = ConfigurationAttributes & {
 
 export type DatabaseServiceAttributes = ServiceAttributes & Required<{
   size: string;
+  nodes: number;
   storage: number;
   engine: string;
   database: string;

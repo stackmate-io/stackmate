@@ -1,9 +1,9 @@
 import Service from '@stackmate/core/service';
-import { Authenticatable, Rootable, Sizeable, Storable } from '@stackmate/interfaces';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
+import { Authenticatable, Rootable, Sizeable, Storable, MultiNode } from '@stackmate/interfaces';
 import { CredentialsObject, DatabaseServiceAttributes, OneOf } from '@stackmate/types';
 
-abstract class Database extends Service implements Sizeable, Storable, Authenticatable, Rootable {
+abstract class Database extends Service implements Sizeable, Storable, Authenticatable, Rootable, MultiNode {
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -18,6 +18,11 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
    * @var {String} database the database to create
    */
   database: string;
+
+  /**
+   * @var {Number} nodes the number of nodes for the database;
+   */
+  nodes: number;
 
   /**
    * @var {Credentials} credentials the service's credentials
@@ -49,10 +54,11 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
    * @returns {ServiceAttributes} the parsed attributes
    */
   parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
-    const { size, storage, engine, database, credentials, rootCredentials } = attributes;
+    const { nodes, size, storage, engine, database, credentials, rootCredentials } = attributes;
 
     return {
       ...super.parseAttributes(attributes),
+      nodes: parseInteger(nodes || 1),
       size: parseString(size || ''),
       storage: parseInteger(storage || 0),
       engine: parseString(engine),
@@ -70,20 +76,27 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
   validations() {
     return {
       ...super.validations(),
+      nodes: {
+        numericality: {
+          onlyInteger: true,
+          greaterThan: 0,
+          message: 'You have to provide the number of nodes for the database',
+        },
+      },
       size: {
         presence: {
           allowEmpty: false,
-          message: 'You have to specify a size for the RDS instance',
+          message: 'You have to specify a size for the database instance(s)',
         },
         inclusion: {
           within: this.sizes,
-          message: 'The instance size you provided is not a valid RDS instance size',
+          message: 'The instance size you provided is not a valid instance size',
         },
       },
       storage: {
         presence: {
           allowEmpty: false,
-          message: 'You have to specify the storage for your RDS instance',
+          message: 'You have to specify the storage for your instance(s)',
         },
       },
       engine: {

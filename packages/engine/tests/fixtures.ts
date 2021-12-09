@@ -11,6 +11,7 @@ export const outputPath = joinPaths(os.tmpdir(), faker.datatype.hexaDecimal(12))
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 
 export const mysqlDatabaseConfiguration = {
+  nodes: 1,
   type: SERVICE_TYPE.MYSQL,
   name: faker.internet.domainWord(),
   region: awsRegion,

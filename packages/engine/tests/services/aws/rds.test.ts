@@ -10,10 +10,12 @@ import { PROVIDER, SERVICE_TYPE } from '../../../src/constants';
 describe('AwsMysqlService', () => {
   let stack: CloudStack;
   let prerequisites: CloudPrerequisites;
-  let attributes: DatabaseServiceAttributes;
+  let singleNodeConfig: DatabaseServiceAttributes;
+  // let multiNodeConfig: DatabaseServiceAttributes;
 
   beforeEach(() => {
-    attributes = mysqlDatabaseConfiguration;
+    singleNodeConfig = { ...mysqlDatabaseConfiguration, nodes: 1 };
+    // multiNodeConfig = { ...mysqlDatabaseConfiguration, nodes: 5 };
     stack = getMockStack();
     prerequisites = getAwsPrerequisites({ stack });
   });
@@ -26,11 +28,11 @@ describe('AwsMysqlService', () => {
     });
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      service.populate(attributes);
+      service.populate(singleNodeConfig);
 
       const {
         name, region, size, storage, engine, database, credentials, rootCredentials,
-      } = attributes;
+      } = singleNodeConfig;
 
       expect(service.provider).to.deep.equal(PROVIDER.AWS);
       expect(service.type).to.deep.equal(SERVICE_TYPE.MYSQL);
@@ -46,5 +48,10 @@ describe('AwsMysqlService', () => {
       expect(service.rootCredentials).to.be.an('Object');
       expect(service.rootCredentials).to.deep.equal(rootCredentials);
     });
+  });
+
+  describe('provision', () => {
+    it('provisions a single-node RDS instance');
+    it('provisions a multi-node cluster');
   });
 });
