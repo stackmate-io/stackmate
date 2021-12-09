@@ -19,6 +19,11 @@ export type CredentialsObject = {
   password?: string;
 };
 
+export type ServiceAssociation = {
+  lookup: ConstructorOf<CloudService>;
+  handler: (a: CloudService) => void;
+};
+
 export type ServiceConfigurationDeclaration = {
   type: ServiceTypeChoice;
   provider?: ProviderChoice;
@@ -34,11 +39,6 @@ export type ServiceConfigurationDeclarationNormalized = {
   links?: ServiceAssociationDeclarations;
   credentials?: CredentialsObject;
   rootCredentials?: CredentialsObject;
-};
-
-export type ServiceAssociation = {
-  lookup: ConstructorOf<CloudService>;
-  handler: (a: CloudService) => void;
 };
 
 // The final attributes that the Service class should expect
@@ -121,10 +121,6 @@ export type Validations = {
   [name: string]: object;
 };
 
-export type AttributeParsers = {
-  [name: string]: Function;
-};
-
 export type ValidationErrorList = {
   [attribute: string]: Array<string>;
 };
@@ -147,3 +143,12 @@ export type VaultAttributes = ConfigurationAttributes & {
   key?: string;
   region?: string;
 };
+
+export type DatabaseServiceAttributes = ServiceAttributes & Required<{
+  size: string;
+  storage: number;
+  engine: string;
+  database: string;
+  credentials: CredentialsObject;
+  rootCredentials: CredentialsObject;
+}>;

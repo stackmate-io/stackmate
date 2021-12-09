@@ -1,16 +1,15 @@
-import { difference, fromPairs, get, has, isEmpty, toPairs } from 'lodash';
+import { isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import { CloudStack } from '@stackmate/interfaces';
-import { SERVICE_TYPE } from '@stackmate/constants';
-import { CloudService, AttributesAssignable } from '@stackmate/interfaces';
+import { CloudService, AttributesParseable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
-  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, AttributeParsers,
+  ProviderChoice, CloudPrerequisites, ServiceTypeChoice,
 } from '@stackmate/types';
 
-abstract class Service extends Entity implements CloudService, AttributesAssignable {
+abstract class Service extends Entity implements CloudService, AttributesParseable {
   /**
    * @var {String} name the service's name
    */
@@ -67,6 +66,7 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
   /**
    * Provisions the service's resources
    * @abstract
+   * @void
    */
   abstract provision(): void;
 
@@ -86,37 +86,30 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
   }
 
   /**
+   * @param {Object} attributes the attributes to parse
+   * @returns {ServiceAttributes} the parsed attributes
+   */
+  parseAttributes(attributes: ServiceAttributes): ServiceAttributes {
+    const { name, region, links } = attributes;
+
+    return {
+      name: parseString(name),
+      region: parseString(region),
+      links: parseArrayToUniqueValues(links || []),
+    };
+  }
+
+  /**
    * Populates a service
    *
    * @param {Object} attributes the attributes to populate the service with
    * @returns {Service} the service returned
    */
   populate(attributes: ServiceAttributes): CloudService {
-    const assignableAttributes = this.assignableAttributes();
-
-    // Validate the keys provided first
-    const invalidKeys = difference(Object.keys(attributes), Object.keys(assignableAttributes));
-    if (!isEmpty(invalidKeys)) {
-      throw new Error(
-        `The ${this.type} service contains invalid attributes: ${invalidKeys.join(', ')}`,
-      );
-    }
-
-    // Parse & finalize the attributes
-    const parsedAttributes = fromPairs(
-      toPairs(assignableAttributes).map(
-        ([attributeName, parserFunction]) => {
-          // Where to get the attribute value from:
-          //  in case it's declared in the `attributes` object, use that
-          //  otherwise, use the default value that is set on this object
-          const attributeSource = has(attributes, attributeName) ? attributes : this;
-          return [attributeName, parserFunction.call(this, get(attributeSource, attributeName))];
-        },
-      ),
-    );
+    const parsedAttributes = this.parseAttributes(attributes);
 
     // Validate the attributes
-    this.validate(parsedAttributes as ServiceAttributes);
+    this.validate(parsedAttributes);
 
     // Validation passed, we can now assign the attributes to the project
     toPairs(parsedAttributes).forEach(([attributeName, attributeValue]) => {
@@ -126,22 +119,6 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
     this.provision();
 
     return this;
-  }
-
-  /**
-   * Returns a key => function. THe key describes an acceptable attribute name
-   * and the function is the parser which would return a valid value
-   *
-   * @returns {Objct} the attribute names and their parsers
-   */
-  assignableAttributes(): AttributeParsers {
-    return {
-      name: parseString,
-      type: parseString,
-      region: parseString,
-      provider: parseString,
-      links: parseArrayToUniqueValues,
-    };
   }
 
   /**
@@ -205,16 +182,6 @@ abstract class Service extends Entity implements CloudService, AttributesAssigna
         inclusion: {
           within: Object.values(this.regions),
           message: `The region for this service is invalid. Available options are: ${Object.values(this.regions).join(', ')}`,
-        },
-      },
-      type: {
-        presence: {
-          allowEmpty: false,
-          message: 'A type should be provided',
-        },
-        inclusion: {
-          within: Object.values(SERVICE_TYPE),
-          message: `The service type is invalid. Available options are ${Object.values(SERVICE_TYPE).join(', ')}`,
         },
       },
       links: {

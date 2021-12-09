@@ -1,11 +1,10 @@
 import { RdsCluster } from '@cdktf/provider-aws';
 
-import AwsService from '@stackmate/clouds/aws/services/base';
-import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
-import { SERVICE_TYPE } from '@stackmate/constants';
-import { Authenticatable, Rootable, Sizeable, Storable } from '@stackmate/interfaces';
-import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
+import Database from '@stackmate/services/database';
+import { OneOf, ProviderChoice, RegionList, ServiceTypeChoice } from '@stackmate/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import {
+  AWS_REGIONS,
   DEFAULT_MYSQL_ENGINE,
   DEFAULT_POSTGRES_ENGINE,
   DEFAULT_RDS_INSTANCE_SIZE,
@@ -15,7 +14,12 @@ import {
   RDS_POSTGRES_ENGINES,
 } from '@stackmate/clouds/aws/constants';
 
-abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Storable, Authenticatable, Rootable {
+abstract class AwsRdsService extends Database {
+  /**
+   * @var {String} provider the cloud provider for this service
+   */
+  readonly provider: ProviderChoice = PROVIDER.AWS;
+
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -27,19 +31,14 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   storage: number = DEFAULT_RDS_INSTANCE_STORAGE;
 
   /**
-   * @var {String} database the database to create
+   * @var {RegionList} regions the regions that the service is available in
    */
-  database: string;
+  readonly regions: RegionList = AWS_REGIONS;
 
   /**
-   * @var {Credentials} credentials the service's credentials
+   * @var {Array<string>} sizes the list of RDS instance sizes
    */
-  credentials: CredentialsObject = {};
-
-  /**
-   * @var {Credentials} rootCredentials the service's root credentials
-   */
-  rootCredentials: CredentialsObject = {};
+  readonly sizes = RDS_INSTANCE_SIZES;
 
   /**
    * @var {String} engine the database engine to use
@@ -52,66 +51,9 @@ abstract class AwsRdsInstanceService extends AwsService implements Sizeable, Sto
   abstract readonly engines: ReadonlyArray<string>;
 
   cluster: RdsCluster;
-
-  assignableAttributes() {
-    return {
-      ...super.assignableAttributes(),
-      size: parseString,
-      storage: parseInteger,
-      engine: parseString,
-      database: parseString,
-      credentials: parseCredentials,
-      rootCredentials: parseCredentials,
-    };
-  }
-
-  validations() {
-    return {
-      ...super.validations(),
-      size: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify a size for the RDS instance',
-        },
-        inclusion: {
-          within: RDS_INSTANCE_SIZES,
-          message: 'The instance size you provided is not a valid RDS instance size',
-        },
-      },
-      storage: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify the storage for your RDS instance',
-        },
-      },
-      engine: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify an engine to use',
-        },
-        inclusion: {
-          within: this.engines,
-          message: `The database engine is not valid. Available choices are: ${this.engines.join(', ')}`,
-        },
-      },
-      database: {
-        format: {
-          pattern: '([a-z0-9_]+)?',
-          flags: 'i',
-          message: 'You can only use letters, numbers and _ for the database name',
-        },
-      },
-      credentials: {
-        validateCredentials: true,
-      },
-      rootCredentials: {
-        validateCredentials: true,
-      },
-    };
-  }
 }
 
-class AwsMysqlService extends AwsRdsInstanceService {
+class AwsMysqlService extends AwsRdsService {
   /**
    * @var {String} type the type for the service
    */
@@ -130,12 +72,12 @@ class AwsMysqlService extends AwsRdsInstanceService {
   provision() {
     // Add instance
     this.cluster = new RdsCluster(this.stack, 'my-rds-cluster', {
-      vpcSecurityGroupIds: [this.vpcId],
+      // vpcSecurityGroupIds: [this.vpcId],
     });
   }
 }
 
-class AwsPostgresqlService extends AwsRdsInstanceService {
+class AwsPostgresqlService extends AwsRdsService {
   /**
    * @var {String} type the type for the service
    */

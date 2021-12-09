@@ -10,6 +10,13 @@ export const getMockStack = ({ name = stackName } = {}): CloudStack => (
 
 export const getAwsPrerequisites = ({
   stack = getMockStack(), region = awsRegion,
-} = {}): CloudPrerequisites => ({
-  vpc: new AwsVpcService(stack).populate({ name: 'test-vpc', region }),
-});
+} = {}): CloudPrerequisites => {
+  try {
+    return {
+      vpc: new AwsVpcService(stack).populate({ name: 'test-vpc', region }),
+    };
+  } catch (error) {
+    console.log(error);
+    return {};
+  }
+};

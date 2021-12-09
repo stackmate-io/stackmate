@@ -1,12 +1,15 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws';
 import { Token } from 'cdktf';
 
-import { SERVICE_TYPE } from '@stackmate/constants';
-import AwsService from '@stackmate/clouds/aws/services/base';
-import { ServiceTypeChoice } from '@stackmate/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { ProviderChoice, RegionList, ServiceTypeChoice } from '@stackmate/types';
+import Service from '@stackmate/core/service';
+import { AWS_REGIONS } from '../constants';
 
-class AwsVpcService extends AwsService {
+class AwsVpcService extends Service {
   readonly type: ServiceTypeChoice = SERVICE_TYPE.NETWORKING;
+  readonly provider: ProviderChoice = PROVIDER.AWS;
+  readonly regions: RegionList = AWS_REGIONS;
 
   protected vpc: Vpc;
 

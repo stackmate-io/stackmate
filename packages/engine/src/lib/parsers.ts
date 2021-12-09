@@ -1,5 +1,5 @@
 import { CredentialsObject } from '@stackmate/types';
-import { isArray, isNumber, isString, uniq } from 'lodash';
+import { isArray, isNil, isNumber, isString, omitBy, uniq } from 'lodash';
 
 /**
  * Parses a string
@@ -7,7 +7,7 @@ import { isArray, isNumber, isString, uniq } from 'lodash';
  * @param {String} value the value to parse
  * @returns {String} the parsed value
  */
-export const parseString = (value: string) => (
+export const parseString = (value: string): string => (
   String(value || '').trim()
 );
 
@@ -17,7 +17,7 @@ export const parseString = (value: string) => (
  * @param {Array} value the array value to parse
  * @returns {Set} the set containing the values
  */
-export const parseArrayToSet = (value: Array<any>) => (
+export const parseArrayToSet = (value: Array<any>): Set<any> => (
   new Set(value || [])
 );
 
@@ -27,7 +27,7 @@ export const parseArrayToSet = (value: Array<any>) => (
  * @param {Array} value the value to make unique
  * @returns {Array} the value containing only unique entries
  */
-export const parseArrayToUniqueValues = (value: Array<any>) => (
+export const parseArrayToUniqueValues = (value: Array<any>): Array<any> => (
   isArray(value) ? uniq(value) : []
 );
 
@@ -37,7 +37,7 @@ export const parseArrayToUniqueValues = (value: Array<any>) => (
  * @param {Number|String} value the value to parse
  * @returns {Number} the value provided as integer
  */
-export const parseInteger = (value: number | string) => (
+export const parseInteger = (value: number | string): number => (
   isNumber(value) ? Number(value) : parseInt(value, 10)
 );
 
@@ -47,7 +47,7 @@ export const parseInteger = (value: number | string) => (
  * @param {Number|String} value the value to parse
  * @returns {Boolean} the value provided as a boolean
  */
-export const parseBoolean = (value: number | string) => (
+export const parseBoolean = (value: number | string): Boolean => (
   Boolean(value)
 );
 
@@ -59,7 +59,9 @@ export const parseBoolean = (value: number | string) => (
  * @param {String} credentials.password the credentials password
  * @returns {Credentials}
  */
-export const parseCredentials = ({ username, password }: CredentialsObject) => ({
-  username: isString(username) ? username.trim() : null,
-  password: isString(password) ? password.trim() : null,
-});
+export const parseCredentials = ({ username, password }: CredentialsObject): CredentialsObject => (
+  omitBy({
+    username: isString(username) ? username.trim() : null,
+    password: isString(password) ? password.trim() : null,
+  }, isNil)
+);

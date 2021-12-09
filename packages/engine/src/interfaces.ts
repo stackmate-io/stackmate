@@ -4,7 +4,7 @@ import { App as TerraformApp } from 'cdktf';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  AttributeParsers, StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
+  StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -34,44 +34,44 @@ export interface Validatable {
   validations(): Validations;
 }
 
-export interface AttributesAssignable {
-  assignableAttributes(): AttributeParsers;
+export interface AttributesParseable {
+  parseAttributes(attributes: object): ServiceAttributes;
 }
 
-export interface Sizeable extends Validatable, AttributesAssignable {
+export interface Sizeable extends Validatable, AttributesParseable {
   size: string;
-  validations(): Required<{ size: object }>;
-  assignableAttributes(): Required<{ size: Function }>;
+  validations(): Validations & Required<{ size: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ size: string }>;
 }
 
-export interface Storable extends Validatable, AttributesAssignable {
+export interface Storable extends Validatable, AttributesParseable {
   storage: number;
-  validations(): Required<{ storage: object }>;
-  assignableAttributes(): Required<{ storage: Function }>;
+  validations(): Validations & Required<{ storage: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ storage: number }>;
 }
 
-export interface Mountable extends Validatable, AttributesAssignable {
+export interface Mountable extends Validatable, AttributesParseable {
   volumes: string; // TODO
-  valdations(): Required<{ volumes: object }>;
-  assignableAttributes(): Required<{ volumes: Function }>;
+  valdations(): Validations & Required<{ volumes: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ volumes: string }>;
 }
 
-export interface MultiNode extends Validatable, AttributesAssignable {
+export interface MultiNode extends Validatable, AttributesParseable {
   nodes: number;
-  valdations(): Required<{ nodes: object }>;
-  assignableAttributes(): Required<{ nodes: Function }>;
+  valdations(): Validations & Required<{ nodes: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ nodes: number }>;
 }
 
-export interface Authenticatable extends Validatable, AttributesAssignable {
+export interface Authenticatable extends Validatable, AttributesParseable {
   credentials: CredentialsObject;
-  validations(): Required<{ credentials: object }>;
-  assignableAttributes(): Required<{ credentials: Function }>;
+  validations(): Validations & Required<{ credentials: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ credentials: CredentialsObject }>;
 }
 
-export interface Rootable extends Validatable, AttributesAssignable {
+export interface Rootable extends Validatable, AttributesParseable {
   rootCredentials: CredentialsObject;
-  validations(): Required<{ rootCredentials: object }>;
-  assignableAttributes(): Required<{ rootCredentials: Function }>;
+  validations(): Validations & Required<{ rootCredentials: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ rootCredentials: CredentialsObject }>;
 }
 
 export interface StorageAdapter {
@@ -99,8 +99,8 @@ export interface Project extends ConfigurationResource {
 }
 
 export interface Vault extends ConfigurationResource {
-  credentials(service: string): Credentials;
-  rootCredentials(service: string): Credentials;
+  credentials(service: string): CredentialsObject;
+  rootCredentials(service: string): CredentialsObject;
 };
 
 export interface CloudStack extends Construct {
