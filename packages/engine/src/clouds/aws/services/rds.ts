@@ -1,3 +1,6 @@
+import { RdsCluster } from '@cdktf/provider-aws/lib/rds';
+import { isUndefined } from 'lodash';
+
 import Database from '@stackmate/services/database';
 import { ProviderChoice, RegionList } from '@stackmate/types';
 import { PROVIDER } from '@stackmate/constants';
@@ -8,7 +11,6 @@ import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
 } from '@stackmate/clouds/aws/constants';
-import { RdsCluster } from '@cdktf/provider-aws/lib/rds';
 
 class AwsRdsService extends Database {
   /**
@@ -50,7 +52,7 @@ class AwsRdsService extends Database {
    * @returns {Boolean} whether the service is provisioned
    */
   public get isProvisioned(): boolean {
-    return Boolean(this.cluster);
+    return !isUndefined(this.cluster);
   }
 
   provision() {}

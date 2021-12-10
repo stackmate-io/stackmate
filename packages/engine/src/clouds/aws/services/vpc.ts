@@ -1,4 +1,5 @@
 import { Token } from 'cdktf';
+import { isUndefined } from 'lodash';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
 import { PROVIDER } from '@stackmate/constants';
@@ -34,6 +35,13 @@ class AwsVpcService extends Networking {
    * @protected
    */
   protected gateway: InternetGateway;
+
+  /**
+   * @returns {Boolean} whether the service is provisioned
+   */
+  public get isProvisioned(): boolean {
+    return !isUndefined(this.vpc) && !isUndefined(this.subnet) && !isUndefined(this.gateway);
+  }
 
   /**
    * @returns {String} the vpc id

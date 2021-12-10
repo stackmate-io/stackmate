@@ -1,12 +1,13 @@
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, isUndefined } from 'lodash';
 
-import { CloudProvider, CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
+import Entity from '@stackmate/lib/entity';
+import { CloudProvider, CloudService, CloudStack, Provisionable, Validatable } from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
-  ProviderDefaults, ServiceTypeChoice,
+  ProviderDefaults, ServiceTypeChoice, Validations,
 } from '@stackmate/types';
 
-abstract class Cloud implements CloudProvider, Provisionable {
+abstract class Cloud extends Entity implements CloudProvider, Provisionable, Validatable {
   /**
    * @var {String} provider the provider's name
    * @abstract
@@ -61,9 +62,51 @@ abstract class Cloud implements CloudProvider, Provisionable {
    */
   abstract init(): void;
 
+  /**
+   * @constructor
+   * @param {CloudStack} stack the cloud stack to use for provisioning
+   * @param {String} region the region for the cloud provider
+   * @param {Object} defaults the defaults for the cloud
+   */
   constructor(stack: CloudStack, region: string, defaults: ProviderDefaults = {}) {
+    super();
+
     this.stack = stack;
+
+    this.validate({ region: this.region });
+
     this.defaults = defaults;
+    this.region = region;
+
+    this.init();
+  }
+
+  /**
+   * Get the validation error message to display when the entity isn't valid
+   *
+   * @param {Object} attributes the entity's attributes
+   * @returns {String} the error message
+   */
+  public getValidationError(attributes: object): string {
+    return `The configuration for the ${this.provider} cloud provider is invalid`;
+  }
+
+  /**
+   * @returns {Validations} the validations to use in the entity
+   */
+  public validations(): Validations {
+    return {
+      region: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to provide a region',
+        },
+        inclusion: {
+          within: Object.values(this.regions),
+          message: `The region for the ${this.provider} is invalid. Available options are: ${Object.values(this.regions).join(', ')}`,
+        },
+      },
+    };
   }
 
   /**
@@ -75,6 +118,13 @@ abstract class Cloud implements CloudProvider, Provisionable {
     }
 
     Object.keys(this.prerequisites).forEach((key) => this.prerequisites[key].provision());
+  }
+
+  /**
+   * @returns {Boolean} whether the cloud provider is provisioned
+   */
+  public get isProvisioned(): boolean {
+    return !isUndefined(this.prerequisites);
   }
 
   /**
@@ -91,17 +141,6 @@ abstract class Cloud implements CloudProvider, Provisionable {
     }
 
     return new ServiceClass(this.stack, this.prerequisites);
-  }
-
-  /**
-   * Provisions the cloud's prerequisites
-   */
-  provision() {
-    if (!this.prerequisites || isEmpty(this.prerequisites)) {
-      return;
-    }
-
-    Object.keys(this.prerequisites).forEach((key) => this.prerequisites[key].provision());
   }
 }
 

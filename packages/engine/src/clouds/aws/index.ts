@@ -32,7 +32,7 @@ class AwsCloud extends Cloud {
   /**
    * @var {Object} prerequisites the prerequisites for any service provisioned in this cloud
    */
-  protected prerequisites: CloudPrerequisites = {};
+  protected prerequisites: CloudPrerequisites;
 
   /**
    * Initializes the cloud provider

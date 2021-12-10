@@ -17,6 +17,11 @@ class CloudManager {
    */
   readonly defaults: ProjectDefaults = {};
 
+  /**
+   * @constructor
+   * @param {CloudStack} stack the stack to use for provisioning
+   * @param {Object} defaults the cloud's defaults
+   */
   constructor(stack: CloudStack, defaults: ProjectDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
