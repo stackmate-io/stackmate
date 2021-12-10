@@ -1,20 +1,16 @@
-import { RdsCluster } from '@cdktf/provider-aws';
-
 import Database from '@stackmate/services/database';
-import { OneOf, ProviderChoice, RegionList, ServiceTypeChoice } from '@stackmate/types';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { ProviderChoice, RegionList } from '@stackmate/types';
+import { PROVIDER } from '@stackmate/constants';
 import {
-  AWS_REGIONS,
-  DEFAULT_MYSQL_ENGINE,
-  DEFAULT_POSTGRES_ENGINE,
   DEFAULT_RDS_INSTANCE_SIZE,
   DEFAULT_RDS_INSTANCE_STORAGE,
+  AWS_REGIONS,
+  RDS_ENGINES,
   RDS_INSTANCE_SIZES,
-  RDS_MYSQL_ENGINES,
-  RDS_POSTGRES_ENGINES,
 } from '@stackmate/clouds/aws/constants';
+import { RdsCluster } from '@cdktf/provider-aws/lib/rds';
 
-abstract class AwsRdsService extends Database {
+class AwsRdsService extends Database {
   /**
    * @var {String} provider the cloud provider for this service
    */
@@ -41,64 +37,23 @@ abstract class AwsRdsService extends Database {
   readonly sizes = RDS_INSTANCE_SIZES;
 
   /**
-   * @var {String} engine the database engine to use
-   */
-  abstract engine: OneOf<Array<string>>;
-
-  /**
    * @var {Array<String>} engines the list of database engines available for this service
    */
-  abstract readonly engines: ReadonlyArray<string>;
-
-  cluster: RdsCluster;
-}
-
-class AwsMysqlService extends AwsRdsService {
-  /**
-   * @var {String} type the type for the service
-   */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.MYSQL;
+  readonly engines: ReadonlyArray<string> = RDS_ENGINES;
 
   /**
-   * @var {Array<String>} engines the list of database engines available for this service
+   * @var {RdsCluster} cluster the rds cluster
    */
-  readonly engines: ReadonlyArray<string> = RDS_MYSQL_ENGINES;
+  public cluster: RdsCluster;
 
   /**
-   * @var {String} engine the engine to use
+   * @returns {Boolean} whether the service is provisioned
    */
-  engine: OneOf<typeof RDS_MYSQL_ENGINES> = DEFAULT_MYSQL_ENGINE;
-
-  provision() {
-    // Add instance
-    this.cluster = new RdsCluster(this.stack, 'my-rds-cluster', {
-      // vpcSecurityGroupIds: [this.vpcId],
-    });
+  public get isProvisioned(): boolean {
+    return Boolean(this.cluster);
   }
+
+  provision() {}
 }
 
-class AwsPostgresqlService extends AwsRdsService {
-  /**
-   * @var {String} type the type for the service
-   */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.POSTGRESQL;
-
-  /**
-   * @var {Array<String>} engines the list of database engines available for this service
-   */
-  readonly engines: ReadonlyArray<string> = RDS_POSTGRES_ENGINES;
-
-  /**
-   * @var {String} engine the engine to use
-   */
-  engine: OneOf<typeof RDS_POSTGRES_ENGINES> = DEFAULT_POSTGRES_ENGINE;
-
-  provision() {
-    // Add instance
-  }
-}
-
-export {
-  AwsMysqlService,
-  AwsPostgresqlService,
-};
+export default AwsRdsService;

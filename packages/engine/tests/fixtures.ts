@@ -12,7 +12,7 @@ export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) a
 
 export const mysqlDatabaseConfiguration = {
   nodes: 1,
-  type: SERVICE_TYPE.MYSQL,
+  type: SERVICE_TYPE.DATABASE,
   name: faker.internet.domainWord(),
   region: awsRegion,
   size: faker.random.arrayElement(RDS_INSTANCE_SIZES),
@@ -35,7 +35,7 @@ export const fullConfig: ProjectConfiguration = {
   region: 'eu-central-1',
   stages: {
     production: {
-      database: mysqlDatabaseConfiguration,
+      mysqlDatabase: mysqlDatabaseConfiguration,
     },
   },
   defaults: {

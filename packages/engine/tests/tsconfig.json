@@ -4,7 +4,8 @@
     "baseUrl": "./",
     "outDir": "../lib",
     "noEmit": true,
-    "rootDir": "../",
+    "rootDir": "../src",
+    "types": ["jest"],
     "paths": {
       "@stackmate/*": [
         "../src/*"

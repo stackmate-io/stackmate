@@ -1,5 +1,4 @@
-import { Construct } from 'constructs';
-import { App as TerraformApp } from 'cdktf';
+import { App as TerraformApp, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
@@ -27,6 +26,11 @@ export interface CloudService {
   link(target: CloudService): void;
   provision(): void;
   populate(attributes: ServiceAttributes): CloudService;
+}
+
+export interface Provisionable {
+  isProvisioned: boolean;
+  provision(): void;
 }
 
 export interface Validatable {
@@ -103,7 +107,7 @@ export interface Vault extends ConfigurationResource {
   rootCredentials(service: string): CredentialsObject;
 };
 
-export interface CloudStack extends Construct {
+export interface CloudStack extends TerraformStack {
   readonly name: string;
   readonly targetPath: string;
   readonly app: TerraformApp;

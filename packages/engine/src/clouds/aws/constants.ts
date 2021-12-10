@@ -9,9 +9,13 @@ export const DEFAULT_INSTANCE_STORAGE = 30;
 
 // RDS service
 export const DEFAULT_RDS_INSTANCE_STORAGE = DEFAULT_INSTANCE_STORAGE;
+
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro';
+
 export const DEFAULT_MYSQL_ENGINE = 'mysql';
+
 export const DEFAULT_POSTGRES_ENGINE = 'postgres';
+
 export const RDS_INSTANCE_SIZES = [
   'db.t3.micro',
   'db.t3.small',
@@ -38,13 +42,20 @@ export const RDS_INSTANCE_SIZES = [
   'db.m5.12xlarge',
   'db.m5.24xlarge',
 ];
+
 export const RDS_MYSQL_ENGINES = [
   'aurora',
   'aurora-mysql',
   'mariadb',
   'mysql',
 ] as const;
+
 export const RDS_POSTGRES_ENGINES = [
   'aurora-postgresql',
   'postgres',
 ] as const;
+
+export const RDS_ENGINES = [
+  ...RDS_MYSQL_ENGINES,
+  ...RDS_POSTGRES_ENGINES,
+];

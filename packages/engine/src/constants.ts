@@ -12,12 +12,11 @@ export const PROVIDER = {
 } as const;
 
 export const SERVICE_TYPE = {
-  INSTANCE: 'instance',
   CDN: 'cdn',
-  MYSQL: 'mysql',
+  DATABASE: 'database',
+  INSTANCE: 'instance',
   REDIS: 'redis',
   MEMCACHED: 'memcached',
-  POSTGRESQL: 'postgresql',
   MAILER: 'mailer',
   VOLUME: 'volume',
   SSL: 'ssl',

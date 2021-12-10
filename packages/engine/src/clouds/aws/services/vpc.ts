@@ -1,22 +1,36 @@
-import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws';
 import { Token } from 'cdktf';
+import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { ProviderChoice, RegionList, ServiceTypeChoice } from '@stackmate/types';
-import Service from '@stackmate/core/service';
-import { AWS_REGIONS } from '../constants';
+import { PROVIDER } from '@stackmate/constants';
+import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { ProviderChoice, RegionList } from '@stackmate/types';
+import Networking from '@stackmate/services/networking';
 
-class AwsVpcService extends Service {
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.NETWORKING;
+class AwsVpcService extends Networking {
+  /**
+   * @var {String} provider the cloud provider for this service
+   */
   readonly provider: ProviderChoice = PROVIDER.AWS;
+
+  /**
+   * @var {RegionList} regions the regions that the service is available in
+   */
   readonly regions: RegionList = AWS_REGIONS;
 
+  /**
+   * @var {Vpc} vpc the VPC resource
+   * @protected
+   */
   protected vpc: Vpc;
 
+  /**
+   * @var {Subnet} subnet the subnet resource
+   * @protected
+   */
   protected subnet: Subnet;
 
   /**
-   * @var {InternetGateway}
+   * @var {InternetGateway} gateway the gateway resource
    * @protected
    */
   protected gateway: InternetGateway;
@@ -45,4 +59,4 @@ class AwsVpcService extends Service {
   }
 }
 
-export { AwsVpcService };
+export default AwsVpcService;

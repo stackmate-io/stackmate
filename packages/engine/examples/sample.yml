@@ -33,7 +33,7 @@ stages:
     #     - database
 
     database:
-      type: mysql
+      type: database
       size: db.t3.medium
       storage: 30
       # credentials:

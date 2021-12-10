@@ -1,12 +1,12 @@
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
-import { CloudProvider, CloudService, CloudStack } from '@stackmate/interfaces';
+import { CloudProvider, CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
   ProviderDefaults, ServiceTypeChoice,
 } from '@stackmate/types';
 
-abstract class Cloud implements CloudProvider {
+abstract class Cloud implements CloudProvider, Provisionable {
   /**
    * @var {String} provider the provider's name
    * @abstract
@@ -48,10 +48,10 @@ abstract class Cloud implements CloudProvider {
   readonly defaults: ProviderDefaults;
 
   /**
-   * @var {String} _region the provider's region
-   * @private
+   * @var {String} region the provider's region
+   * @readonly
    */
-  private _region: string;
+  public readonly region: string;
 
   /**
    * Initializes the provider
@@ -61,27 +61,20 @@ abstract class Cloud implements CloudProvider {
    */
   abstract init(): void;
 
-  constructor(stack: CloudStack, defaults: ProviderDefaults = {}) {
+  constructor(stack: CloudStack, region: string, defaults: ProviderDefaults = {}) {
     this.stack = stack;
     this.defaults = defaults;
   }
 
   /**
-   * @returns {String} the region for the cloud provider
+   * Provisions the cloud's prerequisites
    */
-  public get region(): string {
-    return this._region;
-  }
-
-  /**
-   * @param {String} region the region for the cloud provider
-   */
-  public set region(region: string) {
-    if (!region || !Object.values(this.regions).includes(region)) {
-      throw new Error(`Invalid region ${region} for provider ${this.provider}`);
+  provision() {
+    if (!this.prerequisites || isEmpty(this.prerequisites)) {
+      return;
     }
 
-    this._region = region;
+    Object.keys(this.prerequisites).forEach((key) => this.prerequisites[key].provision());
   }
 
   /**
@@ -98,6 +91,17 @@ abstract class Cloud implements CloudProvider {
     }
 
     return new ServiceClass(this.stack, this.prerequisites);
+  }
+
+  /**
+   * Provisions the cloud's prerequisites
+   */
+  provision() {
+    if (!this.prerequisites || isEmpty(this.prerequisites)) {
+      return;
+    }
+
+    Object.keys(this.prerequisites).forEach((key) => this.prerequisites[key].provision());
   }
 }
 

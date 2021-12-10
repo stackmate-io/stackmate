@@ -4,12 +4,11 @@ import Cloud from '@stackmate/core/cloud';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
-import { AwsMysqlService, AwsPostgresqlService } from '@stackmate/clouds/aws/services/rds';
-import { AwsVpcService } from '@stackmate/clouds/aws/services/vpc';
+import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
+import AwsRdsService from '@stackmate/clouds/aws/services/rds';
 
 export const AWS_SERVICE_MAPPING: ServiceMapping = {
-  [SERVICE_TYPE.MYSQL]: AwsMysqlService,
-  [SERVICE_TYPE.POSTGRESQL]: AwsPostgresqlService,
+  [SERVICE_TYPE.DATABASE]: AwsRdsService,
   [SERVICE_TYPE.NETWORKING]: AwsVpcService,
 };
 
@@ -55,8 +54,7 @@ class AwsCloud extends Cloud {
 
 export {
   AwsCloud,
-  AwsMysqlService,
-  AwsPostgresqlService,
+  AwsRdsService,
   AwsVpcService,
   AWS_SERVICE_MAPPING as AwsServiceMapping,
 };

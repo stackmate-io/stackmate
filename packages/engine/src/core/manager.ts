@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import { PROVIDER } from '@stackmate/constants';
 import { CloudProvider, CloudStack } from '@stackmate/interfaces';
@@ -34,15 +34,14 @@ class CloudManager {
     let cloud;
 
     if (provider === PROVIDER.AWS) {
-      cloud = new AwsCloud(this.stack, get(this.defaults, provider));
+      cloud = new AwsCloud(this.stack, region, get(this.defaults, provider));
     }
 
     if (!cloud) {
       throw new Error(`Provider ${provider} is not supported, yet`);
     }
 
-    cloud.region = region;
-    cloud.init();
+    cloud.provision();
 
     return cloud;
   }

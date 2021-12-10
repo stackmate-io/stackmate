@@ -1,7 +1,7 @@
 import { isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
-import { CloudStack } from '@stackmate/interfaces';
+import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { CloudService, AttributesParseable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
@@ -9,7 +9,7 @@ import {
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice,
 } from '@stackmate/types';
 
-abstract class Service extends Entity implements CloudService, AttributesParseable {
+abstract class Service extends Entity implements CloudService, AttributesParseable, Provisionable {
   /**
    * @var {String} name the service's name
    */
@@ -62,6 +62,11 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    * @readonly
    */
   abstract readonly provider: ProviderChoice;
+
+  /**
+   * @returns {Boolean} whether the service is provisioned or not
+   */
+  abstract get isProvisioned(): boolean;
 
   /**
    * Provisions the service's resources
