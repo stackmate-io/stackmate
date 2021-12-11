@@ -16,7 +16,6 @@
     "cdktf": "^0.8.1",
     "constructs": "^10.0.12",
     "lodash": "^4.17.21",
-    "module-alias": "^2.2.2",
     "tslib": "^2.3.1",
     "validate.js": "^0.13.1",
     "yaml": "^1.10.2"
@@ -66,15 +65,11 @@
     "files": true
   },
   "scripts": {
-    "start": "ts-node ./src/main.ts",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "build": "rm -rf lib && tsc --build tsconfig.build.json",
     "test": "jest --bail --verbose --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   },
-  "types": "lib/index.d.ts",
-  "_moduleAliases": {
-    "@stackmate": "./src"
-  }
+  "types": "lib/index.d.ts"
 }

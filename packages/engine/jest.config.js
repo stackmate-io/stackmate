@@ -1,4 +1,6 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+const { compilerOptions: { paths } } = require('./tsconfig');
+const { pathsToModuleNameMapper } = require('ts-jest');
 
 module.exports = {
   clearMocks: true,
@@ -13,9 +15,7 @@ module.exports = {
   transform: {
     "^.+\\.ts$": "ts-jest"
   },
-  moduleNameMapper: {
-    "@stackmate/(.*)": "<rootDir>/src/$1"
-  },
+  moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
   moduleFileExtensions: [
     "ts",
     "js"

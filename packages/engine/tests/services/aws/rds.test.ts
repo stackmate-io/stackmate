@@ -5,8 +5,8 @@ import { CloudPrerequisites, DatabaseServiceAttributes } from '@stackmate/types'
 import { CloudStack } from '@stackmate/interfaces';
 import { AwsRdsService } from '@stackmate/clouds/aws';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { mysqlDatabaseConfiguration } from '../../fixtures';
-import { getAwsPrerequisites, getMockStack } from '../../mocks';
+import { mysqlDatabaseConfiguration } from 'tests/fixtures';
+import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
 
 describe('AwsRdsService', () => {
   let mockStack: CloudStack;
