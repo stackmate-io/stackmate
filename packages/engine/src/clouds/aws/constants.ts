@@ -43,19 +43,8 @@ export const RDS_INSTANCE_SIZES = [
   'db.m5.24xlarge',
 ];
 
-export const RDS_MYSQL_ENGINES = [
-  'aurora',
-  'aurora-mysql',
+export const RDS_ENGINES = [
   'mariadb',
   'mysql',
-] as const;
-
-export const RDS_POSTGRES_ENGINES = [
-  'aurora-postgresql',
   'postgres',
-] as const;
-
-export const RDS_ENGINES = [
-  ...RDS_MYSQL_ENGINES,
-  ...RDS_POSTGRES_ENGINES,
 ];

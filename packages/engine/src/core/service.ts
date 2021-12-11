@@ -1,3 +1,4 @@
+import { TerraformVariable } from 'cdktf';
 import { isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
@@ -193,6 +194,18 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
         validateServiceLinks: true,
       },
     };
+  }
+
+  /**
+   * Provisions a variable in the stack
+   *
+   * @param {String} name the variable's name
+   * @param {String} value
+   * @param param2
+   */
+  variable(name: string, value: string | undefined | null, { sensitive = true } = {}): TerraformVariable {
+    const id: string = `${this.stack.name}-${this.name}-${name}`;
+    return new TerraformVariable(this.stack, id, { default: value || '', sensitive });
   }
 }
 

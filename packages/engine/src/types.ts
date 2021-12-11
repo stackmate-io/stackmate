@@ -150,6 +150,7 @@ export type DatabaseServiceAttributes = ServiceAttributes & Required<{
   storage: number;
   engine: string;
   database: string;
+  version: string;
   credentials: CredentialsObject;
   rootCredentials: CredentialsObject;
 }>;

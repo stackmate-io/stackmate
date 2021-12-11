@@ -1,5 +1,5 @@
-import { RdsCluster } from '@cdktf/provider-aws/lib/rds';
 import { isUndefined } from 'lodash';
+import { DbInstance } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import { ProviderChoice, RegionList } from '@stackmate/types';
@@ -44,18 +44,33 @@ class AwsRdsService extends Database {
   readonly engines: ReadonlyArray<string> = RDS_ENGINES;
 
   /**
-   * @var {RdsCluster} cluster the rds cluster
+   * @var {DbInstance} instance the rds instance, in case we're provisioning a single instance
    */
-  public cluster: RdsCluster;
+  public instance: DbInstance;
 
   /**
    * @returns {Boolean} whether the service is provisioned
    */
   public get isProvisioned(): boolean {
-    return !isUndefined(this.cluster);
+    return !isUndefined(this.instance);
   }
 
-  provision() {}
+  /**
+   * @returns {Boolean} whether we should provision a cluster
+   */
+  public get useCluster(): boolean {
+    return this.engine.startsWith('aurora');
+  }
+
+  provision() {
+    const { username: rootUsername, password: rootPassword } = this.rootCredentials;
+    const rootUsernameVar = this.variable('rootusername', rootUsername);
+    const rootPasswordVar = this.variable('rootpassword', rootPassword);
+
+    this.instance = new DbInstance(this.stack, this.name, {
+      instanceClass: this.size,
+    });
+  }
 }
 
 export default AwsRdsService;

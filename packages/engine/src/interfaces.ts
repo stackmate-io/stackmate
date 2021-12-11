@@ -14,7 +14,12 @@ export interface CloudProvider {
   service(type: ServiceTypeChoice): CloudService;
 }
 
-export interface CloudService {
+export interface Provisionable {
+  isProvisioned: boolean;
+  provision(): void;
+}
+
+export interface CloudService extends Provisionable {
   readonly name: string;
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
@@ -24,13 +29,7 @@ export interface CloudService {
   region: string;
   dependencies: CloudPrerequisites;
   link(target: CloudService): void;
-  provision(): void;
   populate(attributes: ServiceAttributes): CloudService;
-}
-
-export interface Provisionable {
-  isProvisioned: boolean;
-  provision(): void;
 }
 
 export interface Validatable {
@@ -76,6 +75,12 @@ export interface Rootable extends Validatable, AttributesParseable {
   rootCredentials: CredentialsObject;
   validations(): Validations & Required<{ rootCredentials: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ rootCredentials: CredentialsObject }>;
+}
+
+export interface Versioned extends Validatable, AttributesParseable {
+  version: string;
+  validations(): Validations & Required<{ version: object }>;
+  parseAttributes(attributes: object): ServiceAttributes & Required<{ version: string }>;
 }
 
 export interface StorageAdapter {

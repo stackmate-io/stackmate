@@ -1,10 +1,10 @@
 import Service from '@stackmate/core/service';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
-import { Authenticatable, Rootable, Sizeable, Storable, MultiNode } from '@stackmate/interfaces';
+import { Authenticatable, Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 import { CredentialsObject, DatabaseServiceAttributes, OneOf, ServiceTypeChoice } from '@stackmate/types';
 
-abstract class Database extends Service implements Sizeable, Storable, Authenticatable, Rootable, MultiNode {
+abstract class Database extends Service implements Sizeable, Storable, Authenticatable, Rootable, MultiNode, Versioned {
   /**
    * @var {String} type the type for the service
    */
@@ -19,6 +19,11 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
    * @var {Number} storage the storage size for the instance
    */
   storage: number;
+
+  /**
+   * @var {String} version the database version to run
+   */
+  version: string;
 
   /**
    * @var {String} database the database to create
@@ -60,7 +65,9 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
    * @returns {ServiceAttributes} the parsed attributes
    */
   parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
-    const { nodes, size, storage, engine, database, credentials, rootCredentials } = attributes;
+    const {
+      nodes, size, version, storage, engine, database, credentials, rootCredentials,
+    } = attributes;
 
     return {
       ...super.parseAttributes(attributes),
@@ -69,6 +76,7 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
       storage: parseInteger(storage || 0),
       engine: parseString(engine),
       database: parseString(database),
+      version: parseString(version),
       credentials: parseCredentials(credentials || {}),
       rootCredentials: parseCredentials(rootCredentials || {}),
     };
@@ -103,6 +111,12 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
         presence: {
           allowEmpty: false,
           message: 'You have to specify the storage for your instance(s)',
+        },
+      },
+      version: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to specify the database version to run',
         },
       },
       engine: {
