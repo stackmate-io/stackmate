@@ -6,6 +6,7 @@ import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), '.stackmate', 'config.yml');
 export const OUTPUT_DIRECTORY = process.env.STACKMATE_OUTPUT || path.join(os.tmpdir(), 'stackmate');
 export const DEFAULT_STAGE = 'production';
+export const DEFAULT_RESOURCE_COMMENT = 'Provisioned by Stackmate';
 
 export const PROVIDER = {
   AWS: 'aws',

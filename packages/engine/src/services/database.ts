@@ -1,10 +1,10 @@
 import Service from '@stackmate/core/service';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
-import { Authenticatable, Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
+import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 import { CredentialsObject, DatabaseServiceAttributes, OneOf, ServiceTypeChoice } from '@stackmate/types';
 
-abstract class Database extends Service implements Sizeable, Storable, Authenticatable, Rootable, MultiNode, Versioned {
+abstract class Database extends Service implements Sizeable, Storable, Rootable, MultiNode, Versioned {
   /**
    * @var {String} type the type for the service
    */
@@ -36,11 +36,6 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
   nodes: number;
 
   /**
-   * @var {Credentials} credentials the service's credentials
-   */
-  credentials: CredentialsObject = {};
-
-  /**
    * @var {Credentials} rootCredentials the service's root credentials
    */
   rootCredentials: CredentialsObject = {};
@@ -51,14 +46,27 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
   engine: OneOf<Array<string>>;
 
   /**
+   * @var {Number} the port number to use to connect to the database
+   */
+  port: number;
+
+  /**
    * @var {Array<String>} engines the list of database engines available for this service
+   * @abstract
    */
   abstract readonly engines: ReadonlyArray<string>;
 
   /**
    * @var {Array<String>} sizes the list of available service sizes
+   * @abstract
    */
   abstract readonly sizes: ReadonlyArray<string>;
+
+  /**
+   * @var {Number} defaultPort the default port to use
+   * @abstract
+   */
+  abstract readonly defaultPort: number;
 
   /**
    * @param {Object} attributes the attributes to parse
@@ -66,18 +74,18 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
    */
   parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
     const {
-      nodes, size, version, storage, engine, database, credentials, rootCredentials,
+      nodes, size, port, version, storage, engine, database, rootCredentials,
     } = attributes;
 
     return {
       ...super.parseAttributes(attributes),
       nodes: parseInteger(nodes || 1),
+      port: parseInteger(port || this.defaultPort),
       size: parseString(size || ''),
       storage: parseInteger(storage || 0),
       engine: parseString(engine),
       database: parseString(database),
       version: parseString(version),
-      credentials: parseCredentials(credentials || {}),
       rootCredentials: parseCredentials(rootCredentials || {}),
     };
   }
@@ -129,15 +137,18 @@ abstract class Database extends Service implements Sizeable, Storable, Authentic
           message: `The database engine is not valid. Available choices are: ${this.engines.join(', ')}`,
         },
       },
+      port: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to specify a port number for the database to connect',
+        },
+      },
       database: {
         format: {
           pattern: '([a-z0-9_]+)?',
           flags: 'i',
           message: 'You can only use letters, numbers and _ for the database name',
         },
-      },
-      credentials: {
-        validateCredentials: true,
       },
       rootCredentials: {
         validateCredentials: true,

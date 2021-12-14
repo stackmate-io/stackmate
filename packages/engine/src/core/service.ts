@@ -2,6 +2,7 @@ import { TerraformVariable } from 'cdktf';
 import { isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
+import Profile from '@stackmate/core/profile';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { CloudService, AttributesParseable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
@@ -9,6 +10,7 @@ import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
   ProviderChoice, CloudPrerequisites, ServiceTypeChoice,
 } from '@stackmate/types';
+import { Cached } from '@stackmate/lib/decorators';
 
 abstract class Service extends Entity implements CloudService, AttributesParseable, Provisionable {
   /**
@@ -20,6 +22,16 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    * @var {String} region the region the service operates in
    */
   public region: string;
+
+  /**
+   * @var {String} profile any configuration profile for the service
+   */
+  public profile: string;
+
+  /**
+   * @var {Object} overrides any provisioning profile overrides to use
+   */
+  public overrides: object = {};
 
   /**
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
@@ -96,12 +108,13 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    * @returns {ServiceAttributes} the parsed attributes
    */
   parseAttributes(attributes: ServiceAttributes): ServiceAttributes {
-    const { name, region, links } = attributes;
+    const { name, region, links = [], profile = Profile.DEFAULT } = attributes;
 
     return {
       name: parseString(name),
       region: parseString(region),
-      links: parseArrayToUniqueValues(links || []),
+      profile: parseString(profile),
+      links: parseArrayToUniqueValues(links),
     };
   }
 
@@ -142,6 +155,21 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    */
   public get stage(): string {
     return this.stack.name;
+  }
+
+  /**
+   * @returns {String} the service's identifier
+   */
+  public get identifier(): string {
+    return `${this.name}-${this.stage}`;
+  }
+
+  /**
+   * @returns {Object} the profile to use for provisioning
+   */
+  @Cached()
+  public get provisioningProfile(): object {
+    return Profile.get(this.provider, this.type, this.profile, this.overrides);
   }
 
   /**

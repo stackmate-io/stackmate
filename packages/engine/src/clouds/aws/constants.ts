@@ -41,10 +41,24 @@ export const RDS_INSTANCE_SIZES = [
   'db.m5.4xlarge',
   'db.m5.12xlarge',
   'db.m5.24xlarge',
-];
+] as const;
 
 export const RDS_ENGINES = [
   'mariadb',
   'mysql',
   'postgres',
-];
+] as const;
+
+export const RDS_PARAM_FAMILY_MAPPING = [
+  ['mariadb', '10.2', 'mariadb10.2'],
+  ['mariadb', '10.3', 'mariadb10.3'],
+  ['mariadb', '10.4', 'mariadb10.4'],
+  ['mariadb', '10.5', 'mariadb10.5'],
+  ['mysql', '5.6', 'mysql5.6'],
+  ['mysql', '5.7', 'mysql5.7'],
+  ['mysql', '8', 'mysql8.0'],
+  ['postgres', '10', 'postgres10'],
+  ['postgres', '11', 'postgres11'],
+  ['postgres', '12', 'postgres12'],
+  ['postgres', '13', 'postgres13'],
+] as const;

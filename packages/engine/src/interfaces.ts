@@ -83,6 +83,11 @@ export interface Versioned extends Validatable, AttributesParseable {
   parseAttributes(attributes: object): ServiceAttributes & Required<{ version: string }>;
 }
 
+export interface Profilable {
+  profile: string;
+  overrides: object;
+}
+
 export interface StorageAdapter {
   read(): Promise<string | object>;
   write(contents: string | object): Promise<void>;

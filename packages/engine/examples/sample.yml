@@ -36,6 +36,7 @@ stages:
       type: database
       size: db.t3.medium
       storage: 30
+      profile: production
       # credentials:
       #   username: /sample-app-sinatra/production/database-user-username
       #   password: /sample-app-sinatra/production/database-user-password

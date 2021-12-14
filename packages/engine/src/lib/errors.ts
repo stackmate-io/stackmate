@@ -42,3 +42,9 @@ export class EnvironmentVariableUndefinedError extends Error {
     this.variable = variable;
   }
 }
+
+export class ProfileNotFoundError extends Error {
+  constructor(profileName: string) {
+    super(`The profile ${profileName} was not found in the system`);
+  }
+}

@@ -1,7 +1,7 @@
 import { AwsProvider } from '@cdktf/provider-aws';
 
 import Cloud from '@stackmate/core/cloud';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
@@ -40,7 +40,15 @@ class AwsCloud extends Cloud {
    */
   init(): void {
     /* eslint-disable-next-line no-new */
-    new AwsProvider(this.stack, PROVIDER.AWS, { region: this.region });
+    new AwsProvider(this.stack, PROVIDER.AWS, {
+      region: this.region,
+      defaultTags: {
+        tags: {
+          Environment: this.stack.name,
+          Description: DEFAULT_RESOURCE_COMMENT,
+        },
+      },
+    });
 
     const vpc = this.service(SERVICE_TYPE.NETWORKING).populate({
       name: 'my-vpc', region: this.region,
