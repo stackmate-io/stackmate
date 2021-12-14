@@ -34,7 +34,8 @@ export interface CloudService extends Provisionable {
 
 export interface Validatable {
   validate(attrs: object): void;
-  validations(): Validations;
+  validations(attributes?: object): Validations;
+  applyDefaults(attributes: object): object;
 }
 
 export interface AttributesParseable {
@@ -43,44 +44,43 @@ export interface AttributesParseable {
 
 export interface Sizeable extends Validatable, AttributesParseable {
   size: string;
-  readonly defaultSize: string;
-  validations(): Validations & Required<{ size: object }>;
+  validations(attributes?: object): Validations & Required<{ size: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ size: string }>;
 }
 
 export interface Storable extends Validatable, AttributesParseable {
   storage: number;
-  validations(): Validations & Required<{ storage: object }>;
+  validations(attributes?: object): Validations & Required<{ storage: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ storage: number }>;
 }
 
 export interface Mountable extends Validatable, AttributesParseable {
   volumes: string; // TODO
-  validations(): Validations & Required<{ volumes: object }>;
+  validations(attributes?: object): Validations & Required<{ volumes: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ volumes: string }>;
 }
 
 export interface MultiNode extends Validatable, AttributesParseable {
   nodes: number;
-  validations(): Validations & Required<{ nodes: object }>;
+  validations(attributes?: object): Validations & Required<{ nodes: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ nodes: number }>;
 }
 
 export interface Authenticatable extends Validatable, AttributesParseable {
   credentials: CredentialsObject;
-  validations(): Validations & Required<{ credentials: object }>;
+  validations(attributes?: object): Validations & Required<{ credentials: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ credentials: CredentialsObject }>;
 }
 
 export interface Rootable extends Validatable, AttributesParseable {
   rootCredentials: CredentialsObject;
-  validations(): Validations & Required<{ rootCredentials: object }>;
+  validations(attributes?: object): Validations & Required<{ rootCredentials: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ rootCredentials: CredentialsObject }>;
 }
 
 export interface Versioned extends Validatable, AttributesParseable {
   version: string;
-  validations(): Validations & Required<{ version: object }>;
+  validations(attributes?: object): Validations & Required<{ version: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ version: string }>;
 }
 

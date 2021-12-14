@@ -37,7 +37,6 @@ export type ServiceConfigurationDeclarationNormalized = {
   provider: ProviderChoice;
   region: string;
   name: string;
-  port?: number;
   profile?: string;
   links?: ServiceAssociationDeclarations;
   credentials?: CredentialsObject;
@@ -154,6 +153,7 @@ export type DatabaseServiceAttributes = ServiceAttributes & Required<{
   engine: string;
   database: string;
   version: string;
+  port: number;
   rootCredentials: CredentialsObject;
 }>;
 

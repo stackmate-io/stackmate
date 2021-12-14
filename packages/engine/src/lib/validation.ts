@@ -153,12 +153,34 @@ const validateCredentials = (
   }
 };
 
+/**
+ * Validates a version
+ *
+ * @param {String} version the version to validate
+ * @param {Object} options
+ * @param {Array<string>} options.availableVersions the versions available
+ * @returns
+ */
+const validateVersion = (
+  version: string,
+  { availableVersions = [] }: { availableVersions?: Array<string> } = {},
+) => {
+  if (!version) {
+    return 'You have to define a version';
+  }
+
+  if (!availableVersions.includes(version)) {
+    return `The version specified is not valid. Available options are: ${availableVersions.join(', ')}`;
+  }
+}
+
 Object.assign(validate.validators, {
   validateStages,
   validateProjectDefaults,
   validateVault,
   validateServiceLinks,
   validateCredentials,
+  validateVersion,
 });
 
 export {
@@ -166,6 +188,7 @@ export {
   validateCredentials,
   validateProjectDefaults,
   validateVault,
+  validateVersion,
   validateServiceLinks,
   validate,
 };

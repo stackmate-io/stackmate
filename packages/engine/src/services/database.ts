@@ -1,5 +1,5 @@
 import Service from '@stackmate/core/service';
-import { DEFAULT_STORAGE, SERVICE_TYPE } from '@stackmate/constants';
+import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
 import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 import { CredentialsObject, DatabaseServiceAttributes, OneOf, ServiceTypeChoice } from '@stackmate/types';
@@ -63,16 +63,10 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
   abstract readonly sizes: ReadonlyArray<string>;
 
   /**
-   * @var {Number} defaultPort the default port to use
+   * @param {Object} attributes the attributes to apply the defaults to
    * @abstract
    */
-  abstract readonly defaultPort: number;
-
-  /**
-   * @var {String} defaultSize the default instance size to use for the service
-   * @abstract
-   */
-  abstract readonly defaultSize: string;
+  abstract applyDefaults(attributes: object): DatabaseServiceAttributes;
 
   /**
    * @param {Object} attributes the attributes to parse
@@ -80,18 +74,11 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
    */
   parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
     const {
-      database,
-      engine,
-      version,
-      nodes = 1,
-      storage = DEFAULT_STORAGE,
-      size = this.defaultSize,
-      port = this.defaultPort,
-      rootCredentials = {},
-    } = attributes;
+      database, engine, version, nodes, storage, size, port, rootCredentials, ...rest
+    } = this.applyDefaults(attributes) as DatabaseServiceAttributes;
 
     return {
-      ...super.parseAttributes(attributes),
+      ...super.parseAttributes(rest),
       nodes: parseInteger(nodes),
       port: parseInteger(port),
       size: parseString(size),
@@ -108,9 +95,9 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
    *
    * @returns {Validations} the validations to run
    */
-  validations() {
+  validations(attributes?: object) {
     return {
-      ...super.validations(),
+      ...super.validations(attributes),
       nodes: {
         numericality: {
           onlyInteger: true,
@@ -164,7 +151,10 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
         },
       },
       rootCredentials: {
-        validateCredentials: true,
+        validateCredentials: {
+          requireUserName: true,
+          requirePassword: true,
+        },
       },
     };
   }

@@ -200,7 +200,7 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    *
    * @returns {Object} the validations to use
    */
-  validations(): Validations {
+  validations(attributes?: object): Validations {
     return {
       name: {
         presence: {

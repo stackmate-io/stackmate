@@ -1,10 +1,12 @@
-import { OneOf, RegionList } from '@stackmate/types';
+import { RegionList } from '@stackmate/types';
 
 export const AWS_REGIONS: RegionList = {
   EU_CENTRAL_1: 'eu-central-1',
 } as const;
 
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro';
+
+export const DEFAULT_RDS_ENGINE = 'mysql';
 
 export const RDS_INSTANCE_SIZES = [
   'db.t3.micro',
@@ -47,14 +49,27 @@ export const RDS_PARAM_FAMILY_MAPPING = [
   ['mysql', '5.6', 'mysql5.6'],
   ['mysql', '5.7', 'mysql5.7'],
   ['mysql', '8', 'mysql8.0'],
-  ['postgres', '10', 'postgres10'],
-  ['postgres', '11', 'postgres11'],
-  ['postgres', '12', 'postgres12'],
   ['postgres', '13', 'postgres13'],
+  ['postgres', '12', 'postgres12'],
+  ['postgres', '11', 'postgres11'],
+  ['postgres', '10', 'postgres10'],
+  ['postgres', '9', 'postgres9.6'],
 ] as const;
 
-export const RDS_ENGINE_TO_PORT: Map<OneOf<typeof RDS_ENGINES>, number> = new Map([
+export const RDS_ENGINE_TO_DEFAULT_PORT: Map<string, number> = new Map([
   ['mariadb', 3306],
   ['mysql', 3306],
   ['postgres', 5432],
+]);
+
+export const RDS_ENGINE_TO_DEFAULT_VERSION: Map<string, string> = new Map([
+  ['mariadb', '10.5'],
+  ['mysql', '8.0'],
+  ['postgres', '13'],
+]);
+
+export const RDS_MAJOR_VERSIONS_PER_ENGINE: Map<string, Array<string>> = new Map([
+  ['mariadb', ['10.5', '10.4', '10.3', '10.2']],
+  ['mysql', ['8.0', '5.7', '5.6']],
+  ['postgres', ['13', '12', '11', '10', '9.6']],
 ]);
