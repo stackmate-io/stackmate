@@ -7,38 +7,18 @@ import { PROVIDER } from '@stackmate/constants';
 import { Cached } from '@stackmate/lib/decorators';
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
-  DEFAULT_RDS_INSTANCE_STORAGE,
   AWS_REGIONS,
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
+  RDS_ENGINE_TO_PORT,
 } from '@stackmate/clouds/aws/constants';
 
 class AwsRdsService extends Database {
   /**
-   * @var {Map} ENGINE_TO_PORT the mapping for every engine to port
-   * @static
-   */
-  static ENGINE_TO_PORT: Map<OneOf<typeof RDS_ENGINES>, number> = new Map([
-    ['mariadb', 3306],
-    ['mysql', 3306],
-    ['postgres', 5432],
-  ]);
-
-  /**
    * @var {String} provider the cloud provider for this service
    */
   readonly provider: ProviderChoice = PROVIDER.AWS;
-
-  /**
-   * @var {String} size the size for the RDS instance
-   */
-  size: string = DEFAULT_RDS_INSTANCE_SIZE;
-
-  /**
-   * @var {Number} storage the storage size for the instance
-   */
-  storage: number = DEFAULT_RDS_INSTANCE_STORAGE;
 
   /**
    * @var {RegionList} regions the regions that the service is available in
@@ -49,6 +29,11 @@ class AwsRdsService extends Database {
    * @var {Array<string>} sizes the list of RDS instance sizes
    */
   readonly sizes = RDS_INSTANCE_SIZES;
+
+  /**
+   * @var {String} defaultSize the default instance size to use (should be within the free tier)
+   */
+  readonly defaultSize: string = DEFAULT_RDS_INSTANCE_SIZE;
 
   /**
    * @var {String} engine the database engine to use
@@ -94,7 +79,7 @@ class AwsRdsService extends Database {
 
   @Cached()
   public get defaultPort(): number {
-    const port = AwsRdsService.ENGINE_TO_PORT.get(this.engine);
+    const port = RDS_ENGINE_TO_PORT.get(this.engine);
 
     if (!port) {
       throw new Error(`Port is not defined for engine ${this.engine}`);
@@ -105,9 +90,9 @@ class AwsRdsService extends Database {
 
   provision() {
     const { username: rootUsername, password: rootPassword } = this.rootCredentials;
+    const { instance, params } = this.provisioningProfile as DatabaseProvisioningProfile;
     const rootUsernameVar = this.variable('rootusername', rootUsername);
     const rootPasswordVar = this.variable('rootpassword', rootPassword);
-    const { instance, params } = this.provisioningProfile as DatabaseProvisioningProfile;
 
     this.paramGroup = new DbParameterGroup(this.stack, this.name, {
       ...params,

@@ -47,3 +47,10 @@ export const ENVIRONMENT_VARIABLE = {
   AWS_SECRET_ACCESS_KEY: 'STACKMATE_SECRET_ACCESS_KEY',
   AWS_SESSION_TOKEN: 'STACKMATE_AWS_SESSION_TOKEN',
 };
+
+// Service defaults
+
+/**
+ * @var {Number} DEFAULT_STORAGE the default storage to apply to services (in Gigabytes)
+ */
+export const DEFAULT_STORAGE = 30;

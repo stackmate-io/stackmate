@@ -1,5 +1,5 @@
 import Service from '@stackmate/core/service';
-import { SERVICE_TYPE } from '@stackmate/constants';
+import { DEFAULT_STORAGE, SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
 import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 import { CredentialsObject, DatabaseServiceAttributes, OneOf, ServiceTypeChoice } from '@stackmate/types';
@@ -69,24 +69,37 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
   abstract readonly defaultPort: number;
 
   /**
+   * @var {String} defaultSize the default instance size to use for the service
+   * @abstract
+   */
+  abstract readonly defaultSize: string;
+
+  /**
    * @param {Object} attributes the attributes to parse
    * @returns {ServiceAttributes} the parsed attributes
    */
   parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
     const {
-      nodes, size, port, version, storage, engine, database, rootCredentials,
+      database,
+      engine,
+      version,
+      nodes = 1,
+      storage = DEFAULT_STORAGE,
+      size = this.defaultSize,
+      port = this.defaultPort,
+      rootCredentials = {},
     } = attributes;
 
     return {
       ...super.parseAttributes(attributes),
-      nodes: parseInteger(nodes || 1),
-      port: parseInteger(port || this.defaultPort),
-      size: parseString(size || ''),
-      storage: parseInteger(storage || 0),
+      nodes: parseInteger(nodes),
+      port: parseInteger(port),
+      size: parseString(size),
+      storage: parseInteger(storage),
       engine: parseString(engine),
       database: parseString(database),
       version: parseString(version),
-      rootCredentials: parseCredentials(rootCredentials || {}),
+      rootCredentials: parseCredentials(rootCredentials),
     };
   }
 

@@ -1,20 +1,10 @@
-import { RegionList } from '@stackmate/types';
+import { OneOf, RegionList } from '@stackmate/types';
 
 export const AWS_REGIONS: RegionList = {
   EU_CENTRAL_1: 'eu-central-1',
 } as const;
 
-// Defaults
-export const DEFAULT_INSTANCE_STORAGE = 30;
-
-// RDS service
-export const DEFAULT_RDS_INSTANCE_STORAGE = DEFAULT_INSTANCE_STORAGE;
-
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro';
-
-export const DEFAULT_MYSQL_ENGINE = 'mysql';
-
-export const DEFAULT_POSTGRES_ENGINE = 'postgres';
 
 export const RDS_INSTANCE_SIZES = [
   'db.t3.micro',
@@ -62,3 +52,9 @@ export const RDS_PARAM_FAMILY_MAPPING = [
   ['postgres', '12', 'postgres12'],
   ['postgres', '13', 'postgres13'],
 ] as const;
+
+export const RDS_ENGINE_TO_PORT: Map<OneOf<typeof RDS_ENGINES>, number> = new Map([
+  ['mariadb', 3306],
+  ['mysql', 3306],
+  ['postgres', 5432],
+]);

@@ -43,6 +43,7 @@ export interface AttributesParseable {
 
 export interface Sizeable extends Validatable, AttributesParseable {
   size: string;
+  readonly defaultSize: string;
   validations(): Validations & Required<{ size: object }>;
   parseAttributes(attributes: object): ServiceAttributes & Required<{ size: string }>;
 }
