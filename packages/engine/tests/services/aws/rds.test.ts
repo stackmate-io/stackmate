@@ -49,14 +49,27 @@ describe('AwsRdsService', () => {
     it('provisions a single-node RDS instance with the default profile', () => {
       let cloudStack: CloudStack;
       let stackName: string = 'production';
+      let variables = {};
 
       const scope = Testing.synthScope((stack) => {
         cloudStack = enhanceStack(stack, { name: stackName });
         new AwsRdsService(cloudStack, prerequisites).populate(databaseConfig);
+        ({ variable: variables } = cloudStack.toTerraform());
       });
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
         family: 'mysql8.0',
+      });
+
+      expect(variables).toMatchObject({
+        [`${stackName}-${databaseConfig.name}-rootusername`]: {
+          default: databaseConfig.rootCredentials.username,
+          sensitive: true,
+        },
+        [`${stackName}-${databaseConfig.name}-rootpassword`]: {
+          default: databaseConfig.rootCredentials.password,
+          sensitive: true,
+        }
       });
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
