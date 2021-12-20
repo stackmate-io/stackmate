@@ -2,12 +2,12 @@ import { isUndefined } from 'lodash';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
-import { DatabaseProvisioningProfile, DatabaseServiceAttributes, OneOf, ProviderChoice, RegionList } from '@stackmate/types';
-import { DEFAULT_STORAGE, PROVIDER } from '@stackmate/constants';
+import AwsService from '@stackmate/lib/mixins';
+import { DatabaseProvisioningProfile, DatabaseServiceAttributes, OneOf } from '@stackmate/types';
+import { DEFAULT_STORAGE} from '@stackmate/constants';
 import { Cached } from '@stackmate/lib/decorators';
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
-  AWS_REGIONS,
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
@@ -17,17 +17,9 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
 
-class AwsRdsService extends Database {
-  /**
-   * @var {String} provider the cloud provider for this service
-   */
-  readonly provider: ProviderChoice = PROVIDER.AWS;
+const AwsDatabaseService = AwsService(Database);
 
-  /**
-   * @var {RegionList} regions the regions that the service is available in
-   */
-  readonly regions: RegionList = AWS_REGIONS;
-
+class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
    */

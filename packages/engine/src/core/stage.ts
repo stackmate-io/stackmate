@@ -1,5 +1,3 @@
-import { omit } from 'lodash';
-
 import Registry from '@stackmate/core/registry';
 import CloudManager from '@stackmate/core/manager';
 import Stack from '@stackmate/core/stack';
@@ -14,6 +12,12 @@ class Stage {
   public readonly name: string;
 
   /**
+   * @var {Registry} services the services registry
+   * @private
+   */
+  services: Registry;
+
+  /**
    * @var {Stack} stack the stack to use to provision the services with
    * @readonly
    */
@@ -24,17 +28,11 @@ class Stage {
    */
   protected readonly clouds: CloudManager;
 
-  /**
-   * @var {Registry} _services the services registry
-   * @private
-   */
-  private _services: Registry;
-
   constructor(name: string, targetPath: string, defaults: ProjectDefaults = {}) {
     this.name = name;
     this.stack = new Stack(this.name, targetPath);
     this.clouds = new CloudManager(this.stack, defaults);
-    this._services = new Registry();
+    this.services = new Registry();
   }
 
   /**
@@ -56,7 +54,7 @@ class Stage {
         rootCredentials: vault.rootCredentials(this.name),
       });
 
-      this._services.add(service);
+      this.services.add(service);
     });
 
     return this;

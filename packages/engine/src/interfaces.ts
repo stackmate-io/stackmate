@@ -32,6 +32,10 @@ export interface CloudService extends Provisionable {
   populate(attributes: ServiceAttributes): CloudService;
 }
 
+export interface CloudServiceConstructor extends CloudService {
+  new(stack: CloudStack, prerequisites: CloudPrerequisites): CloudService
+}
+
 export interface Validatable {
   validate(attrs: object): void;
   validations(attributes?: object): Validations;
