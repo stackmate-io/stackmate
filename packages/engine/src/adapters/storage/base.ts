@@ -1,6 +1,5 @@
 import Entity from '@stackmate/lib/entity';
 import { StorageAdapter } from '@stackmate/interfaces';
-import { Validations } from '@stackmate/types';
 
 abstract class BaseStorageAdapter extends Entity implements StorageAdapter {
   /**
@@ -9,24 +8,10 @@ abstract class BaseStorageAdapter extends Entity implements StorageAdapter {
   readonly options: object;
 
   constructor(options = {}) {
-    super();
+    super(options);
 
-    this.validate(options);
+    this.validate();
     this.options = options;
-  }
-
-  /**
-   * @returns {String} the error message to use
-   */
-  getValidationError(contents: object): string {
-    return 'The contents are invalid';
-  }
-
-  /**
-   * @returns {Object} the validations to use
-   */
-  validations(): Validations {
-    return {};
   }
 
   /**

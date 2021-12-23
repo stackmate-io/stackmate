@@ -1,4 +1,5 @@
 import validate from 'validate.js';
+import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
 import { CredentialsObject, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
@@ -153,6 +154,12 @@ const validateCredentials = (
   }
 };
 
+const validateFileExistence = (fileName: string) => {
+  if (!fileExistsSync(fileName)) {
+    return `File ${fileName} does not exist`;
+  }
+};
+
 /**
  * Validates a version
  *
@@ -178,6 +185,7 @@ Object.assign(validate.validators, {
   validateStages,
   validateProjectDefaults,
   validateVault,
+  validateFileExistence,
   validateServiceLinks,
   validateCredentials,
   validateVersion,
@@ -186,6 +194,7 @@ Object.assign(validate.validators, {
 export {
   validateStages,
   validateCredentials,
+  validateFileExistence,
   validateProjectDefaults,
   validateVault,
   validateVersion,

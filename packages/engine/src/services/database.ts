@@ -1,8 +1,8 @@
 import Service from '@stackmate/core/service';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
+import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
-import { CredentialsObject, DatabaseServiceAttributes, OneOf, ServiceTypeChoice } from '@stackmate/types';
 
 abstract class Database extends Service implements Sizeable, Storable, Rootable, MultiNode, Versioned {
   /**
@@ -63,30 +63,19 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
   abstract readonly sizes: ReadonlyArray<string>;
 
   /**
-   * @param {Object} attributes the attributes to apply the defaults to
-   * @abstract
+   * @returns {Object} the parser functions to apply to the entity's attributes
    */
-  abstract applyDefaults(attributes: object): DatabaseServiceAttributes;
-
-  /**
-   * @param {Object} attributes the attributes to parse
-   * @returns {ServiceAttributes} the parsed attributes
-   */
-  parseAttributes(attributes: DatabaseServiceAttributes): DatabaseServiceAttributes {
-    const {
-      database, engine, version, nodes, storage, size, port, rootCredentials, ...rest
-    } = this.applyDefaults(attributes) as DatabaseServiceAttributes;
-
-    return {
-      ...super.parseAttributes(rest),
-      nodes: parseInteger(nodes),
-      port: parseInteger(port),
-      size: parseString(size),
-      storage: parseInteger(storage),
-      engine: parseString(engine),
-      database: parseString(database),
-      version: parseString(version),
-      rootCredentials: parseCredentials(rootCredentials),
+  parsers() {
+    return{
+      ...super.parsers(),
+      nodes: parseInteger,
+      port: parseInteger,
+      size: parseString,
+      storage: parseInteger,
+      engine: parseString,
+      database: parseString,
+      version: parseString,
+      rootCredentials: parseCredentials,
     };
   }
 
@@ -95,9 +84,9 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
    *
    * @returns {Validations} the validations to run
    */
-  validations(attributes?: object) {
+  validations() {
     return {
-      ...super.validations(attributes),
+      ...super.validations(),
       nodes: {
         numericality: {
           onlyInteger: true,

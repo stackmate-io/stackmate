@@ -54,3 +54,5 @@ export const ENVIRONMENT_VARIABLE = {
  * @var {Number} DEFAULT_STORAGE the default storage to apply to services (in Gigabytes)
  */
 export const DEFAULT_STORAGE = 30;
+
+export const DEFAULT_CIDR = '10.0.0.0/0';

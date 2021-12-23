@@ -1,5 +1,7 @@
-import { CredentialsObject } from '@stackmate/types';
+import { resolve as resolvePath } from 'path';
 import { isArray, isNil, isNumber, isString, omitBy, uniq } from 'lodash';
+
+import { CredentialsObject } from '@stackmate/types';
 
 /**
  * Parses a string
@@ -64,4 +66,12 @@ export const parseCredentials = ({ username, password }: CredentialsObject): Cre
     username: isString(username) ? username.trim() : null,
     password: isString(password) ? password.trim() : null,
   }, isNil)
+);
+
+/**
+ * @param {String} path the path to parse
+ * @returns {String} the parsed and resolved path
+ */
+export const parseFileName = (path: string) => (
+  resolvePath(path.trim())
 );

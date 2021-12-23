@@ -1,3 +1,5 @@
+import Entity from './entity';
+
 export const Cached = () => {
   /**
    * @var {Object} _cache the cache object
@@ -25,4 +27,17 @@ export const Cached = () => {
 
     return descriptor.value;
   };
+};
+
+export const Attribute = (): any => {
+  return function (target: Entity, propertyKey: string) {
+    if (!(target instanceof Entity)) {
+      throw new Error('The `Attribute` decorator only applies to `Entity` objects');
+    }
+
+    Object.defineProperty(target, propertyKey, {
+      get: () => target.getAttribute(propertyKey),
+      set: (value: any) => target.setAttribute(propertyKey, value),
+    });
+  }
 };

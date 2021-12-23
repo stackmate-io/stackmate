@@ -1,18 +1,18 @@
+import { isEmpty } from 'lodash';
 import { TerraformVariable } from 'cdktf';
-import { isEmpty, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
+import { Cached } from '@stackmate/lib/decorators';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
-import { CloudService, AttributesParseable } from '@stackmate/interfaces';
+import { CloudService } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
   Validations, RegionList, ServiceAttributes, ServiceAssociation,
-  ProviderChoice, CloudPrerequisites, ServiceTypeChoice,
+  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, EntityAttributes, AttributeParsers,
 } from '@stackmate/types';
-import { Cached } from '@stackmate/lib/decorators';
 
-abstract class Service extends Entity implements CloudService, AttributesParseable, Provisionable {
+abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @var {String} name the service's name
    */
@@ -50,10 +50,10 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
    *
    * @example
-   *  return [{
-   *    lookup: AwsVpcService,
-   *    handler: (vpc): void => this.handleVpcAssociated(vpc as AwsVpcService),
-   *  }];
+   * [{
+   *   lookup: AwsVpcService,
+   *   handler: (vpc): void => this.handleVpcAssociated(vpc as AwsVpcService),
+   * }];
    */
   readonly associations: Array<ServiceAssociation> = [];
 
@@ -93,8 +93,8 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
-    super();
+  constructor(stack: CloudStack, prerequisites: CloudPrerequisites = {}, attributes: EntityAttributes = {}) {
+    super(attributes);
 
     this.stack = stack;
 
@@ -104,39 +104,15 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
   }
 
   /**
-   * @param {Object} attributes the attributes to parse
-   * @returns {ServiceAttributes} the parsed attributes
-   */
-  parseAttributes(attributes: ServiceAttributes): ServiceAttributes {
-    const { name, region, links = [], profile = Profile.DEFAULT } = attributes;
-
-    return {
-      name: parseString(name),
-      region: parseString(region),
-      profile: parseString(profile),
-      links: parseArrayToUniqueValues(links),
-    };
-  }
-
-  /**
    * Populates a service
    *
    * @param {Object} attributes the attributes to populate the service with
    * @returns {Service} the service returned
    */
   populate(attributes: ServiceAttributes): CloudService {
-    const parsedAttributes = this.parseAttributes(attributes);
-
-    // Validate the attributes
-    this.validate(parsedAttributes);
-
-    // Validation passed, we can now assign the attributes to the project
-    toPairs(parsedAttributes).forEach(([attributeName, attributeValue]) => {
-      (this as any)[attributeName] = attributeValue;
-    });
-
+    this.attributes = attributes;
+    this.validate();
     this.provision();
-
     return this;
   }
 
@@ -187,12 +163,21 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
   }
 
   /**
-   * @param {ServiceAttributes} attributes the service's attributes
-   * @returns {String} the message to display
+   * @returns {String} the message to display when the entity is invalid
    */
-  public getValidationError(attributes: ServiceAttributes): string {
-    const { name } = attributes;
-    return `Invalid configuration for the ${name ? `“${name}”` : ''} ${this.type} service`;
+  public get validationMessage(): string {
+    return `Invalid configuration for the ${this.name ? `“${this.name}”` : ''} ${this.type} service`;
+  }
+
+  /**
+   * @returns {Object} the parsers to apply when setting an object attribute
+   */
+  parsers(): AttributeParsers {
+    return {
+      name: parseString,
+      region: parseString,
+      links: parseArrayToUniqueValues,
+    };
   }
 
   /**
@@ -200,7 +185,7 @@ abstract class Service extends Entity implements CloudService, AttributesParseab
    *
    * @returns {Object} the validations to use
    */
-  validations(attributes?: object): Validations {
+  validations(): Validations {
     return {
       name: {
         presence: {

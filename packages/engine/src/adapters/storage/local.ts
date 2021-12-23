@@ -1,9 +1,8 @@
-import { isString } from 'lodash';
 import { promises as fsPromises } from 'fs';
-import { resolve as resolvePath } from 'path';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
-import { LocalFileStorageOptions } from '@stackmate/types';
+import { AttributeParsers, Validations } from '@stackmate/types';
+import { parseFileName } from '@stackmate/lib/parsers';
 
 class LocalFileAdapter extends BaseStorageAdapter {
   /**
@@ -11,24 +10,31 @@ class LocalFileAdapter extends BaseStorageAdapter {
    */
   readonly path: string;
 
-  constructor(options: LocalFileStorageOptions) {
-    super(options);
+  /**
+   * @returns {String} the error message
+   */
+  public get validationMessage(): string {
+    return `The file information provided is not valid`;
+  }
 
-    ({ path: this.path } = options);
-
-    if (!this.path || !isString(this.path)) {
-      throw new Error('A path is required');
+  parsers(): AttributeParsers {
+    return {
+      ...super.parsers(),
+      path: parseFileName,
     }
   }
 
-  /**
-   * Resolves a path as an absolute one
-   *
-   * @param {String} path the path to resolve
-   * @returns {String}
-   */
-  transformPath(path: string): string {
-    return resolvePath(path);
+  validations(): Validations {
+    return {
+      ...super.validations(),
+      path: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to provide a name for the project',
+        },
+        validateFileExistence: true,
+      },
+    };
   }
 
   /**

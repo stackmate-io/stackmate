@@ -20,16 +20,13 @@ class AwsParameterStore extends BaseStorageAdapter {
   constructor(options: AwsParamStorageOptions) {
     super(options);
 
-    this.validate(options);
-
-    ({ key: this.key, region: this.region } = options);
+    this.validate();
   }
 
   /**
-   * @param {Object} contents the contents to validate
    * @returns {String} the error message
    */
-  public getValidationError(contents: AwsParamStorageOptions): string {
+  public get validationMessage(): string {
     return 'The “vault” section in the project configuration is invalid';
   }
 

@@ -1,13 +1,15 @@
 import { get, isEmpty, isUndefined } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
-import { CloudProvider, CloudService, CloudStack, Provisionable, Validatable } from '@stackmate/interfaces';
+import {
+  CloudProvider, CloudService, CloudStack, Provisionable,
+} from '@stackmate/interfaces';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
-  ProviderDefaults, ServiceTypeChoice, Validations,
+  ProviderDefaults, ServiceTypeChoice, Validations, EntityAttributes,
 } from '@stackmate/types';
 
-abstract class Cloud extends Entity implements CloudProvider, Provisionable, Validatable {
+abstract class Cloud extends Entity implements CloudProvider, Provisionable {
   /**
    * @var {String} provider the provider's name
    * @abstract
@@ -68,12 +70,12 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable, Val
    * @param {String} region the region for the cloud provider
    * @param {Object} defaults the defaults for the cloud
    */
-  constructor(stack: CloudStack, region: string, defaults: ProviderDefaults = {}) {
-    super();
+  constructor(stack: CloudStack, region: string, defaults: ProviderDefaults = {}, attributes: EntityAttributes = {}) {
+    super(attributes);
 
     this.stack = stack;
 
-    this.validate({ region: this.region });
+    this.validate();
 
     this.defaults = defaults;
     this.region = region;
@@ -82,12 +84,9 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable, Val
   }
 
   /**
-   * Get the validation error message to display when the entity isn't valid
-   *
-   * @param {Object} attributes the entity's attributes
    * @returns {String} the error message
    */
-  public getValidationError(attributes: object): string {
+  public get validationMessage(): string {
     return `The configuration for the ${this.provider} cloud provider is invalid`;
   }
 

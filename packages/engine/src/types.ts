@@ -120,6 +120,14 @@ export type NormalizedProjectConfiguration = {
   defaults: ProjectDefaults;
 };
 
+export interface AttributeParsers {
+  [name: string]: Function;
+}
+
+export interface EntityAttributes {
+  [name: string]: any;
+}
+
 export type Validations = {
   [name: string]: object;
 };
@@ -161,4 +169,14 @@ export type DatabaseServiceAttributes = ServiceAttributes & Required<{
 export type DatabaseProvisioningProfile = {
   instance: object;
   params: object;
+};
+
+export type DatabaseServiceDefaults = Pick<DatabaseServiceAttributes, 'nodes' | 'size' | 'engine' | 'storage' | 'rootCredentials'>;
+
+export type NetworkingServiceAttributes = ServiceAttributes & {
+  cidr: string;
+};
+
+export type NetworkingServiceDefaults = {
+  cidr: string;
 };

@@ -3,7 +3,7 @@ import { App as TerraformApp, TerraformStack } from 'cdktf';
 import {
   ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
+  StorageChoice, NormalizedProjectConfiguration, CredentialsObject, EntityAttributes, AttributeParsers,
 } from '@stackmate/types';
 
 export interface CloudProvider {
@@ -36,59 +36,58 @@ export interface CloudServiceConstructor extends CloudService {
   new(stack: CloudStack, prerequisites: CloudPrerequisites): CloudService
 }
 
-export interface Validatable {
-  validate(attrs: object): void;
-  validations(attributes?: object): Validations;
-  applyDefaults(attributes: object): object;
+export interface BaseEntity {
+  attributes: EntityAttributes;
+  parsers(): AttributeParsers;
+  validate(): void;
+  validations(): Validations;
+  getAttribute(name: string): any;
+  setAttribute(name: string, value: any): void;
 }
 
-export interface AttributesParseable {
-  parseAttributes(attributes: object): ServiceAttributes;
-}
-
-export interface Sizeable extends Validatable, AttributesParseable {
+export interface Sizeable extends BaseEntity {
   size: string;
-  validations(attributes?: object): Validations & Required<{ size: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ size: string }>;
+  parsers(): AttributeParsers & Required<{ size: Function }>;
+  validations(): Validations & Required<{ size: object }>;
 }
 
-export interface Storable extends Validatable, AttributesParseable {
+export interface Storable extends BaseEntity {
   storage: number;
-  validations(attributes?: object): Validations & Required<{ storage: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ storage: number }>;
+  parsers(): AttributeParsers & Required<{ size: Function }>;
+  validations(): Validations & Required<{ storage: object }>;
 }
 
-export interface Mountable extends Validatable, AttributesParseable {
+export interface Mountable extends BaseEntity {
   volumes: string; // TODO
-  validations(attributes?: object): Validations & Required<{ volumes: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ volumes: string }>;
+  parsers(): AttributeParsers & Required<{ volumes: Function }>;
+  validations(): Validations & Required<{ volumes: object }>;
 }
 
-export interface MultiNode extends Validatable, AttributesParseable {
+export interface MultiNode extends BaseEntity {
   nodes: number;
-  validations(attributes?: object): Validations & Required<{ nodes: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ nodes: number }>;
+  parsers(): AttributeParsers & Required<{ nodes: Function }>;
+  validations(): Validations & Required<{ nodes: object }>;
 }
 
-export interface Authenticatable extends Validatable, AttributesParseable {
+export interface Authenticatable extends BaseEntity {
   credentials: CredentialsObject;
-  validations(attributes?: object): Validations & Required<{ credentials: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ credentials: CredentialsObject }>;
+  parsers(): AttributeParsers & Required<{ credentials: Function }>;
+  validations(): Validations & Required<{ credentials: object }>;
 }
 
-export interface Rootable extends Validatable, AttributesParseable {
+export interface Rootable extends BaseEntity {
   rootCredentials: CredentialsObject;
-  validations(attributes?: object): Validations & Required<{ rootCredentials: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ rootCredentials: CredentialsObject }>;
+  parsers(): AttributeParsers & Required<{ rootCredentials: Function }>;
+  validations(): Validations & Required<{ rootCredentials: object }>;
 }
 
-export interface Versioned extends Validatable, AttributesParseable {
+export interface Versioned extends BaseEntity {
   version: string;
-  validations(attributes?: object): Validations & Required<{ version: object }>;
-  parseAttributes(attributes: object): ServiceAttributes & Required<{ version: string }>;
+  parsers(): AttributeParsers & Required<{ version: Function }>;
+  validations(): Validations & Required<{ version: object }>;
 }
 
-export interface Profilable {
+export interface Profilable extends BaseEntity {
   profile: string;
   overrides: object;
 }

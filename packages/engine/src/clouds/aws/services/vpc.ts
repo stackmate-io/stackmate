@@ -2,39 +2,26 @@ import { Token } from 'cdktf';
 import { isUndefined } from 'lodash';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
-import { PROVIDER } from '@stackmate/constants';
-import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { ProviderChoice, RegionList } from '@stackmate/types';
 import Networking from '@stackmate/services/networking';
+import AwsService from '@stackmate/lib/mixins';
 
-class AwsVpcService extends Networking {
-  /**
-   * @var {String} provider the cloud provider for this service
-   */
-  readonly provider: ProviderChoice = PROVIDER.AWS;
+const AwsNetworking = AwsService(Networking);
 
-  /**
-   * @var {RegionList} regions the regions that the service is available in
-   */
-  readonly regions: RegionList = AWS_REGIONS;
-
+class AwsVpcService extends AwsNetworking {
   /**
    * @var {Vpc} vpc the VPC resource
-   * @protected
    */
-  protected vpc: Vpc;
+  public vpc: Vpc;
 
   /**
    * @var {Subnet} subnet the subnet resource
-   * @protected
    */
-  protected subnet: Subnet;
+  public subnet: Subnet;
 
   /**
    * @var {InternetGateway} gateway the gateway resource
-   * @protected
    */
-  protected gateway: InternetGateway;
+  public gateway: InternetGateway;
 
   /**
    * @returns {Boolean} whether the service is provisioned
@@ -52,16 +39,16 @@ class AwsVpcService extends Networking {
 
   provision() {
     // Add vpc, subnets etc
-    this.vpc = new Vpc(this.stack, this.name, {
+    this.vpc = new Vpc(this.stack, this.identifier, {
       cidrBlock: '10.0.0.0/16',
     });
 
-    this.subnet = new Subnet(this.stack, `${this.name}-subnet`, {
+    this.subnet = new Subnet(this.stack, `${this.identifier}-subnet`, {
       vpcId: this.id,
       cidrBlock: '10.0.0.0/24',
     });
 
-    this.gateway = new InternetGateway(this.stack, `${this.name}-gateway`, {
+    this.gateway = new InternetGateway(this.stack, `${this.identifier}-gateway`, {
       vpcId: this.id,
     });
   }

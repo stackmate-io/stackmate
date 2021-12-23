@@ -3,17 +3,15 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/lib/mixins';
-import { DatabaseProvisioningProfile, DatabaseServiceAttributes, OneOf } from '@stackmate/types';
+import { DatabaseProvisioningProfile, OneOf } from '@stackmate/types';
 import { DEFAULT_STORAGE} from '@stackmate/constants';
-import { Cached } from '@stackmate/lib/decorators';
+import { Attribute, Cached } from '@stackmate/lib/decorators';
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
   DEFAULT_RDS_ENGINE,
-  RDS_ENGINE_TO_DEFAULT_PORT,
-  RDS_ENGINE_TO_DEFAULT_VERSION,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
 
@@ -72,53 +70,19 @@ class AwsRdsService extends AwsDatabaseService {
    *
    * @returns {Validations} the validations to run
    */
-  validations(attributes?: Partial<DatabaseServiceAttributes>) {
-    const validations = super.validations();
-    const { engine } = attributes || {};
-    const availableVersions = engine && RDS_MAJOR_VERSIONS_PER_ENGINE.has(engine)
-      ? RDS_MAJOR_VERSIONS_PER_ENGINE.get(engine)
-      : [];
-
+  validations() {
     return {
-      ...validations,
+      ...super.validations(),
       version: {
         presence: {
           allowEmpty: false,
           message: 'You have to specify the database version to run',
         },
         validateVersion: {
-          availableVersions,
+          availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
         },
       },
     }
-  }
-
-  /**
-   * Applies the defaults to the attributes
-   *
-   * @param {Object} attributes the attributes to apply the defaults to
-   * @returns {DatabaseServiceAttributes}
-   */
-  applyDefaults(attributes: Partial<DatabaseServiceAttributes>): DatabaseServiceAttributes {
-    const {
-      nodes = 1,
-      name = this.name,
-      region = this.region,
-      size = DEFAULT_RDS_INSTANCE_SIZE,
-      engine = DEFAULT_RDS_ENGINE,
-      storage = DEFAULT_STORAGE,
-      port: databasePort,
-      version: databaseVersion,
-      database = '',
-      rootCredentials = {},
-    } = attributes;
-
-    const port = databasePort || RDS_ENGINE_TO_DEFAULT_PORT.get(engine) || 0;
-    const version = databaseVersion || RDS_ENGINE_TO_DEFAULT_VERSION.get(engine) || '';
-
-    return {
-      name, region, nodes, size, engine, storage, database, version, port, rootCredentials,
-    };
   }
 
   provision() {
