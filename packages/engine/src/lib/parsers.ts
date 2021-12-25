@@ -1,5 +1,5 @@
 import { resolve as resolvePath } from 'path';
-import { isArray, isNil, isNumber, isString, omitBy, uniq } from 'lodash';
+import { isArray, isNil, isNumber, isObject, isString, omitBy, uniq } from 'lodash';
 
 import { CredentialsObject } from '@stackmate/types';
 
@@ -22,6 +22,16 @@ export const parseString = (value: string): string => (
 export const parseArrayToSet = (value: Array<any>): Set<any> => (
   new Set(value || [])
 );
+
+/**
+ * Parses an object value
+ *
+ * @param {Object} obj the object to parse
+ * @returns {Object} the parsed object
+ */
+export const parseObject = (obj: object): object => (
+  isObject(obj) ? obj : {}
+)
 
 /**
  * Parses an array to an array of unique values
@@ -75,9 +85,6 @@ export const parseCredentials = ({ username, password }: CredentialsObject): Cre
 export const parseFileName = (path: string) => (
   resolvePath(path.trim())
 );
-
-export const parseProvisioningProfile = (profile: string) => {
-};
 
 export const parseProfileOverrides = (overrides: object) => {
 };

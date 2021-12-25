@@ -2,8 +2,10 @@ import validate from 'validate.js';
 import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
-import { CredentialsObject, ProjectDefaults, ProviderChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
+import { CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
+import Profile from '@stackmate/core/profile';
+import { isKeySubset } from './helpers';
 
 /**
  * Validates the project's stages
@@ -181,26 +183,53 @@ const validateVersion = (
   }
 }
 
-// validateServiceProfile
-// validateProfileOverrides
+const validateServiceProfile = (
+  profile: string,
+  { provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice },
+) => {
+  if (profile && !Profile.exists(provider, service, profile)) {
+    return `Invalid profile specified. The “${profile}” profile is not available`;
+  }
+};
+
+const validateProfileOverrides = (
+  overrides: object,
+  { profile, provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice, profile: string },
+) => {
+  let profileConfig: object;
+
+  try {
+    profileConfig = profile ? Profile.get(provider, service, profile) : {};
+  } catch (error) {
+    return 'The profile specified is invalid, cannot validate the overrides';
+  }
+
+  if (!isEmpty(overrides) && !isEmpty(profileConfig) && !isKeySubset(overrides, profileConfig)) {
+    return 'The overrides provided do not comply with the profile selected';
+  }
+};
 
 Object.assign(validate.validators, {
-  validateStages,
-  validateProjectDefaults,
-  validateVault,
-  validateFileExistence,
-  validateServiceLinks,
   validateCredentials,
+  validateFileExistence,
+  validateProjectDefaults,
+  validateProfileOverrides,
+  validateServiceProfile,
+  validateStages,
+  validateServiceLinks,
+  validateVault,
   validateVersion,
 });
 
 export {
-  validateStages,
   validateCredentials,
   validateFileExistence,
   validateProjectDefaults,
+  validateProfileOverrides,
+  validateServiceProfile,
+  validateStages,
+  validateServiceLinks,
   validateVault,
   validateVersion,
-  validateServiceLinks,
   validate,
 };

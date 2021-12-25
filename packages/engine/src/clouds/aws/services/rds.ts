@@ -85,7 +85,6 @@ class AwsRdsService extends AwsDatabaseService {
   provision() {
     const { username: rootUsername, password: rootPassword } = this.rootCredentials;
     const { instance, params } = this.provisioningProfile as DatabaseProvisioningProfile;
-    console.log({ instance, params });
     const rootUsernameVar = this.variable('rootusername', rootUsername);
     const rootPasswordVar = this.variable('rootpassword', rootPassword);
 

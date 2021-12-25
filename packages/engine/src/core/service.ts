@@ -7,7 +7,7 @@ import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { CloudService } from '@stackmate/interfaces';
-import { parseArrayToUniqueValues, parseProfileOverrides, parseProvisioningProfile, parseString } from '@stackmate/lib/parsers';
+import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
   ServiceTypeChoice, EntityAttributes,
@@ -33,7 +33,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @var {String} profile any configuration profile for the service
    */
-  @Attribute profile: string;
+  @Attribute profile: string = Profile.DEFAULT;
 
   /**
    * @var {Object} overrides any provisioning profile overrides to use
@@ -138,7 +138,6 @@ abstract class Service extends Entity implements CloudService, Provisionable {
     }
 
     const profile = Profile.get(this.provider, this.type, this.profile);
-
     return merge(profile, this.overrides);
   }
 
@@ -171,8 +170,8 @@ abstract class Service extends Entity implements CloudService, Provisionable {
       name: parseString,
       region: parseString,
       links: parseArrayToUniqueValues,
-      profile: parseProvisioningProfile,
-      overrides: parseProfileOverrides,
+      profile: parseString,
+      overrides: parseObject,
     };
   }
 
@@ -203,11 +202,16 @@ abstract class Service extends Entity implements CloudService, Provisionable {
         validateServiceLinks: true,
       },
       profile: {
-        validateServiceProfile: {},
+        validateServiceProfile: {
+          provider: this.provider,
+          service: this.type,
+        },
       },
       overrides: {
         validateProfileOverrides: {
           profile: this.profile,
+          provider: this.provider,
+          service: this.type,
         },
       }
     };
