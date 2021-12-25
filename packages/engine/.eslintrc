@@ -4,7 +4,10 @@
     "object-curly-spacing": ["error", "always"]
   },
   "extends": [
-    "oclif",
-    "oclif-typescript"
-  ]
+    "airbnb-base",
+    "airbnb-typescript/base"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
 }

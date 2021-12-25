@@ -2,8 +2,6 @@ stackmate
 =========
 
 
-
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/stackmate.svg)](https://npmjs.org/package/stackmate)
 [![Downloads/week](https://img.shields.io/npm/dw/stackmate.svg)](https://npmjs.org/package/stackmate)
 [![License](https://img.shields.io/npm/l/stackmate.svg)](https://github.com/falexandrou/stackmate-ce/blob/master/package.json)
@@ -74,6 +72,3 @@ ARGUMENTS
 OPTIONS
   --all  see all commands in CLI
 ```
-
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
-<!-- commandsstop -->
