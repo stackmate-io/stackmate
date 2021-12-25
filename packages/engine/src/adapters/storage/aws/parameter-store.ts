@@ -1,10 +1,10 @@
 import { SSM } from '@aws-sdk/client-ssm';
+import { Memoize } from 'typescript-memoize';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import Environment from '@stackmate/lib/environment';
 import { AwsParamStorageOptions, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { Cached } from '@stackmate/lib/decorators';
 
 class AwsParameterStore extends BaseStorageAdapter {
   /**
@@ -59,7 +59,7 @@ class AwsParameterStore extends BaseStorageAdapter {
     };
   }
 
-  @Cached()
+  @Memoize()
   public get client(): SSM {
     const client = new SSM({
       region: this.region,

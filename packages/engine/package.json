@@ -18,6 +18,7 @@
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.3.1",
+    "typescript-memoize": "^1.1.0",
     "validate.js": "^0.13.1",
     "yaml": "^1.10.2"
   },

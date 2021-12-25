@@ -1,10 +1,10 @@
 import { get } from 'lodash';
+import { Memoize } from 'typescript-memoize';
 
 import { PROVIDER } from '@stackmate/constants';
 import { CloudProvider, CloudStack } from '@stackmate/interfaces';
 import { ProjectDefaults, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from '@stackmate/clouds/aws';
-import { Cached } from '@stackmate/lib/decorators';
 
 class CloudManager {
   /**
@@ -34,7 +34,7 @@ class CloudManager {
    * @param {String} region string the cloud region to use
    * @returns {CloudProvider} the cloud manager for the specified provider & region
    */
-  @Cached()
+  @Memoize((...args: any[]) => args.join(':'))
   get(provider: ProviderChoice, region: string): CloudProvider {
     let cloud;
 

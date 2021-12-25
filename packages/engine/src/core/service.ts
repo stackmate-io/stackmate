@@ -1,12 +1,13 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, merge } from 'lodash';
+import { Memoize } from 'typescript-memoize';
 import { TerraformVariable } from 'cdktf';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
-import { Attribute, Cached } from '@stackmate/lib/decorators';
+import { Attribute } from '@stackmate/lib/decorators';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { CloudService } from '@stackmate/interfaces';
-import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
+import { parseArrayToUniqueValues, parseProfileOverrides, parseProvisioningProfile, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
   ServiceTypeChoice, EntityAttributes,
@@ -32,12 +33,12 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @var {String} profile any configuration profile for the service
    */
-  profile: string;
+  @Attribute profile: string;
 
   /**
    * @var {Object} overrides any provisioning profile overrides to use
    */
-  overrides: object = {};
+  @Attribute overrides: object = {};
 
   /**
    * @var {Construct} stack the stack that the service is provisioned against
@@ -130,13 +131,15 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @returns {Object} the profile to use for provisioning
    */
-  @Cached()
+  @Memoize()
   public get provisioningProfile(): object {
     if (!this.profile) {
       return {};
     }
 
-    return Profile.get(this.provider, this.type, this.profile, this.overrides);
+    const profile = Profile.get(this.provider, this.type, this.profile);
+
+    return merge(profile, this.overrides);
   }
 
   /**
@@ -168,6 +171,8 @@ abstract class Service extends Entity implements CloudService, Provisionable {
       name: parseString,
       region: parseString,
       links: parseArrayToUniqueValues,
+      profile: parseProvisioningProfile,
+      overrides: parseProfileOverrides,
     };
   }
 
@@ -197,6 +202,14 @@ abstract class Service extends Entity implements CloudService, Provisionable {
       links: {
         validateServiceLinks: true,
       },
+      profile: {
+        validateServiceProfile: {},
+      },
+      overrides: {
+        validateProfileOverrides: {
+          profile: this.profile,
+        },
+      }
     };
   }
 

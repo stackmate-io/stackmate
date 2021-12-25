@@ -1,6 +1,6 @@
 import { isEmpty, isObject } from 'lodash';
+import { Memoize } from 'typescript-memoize';
 
-import { Cached } from '@stackmate/lib/decorators';
 import { FORMAT, STORAGE } from '@stackmate/constants';
 import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOptions, StorageOptions } from '@stackmate/types';
 import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';
@@ -49,7 +49,7 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @returns {StorageAdapter} the storage adapter to use
    * @throws {Error} when the storage option is not valid
    */
-  @Cached()
+  @Memoize()
   public get storageAdapter(): StorageAdapter {
     if (this.storage === STORAGE.FILE) {
       return new LocalFileAdapter(this.storageOptions as LocalFileStorageOptions);
@@ -66,7 +66,7 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @returns {Formatter} the formatter to use to parse & write the file
    * @throws {Error} when the format is not valid
    */
-  @Cached()
+  @Memoize()
   public get formatter(): Formatter {
     if (this.format === FORMAT.YML) {
       return new YamlFormatter();

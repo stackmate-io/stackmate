@@ -75,3 +75,9 @@ export const parseCredentials = ({ username, password }: CredentialsObject): Cre
 export const parseFileName = (path: string) => (
   resolvePath(path.trim())
 );
+
+export const parseProvisioningProfile = (profile: string) => {
+};
+
+export const parseProfileOverrides = (overrides: object) => {
+};

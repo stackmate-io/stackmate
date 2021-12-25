@@ -1,9 +1,9 @@
 import { isUndefined } from 'lodash';
+import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/lib/mixins';
-import { Cached } from '@stackmate/lib/decorators';
 import { DatabaseProvisioningProfile, OneOf } from '@stackmate/types';
 import {
   RDS_ENGINES,
@@ -47,7 +47,7 @@ class AwsRdsService extends AwsDatabaseService {
     return !isUndefined(this.instance);
   }
 
-  @Cached()
+  @Memoize()
   public get paramGroupFamily() {
     const triad = RDS_PARAM_FAMILY_MAPPING.find(
       ([engine, version]) => engine === this.engine && this.version.startsWith(version),
@@ -85,6 +85,7 @@ class AwsRdsService extends AwsDatabaseService {
   provision() {
     const { username: rootUsername, password: rootPassword } = this.rootCredentials;
     const { instance, params } = this.provisioningProfile as DatabaseProvisioningProfile;
+    console.log({ instance, params });
     const rootUsernameVar = this.variable('rootusername', rootUsername);
     const rootPasswordVar = this.variable('rootpassword', rootPassword);
 
