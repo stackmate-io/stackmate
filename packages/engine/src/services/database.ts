@@ -1,4 +1,5 @@
 import Service from '@stackmate/core/service';
+import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
 import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
@@ -13,42 +14,42 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
   /**
    * @var {String} size the size for the RDS instance
    */
-  size: string;
+  @Attribute size: string;
 
   /**
    * @var {Number} storage the storage size for the instance
    */
-  storage: number;
+  @Attribute storage: number;
 
   /**
    * @var {String} version the database version to run
    */
-  version: string;
+  @Attribute version: string;
 
   /**
    * @var {String} database the database to create
    */
-  database: string;
+  @Attribute database: string;
 
   /**
    * @var {Number} nodes the number of nodes for the database;
    */
-  nodes: number;
+  @Attribute nodes: number;
 
   /**
    * @var {Credentials} rootCredentials the service's root credentials
    */
-  rootCredentials: CredentialsObject = {};
+  @Attribute rootCredentials: CredentialsObject;
 
   /**
    * @var {String} engine the database engine to use
    */
-  engine: OneOf<Array<string>>;
+  @Attribute engine: OneOf<Array<string>>;
 
   /**
    * @var {Number} the port number to use to connect to the database
    */
-  port: number;
+  @Attribute port: number;
 
   /**
    * @var {Array<String>} engines the list of database engines available for this service

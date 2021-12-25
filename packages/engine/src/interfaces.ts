@@ -1,22 +1,32 @@
 import { App as TerraformApp, TerraformStack } from 'cdktf';
 
 import {
-  ProviderChoice, RegionList, ServiceAttributes, ServiceAssociation,
+  ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  StorageChoice, NormalizedProjectConfiguration, CredentialsObject, EntityAttributes, AttributeParsers,
+  StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
+  EntityAttributes, ServiceAttributes,
 } from '@stackmate/types';
 
-export interface CloudProvider {
+export interface BaseEntity {
+  attributes: EntityAttributes;
+  parsers(): AttributeParsers;
+  validate(): void;
+  validations(): Validations;
+  getAttribute(name: string): any;
+  setAttribute(name: string, value: any): void;
+}
+
+export interface Provisionable extends BaseEntity {
+  isProvisioned: boolean;
+  provision(): void;
+}
+
+export interface CloudProvider extends Provisionable {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
-  init(): void;
-  service(type: ServiceTypeChoice): CloudService;
-}
-
-export interface Provisionable {
-  isProvisioned: boolean;
-  provision(): void;
+  service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService;
+  validations(): Validations & Required<{ region: object }>;
 }
 
 export interface CloudService extends Provisionable {
@@ -28,21 +38,12 @@ export interface CloudService extends Provisionable {
   stage: string;
   region: string;
   dependencies: CloudPrerequisites;
-  link(target: CloudService): void;
-  populate(attributes: ServiceAttributes): CloudService;
+  parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
+  validations(): Validations & Required<{ name: object, region: object, links: object }>;
 }
 
 export interface CloudServiceConstructor extends CloudService {
-  new(stack: CloudStack, prerequisites: CloudPrerequisites): CloudService
-}
-
-export interface BaseEntity {
-  attributes: EntityAttributes;
-  parsers(): AttributeParsers;
-  validate(): void;
-  validations(): Validations;
-  getAttribute(name: string): any;
-  setAttribute(name: string, value: any): void;
+  new(stack: CloudStack, prerequisites: CloudPrerequisites, attributes: ServiceAttributes): CloudService;
 }
 
 export interface Sizeable extends BaseEntity {

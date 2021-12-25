@@ -3,41 +3,41 @@ import { TerraformVariable } from 'cdktf';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
-import { Cached } from '@stackmate/lib/decorators';
+import { Attribute, Cached } from '@stackmate/lib/decorators';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { CloudService } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseString } from '@stackmate/lib/parsers';
 import {
-  Validations, RegionList, ServiceAttributes, ServiceAssociation,
-  ProviderChoice, CloudPrerequisites, ServiceTypeChoice, EntityAttributes, AttributeParsers,
+  RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
+  ServiceTypeChoice, EntityAttributes,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @var {String} name the service's name
    */
-  public name: string;
+  @Attribute name: string;
 
   /**
    * @var {String} region the region the service operates in
    */
-  public region: string;
-
-  /**
-   * @var {String} profile any configuration profile for the service
-   */
-  public profile: string;
-
-  /**
-   * @var {Object} overrides any provisioning profile overrides to use
-   */
-  public overrides: object = {};
+  @Attribute region: string;
 
   /**
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  public links: Array<string> = [];
+  @Attribute links: Array<string> = [];
+
+  /**
+   * @var {String} profile any configuration profile for the service
+   */
+  profile: string;
+
+  /**
+   * @var {Object} overrides any provisioning profile overrides to use
+   */
+  overrides: object = {};
 
   /**
    * @var {Construct} stack the stack that the service is provisioned against
@@ -89,11 +89,11 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   abstract provision(): void;
 
   /**
-   * @param {String} name the service's name
+   * @param {EntityAttributes} attributes the service's attributes
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(stack: CloudStack, prerequisites: CloudPrerequisites = {}, attributes: EntityAttributes = {}) {
+  constructor(attributes: EntityAttributes = {}, stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
     super(attributes);
 
     this.stack = stack;
@@ -101,19 +101,6 @@ abstract class Service extends Entity implements CloudService, Provisionable {
     if (!isEmpty(prerequisites)) {
       this.dependencies = prerequisites;
     }
-  }
-
-  /**
-   * Populates a service
-   *
-   * @param {Object} attributes the attributes to populate the service with
-   * @returns {Service} the service returned
-   */
-  populate(attributes: ServiceAttributes): CloudService {
-    this.attributes = attributes;
-    this.validate();
-    this.provision();
-    return this;
   }
 
   /**
@@ -145,6 +132,10 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    */
   @Cached()
   public get provisioningProfile(): object {
+    if (!this.profile) {
+      return {};
+    }
+
     return Profile.get(this.provider, this.type, this.profile, this.overrides);
   }
 
@@ -172,7 +163,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   /**
    * @returns {Object} the parsers to apply when setting an object attribute
    */
-  parsers(): AttributeParsers {
+  parsers() {
     return {
       name: parseString,
       region: parseString,
@@ -185,7 +176,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    *
    * @returns {Object} the validations to use
    */
-  validations(): Validations {
+  validations() {
     return {
       name: {
         presence: {

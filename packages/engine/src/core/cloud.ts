@@ -1,15 +1,16 @@
-import { get, isEmpty, isUndefined } from 'lodash';
+import { TerraformProvider } from 'cdktf';
+import { get, isEmpty } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
-import {
-  CloudProvider, CloudService, CloudStack, Provisionable,
-} from '@stackmate/interfaces';
+import { Attribute } from '@stackmate/lib/decorators';
+import { CloudProvider, CloudService, CloudStack } from '@stackmate/interfaces';
+import { parseString } from '@stackmate/lib/parsers';
 import {
   CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping,
-  ProviderDefaults, ServiceTypeChoice, Validations, EntityAttributes,
+  ServiceTypeChoice, EntityAttributes, ServiceAttributes,
 } from '@stackmate/types';
 
-abstract class Cloud extends Entity implements CloudProvider, Provisionable {
+abstract class Cloud extends Entity implements CloudProvider {
   /**
    * @var {String} provider the provider's name
    * @abstract
@@ -32,11 +33,15 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable {
   abstract readonly serviceMapping: ServiceMapping;
 
   /**
-   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
-   * @abstract
-   * @protected
+   * Provisions the cloud and its prerequisites
+   * @void
    */
-  protected abstract get prerequisites(): CloudPrerequisites;
+  abstract provision(): void;
+
+  /**
+   * @var {String} region the provider's region
+   */
+  @Attribute region: string;
 
   /**
    * @var {Stack} stack the stack to use for provisioning
@@ -45,24 +50,15 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable {
   readonly stack: CloudStack;
 
   /**
-   * @var {Object} defaults any provider defaults to be used in the resources
-   * @readonly
+   * @var {TerraformProvider} providerInstance the terraform provider instance
    */
-  readonly defaults: ProviderDefaults;
+  protected providerInstance: TerraformProvider;
 
   /**
-   * @var {String} region the provider's region
-   * @readonly
+   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
+   * @private
    */
-  public readonly region: string;
-
-  /**
-   * Initializes the provider
-   *
-   * @abstract
-   * @void
-   */
-  abstract init(): void;
+  private _prerequisites: CloudPrerequisites = {};
 
   /**
    * @constructor
@@ -70,17 +66,10 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable {
    * @param {String} region the region for the cloud provider
    * @param {Object} defaults the defaults for the cloud
    */
-  constructor(stack: CloudStack, region: string, defaults: ProviderDefaults = {}, attributes: EntityAttributes = {}) {
+  constructor(attributes: EntityAttributes = {}, stack: CloudStack) {
     super(attributes);
 
     this.stack = stack;
-
-    this.validate();
-
-    this.defaults = defaults;
-    this.region = region;
-
-    this.init();
   }
 
   /**
@@ -91,9 +80,38 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable {
   }
 
   /**
+   * @returns {CloudPrerequisites} the cloud provider's prerequisites
+   */
+  protected get prerequisites(): CloudPrerequisites {
+    return this._prerequisites;
+  }
+
+  /**
+   * @param {CloudPrerequisites} prereqs the prerequisites the cloud provider provides
+   */
+  protected set prerequisites(prereqs: CloudPrerequisites) {
+    Object.values(prereqs).forEach(service => {
+      if (!service.isProvisioned) {
+        service.provision();
+      }
+    });
+
+    this._prerequisites = prereqs;
+  }
+
+  /**
+   * @returns {AttributeParsers} the parsers to use for the attributes
+   */
+  parsers() {
+    return {
+      region: parseString,
+    };
+  }
+
+  /**
    * @returns {Validations} the validations to use in the entity
    */
-  public validations(): Validations {
+  validations() {
     return {
       region: {
         presence: {
@@ -109,37 +127,33 @@ abstract class Cloud extends Entity implements CloudProvider, Provisionable {
   }
 
   /**
-   * Provisions the cloud's prerequisites
-   */
-  provision() {
-    if (!this.prerequisites || isEmpty(this.prerequisites)) {
-      return;
-    }
-
-    Object.keys(this.prerequisites).forEach((key) => this.prerequisites[key].provision());
-  }
-
-  /**
    * @returns {Boolean} whether the cloud provider is provisioned
    */
   public get isProvisioned(): boolean {
-    return !isUndefined(this.prerequisites);
+    return this.providerInstance instanceof TerraformProvider
+      && !isEmpty(this.prerequisites)
+      && Object.values(this.prerequisites).every(s => s.isProvisioned);
   }
 
   /**
    * Registers a service in the cloud services registry
    *
+   * @param {ServiceTypeChoice} type the type of service to instantiate
    * @param {ServiceAttributes} attributes the service's attributes
    * @returns {CloudService} the service that just got registered
    */
-  service(type: ServiceTypeChoice): CloudService {
+  service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService {
     const ServiceClass = get(this.serviceMapping, type, null);
 
     if (!ServiceClass) {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    return new ServiceClass(this.stack, this.prerequisites);
+    const service = new ServiceClass(attributes, this.stack, this.prerequisites);
+    service.validate();
+    service.provision();
+
+    return service;
   }
 }
 

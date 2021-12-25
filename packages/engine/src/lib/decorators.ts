@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import Entity from './entity';
 
 export const Cached = () => {
@@ -29,15 +30,25 @@ export const Cached = () => {
   };
 };
 
-export const Attribute = (): any => {
-  return function (target: Entity, propertyKey: string) {
-    if (!(target instanceof Entity)) {
-      throw new Error('The `Attribute` decorator only applies to `Entity` objects');
-    }
-
-    Object.defineProperty(target, propertyKey, {
-      get: () => target.getAttribute(propertyKey),
-      set: (value: any) => target.setAttribute(propertyKey, value),
-    });
+export const Attribute = function (target: Entity, propertyKey: string) {
+  if (!(target instanceof Entity)) {
+    throw new Error('The `Attribute` decorator only applies to `Entity` objects');
   }
+
+  target.registerAttribute(propertyKey);
+
+  const getter = function getter(this: Entity) {
+    return this.getAttribute(propertyKey);
+  };
+
+  const setter = function setter(this: Entity, value: any) {
+    this.setAttribute(propertyKey, value);
+  };
+
+  Object.defineProperty(target, propertyKey, {
+    get: getter,
+    set: setter,
+    configurable: false,
+    enumerable: true,
+  });
 };

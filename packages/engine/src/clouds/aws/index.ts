@@ -3,7 +3,7 @@ import { AwsProvider } from '@cdktf/provider-aws';
 import Cloud from '@stackmate/core/cloud';
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
+import { ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
 import AwsRdsService from '@stackmate/clouds/aws/services/rds';
 
@@ -30,17 +30,10 @@ class AwsCloud extends Cloud {
   readonly serviceMapping: ServiceMapping = AWS_SERVICE_MAPPING;
 
   /**
-   * @var {Object} prerequisites the prerequisites for any service provisioned in this cloud
+   * Provisions the cloud provider
    */
-  protected prerequisites: CloudPrerequisites;
-
-  /**
-   * Initializes the cloud provider
-   * @void
-   */
-  init(): void {
-    /* eslint-disable-next-line no-new */
-    new AwsProvider(this.stack, PROVIDER.AWS, {
+  provision(): void {
+    this.providerInstance = new AwsProvider(this.stack, PROVIDER.AWS, {
       region: this.region,
       defaultTags: {
         tags: {
@@ -50,12 +43,8 @@ class AwsCloud extends Cloud {
       },
     });
 
-    const vpc = this.service(SERVICE_TYPE.NETWORKING).populate({
-      name: 'my-vpc', region: this.region,
-    });
-
     this.prerequisites = {
-      vpc,
+      vpc: this.service(SERVICE_TYPE.NETWORKING, { name: 'my-vpc', region: this.region }),
     };
   }
 }

@@ -3,15 +3,12 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/lib/mixins';
+import { Cached } from '@stackmate/lib/decorators';
 import { DatabaseProvisioningProfile, OneOf } from '@stackmate/types';
-import { DEFAULT_STORAGE} from '@stackmate/constants';
-import { Attribute, Cached } from '@stackmate/lib/decorators';
 import {
-  DEFAULT_RDS_INSTANCE_SIZE,
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
-  DEFAULT_RDS_ENGINE,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
 

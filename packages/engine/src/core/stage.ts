@@ -45,10 +45,7 @@ class Stage {
     Object.keys(services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = services;
 
-      const service = this.clouds.get(provider, region).service(type);
-
-      // Enhance the attributes with any credentials that might be related and populate the service
-      service.populate({
+      const service = this.clouds.get(provider, region).service(type, {
         ...attributes,
         credentials: vault.credentials(this.name),
         rootCredentials: vault.rootCredentials(this.name),

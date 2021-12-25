@@ -25,12 +25,11 @@ describe('AwsRdsService', () => {
 
     beforeEach(() => {
       mockStack = getMockStack();
-      service = new AwsRdsService(mockStack, prerequisites);
     });
 
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, size, storage, engine, database, rootCredentials } = databaseConfig;
-      service.populate(databaseConfig);
+      service = new AwsRdsService(databaseConfig, mockStack, prerequisites);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.DATABASE);
@@ -53,7 +52,9 @@ describe('AwsRdsService', () => {
 
       const scope = Testing.synthScope((stack) => {
         cloudStack = enhanceStack(stack, { name: stackName });
-        new AwsRdsService(cloudStack, prerequisites).populate(databaseConfig);
+        const service = new AwsRdsService(databaseConfig, cloudStack, prerequisites);
+        service.provision();
+
         ({ variable: variables } = cloudStack.toTerraform());
       });
 
