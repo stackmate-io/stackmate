@@ -40,12 +40,12 @@ class AwsVpcService extends AwsNetworking {
   provision() {
     // Add vpc, subnets etc
     this.vpc = new Vpc(this.stack, this.identifier, {
-      cidrBlock: '10.0.0.0/16',
+      cidrBlock: this.cidr(8),
     });
 
     this.subnet = new Subnet(this.stack, `${this.identifier}-subnet`, {
       vpcId: this.id,
-      cidrBlock: '10.0.0.0/24',
+      cidrBlock: this.cidr(16),
     });
 
     this.gateway = new InternetGateway(this.stack, `${this.identifier}-gateway`, {

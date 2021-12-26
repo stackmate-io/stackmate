@@ -13,7 +13,7 @@ export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) a
 export const networkingConfiguration = {
   name: `${faker.internet.domainWord()}-vpc`,
   region: awsRegion,
-  cidr: '12.0.0.0/0',
+  ip: '12.0.0.0',
 };
 
 export const mysqlDatabaseConfiguration = {

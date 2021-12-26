@@ -55,4 +55,4 @@ export const ENVIRONMENT_VARIABLE = {
  */
 export const DEFAULT_STORAGE = 30;
 
-export const DEFAULT_CIDR = '10.0.0.0/0';
+export const DEFAULT_IP = '10.0.0.0';

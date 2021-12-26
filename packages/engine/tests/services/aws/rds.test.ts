@@ -1,12 +1,11 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
-import { Testing } from 'cdktf';
 
 import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
-import { enhanceStack } from 'tests/helpers';
+import { getProvisionResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures';
 import { AwsRdsService } from '@stackmate/clouds/aws';
 import Profile from '@stackmate/core/profile';
@@ -58,17 +57,13 @@ describe('AwsRdsService', () => {
   });
 
   describe('provision', () => {
-    it('provisions a single-node RDS instance with the default profile', () => {
-      let cloudStack: CloudStack;
-      let variables = {};
+    it('provisions a single-node RDS instance with the default profile', async () => {
       const stackName: string = 'production';
-
-      const scope = Testing.synthScope((stack) => {
-        cloudStack = enhanceStack(stack, { name: stackName });
-        const service = AwsRdsService.factory(serviceConfig, cloudStack, prerequisites);
-
-        expect(service.isProvisioned).toBeTruthy();
-        ({ variable: variables } = cloudStack.toTerraform());
+      const { scope, variables } = await getProvisionResults({
+        provider: PROVIDER.AWS,
+        serviceClass: AwsRdsService,
+        serviceConfig,
+        stackName,
       });
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
