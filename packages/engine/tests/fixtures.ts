@@ -10,11 +10,17 @@ export const stackName = `test-stack-${faker.random.alphaNumeric(12)}`;
 export const outputPath = joinPaths(os.tmpdir(), faker.datatype.hexaDecimal(12));
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 
+export const networkingConfiguration = {
+  name: `${faker.internet.domainWord()}-vpc`,
+  region: awsRegion,
+  cidr: '12.0.0.0/0',
+};
+
 export const mysqlDatabaseConfiguration = {
+  name: `${faker.internet.domainWord()}-mysql-database`,
+  region: awsRegion,
   nodes: 1,
   type: SERVICE_TYPE.DATABASE,
-  name: faker.internet.domainWord(),
-  region: awsRegion,
   size: faker.random.arrayElement(RDS_INSTANCE_SIZES),
   storage: faker.datatype.number({ min: 30, max: 100 }),
   engine: 'mysql',

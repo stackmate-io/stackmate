@@ -44,7 +44,7 @@ class AwsRdsService extends AwsDatabaseService {
    * @returns {Boolean} whether the service is provisioned
    */
   public get isProvisioned(): boolean {
-    return !isUndefined(this.instance);
+    return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
   @Memoize()

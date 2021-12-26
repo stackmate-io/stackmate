@@ -9,7 +9,7 @@ import { CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
-  ServiceTypeChoice, EntityAttributes, ProvisioningProfile,
+  ServiceTypeChoice, ProvisioningProfile, ServiceAttributes,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService, Provisionable {
@@ -87,23 +87,6 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * @void
    */
   abstract provision(): void;
-
-  /**
-   * @param {EntityAttributes} attributes the service's attributes
-   * @param {Object} stack the terraform stack object
-   * @param {Object} prerequisites any prerequisites by the cloud provider
-   */
-  constructor(
-    attributes: EntityAttributes, stack: CloudStack, prerequisites: CloudPrerequisites = {},
-  ) {
-    super(attributes);
-
-    this.stack = stack;
-
-    if (!isEmpty(prerequisites)) {
-      this.dependencies = prerequisites;
-    }
-  }
 
   /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
@@ -231,6 +214,33 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   ): TerraformVariable {
     const id: string = `${this.stack.name}-${this.name}-${name}`;
     return new TerraformVariable(this.stack, id, { default: value || '', sensitive });
+  }
+
+  /**
+   * Instantiates, validates and provisions a service
+   *
+   * @param {ServiceAttributes} attributes the service's attributes
+   * @param {Object} stack the terraform stack object
+   * @param {Object} prerequisites any prerequisites by the cloud provider
+   */
+  static factory<T extends Service>(
+    this: new (...args: any[]) => T,
+    attributes: ServiceAttributes,
+    stack: CloudStack,
+    prerequisites: CloudPrerequisites = {},
+  ): T {
+    const service = new this;
+    service.attributes = attributes;
+    service.stack = stack;
+
+    if (!isEmpty(prerequisites)) {
+      service.dependencies = prerequisites;
+    }
+
+    service.validate();
+    service.provision();
+
+    return service;
   }
 }
 

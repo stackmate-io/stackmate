@@ -44,9 +44,8 @@ export interface CloudService extends Provisionable {
 }
 
 export interface CloudServiceConstructor extends CloudService {
-  new(
-    stack: CloudStack, prerequisites: CloudPrerequisites, attributes: ServiceAttributes,
-  ): CloudService;
+  new(...args: any[]): CloudService;
+  factory(attrs: ServiceAttributes, stack: CloudStack, prereqs: CloudPrerequisites): CloudService;
 }
 
 export interface Sizeable extends BaseEntity {

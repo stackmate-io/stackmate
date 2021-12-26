@@ -1,8 +1,9 @@
-import { CloudService } from '@stackmate/interfaces';
+import { CloudService, CloudServiceConstructor } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 // Utility types
 export type ConstructorOf<T> = { new(...args: any[]): T };
+export type FactoryOf<T> = { factory(...args: any[]): T; }
 export type AbstractConstructor<T = {}> = abstract new (...args: any[]) => T;
 export type ValueOf<T> = T[keyof T];
 export type ChoiceOf<T> = T[keyof T];
@@ -47,10 +48,15 @@ export type ServiceConfigurationDeclarationNormalized = {
 // The final attributes that the Service class should expect
 export type ServiceAttributes = Omit<ServiceConfigurationDeclarationNormalized, 'type' | 'provider'>;
 
+export type CloudAttributes = {
+  region: string;
+  defaults?: ProviderDefaults;
+};
+
 export type ServiceList = Map<string, CloudService>;
 
 export type ServiceMapping = {
-  [name: string]: ConstructorOf<CloudService>;
+  [name: string]: FactoryOf<CloudService>;
 };
 
 export type RegionList = {

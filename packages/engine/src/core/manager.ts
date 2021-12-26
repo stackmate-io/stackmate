@@ -36,20 +36,19 @@ class CloudManager {
    */
   @Memoize((...args: any[]) => args.join(':'))
   get(provider: ProviderChoice, region: string): CloudProvider {
-    let cloud;
+    let CloudClass;
 
     if (provider === PROVIDER.AWS) {
-      cloud = new AwsCloud({ region, defaults: get(this.defaults, provider) }, this.stack);
+      CloudClass = AwsCloud;
     }
 
-    if (!cloud) {
+    if (!CloudClass) {
       throw new Error(`Provider ${provider} is not supported, yet`);
     }
 
-    cloud.validate();
-    cloud.provision();
-
-    return cloud;
+    return CloudClass.factory(
+      { region, defaults: get(this.defaults, provider, {}) }, this.stack,
+    );
   }
 }
 

@@ -13,14 +13,6 @@ abstract class Entity implements BaseEntity {
   protected state: EntityAttributes = {};
 
   /**
-   * @constructor
-   * @param {Object} attributes the entity's attributes
-   */
-  constructor(attributes: EntityAttributes) {
-    this.attributes = attributes || {};
-  }
-
-  /**
    * @var {String} validationMessage the validation message to use
    */
   public readonly abstract validationMessage: string;

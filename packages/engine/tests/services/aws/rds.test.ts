@@ -1,26 +1,25 @@
 import 'cdktf/lib/testing/adapters/jest';
+import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { Testing } from 'cdktf';
 
 import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
-import { AwsRdsService } from '@stackmate/clouds/aws';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { mysqlDatabaseConfiguration } from 'tests/fixtures';
 import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
 import { enhanceStack } from 'tests/helpers';
-import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures';
+import { AwsRdsService } from '@stackmate/clouds/aws';
+import Profile from '@stackmate/core/profile';
 
 describe('AwsRdsService', () => {
   let mockStack: CloudStack;
   let prerequisites: CloudPrerequisites;
-  let databaseConfig: { [name: string]: any };
 
   beforeEach(() => {
-    databaseConfig = mysqlDatabaseConfiguration;
     prerequisites = getAwsPrerequisites({ stack: mockStack });
   });
 
-  describe('populate', () => {
+  describe('instantiation', () => {
     let service: AwsRdsService;
 
     beforeEach(() => {
@@ -30,9 +29,9 @@ describe('AwsRdsService', () => {
     it('instantiates the service and assigns the attributes correctly', () => {
       const {
         name, region, size, storage, engine, database, rootCredentials,
-      } = databaseConfig;
+      } = serviceConfig;
 
-      service = new AwsRdsService(databaseConfig, mockStack, prerequisites);
+      service = AwsRdsService.factory(serviceConfig, mockStack, prerequisites);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.DATABASE);
@@ -44,6 +43,17 @@ describe('AwsRdsService', () => {
       expect(service.database).toEqual(database);
       expect(service.stage).toEqual(mockStack.name);
       expect(service.rootCredentials).toEqual(rootCredentials);
+      expect(service.links).toEqual([]);
+      expect(service.profile).toEqual(Profile.DEFAULT);
+      expect(service.overrides).toEqual({});
+    });
+
+    it('returns the attribute names', () => {
+      service = AwsRdsService.factory(serviceConfig, mockStack, prerequisites);
+      expect(new Set(service.attributeNames)).toEqual(new Set([
+        'size', 'storage', 'version', 'database', 'nodes', 'rootCredentials',
+        'engine', 'port', 'name', 'region', 'links', 'profile', 'overrides',
+      ]));
     });
   });
 
@@ -55,9 +65,9 @@ describe('AwsRdsService', () => {
 
       const scope = Testing.synthScope((stack) => {
         cloudStack = enhanceStack(stack, { name: stackName });
-        const service = new AwsRdsService(databaseConfig, cloudStack, prerequisites);
-        service.provision();
+        const service = AwsRdsService.factory(serviceConfig, cloudStack, prerequisites);
 
+        expect(service.isProvisioned).toBeTruthy();
         ({ variable: variables } = cloudStack.toTerraform());
       });
 
@@ -66,41 +76,41 @@ describe('AwsRdsService', () => {
       });
 
       expect(variables).toMatchObject({
-        [`${stackName}-${databaseConfig.name}-rootusername`]: {
-          default: databaseConfig.rootCredentials.username,
+        [`${stackName}-${serviceConfig.name}-rootusername`]: {
+          default: serviceConfig.rootCredentials.username,
           sensitive: true,
         },
-        [`${stackName}-${databaseConfig.name}-rootpassword`]: {
-          default: databaseConfig.rootCredentials.password,
+        [`${stackName}-${serviceConfig.name}-rootpassword`]: {
+          default: serviceConfig.rootCredentials.password,
           sensitive: true,
         },
       });
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
-        allocated_storage: databaseConfig.storage,
+        allocated_storage: serviceConfig.storage,
         allow_major_version_upgrade: false,
         apply_immediately: true,
         auto_minor_version_upgrade: true,
         backup_retention_period: 0,
         copy_tags_to_snapshot: true,
         count: 1,
-        db_subnet_group_name: `db-subnet-${databaseConfig.name}-${stackName}`,
+        db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stackName}`,
         delete_automated_backups: true,
         deletion_protection: false,
         enabled_cloudwatch_logs_exports: ['error'],
-        engine: databaseConfig.engine,
-        engine_version: databaseConfig.version,
-        identifier: databaseConfig.name,
-        instance_class: databaseConfig.size,
+        engine: serviceConfig.engine,
+        engine_version: serviceConfig.version,
+        identifier: serviceConfig.name,
+        instance_class: serviceConfig.size,
         multi_az: false,
-        name: databaseConfig.database,
+        name: serviceConfig.database,
         port: 3306,
         publicly_accessible: true,
         skip_final_snapshot: true,
         storage_type: 'gp2',
-        parameter_group_name: `$\{aws_db_parameter_group.${databaseConfig.name}-${stackName}-params.name}`,
-        password: `$\{var.${stackName}-${databaseConfig.name}-rootpassword}`,
-        username: `$\{var.${stackName}-${databaseConfig.name}-rootusername}`,
+        parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stackName}-params.name}`,
+        password: `$\{var.${stackName}-${serviceConfig.name}-rootpassword}`,
+        username: `$\{var.${stackName}-${serviceConfig.name}-rootusername}`,
       });
     });
   });

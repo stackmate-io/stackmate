@@ -21,19 +21,22 @@ describe('Entity', () => {
     });
 
     it('instantiates the entity class properly', () => {
-      subject = new MockEntity(attributes);
+      subject = new MockEntity();
+      subject.attributes = attributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(subject.name).toEqual(name);
       expect(subject.number).toEqual(multiply(number));
     });
 
     it('returns the attribute names', () => {
-      subject = new MockEntity(attributes);
+      subject = new MockEntity();
+      subject.attributes = attributes;
       expect(subject.attributeNames).toStrictEqual(['name', 'number']);
     });
 
     it('instantiates an extended object', () => {
-      subject = new ExtendedMockEntity(extendedAttributes);
+      subject = new ExtendedMockEntity();
+      subject.attributes = extendedAttributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(subject.name).toEqual(name);
       expect(subject.number).toEqual(multiply(number));
@@ -41,7 +44,8 @@ describe('Entity', () => {
     });
 
     it('returns the expected attributes for the extended object', () => {
-      subject = new ExtendedMockEntity(extendedAttributes);
+      subject = new ExtendedMockEntity();
+      subject.attributes = extendedAttributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(new Set(subject.attributeNames)).toEqual(new Set(['name', 'number', 'email']));
     });
@@ -57,7 +61,8 @@ describe('Entity', () => {
         number: String(number),
       };
 
-      const subject = new MockEntity(attributes);
+      const subject = new MockEntity();
+      subject.attributes = attributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(subject.name).toEqual(name);
       expect(subject.number).toEqual(multiply(number));
@@ -66,7 +71,8 @@ describe('Entity', () => {
 
   describe('validators', () => {
     it('raises validation errors', () => {
-      const subject = new MockEntity({ name: '', number: 'abc' });
+      const subject = new MockEntity();
+      subject.attributes = { name: '', number: 'abc' };
       expect(subject).toBeInstanceOf(MockEntity);
       try {
         subject.validate();
