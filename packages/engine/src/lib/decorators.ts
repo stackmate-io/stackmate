@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import Entity from './entity';
 
-export const Attribute = function (target: Entity, propertyKey: string) {
+// eslint-disable-next-line import/prefer-default-export
+export const Attribute = function Attribute(target: Entity, propertyKey: string) {
   if (!(target instanceof Entity)) {
     throw new Error('The `Attribute` decorator only applies to `Entity` objects');
   }

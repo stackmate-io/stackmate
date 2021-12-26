@@ -28,16 +28,15 @@ class Project extends Configuration implements ProjectInterface {
   async load(): Promise<object> {
     await super.load();
 
-    this.validate(this.contents);
+    this.validate();
 
     return this.contents;
   }
 
   /**
-   * @param {Object} contents the projects's contents
    * @returns {String} the error message
    */
-  public getValidationError(contents: ProjectConfiguration): string {
+  public get validationMessage(): string {
     return 'The project’s configuration file is not valid';
   }
 
@@ -56,10 +55,10 @@ class Project extends Configuration implements ProjectInterface {
           message: 'You have to provide a name for the project',
         },
         format: {
-          pattern: '[a-z0-9-_.\/]+',
+          pattern: '[a-z0-9-_./]+',
           flags: 'i',
           message: 'The project name needs to be in URL-friendly format, same as the repository name',
-        }
+        },
       },
       vault: {
         validateVault: true,
@@ -129,7 +128,7 @@ class Project extends Configuration implements ProjectInterface {
       return stg.from ? getSourceDeclaration(stg.from) : stg;
     };
 
-    const normalizedStages = Object.keys(stages || []).map(stageName => {
+    const normalizedStages = Object.keys(stages || []).map((stageName) => {
       const {
         from: copiedStageName = null,
         skip: skippedServices = [],
@@ -142,13 +141,13 @@ class Project extends Configuration implements ProjectInterface {
       if (copiedStageName) {
         const source = clone(
           // Omit any services that the copied stage doesn't need
-          omit(getSourceDeclaration(copiedStageName), ...skippedServices)
+          omit(getSourceDeclaration(copiedStageName), ...skippedServices),
         );
 
         stage = merge(omit(source, 'from', 'skip'), declaration);
       }
 
-      Object.keys(stage).forEach(name => {
+      Object.keys(stage).forEach((name) => {
         const service = stage[name]!;
 
         // Apply the service's name
@@ -204,7 +203,7 @@ class Project extends Configuration implements ProjectInterface {
   static async synthesize(
     path: string = DEFAULT_PROJECT_FILE, stageName: string = DEFAULT_STAGE,
   ): Promise<void> {
-    const project = new Project({ path, storage: STORAGE.FILE })
+    const project = new Project({ path, storage: STORAGE.FILE });
     await project.load();
 
     if (!project.contents.stages) {
@@ -232,7 +231,7 @@ class Project extends Configuration implements ProjectInterface {
     await vault.load();
 
     const stage = new Stage(stageName, project.outputPath, defaults).populate(services, vault);
-    stage.synthesize();
+    stage.stack.synthesize();
   }
 }
 

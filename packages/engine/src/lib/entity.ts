@@ -124,14 +124,14 @@ abstract class Entity implements BaseEntity {
   registerAttribute(name: string) {
     const attributeMetadata = Reflect.getOwnMetadata(this.metadataKey, this) || [];
     Reflect.defineMetadata(this.metadataKey, [...attributeMetadata, name], this);
-  };
+  }
 
   /**
    * @returns {String} the metadata key to use
    */
   get metadataKey(): string {
     return `attributes:${this.constructor.name}`.toLowerCase();
-  };
+  }
 }
 
 export default Entity;

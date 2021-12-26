@@ -59,9 +59,8 @@ class Profile {
   @Memoize((...args: any[]) => args.join(':'))
   static get(provider: ProviderChoice, service: ServiceTypeChoice, name: string): object {
     try {
-      return require(
-        Profile.path(provider, service, name),
-      );
+      // eslint-disable-next-line global-require,import/no-dynamic-require
+      return require(Profile.path(provider, service, name));
     } catch (error) {
       throw new ProfileNotFoundError(name);
     }

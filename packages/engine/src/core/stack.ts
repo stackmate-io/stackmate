@@ -38,9 +38,7 @@ class Stack extends TerraformStack implements CloudStack {
    * @returns {String} returns the stack path for the stage
    */
   public get path(): string {
-    return joinPaths(
-      this.targetPath, Manifest.stacksFolder, this.name,
-    );
+    return joinPaths(this.targetPath, Manifest.stacksFolder, this.name);
   }
 
   /**

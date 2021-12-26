@@ -11,7 +11,7 @@ class RawFormatter extends BaseFormatter {
     return raw;
   }
 
-  async export(parsed: object): Promise<object|string> {
+  async export(parsed: object): Promise<object | string> {
     return parsed;
   }
 }

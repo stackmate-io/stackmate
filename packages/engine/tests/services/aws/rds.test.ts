@@ -28,7 +28,10 @@ describe('AwsRdsService', () => {
     });
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const { name, region, size, storage, engine, database, rootCredentials } = databaseConfig;
+      const {
+        name, region, size, storage, engine, database, rootCredentials,
+      } = databaseConfig;
+
       service = new AwsRdsService(databaseConfig, mockStack, prerequisites);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
@@ -47,8 +50,8 @@ describe('AwsRdsService', () => {
   describe('provision', () => {
     it('provisions a single-node RDS instance with the default profile', () => {
       let cloudStack: CloudStack;
-      let stackName: string = 'production';
       let variables = {};
+      const stackName: string = 'production';
 
       const scope = Testing.synthScope((stack) => {
         cloudStack = enhanceStack(stack, { name: stackName });
@@ -70,7 +73,7 @@ describe('AwsRdsService', () => {
         [`${stackName}-${databaseConfig.name}-rootpassword`]: {
           default: databaseConfig.rootCredentials.password,
           sensitive: true,
-        }
+        },
       });
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
@@ -95,9 +98,9 @@ describe('AwsRdsService', () => {
         publicly_accessible: true,
         skip_final_snapshot: true,
         storage_type: 'gp2',
-        parameter_group_name: `\$\{aws_db_parameter_group.${databaseConfig.name}-${stackName}-params.name\}`,
-        password: `\$\{var.${stackName}-${databaseConfig.name}-rootpassword}`,
-        username: `\$\{var.${stackName}-${databaseConfig.name}-rootusername}`,
+        parameter_group_name: `$\{aws_db_parameter_group.${databaseConfig.name}-${stackName}-params.name}`,
+        password: `$\{var.${stackName}-${databaseConfig.name}-rootpassword}`,
+        username: `$\{var.${stackName}-${databaseConfig.name}-rootusername}`,
       });
     });
   });

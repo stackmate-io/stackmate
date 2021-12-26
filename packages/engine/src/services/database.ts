@@ -67,7 +67,7 @@ abstract class Database extends Service implements Sizeable, Storable, Rootable,
    * @returns {Object} the parser functions to apply to the entity's attributes
    */
   parsers() {
-    return{
+    return {
       ...super.parsers(),
       nodes: parseInteger,
       port: parseInteger,

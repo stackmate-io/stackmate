@@ -5,8 +5,7 @@ import { TerraformVariable } from 'cdktf';
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudStack, Provisionable } from '@stackmate/interfaces';
-import { CloudService } from '@stackmate/interfaces';
+import { CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
@@ -94,7 +93,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(attributes: EntityAttributes = {}, stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
+  constructor(attributes: EntityAttributes, stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
     super(attributes);
 
     this.stack = stack;
@@ -146,7 +145,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    *
    * @param {Service} target the service to link the current service with
    */
-  public link(target: Service) {
+  public link(target: CloudService) {
     // Find an appropriate handler & run it
     const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
 

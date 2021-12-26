@@ -4,11 +4,7 @@ import { PROVIDER } from '@stackmate/constants';
 import { AbstractConstructor, ProviderChoice, RegionList } from '@stackmate/types';
 
 const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
-  abstract class AwsService extends Base {
-    constructor(...args: any[]) {
-      super(...args);
-    }
-
+  abstract class AwsServiceWrapper extends Base {
     /**
      * @var {String} provider the cloud provider used (eg. AWS)
      * @readonly
@@ -33,9 +29,9 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
     public set dependencies({ vpc }: { vpc: AwsVpcService }) {
       this.vpcId = vpc.id;
     }
-  };
+  }
 
-  return AwsService;
-}
+  return AwsServiceWrapper;
+};
 
 export default AwsService;

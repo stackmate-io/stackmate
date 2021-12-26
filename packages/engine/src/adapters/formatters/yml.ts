@@ -18,15 +18,11 @@ class YamlFormatter extends BaseFormatter {
   protected readonly exportOptions: object = {};
 
   async parse(raw: string): Promise<object> {
-    return YAML.parse(
-      raw.toString().trim(), this.parseOptions,
-    );
+    return YAML.parse(raw.toString().trim(), this.parseOptions);
   }
 
   async export(parsed: object): Promise<string> {
-    return YAML.stringify(
-      parsed, this.exportOptions,
-    );
+    return YAML.stringify(parsed, this.exportOptions);
   }
 }
 

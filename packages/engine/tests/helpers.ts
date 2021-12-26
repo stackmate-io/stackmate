@@ -3,9 +3,10 @@ import { Construct } from 'constructs';
 
 import { CloudStack } from '@stackmate/interfaces';
 
-export const enhanceStack = (
-  stack: Construct, { name, targetPath, synthesize }: { name?: string, targetPath?: string, synthesize?: Function } = {},
-): CloudStack => {
+// eslint-disable-next-line import/prefer-default-export
+export const enhanceStack = (stack: Construct, {
+  name, targetPath, synthesize,
+}: { name?: string, targetPath?: string, synthesize?: Function } = {}): CloudStack => {
   Object.defineProperties(stack, {
     name: {
       value: name || faker.internet.domainWord(),

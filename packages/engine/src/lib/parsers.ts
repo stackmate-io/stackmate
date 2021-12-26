@@ -31,7 +31,7 @@ export const parseArrayToSet = (value: Array<any>): Set<any> => (
  */
 export const parseObject = (obj: object): object => (
   isObject(obj) ? obj : {}
-)
+);
 
 /**
  * Parses an array to an array of unique values
@@ -85,6 +85,3 @@ export const parseCredentials = ({ username, password }: CredentialsObject): Cre
 export const parseFileName = (path: string) => (
   resolvePath(path.trim())
 );
-
-export const parseProfileOverrides = (overrides: object) => {
-};

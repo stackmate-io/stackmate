@@ -18,12 +18,12 @@ export const hashObject = (obj: object): string => (
  * @param {Object} superObj the superset object
  * @returns {Boolean}
  */
-export const isKeySubset = (subObj: any, superObj: any): boolean => {
-  return Object.keys(subObj).every((key) => {
+export const isKeySubset = (subObj: any, superObj: any): boolean => (
+  Object.keys(subObj).every((key) => {
     if (isObject(subObj[key])) {
       return isKeySubset(superObj[key], subObj[key]);
     }
 
     return key in subObj && key in superObj;
-  });
-};
+  })
+);

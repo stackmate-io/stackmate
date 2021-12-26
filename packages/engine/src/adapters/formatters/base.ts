@@ -7,7 +7,7 @@ abstract class BaseFormatter implements Formatter {
    * @param {String} raw the raw content to parse
    * @returns {Promise<object>} the parsed object
    */
-  abstract parse(raw: string|object): Promise<object>;
+  abstract parse(raw: string | object): Promise<object>;
 
   /**
    * Exports a (parsed) object to a string
@@ -15,7 +15,7 @@ abstract class BaseFormatter implements Formatter {
    * @param {Object} parsed the object to stringify
    * @returns {Promise<string>} the stringified object
    */
-  abstract export(parsed: object): Promise<string|object>;
+  abstract export(parsed: object): Promise<string | object>;
 }
 
 export default BaseFormatter;

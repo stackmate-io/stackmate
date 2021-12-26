@@ -21,12 +21,12 @@ class Stage {
    * @var {Stack} stack the stack to use to provision the services with
    * @readonly
    */
-  protected readonly stack: CloudStack;
+  readonly stack: CloudStack;
 
   /**
    * @var {CloudManager} clouds the class that handles the cloud services
    */
-  protected readonly clouds: CloudManager;
+  readonly clouds: CloudManager;
 
   constructor(name: string, targetPath: string, defaults: ProjectDefaults = {}) {
     this.name = name;

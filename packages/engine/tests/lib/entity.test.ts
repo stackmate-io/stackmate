@@ -78,7 +78,7 @@ describe('Entity', () => {
         expect(err.errors).toBeInstanceOf(Object);
         expect(err.errors).toMatchObject({
           name: ['You have to specify a name to use'],
-          number: ['The number provided is invalid']
+          number: ['The number provided is invalid'],
         });
       }
     });

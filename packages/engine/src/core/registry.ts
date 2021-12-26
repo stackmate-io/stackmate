@@ -5,17 +5,17 @@ import { CloudService } from '@stackmate/interfaces';
  */
 class Registry {
   /**
-   * @var {Map} _collection the list of available services
+   * @var {Map} collection the list of available services
    * @private
    */
-  private _collection: Map<string, CloudService> = new Map();
+  private collection: Map<string, CloudService> = new Map();
 
   /**
-   * @var {Map} _queue the list of services that are awaited to be
+   * @var {Map} queue the list of services that are awaited to be
    *                   introduced and their corresponding links
    * @private
    */
-  private _queue: Map<string, Set<string>> = new Map();
+  private queue: Map<string, Set<string>> = new Map();
 
   /**
    * Adds a new service to the queue
@@ -46,12 +46,12 @@ class Registry {
    */
   add(service: CloudService): void {
     // Add the list to the registry
-    this._collection.set(service.name, service);
+    this.collection.set(service.name, service);
 
     if (service.links) {
       service.links.forEach((linkedServiceName: string) => {
         // if the linked service exists in the registry, just link the two
-        if (this._collection.has(linkedServiceName)) {
+        if (this.collection.has(linkedServiceName)) {
           this.link(service.name, linkedServiceName);
         } else {
           // add to queue which means that when the linked service will be introduced,
@@ -73,7 +73,7 @@ class Registry {
    * @returns {Service} the service requested
    */
   get(serviceName: string): CloudService {
-    const service = this._collection.get(serviceName);
+    const service = this.collection.get(serviceName);
 
     if (!service) {
       throw new Error(`Service ${serviceName} was not found in the registry`);
@@ -91,11 +91,11 @@ class Registry {
    * @void
    */
   enqueue(awaitedServiceName: string, linkedServiceName: string): void {
-    const servicesToBeNotified = this._queue.get(awaitedServiceName) || new Set();
+    const servicesToBeNotified = this.queue.get(awaitedServiceName) || new Set();
 
     servicesToBeNotified.add(linkedServiceName);
 
-    this._queue.set(awaitedServiceName, servicesToBeNotified);
+    this.queue.set(awaitedServiceName, servicesToBeNotified);
   }
 
   /**
@@ -105,15 +105,15 @@ class Registry {
    * @void
    */
   dequeue(serviceName: string): void {
-    const linkedServices = this._queue.get(serviceName);
-    this._queue.delete(serviceName);
+    const linkedServices = this.queue.get(serviceName);
+    this.queue.delete(serviceName);
 
     if (!linkedServices || !linkedServices.size) {
       return;
     }
 
     linkedServices.forEach(
-      name => this.link(serviceName, name),
+      (name) => this.link(serviceName, name),
     );
   }
 

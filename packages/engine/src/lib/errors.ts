@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { ValidationErrorList } from '@stackmate/types';
 
 /**

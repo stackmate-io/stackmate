@@ -1,8 +1,5 @@
 {
   "extends": "./tsconfig",
-  "include": [
-    "src/**/*"
-  ],
   "exclude": [
     "tests/**/*",
     "node_modules/**/*"

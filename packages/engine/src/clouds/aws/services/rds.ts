@@ -79,7 +79,7 @@ class AwsRdsService extends AwsDatabaseService {
           availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
         },
       },
-    }
+    };
   }
 
   provision() {

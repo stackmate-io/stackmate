@@ -20,7 +20,7 @@ const validateStages = (stages: StagesNormalizedAttributes) => {
 
   const stageErrors: Array<string> = [];
 
-  Object.keys(stages).forEach(stageName => {
+  Object.keys(stages).forEach((stageName) => {
     const stage = stages[stageName];
 
     if (isEmpty(stage)) {
@@ -29,17 +29,17 @@ const validateStages = (stages: StagesNormalizedAttributes) => {
       );
     }
 
-    if (Object.values(stage).some(s => !isObject(s))) {
+    if (Object.values(stage).some((s) => !isObject(s))) {
       return stageErrors.push(
         `Stage “${stageName}” contains invalid service configurations. Every service should be declared as an object`,
       );
     }
 
     const serviceNames = Object.keys(stage);
-    serviceNames.forEach(serviceName => {
+    serviceNames.forEach((serviceName) => {
       const srv = stage[serviceName];
 
-      if (!Boolean(srv.type) || !Object.values(SERVICE_TYPE).includes(srv.type)) {
+      if (!srv.type || !Object.values(SERVICE_TYPE).includes(srv.type)) {
         stageErrors.push(
           `Stage “${stageName}” contains invalid configuration for service “${serviceName}”`,
         );
@@ -49,16 +49,16 @@ const validateStages = (stages: StagesNormalizedAttributes) => {
 
   // Make sure the services are properly linked together
   const invalidLinks: Array<[string, Array<string>]> = [];
-  Object.keys(stages).forEach(stageName => {
+  Object.keys(stages).forEach((stageName) => {
     const serviceNames = Object.keys(stages[stageName]);
     const links = uniq(
-      flatten(Object.values(stages[stageName]).map(srv => srv.links || [])),
+      flatten(Object.values(stages[stageName]).map((srv) => srv.links || [])),
     );
 
     const invalidServices = difference(links, serviceNames);
     if (!isEmpty(invalidServices)) {
       stageErrors.push(
-        `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`
+        `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`,
       );
     }
   });
@@ -82,7 +82,7 @@ const validateProjectDefaults = (defaults: ProjectDefaults) => {
 
   const providers = Object.values(PROVIDER);
   const hasValidProviderKeys = isObject(defaults) && Object.keys(defaults).some(
-    prov => !providers.includes(prov as ProviderChoice),
+    (prov) => !providers.includes(prov as ProviderChoice),
   );
 
   if (!hasValidProviderKeys) {
@@ -122,7 +122,7 @@ const validateVault = (vault: VaultConfiguration) => {
  * @returns {String|undefined} the error message (if any)
  */
 const validateServiceLinks = (links: Array<string>) => {
-  if (isArray(links) && !links.every(l => isString(l))) {
+  if (isArray(links) && !links.every((l) => isString(l))) {
     return 'The service contains an invalid entries under “links“';
   }
 };
@@ -181,7 +181,7 @@ const validateVersion = (
   if (!availableVersions.includes(version)) {
     return `The version specified is not valid. Available options are: ${availableVersions.join(', ')}`;
   }
-}
+};
 
 const validateServiceProfile = (
   profile: string,

@@ -38,6 +38,7 @@ export interface CloudService extends Provisionable {
   stage: string;
   region: string;
   dependencies: CloudPrerequisites;
+  link(target: CloudService): void;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
 }
@@ -99,8 +100,8 @@ export interface StorageAdapter {
 }
 
 export interface Formatter {
-  parse(raw: string|object): Promise<object>;
-  export(parsed: object): Promise<string|object>;
+  parse(raw: string | object): Promise<object>;
+  export(parsed: object): Promise<string | object>;
 }
 
 export interface ConfigurationResource {
@@ -120,7 +121,7 @@ export interface Project extends ConfigurationResource {
 export interface Vault extends ConfigurationResource {
   credentials(service: string): CredentialsObject;
   rootCredentials(service: string): CredentialsObject;
-};
+}
 
 export interface CloudStack extends TerraformStack {
   readonly name: string;
@@ -128,4 +129,4 @@ export interface CloudStack extends TerraformStack {
   readonly app: TerraformApp;
   path: string;
   synthesize(): void;
-};
+}

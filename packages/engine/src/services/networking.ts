@@ -31,7 +31,7 @@ abstract class Networking extends Service {
           message: 'You should define a CIDR block for the networking',
         },
       },
-    }
+    };
   }
 }
 

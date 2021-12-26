@@ -20,9 +20,9 @@ class Vault extends Configuration implements VaultInterface {
   }
 
   /**
-   * @returns {String} the error message to use
+   * @returns {String} the error message
    */
-  getValidationError() {
+  public get validationMessage(): string {
     return 'The vault contents are invalid';
   }
 

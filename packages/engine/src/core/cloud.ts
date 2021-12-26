@@ -58,7 +58,7 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
    * @private
    */
-  private _prerequisites: CloudPrerequisites = {};
+  private provisions: CloudPrerequisites = {};
 
   /**
    * @constructor
@@ -66,7 +66,7 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @param {String} region the region for the cloud provider
    * @param {Object} defaults the defaults for the cloud
    */
-  constructor(attributes: EntityAttributes = {}, stack: CloudStack) {
+  constructor(attributes: EntityAttributes, stack: CloudStack) {
     super(attributes);
 
     this.stack = stack;
@@ -83,20 +83,20 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @returns {CloudPrerequisites} the cloud provider's prerequisites
    */
   protected get prerequisites(): CloudPrerequisites {
-    return this._prerequisites;
+    return this.provisions;
   }
 
   /**
    * @param {CloudPrerequisites} prereqs the prerequisites the cloud provider provides
    */
   protected set prerequisites(prereqs: CloudPrerequisites) {
-    Object.values(prereqs).forEach(service => {
+    Object.values(prereqs).forEach((service) => {
       if (!service.isProvisioned) {
         service.provision();
       }
     });
 
-    this._prerequisites = prereqs;
+    this.provisions = prereqs;
   }
 
   /**
@@ -132,7 +132,7 @@ abstract class Cloud extends Entity implements CloudProvider {
   public get isProvisioned(): boolean {
     return this.providerInstance instanceof TerraformProvider
       && !isEmpty(this.prerequisites)
-      && Object.values(this.prerequisites).every(s => s.isProvisioned);
+      && Object.values(this.prerequisites).every((srv) => srv.isProvisioned);
   }
 
   /**

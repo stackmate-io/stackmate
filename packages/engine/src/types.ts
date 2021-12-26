@@ -13,7 +13,7 @@ export type StorageChoice = ChoiceOf<typeof STORAGE>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
-export type EnvironmentVariablesDeclaration = Record<string, string|number>;
+export type EnvironmentVariablesDeclaration = Record<string, string | number>;
 
 export type CredentialsObject = {
   username?: string;
@@ -63,7 +63,7 @@ export type CloudPrerequisites = {
 
 export type ProviderDefaults = {
   [name: string]: string | number;
-}
+};
 
 export type AwsDefaults = ProviderDefaults & {
   'vpc-cidr'?: string;
@@ -78,7 +78,7 @@ export type StageDeclarations = {
   [name: string]: { from?: string; skip?: Array<string> } & {
     [srv: string]: ServiceConfigurationDeclaration;
   };
-}
+};
 
 export type VaultConfiguration = {
   storage: StorageChoice;
@@ -143,7 +143,7 @@ export type LocalFileStorageOptions = StorageOptions & {
 export type AwsParamStorageOptions = StorageOptions & {
   key: string;
   region: string;
-}
+};
 
 export type ConfigurationAttributes = {
   storage: StorageChoice;

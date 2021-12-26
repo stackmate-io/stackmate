@@ -14,14 +14,14 @@ class LocalFileAdapter extends BaseStorageAdapter {
    * @returns {String} the error message
    */
   public get validationMessage(): string {
-    return `The file information provided is not valid`;
+    return 'The file information provided is not valid';
   }
 
   parsers(): AttributeParsers {
     return {
       ...super.parsers(),
       path: parseFileName,
-    }
+    };
   }
 
   validations(): Validations {
