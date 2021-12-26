@@ -5,7 +5,8 @@ import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/pars
 import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 
-abstract class Database extends Service implements Sizeable, Storable, Rootable, MultiNode, Versioned {
+abstract class Database extends Service implements Sizeable, Storable,
+  Rootable, MultiNode, Versioned {
   /**
    * @var {String} type the type for the service
    */

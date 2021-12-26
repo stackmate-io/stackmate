@@ -201,7 +201,8 @@ class Project extends Configuration implements ProjectInterface {
    * @param {String} name the stage's name
    */
   static async synthesize(
-    path: string = DEFAULT_PROJECT_FILE, stageName: string = DEFAULT_STAGE,
+    path: string = DEFAULT_PROJECT_FILE,
+    stageName: string = DEFAULT_STAGE,
   ): Promise<void> {
     const project = new Project({ path, storage: STORAGE.FILE });
     await project.load();

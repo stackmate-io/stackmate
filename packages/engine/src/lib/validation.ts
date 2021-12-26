@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import validate from 'validate.js';
 import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
@@ -137,7 +138,8 @@ const validateServiceLinks = (links: Array<string>) => {
  * @returns {String|undefined} the error message (if any)
  */
 const validateCredentials = (
-  credentials: CredentialsObject, { requireUserName = true, requirePassword = true } = {},
+  credentials: CredentialsObject,
+{ requireUserName = true, requirePassword = true } = {},
 ) => {
   const { username, password } = credentials;
   const erroredFields = [];

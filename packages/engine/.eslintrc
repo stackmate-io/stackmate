@@ -1,6 +1,7 @@
 {
   "rules": {
     "class-methods-use-this": "off",
+    "object-curly-newline": "off",
     "semi": ["error", "always"],
     "object-curly-spacing": ["error", "always"]
   },

@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { inspect } from 'util';
 
 import Stack from '@stackmate/core/stack';

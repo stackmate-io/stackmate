@@ -212,7 +212,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
           provider: this.provider,
           service: this.type,
         },
-      }
+      },
     };
   }
 
