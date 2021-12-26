@@ -150,33 +150,11 @@ export type ConfigurationAttributes = {
   path?: string;
 };
 
+export type ProvisioningProfile = {
+  [attribute: string]: object;
+};
+
 export type VaultAttributes = ConfigurationAttributes & {
   key?: string;
   region?: string;
-};
-
-export type DatabaseServiceAttributes = ServiceAttributes & Required<{
-  size: string;
-  nodes: number;
-  storage: number;
-  engine: string;
-  database: string;
-  version: string;
-  port: number;
-  rootCredentials: CredentialsObject;
-}>;
-
-export type DatabaseProvisioningProfile = {
-  instance: object;
-  params: object;
-};
-
-export type DatabaseServiceDefaults = Pick<DatabaseServiceAttributes, 'nodes' | 'size' | 'engine' | 'storage' | 'rootCredentials'>;
-
-export type NetworkingServiceAttributes = ServiceAttributes & {
-  cidr: string;
-};
-
-export type NetworkingServiceDefaults = {
-  cidr: string;
 };

@@ -9,7 +9,7 @@ import { CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
-  ServiceTypeChoice, EntityAttributes,
+  ServiceTypeChoice, EntityAttributes, ProvisioningProfile,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService, Provisionable {
@@ -93,7 +93,9 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  constructor(attributes: EntityAttributes, stack: CloudStack, prerequisites: CloudPrerequisites = {}) {
+  constructor(
+    attributes: EntityAttributes, stack: CloudStack, prerequisites: CloudPrerequisites = {},
+  ) {
     super(attributes);
 
     this.stack = stack;
@@ -131,13 +133,13 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * @returns {Object} the profile to use for provisioning
    */
   @Memoize()
-  public get provisioningProfile(): object {
+  public get provisioningProfile(): ProvisioningProfile {
     if (!this.profile) {
       return {};
     }
 
     const profile = Profile.get(this.provider, this.type, this.profile);
-    return merge(profile, this.overrides);
+    return merge(profile, this.overrides) as ProvisioningProfile;
   }
 
   /**
@@ -220,10 +222,13 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * Provisions a variable in the stack
    *
    * @param {String} name the variable's name
-   * @param {String} value
-   * @param param2
+   * @param {String} value the value for the variable
+   * @param {Object} options
+   * @param {Boolean} options.sensitive whether the variable is sensitive
    */
-  variable(name: string, value: string | undefined | null, { sensitive = true } = {}): TerraformVariable {
+  variable(
+    name: string, value: string | undefined | null, { sensitive = true } = {},
+  ): TerraformVariable {
     const id: string = `${this.stack.name}-${this.name}-${name}`;
     return new TerraformVariable(this.stack, id, { default: value || '', sensitive });
   }

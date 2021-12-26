@@ -4,7 +4,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/lib/mixins';
-import { DatabaseProvisioningProfile, OneOf } from '@stackmate/types';
+import { OneOf } from '@stackmate/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -84,7 +84,7 @@ class AwsRdsService extends AwsDatabaseService {
 
   provision() {
     const { username: rootUsername, password: rootPassword } = this.rootCredentials;
-    const { instance, params } = this.provisioningProfile as DatabaseProvisioningProfile;
+    const { instance, params } = this.provisioningProfile;
     const rootUsernameVar = this.variable('rootusername', rootUsername);
     const rootPasswordVar = this.variable('rootpassword', rootPassword);
 

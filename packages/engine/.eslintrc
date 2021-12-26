@@ -2,6 +2,7 @@
   "rules": {
     "class-methods-use-this": "off",
     "object-curly-newline": "off",
+    "function-paren-newline": "off",
     "semi": ["error", "always"],
     "object-curly-spacing": ["error", "always"]
   },

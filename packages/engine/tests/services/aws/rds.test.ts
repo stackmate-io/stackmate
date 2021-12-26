@@ -1,7 +1,7 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { Testing } from 'cdktf';
 
-import { CloudPrerequisites, DatabaseServiceAttributes } from '@stackmate/types';
+import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { AwsRdsService } from '@stackmate/clouds/aws';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
@@ -13,7 +13,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 describe('AwsRdsService', () => {
   let mockStack: CloudStack;
   let prerequisites: CloudPrerequisites;
-  let databaseConfig: DatabaseServiceAttributes;
+  let databaseConfig: { [name: string]: any };
 
   beforeEach(() => {
     databaseConfig = mysqlDatabaseConfiguration;

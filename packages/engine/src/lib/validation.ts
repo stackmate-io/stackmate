@@ -139,7 +139,7 @@ const validateServiceLinks = (links: Array<string>) => {
  */
 const validateCredentials = (
   credentials: CredentialsObject,
-{ requireUserName = true, requirePassword = true } = {},
+  { requireUserName = true, requirePassword = true } = {},
 ) => {
   const { username, password } = credentials;
   const erroredFields = [];
@@ -196,7 +196,9 @@ const validateServiceProfile = (
 
 const validateProfileOverrides = (
   overrides: object,
-  { profile, provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice, profile: string },
+  { profile, provider, service }: {
+    provider: ProviderChoice, service: ServiceTypeChoice, profile: string
+  },
 ) => {
   let profileConfig: object;
 
