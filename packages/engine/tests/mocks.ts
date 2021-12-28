@@ -8,7 +8,7 @@ import { AttributeParsers, CloudPrerequisites, Validations } from '@stackmate/ty
 import { CloudStack } from '@stackmate/interfaces';
 import { parseString } from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { awsRegion, stackName, outputPath } from './fixtures';
 
@@ -28,9 +28,7 @@ export const getAwsPrerequisites = ({
     throw new Error('Failure when instantiating the AWS cloud provider');
   }
 
-  return {
-    vpc: aws.service(SERVICE_TYPE.NETWORKING, { name: 'test-vpc', region }),
-  };
+  return aws.prerequisites;
 };
 
 export const multiply = (value: number, { times = 5 } = {}) => (

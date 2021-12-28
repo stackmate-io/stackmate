@@ -24,10 +24,17 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
     vpcId: string;
 
     /**
+     * @var {Array<String>} securityGroupIds the security group ids for the service
+     * @protected
+     */
+    securityGroupIds: Array<string> = [];
+
+    /**
      * @param {Object} dependencies the service's dependencies
      */
     public set dependencies({ vpc }: { vpc: AwsVpcService }) {
       this.vpcId = vpc.id;
+      this.securityGroupIds.push(vpc.securityGroupId);
     }
   }
 

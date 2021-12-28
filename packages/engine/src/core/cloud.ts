@@ -50,15 +50,14 @@ abstract class Cloud extends Entity implements CloudProvider {
   stack: CloudStack;
 
   /**
+   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
+   */
+  prerequisites: CloudPrerequisites;
+
+  /**
    * @var {TerraformProvider} providerInstance the terraform provider instance
    */
   protected providerInstance: TerraformProvider;
-
-  /**
-   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
-   * @private
-   */
-  protected prerequisites: CloudPrerequisites;
 
   /**
    * @returns {String} the error message

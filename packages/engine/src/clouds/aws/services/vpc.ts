@@ -1,22 +1,39 @@
 import { Token } from 'cdktf';
-import { isUndefined } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
 import Networking from '@stackmate/services/networking';
-import AwsService from '@stackmate/lib/mixins';
+import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
+import { ProviderChoice, RegionList } from '@stackmate/types';
+import { PROVIDER } from '@stackmate/constants';
+import { AWS_REGIONS } from '../constants';
 
-const AwsNetworking = AwsService(Networking);
+/**
+ * We don't wrap the service with the AwsService decorator
+ * because this is a service that gets instantiated when the cloud provider inits
+ */
+class AwsVpcService extends Networking {
+  /**
+ * @var {String} provider the cloud provider used (eg. AWS)
+ * @readonly
+ */
+  readonly provider: ProviderChoice = PROVIDER.AWS;
 
-class AwsVpcService extends AwsNetworking {
+  /**
+   * @var {Object} regions the list of regions available
+   * @readonly
+   */
+  readonly regions: RegionList = AWS_REGIONS;
+
   /**
    * @var {Vpc} vpc the VPC resource
    */
   public vpc: Vpc;
 
   /**
-   * @var {Subnet} subnet the subnet resource
+   * @var {Array<Subnet>} subnetPrimary the subnet resource
    */
-  public subnet: Subnet;
+  public subnets: Array<Subnet> = [];
 
   /**
    * @var {InternetGateway} gateway the gateway resource
@@ -27,7 +44,10 @@ class AwsVpcService extends AwsNetworking {
    * @returns {Boolean} whether the service is provisioned
    */
   public get isProvisioned(): boolean {
-    return !isUndefined(this.vpc) && !isUndefined(this.subnet) && !isUndefined(this.gateway);
+    return !isUndefined(this.vpc)
+      && !isUndefined(this.subnets)
+      && !isEmpty(this.subnets)
+      && !isUndefined(this.gateway);
   }
 
   /**
@@ -37,19 +57,33 @@ class AwsVpcService extends AwsNetworking {
     return Token.asString(this.vpc.id);
   }
 
+  /**
+   * @returns {String} the security group id
+   */
+  public get securityGroupId(): string {
+    return Token.asString(this.vpc.defaultSecurityGroupId);
+  }
+
   provision() {
-    // Add vpc, subnets etc
+    const { vpc, subnet, gateway } = this.provisioningProfile;
+    const [vpcCidr, ...subnetCidrs] = getNetworkingCidrBlocks(this.ip, 16, 2, 24);
+
     this.vpc = new Vpc(this.stack, this.identifier, {
-      cidrBlock: this.cidr(8),
+      ...vpc,
+      cidrBlock: vpcCidr,
     });
 
-    this.subnet = new Subnet(this.stack, `${this.identifier}-subnet`, {
-      vpcId: this.id,
-      cidrBlock: this.cidr(16),
-    });
+    this.subnets = subnetCidrs.map((cidrBlock, idx) => (
+      new Subnet(this.stack, `${this.identifier}-subnet${(idx + 1)}`, {
+        ...subnet,
+        vpcId: this.vpc.id,
+        cidrBlock,
+      })
+    ));
 
     this.gateway = new InternetGateway(this.stack, `${this.identifier}-gateway`, {
-      vpcId: this.id,
+      ...gateway,
+      vpcId: this.vpc.id,
     });
   }
 }

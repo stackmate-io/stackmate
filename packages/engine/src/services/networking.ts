@@ -15,16 +15,6 @@ abstract class Networking extends Service {
    */
   @Attribute ip: string = DEFAULT_IP;
 
-  /**
-   * Returns a CIDR block based on the service's IP
-   *
-   * @param {Number} bits the bits for the CIDR
-   * @returns {String} the CIDR
-   */
-  protected cidr(bits: number): string {
-    return `${this.ip}/${bits}`;
-  }
-
   parsers() {
     return {
       ...super.parsers(),

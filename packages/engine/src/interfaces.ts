@@ -22,6 +22,7 @@ export interface Provisionable extends BaseEntity {
 }
 
 export interface CloudProvider extends Provisionable {
+  prerequisites: CloudPrerequisites;
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;

@@ -1,21 +1,18 @@
 import 'cdktf/lib/testing/adapters/jest';
+import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
 import Profile from '@stackmate/core/profile';
 import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
+import { getMockStack } from 'tests/mocks';
 import { networkingConfiguration as serviceConfig } from 'tests/fixtures';
 import { AwsVpcService } from '@stackmate/clouds/aws';
 import { getProvisionResults } from 'tests/helpers';
 
 describe('AwsVpcService', () => {
   let mockStack: CloudStack;
-  let prerequisites: CloudPrerequisites;
-
-  beforeEach(() => {
-    prerequisites = getAwsPrerequisites({ stack: mockStack });
-  });
+  const prerequisites: CloudPrerequisites = {};
 
   describe('instantiation', () => {
     let service: AwsVpcService;
@@ -48,14 +45,40 @@ describe('AwsVpcService', () => {
 
   describe('provision', () => {
     it('provisions a VPC and its dependencies', async () => {
-      const { scope, variables } = await getProvisionResults({
+      const stackName = 'production';
+      // verify the fixture
+      expect(serviceConfig.ip).toEqual('12.0.0.0');
+      const expectedVpcId = `$\{aws_vpc.${serviceConfig.name}-${stackName}.id}`;
+
+      const { scope } = await getProvisionResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsVpcService,
         serviceConfig,
-        stackName: 'production',
+        stackName,
+        withPrerequisites: false,
       });
 
-      console.log(scope, variables);
+      expect(scope).toHaveResourceWithProperties(Vpc, {
+        cidr_block: `12.0.0.0/16`,
+        enable_dns_hostnames: true,
+        enable_dns_support: true,
+      });
+
+      expect(scope).toHaveResourceWithProperties(Subnet, {
+        vpc_id: expectedVpcId,
+        cidr_block: `12.0.1.0/24`,
+        map_public_ip_on_launch: true,
+      });
+
+      expect(scope).toHaveResourceWithProperties(Subnet, {
+        vpc_id: expectedVpcId,
+        cidr_block: `12.0.2.0/24`,
+        map_public_ip_on_launch: true,
+      });
+
+      expect(scope).toHaveResourceWithProperties(InternetGateway, {
+        vpc_id: expectedVpcId,
+      });
     });
   });
 });

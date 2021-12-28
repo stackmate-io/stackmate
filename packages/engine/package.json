@@ -15,6 +15,7 @@
     "@cdktf/provider-aws": "^3.0.1",
     "cdktf": "^0.8.1",
     "constructs": "^10.0.12",
+    "ip-address": "^8.1.0",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.3.1",

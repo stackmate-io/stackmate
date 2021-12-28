@@ -39,12 +39,13 @@ export const enhanceStack = (stack: Construct, {
  * @returns {Promise<Object>}
  */
 export const getProvisionResults = async ({
-  provider, serviceClass, serviceConfig, stackName = 'production',
+  provider, serviceClass, serviceConfig, stackName = 'production', withPrerequisites = true,
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
   serviceConfig: object;
-  stackName: string;
+  stackName?: string;
+  withPrerequisites?: boolean;
 }): Promise<{
   scope: string;
   variables: object;
@@ -52,8 +53,10 @@ export const getProvisionResults = async ({
 }> => {
   let prerequisitesGenerator = ({ stack }: { stack: CloudStack }) => ({});
 
-  if (provider === PROVIDER.AWS) {
-    prerequisitesGenerator = getAwsPrerequisites;
+  if (withPrerequisites) {
+    if (provider === PROVIDER.AWS) {
+      prerequisitesGenerator = getAwsPrerequisites;
+    }
   }
 
   const synthesize = (): Promise<{ [name: string]: any }> => {

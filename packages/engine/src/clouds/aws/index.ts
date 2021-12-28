@@ -44,7 +44,10 @@ class AwsCloud extends Cloud {
     });
 
     this.prerequisites = {
-      vpc: this.service(SERVICE_TYPE.NETWORKING, { name: 'my-vpc', region: this.region }),
+      vpc: this.service(SERVICE_TYPE.NETWORKING, {
+        name: `${this.stack.name}-vpc`,
+        region: this.region,
+      }),
     };
   }
 }
