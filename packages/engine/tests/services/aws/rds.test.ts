@@ -6,7 +6,7 @@ import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
 import { getProvisionResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures';
+import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsRdsService } from '@stackmate/clouds/aws';
 import Profile from '@stackmate/core/profile';
 
@@ -58,7 +58,6 @@ describe('AwsRdsService', () => {
 
   describe('provision', () => {
     it('provisions a single-node RDS instance with the default profile', async () => {
-      const stackName: string = 'production';
       const { scope, variables } = await getProvisionResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsRdsService,

@@ -7,7 +7,8 @@ import { SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/clouds/aws/constants';
 
 export const stackName = `test-stack-${faker.random.alphaNumeric(12)}`;
-export const outputPath = joinPaths(os.tmpdir(), faker.datatype.hexaDecimal(12));
+export const inputPath = joinPaths(os.tmpdir(), 'input-files', `${faker.datatype.hexaDecimal(12)}.yml`);
+export const outputPath = joinPaths(os.tmpdir(), 'output-files', faker.datatype.hexaDecimal(12));
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 
 export const networkingConfiguration = {

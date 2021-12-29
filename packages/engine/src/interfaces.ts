@@ -96,7 +96,7 @@ export interface Profilable extends BaseEntity {
   overrides: object;
 }
 
-export interface StorageAdapter {
+export interface StorageAdapter extends BaseEntity {
   read(): Promise<string | object>;
   write(contents: string | object): Promise<void>;
 }

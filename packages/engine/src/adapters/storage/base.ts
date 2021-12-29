@@ -3,18 +3,6 @@ import { StorageAdapter } from '@stackmate/interfaces';
 
 abstract class BaseStorageAdapter extends Entity implements StorageAdapter {
   /**
-   * @var {Object} options any extra options provided by the parent class
-   */
-  readonly options: object;
-
-  constructor(options = {}) {
-    super(options);
-
-    this.validate();
-    this.options = options;
-  }
-
-  /**
    * @returns {Promise<String>} the raw content as fetched from the source
    * @async
    */

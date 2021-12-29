@@ -203,6 +203,7 @@ class Project extends Configuration implements ProjectInterface {
   static async synthesize(
     path: string = DEFAULT_PROJECT_FILE,
     stageName: string = DEFAULT_STAGE,
+    outputPath: string = '',
   ): Promise<void> {
     const project = new Project({ path, storage: STORAGE.FILE });
     await project.load();
@@ -231,7 +232,8 @@ class Project extends Configuration implements ProjectInterface {
     const vault = new Vault({ storage: vaultStorage, ...vaultStorageOptions });
     await vault.load();
 
-    const stage = new Stage(stageName, project.outputPath, defaults).populate(services, vault);
+    const output: string = outputPath || project.outputPath;
+    const stage = new Stage(stageName, output, defaults).populate(services, vault);
     stage.stack.synthesize();
   }
 }

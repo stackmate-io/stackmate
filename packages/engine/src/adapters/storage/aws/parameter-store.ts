@@ -3,25 +3,20 @@ import { Memoize } from 'typescript-memoize';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import Environment from '@stackmate/lib/environment';
-import { AwsParamStorageOptions, Validations } from '@stackmate/types';
+import { Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { Attribute } from '@stackmate/lib/decorators';
 
 class AwsParameterStore extends BaseStorageAdapter {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
-  readonly key: string;
+  @Attribute key: string;
 
   /**
    * @var {String} region the region that the params are stored into
    */
-  readonly region: string;
-
-  constructor(options: AwsParamStorageOptions) {
-    super(options);
-
-    this.validate();
-  }
+  @Attribute region: string;
 
   /**
    * @returns {String} the error message

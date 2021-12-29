@@ -6,7 +6,7 @@ import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getMockStack } from 'tests/mocks';
-import { networkingConfiguration as serviceConfig } from 'tests/fixtures';
+import { networkingConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsVpcService } from '@stackmate/clouds/aws';
 import { getProvisionResults } from 'tests/helpers';
 
@@ -45,7 +45,6 @@ describe('AwsVpcService', () => {
 
   describe('provision', () => {
     it('provisions a VPC and its dependencies', async () => {
-      const stackName = 'production';
       // verify the fixture
       expect(serviceConfig.ip).toEqual('12.0.0.0');
       const expectedVpcId = `$\{aws_vpc.${serviceConfig.name}-${stackName}.id}`;

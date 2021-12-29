@@ -3,12 +3,13 @@ import { promises as fsPromises } from 'fs';
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import { AttributeParsers, Validations } from '@stackmate/types';
 import { parseFileName } from '@stackmate/lib/parsers';
+import { Attribute } from '@stackmate/lib/decorators';
 
 class LocalFileAdapter extends BaseStorageAdapter {
   /**
-   * @var {String} path the path to read and write
+   * @var {Object} options the options for the storage
    */
-  readonly path: string;
+  @Attribute path: string;
 
   /**
    * @returns {String} the error message
@@ -30,9 +31,9 @@ class LocalFileAdapter extends BaseStorageAdapter {
       path: {
         presence: {
           allowEmpty: false,
-          message: 'You have to provide a name for the project',
+          message: 'You have to provide a file path for the project',
         },
-        validateFileExistence: true,
+        validateFileExistence: {},
       },
     };
   }

@@ -2,7 +2,7 @@ import { isEmpty, isObject } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import { FORMAT, STORAGE } from '@stackmate/constants';
-import { AwsParamStorageOptions, ConfigurationAttributes, LocalFileStorageOptions, StorageOptions } from '@stackmate/types';
+import { ConfigurationAttributes, StorageOptions } from '@stackmate/types';
 import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';
 import { AwsParameterStore, LocalFileAdapter } from '@stackmate/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
@@ -51,15 +51,22 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    */
   @Memoize()
   public get storageAdapter(): StorageAdapter {
+    let adapter: StorageAdapter | undefined;
+
     if (this.storage === STORAGE.FILE) {
-      return new LocalFileAdapter(this.storageOptions as LocalFileStorageOptions);
+      adapter = new LocalFileAdapter();
+    } else if (this.storage === STORAGE.AWS_PARAMS) {
+      adapter = new AwsParameterStore();
     }
 
-    if (this.storage === STORAGE.AWS_PARAMS) {
-      return new AwsParameterStore(this.storageOptions as AwsParamStorageOptions);
+    if (!adapter) {
+      throw new Error(`Invalid storage “${this.storage}” specified`);
     }
 
-    throw new Error(`Invalid storage “${this.storage}” specified`);
+    adapter.attributes = this.storageOptions;
+    adapter.validate();
+
+    return adapter;
   }
 
   /**
