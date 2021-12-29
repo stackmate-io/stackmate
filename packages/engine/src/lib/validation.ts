@@ -98,7 +98,7 @@ const validateProjectDefaults = (defaults: ProjectDefaults) => {
  * @returns {String|undefined} the error message (if any)
  */
 const validateVault = (vault: VaultConfiguration) => {
-  if (vault || !isObject(vault) || isEmpty(vault)) {
+  if (!vault || !isObject(vault) || isEmpty(vault)) {
     return 'The project does not contain a “vault” section';
   }
 

@@ -31,7 +31,7 @@ class LocalFileAdapter extends BaseStorageAdapter {
       path: {
         presence: {
           allowEmpty: false,
-          message: 'You have to provide a file path for the project',
+          message: 'You have to provide a valid file path',
         },
         validateFileExistence: {},
       },

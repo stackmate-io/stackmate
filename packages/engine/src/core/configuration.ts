@@ -1,5 +1,5 @@
-import { isEmpty, isObject } from 'lodash';
 import { Memoize } from 'typescript-memoize';
+import { isEmpty, isObject } from 'lodash';
 
 import { FORMAT, STORAGE } from '@stackmate/constants';
 import { ConfigurationAttributes, StorageOptions } from '@stackmate/types';
@@ -10,19 +10,19 @@ import Entity from '@stackmate/lib/entity';
 
 abstract class Configuration extends Entity implements ConfigurationResource {
   /**
-   * @var {Object} contents the file's contents in a structured format
-   */
-  contents: object;
-
-  /**
    * @var {String} storage the storage option (whether local or remote)
    */
-  storage: string;
+  storage: string = STORAGE.FILE;
 
   /**
    * @var {Object} storageOptions any extra options to use for the storage adapter
    */
   storageOptions: StorageOptions = {};
+
+  /**
+   * @var {Object} contents the file's contents in a structured format
+   */
+  contents: object;
 
   /**
    * @var {String} format the file's format (eg. YML, JSON)
@@ -37,6 +37,8 @@ abstract class Configuration extends Entity implements ConfigurationResource {
 
   constructor({ storage, ...storageOptions }: ConfigurationAttributes = { storage: STORAGE.FILE }) {
     super();
+
+    console.log({ storage, storageOptions });
 
     this.storage = storage;
 
@@ -120,9 +122,9 @@ abstract class Configuration extends Entity implements ConfigurationResource {
       throw new Error('File is not writeable');
     }
 
-    const stringified = await this.formatter.export(this.contents);
+    const formatted = await this.formatter.export(this.contents);
 
-    await this.storageAdapter.write(stringified);
+    await this.storageAdapter.write(formatted);
   }
 }
 

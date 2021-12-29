@@ -1,4 +1,4 @@
-import { CloudService, CloudServiceConstructor } from '@stackmate/interfaces';
+import { CloudService } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 // Utility types
@@ -153,7 +153,7 @@ export type AwsParamStorageOptions = StorageOptions & {
 
 export type ConfigurationAttributes = {
   storage: StorageChoice;
-  path?: string;
+  [name: string]: any;
 };
 
 export type ProvisioningProfile = {

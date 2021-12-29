@@ -1,17 +1,49 @@
 import { join as joinPaths } from 'path';
-import { clone, fromPairs, isEmpty, kebabCase, merge, omit } from 'lodash';
+import { clone, defaultsDeep, fromPairs, isEmpty, kebabCase, merge, omit } from 'lodash';
 
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
+import { Attribute } from '@stackmate/lib/decorators';
 import { Project as ProjectInterface } from '@stackmate/interfaces';
 import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration,
-  ProviderChoice, Validations, StageDeclarations, VaultConfiguration,
+  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, AttributeParsers,
+  VaultConfiguration, ProviderChoice, Validations, StageDeclarations, StorageChoice,
 } from '@stackmate/types';
+import { parseObject, parseString } from '@stackmate/lib/parsers';
 
 class Project extends Configuration implements ProjectInterface {
+  /**
+   * @var {String} name the project's name
+   */
+  @Attribute name: string
+
+  /**
+   * @var {String} provider the default cloud provider for the project
+   */
+  @Attribute provider: ProviderChoice;
+
+  /**
+   * @var {String} region the default cloud region for the project
+   */
+  @Attribute region: string;
+
+  /**
+   * @var {Object} vault the valult configuration
+   */
+  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS };
+
+  /**
+   * @var {Object} stages the stages declarations
+   */
+  @Attribute stages: StageDeclarations = {};
+
+  /**
+   * @var {Object} defaults the project's defaults
+   */
+  @Attribute defaults: ProjectDefaults = {};
+
   /**
    * @var {Object} contents the file's contents in a structured format
    */
@@ -27,6 +59,8 @@ class Project extends Configuration implements ProjectInterface {
    */
   async load(): Promise<object> {
     await super.load();
+
+    this.attributes = this.contents;
 
     this.validate();
 
@@ -60,9 +94,6 @@ class Project extends Configuration implements ProjectInterface {
           message: 'The project name needs to be in URL-friendly format, same as the repository name',
         },
       },
-      vault: {
-        validateVault: true,
-      },
       provider: {
         presence: {
           message: 'A default cloud provider should be specified',
@@ -77,12 +108,29 @@ class Project extends Configuration implements ProjectInterface {
           message: 'A default region (that corresponds to the regions that the default cloud provider provides) should be specified',
         },
       },
+      vault: {
+        validateVault: {},
+      },
       stages: {
-        validateStages: true,
+        validateStages: {},
       },
       defaults: {
-        validateProjectDefaults: true,
+        validateProjectDefaults: {},
       },
+    };
+  }
+
+  /**
+   * @returns {AttributeParsers} the functions to parse the attributes with
+   */
+  parsers(): AttributeParsers {
+    return {
+      name: parseString,
+      provider: parseString,
+      region: parseString,
+      vault: parseObject,
+      stages: parseObject,
+      defaults: parseObject,
     };
   }
 
@@ -99,10 +147,11 @@ class Project extends Configuration implements ProjectInterface {
 
     Object.assign(normalized, {
       stages: this.normalizeStages(stages, provider, region),
-      vault: this.normalizeVault(vault, provider, region),
+      vault: defaultsDeep(vault, { storage: Project.defaultVaultStorage(provider), region }),
       defaults: defaults || {},
     });
 
+    console.log({ normalized });
     return normalized;
   }
 
@@ -171,27 +220,14 @@ class Project extends Configuration implements ProjectInterface {
   }
 
   /**
-   * Normalizes a project's vault configuration
-   *
-   * @param vault {Object} the vault configuration
-   * @param provider {String} the default provider for the project
-   * @param region {String} the default region for the project
-   * @returns {Object} the normalized vault contents
+   * @returns {StorageChoice} the default storage choice
    */
-  private normalizeVault(vault: VaultConfiguration, provider: ProviderChoice, region: string) {
-    const { storage, region: vaultRegion, ...vaultAttrs } = vault;
-
-    const normalizedVault = { storage, region: vaultRegion, ...vaultAttrs };
-
-    if (!storage && provider === PROVIDER.AWS) {
-      Object.assign(normalizedVault, { storage: STORAGE.AWS_PARAMS });
+  static defaultVaultStorage(provider: ProviderChoice): StorageChoice {
+    if (provider === PROVIDER.AWS) {
+      return STORAGE.AWS_PARAMS;
     }
 
-    if (!region) {
-      Object.assign(normalizedVault, { region });
-    }
-
-    return normalizedVault;
+    return STORAGE.FILE;
   }
 
   /**
@@ -214,11 +250,11 @@ class Project extends Configuration implements ProjectInterface {
 
     const {
       contents: {
-        defaults,
-        stages,
         name: projectName,
+        stages,
         stages: { [stageName]: services },
-        vault: { storage: vaultStorage = STORAGE.FILE, ...vaultOptions },
+        vault: vaultOptions = { storage: STORAGE.FILE },
+        defaults,
       },
     } = project;
 
@@ -228,8 +264,7 @@ class Project extends Configuration implements ProjectInterface {
       );
     }
 
-    const vaultStorageOptions = { ...(vaultOptions || {}), stage: stageName, project: projectName };
-    const vault = new Vault({ storage: vaultStorage, ...vaultStorageOptions });
+    const vault = new Vault({ ...vaultOptions, stage: stageName, project: projectName });
     await vault.load();
 
     const output: string = outputPath || project.outputPath;
