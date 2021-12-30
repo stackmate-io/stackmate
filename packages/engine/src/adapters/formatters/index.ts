@@ -3,6 +3,7 @@ import { Formatter } from '@stackmate/interfaces';
 import { FORMAT } from '@stackmate/constants';
 import YamlFormatter from './yml';
 import JsonFormatter from './json';
+import RawFormatter from './raw';
 
 /**
  * Returns a formatter instance based on a format choice
@@ -11,15 +12,16 @@ import JsonFormatter from './json';
  * @returns {Formatter} the formatter instance
  */
 const getFormatter = (format: FormatChoice): Formatter => {
-  if (format === FORMAT.YML) {
-    return new YamlFormatter();
+  switch (format) {
+    case FORMAT.YML:
+      return new YamlFormatter();
+    case FORMAT.JSON:
+      return new JsonFormatter();
+    case FORMAT.RAW:
+      return new RawFormatter();
+    default:
+      throw new Error(`Invalid format “${format}” specified`);
   }
-
-  if (format === FORMAT.JSON) {
-    return new JsonFormatter();
-  }
-
-  throw new Error(`Invalid format “${format}” specified`);
 };
 
 export {

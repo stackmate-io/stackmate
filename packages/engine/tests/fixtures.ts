@@ -10,6 +10,7 @@ export const stackName = `test-stack-${faker.random.alphaNumeric(12)}`;
 export const inputPath = joinPaths(os.tmpdir(), 'input-files', `${faker.datatype.hexaDecimal(12)}.yml`);
 export const outputPath = joinPaths(os.tmpdir(), 'output-files', faker.datatype.hexaDecimal(12));
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
+export const awsKeyArn = `arn:aws:kms:${awsRegion}:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`;
 
 export const networkingConfiguration = {
   name: `${faker.internet.domainWord()}-vpc`,

@@ -3,15 +3,16 @@ import YAML from 'yaml';
 import sinon from 'sinon';
 import 'cdktf/lib/testing/adapters/jest';
 
-import { AWS_REGIONS, DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/clouds/aws/constants';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/clouds/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { Project } from '@stackmate/main';
-import { inputPath, outputPath } from 'tests/fixtures';
+import { inputPath, outputPath, awsRegion, awsKeyArn } from 'tests/fixtures';
 
 const projectConfig = {
   name: 'database-only-project',
   provider: PROVIDER.AWS,
-  region: AWS_REGIONS.EU_CENTRAL_1,
+  region: awsRegion,
+  vault: { key: awsKeyArn },
   stages: {
     production: {
       mysqlDatabase: {

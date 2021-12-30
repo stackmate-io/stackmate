@@ -1,8 +1,8 @@
+import Entity from '@stackmate/lib/entity';
 import { getFormatter } from '@stackmate/adapters/formatters';
 import { getStorageAdapter } from '@stackmate/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
 import { FormatChoice, StorageChoice } from '@stackmate/types';
-import Entity from '@stackmate/lib/entity';
 
 abstract class Configuration extends Entity implements ConfigurationResource {
   /**
