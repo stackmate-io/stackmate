@@ -6,12 +6,13 @@ import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
 import { Attribute } from '@stackmate/lib/decorators';
 import { Project as ProjectInterface } from '@stackmate/interfaces';
+import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, AttributeParsers,
-  VaultConfiguration, ProviderChoice, Validations, StageDeclarations, StagesNormalizedAttributes,
+  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
+  AttributeParsers, VaultConfiguration, ProviderChoice, Validations,
+  StageDeclarations, StagesNormalizedAttributes, NormalizedStage,
 } from '@stackmate/types';
-import { parseObject, parseString } from '@stackmate/lib/parsers';
 
 class Project extends Configuration implements ProjectInterface {
   /**
@@ -132,6 +133,16 @@ class Project extends Configuration implements ProjectInterface {
   }
 
   /**
+   * Returns the services for a given stage
+   *
+   * @param {String} name the name of the stage to get the services for
+   * @returns {Object} the stage's services
+   */
+  public stage(name: string): NormalizedStage {
+    return this.stages[name];
+  }
+
+  /**
    * @returns {String} the output path for the generated resources
    */
   public get outputPath() : string {
@@ -217,17 +228,11 @@ class Project extends Configuration implements ProjectInterface {
   ): Promise<void> {
     const project = await Project.load(STORAGE.FILE, { path }, FORMAT.YML);
 
-    if (!project.stages) {
-      throw new Error('The project doesn’t provide any stages available for deployment');
-    }
-
-    if (!project.stages[stageName]) {
-      throw new Error(
-        `Stage ${stageName} was not found in the project. Available options are ${Object.keys(project.stages)}`,
-      );
-    }
-
-    const { vault: { storage: vaultStorage, format: vaultFormat, ...vaultStorageOptions } } = project;
+    const {
+      storage: vaultStorage,
+      format: vaultFormat,
+      ...vaultStorageOptions
+    } = project.vault;
     const vault = await Vault.load(vaultStorage, vaultStorageOptions, vaultFormat);
 
     const output: string = outputPath || project.outputPath;

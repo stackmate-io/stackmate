@@ -81,10 +81,12 @@ export type ProjectDefaults = {
   aws?: AwsDefaults;
 };
 
+export type StageConfiguration = {
+  [srv: string]: ServiceConfigurationDeclaration;
+};
+
 export type StageDeclarations = {
-  [name: string]: { from?: string; skip?: Array<string> } & {
-    [srv: string]: ServiceConfigurationDeclaration;
-  };
+  [name: string]: StageConfiguration & { from?: string; skip?: Array<string> };
 };
 
 export type VaultConfiguration = {
@@ -109,10 +111,12 @@ export type StagesAttributes = {
   };
 };
 
+export type NormalizedStage = {
+  [serviceName: string]: ServiceConfigurationDeclarationNormalized;
+}
+
 export type StagesNormalizedAttributes = {
-  [name: string]: {
-    [serviceName: string]: ServiceConfigurationDeclarationNormalized;
-  };
+  [name: string]: NormalizedStage;
 };
 
 export type NormalizedStages = {
