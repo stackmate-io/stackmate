@@ -1,29 +1,18 @@
 import Configuration from '@stackmate/core/configuration';
-import { FORMAT, STORAGE } from '@stackmate/constants';
 import { Vault as VaultInterface } from '@stackmate/interfaces';
-import { CredentialsObject, Validations } from '@stackmate/types';
+import { AttributeParsers, CredentialsObject, Validations } from '@stackmate/types';
 
 class Vault extends Configuration implements VaultInterface {
   /**
-   * @returns {String} the format to use
+   * @var {String} validationMessage the error message
    */
-  get format(): string {
-    if (this.storage === STORAGE.FILE) {
-      return FORMAT.YML;
-    }
-
-    if (this.storage === STORAGE.AWS_PARAMS) {
-      return FORMAT.RAW;
-    }
-
-    throw new Error(`Unsupported storage type ${this.storage} specified for the vault`);
-  }
+  readonly validationMessage: string = 'The vault contents are invalid';
 
   /**
-   * @returns {String} the error message
+   * @returns {AttributeParsers}
    */
-  public get validationMessage(): string {
-    return 'The vault contents are invalid';
+  parsers(): AttributeParsers {
+    return {};
   }
 
   /**

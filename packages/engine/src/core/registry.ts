@@ -129,6 +129,13 @@ class Registry {
 
     source.link(target);
   }
+
+  /**
+   * @returns {Number} the size of the registry's length
+   */
+  public get length(): number {
+    return this.collection.size;
+  }
 }
 
 export default Registry;

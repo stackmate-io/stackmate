@@ -12,22 +12,18 @@ class LocalFileAdapter extends BaseStorageAdapter {
   @Attribute path: string;
 
   /**
-   * @returns {String} the error message
+   * @var {String} validationMessage the error message
    */
-  public get validationMessage(): string {
-    return 'The file information provided is not valid';
-  }
+  public readonly validationMessage: string = 'The file information provided is not valid';
 
   parsers(): AttributeParsers {
     return {
-      ...super.parsers(),
       path: parseFileName,
     };
   }
 
   validations(): Validations {
     return {
-      ...super.validations(),
       path: {
         presence: {
           allowEmpty: false,

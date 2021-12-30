@@ -158,6 +158,12 @@ const validateCredentials = (
   }
 };
 
+/**
+ * Validates the existence of a file
+ *
+ * @param {String} fileName the name of the file to check whether exists or not
+ * @returns {String}
+ */
 const validateFileExistence = (fileName: string) => {
   if (!fileExistsSync(fileName)) {
     return `File ${fileName} does not exist`;
@@ -165,12 +171,28 @@ const validateFileExistence = (fileName: string) => {
 };
 
 /**
+ * Validates whether a given object is an instance of an expected type
+ *
+ * @param {Object} obj the object to check the whether the instance is of the expected type
+ * @param {Object} options
+ * @param {Object} options.expected the expected instance type
+ * @returns {String}
+ */
+const validateInstanceType = (
+  obj: object, { expected }: { expected: { new(...args: any[]): any } },
+) => {
+  if (!(obj instanceof expected)) {
+    return `The object is not a valid instance of ${expected.name}`;
+  }
+}
+
+/**
  * Validates a version
  *
  * @param {String} version the version to validate
  * @param {Object} options
  * @param {Array<string>} options.availableVersions the versions available
- * @returns
+ * @returns {String}
  */
 const validateVersion = (
   version: string,
@@ -185,6 +207,15 @@ const validateVersion = (
   }
 };
 
+/**
+ * Validates a profile for a service based on the provider and service type
+ *
+ * @param {String} profile the profile's name
+ * @param {Object} options
+ * @param {String} options.provider the cloud provider for the service to apply the profile to
+ * @param {String} options.service the type of the service to apply the profile to
+ * @returns {String}
+ */
 const validateServiceProfile = (
   profile: string,
   { provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice },
@@ -194,9 +225,19 @@ const validateServiceProfile = (
   }
 };
 
+/**
+ * Validates a profile's overrides
+ *
+ * @param {Object} overrides the profile's overrides
+ * @param {Object} options
+ * @param {String} options.provider the service's cloud provider
+ * @param {String} options.service the service's type
+ * @param {String} options.profile the profile to override
+ * @returns {String}
+ */
 const validateProfileOverrides = (
   overrides: object,
-  { profile, provider, service }: {
+  { provider, service, profile}: {
     provider: ProviderChoice, service: ServiceTypeChoice, profile: string
   },
 ) => {
@@ -223,6 +264,7 @@ Object.assign(validate.validators, {
   validateServiceLinks,
   validateVault,
   validateVersion,
+  validateInstanceType,
 });
 
 export {
@@ -235,5 +277,6 @@ export {
   validateServiceLinks,
   validateVault,
   validateVersion,
+  validateInstanceType,
   validate,
 };

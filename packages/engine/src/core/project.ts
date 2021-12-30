@@ -46,11 +46,9 @@ class Project extends Configuration implements ProjectInterface {
   @Attribute defaults: ProjectDefaults = {};
 
   /**
-   * @returns {String} the error message
+   * @var {String} validationMessage the error message
    */
-  public get validationMessage(): string {
-    return 'The project’s configuration file is not valid';
-  }
+  readonly validationMessage: string = 'The project’s configuration file is not valid';
 
   /**
    * Returns a list of validations to validate the structure of the configuration file with
@@ -121,12 +119,12 @@ class Project extends Configuration implements ProjectInterface {
   normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
     // the configuration have been validated, so it's safe to cast it as NormalizedProjectConfiguration
     const normalized = clone(configuration) as NormalizedProjectConfiguration;
-    const { vault, provider, region, stages, defaults } = normalized;
+    const { provider, region, stages, vault, defaults = {} } = normalized;
 
     Object.assign(normalized, {
-      stages: this.normalizeStages(stages, provider, region),
-      vault: this.normalizeVault(vault),
-      defaults: defaults || {},
+      stages: Project.normalizeStages(stages, provider, region),
+      vault: Project.normalizeVault(vault, provider, region),
+      defaults,
     });
 
     return normalized;
@@ -153,10 +151,12 @@ class Project extends Configuration implements ProjectInterface {
    * @param {VaultConfiguration} vault the vault configuration
    * @returns {VaultConfiguration} the normalized vault configuration
    */
-  private normalizeVault(vault: VaultConfiguration): VaultConfiguration {
-    const storage = this.provider === PROVIDER.AWS ? STORAGE.AWS_PARAMS : STORAGE.FILE;
+  static normalizeVault(
+    vault: VaultConfiguration, provider: ProviderChoice, region: string,
+  ): VaultConfiguration {
+    const storage = provider === PROVIDER.AWS ? STORAGE.AWS_PARAMS : STORAGE.FILE;
     const format = storage === STORAGE.AWS_PARAMS ? FORMAT.RAW : FORMAT.YML;
-    return defaultsDeep(vault, { format, storage, region: this.region });
+    return defaultsDeep(vault, { format, storage, region });
   }
 
   /**
@@ -167,7 +167,7 @@ class Project extends Configuration implements ProjectInterface {
    * @param region {String} the project's default string
    * @returns {Object} the normalized stages
    */
-  private normalizeStages(stages: StageDeclarations, provider: ProviderChoice, region: string) {
+  static normalizeStages(stages: StageDeclarations, provider: ProviderChoice, region: string) {
     const getSourceDeclaration = (source: string): object => {
       const stg = stages[source];
       return stg.from ? getSourceDeclaration(stg.from) : stg;
@@ -227,20 +227,24 @@ class Project extends Configuration implements ProjectInterface {
     outputPath: string = '',
   ): Promise<void> {
     const project = await Project.load(STORAGE.FILE, { path }, FORMAT.YML);
+    console.log({
+      attrs: project.attributes,
+      region: project.region,
+      name: project.name,
+    })
 
-    const {
-      storage: vaultStorage,
-      format: vaultFormat,
-      ...vaultStorageOptions
-    } = project.vault;
+    const { storage: vaultStorage, format: vaultFormat, ...vaultStorageOptions } = project.vault;
+    console.log({ vaultStorage, vaultStorageOptions, vaultFormat })
     const vault = await Vault.load(vaultStorage, vaultStorageOptions, vaultFormat);
 
-    const output: string = outputPath || project.outputPath;
-    const stage = new Stage(stageName, output, project.defaults).populate(
-      project.stages[stageName], vault,
-    );
-
-    stage.stack.synthesize();
+    const stage = Stage.factory({
+      name: stageName,
+      targetPath: outputPath || project.outputPath,
+      defaults: project.defaults,
+      services: project.stage(stageName),
+      vault,
+    });
+    stage.provision();
   }
 }
 

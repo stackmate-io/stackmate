@@ -3,9 +3,10 @@ import { Memoize } from 'typescript-memoize';
 
 import BaseStorageAdapter from '@stackmate/adapters/storage/base';
 import Environment from '@stackmate/lib/environment';
-import { Validations } from '@stackmate/types';
+import { AttributeParsers, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Attribute } from '@stackmate/lib/decorators';
+import { parseString } from '@stackmate/lib/parsers';
 
 class AwsParameterStore extends BaseStorageAdapter {
   /**
@@ -19,10 +20,18 @@ class AwsParameterStore extends BaseStorageAdapter {
   @Attribute region: string;
 
   /**
-   * @returns {String} the error message
+   * @var {String} validationMessage the error message
    */
-  public get validationMessage(): string {
-    return 'The “vault” section in the project configuration is invalid';
+  readonly validationMessage: string = 'The “vault” section in the project configuration is invalid';
+
+  /**
+   * @returns {Object} the parser functions to use
+   */
+  parsers(): AttributeParsers {
+    return {
+      key: parseString,
+      region: parseString,
+    };
   }
 
   /**

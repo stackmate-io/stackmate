@@ -7,15 +7,25 @@ import { ValidationError } from '@stackmate/lib/errors';
 
 abstract class Entity implements BaseEntity {
   /**
-   * @var {Object} _state the state of the attributes
-   * @private
+   * @returns {Object} the parsers for the attributes
    */
-  protected state: EntityAttributes = {};
+  abstract parsers(): AttributeParsers;
+
+  /**
+   * @returns {Object} the validations to use for the entity
+   */
+  abstract validations(): Validations;
 
   /**
    * @var {String} validationMessage the validation message to use
    */
   public readonly abstract validationMessage: string;
+
+  /**
+   * @var {Object} _state the state of the attributes
+   * @private
+   */
+  protected state: EntityAttributes = {};
 
   /**
    * @returns {Array} the list of attribute names assigned to the entity
@@ -63,20 +73,6 @@ abstract class Entity implements BaseEntity {
    */
   normalize(attributes: EntityAttributes): EntityAttributes {
     return attributes;
-  }
-
-  /**
-   * @returns {Object} the parsers for the attributes
-   */
-  parsers(): AttributeParsers {
-    return {};
-  }
-
-  /**
-   * @returns {Object} the validations to use for the entity
-   */
-  validations(): Validations {
-    return {};
   }
 
   /**
