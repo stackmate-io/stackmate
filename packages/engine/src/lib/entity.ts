@@ -48,9 +48,21 @@ abstract class Entity implements BaseEntity {
    * @param {Object} values the attribute values to set
    */
   public set attributes(values: EntityAttributes) {
-    Object.keys(pick(values, this.attributeNames)).forEach((attributeKey) => {
+    const attributes = this.normalize(
+      pick(values, this.attributeNames),
+    );
+
+    Object.keys(attributes).forEach((attributeKey) => {
       this.setAttribute(attributeKey, values[attributeKey]);
     });
+  }
+
+  /**
+   * @param {EntityAttributes} attributes the attributes to normalize
+   * @returns {EntityAttributes} the normalized attributes
+   */
+  normalize(attributes: EntityAttributes): EntityAttributes {
+    return attributes;
   }
 
   /**

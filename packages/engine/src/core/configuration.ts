@@ -1,33 +1,27 @@
-import { Memoize } from 'typescript-memoize';
-import { isEmpty, isObject } from 'lodash';
-
-import { FORMAT, STORAGE } from '@stackmate/constants';
-import { ConfigurationAttributes, StorageOptions } from '@stackmate/types';
-import { JsonFormatter, YamlFormatter } from '@stackmate/adapters/formatters';
-import { AwsParameterStore, LocalFileAdapter } from '@stackmate/adapters/storage';
+import { getFormatter } from '@stackmate/adapters/formatters';
+import { getStorageAdapter } from '@stackmate/adapters/storage';
 import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
+import { FormatChoice, StorageChoice } from '@stackmate/types';
 import Entity from '@stackmate/lib/entity';
 
 abstract class Configuration extends Entity implements ConfigurationResource {
   /**
-   * @var {String} storage the storage option (whether local or remote)
+   * @var {StorageAdapter} storageAdapter the storage adapter to use
+   * @protected
    */
-  storage: string = STORAGE.FILE;
+  protected storageAdapter: StorageAdapter;
 
   /**
-   * @var {Object} storageOptions any extra options to use for the storage adapter
+   * @var {Formatter} formatter the format adapter to use
+   * @protected
    */
-  storageOptions: StorageOptions = {};
+  protected formatter: Formatter;
 
   /**
    * @var {Object} contents the file's contents in a structured format
+   * @protected
    */
-  contents: object;
-
-  /**
-   * @var {String} format the file's format (eg. YML, JSON)
-   */
-  abstract format: string;
+  protected contents: object;
 
   /**
    * @var {Boolean} isWriteable whether we can write to the file
@@ -35,57 +29,11 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    */
   readonly isWriteable: boolean = true;
 
-  constructor({ storage, ...storageOptions }: ConfigurationAttributes = { storage: STORAGE.FILE }) {
+  constructor(storageAdapter: StorageAdapter, formatter: Formatter) {
     super();
 
-    console.log({ storage, storageOptions });
-
-    this.storage = storage;
-
-    if (isObject(storageOptions) && !isEmpty(storageOptions)) {
-      this.storageOptions = storageOptions;
-    }
-  }
-
-  /**
-   * @returns {StorageAdapter} the storage adapter to use
-   * @throws {Error} when the storage option is not valid
-   */
-  @Memoize()
-  public get storageAdapter(): StorageAdapter {
-    let adapter: StorageAdapter | undefined;
-
-    if (this.storage === STORAGE.FILE) {
-      adapter = new LocalFileAdapter();
-    } else if (this.storage === STORAGE.AWS_PARAMS) {
-      adapter = new AwsParameterStore();
-    }
-
-    if (!adapter) {
-      throw new Error(`Invalid storage “${this.storage}” specified`);
-    }
-
-    adapter.attributes = this.storageOptions;
-    adapter.validate();
-
-    return adapter;
-  }
-
-  /**
-   * @returns {Formatter} the formatter to use to parse & write the file
-   * @throws {Error} when the format is not valid
-   */
-  @Memoize()
-  public get formatter(): Formatter {
-    if (this.format === FORMAT.YML) {
-      return new YamlFormatter();
-    }
-
-    if (this.format === FORMAT.JSON) {
-      return new JsonFormatter();
-    }
-
-    throw new Error(`Invalid format “${this.format}” specified`);
+    this.storageAdapter = storageAdapter;
+    this.formatter = formatter;
   }
 
   /**
@@ -93,22 +41,11 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @returns {Promise<Object>} the parsed file's contents
    * @async
    */
-  async load(): Promise<object> {
+  async read(): Promise<void> {
     const rawContents = await this.storageAdapter.read();
     const parsedContents = await this.formatter.parse(rawContents);
 
-    this.contents = this.normalize(parsedContents);
-    return this.contents;
-  }
-
-  /**
-   * Normalizes the configuration file's contents (if necessary)
-   *
-   * @param {Object} contents the contents prior to normalization
-   * @returns {Object} the normalized object
-   */
-  normalize(contents: object): object {
-    return contents;
+    this.attributes = this.normalize(parsedContents);
   }
 
   /**
@@ -125,6 +62,29 @@ abstract class Configuration extends Entity implements ConfigurationResource {
     const formatted = await this.formatter.export(this.contents);
 
     await this.storageAdapter.write(formatted);
+  }
+
+  /**
+   * Instantiates, validates and provisions a service
+   *
+   * @param {ServiceAttributes} attributes the service's attributes
+   * @param {Object} stack the terraform stack object
+   * @param {Object} prerequisites any prerequisites by the cloud provider
+   */
+  static async load<T extends Configuration>(
+    this: new (...args: any[]) => T,
+    storage: StorageChoice,
+    storageOptions: object,
+    format: FormatChoice,
+  ): Promise<T> {
+    const storageAdapter = getStorageAdapter(storage, storageOptions);
+    const formatter = getFormatter(format);
+
+    const conf = new this(storageAdapter, formatter);
+    await conf.read();
+    conf.validate();
+
+    return conf;
   }
 }
 

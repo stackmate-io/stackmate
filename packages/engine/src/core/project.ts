@@ -1,5 +1,5 @@
 import { join as joinPaths } from 'path';
-import { clone, defaultsDeep, fromPairs, isEmpty, kebabCase, merge, omit } from 'lodash';
+import { clone, defaultsDeep, fromPairs, kebabCase, merge, omit } from 'lodash';
 
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
@@ -9,7 +9,7 @@ import { Project as ProjectInterface } from '@stackmate/interfaces';
 import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, AttributeParsers,
-  VaultConfiguration, ProviderChoice, Validations, StageDeclarations, StorageChoice,
+  VaultConfiguration, ProviderChoice, Validations, StageDeclarations, StagesNormalizedAttributes,
 } from '@stackmate/types';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 
@@ -32,40 +32,17 @@ class Project extends Configuration implements ProjectInterface {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS };
+  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS, format: FORMAT.RAW };
 
   /**
    * @var {Object} stages the stages declarations
    */
-  @Attribute stages: StageDeclarations = {};
+  @Attribute stages: StagesNormalizedAttributes = {};
 
   /**
    * @var {Object} defaults the project's defaults
    */
   @Attribute defaults: ProjectDefaults = {};
-
-  /**
-   * @var {Object} contents the file's contents in a structured format
-   */
-  contents: NormalizedProjectConfiguration;
-
-  /**
-   * @var {String} format the file's format (eg. YML, JSON)
-   */
-  format: string = FORMAT.YML;
-
-  /**
-   * @returns {Promise<Object>} the file's contents
-   */
-  async load(): Promise<object> {
-    await super.load();
-
-    this.attributes = this.contents;
-
-    this.validate();
-
-    return this.contents;
-  }
 
   /**
    * @returns {String} the error message
@@ -126,8 +103,8 @@ class Project extends Configuration implements ProjectInterface {
   parsers(): AttributeParsers {
     return {
       name: parseString,
-      provider: parseString,
       region: parseString,
+      provider: parseString,
       vault: parseObject,
       stages: parseObject,
       defaults: parseObject,
@@ -137,21 +114,20 @@ class Project extends Configuration implements ProjectInterface {
   /**
    * Applies arguments in stage services that were skipped for brevity
    *
-   * @param {Object} contents the file contents that are to be normalized
+   * @param {Object} configuration the file contents that are to be normalized
    * @returns {Object} the normalized contents
    */
-  normalize(contents: ProjectConfiguration): NormalizedProjectConfiguration {
-    // the contents have been validated, so it's safe to cast it as NormalizedProjectConfiguration
-    const normalized = clone(contents) as NormalizedProjectConfiguration;
+  normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
+    // the configuration have been validated, so it's safe to cast it as NormalizedProjectConfiguration
+    const normalized = clone(configuration) as NormalizedProjectConfiguration;
     const { vault, provider, region, stages, defaults } = normalized;
 
     Object.assign(normalized, {
       stages: this.normalizeStages(stages, provider, region),
-      vault: defaultsDeep(vault, { storage: Project.defaultVaultStorage(provider), region }),
+      vault: this.normalizeVault(vault),
       defaults: defaults || {},
     });
 
-    console.log({ normalized });
     return normalized;
   }
 
@@ -159,8 +135,17 @@ class Project extends Configuration implements ProjectInterface {
    * @returns {String} the output path for the generated resources
    */
   public get outputPath() : string {
-    const { name } = this.contents;
-    return joinPaths(OUTPUT_DIRECTORY, kebabCase(name));
+    return joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
+  }
+
+  /**
+   * @param {VaultConfiguration} vault the vault configuration
+   * @returns {VaultConfiguration} the normalized vault configuration
+   */
+  private normalizeVault(vault: VaultConfiguration): VaultConfiguration {
+    const storage = this.provider === PROVIDER.AWS ? STORAGE.AWS_PARAMS : STORAGE.FILE;
+    const format = storage === STORAGE.AWS_PARAMS ? FORMAT.RAW : FORMAT.YML;
+    return defaultsDeep(vault, { format, storage, region: this.region });
   }
 
   /**
@@ -220,17 +205,6 @@ class Project extends Configuration implements ProjectInterface {
   }
 
   /**
-   * @returns {StorageChoice} the default storage choice
-   */
-  static defaultVaultStorage(provider: ProviderChoice): StorageChoice {
-    if (provider === PROVIDER.AWS) {
-      return STORAGE.AWS_PARAMS;
-    }
-
-    return STORAGE.FILE;
-  }
-
-  /**
    * Synthesize the stack and prepare for provision
    *
    * @param {String} path loads and returns a project from a file
@@ -241,34 +215,26 @@ class Project extends Configuration implements ProjectInterface {
     stageName: string = DEFAULT_STAGE,
     outputPath: string = '',
   ): Promise<void> {
-    const project = new Project({ path, storage: STORAGE.FILE });
-    await project.load();
+    const project = await Project.load(STORAGE.FILE, { path }, FORMAT.YML);
 
-    if (!project.contents.stages) {
+    if (!project.stages) {
       throw new Error('The project doesn’t provide any stages available for deployment');
     }
 
-    const {
-      contents: {
-        name: projectName,
-        stages,
-        stages: { [stageName]: services },
-        vault: vaultOptions = { storage: STORAGE.FILE },
-        defaults,
-      },
-    } = project;
-
-    if (!services || isEmpty(services)) {
+    if (!project.stages[stageName]) {
       throw new Error(
-        `Stage ${stageName} was not found in the project. Available options are ${Object.keys(stages)}`,
+        `Stage ${stageName} was not found in the project. Available options are ${Object.keys(project.stages)}`,
       );
     }
 
-    const vault = new Vault({ ...vaultOptions, stage: stageName, project: projectName });
-    await vault.load();
+    const { vault: { storage: vaultStorage, format: vaultFormat, ...vaultStorageOptions } } = project;
+    const vault = await Vault.load(vaultStorage, vaultStorageOptions, vaultFormat);
 
     const output: string = outputPath || project.outputPath;
-    const stage = new Stage(stageName, output, defaults).populate(services, vault);
+    const stage = new Stage(stageName, output, project.defaults).populate(
+      project.stages[stageName], vault,
+    );
+
     stage.stack.synthesize();
   }
 }

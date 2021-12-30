@@ -107,17 +107,14 @@ export interface Formatter {
 }
 
 export interface ConfigurationResource {
-  storage: StorageChoice;
-  contents: object;
   readonly isWriteable: boolean;
-  load(): Promise<object>;
   normalize(contents: object): object;
+  read(): void;
   write(): Promise<void>;
 }
 
 export interface Project extends ConfigurationResource {
   outputPath: string;
-  contents: NormalizedProjectConfiguration;
 }
 
 export interface Vault extends ConfigurationResource {

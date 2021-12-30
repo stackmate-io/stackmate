@@ -1,5 +1,5 @@
 import { CloudService } from '@stackmate/interfaces';
-import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE, FORMAT, STORAGE } from '@stackmate/constants';
 
 // Utility types
 export type ConstructorOf<T> = { new(...args: any[]): T };
@@ -11,6 +11,7 @@ export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<in
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
+export type FormatChoice = ChoiceOf<typeof FORMAT>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
@@ -88,6 +89,7 @@ export type StageDeclarations = {
 
 export type VaultConfiguration = {
   storage: StorageChoice;
+  format: FormatChoice;
   key?: string;
   region?: string;
 };
