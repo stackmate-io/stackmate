@@ -5,7 +5,7 @@ import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
-import { getProvisionResults } from 'tests/helpers';
+import { getServiceProvisionResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsRdsService } from '@stackmate/clouds/aws';
 import Profile from '@stackmate/core/profile';
@@ -58,7 +58,7 @@ describe('AwsRdsService', () => {
 
   describe('provision', () => {
     it('provisions a single-node RDS instance with the default profile', async () => {
-      const { scope, variables } = await getProvisionResults({
+      const { scope, variables } = await getServiceProvisionResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsRdsService,
         serviceConfig,
@@ -94,7 +94,7 @@ describe('AwsRdsService', () => {
         enabled_cloudwatch_logs_exports: ['error'],
         engine: serviceConfig.engine,
         engine_version: serviceConfig.version,
-        identifier: serviceConfig.name,
+        identifier: `${serviceConfig.name}-${stackName}`,
         instance_class: serviceConfig.size,
         multi_az: false,
         name: serviceConfig.database,

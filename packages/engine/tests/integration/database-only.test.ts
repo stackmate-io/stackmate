@@ -1,12 +1,11 @@
-import fs from 'fs';
-import YAML from 'yaml';
-import sinon from 'sinon';
+import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/clouds/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { Project } from '@stackmate/main';
-import { inputPath, outputPath, awsRegion, awsKeyArn } from 'tests/fixtures';
+import { awsRegion, awsKeyArn } from 'tests/fixtures';
+import { synthesizeProject } from 'tests/helpers';
+import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 const projectConfig = {
   name: 'database-only-project',
@@ -19,43 +18,54 @@ const projectConfig = {
         type: SERVICE_TYPE.DATABASE,
         size: DEFAULT_RDS_INSTANCE_SIZE,
         profile: 'production',
+        storage: 30,
+        version: '8.0',
+        engine: 'mysql',
+        port: 3306,
       },
     },
   },
 };
 
 describe('Database only project', () => {
-  let readStub: sinon.SinonStub;
-  let existsStub: sinon.SinonStub;
-  let writeStub: sinon.SinonStub;
-  let scopeContents: string;
-
-  beforeEach(() => {
-    readStub = sinon.stub(fs.promises, 'readFile');
-    readStub.withArgs(inputPath).resolves(YAML.stringify(projectConfig));
-
-    existsStub = sinon.stub(fs, 'existsSync');
-    existsStub.withArgs(inputPath).returns(true);
-
-    writeStub = sinon.stub(fs.promises, 'writeFile');
-    writeStub.withArgs(outputPath).callsFake((path, contents) => new Promise((resolve) => {
-      scopeContents = contents;
-      return resolve(contents);
-    }));
-  });
-
-  afterEach(() => {
-    readStub.restore();
-    existsStub.restore();
-    writeStub.restore();
-  });
-
   it('provisions the production stage for the project', async () => {
-    try {
-      await Project.synthesize(inputPath, 'production');
-    } catch (err) {
-      console.log(require('util').inspect(err));
-    }
-    console.log(scopeContents);
+    const { scope } = await synthesizeProject(projectConfig);
+
+    expect(scope).toHaveResourceWithProperties(Vpc, {
+      cidr_block: '10.0.0.0/16',
+      enable_dns_hostnames: true,
+      enable_dns_support: true,
+    });
+
+    expect(scope).toHaveResourceWithProperties(Subnet, {
+      cidr_block: '10.0.1.0/24',
+      map_public_ip_on_launch: true,
+    });
+
+    expect(scope).toHaveResource(InternetGateway);
+
+    expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
+      family: 'mysql8.0',
+    });
+
+    expect(scope).toHaveResourceWithProperties(DbInstance, {
+      allocated_storage: 30,
+      allow_major_version_upgrade: false,
+      apply_immediately: true,
+      auto_minor_version_upgrade: false,
+      backup_retention_period: 30,
+      copy_tags_to_snapshot: true,
+      db_subnet_group_name: 'db-subnet-mysqlDatabase-production',
+      delete_automated_backups: false,
+      deletion_protection: true,
+      engine: 'mysql',
+      engine_version: '8.0',
+      identifier: 'mysqlDatabase-production',
+      instance_class: 'db.t3.micro',
+      port: 3306,
+      publicly_accessible: true,
+      skip_final_snapshot: false,
+      storage_type: 'gp2',
+    });
   });
 });

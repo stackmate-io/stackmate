@@ -29,6 +29,11 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    */
   readonly isWriteable: boolean = true;
 
+  /**
+   * @constructor
+   * @param {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+   * @param {Formatter} formatter the formatter to parse values with
+   */
   constructor(storageAdapter: StorageAdapter, formatter: Formatter) {
     super();
 
@@ -41,11 +46,12 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @returns {Promise<Object>} the parsed file's contents
    * @async
    */
-  async read(): Promise<void> {
+  async read(): Promise<object> {
     const rawContents = await this.storageAdapter.read();
     const parsedContents = await this.formatter.parse(rawContents);
 
-    this.attributes = this.normalize(parsedContents);
+    this.contents = this.normalize(parsedContents);
+    return this.contents;
   }
 
   /**
@@ -81,7 +87,7 @@ abstract class Configuration extends Entity implements ConfigurationResource {
     const formatter = getFormatter(format);
 
     const conf = new this(storageAdapter, formatter);
-    await conf.read();
+    conf.attributes = await conf.read();
     conf.validate();
 
     return conf;

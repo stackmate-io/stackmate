@@ -8,7 +8,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getMockStack } from 'tests/mocks';
 import { networkingConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsVpcService } from '@stackmate/clouds/aws';
-import { getProvisionResults } from 'tests/helpers';
+import { getServiceProvisionResults } from 'tests/helpers';
 
 describe('AwsVpcService', () => {
   let mockStack: CloudStack;
@@ -49,7 +49,7 @@ describe('AwsVpcService', () => {
       expect(serviceConfig.ip).toEqual('12.0.0.0');
       const expectedVpcId = `$\{aws_vpc.${serviceConfig.name}-${stackName}.id}`;
 
-      const { scope } = await getProvisionResults({
+      const { scope } = await getServiceProvisionResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsVpcService,
         serviceConfig,

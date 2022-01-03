@@ -6,7 +6,8 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { CloudStack, Provisionable } from '@stackmate/interfaces';
 import { AttributeParsers, EntityAttributes, NormalizedStage, ProjectDefaults, Validations } from '@stackmate/types';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import Vault from './vault';
+import { createDirectory } from '@stackmate/lib/helpers';
+import Vault from '@stackmate/core/vault';
 
 class Stage extends Entity implements Provisionable {
   /**
@@ -89,7 +90,7 @@ class Stage extends Entity implements Provisionable {
         },
       },
       vault: {
-        validateInstanceType: { target: Vault }
+        validateInstanceType: { expected: Vault }
       },
       services: {
         presence: {
@@ -100,7 +101,10 @@ class Stage extends Entity implements Provisionable {
       defaults: {
       },
       targetPath: {
-        validateFileExistence: {},
+        presence: {
+          allowEmpty: false,
+          message: 'You need to set a target output path for the stage',
+        },
       }
     };
   }
@@ -120,13 +124,16 @@ class Stage extends Entity implements Provisionable {
       throw new Error('Stage is already provisioned');
     }
 
-    const stack = new Stack(this.name, this.targetPath);
-    const cloudManager = new CloudManager(stack, this.defaults);
+    // create target output path if it doesn't exist
+    createDirectory(this.targetPath);
+
+    this.stack = new Stack(this.name, this.targetPath);
+    this.clouds = new CloudManager(this.stack, this.defaults);
 
     Object.keys(this.services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = this.services;
 
-      const service = cloudManager.get(provider, region).service(type, {
+      const service = this.clouds.get(provider, region).service(type, {
         ...attributes,
         credentials: this.vault.credentials(this.name),
         rootCredentials: this.vault.rootCredentials(this.name),
@@ -134,8 +141,14 @@ class Stage extends Entity implements Provisionable {
 
       this.registry.add(service);
     });
+  }
 
-    stack.synthesize();
+  /**
+   * Synthesizes the stack
+   * @void
+   */
+  synthesize() {
+    this.stack.generate();
   }
 
   /**
@@ -150,6 +163,7 @@ class Stage extends Entity implements Provisionable {
     stage.attributes = attributes;
 
     stage.validate();
+    stage.provision();
 
     return stage;
   }

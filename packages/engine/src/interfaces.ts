@@ -127,5 +127,5 @@ export interface CloudStack extends TerraformStack {
   readonly targetPath: string;
   readonly app: TerraformApp;
   path: string;
-  synthesize(): void;
+  generate(): void;
 }

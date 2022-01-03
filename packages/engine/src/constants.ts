@@ -32,9 +32,9 @@ export const REGION: { [name: string]: RegionList } = {
 } as const;
 
 export const FORMAT: { [name: string]: string } = {
-  YML: 'yml',
   JSON: 'json',
   RAW: 'raw',
+  YML: 'yml',
 } as const;
 
 export const STORAGE: { [name: string]: string } = {

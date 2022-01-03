@@ -181,7 +181,7 @@ const validateFileExistence = (fileName: string) => {
 const validateInstanceType = (
   obj: object, { expected }: { expected: { new(...args: any[]): any } },
 ) => {
-  if (!(obj instanceof expected)) {
+  if (isObject(obj) && !(obj instanceof expected)) {
     return `The object is not a valid instance of ${expected.name}`;
   }
 }

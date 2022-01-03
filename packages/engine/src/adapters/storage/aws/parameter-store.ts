@@ -20,6 +20,16 @@ class AwsParameterStore extends BaseStorageAdapter {
   @Attribute region: string;
 
   /**
+   * @var {String} project the name of the project
+   */
+  @Attribute project: string;
+
+  /**
+   * @var {String} stage the name of the stage
+   */
+  @Attribute stage: string;
+
+  /**
    * @var {String} validationMessage the error message
    */
   readonly validationMessage: string = 'The “vault” section in the project configuration is invalid';
@@ -31,6 +41,8 @@ class AwsParameterStore extends BaseStorageAdapter {
     return {
       key: parseString,
       region: parseString,
+      project: parseString,
+      stage: parseString,
     };
   }
 
@@ -60,6 +72,16 @@ class AwsParameterStore extends BaseStorageAdapter {
           message: 'The region specified is not valid',
         },
       },
+      project: {
+        presence: {
+          message: 'The project’s name should be specified as storage options',
+        },
+      },
+      stage: {
+        presence: {
+          message: 'The stage’s name should be specified as storage options',
+        },
+      },
     };
   }
 
@@ -73,12 +95,25 @@ class AwsParameterStore extends BaseStorageAdapter {
     return client;
   }
 
-  async read(): Promise<object> {
-    const params = await this.client.getParametersByPath({ 'Path': '/manual-testing' });
-    console.log(params);
-    return {};
+  /**
+   * @returns {String} the namespace to use in the SSM param store
+   */
+  public get namespace() : string {
+    return `/${this.project}/${this.stage}`;
   }
 
+  /**
+   * @returns {Promise<Object>} the parameters under a specific path
+   */
+  async read(): Promise<object> {
+    const params = await this.client.getParametersByPath({ 'Path': this.namespace });
+    return params;
+  }
+
+  /**
+   * @param {Object} contents the params to write to AWS SSM
+   * @void
+   */
   async write(contents: object): Promise<void> {
   }
 }

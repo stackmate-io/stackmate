@@ -97,7 +97,7 @@ class AwsRdsService extends AwsDatabaseService {
       ...instance,
       allocatedStorage: this.storage,
       count: this.nodes,
-      identifier: this.name,
+      identifier: this.identifier,
       engine: this.engine,
       engineVersion: this.version,
       instanceClass: this.size,

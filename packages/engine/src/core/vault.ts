@@ -1,5 +1,7 @@
 import Configuration from '@stackmate/core/configuration';
 import { Vault as VaultInterface } from '@stackmate/interfaces';
+import { Attribute } from '@stackmate/lib/decorators';
+import { parseObject } from '@stackmate/lib/parsers';
 import { AttributeParsers, CredentialsObject, Validations } from '@stackmate/types';
 
 class Vault extends Configuration implements VaultInterface {
@@ -8,11 +10,15 @@ class Vault extends Configuration implements VaultInterface {
    */
   readonly validationMessage: string = 'The vault contents are invalid';
 
+  @Attribute params: object;
+
   /**
    * @returns {AttributeParsers}
    */
   parsers(): AttributeParsers {
-    return {};
+    return {
+      params: parseObject,
+    };
   }
 
   /**
@@ -27,7 +33,7 @@ class Vault extends Configuration implements VaultInterface {
   }
 
   rootCredentials(service: string): CredentialsObject {
-    return {};
+    return { username: 'abc123', password: 'abc' };
   }
 }
 

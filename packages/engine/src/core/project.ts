@@ -227,8 +227,10 @@ class Project extends Configuration implements ProjectInterface {
     outputPath: string = '',
   ): Promise<void> {
     const project = await Project.load(STORAGE.FILE, { path }, FORMAT.YML);
+
     const { storage: vaultStorage, format: vaultFormat, ...vaultStorageOptions } = project.vault;
-    const vault = await Vault.load(vaultStorage, vaultStorageOptions, vaultFormat);
+    const vaultOptions = { project: project.name, stage: stageName, ...vaultStorageOptions };
+    const vault = await Vault.load(vaultStorage, vaultOptions, vaultFormat);
 
     const stage = Stage.factory({
       name: stageName,
@@ -238,7 +240,7 @@ class Project extends Configuration implements ProjectInterface {
       vault,
     });
 
-    stage.provision();
+    stage.synthesize();
   }
 }
 

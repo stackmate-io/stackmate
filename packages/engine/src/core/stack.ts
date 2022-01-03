@@ -45,7 +45,7 @@ class Stack extends TerraformStack implements CloudStack {
    * Synthesizes the application's stack and writes out the corresponding TF files
    * @void
    */
-  synthesize(): void {
+  generate(): void {
     this.app.synth();
   }
 }
