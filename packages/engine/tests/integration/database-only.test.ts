@@ -29,7 +29,17 @@ const projectConfig = {
 
 describe('Database only project', () => {
   it('provisions the production stage for the project', async () => {
-    const { scope } = await synthesizeProject(projectConfig);
+    let scope = '';
+
+    try {
+      ({ scope } = await synthesizeProject(projectConfig));
+    } catch (err) {
+      console.log(err);
+    }
+
+    // .catch(error => {
+    //   console.log(error);
+    // }));
 
     expect(scope).toHaveResourceWithProperties(Vpc, {
       cidr_block: '10.0.0.0/16',

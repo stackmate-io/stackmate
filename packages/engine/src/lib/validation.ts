@@ -4,9 +4,9 @@ import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
 import { CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
-import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { isKeySubset } from '@stackmate/lib/helpers';
 import Profile from '@stackmate/core/profile';
-import { isKeySubset } from './helpers';
 
 /**
  * Validates the project's stages
@@ -102,17 +102,9 @@ const validateVault = (vault: VaultConfiguration) => {
     return 'The project does not contain a “vault” section';
   }
 
-  const { storage } = vault;
-  if (!storage || !Object.values(STORAGE).includes(storage)) {
-    return 'You have to specify a valid storage for your credentials vault';
-  }
-
-  if (storage === STORAGE.AWS_PARAMS) {
-    const { key, region } = vault;
-
-    if (!key || !region) {
-      return 'The vault needs to have “region” and a “key” ARN to encrypt values';
-    }
+  const { provider, key, region } = vault;
+  if (provider === PROVIDER.AWS && (!key || !region)) {
+    return 'The vault needs to have “region” and a “key” ARN to encrypt values';
   }
 };
 

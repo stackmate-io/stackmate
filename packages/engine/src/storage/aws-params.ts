@@ -8,7 +8,7 @@ import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
 
-class AwsParametersAdapter extends BaseStorageAdapter {
+class AwsParametersStorageAdapter extends BaseStorageAdapter {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -20,14 +20,9 @@ class AwsParametersAdapter extends BaseStorageAdapter {
   @Attribute region: string;
 
   /**
-   * @var {String} project the name of the project
+   * @var {String} namespace the namespace under which the parameters are stored
    */
-  @Attribute project: string;
-
-  /**
-   * @var {String} stage the name of the stage
-   */
-  @Attribute stage: string;
+  @Attribute namespace: string;
 
   /**
    * @var {String} validationMessage the error message
@@ -41,8 +36,7 @@ class AwsParametersAdapter extends BaseStorageAdapter {
     return {
       key: parseString,
       region: parseString,
-      project: parseString,
-      stage: parseString,
+      namespace: parseString,
     };
   }
 
@@ -72,14 +66,9 @@ class AwsParametersAdapter extends BaseStorageAdapter {
           message: 'The region specified is not valid',
         },
       },
-      project: {
+      namespace: {
         presence: {
-          message: 'The project’s name should be specified as storage options',
-        },
-      },
-      stage: {
-        presence: {
-          message: 'The stage’s name should be specified as storage options',
+          message: 'There is no namespace defined for the AWS params',
         },
       },
     };
@@ -95,18 +84,19 @@ class AwsParametersAdapter extends BaseStorageAdapter {
     return client;
   }
 
-  /**
-   * @returns {String} the namespace to use in the SSM param store
-   */
-  public get namespace() : string {
-    return `/${this.project}/${this.stage}`;
+  serialize(contents: object): object {
+    return contents;
+  }
+
+  deserialize(serialized: object): object {
+    return serialized;
   }
 
   /**
    * @returns {Promise<Object>} the parameters under a specific path
    */
   async read(): Promise<object> {
-    const params = await this.client.getParametersByPath({ 'Path': this.namespace });
+    const params = await this.client.getParametersByPath({ 'Path': 'this.namespace' });
     return this.deserialize(params);
   }
 
@@ -118,4 +108,4 @@ class AwsParametersAdapter extends BaseStorageAdapter {
   }
 }
 
-export default AwsParametersAdapter;
+export default AwsParametersStorageAdapter;

@@ -89,9 +89,11 @@ export type StageDeclarations = {
 };
 
 export type VaultConfiguration = {
-  storage: StorageChoice;
+  provider?: ProviderChoice;
   key?: string;
   region?: string;
+  namespace?: string;
+  path?: string;
 };
 
 export type ProjectConfiguration = {
@@ -151,8 +153,10 @@ export type LocalFileStorageOptions = StorageOptions & {
   path: string;
 };
 export type AwsParamStorageOptions = StorageOptions & {
+  provider: 'aws';
   key: string;
   region: string;
+  namespace: string;
 };
 
 export type ConfigurationAttributes = {

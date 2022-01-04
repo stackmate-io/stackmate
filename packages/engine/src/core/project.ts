@@ -1,13 +1,17 @@
 import { join as joinPaths } from 'path';
+import { Memoize } from 'typescript-memoize';
 import { clone, defaultsDeep, fromPairs, kebabCase, merge, omit } from 'lodash';
 
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
+import FileStorageAdapter from '@stackmate/storage/file';
 import { Attribute } from '@stackmate/lib/decorators';
 import { Project as ProjectInterface } from '@stackmate/interfaces';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
+import {
+  DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, PROVIDER, DEFAULT_STAGE,
+} from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
   AttributeParsers, VaultConfiguration, ProviderChoice, Validations,
@@ -33,7 +37,7 @@ class Project extends Configuration implements ProjectInterface {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS };
+  @Attribute vault: VaultConfiguration = { provider: PROVIDER.AWS };
 
   /**
    * @var {Object} stages the stages declarations
@@ -49,6 +53,29 @@ class Project extends Configuration implements ProjectInterface {
    * @var {String} validationMessage the error message
    */
   readonly validationMessage: string = 'The project’s configuration file is not valid';
+
+  /**
+   * @var {String} path the file's path
+   */
+  readonly path: string;
+
+  /**
+   * @param {String} path the project's file path
+   * @constructor
+   */
+  constructor(path: string) {
+    super();
+
+    this.path = path;
+  }
+
+  /**
+   * @returns {FileStorageAdapter} the storage adapter to use for reading the file
+   */
+  @Memoize()
+  get storage() {
+    return FileStorageAdapter.factory({ path: this.path });
+  }
 
   /**
    * Returns a list of validations to validate the structure of the configuration file with
@@ -123,7 +150,7 @@ class Project extends Configuration implements ProjectInterface {
 
     Object.assign(normalized, {
       stages: Project.normalizeStages(stages, provider, region),
-      vault: Project.normalizeVault(vault, provider, region),
+      vault: defaultsDeep(vault, { provider, region }),
       defaults,
     });
 
@@ -145,17 +172,6 @@ class Project extends Configuration implements ProjectInterface {
    */
   public get outputPath() : string {
     return joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
-  }
-
-  /**
-   * @param {VaultConfiguration} vault the vault configuration
-   * @returns {VaultConfiguration} the normalized vault configuration
-   */
-  static normalizeVault(
-    vault: VaultConfiguration, provider: ProviderChoice, region: string,
-  ): VaultConfiguration {
-    const storage = provider === PROVIDER.AWS ? STORAGE.AWS_PARAMS : STORAGE.FILE;
-    return defaultsDeep(vault, { storage, region });
   }
 
   /**
@@ -218,21 +234,20 @@ class Project extends Configuration implements ProjectInterface {
    * Synthesize the stack and prepare for provision
    *
    * @param {String} path loads and returns a project from a file
-   * @param {String} name the stage's name
+   * @param {String} stageName the stage's name
+   * @param {String} outputPath the path to write the output files to
+   * @void
    */
   static async synthesize(
     path: string = DEFAULT_PROJECT_FILE,
     stageName: string = DEFAULT_STAGE,
     outputPath: string = '',
   ): Promise<void> {
-    const project = await Project.load(STORAGE.FILE, { path });
+    const project = new Project(path);
+    await project.load();
 
-    const { storage: vaultStorage, ...vaultStorageOptions } = project.vault;
-    const vault = await Vault.load(vaultStorage, {
-      project: project.name,
-      stage: stageName,
-      ...vaultStorageOptions,
-    });
+    const vault = new Vault(project.name, stageName, project.vault);
+    await vault.load();
 
     const stage = Stage.factory({
       name: stageName,

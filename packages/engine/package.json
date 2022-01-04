@@ -75,7 +75,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
     "build": "rm -rf lib && tsc --build tsconfig.build.json",
-    "test": "jest --bail --verbose --watchAll",
+    "test": "jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   },

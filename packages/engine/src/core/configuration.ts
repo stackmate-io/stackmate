@@ -1,6 +1,4 @@
 import Entity from '@stackmate/lib/entity';
-import { StorageChoice } from '@stackmate/types';
-import { getStorageAdapter } from '@stackmate/storage';
 import { ConfigurationResource, StorageAdapter } from '@stackmate/interfaces';
 
 abstract class Configuration extends Entity implements ConfigurationResource {
@@ -23,14 +21,10 @@ abstract class Configuration extends Entity implements ConfigurationResource {
   readonly isWriteable: boolean = true;
 
   /**
-   * @constructor
-   * @param {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+   * @var {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+   * @abstract
    */
-  constructor(storageAdapter: StorageAdapter) {
-    super();
-
-    this.storageAdapter = storageAdapter;
-  }
+  public abstract get storage(): StorageAdapter;
 
   /**
    * Opens, reads and parses the file contents
@@ -38,7 +32,7 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @async
    */
   async read(): Promise<object> {
-    const contents = await this.storageAdapter.read();
+    const contents = await this.storage.read();
     this.contents = this.normalize(contents);
     return this.contents;
   }
@@ -54,29 +48,16 @@ abstract class Configuration extends Entity implements ConfigurationResource {
       throw new Error('File is not writeable');
     }
 
-    await this.storageAdapter.write(this.contents);
+    await this.storage.write(this.contents);
   }
 
   /**
-   * Instantiates, validates and provisions a service
-   *
-   * @param {ServiceAttributes} attributes the service's attributes
-   * @param {Object} stack the terraform stack object
-   * @param {Object} prerequisites any prerequisites by the cloud provider
+   * Instantiates and validates a configuration resource
    */
-  static async load<T extends Configuration>(
-    this: new (...args: any[]) => T,
-    storage: StorageChoice,
-    storageOptions: object,
-    additionalAttributes: object = {},
-  ): Promise<T> {
-    const conf = new this(getStorageAdapter(storage, storageOptions));
-    const attrs = await conf.read();
-
-    conf.attributes = { ...attrs, ...additionalAttributes };
-    conf.validate();
-
-    return conf;
+  async load(): Promise<ConfigurationResource> {
+    this.attributes = await this.read();
+    this.validate();
+    return this;
   }
 }
 

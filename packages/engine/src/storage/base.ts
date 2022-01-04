@@ -25,6 +25,40 @@ abstract class BaseStorageAdapter extends Entity implements StorageAdapter {
    * @async
    */
   abstract write(contents: object): Promise<void>;
+
+  /**
+   * @var {Object} options the options to use for this storage adapter
+   * @protected
+   * @readonly
+   */
+  protected readonly options: object;
+
+  /**
+   * @constructor
+   * @param {Object} options the options to set
+   */
+  constructor(options: object) {
+    super();
+
+    this.options = options;
+  }
+
+  /**
+   * Instantiates, validates and provisions a storage adapter
+   *
+   * @param {Object} options the storage options
+   * @param {Object} attributes the storage adapter's attributes
+   */
+  static factory<T extends BaseStorageAdapter>(
+    this: new (...args: any[]) => T,
+    attributes: object = {},
+    options: object = {},
+  ): T {
+    const adapter = new this(options);
+    adapter.attributes = attributes;
+    adapter.validate();
+    return adapter;
+  }
 }
 
 export default BaseStorageAdapter;

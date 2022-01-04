@@ -3,11 +3,11 @@ import { promises as fsPromises } from 'fs';
 
 import BaseStorageAdapter from '@stackmate/storage/base';
 import { AttributeParsers, Validations } from '@stackmate/types';
-import { parseFileName } from '@stackmate/lib/parsers';
+import { parseFileName, parseString } from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { FORMAT } from '@stackmate/constants';
 
-class FileAdapter extends BaseStorageAdapter {
+class FileStorageAdapter extends BaseStorageAdapter {
   /**
    * @var {Object} options the options for the storage
    */
@@ -26,10 +26,13 @@ class FileAdapter extends BaseStorageAdapter {
   parsers(): AttributeParsers {
     return {
       path: parseFileName,
+      format: parseString,
     };
   }
 
   validations(): Validations {
+    const formats = Object.values(FORMAT);
+
     return {
       path: {
         presence: {
@@ -38,6 +41,12 @@ class FileAdapter extends BaseStorageAdapter {
         },
         validateFileExistence: {},
       },
+      format: {
+        inclusion: {
+          within: Object.values(formats),
+          message: `The format provided for the file is invalid. Available options are: ${formats.join(', ')}`,
+        },
+      }
     };
   }
 
@@ -80,8 +89,8 @@ class FileAdapter extends BaseStorageAdapter {
    * @async
    */
   async read(): Promise<object> {
-    const contents = await fsPromises.readFile(this.path).toString();
-    return this.deserialize(contents);
+    const contents = await fsPromises.readFile(this.path)
+    return this.deserialize(contents.toString());
   }
 
   /**
@@ -96,4 +105,4 @@ class FileAdapter extends BaseStorageAdapter {
   }
 }
 
-export default FileAdapter;
+export default FileStorageAdapter;
