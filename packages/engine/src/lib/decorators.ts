@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import Entity from './entity';
+import Entity from '@stackmate/lib/entity';
 
 // eslint-disable-next-line import/prefer-default-export
 export const Attribute = function Attribute(target: Entity, propertyKey: string) {

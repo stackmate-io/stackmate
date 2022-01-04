@@ -7,7 +7,7 @@ import Configuration from '@stackmate/core/configuration';
 import { Attribute } from '@stackmate/lib/decorators';
 import { Project as ProjectInterface } from '@stackmate/interfaces';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, FORMAT, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
+import { DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, PROVIDER, STORAGE, DEFAULT_STAGE } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
   AttributeParsers, VaultConfiguration, ProviderChoice, Validations,
@@ -33,7 +33,7 @@ class Project extends Configuration implements ProjectInterface {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS, format: FORMAT.RAW };
+  @Attribute vault: VaultConfiguration = { storage: STORAGE.AWS_PARAMS };
 
   /**
    * @var {Object} stages the stages declarations
@@ -155,8 +155,7 @@ class Project extends Configuration implements ProjectInterface {
     vault: VaultConfiguration, provider: ProviderChoice, region: string,
   ): VaultConfiguration {
     const storage = provider === PROVIDER.AWS ? STORAGE.AWS_PARAMS : STORAGE.FILE;
-    const format = storage === STORAGE.AWS_PARAMS ? FORMAT.RAW : FORMAT.YML;
-    return defaultsDeep(vault, { format, storage, region });
+    return defaultsDeep(vault, { storage, region });
   }
 
   /**
@@ -226,11 +225,14 @@ class Project extends Configuration implements ProjectInterface {
     stageName: string = DEFAULT_STAGE,
     outputPath: string = '',
   ): Promise<void> {
-    const project = await Project.load(STORAGE.FILE, { path }, FORMAT.YML);
+    const project = await Project.load(STORAGE.FILE, { path });
 
-    const { storage: vaultStorage, format: vaultFormat, ...vaultStorageOptions } = project.vault;
-    const vaultOptions = { project: project.name, stage: stageName, ...vaultStorageOptions };
-    const vault = await Vault.load(vaultStorage, vaultOptions, vaultFormat);
+    const { storage: vaultStorage, ...vaultStorageOptions } = project.vault;
+    const vault = await Vault.load(vaultStorage, {
+      project: project.name,
+      stage: stageName,
+      ...vaultStorageOptions,
+    });
 
     const stage = Stage.factory({
       name: stageName,

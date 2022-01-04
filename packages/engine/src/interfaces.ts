@@ -3,8 +3,7 @@ import { App as TerraformApp, TerraformStack } from 'cdktf';
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  StorageChoice, NormalizedProjectConfiguration, CredentialsObject,
-  EntityAttributes, ServiceAttributes,
+  CredentialsObject, EntityAttributes, ServiceAttributes,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -97,13 +96,8 @@ export interface Profilable extends BaseEntity {
 }
 
 export interface StorageAdapter extends BaseEntity {
-  read(): Promise<string | object>;
-  write(contents: string | object): Promise<void>;
-}
-
-export interface Formatter {
-  parse(raw: string | object): Promise<object>;
-  export(parsed: object): Promise<string | object>;
+  read(): Promise<object>;
+  write(contents: object): Promise<void>;
 }
 
 export interface ConfigurationResource {

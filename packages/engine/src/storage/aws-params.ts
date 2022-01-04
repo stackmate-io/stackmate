@@ -1,14 +1,14 @@
 import { SSM } from '@aws-sdk/client-ssm';
 import { Memoize } from 'typescript-memoize';
 
-import BaseStorageAdapter from '@stackmate/adapters/storage/base';
+import BaseStorageAdapter from '@stackmate/storage/base';
 import Environment from '@stackmate/lib/environment';
 import { AttributeParsers, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
 
-class AwsParameterStore extends BaseStorageAdapter {
+class AwsParametersAdapter extends BaseStorageAdapter {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -107,7 +107,7 @@ class AwsParameterStore extends BaseStorageAdapter {
    */
   async read(): Promise<object> {
     const params = await this.client.getParametersByPath({ 'Path': this.namespace });
-    return params;
+    return this.deserialize(params);
   }
 
   /**
@@ -118,4 +118,4 @@ class AwsParameterStore extends BaseStorageAdapter {
   }
 }
 
-export default AwsParameterStore;
+export default AwsParametersAdapter;

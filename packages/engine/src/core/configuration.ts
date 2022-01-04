@@ -1,8 +1,7 @@
 import Entity from '@stackmate/lib/entity';
-import { getFormatter } from '@stackmate/adapters/formatters';
-import { getStorageAdapter } from '@stackmate/adapters/storage';
-import { ConfigurationResource, Formatter, StorageAdapter } from '@stackmate/interfaces';
-import { FormatChoice, StorageChoice } from '@stackmate/types';
+import { StorageChoice } from '@stackmate/types';
+import { getStorageAdapter } from '@stackmate/storage';
+import { ConfigurationResource, StorageAdapter } from '@stackmate/interfaces';
 
 abstract class Configuration extends Entity implements ConfigurationResource {
   /**
@@ -12,16 +11,10 @@ abstract class Configuration extends Entity implements ConfigurationResource {
   protected storageAdapter: StorageAdapter;
 
   /**
-   * @var {Formatter} formatter the format adapter to use
-   * @protected
-   */
-  protected formatter: Formatter;
-
-  /**
    * @var {Object} contents the file's contents in a structured format
    * @protected
    */
-  protected contents: object;
+  private contents: object;
 
   /**
    * @var {Boolean} isWriteable whether we can write to the file
@@ -32,13 +25,11 @@ abstract class Configuration extends Entity implements ConfigurationResource {
   /**
    * @constructor
    * @param {StorageAdapter} storageAdapter the storage adapter to fetch & push values
-   * @param {Formatter} formatter the formatter to parse values with
    */
-  constructor(storageAdapter: StorageAdapter, formatter: Formatter) {
+  constructor(storageAdapter: StorageAdapter) {
     super();
 
     this.storageAdapter = storageAdapter;
-    this.formatter = formatter;
   }
 
   /**
@@ -47,10 +38,8 @@ abstract class Configuration extends Entity implements ConfigurationResource {
    * @async
    */
   async read(): Promise<object> {
-    const rawContents = await this.storageAdapter.read();
-    const parsedContents = await this.formatter.parse(rawContents);
-
-    this.contents = this.normalize(parsedContents);
+    const contents = await this.storageAdapter.read();
+    this.contents = this.normalize(contents);
     return this.contents;
   }
 
@@ -65,9 +54,7 @@ abstract class Configuration extends Entity implements ConfigurationResource {
       throw new Error('File is not writeable');
     }
 
-    const formatted = await this.formatter.export(this.contents);
-
-    await this.storageAdapter.write(formatted);
+    await this.storageAdapter.write(this.contents);
   }
 
   /**
@@ -81,13 +68,12 @@ abstract class Configuration extends Entity implements ConfigurationResource {
     this: new (...args: any[]) => T,
     storage: StorageChoice,
     storageOptions: object,
-    format: FormatChoice,
+    additionalAttributes: object = {},
   ): Promise<T> {
-    const storageAdapter = getStorageAdapter(storage, storageOptions);
-    const formatter = getFormatter(format);
+    const conf = new this(getStorageAdapter(storage, storageOptions));
+    const attrs = await conf.read();
 
-    const conf = new this(storageAdapter, formatter);
-    conf.attributes = await conf.read();
+    conf.attributes = { ...attrs, ...additionalAttributes };
     conf.validate();
 
     return conf;

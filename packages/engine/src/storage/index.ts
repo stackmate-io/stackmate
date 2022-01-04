@@ -1,18 +1,18 @@
 import { StorageChoice, StorageOptions } from '@stackmate/types';
 import { StorageAdapter } from '@stackmate/interfaces';
 import { STORAGE } from '@stackmate/constants';
-import LocalFileAdapter from './local';
-import AwsParameterStore from './aws/parameter-store';
+import FileAdapter from '@stackmate/storage/file';
+import AwsParametersAdapter from '@stackmate/storage/aws-params';
 
 const getStorageAdapter = (storage: StorageChoice, storageOptions: StorageOptions): StorageAdapter => {
   let adapter: StorageAdapter | undefined;
 
   switch (storage) {
     case STORAGE.FILE:
-      adapter = new LocalFileAdapter();
+      adapter = new FileAdapter();
       break;
     case STORAGE.AWS_PARAMS:
-      adapter = new AwsParameterStore();
+      adapter = new AwsParametersAdapter();
       break;
     default:
       throw new Error(`Invalid storage “${storage}” specified`);
@@ -25,7 +25,7 @@ const getStorageAdapter = (storage: StorageChoice, storageOptions: StorageOption
 };
 
 export {
-  LocalFileAdapter,
-  AwsParameterStore,
+  FileAdapter,
+  AwsParametersAdapter,
   getStorageAdapter,
 };

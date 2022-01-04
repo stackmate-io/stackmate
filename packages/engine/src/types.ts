@@ -11,7 +11,6 @@ export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<in
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
-export type FormatChoice = ChoiceOf<typeof FORMAT>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
@@ -91,7 +90,6 @@ export type StageDeclarations = {
 
 export type VaultConfiguration = {
   storage: StorageChoice;
-  format: FormatChoice;
   key?: string;
   region?: string;
 };
