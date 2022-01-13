@@ -107,10 +107,6 @@ export interface ConfigurationResource {
   write(): Promise<void>;
 }
 
-export interface Project extends ConfigurationResource {
-  outputPath: string;
-}
-
 export interface Vault extends ConfigurationResource {
   credentials(service: string): CredentialsObject;
   rootCredentials(service: string): CredentialsObject;

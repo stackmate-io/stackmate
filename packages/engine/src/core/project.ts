@@ -7,7 +7,6 @@ import Stage from '@stackmate/core/stage';
 import Configuration from '@stackmate/core/configuration';
 import FileStorageAdapter from '@stackmate/storage/file';
 import { Attribute } from '@stackmate/lib/decorators';
-import { Project as ProjectInterface } from '@stackmate/interfaces';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, PROVIDER, DEFAULT_STAGE,
@@ -18,7 +17,7 @@ import {
   StageDeclarations, StagesNormalizedAttributes, NormalizedStage,
 } from '@stackmate/types';
 
-class Project extends Configuration implements ProjectInterface {
+class Project extends Configuration {
   /**
    * @var {String} name the project's name
    */
@@ -63,7 +62,7 @@ class Project extends Configuration implements ProjectInterface {
    * @param {String} path the project's file path
    * @constructor
    */
-  constructor(path: string) {
+  constructor(path: string, outputPath = null) {
     super();
 
     this.path = path;
@@ -168,13 +167,6 @@ class Project extends Configuration implements ProjectInterface {
   }
 
   /**
-   * @returns {String} the output path for the generated resources
-   */
-  public get outputPath() : string {
-    return joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
-  }
-
-  /**
    * Normalizes the stages configuration
    *
    * @param stages {Object} the stages to normalize
@@ -249,11 +241,12 @@ class Project extends Configuration implements ProjectInterface {
     const vault = new Vault(project.name, stageName, project.vault);
     await vault.load();
 
+    const targetPath = outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(project.name));
     const stage = Stage.factory({
       name: stageName,
-      targetPath: outputPath || project.outputPath,
       defaults: project.defaults,
       services: project.stage(stageName),
+      targetPath,
       vault,
     });
 
