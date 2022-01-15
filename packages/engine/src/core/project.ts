@@ -4,19 +4,19 @@ import { clone, defaultsDeep, fromPairs, get, kebabCase, merge, omit } from 'lod
 
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
-import Storage from '@stackmate/lib/storage';
-import Loadable from '@stackmate/lib/loadable';
+import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
+import { Loadable, StorageAdapter } from '@stackmate/interfaces';
+import { getVaultByProvider } from '@stackmate/vault';
+import { getStoragAdaptereByType } from '@stackmate/storage';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { OUTPUT_DIRECTORY, PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
-  AttributeParsers, VaultConfiguration, ProviderChoice, Validations,
-  StageDeclarations, StagesNormalizedAttributes,
+  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, StageDeclarations,
+  AttributeParsers, VaultConfiguration, ProviderChoice, Validations, StagesNormalizedAttributes,
 } from '@stackmate/types';
-import { getVaultByProvider } from '@stackmate/vault';
 
-class Project extends Loadable {
+class Project extends Entity implements Loadable {
   /**
    * @var {String} name the project's name
    */
@@ -53,36 +53,18 @@ class Project extends Loadable {
   readonly validationMessage: string = 'The project’s configuration file is not valid';
 
   /**
-   * @var {String} path the file's path
+   * @var {String} path the path to the file
    */
-  readonly path: string;
-
-  /**
-   * @var {String} outputPath the path to write out the synthesized files
-   */
-  readonly outputPath: string;
+  public readonly path: string;
 
   /**
    * @constructor
    * @param {String} path the project's file path
-   * @param {String} stageName the stage name to load
-   * @param {String} outputPath the path to write out the synthesized files
    */
-  constructor(path: string, outputPath?: string) {
+  constructor(path: string) {
     super();
 
     this.path = path;
-    if (outputPath) {
-      this.outputPath = outputPath;
-    }
-  }
-
-  /**
-   * @returns {Storage} the storage adapter to use for reading the file
-   */
-  @Memoize()
-  get storage(): Storage {
-    return new Storage(STORAGE.FILE, { path: this.path, format: FORMAT.YML }, false);
   }
 
   /**
@@ -112,16 +94,34 @@ class Project extends Loadable {
    * Returns the stage object for a given stage name
    *
    * @param {String} name the name of the stage to get
+   * @param {String} outputPath the path to write the output files to
    * @returns {Promise<Stage>} the requested stage object
    */
   @Memoize()
-  async stage(name: string): Promise<Stage> {
+  async stage(name: string, outputPath?: string): Promise<Stage> {
     const defaults = this.defaults;
     const vault = await this.vault(name);
     const services = get(this.stages, name, {});
-    const targetPath = this.outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
+    const targetPath = outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
 
     return Stage.factory({ name, defaults, services, targetPath, vault });
+  }
+
+  /**
+  * @var {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+  */
+  @Memoize() public get storage(): StorageAdapter {
+    return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
+  }
+
+  /**
+   * Loads the project attributes from the file storage
+   * @void
+   */
+  async load(): Promise<void> {
+    const attributes = await this.storage.read();
+    this.attributes = this.storage.deserialize(attributes);
+    this.validate();
   }
 
   /**

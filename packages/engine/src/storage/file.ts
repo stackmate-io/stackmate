@@ -4,11 +4,11 @@ import { promises as fsPromises } from 'fs';
 import Entity from '@stackmate/lib/entity';
 import { AttributeParsers, Validations } from '@stackmate/types';
 import { parseFileName, parseString } from '@stackmate/lib/parsers';
+import { StorageAdapter } from '@stackmate/interfaces';
 import { Attribute } from '@stackmate/lib/decorators';
 import { FORMAT } from '@stackmate/constants';
-import { StorageStrategy } from '@stackmate/interfaces';
 
-class FileStorage extends Entity implements StorageStrategy {
+class FileStorage extends Entity implements StorageAdapter {
   /**
    * @var {Object} options the options for the storage
    */
@@ -89,9 +89,9 @@ class FileStorage extends Entity implements StorageStrategy {
    * @returns {String}
    * @async
    */
-  async read(): Promise<object> {
+  async read(): Promise<string> {
     const contents = await fsPromises.readFile(this.path)
-    return this.deserialize(contents.toString());
+    return contents.toString();
   }
 
   /**

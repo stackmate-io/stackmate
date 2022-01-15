@@ -1,8 +1,9 @@
-import Loadable from '@stackmate/lib/loadable';
+import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
 import { CredentialsObject } from '@stackmate/types';
+import { Loadable, StorageAdapter } from '@stackmate/interfaces';
 
-abstract class Vault extends Loadable {
+abstract class Vault extends Entity implements Loadable {
   /**
    * @var {String} project the vault's project name
    */
@@ -19,20 +20,30 @@ abstract class Vault extends Loadable {
   readonly validationMessage: string = 'The vault contents are invalid';
 
   /**
-   * @var {Object} data the secrets data
+   * @var {StorageAdapter} storage the storage adapter to use
    */
-  protected data: object;
+  abstract storage: StorageAdapter;
+
+  /**
+   * @var {Object} secrets the secrets in the remote storage
+   */
+  protected secrets: object;
 
   credentials(service: string): CredentialsObject {
     return {};
   }
 
   rootCredentials(service: string): CredentialsObject {
-    return { username: 'abc123', password: 'abc' };
+    return {};
   }
 
-  async load() {
-    this.data = await this.storage.read();
+  /**
+   * Loads the project attributes from the file storage
+   * @void
+   */
+  async load(): Promise<void> {
+    const secrets = await this.storage.read();
+    this.secrets = this.storage.deserialize(secrets);
   }
 }
 

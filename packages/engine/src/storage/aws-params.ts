@@ -7,9 +7,9 @@ import { AttributeParsers, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
-import { StorageStrategy } from '@stackmate/interfaces';
+import { StorageAdapter } from '@stackmate/interfaces';
 
-class AwsParametersStorage extends Entity implements StorageStrategy {
+class AwsParametersStorage extends Entity implements StorageAdapter {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -28,7 +28,7 @@ class AwsParametersStorage extends Entity implements StorageStrategy {
   /**
    * @var {String} validationMessage the error message
    */
-  readonly validationMessage: string = 'The “vault” section in the project configuration is invalid';
+  readonly validationMessage: string = 'The configuration for using AWS parameter storage is invalid';
 
   /**
    * @returns {Object} the parser functions to use
@@ -85,27 +85,22 @@ class AwsParametersStorage extends Entity implements StorageStrategy {
     return client;
   }
 
-  serialize(contents: object): object {
-    return contents;
-  }
-
-  deserialize(serialized: object): object {
-    return serialized;
+  /**
+   * Deserializes the content from the storage
+   *
+   * @param {Object} serialized the serialize contents
+   * @returns {Object}
+   */
+  deserialize(serialized: string | object): object {
+    return {};
   }
 
   /**
    * @returns {Promise<Object>} the parameters under a specific path
    */
   async read(): Promise<object> {
-    const params = await this.client.getParametersByPath({ 'Path': 'this.namespace' });
+    const params = await this.client.getParametersByPath({ 'Path': this.namespace });
     return this.deserialize(params);
-  }
-
-  /**
-   * @param {Object} contents the params to write to AWS SSM
-   * @void
-   */
-  async write(contents: object): Promise<void> {
   }
 }
 

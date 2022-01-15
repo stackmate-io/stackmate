@@ -99,17 +99,9 @@ export interface Profilable extends BaseEntity {
   overrides: object;
 }
 
-export interface StorageStrategy extends BaseEntity {
-  read(): Promise<object>;
-  write(contents: object): Promise<void>;
-  serialize(contents: object): string | object;
-  deserialize(serialized: string | object): object;
-};
-
 export interface StorageAdapter {
-  readonly isWriteable: boolean;
-  read(): Promise<object>;
-  write(contents: object): Promise<void>;
+  deserialize(serialized: string | object): object;
+  read(): Promise<object | string>;
 }
 
 export interface CloudStack extends TerraformStack {
@@ -118,4 +110,9 @@ export interface CloudStack extends TerraformStack {
   readonly app: TerraformApp;
   path: string;
   generate(): void;
+}
+
+export interface Loadable {
+  storage: StorageAdapter;
+  load(): Promise<void>;
 }
