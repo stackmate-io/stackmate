@@ -1,13 +1,16 @@
+import { get } from 'lodash';
+import { Memoize } from 'typescript-memoize';
+
 import Entity from '@stackmate/lib/entity';
 import Registry from '@stackmate/core/registry';
-import CloudManager from '@stackmate/core/manager';
 import Stack from '@stackmate/core/stack';
+import Vault from '@stackmate/core/vault';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudStack, Provisionable } from '@stackmate/interfaces';
-import { AttributeParsers, EntityAttributes, NormalizedStage, ProjectDefaults, Validations } from '@stackmate/types';
+import { CloudProvider, CloudStack, Provisionable } from '@stackmate/interfaces';
+import { AttributeParsers, EntityAttributes, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { createDirectory } from '@stackmate/lib/helpers';
-import Vault from '@stackmate/core/vault';
+import { getCloudByProvider } from '@stackmate/clouds';
 
 class Stage extends Entity implements Provisionable {
   /**
@@ -44,12 +47,6 @@ class Stage extends Entity implements Provisionable {
    * @var {Registry} registry the services registry
    */
   readonly registry: Registry;
-
-  /**
-   * @var {CloudManager} clouds the class that handles the cloud services
-   * @protected
-   */
-  protected clouds: CloudManager;
 
   /**
    * @var {Stack} stack the stack to use to provision the services with
@@ -117,6 +114,19 @@ class Stage extends Entity implements Provisionable {
   }
 
   /**
+   * Returns a cloud provider instance
+   *
+   * @param {ProviderChoice} provider The provider to get as a cloud instance
+   * @param {String} region The cloud region to use
+   * @returns {CloudProvider} the instance of the cloud provider
+   */
+  @Memoize((...args: any[]) => args.join(':'))
+  public cloud(provider: ProviderChoice, region: string): CloudProvider {
+    const attributes = { region, defaults: get(this.defaults, provider, {}) };
+    return getCloudByProvider(provider, attributes, this.stack);
+  }
+
+  /**
    * Provisions the stage
    */
   provision(): void {
@@ -128,12 +138,11 @@ class Stage extends Entity implements Provisionable {
     createDirectory(this.targetPath);
 
     this.stack = new Stack(this.name, this.targetPath);
-    this.clouds = new CloudManager(this.stack, this.defaults);
 
     Object.keys(this.services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = this.services;
 
-      const service = this.clouds.get(provider, region).service(type, {
+      const service = this.cloud(provider, region).service(type, {
         ...attributes,
         credentials: this.vault.credentials(this.name),
         rootCredentials: this.vault.rootCredentials(this.name),

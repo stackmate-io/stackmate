@@ -4,7 +4,7 @@ import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
 import { CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice, StagesNormalizedAttributes, VaultConfiguration } from '@stackmate/types';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE, VAULT_PROVIDER } from '@stackmate/constants';
 import { isKeySubset } from '@stackmate/lib/helpers';
 import Profile from '@stackmate/core/profile';
 
@@ -103,7 +103,13 @@ const validateVault = (vault: VaultConfiguration) => {
   }
 
   const { provider, key, region } = vault;
-  if (provider === PROVIDER.AWS && (!key || !region)) {
+  const availableProviders = Object.values(VAULT_PROVIDER);
+
+  if (!provider || !availableProviders.includes(provider)) {
+    return `You have to specify a valid vault provider. Available options are: ${availableProviders.join(', ')}`;
+  }
+
+  if (provider === VAULT_PROVIDER.AWS && (!key || !region)) {
     return 'The vault needs to have “region” and a “key” ARN to encrypt values';
   }
 };

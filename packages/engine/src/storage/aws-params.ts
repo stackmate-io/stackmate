@@ -1,14 +1,15 @@
 import { SSM } from '@aws-sdk/client-ssm';
 import { Memoize } from 'typescript-memoize';
 
-import BaseStorageAdapter from '@stackmate/storage/base';
+import Entity from '@stackmate/lib/entity';
 import Environment from '@stackmate/lib/environment';
 import { AttributeParsers, Validations } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
+import { StorageStrategy } from '@stackmate/interfaces';
 
-class AwsParametersStorageAdapter extends BaseStorageAdapter {
+class AwsParametersStorage extends Entity implements StorageStrategy {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -108,4 +109,4 @@ class AwsParametersStorageAdapter extends BaseStorageAdapter {
   }
 }
 
-export default AwsParametersStorageAdapter;
+export default AwsParametersStorage;

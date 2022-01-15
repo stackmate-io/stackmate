@@ -1,23 +1,22 @@
 import { join as joinPaths } from 'path';
 import { Memoize } from 'typescript-memoize';
-import { clone, defaultsDeep, fromPairs, kebabCase, merge, omit } from 'lodash';
+import { clone, defaultsDeep, fromPairs, get, kebabCase, merge, omit } from 'lodash';
 
 import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
-import Configuration from '@stackmate/core/configuration';
-import FileStorageAdapter from '@stackmate/storage/file';
+import Storage from '@stackmate/lib/storage';
+import Loadable from '@stackmate/lib/loadable';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import {
-  DEFAULT_PROJECT_FILE, OUTPUT_DIRECTORY, PROVIDER, DEFAULT_STAGE,
-} from '@stackmate/constants';
+import { OUTPUT_DIRECTORY, PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults,
   AttributeParsers, VaultConfiguration, ProviderChoice, Validations,
-  StageDeclarations, StagesNormalizedAttributes, NormalizedStage,
+  StageDeclarations, StagesNormalizedAttributes,
 } from '@stackmate/types';
+import { getVaultByProvider } from '@stackmate/vault';
 
-class Project extends Configuration {
+class Project extends Loadable {
   /**
    * @var {String} name the project's name
    */
@@ -36,7 +35,7 @@ class Project extends Configuration {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute vault: VaultConfiguration = { provider: PROVIDER.AWS };
+  @Attribute secrets: VaultConfiguration = { provider: PROVIDER.AWS };
 
   /**
    * @var {Object} stages the stages declarations
@@ -59,21 +58,70 @@ class Project extends Configuration {
   readonly path: string;
 
   /**
-   * @param {String} path the project's file path
-   * @constructor
+   * @var {String} outputPath the path to write out the synthesized files
    */
-  constructor(path: string, outputPath = null) {
+  readonly outputPath: string;
+
+  /**
+   * @constructor
+   * @param {String} path the project's file path
+   * @param {String} stageName the stage name to load
+   * @param {String} outputPath the path to write out the synthesized files
+   */
+  constructor(path: string, outputPath?: string) {
     super();
 
     this.path = path;
+    if (outputPath) {
+      this.outputPath = outputPath;
+    }
   }
 
   /**
-   * @returns {FileStorageAdapter} the storage adapter to use for reading the file
+   * @returns {Storage} the storage adapter to use for reading the file
    */
   @Memoize()
-  get storage() {
-    return FileStorageAdapter.factory({ path: this.path });
+  get storage(): Storage {
+    return new Storage(STORAGE.FILE, { path: this.path, format: FORMAT.YML }, false);
+  }
+
+  /**
+   * Returns the secrets vault for a certain stage
+   *
+   * @param {String} stage the stage to get the vault for
+   * @returns {Promise<Vault>} the vault for the stage specified
+   */
+  @Memoize()
+  async vault(stage: string): Promise<Vault> {
+    const { provider, ...vaultStorageOptions } = this.secrets;
+
+    if (!provider) {
+      throw new Error('No provider has been specified for the vault');
+    }
+
+    const vault = await getVaultByProvider(provider, {
+      ...vaultStorageOptions,
+      project: this.name,
+      stage,
+    });
+
+    return vault;
+  }
+
+  /**
+   * Returns the stage object for a given stage name
+   *
+   * @param {String} name the name of the stage to get
+   * @returns {Promise<Stage>} the requested stage object
+   */
+  @Memoize()
+  async stage(name: string): Promise<Stage> {
+    const defaults = this.defaults;
+    const vault = await this.vault(name);
+    const services = get(this.stages, name, {});
+    const targetPath = this.outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
+
+    return Stage.factory({ name, defaults, services, targetPath, vault });
   }
 
   /**
@@ -110,7 +158,7 @@ class Project extends Configuration {
           message: 'A default region (that corresponds to the regions that the default cloud provider provides) should be specified',
         },
       },
-      vault: {
+      secrets: {
         validateVault: {},
       },
       stages: {
@@ -130,7 +178,7 @@ class Project extends Configuration {
       name: parseString,
       region: parseString,
       provider: parseString,
-      vault: parseObject,
+      secrets: parseObject,
       stages: parseObject,
       defaults: parseObject,
     };
@@ -145,25 +193,15 @@ class Project extends Configuration {
   normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
     // the configuration have been validated, so it's safe to cast it as NormalizedProjectConfiguration
     const normalized = clone(configuration) as NormalizedProjectConfiguration;
-    const { provider, region, stages, vault, defaults = {} } = normalized;
+    const { provider, region, stages, secrets, defaults = {} } = normalized;
 
     Object.assign(normalized, {
       stages: Project.normalizeStages(stages, provider, region),
-      vault: defaultsDeep(vault, { provider, region }),
+      secrets: defaultsDeep(secrets, { provider, region }),
       defaults,
     });
 
     return normalized;
-  }
-
-  /**
-   * Returns the services for a given stage
-   *
-   * @param {String} name the name of the stage to get the services for
-   * @returns {Object} the stage's services
-   */
-  public stage(name: string): NormalizedStage {
-    return this.stages[name];
   }
 
   /**
@@ -220,37 +258,6 @@ class Project extends Configuration {
     });
 
     return fromPairs(normalizedStages);
-  }
-
-  /**
-   * Synthesize the stack and prepare for provision
-   *
-   * @param {String} path loads and returns a project from a file
-   * @param {String} stageName the stage's name
-   * @param {String} outputPath the path to write the output files to
-   * @void
-   */
-  static async synthesize(
-    path: string = DEFAULT_PROJECT_FILE,
-    stageName: string = DEFAULT_STAGE,
-    outputPath: string = '',
-  ): Promise<void> {
-    const project = new Project(path);
-    await project.load();
-
-    const vault = new Vault(project.name, stageName, project.vault);
-    await vault.load();
-
-    const targetPath = outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(project.name));
-    const stage = Stage.factory({
-      name: stageName,
-      defaults: project.defaults,
-      services: project.stage(stageName),
-      targetPath,
-      vault,
-    });
-
-    stage.synthesize();
   }
 }
 

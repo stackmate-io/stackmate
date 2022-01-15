@@ -12,6 +12,10 @@ export const PROVIDER = {
   AWS: 'aws',
 } as const;
 
+export const VAULT_PROVIDER = {
+  AWS: 'aws',
+} as const;
+
 export const SERVICE_TYPE = {
   CDN: 'cdn',
   DATABASE: 'database',

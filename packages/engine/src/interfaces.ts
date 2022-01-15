@@ -54,6 +54,10 @@ export interface Sizeable extends BaseEntity {
   validations(): Validations & Required<{ size: object }>;
 }
 
+export interface EntityConstructor extends BaseEntity {
+  new(...args: any[]): BaseEntity;
+}
+
 export interface Storable extends BaseEntity {
   storage: number;
   parsers(): AttributeParsers & Required<{ size: Function }>;
@@ -95,21 +99,17 @@ export interface Profilable extends BaseEntity {
   overrides: object;
 }
 
-export interface StorageAdapter extends BaseEntity {
+export interface StorageStrategy extends BaseEntity {
   read(): Promise<object>;
   write(contents: object): Promise<void>;
-}
+  serialize(contents: object): string | object;
+  deserialize(serialized: string | object): object;
+};
 
-export interface ConfigurationResource {
+export interface StorageAdapter {
   readonly isWriteable: boolean;
-  normalize(contents: object): object;
-  read(): void;
-  write(): Promise<void>;
-}
-
-export interface Vault extends ConfigurationResource {
-  credentials(service: string): CredentialsObject;
-  rootCredentials(service: string): CredentialsObject;
+  read(): Promise<object>;
+  write(contents: object): Promise<void>;
 }
 
 export interface CloudStack extends TerraformStack {

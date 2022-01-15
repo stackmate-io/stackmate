@@ -3,7 +3,7 @@ import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
-import AwsService from '@stackmate/lib/mixins';
+import AwsService from '@stackmate/clouds/aws/mixins';
 import { OneOf } from '@stackmate/types';
 import {
   RDS_ENGINES,

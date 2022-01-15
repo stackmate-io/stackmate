@@ -9,7 +9,7 @@ import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '../constants';
 
 /**
- * We don't wrap the service with the AwsService decorator
+ * We don't wrap the service with the AwsService mixin
  * because this is a service that gets instantiated when the cloud provider inits
  */
 class AwsVpcService extends Networking {

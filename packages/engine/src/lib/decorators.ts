@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+
 import Entity from '@stackmate/lib/entity';
 
 // eslint-disable-next-line import/prefer-default-export

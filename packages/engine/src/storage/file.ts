@@ -1,13 +1,14 @@
 import YAML from 'yaml';
 import { promises as fsPromises } from 'fs';
 
-import BaseStorageAdapter from '@stackmate/storage/base';
+import Entity from '@stackmate/lib/entity';
 import { AttributeParsers, Validations } from '@stackmate/types';
 import { parseFileName, parseString } from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { FORMAT } from '@stackmate/constants';
+import { StorageStrategy } from '@stackmate/interfaces';
 
-class FileStorageAdapter extends BaseStorageAdapter {
+class FileStorage extends Entity implements StorageStrategy {
   /**
    * @var {Object} options the options for the storage
    */
@@ -105,4 +106,4 @@ class FileStorageAdapter extends BaseStorageAdapter {
   }
 }
 
-export default FileStorageAdapter;
+export default FileStorage;

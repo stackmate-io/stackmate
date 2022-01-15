@@ -13,11 +13,10 @@ region: eu-central-1
 
 # TODO:
 # Where to store the credentials
-# vault:
-#   storage: file
+# secrets:
+#   provider: aws
 #   key: abc/def
 #   path: ~/.stackmate/test123.yml.enc
-#   # storage: github # todo
 
 stages:
   production:
