@@ -4,6 +4,7 @@ import Vault from '@stackmate/core/vault';
 import { STORAGE } from '@stackmate/constants';
 import { StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/storage';
+import { AttributeParsers, Validations } from '@stackmate/types';
 
 class AwsParamsVault extends Vault {
   /**
@@ -11,6 +12,24 @@ class AwsParamsVault extends Vault {
     */
   @Memoize() public get storage(): StorageAdapter {
     return getStoragAdaptereByType(STORAGE.AWS, {});
+  }
+
+  /**
+   * @returns {AttributeParsers}
+   */
+  parsers(): AttributeParsers {
+    return {
+      ...super.parsers(),
+    };
+  }
+
+  /**
+   * @returns {Validations}
+   */
+  validations(): Validations {
+    return {
+      ...super.validations(),
+    }
   }
 }
 

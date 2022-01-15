@@ -1,6 +1,7 @@
 import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CredentialsObject } from '@stackmate/types';
+import { parseString } from '@stackmate/lib/parsers';
+import { AttributeParsers, CredentialsObject, Validations } from '@stackmate/types';
 import { Loadable, StorageAdapter } from '@stackmate/interfaces';
 
 abstract class Vault extends Entity implements Loadable {
@@ -28,6 +29,30 @@ abstract class Vault extends Entity implements Loadable {
    * @var {Object} secrets the secrets in the remote storage
    */
   protected secrets: object;
+
+  parsers(): AttributeParsers {
+    return {
+      project: parseString,
+      stage: parseString,
+    };
+  }
+
+  validations(): Validations {
+    return {
+      project: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to provide a project name for the vault',
+        },
+      },
+      stage: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to provide a stage name for the vault',
+        },
+      },
+    };
+  }
 
   credentials(service: string): CredentialsObject {
     return {};
