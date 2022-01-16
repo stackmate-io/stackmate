@@ -3,7 +3,18 @@ import { VaultProviderChoice } from '@stackmate/types';
 import Vault from '@stackmate/core/vault';
 import AwsParamsVault from './aws-params';
 
+/**
+ * Gets a vault by providing its attributes
+ *
+ * @param {VaultProviderChoice} provider the provider to use for the vault
+ * @param {Object} attributes the vault's attributes
+ * @returns {Vault}
+ */
 const getVaultByProvider = async (provider: VaultProviderChoice, attributes: object): Promise<Vault> => {
+  if (!provider) {
+    throw new Error('No provider has been specified for the vault');
+  }
+
   let vault;
 
   if (provider === STORAGE.AWS_PARAMS) {

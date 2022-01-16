@@ -1,6 +1,5 @@
 import { isEmpty, merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
-import { TerraformVariable } from 'cdktf';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
@@ -199,21 +198,6 @@ abstract class Service extends Entity implements CloudService, Provisionable {
         },
       },
     };
-  }
-
-  /**
-   * Provisions a variable in the stack
-   *
-   * @param {String} name the variable's name
-   * @param {String} value the value for the variable
-   * @param {Object} options
-   * @param {Boolean} options.sensitive whether the variable is sensitive
-   */
-  variable(
-    name: string, value: string | undefined | null, { sensitive = true } = {},
-  ): TerraformVariable {
-    const id: string = `${this.stack.name}-${this.name}-${name}`;
-    return new TerraformVariable(this.stack, id, { default: value || '', sensitive });
   }
 
   /**

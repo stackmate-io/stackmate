@@ -2,7 +2,6 @@ import { join as joinPaths } from 'path';
 import { Memoize } from 'typescript-memoize';
 import { clone, defaultsDeep, fromPairs, get, kebabCase, merge, omit } from 'lodash';
 
-import Vault from '@stackmate/core/vault';
 import Stage from '@stackmate/core/stage';
 import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
@@ -10,7 +9,7 @@ import { Loadable, StorageAdapter } from '@stackmate/interfaces';
 import { getVaultByProvider } from '@stackmate/vault';
 import { getStoragAdaptereByType } from '@stackmate/storage';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { OUTPUT_DIRECTORY, PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
+import { OUTPUT_DIRECTORY, PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, StageDeclarations,
   AttributeParsers, VaultConfiguration, ProviderChoice, Validations, StagesNormalizedAttributes,
@@ -35,7 +34,7 @@ class Project extends Entity implements Loadable {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute secrets: VaultConfiguration = { provider: PROVIDER.AWS };
+  @Attribute secrets: VaultConfiguration = { provider: VAULT_PROVIDER.AWS };
 
   /**
    * @var {Object} stages the stages declarations
@@ -68,43 +67,25 @@ class Project extends Entity implements Loadable {
   }
 
   /**
-   * Returns the secrets vault for a certain stage
-   *
-   * @param {String} stage the stage to get the vault for
-   * @returns {Promise<Vault>} the vault for the stage specified
-   */
-  @Memoize()
-  async vault(stage: string): Promise<Vault> {
-    const { provider, ...vaultStorageOptions } = this.secrets;
-
-    if (!provider) {
-      throw new Error('No provider has been specified for the vault');
-    }
-
-    const vault = await getVaultByProvider(provider, {
-      ...vaultStorageOptions,
-      project: this.name,
-      stage,
-    });
-
-    return vault;
-  }
-
-  /**
    * Returns the stage object for a given stage name
    *
    * @param {String} name the name of the stage to get
    * @param {String} outputPath the path to write the output files to
    * @returns {Promise<Stage>} the requested stage object
    */
-  @Memoize()
-  async stage(name: string, outputPath?: string): Promise<Stage> {
-    const defaults = this.defaults;
-    const vault = await this.vault(name);
-    const services = get(this.stages, name, {});
-    const targetPath = outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name));
+  @Memoize() async stage(name: string, outputPath?: string): Promise<Stage> {
+    const { provider = VAULT_PROVIDER.AWS, ...vaultAttributes } = this.secrets;
 
-    return Stage.factory({ name, defaults, services, targetPath, vault });
+    const vault = await getVaultByProvider(provider, {
+      ...vaultAttributes, project: this.name, stage: name,
+    });
+
+    return Stage.factory(vault, {
+      name,
+      defaults: this.defaults,
+      services: get(this.stages, name, {}),
+      targetPath: outputPath || joinPaths(OUTPUT_DIRECTORY, kebabCase(this.name)),
+    });
   }
 
   /**
@@ -197,7 +178,7 @@ class Project extends Entity implements Loadable {
 
     Object.assign(normalized, {
       stages: Project.normalizeStages(stages, provider, region),
-      secrets: defaultsDeep(secrets, { provider, region }),
+      secrets: defaultsDeep(secrets, { region, provider: VAULT_PROVIDER.AWS }),
       defaults,
     });
 

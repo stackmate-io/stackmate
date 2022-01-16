@@ -83,10 +83,7 @@ class AwsRdsService extends AwsDatabaseService {
   }
 
   provision() {
-    const { username: rootUsername, password: rootPassword } = this.rootCredentials;
     const { instance, params } = this.provisioningProfile;
-    const rootUsernameVar = this.variable('rootusername', rootUsername);
-    const rootPasswordVar = this.variable('rootpassword', rootPassword);
 
     this.paramGroup = new DbParameterGroup(this.stack, `${this.identifier}-params`, {
       ...params,
@@ -104,8 +101,8 @@ class AwsRdsService extends AwsDatabaseService {
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
-      username: rootUsernameVar.value,
-      password: rootPasswordVar.value,
+      // username: rootUsernameVar.value,
+      // password: rootPasswordVar.value,
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
     });
   }

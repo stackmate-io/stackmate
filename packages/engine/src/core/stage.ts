@@ -7,7 +7,7 @@ import Stack from '@stackmate/core/stack';
 import Vault from '@stackmate/core/vault';
 import { Attribute } from '@stackmate/lib/decorators';
 import { CloudProvider, CloudStack, Provisionable } from '@stackmate/interfaces';
-import { AttributeParsers, EntityAttributes, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
+import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { createDirectory } from '@stackmate/lib/helpers';
 import { getCloudByProvider } from '@stackmate/clouds';
@@ -17,11 +17,6 @@ class Stage extends Entity implements Provisionable {
    * @var {String} name the stage's name
    */
   @Attribute name: string;
-
-  /**
-   * @var {Vault} vault the vault containing the credentials
-   */
-  @Attribute vault: Vault;
 
   /**
    * @var {NormalizedStage} services the services configuration
@@ -49,15 +44,19 @@ class Stage extends Entity implements Provisionable {
   readonly registry: Registry;
 
   /**
-   * @var {Stack} stack the stack to use to provision the services with
-   * @protected
+   * @var {Vault} vault the secrets vault to use for service credentials
    */
-  protected stack: CloudStack;
+  protected vault: Vault;
 
-  constructor() {
+  /**
+   * @constructor
+   * @param {Vault} vault
+   */
+  constructor(vault: Vault) {
     super();
 
     this.registry = new Registry();
+    this.vault = vault;
   }
 
   /**
@@ -66,7 +65,6 @@ class Stage extends Entity implements Provisionable {
   parsers(): AttributeParsers {
     return {
       name: parseString,
-      vault: parseObject,
       services: parseObject,
       defaults: parseObject,
       targetPath: parseString,
@@ -86,17 +84,13 @@ class Stage extends Entity implements Provisionable {
           message: 'The stage’s can contain characters, numbers or dash eg. production or staging',
         },
       },
-      vault: {
-        validateInstanceType: { expected: Vault }
-      },
       services: {
         presence: {
           allowEmpty: false,
           message: 'You have to provide the services for the stage',
         },
       },
-      defaults: {
-      },
+      defaults: {},
       targetPath: {
         presence: {
           allowEmpty: false,
@@ -111,6 +105,13 @@ class Stage extends Entity implements Provisionable {
    */
   public get isProvisioned(): boolean {
     return this.stack instanceof Stack && this.registry.length > 0;
+  }
+
+  /**
+   * @returns {CloudStack} the stack for the stage
+   */
+  @Memoize() public get stack(): CloudStack {
+    return new Stack(this.name, this.targetPath);
   }
 
   /**
@@ -137,8 +138,6 @@ class Stage extends Entity implements Provisionable {
     // create target output path if it doesn't exist
     createDirectory(this.targetPath);
 
-    this.stack = new Stack(this.name, this.targetPath);
-
     Object.keys(this.services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = this.services;
 
@@ -163,12 +162,12 @@ class Stage extends Entity implements Provisionable {
   /**
    * Instantiates, validates and provisions a stage
    *
+   * @param {Vault} vault the secrets vault to use
    * @param {EntityAttributes} attributes the stage's attributes
-   * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
    */
-  static factory(attributes: EntityAttributes): Stage {
-    const stage = new Stage();
+  static factory(vault: Vault, attributes: object): Stage {
+    const stage = new Stage(vault);
     stage.attributes = attributes;
 
     stage.validate();
