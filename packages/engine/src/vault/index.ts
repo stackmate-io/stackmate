@@ -1,4 +1,4 @@
-import { STORAGE } from '@stackmate/constants';
+import { VAULT_PROVIDER } from '@stackmate/constants';
 import { VaultProviderChoice } from '@stackmate/types';
 import Vault from '@stackmate/core/vault';
 import AwsParamsVault from './aws-params';
@@ -17,20 +17,19 @@ const getVaultByProvider = async (provider: VaultProviderChoice, attributes: obj
 
   let vault;
 
-  if (provider === STORAGE.AWS_PARAMS) {
+  if (provider === VAULT_PROVIDER.AWS) {
     vault = new AwsParamsVault();
   }
 
   if (!vault) {
     throw new Error(
-      `Invalid secrets provider ${provider}. Available options are ${Object.values(STORAGE).join(', ')}`,
+      `Invalid secrets provider ${provider}. Available options are ${Object.values(VAULT_PROVIDER).join(', ')}`,
     );
   }
 
   vault.attributes = attributes;
   vault.validate();
 
-  await vault.load();
   return vault;
 };
 

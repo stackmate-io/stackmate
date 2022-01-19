@@ -1,15 +1,10 @@
 import FileStorage from '@stackmate/storage/file';
-import AwsParametersStorage from '@stackmate/storage/aws-params';
 import { StorageChoice } from '@stackmate/types';
 import { STORAGE } from '@stackmate/constants';
 import { StorageAdapter } from '@stackmate/interfaces';
 
 const getStoragAdaptereByType = (type: StorageChoice, attributes: object): StorageAdapter => {
   let adapter;
-
-  if (type === STORAGE.AWS) {
-    adapter = new AwsParametersStorage();
-  }
 
   if (type === STORAGE.FILE) {
     adapter = new FileStorage();
@@ -29,6 +24,5 @@ const getStoragAdaptereByType = (type: StorageChoice, attributes: object): Stora
 
 export {
   getStoragAdaptereByType,
-  AwsParametersStorage,
   FileStorage,
 };

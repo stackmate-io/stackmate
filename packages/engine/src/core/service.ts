@@ -164,6 +164,8 @@ abstract class Service extends Entity implements CloudService, Provisionable {
    * @returns {Object} the validations to use
    */
   validations() {
+    const regions = Object.values(this.regions);
+
     return {
       name: {
         presence: {
@@ -177,8 +179,8 @@ abstract class Service extends Entity implements CloudService, Provisionable {
           message: 'A region should be provided',
         },
         inclusion: {
-          within: Object.values(this.regions),
-          message: `The region for this service is invalid. Available options are: ${Object.values(this.regions).join(', ')}`,
+          within: regions,
+          message: `The region for this service is invalid. Available options are: ${regions.join(', ')}`,
         },
       },
       links: {

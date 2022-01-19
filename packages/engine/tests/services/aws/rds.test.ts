@@ -58,7 +58,7 @@ describe('AwsRdsService', () => {
 
   describe('provision', () => {
     it('provisions a single-node RDS instance with the default profile', async () => {
-      const { scope, variables } = await getServiceProvisionResults({
+      const { scope } = await getServiceProvisionResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsRdsService,
         serviceConfig,
@@ -67,17 +67,6 @@ describe('AwsRdsService', () => {
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
         family: 'mysql8.0',
-      });
-
-      expect(variables).toMatchObject({
-        [`${stackName}-${serviceConfig.name}-rootusername`]: {
-          default: serviceConfig.rootCredentials.username,
-          sensitive: true,
-        },
-        [`${stackName}-${serviceConfig.name}-rootpassword`]: {
-          default: serviceConfig.rootCredentials.password,
-          sensitive: true,
-        },
       });
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
@@ -103,8 +92,8 @@ describe('AwsRdsService', () => {
         skip_final_snapshot: true,
         storage_type: 'gp2',
         parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stackName}-params.name}`,
-        password: `$\{var.${stackName}-${serviceConfig.name}-rootpassword}`,
-        username: `$\{var.${stackName}-${serviceConfig.name}-rootusername}`,
+        // password: `$\{var.${stackName}-${serviceConfig.name}-rootpassword}`,
+        // username: `$\{var.${stackName}-${serviceConfig.name}-rootusername}`,
       });
     });
   });

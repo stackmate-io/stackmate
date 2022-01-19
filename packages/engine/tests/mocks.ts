@@ -1,7 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { inspect } from 'util';
 
-import Stack from '@stackmate/core/stack';
+import App from '@stackmate/lib/terraform/app';
+import Stack from '@stackmate/lib/terraform/stack';
 import Entity from '@stackmate/lib/entity';
 import { AttributeParsers, CloudPrerequisites, Validations } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
@@ -9,11 +10,15 @@ import { parseString } from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { awsRegion, stackName, outputPath } from './fixtures';
+import { awsRegion, stackName } from './fixtures';
 import { getCloudByProvider } from '@stackmate/clouds';
 
-export const getMockStack = ({ name = stackName } = {}): CloudStack => (
-  new Stack(name, outputPath)
+export const getMockApp = () => (
+  new App()
+);
+
+export const getMockStack = ({ app = getMockApp(), name = stackName } = {}): CloudStack => (
+  new Stack(app, name)
 );
 
 export const getAwsPrerequisites = ({

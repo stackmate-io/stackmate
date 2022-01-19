@@ -5,27 +5,31 @@ import sinon from 'sinon';
 import YAML from 'yaml';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
-import { Testing } from 'cdktf';
+import { Manifest, Testing } from 'cdktf';
 
+import Stage from '@stackmate/core/stage';
+import Stack from '@stackmate/lib/terraform/stack';
 import Service from '@stackmate/core/service';
-import Stack from '@stackmate/core/stack';
-import Project from '@stackmate/core/project';
 import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
 import { PROVIDER } from '@stackmate/constants';
 import { getAwsPrerequisites } from './mocks';
-import { getAwsParamsStubber } from './stubs';
+import { outputPath } from './fixtures';
 
-export const enhanceStack = (stack: Construct, {
-  name, targetPath, synthesize,
-}: { name?: string, targetPath?: string, synthesize?: Function } = {}): CloudStack => {
+/**
+ *
+ * @param {TerraformStack} stack the stack to enhance
+ * @param {Object} opts
+ * @param {String} opts.name the name for the stack
+ * @param {String} opts.name the name for the stack
+ * @returns
+ */
+export const enhanceStack = (
+  stack: Construct, { name, synthesize }: { name?: string, synthesize?: Function } = {},
+): CloudStack => {
   Object.defineProperties(stack, {
     name: {
       value: name || faker.internet.domainWord(),
-      writable: false,
-    },
-    targetPath: {
-      value: targetPath || faker.system.directoryPath(),
       writable: false,
     },
     synthesize: {
@@ -34,6 +38,35 @@ export const enhanceStack = (stack: Construct, {
   });
 
   return stack as CloudStack;
+};
+
+/**
+ * Writes out the stack as a JSON file
+ *
+ * @param {Object} obj the object to store on the json file
+ * @param {String} targetPath the path to write the output to
+ * @param {String} filename the target filename
+ */
+export const writeManifestFile = (obj: object, targetDir: string): string => {
+  const fileName = joinPaths(targetDir, Manifest.fileName);
+  fs.writeFileSync(fileName, JSON.stringify(obj, undefined, 2));
+  return fileName;
+};
+
+/**
+ * Writes contents to a manifest file, runs a callback and removes the file afterwards
+ *
+ * @param {String} contents the contents to write to the manifest file
+ * @param {Function} callback the callback function
+ */
+export const withEphemeralManifest = (
+  contents: string, callback: (obj: { path: string, fileName: string }) => void,
+) => {
+  const targetDir = os.tmpdir();
+  const fileName = joinPaths(targetDir, Manifest.fileName);
+  fs.writeFileSync(fileName, JSON.stringify(contents, undefined, 2));
+  callback({ path: targetDir, fileName });
+  fs.unlinkSync(fileName);
 };
 
 /**
@@ -109,7 +142,7 @@ export const synthesizeProject = async (
   projectConfig: object,
   secrets: object = {},
   stageName: string = 'production',
-): Promise<{ scope: string, stack: object }> => {
+): Promise<{ scope: string, stack: CloudStack }> => {
   const inputPath = joinPaths(os.tmpdir(), 'input-files', '.stackmate', 'config.yml');
 
   // Stub the readFile that is used in projet file loading, to return the project config we set
@@ -122,25 +155,18 @@ export const synthesizeProject = async (
   existsStub.withArgs(inputPath).returns(true);
   (fs.existsSync as sinon.SinonStub).callThrough();
 
-  // Spy the `toTerraform` method that is used internally by CDKTF
   const stackSpy = sinon.spy(Stack.prototype, 'toTerraform');
 
-  const { stub: stubAwsSSM, restore: restoreAwsSSM } = getAwsParamsStubber();
-
-  // Stub the SSM parameters
-  stubAwsSSM();
-
   // Synthesize the project
-  await Project.synthesize(inputPath, stageName);
+  const stage = await Stage.fromFile(stageName, inputPath, outputPath);
+  stage.synthesize();
 
-  // Now that the project is synthesized, get the scope to perform assertions with
   const [stack] = stackSpy.returnValues;
   const scope = JSON.stringify(stack, null, 2);
 
   // Restore the stubs
   readStub.restore();
   existsStub.restore();
-  restoreAwsSSM();
 
-  return { scope, stack };
+  return { scope, stack: stage.stack };
 };

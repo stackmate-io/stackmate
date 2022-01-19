@@ -106,10 +106,7 @@ export interface StorageAdapter {
 
 export interface CloudStack extends TerraformStack {
   readonly name: string;
-  readonly targetPath: string;
   readonly app: TerraformApp;
-  path: string;
-  generate(): void;
 }
 
 export interface Loadable {

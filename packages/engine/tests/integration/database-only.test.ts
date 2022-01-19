@@ -2,7 +2,7 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/clouds/aws/constants';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE, VAULT_PROVIDER } from '@stackmate/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
 import { synthesizeProject } from 'tests/helpers';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
@@ -11,7 +11,10 @@ const projectConfig = {
   name: 'database-only-project',
   provider: PROVIDER.AWS,
   region: awsRegion,
-  vault: { key: awsKeyArn },
+  secrets: {
+    provider: VAULT_PROVIDER.AWS,
+    key: awsKeyArn,
+  },
   stages: {
     production: {
       mysqlDatabase: {
@@ -34,13 +37,10 @@ describe('Database only project', () => {
     try {
       ({ scope } = await synthesizeProject(projectConfig));
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
 
-    // .catch(error => {
-    //   console.log(error);
-    // }));
-
+    // const { scope } = await synthesizeProject(projectConfig);
     expect(scope).toHaveResourceWithProperties(Vpc, {
       cidr_block: '10.0.0.0/16',
       enable_dns_hostnames: true,

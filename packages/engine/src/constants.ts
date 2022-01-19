@@ -3,10 +3,12 @@ import path from 'path';
 import { RegionList } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 
+export const TERRAFORM_BINDING = path.resolve(path.join('bindings', 'terraform.so'));
 export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), '.stackmate', 'config.yml');
 export const OUTPUT_DIRECTORY = process.env.STACKMATE_OUTPUT || path.join(os.tmpdir(), 'stackmate');
 export const DEFAULT_STAGE = 'production';
 export const DEFAULT_RESOURCE_COMMENT = 'Provisioned by Stackmate';
+export const DEBUG_MODE = Boolean(process.env.DEBUG) || false;
 
 export const PROVIDER = {
   AWS: 'aws',
@@ -43,7 +45,6 @@ export const FORMAT: { [name: string]: string } = {
 
 export const STORAGE: { [name: string]: string } = {
   FILE: 'file',
-  AWS_PARAMS: 'aws/ssm/parameter-store',
 } as const;
 
 export const ENVIRONMENT_VARIABLE = {

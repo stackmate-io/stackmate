@@ -142,10 +142,10 @@ abstract class Database extends Service implements Sizeable, Storable,
         },
       },
       rootCredentials: {
-        validateCredentials: {
-          requireUserName: true,
-          requirePassword: true,
-        },
+        // validateCredentials: {
+        //   requireUserName: true,
+        //   requirePassword: true,
+        // },
       },
     };
   }

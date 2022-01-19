@@ -3,14 +3,17 @@ import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
 import Registry from '@stackmate/core/registry';
-import Stack from '@stackmate/core/stack';
 import Vault from '@stackmate/core/vault';
+import Project from '@stackmate/core/project';
+import App from '@stackmate/lib/terraform/app';
+import Stack from '@stackmate/lib/terraform/stack';
 import { Attribute } from '@stackmate/lib/decorators';
+import { getCloudByProvider } from '@stackmate/clouds';
+import { DEBUG_MODE, VAULT_PROVIDER } from '@stackmate/constants';
+import { getVaultByProvider } from '@stackmate/vault';
+import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { CloudProvider, CloudStack, Provisionable } from '@stackmate/interfaces';
 import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
-import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { createDirectory } from '@stackmate/lib/helpers';
-import { getCloudByProvider } from '@stackmate/clouds';
 
 class Stage extends Entity implements Provisionable {
   /**
@@ -29,11 +32,6 @@ class Stage extends Entity implements Provisionable {
   @Attribute defaults: ProjectDefaults;
 
   /**
-   * @var {String} targetPath the path to write the output files to
-   */
-  @Attribute targetPath: string;
-
-  /**
    * @var {String} validationMessage the validation error message
    */
   readonly validationMessage: string = 'The stage’s configuration is invalid';
@@ -49,14 +47,24 @@ class Stage extends Entity implements Provisionable {
   protected vault: Vault;
 
   /**
+   * @var {App} app the terraform CDK app to create
+   */
+  protected app: App;
+
+  /**
    * @constructor
    * @param {Vault} vault
+   * @param {String} targetPath
    */
-  constructor(vault: Vault) {
+  constructor(vault: Vault, targetPath?: string) {
     super();
 
     this.registry = new Registry();
     this.vault = vault;
+    this.app = new App({
+      outdir: targetPath,
+      stackTraces: DEBUG_MODE,
+    });
   }
 
   /**
@@ -67,7 +75,6 @@ class Stage extends Entity implements Provisionable {
       name: parseString,
       services: parseObject,
       defaults: parseObject,
-      targetPath: parseString,
     }
   }
 
@@ -91,12 +98,6 @@ class Stage extends Entity implements Provisionable {
         },
       },
       defaults: {},
-      targetPath: {
-        presence: {
-          allowEmpty: false,
-          message: 'You need to set a target output path for the stage',
-        },
-      }
     };
   }
 
@@ -111,7 +112,7 @@ class Stage extends Entity implements Provisionable {
    * @returns {CloudStack} the stack for the stage
    */
   @Memoize() public get stack(): CloudStack {
-    return new Stack(this.name, this.targetPath);
+    return new Stack(this.app, this.name);
   }
 
   /**
@@ -129,22 +130,21 @@ class Stage extends Entity implements Provisionable {
 
   /**
    * Provisions the stage
+   *
+   * @void
    */
   provision(): void {
     if (this.isProvisioned) {
       throw new Error('Stage is already provisioned');
     }
 
-    // create target output path if it doesn't exist
-    createDirectory(this.targetPath);
-
     Object.keys(this.services).forEach((name: string) => {
       const { [name]: attributes, [name]: { type, provider, region } } = this.services;
 
       const service = this.cloud(provider, region).service(type, {
         ...attributes,
-        credentials: this.vault.credentials(this.name),
-        rootCredentials: this.vault.rootCredentials(this.name),
+        // credentials: this.vault.credentials(this.name),
+        // rootCredentials: this.vault.rootCredentials(this.name),
       });
 
       this.registry.add(service);
@@ -155,25 +155,60 @@ class Stage extends Entity implements Provisionable {
    * Synthesizes the stack
    * @void
    */
-  synthesize() {
-    this.stack.generate();
+  synthesize(): void {
+    this.provision();
+    this.app.synth();
+  }
+
+  /**
+   * Prepares a stage for deployment
+   * @void
+   */
+  prepare(): void {
+    // this.vault.provision();
+    // this.state.provision();
+    this.app.synth();
   }
 
   /**
    * Instantiates, validates and provisions a stage
    *
    * @param {Vault} vault the secrets vault to use
-   * @param {EntityAttributes} attributes the stage's attributes
-   * @param {Object} prerequisites any prerequisites by the cloud provider
+   * @param {object} attributes the stage's attributes
+   * @param {String} targetPath the target path to write the output files to
    */
-  static factory(vault: Vault, attributes: object): Stage {
-    const stage = new Stage(vault);
+  static factory(vault: Vault, attributes: object, targetPath?: string): Stage {
+    const stage = new Stage(vault, targetPath);
     stage.attributes = attributes;
-
     stage.validate();
-    stage.provision();
 
     return stage;
+  }
+
+  /**
+   * Loads a stage by project file and name
+   *
+   * @param {String} name the stage's name
+   * @param {String} projectFile the project file
+   * @param {String} targetPath the target path to write the output to
+   * @returns {Stage}
+   */
+  static async fromFile(name: string, projectFile: string, targetPath?: string): Promise<Stage> {
+    const project = new Project(projectFile);
+    await project.load();
+
+    const { secrets: { provider = VAULT_PROVIDER.AWS, ...vaultAttributes } } = project;
+
+    const vault = await getVaultByProvider(provider, {
+      ...vaultAttributes, provider, project: this.name, stage: name,
+    });
+
+    return Stage.factory(vault, {
+      name,
+      targetPath,
+      defaults: project.defaults,
+      services: get(project.stages, name, {}),
+    });
   }
 }
 

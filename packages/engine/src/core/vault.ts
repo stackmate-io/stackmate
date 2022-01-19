@@ -1,10 +1,9 @@
 import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
-import { AttributeParsers, CredentialsObject, Validations } from '@stackmate/types';
-import { Loadable, StorageAdapter } from '@stackmate/interfaces';
+import { AttributeParsers, Validations, VaultProviderChoice } from '@stackmate/types';
 
-abstract class Vault extends Entity implements Loadable {
+abstract class Vault extends Entity {
   /**
    * @var {String} project the vault's project name
    */
@@ -18,17 +17,12 @@ abstract class Vault extends Entity implements Loadable {
   /**
    * @var {String} validationMessage the error message
    */
-  readonly validationMessage: string = 'The vault contents are invalid';
+  readonly validationMessage: string = 'The secrets section contents are invalid';
 
   /**
-   * @var {StorageAdapter} storage the storage adapter to use
+   * @var {String} provider the providr for the vault
    */
-  abstract storage: StorageAdapter;
-
-  /**
-   * @var {Object} secrets the secrets in the remote storage
-   */
-  protected secrets: object;
+  abstract provider: VaultProviderChoice;
 
   parsers(): AttributeParsers {
     return {
@@ -42,33 +36,16 @@ abstract class Vault extends Entity implements Loadable {
       project: {
         presence: {
           allowEmpty: false,
-          message: 'You have to provide a project name for the vault',
+          message: 'You have to provide a project name for the secrets section',
         },
       },
       stage: {
         presence: {
           allowEmpty: false,
-          message: 'You have to provide a stage name for the vault',
+          message: 'You have to provide a stage name for the secrets section',
         },
       },
     };
-  }
-
-  credentials(service: string): CredentialsObject {
-    return {};
-  }
-
-  rootCredentials(service: string): CredentialsObject {
-    return {};
-  }
-
-  /**
-   * Loads the project attributes from the file storage
-   * @void
-   */
-  async load(): Promise<void> {
-    const secrets = await this.storage.read();
-    this.secrets = this.storage.deserialize(secrets);
   }
 }
 

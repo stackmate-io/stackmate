@@ -94,23 +94,19 @@ const validateProjectDefaults = (defaults: ProjectDefaults) => {
 /**
  * Validates the project's vault configuration
  *
- * @param {VaultConfiguration} vault The vault configuration
+ * @param {VaultConfiguration} secrets The vault configuration
  * @returns {String|undefined} the error message (if any)
  */
-const validateVault = (vault: VaultConfiguration) => {
-  if (!vault || !isObject(vault) || isEmpty(vault)) {
-    return 'The project does not contain a “vault” section';
+const validateSecrets = (secrets: VaultConfiguration) => {
+  if (!secrets || !isObject(secrets) || isEmpty(secrets)) {
+    return 'The project does not contain a “secrets” section';
   }
 
-  const { provider, key, region } = vault;
+  const { provider } = secrets;
   const availableProviders = Object.values(VAULT_PROVIDER);
 
   if (!provider || !availableProviders.includes(provider)) {
-    return `You have to specify a valid vault provider. Available options are: ${availableProviders.join(', ')}`;
-  }
-
-  if (provider === VAULT_PROVIDER.AWS && (!key || !region)) {
-    return 'The vault needs to have “region” and a “key” ARN to encrypt values';
+    return `You have to specify a valid secrets provider. Available options are: ${availableProviders.join(', ')}`;
   }
 };
 
@@ -260,7 +256,7 @@ Object.assign(validate.validators, {
   validateServiceProfile,
   validateStages,
   validateServiceLinks,
-  validateVault,
+  validateSecrets,
   validateVersion,
   validateInstanceType,
 });
@@ -273,7 +269,7 @@ export {
   validateServiceProfile,
   validateStages,
   validateServiceLinks,
-  validateVault,
+  validateSecrets,
   validateVersion,
   validateInstanceType,
   validate,
