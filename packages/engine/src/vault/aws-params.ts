@@ -3,7 +3,7 @@ import { Memoize } from 'typescript-memoize';
 import Vault from '@stackmate/core/vault';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { STORAGE, VAULT_PROVIDER } from '@stackmate/constants';
-import { StorageAdapter } from '@stackmate/interfaces';
+import { CloudService, StorageAdapter } from '@stackmate/interfaces';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
 import { getStoragAdaptereByType } from '@stackmate/storage';
@@ -11,8 +11,8 @@ import { AttributeParsers, Validations, VaultProviderChoice } from '@stackmate/t
 
 class AwsParamsVault extends Vault {
   /**
- * @var {String} key the key arn to use for encryption / decryption
- */
+   * @var {String} key the key arn to use for encryption / decryption
+   */
   @Attribute key: string;
 
   /**
@@ -76,6 +76,18 @@ class AwsParamsVault extends Vault {
         },
       },
     }
+  }
+
+  isProvisioned: boolean;
+
+  provision(): void {
+    // throw new Error('Method not implemented.');
+  }
+  link(target: CloudService): void {
+    // throw new Error('Method not implemented.');
+  }
+  create(): void {
+    // throw new Error('Method not implemented.');
   }
 }
 

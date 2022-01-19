@@ -2,19 +2,19 @@ import Stage from '@stackmate/core/stage';
 import { DEFAULT_PROJECT_FILE, DEFAULT_STAGE } from '@stackmate/constants';
 
 /**
- * Deploys prerequisites for a stage
+ * Creates and deploys prerequisites for a stage
  *
  * @param {String} projectFile the project file that contains the stage
  * @param {String} stageName the name of the stage to prepare
  * @param {String} targetPath the path to write the output to
  */
-const prepare = async (
+const create = async (
   projectFile: string = DEFAULT_PROJECT_FILE,
   stageName: string = DEFAULT_STAGE,
-  targetPath?: string,
+  targetPath: string,
 ): Promise<void> => {
   const stage = await Stage.fromFile(stageName, projectFile, targetPath);
-  stage.prepare();
+  stage.create();
 };
 
 /**
@@ -35,5 +35,5 @@ const deploy = async (
 
 export {
   deploy,
-  prepare,
+  create,
 };

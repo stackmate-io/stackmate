@@ -6,6 +6,7 @@ import { PROVIDER, SERVICE_TYPE, VAULT_PROVIDER } from '@stackmate/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
 import { synthesizeProject } from 'tests/helpers';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { Testing } from 'cdktf';
 
 const projectConfig = {
   name: 'database-only-project',
@@ -32,15 +33,10 @@ const projectConfig = {
 
 describe('Database only project', () => {
   it('provisions the production stage for the project', async () => {
-    let scope = '';
+    const { scope, stack } = await synthesizeProject(projectConfig);
 
-    try {
-      ({ scope } = await synthesizeProject(projectConfig));
-    } catch (err) {
-      console.error(err);
-    }
+    expect(Testing.fullSynth(stack)).toBeValidTerraform();
 
-    // const { scope } = await synthesizeProject(projectConfig);
     expect(scope).toHaveResourceWithProperties(Vpc, {
       cidr_block: '10.0.0.0/16',
       enable_dns_hostnames: true,
@@ -65,12 +61,12 @@ describe('Database only project', () => {
       auto_minor_version_upgrade: false,
       backup_retention_period: 30,
       copy_tags_to_snapshot: true,
-      db_subnet_group_name: 'db-subnet-mysqlDatabase-production',
+      db_subnet_group_name: 'db-subnet-mysqldatabase-production',
       delete_automated_backups: false,
       deletion_protection: true,
       engine: 'mysql',
       engine_version: '8.0',
-      identifier: 'mysqlDatabase-production',
+      identifier: 'mysqldatabase-production',
       instance_class: 'db.t3.micro',
       port: 3306,
       publicly_accessible: true,

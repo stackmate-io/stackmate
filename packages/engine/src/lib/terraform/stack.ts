@@ -1,7 +1,6 @@
 import { TerraformStack } from 'cdktf';
 
-import App from '@stackmate/lib/terraform/app';
-import { CloudStack } from '@stackmate/interfaces';
+import { CloudStack, CloudApp } from '@stackmate/interfaces';
 
 class Stack extends TerraformStack implements CloudStack {
   /**
@@ -13,13 +12,13 @@ class Stack extends TerraformStack implements CloudStack {
    * @var {App} app the terraform app to synthesize
    * @readonly
    */
-  public readonly app: App;
+  public readonly app: CloudApp;
 
   /**
    * @constructor
    * @param {String} name the stack's name
    */
-  constructor(app: App, name: string) {
+  constructor(app: CloudApp, name: string) {
     super(app, name);
 
     this.app = app;

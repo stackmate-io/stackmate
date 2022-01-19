@@ -2,8 +2,8 @@ package main
 
 import "C"
 
-// export Prepare
-func Prepare() {}
+// export Create
+func Create() {}
 
 // export Deploy
 func Deploy() {}

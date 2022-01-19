@@ -78,9 +78,3 @@ stages:
     from: staging
     # application:
     #   size: t2.xlarge
-
-# Optional
-defaults:
-  aws:
-    vpc-cidr: 10.0.0.0/16
-    vpc-prefix: my-project-vpc

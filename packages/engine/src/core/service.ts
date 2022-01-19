@@ -98,24 +98,16 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   }
 
   /**
-   * @returns {String} the stage's name
-   */
-  public get stage(): string {
-    return this.stack.name;
-  }
-
-  /**
    * @returns {String} the service's identifier
    */
   public get identifier(): string {
-    return `${this.name}-${this.stage}`;
+    return `${this.name}-${this.stack.name}`.toLowerCase();
   }
 
   /**
    * @returns {Object} the profile to use for provisioning
    */
-  @Memoize()
-  public get provisioningProfile(): ProvisioningProfile {
+  @Memoize() public get provisioningProfile(): ProvisioningProfile {
     if (!this.profile) {
       return {};
     }

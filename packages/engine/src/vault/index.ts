@@ -1,4 +1,5 @@
 import { VAULT_PROVIDER } from '@stackmate/constants';
+import { CloudStack } from '@stackmate/interfaces';
 import { VaultProviderChoice } from '@stackmate/types';
 import Vault from '@stackmate/core/vault';
 import AwsParamsVault from './aws-params';
@@ -10,7 +11,7 @@ import AwsParamsVault from './aws-params';
  * @param {Object} attributes the vault's attributes
  * @returns {Vault}
  */
-const getVaultByProvider = async (provider: VaultProviderChoice, attributes: object): Promise<Vault> => {
+const getVaultByProvider = (stack: CloudStack, provider: VaultProviderChoice, attributes: object): Vault => {
   if (!provider) {
     throw new Error('No provider has been specified for the vault');
   }
@@ -18,7 +19,7 @@ const getVaultByProvider = async (provider: VaultProviderChoice, attributes: obj
   let vault;
 
   if (provider === VAULT_PROVIDER.AWS) {
-    vault = new AwsParamsVault();
+    vault = new AwsParamsVault(stack);
   }
 
   if (!vault) {

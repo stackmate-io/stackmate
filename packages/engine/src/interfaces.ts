@@ -16,11 +16,18 @@ export interface BaseEntity {
 }
 
 export interface Provisionable extends BaseEntity {
+  stack: CloudStack;
+  identifier: string;
   isProvisioned: boolean;
   provision(): void;
+  link(target: CloudService): void;
 }
 
-export interface CloudProvider extends Provisionable {
+export interface CreatableProvisionable extends Provisionable {
+  create(): void;
+}
+
+export interface CloudProvider extends Omit<Provisionable, 'link'> {
   prerequisites: CloudPrerequisites;
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
@@ -35,10 +42,8 @@ export interface CloudService extends Provisionable {
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
   links: Array<string>;
-  stage: string;
   region: string;
   dependencies: CloudPrerequisites;
-  link(target: CloudService): void;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
 }
@@ -101,7 +106,7 @@ export interface Profilable extends BaseEntity {
 
 export interface StorageAdapter {
   deserialize(serialized: string | object): object;
-  read(): Promise<object | string>;
+  read(): Promise<object>;
 }
 
 export interface CloudStack extends TerraformStack {
@@ -109,7 +114,12 @@ export interface CloudStack extends TerraformStack {
   readonly app: TerraformApp;
 }
 
-export interface Loadable {
-  storage: StorageAdapter;
-  load(): Promise<void>;
+export interface CloudApp extends TerraformApp {
+  stack(name: string): CloudStack;
 }
+
+export interface ProjectStage extends Omit<CreatableProvisionable, 'link'> {
+  cloud(provider: ProviderChoice, region: string): CloudProvider;
+}
+
+export interface VaultService extends CreatableProvisionable {}

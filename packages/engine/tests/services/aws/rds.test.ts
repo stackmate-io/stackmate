@@ -40,7 +40,7 @@ describe('AwsRdsService', () => {
       expect(service.storage).toEqual(storage);
       expect(service.engine).toEqual(engine);
       expect(service.database).toEqual(database);
-      expect(service.stage).toEqual(mockStack.name);
+      expect(service.stack.name).toEqual(mockStack.name);
       expect(service.rootCredentials).toEqual(rootCredentials);
       expect(service.links).toEqual([]);
       expect(service.profile).toEqual(Profile.DEFAULT);

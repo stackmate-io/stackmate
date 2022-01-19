@@ -60,6 +60,13 @@ abstract class Cloud extends Entity implements CloudProvider {
   protected providerInstance: TerraformProvider;
 
   /**
+   * @returns {String} identifier the cloud provider's identifier
+   */
+  get identifier(): string {
+    return this.provider;
+  }
+
+  /**
    * @returns {String} the error message
    */
   public get validationMessage(): string {

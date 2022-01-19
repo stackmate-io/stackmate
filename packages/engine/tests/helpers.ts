@@ -5,16 +5,22 @@ import sinon from 'sinon';
 import YAML from 'yaml';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
-import { Manifest, Testing } from 'cdktf';
+import { Manifest, Testing, App as TerraformApp } from 'cdktf';
 
-import Stage from '@stackmate/core/stage';
-import Stack from '@stackmate/lib/terraform/stack';
 import Service from '@stackmate/core/service';
-import { CloudStack } from '@stackmate/interfaces';
+import { CloudApp, CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
 import { PROVIDER } from '@stackmate/constants';
-import { getAwsPrerequisites } from './mocks';
-import { outputPath } from './fixtures';
+import { getAwsPrerequisites, getMockApp } from './mocks';
+import Project from '@stackmate/core/project';
+
+export const enhanceApp = (app: TerraformApp): CloudApp => {
+  Object.defineProperties(app, {
+    stack: {},
+  });
+
+  return app as CloudApp;
+};
 
 /**
  *
@@ -155,14 +161,14 @@ export const synthesizeProject = async (
   existsStub.withArgs(inputPath).returns(true);
   (fs.existsSync as sinon.SinonStub).callThrough();
 
-  const stackSpy = sinon.spy(Stack.prototype, 'toTerraform');
+  const project = new Project(inputPath, getMockApp());
+  project.attributes = await project.storage.read();
+  project.validate();
 
-  // Synthesize the project
-  const stage = await Stage.fromFile(stageName, inputPath, outputPath);
-  stage.synthesize();
+  const stage = project.select(stageName);
+  stage.provision();
 
-  const [stack] = stackSpy.returnValues;
-  const scope = JSON.stringify(stack, null, 2);
+  const scope = JSON.stringify(stage.stack.toTerraform(), null, 2);
 
   // Restore the stubs
   readStub.restore();

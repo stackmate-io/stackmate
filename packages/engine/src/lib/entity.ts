@@ -22,10 +22,10 @@ abstract class Entity implements BaseEntity {
   public readonly abstract validationMessage: string;
 
   /**
-   * @var {Object} _state the state of the attributes
+   * @var {Object} attributeState the state of the attributes
    * @private
    */
-  protected state: EntityAttributes = {};
+  private attributeState: EntityAttributes = {};
 
   /**
    * @returns {Array} the list of attribute names assigned to the entity
@@ -51,7 +51,7 @@ abstract class Entity implements BaseEntity {
    * @returns {Object} the attributes
    */
   public get attributes(): EntityAttributes {
-    return this.state;
+    return this.attributeState;
   }
 
   /**
@@ -83,7 +83,7 @@ abstract class Entity implements BaseEntity {
    * @void
    */
   validate(): void {
-    const errors = validate.validate(this.state, this.validations(), {
+    const errors = validate.validate(this.attributeState, this.validations(), {
       fullMessages: false,
     });
 
@@ -99,7 +99,7 @@ abstract class Entity implements BaseEntity {
    * @returns {Any}
    */
   getAttribute(name: string): any {
-    return this.state[name];
+    return this.attributeState[name];
   }
 
   /**
@@ -115,7 +115,7 @@ abstract class Entity implements BaseEntity {
       throw new Error(`No parser has been specified for attribute “${name}”`);
     }
 
-    this.state[name] = parser(value);
+    this.attributeState[name] = parser(value);
   }
 
   /**

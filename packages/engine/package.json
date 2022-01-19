@@ -76,7 +76,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "bindings": "go build -o bindings/terraform.so -buildmode=c-shared bindings/terraform.go",
     "build": "rm -rf lib && tsc --build tsconfig.build.json && npm run bindings",
-    "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
+    "test": "rm -rf tests/output/* && TERRAFORM_BINARY_NAME=$(which terraform) jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   },

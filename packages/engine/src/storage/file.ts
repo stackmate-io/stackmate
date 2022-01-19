@@ -89,9 +89,9 @@ class FileStorage extends Entity implements StorageAdapter {
    * @returns {String}
    * @async
    */
-  async read(): Promise<string> {
+  async read(): Promise<object> {
     const contents = await fsPromises.readFile(this.path)
-    return contents.toString();
+    return this.deserialize(contents.toString());
   }
 
   /**

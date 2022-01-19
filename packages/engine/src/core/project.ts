@@ -1,18 +1,22 @@
+import { get } from 'lodash';
 import { Memoize } from 'typescript-memoize';
-import { clone, defaultsDeep, fromPairs, merge, omit } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
+import App from '@stackmate/lib/terraform/app';
+import Stage from '@stackmate/core/stage';
 import { Attribute } from '@stackmate/lib/decorators';
-import { Loadable, StorageAdapter } from '@stackmate/interfaces';
+import { normalizeProject } from '@stackmate/lib/normalizers';
+import { CloudApp, StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/storage';
+import { getVaultByProvider } from '@stackmate/vault';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER } from '@stackmate/constants';
+import { PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER, DEBUG_MODE } from '@stackmate/constants';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, StageDeclarations,
-  AttributeParsers, VaultConfiguration, ProviderChoice, Validations, StagesNormalizedAttributes,
+  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
+  AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes,
 } from '@stackmate/types';
 
-class Project extends Entity implements Loadable {
+class Project extends Entity {
   /**
    * @var {String} name the project's name
    */
@@ -54,30 +58,20 @@ class Project extends Entity implements Loadable {
   public readonly path: string;
 
   /**
+   * @var {CloudApp} app the terraform app to deploy
+   */
+  public readonly app: CloudApp;
+
+  /**
    * @constructor
    * @param {String} path the project's file path
+   * @param {String} outputPath the output path for the stack
    */
-  constructor(path: string) {
+  constructor(path: string, app: CloudApp) {
     super();
 
     this.path = path;
-  }
-
-  /**
-  * @var {StorageAdapter} storageAdapter the storage adapter to fetch & push values
-  */
-  @Memoize() public get storage(): StorageAdapter {
-    return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
-  }
-
-  /**
-   * Loads the project attributes from the file storage
-   * @void
-   */
-  async load(): Promise<void> {
-    const attributes = await this.storage.read();
-    this.attributes = this.storage.deserialize(attributes);
-    this.validate();
+    this.app = app;
   }
 
   /**
@@ -147,73 +141,49 @@ class Project extends Entity implements Loadable {
    * @returns {Object} the normalized contents
    */
   normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
-    // the configuration have been validated, so it's safe to cast it as NormalizedProjectConfiguration
-    const normalized = clone(configuration) as NormalizedProjectConfiguration;
-    const { provider, region, stages, secrets, defaults = {} } = normalized;
-
-    Object.assign(normalized, {
-      stages: Project.normalizeStages(stages, provider, region),
-      secrets: defaultsDeep(secrets, { region, provider: VAULT_PROVIDER.AWS }),
-      defaults,
-    });
-
-    return normalized;
+    return normalizeProject(configuration);
   }
 
   /**
-   * Normalizes the stages configuration
+  * @var {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+  */
+  @Memoize() public get storage(): StorageAdapter {
+    return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
+  }
+
+  /**
+   * Selects a workspace to be deployed
    *
-   * @param stages {Object} the stages to normalize
-   * @param provider {String} the project's default provider
-   * @param region {String} the project's default string
-   * @returns {Object} the normalized stages
+   * @param {String} name the workspace's name
    */
-  static normalizeStages(stages: StageDeclarations, provider: ProviderChoice, region: string) {
-    const getSourceDeclaration = (source: string): object => {
-      const stg = stages[source];
-      return stg.from ? getSourceDeclaration(stg.from) : stg;
-    };
+  select(name: string) {
+    const { provider = VAULT_PROVIDER.AWS, ...vaultOpts } = this.secrets;
 
-    const normalizedStages = Object.keys(stages || []).map((stageName) => {
-      const {
-        from: copiedStageName = null,
-        skip: skippedServices = [],
-        ...declaration
-      } = stages[stageName];
+    const stack = this.app.stack(name);
+    const vault = getVaultByProvider(
+      stack, provider, { ...vaultOpts, project: this.name, stage: name },
+    );
 
-      let stage = clone(declaration);
+    return Stage.factory(
+      stack, vault, { name, services: get(this.stages, name, {}), defaults: this.defaults },
+    );
+  }
 
-      // Copy the full attributes to stages that copy each other
-      if (copiedStageName) {
-        const source = clone(
-          // Omit any services that the copied stage doesn't need
-          omit(getSourceDeclaration(copiedStageName), ...skippedServices),
-        );
+  /**
+   * Loads and validates the project
+   *
+   * @param {String} fileName the file name to load the project from
+   * @returns {Project} the project loaded and validated
+   * @async
+   */
+  static async load(fileName: string, outputPath: string): Promise<Project> {
+    const app = new App({ outdir: outputPath, stackTraces: DEBUG_MODE });
+    const project = new Project(fileName, app);
 
-        stage = merge(omit(source, 'from', 'skip'), declaration);
-      }
+    project.attributes = await project.storage.read();
+    project.validate();
 
-      Object.keys(stage).forEach((name) => {
-        const service = stage[name]!;
-
-        // Apply the service's name
-        Object.assign(service, { name });
-
-        // Apply the service's provider (if not any)
-        if (!service.provider) {
-          Object.assign(service, { provider });
-        }
-
-        // Apply the service's region (if not any)
-        if (!service.region) {
-          Object.assign(service, { region });
-        }
-      });
-
-      return [stageName, stage];
-    });
-
-    return fromPairs(normalizedStages);
+    return project;
   }
 }
 

@@ -33,7 +33,7 @@ class AwsCloud extends Cloud {
    * Provisions the cloud provider
    */
   provision(): void {
-    this.providerInstance = new AwsProvider(this.stack, PROVIDER.AWS, {
+    this.providerInstance = new AwsProvider(this.stack, this.identifier, {
       region: this.region,
       defaultTags: {
         tags: {
