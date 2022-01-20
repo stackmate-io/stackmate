@@ -81,13 +81,12 @@ class AwsParamsVault extends Vault {
   isProvisioned: boolean;
 
   provision(): void {
-    // throw new Error('Method not implemented.');
   }
+
   link(target: CloudService): void {
-    // throw new Error('Method not implemented.');
   }
+
   create(): void {
-    // throw new Error('Method not implemented.');
   }
 }
 

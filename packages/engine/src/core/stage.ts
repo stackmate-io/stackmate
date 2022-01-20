@@ -4,13 +4,8 @@ import { Memoize } from 'typescript-memoize';
 import Entity from '@stackmate/lib/entity';
 import Registry from '@stackmate/core/registry';
 import Vault from '@stackmate/core/vault';
-// import Project from '@stackmate/core/project';
-// import App from '@stackmate/lib/terraform/app';
-// import Stack from '@stackmate/lib/terraform/stack';
 import { Attribute } from '@stackmate/lib/decorators';
 import { getCloudByProvider } from '@stackmate/clouds';
-// import { DEBUG_MODE, VAULT_PROVIDER } from '@stackmate/constants';
-// import { getVaultByProvider } from '@stackmate/vault';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { CloudProvider, CloudStack, ProjectStage } from '@stackmate/interfaces';
 import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
@@ -146,7 +141,7 @@ class Stage extends Entity implements ProjectStage {
    */
   create(): void {
     // this.state.create();
-    this.vault.create();
+    // this.vault.create();
   }
 
   /**
