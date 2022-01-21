@@ -23,13 +23,15 @@ export interface Provisionable extends BaseEntity {
   link(target: CloudService): void;
 }
 
-export interface CloudProvider extends Omit<Provisionable, 'link'> {
-  prerequisites: CloudPrerequisites;
+export interface CloudProvider extends BaseEntity {
+  stack: CloudStack;
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
-  service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService;
+  provision(): void;
+  prerequisites(): CloudPrerequisites;
   validations(): Validations & Required<{ region: object }>;
+  service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService;
 }
 
 export interface CloudService extends Provisionable {

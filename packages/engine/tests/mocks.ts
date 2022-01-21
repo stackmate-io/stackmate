@@ -33,7 +33,7 @@ export const getAwsPrerequisites = ({
     throw new Error('Failure when instantiating the AWS cloud provider');
   }
 
-  return aws.prerequisites;
+  return aws.prerequisites();
 };
 
 export const multiply = (value: number, { times = 5 } = {}) => (

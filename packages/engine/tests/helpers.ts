@@ -9,9 +9,10 @@ import { Manifest, Testing } from 'cdktf';
 
 import Project from '@stackmate/core/project';
 import Service from '@stackmate/core/service';
+import Environment from '@stackmate/lib/environment';
 import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
-import { PROVIDER } from '@stackmate/constants';
+import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/constants';
 import { getAwsPrerequisites } from 'tests/mocks';
 
 /**
@@ -110,6 +111,8 @@ export const getServiceProvisionResults = async ({
             serviceConfig, cloudStack, prerequisitesGenerator({ stack: cloudStack }),
           );
 
+          service.provision();
+
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
 
           resolve({ service, variables, ...terraform });
@@ -140,7 +143,10 @@ export const synthesizeProject = async (
   projectConfig: object,
   secrets: object = {},
   stageName: string = 'production',
-): Promise<{ scope: string, stack: CloudStack }> => {
+): Promise<{ scope: string, stack: CloudStack, output: string }> => {
+  // Set the app's output path to the temp directory
+  sinon.stub(Environment, 'get').withArgs(ENVIRONMENT_VARIABLE.OUTPUT_DIR).returns(os.tmpdir());
+
   const inputPath = joinPaths(os.tmpdir(), 'input-files', '.stackmate', 'config.yml');
 
   // Stub the readFile that is used in projet file loading, to return the project config we set
@@ -165,5 +171,6 @@ export const synthesizeProject = async (
   return {
     stack: stage.stack,
     scope: JSON.stringify(stage.stack.toTerraform(), null, 2),
+    output: stage.stack.app.outdir,
   };
 };

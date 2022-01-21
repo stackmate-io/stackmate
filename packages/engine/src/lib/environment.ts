@@ -1,38 +1,24 @@
-import { EnvironmentVariableUndefinedError } from '@stackmate/lib/errors';
-import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
-import { Credentials } from '@aws-sdk/types';
+import { get } from 'lodash';
 
 class Environment {
   /**
-   * Returns the credentials that are available through environment variables for AWS
-   *
-   * @param {String} provider the provider to get the credentials for
-   * @returns {Object} the credentials to use
-   * @throws {Error} if the provider is not valid
+   * @var {Object} env the environment variables
    */
-  static getAwsCredentials(): Credentials {
-    const {
-      env: {
-        [ENVIRONMENT_VARIABLE.AWS_ACCESS_KEY_ID]: accessKeyId,
-        [ENVIRONMENT_VARIABLE.AWS_SECRET_ACCESS_KEY]: secretAccessKey,
-        [ENVIRONMENT_VARIABLE.AWS_SESSION_TOKEN]: sessionToken,
-      },
-    } = process;
+  readonly env: object;
 
-    if (!accessKeyId) {
-      throw new EnvironmentVariableUndefinedError(ENVIRONMENT_VARIABLE.AWS_ACCESS_KEY_ID);
-    }
+  constructor() {
+    ({ env: this.env } = process);
+  }
 
-    if (!secretAccessKey) {
-      throw new EnvironmentVariableUndefinedError(ENVIRONMENT_VARIABLE.AWS_SECRET_ACCESS_KEY);
-    }
-
-    return {
-      accessKeyId,
-      secretAccessKey,
-      sessionToken,
-    };
+  /**
+   * @param {String} name the name of the environment variable to get
+   * @returns {String} the value for the environment variable
+   */
+  get(name: string): string {
+    return get(this.env, name);
   }
 }
 
-export default Environment;
+const instance = new Environment();
+
+export default instance as Environment;

@@ -8,7 +8,10 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { getCloudByProvider } from '@stackmate/clouds';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { CloudProvider, CloudStack, ProjectStage } from '@stackmate/interfaces';
-import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
+import {
+  AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice,
+  ServiceConfigurationDeclarationNormalized, Validations,
+} from '@stackmate/types';
 
 class Stage extends Entity implements ProjectStage {
   /**
@@ -113,6 +116,18 @@ class Stage extends Entity implements ProjectStage {
     return getCloudByProvider(provider, attributes, this.stack);
   }
 
+  prepare() {
+    // provision the cloud providers
+    Object.values(this.services).forEach(
+      ({ provider, region }: ServiceConfigurationDeclarationNormalized) => (
+        this.cloud(provider, region).provision()
+      ),
+    );
+
+    // provision the vault
+    this.vault.provision();
+  }
+
   /**
    * Provisions the stage
    * @void
@@ -122,14 +137,13 @@ class Stage extends Entity implements ProjectStage {
       throw new Error('Stage is already provisioned');
     }
 
-    this.vault.provision();
+    this.prepare();
 
-    Object.keys(this.services).forEach((name: string) => {
-      const { [name]: attributes } = this.services;
+    Object.values(this.services).forEach((attributes) => {
       const { type, provider, region } = attributes;
-
       const service = this.cloud(provider, region).service(type, attributes);
 
+      service.provision();
       this.registry.add(service);
       this.vault.link(service);
     });

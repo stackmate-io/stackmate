@@ -37,7 +37,6 @@ class AwsParamsVault extends Vault {
    */
   parsers(): AttributeParsers {
     return {
-      ...super.parsers(),
       key: parseString,
       region: parseString,
     };
@@ -55,7 +54,6 @@ class AwsParamsVault extends Vault {
    */
   validations(): Validations {
     return {
-      ...super.validations(),
       key: {
         presence: {
           message: 'A key in the form of a KMS ARN should be specified',

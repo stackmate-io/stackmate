@@ -1,5 +1,5 @@
+import { get } from 'lodash';
 import { TerraformProvider } from 'cdktf';
-import { get, isEmpty } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
@@ -33,8 +33,12 @@ abstract class Cloud extends Entity implements CloudProvider {
   abstract readonly serviceMapping: ServiceMapping;
 
   /**
-   * Provisions the cloud and its prerequisites
-   * @void
+   * @returns {CloudPrerequisites} the prerequisites for a service that is provisioned in this cloud
+   */
+  abstract prerequisites(): CloudPrerequisites;
+
+  /**
+   * Provisions the cloud into the stack
    */
   abstract provision(): void;
 
@@ -50,21 +54,9 @@ abstract class Cloud extends Entity implements CloudProvider {
   stack: CloudStack;
 
   /**
-   * @var {Object} prerequisites a key value mapping of {string => Service} of the main provisions
-   */
-  prerequisites: CloudPrerequisites;
-
-  /**
    * @var {TerraformProvider} providerInstance the terraform provider instance
    */
   protected providerInstance: TerraformProvider;
-
-  /**
-   * @returns {String} identifier the cloud provider's identifier
-   */
-  get identifier(): string {
-    return this.provider;
-  }
 
   /**
    * @returns {String} the error message
@@ -101,15 +93,6 @@ abstract class Cloud extends Entity implements CloudProvider {
   }
 
   /**
-   * @returns {Boolean} whether the cloud provider is provisioned
-   */
-  public get isProvisioned(): boolean {
-    return this.providerInstance instanceof TerraformProvider
-      && !isEmpty(this.prerequisites)
-      && Object.values(this.prerequisites).every((srv) => srv.isProvisioned);
-  }
-
-  /**
    * Registers a service in the cloud services registry
    *
    * @param {ServiceTypeChoice} type the type of service to instantiate
@@ -123,7 +106,7 @@ abstract class Cloud extends Entity implements CloudProvider {
       throw new Error(`Service ${type} for ${this.provider} is not supported, yet`);
     }
 
-    return ServiceClass.factory(attributes, this.stack, this.prerequisites);
+    return ServiceClass.factory(attributes, this.stack, this.prerequisites());
   }
 
   /**
@@ -141,9 +124,7 @@ abstract class Cloud extends Entity implements CloudProvider {
     const cloud = new this;
     cloud.attributes = attributes;
     cloud.stack = stack;
-
     cloud.validate();
-    cloud.provision();
 
     return cloud;
   }

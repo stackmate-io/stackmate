@@ -1,9 +1,9 @@
-import { join } from 'path';
 import { Memoize } from 'typescript-memoize';
 import { App as TerraformApp, AppOptions } from 'cdktf';
 
 import Stack from '@stackmate/lib/terraform/stack';
-import { DEBUG_MODE, OUTPUT_DIRECTORY } from '@stackmate/constants';
+import Environment from '@stackmate/lib//environment';
+import { DEBUG_MODE, DEFAULT_OUTPUT_PATH, ENVIRONMENT_VARIABLE } from '@stackmate/constants';
 import { CloudApp, CloudStack } from '@stackmate/interfaces';
 
 class App extends TerraformApp implements CloudApp {
@@ -17,13 +17,7 @@ class App extends TerraformApp implements CloudApp {
    * @param {AppOptions} options
    */
   constructor(name: string, options?: AppOptions) {
-    const opts = {
-      ...options,
-      outdir: join(OUTPUT_DIRECTORY, name),
-      stackTraces: DEBUG_MODE,
-    }
-
-    super(opts);
+    super({ ...options, ...App.options(name) });
 
     this.name = name;
   }
@@ -36,6 +30,19 @@ class App extends TerraformApp implements CloudApp {
    */
   @Memoize() stack(name: string): CloudStack {
     return new Stack(this, name);
+  }
+
+  /**
+   * Returns the app's options that should overload the defaults
+   *
+   * @param {String} name the app's name
+   * @returns {AppOptions} the options to use for the app
+   */
+  static options(name: string): AppOptions {
+    return {
+      outdir: Environment.get(ENVIRONMENT_VARIABLE.OUTPUT_DIR) || DEFAULT_OUTPUT_PATH,
+      stackTraces: DEBUG_MODE,
+    };
   }
 }
 

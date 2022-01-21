@@ -216,7 +216,6 @@ abstract class Service extends Entity implements CloudService, Provisionable {
     }
 
     service.validate();
-    service.provision();
 
     return service;
   }
