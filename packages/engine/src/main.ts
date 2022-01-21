@@ -1,4 +1,3 @@
-import Stage from '@stackmate/core/stage';
 import { DEFAULT_PROJECT_FILE, DEFAULT_STAGE } from '@stackmate/constants';
 
 /**
@@ -13,8 +12,7 @@ const create = async (
   stageName: string = DEFAULT_STAGE,
   targetPath: string,
 ): Promise<void> => {
-  const stage = await Stage.fromFile(stageName, projectFile, targetPath);
-  stage.create();
+  /** @todo */
 };
 
 /**
@@ -29,8 +27,7 @@ const deploy = async (
   stageName: string = DEFAULT_STAGE,
   targetPath?: string,
 ): Promise<void> => {
-  const stage = await Stage.fromFile(stageName, projectFile, targetPath);
-  stage.synthesize();
+  /** @todo */
 };
 
 export {

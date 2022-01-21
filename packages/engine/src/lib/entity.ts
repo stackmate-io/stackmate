@@ -93,6 +93,16 @@ abstract class Entity implements BaseEntity {
   }
 
   /**
+   * Checks whether the entity has the attribute specified
+   *
+   * @param {String} name the name of the attribute to look up
+   * @returns {Boolean} whether the entity has the attribute specified
+   */
+  hasAttribute(name: string): boolean {
+    return this.attributeNames.includes(name);
+  }
+
+  /**
    * Returns the value for an attribute
    *
    * @param {String} name the name of the attribute to get

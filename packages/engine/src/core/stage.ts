@@ -136,15 +136,6 @@ class Stage extends Entity implements ProjectStage {
   }
 
   /**
-   * Creates a stage for deployment
-   * @void
-   */
-  create(): void {
-    // this.state.create();
-    // this.vault.create();
-  }
-
-  /**
    * Instantiates, validates and provisions a stage
    *
    * @param {Vault} vault the secrets vault to use

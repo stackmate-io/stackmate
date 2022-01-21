@@ -3,11 +3,14 @@ import path from 'path';
 import { RegionList } from '@stackmate/types';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 
-export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), '.stackmate', 'config.yml');
-export const OUTPUT_DIRECTORY = process.env.STACKMATE_OUTPUT || path.join(os.tmpdir(), 'stackmate');
+export const STACKMATE_DIRECTORY = '.stackmate';
+export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), STACKMATE_DIRECTORY, 'config.yml');
 export const DEFAULT_STAGE = 'production';
 export const DEFAULT_RESOURCE_COMMENT = 'Provisioned by Stackmate';
 export const DEBUG_MODE = Boolean(process.env.DEBUG) || false;
+export const OUTPUT_DIRECTORY = process.env.STACKMATE_OUTPUT || path.join(
+  os.homedir(), STACKMATE_DIRECTORY, 'projects',
+);
 
 export const PROVIDER = {
   AWS: 'aws',

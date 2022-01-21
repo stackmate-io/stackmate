@@ -10,14 +10,14 @@ import { parseString } from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
-import { awsRegion, stackName } from './fixtures';
 import { getCloudByProvider } from '@stackmate/clouds';
+import { awsRegion, stackName, appName } from 'tests/fixtures';
 
-export const getMockApp = () => (
-  new App()
+export const getMockApp = (name: string) => (
+  new App(name)
 );
 
-export const getMockStack = ({ app = getMockApp(), name = stackName } = {}): CloudStack => (
+export const getMockStack = ({ app = getMockApp(appName), name = stackName } = {}): CloudStack => (
   new Stack(app, name)
 );
 

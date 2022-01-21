@@ -49,6 +49,15 @@ describe('Entity', () => {
       expect(subject).toBeInstanceOf(MockEntity);
       expect(new Set(subject.attributeNames)).toEqual(new Set(['name', 'number', 'email']));
     });
+
+    it('returns whether the attribute exists on the entity', () => {
+      subject = new ExtendedMockEntity();
+      expect(subject.hasAttribute('name')).toBeTruthy();
+      expect(subject.hasAttribute('number')).toBeTruthy();
+      expect(subject.hasAttribute('email')).toBeTruthy();
+      expect(subject.hasAttribute('somethingWeird')).toBeFalsy();
+      expect(subject.hasAttribute('somethingWeirder')).toBeFalsy();
+    });
   });
 
   describe('parsers', () => {

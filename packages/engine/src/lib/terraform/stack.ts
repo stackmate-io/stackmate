@@ -24,6 +24,14 @@ class Stack extends TerraformStack implements CloudStack {
     this.app = app;
     this.name = name;
   }
+
+  /**
+   * @returns {String} the stack application's name
+   */
+  public get appName() : string {
+    return this.app.name;
+  }
+
 }
 
 export default Stack;

@@ -1,20 +1,8 @@
 import Entity from '@stackmate/lib/entity';
-import { Attribute } from '@stackmate/lib/decorators';
-import { parseString } from '@stackmate/lib/parsers';
 import { CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
-import { AttributeParsers, Validations, VaultProviderChoice } from '@stackmate/types';
+import { AttributeParsers, CredentialsObject, Validations, VaultProviderChoice } from '@stackmate/types';
 
 abstract class Vault extends Entity implements VaultService {
-  /**
-   * @var {String} project the vault's project name
-   */
-  @Attribute project: string;
-
-  /**
-   * @var {String} stage the stage's name
-   */
-  @Attribute stage: string;
-
   /**
    * @var {CloudStack} stack the stack to apply the changes to
    */
@@ -36,16 +24,19 @@ abstract class Vault extends Entity implements VaultService {
   abstract readonly isProvisioned: boolean;
 
   /**
+   * @returns {AttributeParsers} the attribute parsers for the entity
+   */
+  abstract parsers(): AttributeParsers;
+
+  /**
+   * @returns {Validations} the validations for the entity
+   */
+  abstract validations(): Validations;
+
+  /**
    * Provisions the vault
    */
   abstract provision(): void;
-
-  /**
-   * Links the vault with a given service
-   *
-   * @param {Service} target the service to link the current service with
-   */
-  abstract link(target: CloudService): void;
 
   /**
    * Creates the vault to be used in future provisions
@@ -59,34 +50,38 @@ abstract class Vault extends Entity implements VaultService {
   }
 
   /**
+   * @returns {String} the project's name
+   */
+  public get project(): string {
+    return this.stack.appName;
+  }
+
+  /**
+   * @returns {String} the stage's name
+   */
+  public get stage() : string {
+    return this.stack.name;
+  }
+
+  /**
    * @var {String} identifier the vault's identifier
    */
   get identifier(): string {
     return `vault-${this.provider}-${this.stage}`;
   }
 
-  parsers(): AttributeParsers {
-    return {
-      project: parseString,
-      stage: parseString,
-    };
+  rotate(service: string, root: boolean = false) {
   }
 
-  validations(): Validations {
-    return {
-      project: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to provide a project name for the secrets section',
-        },
-      },
-      stage: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to provide a stage name for the secrets section',
-        },
-      },
-    };
+  provide(service: string, credentials: CredentialsObject, root: boolean = false) {
+  }
+
+  /**
+   * Links a given service to the vault
+   *
+   * @param {Service} target the service to link the current service with
+   */
+  link(target: CloudService): void {
   }
 }
 

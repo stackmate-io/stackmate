@@ -5,22 +5,14 @@ import sinon from 'sinon';
 import YAML from 'yaml';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
-import { Manifest, Testing, App as TerraformApp } from 'cdktf';
+import { Manifest, Testing } from 'cdktf';
 
+import Project from '@stackmate/core/project';
 import Service from '@stackmate/core/service';
-import { CloudApp, CloudStack } from '@stackmate/interfaces';
+import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
 import { PROVIDER } from '@stackmate/constants';
-import { getAwsPrerequisites, getMockApp } from './mocks';
-import Project from '@stackmate/core/project';
-
-export const enhanceApp = (app: TerraformApp): CloudApp => {
-  Object.defineProperties(app, {
-    stack: {},
-  });
-
-  return app as CloudApp;
-};
+import { getAwsPrerequisites } from 'tests/mocks';
 
 /**
  *
@@ -161,18 +153,17 @@ export const synthesizeProject = async (
   existsStub.withArgs(inputPath).returns(true);
   (fs.existsSync as sinon.SinonStub).callThrough();
 
-  const project = new Project(inputPath, getMockApp());
-  project.attributes = await project.storage.read();
-  project.validate();
-
+  const project = await Project.load(inputPath);
   const stage = project.select(stageName);
-  stage.provision();
 
-  const scope = JSON.stringify(stage.stack.toTerraform(), null, 2);
+  stage.provision();
 
   // Restore the stubs
   readStub.restore();
   existsStub.restore();
 
-  return { scope, stack: stage.stack };
+  return {
+    stack: stage.stack,
+    scope: JSON.stringify(stage.stack.toTerraform(), null, 2),
+  };
 };

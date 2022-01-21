@@ -23,10 +23,6 @@ export interface Provisionable extends BaseEntity {
   link(target: CloudService): void;
 }
 
-export interface CreatableProvisionable extends Provisionable {
-  create(): void;
-}
-
 export interface CloudProvider extends Omit<Provisionable, 'link'> {
   prerequisites: CloudPrerequisites;
   readonly provider: ProviderChoice;
@@ -112,14 +108,16 @@ export interface StorageAdapter {
 export interface CloudStack extends TerraformStack {
   readonly name: string;
   readonly app: TerraformApp;
+  readonly appName: string;
 }
 
 export interface CloudApp extends TerraformApp {
+  readonly name: string;
   stack(name: string): CloudStack;
 }
 
-export interface ProjectStage extends Omit<CreatableProvisionable, 'link'> {
+export interface ProjectStage extends Omit<Provisionable, 'link'> {
   cloud(provider: ProviderChoice, region: string): CloudProvider;
 }
 
-export interface VaultService extends CreatableProvisionable {}
+export interface VaultService extends Provisionable {}

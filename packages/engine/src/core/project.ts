@@ -6,11 +6,11 @@ import App from '@stackmate/lib/terraform/app';
 import Stage from '@stackmate/core/stage';
 import { Attribute } from '@stackmate/lib/decorators';
 import { normalizeProject } from '@stackmate/lib/normalizers';
-import { CloudApp, StorageAdapter } from '@stackmate/interfaces';
+import { StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/storage';
 import { getVaultByProvider } from '@stackmate/vault';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER, DEBUG_MODE } from '@stackmate/constants';
+import { PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
   AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes,
@@ -58,20 +58,14 @@ class Project extends Entity {
   public readonly path: string;
 
   /**
-   * @var {CloudApp} app the terraform app to deploy
-   */
-  public readonly app: CloudApp;
-
-  /**
    * @constructor
    * @param {String} path the project's file path
-   * @param {String} outputPath the output path for the stack
+   * @param {String} targetPath the output path for the stack
    */
-  constructor(path: string, app: CloudApp) {
+  constructor(path: string) {
     super();
 
     this.path = path;
-    this.app = app;
   }
 
   /**
@@ -154,19 +148,21 @@ class Project extends Entity {
   /**
    * Selects a workspace to be deployed
    *
-   * @param {String} name the workspace's name
+   * @param {String} stage the workspace's name
    */
-  select(name: string) {
-    const { provider = VAULT_PROVIDER.AWS, ...vaultOpts } = this.secrets;
+  select(stage: string) {
+    const { provider = VAULT_PROVIDER.AWS, ...vaultAttributes } = this.secrets;
 
-    const stack = this.app.stack(name);
-    const vault = getVaultByProvider(
-      stack, provider, { ...vaultOpts, project: this.name, stage: name },
-    );
+    const stack = new App(this.name).stack(stage);
+    const vault = getVaultByProvider(stack, provider, vaultAttributes);
 
-    return Stage.factory(
-      stack, vault, { name, services: get(this.stages, name, {}), defaults: this.defaults },
-    );
+    const attributes = {
+      name: stage,
+      services: get(this.stages, stage, {}),
+      defaults: this.defaults,
+    };
+
+    return Stage.factory(stack, vault, attributes);
   }
 
   /**
@@ -176,10 +172,8 @@ class Project extends Entity {
    * @returns {Project} the project loaded and validated
    * @async
    */
-  static async load(fileName: string, outputPath: string): Promise<Project> {
-    const app = new App({ outdir: outputPath, stackTraces: DEBUG_MODE });
-    const project = new Project(fileName, app);
-
+  static async load(fileName: string): Promise<Project> {
+    const project = new Project(fileName);
     project.attributes = await project.storage.read();
     project.validate();
 
