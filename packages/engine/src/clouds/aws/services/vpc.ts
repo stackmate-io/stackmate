@@ -41,9 +41,9 @@ class AwsVpcService extends Networking {
   public gateway: InternetGateway;
 
   /**
-   * @returns {Boolean} whether the service is provisioned
+   * @returns {Boolean} whether the service is registered into the stack
    */
-  public get isProvisioned(): boolean {
+  public get isRegistered(): boolean {
     return !isUndefined(this.vpc)
       && !isUndefined(this.subnets)
       && !isEmpty(this.subnets)
@@ -64,8 +64,8 @@ class AwsVpcService extends Networking {
     return Token.asString(this.vpc.defaultSecurityGroupId);
   }
 
-  provision() {
-    const { vpc, subnet, gateway } = this.provisioningProfile;
+  register() {
+    const { vpc, subnet, gateway } = this.resourceProfile;
     const [vpcCidr, ...subnetCidrs] = getNetworkingCidrBlocks(this.ip, 16, 2, 24);
 
     this.vpc = new Vpc(this.stack, this.identifier, {

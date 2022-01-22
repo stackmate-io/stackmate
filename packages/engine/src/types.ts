@@ -165,7 +165,7 @@ export type ConfigurationAttributes = {
   [name: string]: any;
 };
 
-export type ProvisioningProfile = {
+export type ResourceProfile = {
   [attribute: string]: object;
 };
 

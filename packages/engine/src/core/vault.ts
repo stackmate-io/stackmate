@@ -1,8 +1,8 @@
 import Entity from '@stackmate/lib/entity';
-import { CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import { Bootstrappable, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
 import { AttributeParsers, CredentialsObject, Validations, VaultProviderChoice } from '@stackmate/types';
 
-abstract class Vault extends Entity implements VaultService {
+abstract class Vault extends Entity implements VaultService, Bootstrappable {
   /**
    * @var {CloudStack} stack the stack to apply the changes to
    */
@@ -19,9 +19,9 @@ abstract class Vault extends Entity implements VaultService {
   abstract provider: VaultProviderChoice;
 
   /**
-   * @var {Boolean} isProvisioned whether the vault is provisioned or not
+   * @var {Boolean} isRegistered whether the vault is registered or not
    */
-  abstract readonly isProvisioned: boolean;
+  abstract readonly isRegistered: boolean;
 
   /**
    * @returns {AttributeParsers} the attribute parsers for the entity
@@ -34,14 +34,14 @@ abstract class Vault extends Entity implements VaultService {
   abstract validations(): Validations;
 
   /**
-   * Provisions the vault
+   * Registers the vault into the stack
    */
-  abstract provision(): void;
+  abstract register(): void;
 
   /**
-   * Creates the vault to be used in future provisions
+   * Bootstraps the vault
    */
-  abstract create(): void;
+  abstract bootstrap(): void;
 
   constructor(stack: CloudStack) {
     super();

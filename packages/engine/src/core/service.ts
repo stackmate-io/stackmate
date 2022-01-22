@@ -4,14 +4,14 @@ import { Memoize } from 'typescript-memoize';
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudService, CloudStack, Provisionable } from '@stackmate/interfaces';
+import { CloudService, CloudStack } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
-  ServiceTypeChoice, ProvisioningProfile, ServiceAttributes,
+  ServiceTypeChoice, ResourceProfile, ServiceAttributes,
 } from '@stackmate/types';
 
-abstract class Service extends Entity implements CloudService, Provisionable {
+abstract class Service extends Entity implements CloudService {
   /**
    * @var {String} name the service's name
    */
@@ -34,12 +34,12 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   @Attribute profile: string = Profile.DEFAULT;
 
   /**
-   * @var {Object} overrides any provisioning profile overrides to use
+   * @var {Object} overrides any profile overrides to use
    */
   @Attribute overrides: object = {};
 
   /**
-   * @var {Construct} stack the stack that the service is provisioned against
+   * @var {Construct} stack the stack that the service uses
    * @protected
    * @readonly
    */
@@ -76,16 +76,16 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   abstract readonly provider: ProviderChoice;
 
   /**
-   * @returns {Boolean} whether the service is provisioned or not
+   * @returns {Boolean} whether the service is registered in the stack
    */
-  abstract get isProvisioned(): boolean;
+  abstract get isRegistered(): boolean;
 
   /**
-   * Provisions the service's resources
+   * Registers the service's resources
    * @abstract
    * @void
    */
-  abstract provision(): void;
+  abstract register(): void;
 
   /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
@@ -105,15 +105,15 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   }
 
   /**
-   * @returns {Object} the profile to use for provisioning
+   * @returns {Object} the profile to use for the resources
    */
-  @Memoize() public get provisioningProfile(): ProvisioningProfile {
+  @Memoize() public get resourceProfile(): ResourceProfile {
     if (!this.profile) {
       return {};
     }
 
     const profile = Profile.get(this.provider, this.type, this.profile);
-    return merge(profile, this.overrides) as ProvisioningProfile;
+    return merge(profile, this.overrides) as ResourceProfile;
   }
 
   /**
@@ -195,7 +195,7 @@ abstract class Service extends Entity implements CloudService, Provisionable {
   }
 
   /**
-   * Instantiates, validates and provisions a service
+   * Instantiates and validates a service
    *
    * @param {ServiceAttributes} attributes the service's attributes
    * @param {Object} stack the terraform stack object

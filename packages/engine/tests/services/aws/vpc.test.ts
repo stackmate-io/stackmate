@@ -8,7 +8,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getMockStack } from 'tests/mocks';
 import { networkingConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsVpcService } from '@stackmate/clouds/aws';
-import { getServiceProvisionResults } from 'tests/helpers';
+import { getServiceRegisterationResults } from 'tests/helpers';
 
 describe('AwsVpcService', () => {
   let mockStack: CloudStack;
@@ -43,13 +43,13 @@ describe('AwsVpcService', () => {
     });
   });
 
-  describe('provision', () => {
-    it('provisions a VPC and its dependencies', async () => {
+  describe('register', () => {
+    it('registers a VPC and its dependencies', async () => {
       // verify the fixture
       expect(serviceConfig.ip).toEqual('12.0.0.0');
       const expectedVpcId = `$\{aws_vpc.${serviceConfig.name}-${stackName}.id}`;
 
-      const { scope } = await getServiceProvisionResults({
+      const { scope } = await getServiceRegisterationResults({
         provider: PROVIDER.AWS,
         serviceClass: AwsVpcService,
         serviceConfig,

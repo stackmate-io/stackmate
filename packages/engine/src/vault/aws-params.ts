@@ -76,9 +76,9 @@ class AwsParamsVault extends Vault {
     }
   }
 
-  isProvisioned: boolean;
+  isRegistered: boolean;
 
-  provision(): void {
+  register(): void {
   }
 
   link(target: CloudService): void {

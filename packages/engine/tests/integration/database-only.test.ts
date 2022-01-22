@@ -32,7 +32,7 @@ const projectConfig = {
 };
 
 describe('Database only project', () => {
-  it('provisions the production stage for the project', async () => {
+  it('registers the production stage for the project', async () => {
     const { scope, stack } = await synthesizeProject(projectConfig);
 
     expect(Testing.fullSynth(stack)).toBeValidTerraform();

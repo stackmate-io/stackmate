@@ -57,7 +57,7 @@ class Stage extends Entity implements ProjectStage {
   /**
    * @constructor
    * @param {CloudStack} stack the stack on which to deploy the stage
-   * @param {Vault} vault the vault that is used to provision credentials
+   * @param {Vault} vault the vault that handles credentials
    */
   constructor(stack: CloudStack, vault: Vault) {
     super();
@@ -97,9 +97,9 @@ class Stage extends Entity implements ProjectStage {
   }
 
   /**
-   * @returns {Boolean} whether the stage is provisioned
+   * @returns {Boolean} whether the stage is ready to be deployed
    */
-  public get isProvisioned(): boolean {
+  public get isReady(): boolean {
     return this.registry.length > 0;
   }
 
@@ -116,41 +116,40 @@ class Stage extends Entity implements ProjectStage {
     return getCloudByProvider(provider, attributes, this.stack);
   }
 
-  prepare() {
-    // provision the cloud providers
+  initialize() {
+    // Register the cloud providers
     Object.values(this.services).forEach(
       ({ provider, region }: ServiceConfigurationDeclarationNormalized) => (
-        this.cloud(provider, region).provision()
+        this.cloud(provider, region).register()
       ),
     );
-
-    // provision the vault
-    this.vault.provision();
   }
 
   /**
-   * Provisions the stage
+   * Prepares the stage for deployment
    * @void
    */
-  provision(): void {
-    if (this.isProvisioned) {
-      throw new Error('Stage is already provisioned');
+  prepare(): void {
+    if (this.isReady) {
+      throw new Error('Stage is already prepared');
     }
 
-    this.prepare();
+    // register the cloud provider & vault
+    this.initialize();
+    this.vault.register();
 
     Object.values(this.services).forEach((attributes) => {
       const { type, provider, region } = attributes;
       const service = this.cloud(provider, region).service(type, attributes);
 
-      service.provision();
+      service.register();
       this.registry.add(service);
       this.vault.link(service);
     });
   }
 
   /**
-   * Instantiates, validates and provisions a stage
+   * Instantiates and validates a stage
    *
    * @param {Vault} vault the secrets vault to use
    * @param {object} attributes the stage's attributes

@@ -69,16 +69,16 @@ export const withEphemeralManifest = (
 };
 
 /**
- * Provisions a service into the stack and returns the result
+ * Registers a service into the stack and returns the result
  *
  * @param {Object} options
  * @param {ProviderChoice} options.provider the cloud provider (used to get the prerequisites)
- * @param {Service} options.serviceClass the class of the service to provision
+ * @param {Service} options.serviceClass the class of the service to register
  * @param {Object} options.serviceConfig the service's attributes
  * @param {String} options.stackName the name of the mock stack
  * @returns {Promise<Object>}
  */
-export const getServiceProvisionResults = async ({
+export const getServiceRegisterationResults = async ({
   provider, serviceClass, serviceConfig, stackName = 'production', withPrerequisites = true,
 }: {
   provider: ProviderChoice;
@@ -111,7 +111,7 @@ export const getServiceProvisionResults = async ({
             serviceConfig, cloudStack, prerequisitesGenerator({ stack: cloudStack }),
           );
 
-          service.provision();
+          service.register();
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
 
@@ -162,7 +162,7 @@ export const synthesizeProject = async (
   const project = await Project.load(inputPath);
   const stage = project.select(stageName);
 
-  stage.provision();
+  stage.prepare();
 
   // Restore the stubs
   readStub.restore();

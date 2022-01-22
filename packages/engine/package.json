@@ -60,7 +60,8 @@
     "aws",
     "cloud",
     "terraform",
-    "provisioning"
+    "provisioning",
+    "deployment"
   ],
   "license": "MIT",
   "main": "lib/index.js",

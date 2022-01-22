@@ -31,19 +31,19 @@ class AwsRdsService extends AwsDatabaseService {
   readonly engines: ReadonlyArray<string> = RDS_ENGINES;
 
   /**
-   * @var {DbInstance} instance the rds instance, in case we're provisioning a single instance
+   * @var {DbInstance} instance the rds instance, in case we're deploying a single instance
    */
   public instance: DbInstance;
 
   /**
-   * @var {DbParameterGroup} paramGroup the parameter group to use when provisioning an RDS resource
+   * @var {DbParameterGroup} paramGroup the parameter group to use when deploying an RDS resource
    */
   public paramGroup: DbParameterGroup;
 
   /**
-   * @returns {Boolean} whether the service is provisioned
+   * @returns {Boolean} whether the service is registered
    */
-  public get isProvisioned(): boolean {
+  public get isRegistered(): boolean {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
@@ -82,8 +82,8 @@ class AwsRdsService extends AwsDatabaseService {
     };
   }
 
-  provision() {
-    const { instance, params } = this.provisioningProfile;
+  register() {
+    const { instance, params } = this.resourceProfile;
 
     this.paramGroup = new DbParameterGroup(this.stack, `${this.identifier}-params`, {
       ...params,

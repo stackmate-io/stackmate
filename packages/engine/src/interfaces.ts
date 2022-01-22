@@ -15,12 +15,16 @@ export interface BaseEntity {
   setAttribute(name: string, value: any): void;
 }
 
-export interface Provisionable extends BaseEntity {
+export interface Deployable extends BaseEntity {
   stack: CloudStack;
   identifier: string;
-  isProvisioned: boolean;
-  provision(): void;
+  isRegistered: boolean;
+  register(): void;
   link(target: CloudService): void;
+}
+
+export interface Bootstrappable extends Deployable {
+  bootstrap(): void;
 }
 
 export interface CloudProvider extends BaseEntity {
@@ -28,13 +32,13 @@ export interface CloudProvider extends BaseEntity {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
-  provision(): void;
+  register(): void;
   prerequisites(): CloudPrerequisites;
   validations(): Validations & Required<{ region: object }>;
   service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService;
 }
 
-export interface CloudService extends Provisionable {
+export interface CloudService extends Deployable {
   readonly name: string;
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
@@ -118,8 +122,11 @@ export interface CloudApp extends TerraformApp {
   stack(name: string): CloudStack;
 }
 
-export interface ProjectStage extends Omit<Provisionable, 'link'> {
+export interface ProjectStage extends Omit<Deployable, 'link' | 'isRegistered' | 'register'> {
+  isReady: boolean;
+  initialize(): void;
+  prepare(): void;
   cloud(provider: ProviderChoice, region: string): CloudProvider;
 }
 
-export interface VaultService extends Provisionable {}
+export interface VaultService extends Deployable {}

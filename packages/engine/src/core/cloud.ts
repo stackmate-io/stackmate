@@ -19,7 +19,7 @@ abstract class Cloud extends Entity implements CloudProvider {
   abstract readonly provider: ProviderChoice;
 
   /**
-   * @var {Object} regions the regions that the provider can provision resources in
+   * @var {Object} regions the regions that the provider can deploy resources in
    * @abstract
    * @readonly
    */
@@ -33,14 +33,14 @@ abstract class Cloud extends Entity implements CloudProvider {
   abstract readonly serviceMapping: ServiceMapping;
 
   /**
-   * @returns {CloudPrerequisites} the prerequisites for a service that is provisioned in this cloud
+   * @returns {CloudPrerequisites} the prerequisites for a service that is deployed in this cloud
    */
   abstract prerequisites(): CloudPrerequisites;
 
   /**
-   * Provisions the cloud into the stack
+   * Registers the cloud provider into the stack
    */
-  abstract provision(): void;
+  abstract register(): void;
 
   /**
    * @var {String} region the provider's region
@@ -48,7 +48,7 @@ abstract class Cloud extends Entity implements CloudProvider {
   @Attribute region: string;
 
   /**
-   * @var {Stack} stack the stack to use for provisioning
+   * @var {Stack} stack the stack to use
    * @readonly
    */
   stack: CloudStack;
@@ -110,7 +110,7 @@ abstract class Cloud extends Entity implements CloudProvider {
   }
 
   /**
-   * Instantiates, validates and provisions a cloud provider
+   * Instantiates and validates a cloud provider
    *
    * @param {ServiceAttributes} attributes the service's attributes
    * @param {Object} stack the terraform stack object

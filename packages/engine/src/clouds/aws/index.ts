@@ -31,9 +31,9 @@ class AwsCloud extends Cloud {
   readonly serviceMapping: ServiceMapping = AWS_SERVICE_MAPPING;
 
   /**
-   * Provisions the cloud provider to the stack
+   * Registers the cloud provider to the stack
    */
-  provision(): void {
+  register(): void {
     if (this.providerInstance) {
       return;
     }
@@ -55,7 +55,7 @@ class AwsCloud extends Cloud {
   @Memoize() prerequisites(): CloudPrerequisites {
     const vpcAttributes = { name: `${this.stack.name}-vpc`, region: this.region };
     const vpc = AwsVpcService.factory(vpcAttributes, this.stack);
-    vpc.provision();
+    vpc.register();
 
     return {
       vpc,
