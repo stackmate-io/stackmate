@@ -58,6 +58,11 @@ class Project extends Entity {
   public readonly path: string;
 
   /**
+   * @var {Stage} activeStage the stage that is currently selected
+   */
+  protected activeStage: Stage;
+
+  /**
    * @constructor
    * @param {String} path the project's file path
    * @param {String} targetPath the output path for the stack
@@ -146,6 +151,24 @@ class Project extends Entity {
   }
 
   /**
+   * @returns {App} the application to deploy
+   */
+  @Memoize() public get app(): App {
+    return new App(this.name);
+  }
+
+  /**
+   * @returns {Stage} the currently selectd stage
+   */
+  public get stage() : Stage {
+    if (!this.activeStage) {
+      throw new Error('You have to select a stage first');
+    }
+
+    return this.activeStage;
+  }
+
+  /**
    * Selects a workspace to be deployed
    *
    * @param {String} stage the workspace's name
@@ -153,7 +176,7 @@ class Project extends Entity {
   select(stage: string) {
     const { provider = VAULT_PROVIDER.AWS, ...vaultAttributes } = this.secrets;
 
-    const stack = new App(this.name).stack(stage);
+    const stack = this.app.stack(stage);
     const vault = getVaultByProvider(stack, provider, vaultAttributes);
 
     const attributes = {
@@ -162,7 +185,8 @@ class Project extends Entity {
       defaults: this.defaults,
     };
 
-    return Stage.factory(stack, vault, attributes);
+    this.activeStage = Stage.factory(stack, vault, attributes);
+    return this.activeStage;
   }
 
   /**

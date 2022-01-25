@@ -23,19 +23,15 @@ export interface Deployable extends BaseEntity {
   link(target: CloudService): void;
 }
 
-export interface Bootstrappable extends Deployable {
-  bootstrap(): void;
-}
-
 export interface CloudProvider extends BaseEntity {
   stack: CloudStack;
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
-  register(): void;
+  provision(): void;
   prerequisites(): CloudPrerequisites;
-  validations(): Validations & Required<{ region: object }>;
-  service(type: ServiceTypeChoice, attributes: ServiceAttributes): CloudService;
+  validations(): Validations & Required<{ regions: object }>;
+  introduce(attributes: Omit<ServiceAttributes, 'provider'>): CloudService;
 }
 
 export interface CloudService extends Deployable {
@@ -45,9 +41,12 @@ export interface CloudService extends Deployable {
   readonly associations: Array<ServiceAssociation>;
   links: Array<string>;
   region: string;
-  dependencies: CloudPrerequisites;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
+}
+
+export interface CreatableDeployable extends Deployable {
+  create(): void;
 }
 
 export interface CloudServiceConstructor extends CloudService {
@@ -115,6 +114,7 @@ export interface CloudStack extends TerraformStack {
   readonly name: string;
   readonly app: TerraformApp;
   readonly appName: string;
+  readonly outputPath: string;
 }
 
 export interface CloudApp extends TerraformApp {
@@ -123,10 +123,7 @@ export interface CloudApp extends TerraformApp {
 }
 
 export interface ProjectStage extends Omit<Deployable, 'link' | 'isRegistered' | 'register'> {
-  isReady: boolean;
   initialize(): void;
-  prepare(): void;
-  cloud(provider: ProviderChoice, region: string): CloudProvider;
 }
 
 export interface VaultService extends Deployable {}

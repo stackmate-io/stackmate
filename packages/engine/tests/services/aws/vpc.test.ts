@@ -23,7 +23,7 @@ describe('AwsVpcService', () => {
 
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, ip } = serviceConfig;
-      service = AwsVpcService.factory(serviceConfig, mockStack, prerequisites);
+      service = AwsVpcService.factory(mockStack, prerequisites, serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.NETWORKING);
@@ -36,7 +36,7 @@ describe('AwsVpcService', () => {
     });
 
     it('returns the attribute names', () => {
-      service = AwsVpcService.factory(serviceConfig, mockStack, prerequisites);
+      service = AwsVpcService.factory(mockStack, prerequisites, serviceConfig);
       expect(new Set(service.attributeNames)).toEqual(new Set([
         'name', 'region', 'links', 'profile', 'overrides', 'ip',
       ]));

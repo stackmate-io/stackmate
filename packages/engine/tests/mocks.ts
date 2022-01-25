@@ -26,7 +26,7 @@ export const getAwsPrerequisites = ({
 } = {}): CloudPrerequisites => {
   let aws;
   try {
-    aws = getCloudByProvider(PROVIDER.AWS, { region: AWS_REGIONS.EU_CENTRAL_1 }, stack);
+    aws = getCloudByProvider(PROVIDER.AWS, stack, { regions: Object.values(AWS_REGIONS) });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(inspect(error, { depth: 20 }));

@@ -47,10 +47,10 @@ export type ServiceConfigurationDeclarationNormalized = {
 };
 
 // The final attributes that the Service class should expect
-export type ServiceAttributes = Omit<ServiceConfigurationDeclarationNormalized, 'type' | 'provider'>;
+export type ServiceAttributes = ServiceConfigurationDeclarationNormalized;
 
 export type CloudAttributes = {
-  region: string;
+  regions: Array<string>;
   defaults?: ProviderDefaults;
 };
 

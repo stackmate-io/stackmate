@@ -21,9 +21,9 @@ class AwsCloud extends Cloud {
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
   /**
-   * @var {Array<String>} regions the regions that the cloud is available in
+   * @var {Array<String>} availableRegions the regions that the cloud is available in
    */
-  readonly regions: RegionList = AWS_REGIONS;
+  readonly availableRegions: RegionList = AWS_REGIONS;
 
   /**
    * @var {Object<[String]: Service>} serviceMapping the mapping from service name to constructor
@@ -31,21 +31,27 @@ class AwsCloud extends Cloud {
   readonly serviceMapping: ServiceMapping = AWS_SERVICE_MAPPING;
 
   /**
+   * @var {Array<AwsProvider>} providerInstances The array of provider instances after bootstrapping
+   */
+  protected providerInstances: Array<AwsProvider>
+
+  /**
    * Registers the cloud provider to the stack
    */
-  register(): void {
-    if (this.providerInstance) {
-      return;
-    }
-
-    this.providerInstance = new AwsProvider(this.stack, this.provider, {
-      region: this.region,
-      defaultTags: {
-        tags: {
-          Environment: this.stack.name,
-          Description: DEFAULT_RESOURCE_COMMENT,
+  bootstrap(): void {
+    this.aliases.forEach((alias, region) => {
+      const instance = new AwsProvider(this.stack, this.provider, {
+        region,
+        alias,
+        defaultTags: {
+          tags: {
+            Environment: this.stack.name,
+            Description: DEFAULT_RESOURCE_COMMENT,
+          },
         },
-      },
+      });
+
+      this.providerInstances.push(instance);
     });
   }
 
@@ -53,12 +59,12 @@ class AwsCloud extends Cloud {
    * @returns {CloudPrerequisites} the cloud's prerequisites for the services to be deployed
    */
   @Memoize() prerequisites(): CloudPrerequisites {
-    const vpcAttributes = { name: `${this.stack.name}-vpc`, region: this.region };
-    const vpc = AwsVpcService.factory(vpcAttributes, this.stack);
-    vpc.register();
-
     return {
-      vpc,
+      vpc: this.introduce({
+        type: SERVICE_TYPE.NETWORKING,
+        name: `${this.stack.name}-vpc`,
+        region: this.defaultRegion,
+      }),
     };
   }
 }

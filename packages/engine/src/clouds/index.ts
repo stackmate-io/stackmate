@@ -4,7 +4,7 @@ import { CloudAttributes, ProviderChoice } from '@stackmate/types';
 import { AwsCloud } from './aws';
 
 const getCloudByProvider = (
-  provider: ProviderChoice, attributes: CloudAttributes, stack: CloudStack,
+  provider: ProviderChoice, stack: CloudStack, attributes: CloudAttributes,
 ): CloudProvider => {
   let CloudClass;
 

@@ -30,7 +30,7 @@ describe('AwsRdsService', () => {
         name, region, size, storage, engine, database, rootCredentials,
       } = serviceConfig;
 
-      service = AwsRdsService.factory(serviceConfig, mockStack, prerequisites);
+      service = AwsRdsService.factory(mockStack, prerequisites, serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.DATABASE);
@@ -48,7 +48,7 @@ describe('AwsRdsService', () => {
     });
 
     it('returns the attribute names', () => {
-      service = AwsRdsService.factory(serviceConfig, mockStack, prerequisites);
+      service = AwsRdsService.factory(mockStack, prerequisites, serviceConfig);
       expect(new Set(service.attributeNames)).toEqual(new Set([
         'size', 'storage', 'version', 'database', 'nodes', 'rootCredentials',
         'engine', 'port', 'name', 'region', 'links', 'profile', 'overrides',

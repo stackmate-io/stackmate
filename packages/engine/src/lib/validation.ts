@@ -248,11 +248,26 @@ const validateProfileOverrides = (
   }
 };
 
+const validateRegionList = (
+  regions: Array<string>,
+  { availableRegions = [] }: { availableRegions: Array<string>},
+) => {
+  if (isEmpty(regions)) {
+    return 'You have to provide a set of regions for the provider';
+  }
+
+  const invalidRegions = difference(regions, availableRegions);
+  if (!isEmpty(invalidRegions)) {
+    return `Invalid regions provided: ${invalidRegions.join(', ')}`;
+  }
+};
+
 Object.assign(validate.validators, {
   validateCredentials,
   validateFileExistence,
   validateProjectDefaults,
   validateProfileOverrides,
+  validateRegionList,
   validateServiceProfile,
   validateStages,
   validateServiceLinks,
@@ -266,6 +281,7 @@ export {
   validateFileExistence,
   validateProjectDefaults,
   validateProfileOverrides,
+  validateRegionList,
   validateServiceProfile,
   validateStages,
   validateServiceLinks,

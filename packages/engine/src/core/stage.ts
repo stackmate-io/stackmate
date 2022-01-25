@@ -1,16 +1,13 @@
-import { get } from 'lodash';
-import { Memoize } from 'typescript-memoize';
+import { get, groupBy, map } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
-import Registry from '@stackmate/core/registry';
 import Vault from '@stackmate/core/vault';
 import { Attribute } from '@stackmate/lib/decorators';
 import { getCloudByProvider } from '@stackmate/clouds';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { CloudProvider, CloudStack, ProjectStage } from '@stackmate/interfaces';
 import {
-  AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice,
-  ServiceConfigurationDeclarationNormalized, Validations,
+  AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations,
 } from '@stackmate/types';
 
 class Stage extends Entity implements ProjectStage {
@@ -35,14 +32,14 @@ class Stage extends Entity implements ProjectStage {
   readonly validationMessage: string = 'The stage’s configuration is invalid';
 
   /**
-   * @var {Registry} registry the services registry
-   */
-  readonly registry: Registry;
-
-  /**
    * @var {CloudStack} stack the stack to deploy the stage to
    */
   readonly stack: CloudStack;
+
+  /**
+   * @var {Map} clouds the cloud instances instantiated for thsi stage
+   */
+  readonly clouds: Map<ProviderChoice, CloudProvider>;
 
   /**
    * @var {String} identifier the stage's identifier
@@ -64,7 +61,7 @@ class Stage extends Entity implements ProjectStage {
 
     this.stack = stack;
     this.vault = vault;
-    this.registry = new Registry();
+    this.clouds = new Map();
   }
 
   /**
@@ -97,55 +94,26 @@ class Stage extends Entity implements ProjectStage {
   }
 
   /**
-   * @returns {Boolean} whether the stage is ready to be deployed
+   * Initializes the stage
    */
-  public get isReady(): boolean {
-    return this.registry.length > 0;
-  }
+  protected initialize() {
+    const servicesByProvider = groupBy(Object.values(this.services), 'provider');
+    Object.keys(servicesByProvider).forEach(provider => {
+      const services = servicesByProvider[provider];
 
-  /**
-   * Returns a cloud provider instance
-   *
-   * @param {ProviderChoice} provider The provider to get as a cloud instance
-   * @param {String} region The cloud region to use
-   * @returns {CloudProvider} the instance of the cloud provider
-   */
-  @Memoize((...args: any[]) => args.join(':'))
-  public cloud(provider: ProviderChoice, region: string): CloudProvider {
-    const attributes = { region, defaults: get(this.defaults, provider, {}) };
-    return getCloudByProvider(provider, attributes, this.stack);
-  }
+      const cloud = getCloudByProvider(provider as ProviderChoice, this.stack, {
+        regions: map(services, 'region'),
+        defaults: get(this.defaults, provider, {}),
+      });
 
-  initialize() {
-    // Register the cloud providers
-    Object.values(this.services).forEach(
-      ({ provider, region }: ServiceConfigurationDeclarationNormalized) => (
-        this.cloud(provider, region).register()
-      ),
-    );
-  }
+      services.forEach(service => cloud.introduce(service));
 
-  /**
-   * Prepares the stage for deployment
-   * @void
-   */
-  prepare(): void {
-    if (this.isReady) {
-      throw new Error('Stage is already prepared');
-    }
-
-    // register the cloud provider & vault
-    this.initialize();
-    this.vault.register();
-
-    Object.values(this.services).forEach((attributes) => {
-      const { type, provider, region } = attributes;
-      const service = this.cloud(provider, region).service(type, attributes);
-
-      service.register();
-      this.registry.add(service);
-      this.vault.link(service);
+      this.clouds.set(provider as ProviderChoice, cloud);
     });
+  }
+
+  provision() {
+    // Provision all clouds
   }
 
   /**

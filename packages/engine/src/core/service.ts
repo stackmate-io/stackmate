@@ -93,9 +93,14 @@ abstract class Service extends Entity implements CloudService {
    *
    * @param {Array<Service>} dependencies the dependencies provided by the cloud provider
    */
-  public set dependencies(dependencies: CloudPrerequisites) {
+  protected set dependencies(dependencies: CloudPrerequisites) {
     // overload this function in services that it's required to parse the cloud dependencies
   }
+
+  /**
+   * @var {String} providerAlias any provider alias to use
+   */
+  protected providerAlias: string;
 
   /**
    * @returns {String} the service's identifier
@@ -200,12 +205,14 @@ abstract class Service extends Entity implements CloudService {
    * @param {ServiceAttributes} attributes the service's attributes
    * @param {Object} stack the terraform stack object
    * @param {Object} prerequisites any prerequisites by the cloud provider
+   * @param {String} providerAlias the provider alias associated with this resource
    */
   static factory<T extends Service>(
     this: new (...args: any[]) => T,
-    attributes: ServiceAttributes,
     stack: CloudStack,
     prerequisites: CloudPrerequisites = {},
+    attributes: ServiceAttributes,
+    providerAlias?: string,
   ): T {
     const service = new this;
     service.attributes = attributes;
@@ -213,6 +220,10 @@ abstract class Service extends Entity implements CloudService {
 
     if (!isEmpty(prerequisites)) {
       service.dependencies = prerequisites;
+    }
+
+    if (providerAlias) {
+      service.providerAlias = providerAlias;
     }
 
     service.validate();

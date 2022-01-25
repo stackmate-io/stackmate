@@ -1,8 +1,8 @@
 import Entity from '@stackmate/lib/entity';
-import { Bootstrappable, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import { CreatableDeployable, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
 import { AttributeParsers, CredentialsObject, Validations, VaultProviderChoice } from '@stackmate/types';
 
-abstract class Vault extends Entity implements VaultService, Bootstrappable {
+abstract class Vault extends Entity implements VaultService, CreatableDeployable {
   /**
    * @var {CloudStack} stack the stack to apply the changes to
    */
@@ -39,9 +39,9 @@ abstract class Vault extends Entity implements VaultService, Bootstrappable {
   abstract register(): void;
 
   /**
-   * Bootstraps the vault
+   * Create the vault
    */
-  abstract bootstrap(): void;
+  abstract create(): void;
 
   constructor(stack: CloudStack) {
     super();
