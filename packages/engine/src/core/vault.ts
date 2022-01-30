@@ -1,8 +1,9 @@
 import Entity from '@stackmate/lib/entity';
-import { CreatableDeployable, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
-import { AttributeParsers, CredentialsObject, Validations, VaultProviderChoice } from '@stackmate/types';
+import Credentials from '@stackmate/lib/credentials';
+import { CloudStack, CredentialsProvider, CredentialsResource, VaultService } from '@stackmate/interfaces';
+import { AttributeParsers, CredentialsCollection, CredentialsKeyChoice, Validations, VaultProviderChoice } from '@stackmate/types';
 
-abstract class Vault extends Entity implements VaultService, CreatableDeployable {
+abstract class Vault extends Entity implements VaultService {
   /**
    * @var {CloudStack} stack the stack to apply the changes to
    */
@@ -34,54 +35,64 @@ abstract class Vault extends Entity implements VaultService, CreatableDeployable
   abstract validations(): Validations;
 
   /**
-   * Registers the vault into the stack
+   * @var {CredentialsCollection} assigned the user-assigned credentials collection
    */
-  abstract register(): void;
+  protected assigned: CredentialsCollection;
 
   /**
-   * Create the vault
+   * Provisions a credentials resource, either a username or password
+   *
+   * @param {String} service the service to provide the credentials for
+   * @param {String} key
+   * @param {Boolean} root whether we're creating root credentials for
    */
-  abstract create(): void;
+  abstract provide(service: string, key: CredentialsKeyChoice, root: boolean): CredentialsResource;
 
-  constructor(stack: CloudStack) {
+  /**
+   * @constructor
+   * @param {CloudStack} stack the stack to provision resources on
+   * @param {CredentialsCollection} assigned any assigned credentials
+   */
+  constructor(stack: CloudStack, assigned?: CredentialsCollection) {
     super();
 
     this.stack = stack;
+    this.assigned = assigned || {};
   }
 
   /**
-   * @returns {String} the project's name
-   */
-  public get project(): string {
-    return this.stack.appName;
-  }
-
-  /**
-   * @returns {String} the stage's name
-   */
-  public get stage() : string {
-    return this.stack.name;
-  }
-
-  /**
-   * @var {String} identifier the vault's identifier
-   */
-  get identifier(): string {
-    return `vault-${this.provider}-${this.stage}`;
-  }
-
-  rotate(service: string, root: boolean = false) {
-  }
-
-  provide(service: string, credentials: CredentialsObject, root: boolean = false) {
-  }
-
-  /**
-   * Links a given service to the vault
+   * Returns the username for a service
    *
-   * @param {Service} target the service to link the current service with
+   * @param {String} service the service to get the username for
+   * @param {Boolean} root whether we intend to use the username for a root user
    */
-  link(target: CloudService): void {
+  protected username(service: string, root: boolean) {}
+
+  /**
+   * Returns the password for a service
+   *
+   * @param {String} service the service to get the password for
+   */
+  protected password(service: string) {}
+
+  /**
+   * Provides credentials for a service.
+   * It returns a proxy, so that the credentials are not immediately provisioned,
+   * but they get included in the stack, when eg. the username or password gets requested
+   *
+   * @param {String} service the service to provide credentials for
+   * @param {Object} opts options
+   * @param {Boolean} opts.root whether we need to get root credentials
+   * @returns {Proxy<CredentialsProvider>}
+   */
+  for(service: string, { root = false }: { root: boolean }): CredentialsProvider {
+    const handler: ProxyHandler<CredentialsProvider> = {
+      get: (_target: object, key: CredentialsKeyChoice, _receiver: object) => (
+        this.provide(service, key, root)
+      ),
+    };
+
+    return new Proxy(new Credentials(), handler);
   }
 }
 

@@ -1,14 +1,14 @@
-import { isEmpty, merge } from 'lodash';
+import { merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudService, CloudStack } from '@stackmate/interfaces';
+import { CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
-  RegionList, ServiceAssociation, ProviderChoice, CloudPrerequisites,
-  ServiceTypeChoice, ResourceProfile, ServiceAttributes,
+  RegionList, ServiceAssociation, ProviderChoice,
+  CloudPrerequisites, ServiceTypeChoice, ResourceProfile,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService {
@@ -26,7 +26,7 @@ abstract class Service extends Entity implements CloudService {
    * @var {ServiceAssociationDeclarations} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  @Attribute links: Array<string> = [];
+  @Attribute links: string[] = [];
 
   /**
    * @var {String} profile any configuration profile for the service
@@ -37,13 +37,6 @@ abstract class Service extends Entity implements CloudService {
    * @var {Object} overrides any profile overrides to use
    */
   @Attribute overrides: object = {};
-
-  /**
-   * @var {Construct} stack the stack that the service uses
-   * @protected
-   * @readonly
-   */
-  public stack: CloudStack;
 
   /**
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
@@ -81,11 +74,15 @@ abstract class Service extends Entity implements CloudService {
   abstract get isRegistered(): boolean;
 
   /**
-   * Registers the service's resources
+   * Provisions the service's resources
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @param {VaultService} vault the vault providing the credentials
+   * @param {String} providerAlias the alias for the cloud provider introducing this service
    * @abstract
    * @void
    */
-  abstract register(): void;
+  abstract provision(stack: CloudStack, vault: VaultService, providerAlias?: string): void;
 
   /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
@@ -93,20 +90,15 @@ abstract class Service extends Entity implements CloudService {
    *
    * @param {Array<Service>} dependencies the dependencies provided by the cloud provider
    */
-  protected set dependencies(dependencies: CloudPrerequisites) {
+  set dependencies(dependencies: CloudPrerequisites) {
     // overload this function in services that it's required to parse the cloud dependencies
   }
-
-  /**
-   * @var {String} providerAlias any provider alias to use
-   */
-  protected providerAlias: string;
 
   /**
    * @returns {String} the service's identifier
    */
   public get identifier(): string {
-    return `${this.name}-${this.stack.name}`.toLowerCase();
+    return `${this.provider}-${this.name}`.toLowerCase();
   }
 
   /**
@@ -197,38 +189,6 @@ abstract class Service extends Entity implements CloudService {
         },
       },
     };
-  }
-
-  /**
-   * Instantiates and validates a service
-   *
-   * @param {ServiceAttributes} attributes the service's attributes
-   * @param {Object} stack the terraform stack object
-   * @param {Object} prerequisites any prerequisites by the cloud provider
-   * @param {String} providerAlias the provider alias associated with this resource
-   */
-  static factory<T extends Service>(
-    this: new (...args: any[]) => T,
-    stack: CloudStack,
-    prerequisites: CloudPrerequisites = {},
-    attributes: ServiceAttributes,
-    providerAlias?: string,
-  ): T {
-    const service = new this;
-    service.attributes = attributes;
-    service.stack = stack;
-
-    if (!isEmpty(prerequisites)) {
-      service.dependencies = prerequisites;
-    }
-
-    if (providerAlias) {
-      service.providerAlias = providerAlias;
-    }
-
-    service.validate();
-
-    return service;
   }
 }
 

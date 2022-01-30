@@ -1,9 +1,9 @@
-import { App as TerraformApp, TerraformStack } from 'cdktf';
+import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
   ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  CredentialsObject, EntityAttributes, ServiceAttributes,
+  EntityAttributes, ServiceAttributes,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -16,22 +16,20 @@ export interface BaseEntity {
 }
 
 export interface Deployable extends BaseEntity {
-  stack: CloudStack;
   identifier: string;
   isRegistered: boolean;
-  register(): void;
   link(target: CloudService): void;
+  provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
 }
 
 export interface CloudProvider extends BaseEntity {
-  stack: CloudStack;
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly serviceMapping: ServiceMapping;
-  provision(): void;
+  readonly aliases: Map<string, string | undefined>;
   prerequisites(): CloudPrerequisites;
+  provision(stack: CloudStack, vault?: VaultService): void;
   validations(): Validations & Required<{ regions: object }>;
-  introduce(attributes: Omit<ServiceAttributes, 'provider'>): CloudService;
 }
 
 export interface CloudService extends Deployable {
@@ -39,14 +37,11 @@ export interface CloudService extends Deployable {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   readonly associations: Array<ServiceAssociation>;
-  links: Array<string>;
   region: string;
+  links: Array<string>;
+  providerAlias?: string;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
-}
-
-export interface CreatableDeployable extends Deployable {
-  create(): void;
 }
 
 export interface CloudServiceConstructor extends CloudService {
@@ -82,18 +77,6 @@ export interface MultiNode extends BaseEntity {
   validations(): Validations & Required<{ nodes: object }>;
 }
 
-export interface Authenticatable extends BaseEntity {
-  credentials: CredentialsObject;
-  parsers(): AttributeParsers & Required<{ credentials: Function }>;
-  validations(): Validations & Required<{ credentials: object }>;
-}
-
-export interface Rootable extends BaseEntity {
-  rootCredentials: CredentialsObject;
-  parsers(): AttributeParsers & Required<{ rootCredentials: Function }>;
-  validations(): Validations & Required<{ rootCredentials: object }>;
-}
-
 export interface Versioned extends BaseEntity {
   version: string;
   parsers(): AttributeParsers & Required<{ version: Function }>;
@@ -122,8 +105,27 @@ export interface CloudApp extends TerraformApp {
   stack(name: string): CloudStack;
 }
 
-export interface ProjectStage extends Omit<Deployable, 'link' | 'isRegistered' | 'register'> {
-  initialize(): void;
+export interface ProjectStage extends BaseEntity {
+  stack: CloudStack;
+  vault: VaultService;
 }
 
-export interface VaultService extends Deployable {}
+export interface CredentialsResource extends ITerraformResource {}
+
+export interface CredentialsProvider {
+  username: CredentialsResource;
+  password: CredentialsResource;
+}
+
+export interface VaultService extends BaseEntity {
+  stack: CloudStack;
+  for(service: string, opts?: { root: boolean }): CredentialsProvider;
+}
+
+export interface CloudCollection {
+  add(cloud: CloudProvider): void;
+  get(provider: ProviderChoice): CloudProvider;
+  forEach(callback: (c: CloudProvider) => void): void;
+  alias(provider: ProviderChoice, region: string): string | undefined;
+  provision(s: CloudStack, srv: CloudService[], obj?: { vault?: VaultService, state?: object /** @todo */ }): void;
+}

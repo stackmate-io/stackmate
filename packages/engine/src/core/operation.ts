@@ -1,10 +1,16 @@
 import Project from '@stackmate/core/project';
+import Stage from '@stackmate/core/stage';
 
 abstract class Operation {
   /**
    * @var {Project} project the project to deploy
    */
-  protected project: Project;
+  protected readonly project: Project;
+
+  /**
+   * @var {Stage} stage the stage to deploy
+   */
+  protected readonly stage: Stage;
 
   /**
    * Runs the operation
@@ -15,8 +21,9 @@ abstract class Operation {
    * @constructor
    * @param {ProjectStage} stage the stage to perform the operation on
    */
-  constructor(project: Project) {
+  constructor(project: Project, stage: Stage) {
     this.project = project;
+    this.stage = stage;
   }
 
   /**
@@ -32,8 +39,8 @@ abstract class Operation {
     stageName: string,
   ): Promise<T> {
     const project = await Project.load(projectFile);
-    project.select(stageName);
-    return new this(project);
+    const stage = project.select(stageName);
+    return new this(project, stage);
   }
 }
 

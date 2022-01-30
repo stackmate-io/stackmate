@@ -185,7 +185,7 @@ class Project extends Entity {
       defaults: this.defaults,
     };
 
-    this.activeStage = Stage.factory(stack, vault, attributes);
+    this.activeStage = Stage.factory(attributes, stack, vault);
     return this.activeStage;
   }
 
@@ -200,7 +200,6 @@ class Project extends Entity {
     const project = new Project(fileName);
     project.attributes = await project.storage.read();
     project.validate();
-
     return project;
   }
 }

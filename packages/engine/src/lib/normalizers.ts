@@ -68,7 +68,7 @@ export const normalizeStages = (
  * @param {String} provider the project's provider
  */
 export const normalizeSecrets = (secrets: object, region: string) => {
-  return defaultsDeep(secrets, { region, provider: VAULT_PROVIDER.AWS });
+  return defaultsDeep(secrets, { provider: VAULT_PROVIDER.AWS, region});
 };
 
 /**

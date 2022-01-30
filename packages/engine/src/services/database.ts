@@ -2,11 +2,10 @@ import Service from '@stackmate/core/service';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
-import { CredentialsObject, OneOf, ServiceTypeChoice } from '@stackmate/types';
-import { Rootable, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
+import { OneOf, ServiceTypeChoice } from '@stackmate/types';
+import { Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 
-abstract class Database extends Service implements Sizeable, Storable,
-  Rootable, MultiNode, Versioned {
+abstract class Database extends Service implements Sizeable, Storable, MultiNode, Versioned {
   /**
    * @var {String} type the type for the service
    */
@@ -36,11 +35,6 @@ abstract class Database extends Service implements Sizeable, Storable,
    * @var {Number} nodes the number of nodes for the database;
    */
   @Attribute nodes: number;
-
-  /**
-   * @var {Credentials} rootCredentials the service's root credentials
-   */
-  @Attribute rootCredentials: CredentialsObject;
 
   /**
    * @var {String} engine the database engine to use

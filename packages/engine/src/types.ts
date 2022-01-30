@@ -12,6 +12,7 @@ export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type VaultProviderChoice = ChoiceOf<typeof VAULT_PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
+export type CredentialsKeyChoice = OneOf<['username', 'password']>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
@@ -21,6 +22,10 @@ export type CredentialsObject = {
   username?: string;
   password?: string;
 };
+
+export type CredentialsCollection = {
+  [service: string]: CredentialsObject;
+}
 
 export type ServiceAssociation = {
   lookup: ConstructorOf<CloudService>;
@@ -42,8 +47,6 @@ export type ServiceConfigurationDeclarationNormalized = {
   name: string;
   profile?: string;
   links?: ServiceAssociationDeclarations;
-  credentials?: CredentialsObject;
-  rootCredentials?: CredentialsObject;
 };
 
 // The final attributes that the Service class should expect

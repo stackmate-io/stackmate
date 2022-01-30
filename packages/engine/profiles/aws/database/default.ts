@@ -15,7 +15,7 @@ const instance: Partial<DbInstanceConfig> = {
   storageType: 'gp2',
 };
 
-const params: Array<DbParameterGroupParameter> = [{
+const params: DbParameterGroupParameter[] = [{
   name: 'character_set_server',
   value: 'utf8mb4',
 }, {

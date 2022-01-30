@@ -1,11 +1,12 @@
-import { get, groupBy, map } from 'lodash';
+import { get, groupBy, map, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Vault from '@stackmate/core/vault';
+import Collection from '@stackmate/core/collection';
 import { Attribute } from '@stackmate/lib/decorators';
 import { getCloudByProvider } from '@stackmate/clouds';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { CloudProvider, CloudStack, ProjectStage } from '@stackmate/interfaces';
+import { CloudCollection, CloudService, CloudStack, ProjectStage } from '@stackmate/interfaces';
 import {
   AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations,
 } from '@stackmate/types';
@@ -29,7 +30,7 @@ class Stage extends Entity implements ProjectStage {
   /**
    * @var {String} validationMessage the validation error message
    */
-  readonly validationMessage: string = 'The stage’s configuration is invalid';
+  readonly validationMessage: string = 'The stage\'s configuration is invalid';
 
   /**
    * @var {CloudStack} stack the stack to deploy the stage to
@@ -37,19 +38,19 @@ class Stage extends Entity implements ProjectStage {
   readonly stack: CloudStack;
 
   /**
-   * @var {Map} clouds the cloud instances instantiated for thsi stage
-   */
-  readonly clouds: Map<ProviderChoice, CloudProvider>;
-
-  /**
-   * @var {String} identifier the stage's identifier
-   */
-  readonly identifier: string;
-
-  /**
    * @var {Vault} vault the secrets vault to use for service credentials
    */
   readonly vault: Vault;
+
+  /**
+   * @var {Map} serviceCollection the collection of service instances
+   */
+  protected readonly serviceCollection: Map<string, CloudService>;
+
+  /**
+   * @var {Map} clouds the cloud instances instantiated for thsi stage
+   */
+  protected readonly cloudCollection: CloudCollection;
 
   /**
    * @constructor
@@ -61,12 +62,10 @@ class Stage extends Entity implements ProjectStage {
 
     this.stack = stack;
     this.vault = vault;
-    this.clouds = new Map();
+    this.cloudCollection = new Collection();
+    this.serviceCollection = new Map();
   }
 
-  /**
-   * @returns {AttributeParsers} the parser functions to apply to the attributes
-   */
   parsers(): AttributeParsers {
     return {
       name: parseString,
@@ -93,41 +92,33 @@ class Stage extends Entity implements ProjectStage {
     };
   }
 
-  /**
-   * Initializes the stage
-   */
-  protected initialize() {
+  protected initialize(): void {
     const servicesByProvider = groupBy(Object.values(this.services), 'provider');
-    Object.keys(servicesByProvider).forEach(provider => {
-      const services = servicesByProvider[provider];
 
-      const cloud = getCloudByProvider(provider as ProviderChoice, this.stack, {
+    toPairs(servicesByProvider).forEach(([provider, services]) => {
+      // Add the cloud to the collection
+      const cloudAttrs = {
         regions: map(services, 'region'),
         defaults: get(this.defaults, provider, {}),
-      });
+      };
 
-      services.forEach(service => cloud.introduce(service));
+      this.cloudCollection.add(getCloudByProvider(provider as ProviderChoice, cloudAttrs));
 
-      this.clouds.set(provider as ProviderChoice, cloud);
+      // Instantiate the services and add them to the collection
+      // this.serviceCollection.set
     });
   }
 
-  provision() {
-    // Provision all clouds
+  prepare() {
+    const provisionables = [this.vault];
+    this.cloudCollection.provision(this.stack, provisionables);
   }
 
-  /**
-   * Instantiates and validates a stage
-   *
-   * @param {Vault} vault the secrets vault to use
-   * @param {object} attributes the stage's attributes
-   * @param {String} targetPath the target path to write the output files to
-   */
-  static factory(stack: CloudStack, vault: Vault, attributes: object): Stage {
-    const stage = new Stage(stack, vault);
-    stage.attributes = attributes;
-    stage.validate();
-    return stage;
+  provision() {
+    const provisionables = Array.from(this.serviceCollection.values());
+    this.cloudCollection.provision(this.stack, provisionables, {
+      vault: this.vault,
+    });
   }
 }
 

@@ -11,6 +11,7 @@ import {
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
+import { CloudStack, VaultService } from '@stackmate/interfaces';
 
 const AwsDatabaseService = AwsService(Database);
 
@@ -82,15 +83,15 @@ class AwsRdsService extends AwsDatabaseService {
     };
   }
 
-  register() {
+  provision(stack: CloudStack, vault: VaultService) {
     const { instance, params } = this.resourceProfile;
 
-    this.paramGroup = new DbParameterGroup(this.stack, `${this.identifier}-params`, {
+    this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,
       family: this.paramGroupFamily,
     });
 
-    this.instance = new DbInstance(this.stack, this.name, {
+    this.instance = new DbInstance(stack, this.name, {
       ...instance,
       allocatedStorage: this.storage,
       count: this.nodes,
@@ -101,8 +102,9 @@ class AwsRdsService extends AwsDatabaseService {
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
-      // username: rootUsernameVar.value,
-      // password: rootPasswordVar.value,
+      // provider: this.providerAlias,
+      // username: rootCredentials.username,
+      // password: rootCredentials.password,
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
     });
   }
