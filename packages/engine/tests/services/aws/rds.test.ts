@@ -1,6 +1,7 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
+import Profile from '@stackmate/core/profile';
 import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
@@ -8,14 +9,13 @@ import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
 import { AwsRdsService } from '@stackmate/clouds/aws';
-import Profile from '@stackmate/core/profile';
 
 describe('AwsRdsService', () => {
   let mockStack: CloudStack;
   let prerequisites: CloudPrerequisites;
 
   beforeEach(() => {
-    prerequisites = getAwsPrerequisites({ stack: mockStack });
+    prerequisites = getAwsPrerequisites();
   });
 
   describe('instantiation', () => {
@@ -26,9 +26,7 @@ describe('AwsRdsService', () => {
     });
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const {
-        name, region, size, storage, engine, database, rootCredentials,
-      } = serviceConfig;
+      const { name, region, size, storage, engine, database } = serviceConfig;
 
       service = AwsRdsService.factory(mockStack, prerequisites, serviceConfig);
 
@@ -40,8 +38,6 @@ describe('AwsRdsService', () => {
       expect(service.storage).toEqual(storage);
       expect(service.engine).toEqual(engine);
       expect(service.database).toEqual(database);
-      expect(service.stack.name).toEqual(mockStack.name);
-      expect(service.rootCredentials).toEqual(rootCredentials);
       expect(service.links).toEqual([]);
       expect(service.profile).toEqual(Profile.DEFAULT);
       expect(service.overrides).toEqual({});

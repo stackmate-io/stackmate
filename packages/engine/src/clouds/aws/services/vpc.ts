@@ -6,7 +6,8 @@ import Networking from '@stackmate/services/networking';
 import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
 import { ProviderChoice, RegionList } from '@stackmate/types';
 import { PROVIDER } from '@stackmate/constants';
-import { AWS_REGIONS } from '../constants';
+import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { CloudStack } from '@stackmate/interfaces';
 
 /**
  * We don't wrap the service with the AwsService mixin
@@ -64,24 +65,24 @@ class AwsVpcService extends Networking {
     return Token.asString(this.vpc.defaultSecurityGroupId);
   }
 
-  register() {
+  provision(stack: CloudStack) {
     const { vpc, subnet, gateway } = this.resourceProfile;
     const [vpcCidr, ...subnetCidrs] = getNetworkingCidrBlocks(this.ip, 16, 2, 24);
 
-    this.vpc = new Vpc(this.stack, this.identifier, {
+    this.vpc = new Vpc(stack, this.identifier, {
       ...vpc,
       cidrBlock: vpcCidr,
     });
 
     this.subnets = subnetCidrs.map((cidrBlock, idx) => (
-      new Subnet(this.stack, `${this.identifier}-subnet${(idx + 1)}`, {
+      new Subnet(stack, `${this.identifier}-subnet${(idx + 1)}`, {
         ...subnet,
         vpcId: this.vpc.id,
         cidrBlock,
       })
     ));
 
-    this.gateway = new InternetGateway(this.stack, `${this.identifier}-gateway`, {
+    this.gateway = new InternetGateway(stack, `${this.identifier}-gateway`, {
       ...gateway,
       vpcId: this.vpc.id,
     });

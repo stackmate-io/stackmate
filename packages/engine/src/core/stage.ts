@@ -2,14 +2,12 @@ import { get, groupBy, map, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Vault from '@stackmate/core/vault';
-import Collection from '@stackmate/core/collection';
+import Collection from '@stackmate/core/provisioner';
 import { Attribute } from '@stackmate/lib/decorators';
 import { getCloudByProvider } from '@stackmate/clouds';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { CloudCollection, CloudService, CloudStack, ProjectStage } from '@stackmate/interfaces';
-import {
-  AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations,
-} from '@stackmate/types';
+import { CloudProvisioner, CloudService, CloudStack, ProjectStage } from '@stackmate/interfaces';
+import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
 
 class Stage extends Entity implements ProjectStage {
   /**
@@ -48,9 +46,9 @@ class Stage extends Entity implements ProjectStage {
   protected readonly serviceCollection: Map<string, CloudService>;
 
   /**
-   * @var {Map} clouds the cloud instances instantiated for thsi stage
+   * @var {CloudProvisioner} provisioner the cloud instances instantiated for thsi stage
    */
-  protected readonly cloudCollection: CloudCollection;
+  protected readonly provisioner: CloudProvisioner;
 
   /**
    * @constructor
@@ -62,7 +60,7 @@ class Stage extends Entity implements ProjectStage {
 
     this.stack = stack;
     this.vault = vault;
-    this.cloudCollection = new Collection();
+    this.provisioner = new Collection();
     this.serviceCollection = new Map();
   }
 
@@ -102,21 +100,20 @@ class Stage extends Entity implements ProjectStage {
         defaults: get(this.defaults, provider, {}),
       };
 
-      this.cloudCollection.add(getCloudByProvider(provider as ProviderChoice, cloudAttrs));
-
-      // Instantiate the services and add them to the collection
-      // this.serviceCollection.set
+      this.provisioner.addCloud(
+        getCloudByProvider(provider as ProviderChoice, cloudAttrs),
+      );
     });
   }
 
   prepare() {
-    const provisionables = [this.vault];
-    this.cloudCollection.provision(this.stack, provisionables);
+    // const provisionables = [this.vault];
+    this.provisioner.provision(this.stack, []);
   }
 
   provision() {
     const provisionables = Array.from(this.serviceCollection.values());
-    this.cloudCollection.provision(this.stack, provisionables, {
+    this.provisioner.provision(this.stack, provisionables, {
       vault: this.vault,
     });
   }

@@ -1,10 +1,10 @@
 import { ProviderChoice } from '@stackmate/types';
-import { CloudCollection, CloudProvider, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import { CloudProvisioner, CloudProvider, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
 
-class Collection implements CloudCollection {
+class Provisioner implements CloudProvisioner {
   protected clouds: Map<ProviderChoice, CloudProvider>;
 
-  add(cloud: CloudProvider): void {
+  addCloud(cloud: CloudProvider): void {
     this.clouds.set(cloud.provider, cloud);
   }
 
@@ -43,4 +43,4 @@ class Collection implements CloudCollection {
   }
 }
 
-export default Collection;
+export default Provisioner;

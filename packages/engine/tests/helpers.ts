@@ -111,7 +111,7 @@ export const getServiceRegisterationResults = async ({
             serviceConfig, cloudStack, prerequisitesGenerator({ stack: cloudStack }),
           );
 
-          service.register();
+          service.provision(cloudStack);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
 

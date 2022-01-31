@@ -150,7 +150,10 @@ abstract class Entity implements BaseEntity {
    * initialization issue in TypeScript. This method runs after the entity has been
    * instantiated and validated and allows us to perform actions with attributes in place
    *
-   * @see https://github.com/RicoSuter/NJsonSchema/issues/625
+   * @see https://github.com/microsoft/TypeScript/issues/13525
+   * @see https://github.com/microsoft/TypeScript/issues/1617
+   * @see https://github.com/microsoft/TypeScript/issues/10634s
+   * @see https://stackoverflow.com/questions/43595943/why-are-derived-class-property-values-not-seen-in-the-base-class-constructor/43595944
    */
   protected initialize(): void {}
 

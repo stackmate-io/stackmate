@@ -2,8 +2,7 @@ import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations,
-  EntityAttributes, ServiceAttributes,
+  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -32,6 +31,10 @@ export interface CloudProvider extends BaseEntity {
   validations(): Validations & Required<{ regions: object }>;
 }
 
+export interface CloudProviderConstructor {
+  registry: SubclassRegistry<CloudProviderConstructor>;
+}
+
 export interface CloudService extends Deployable {
   readonly name: string;
   readonly provider: ProviderChoice;
@@ -44,9 +47,8 @@ export interface CloudService extends Deployable {
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
 }
 
-export interface CloudServiceConstructor extends CloudService {
-  new(...args: any[]): CloudService;
-  factory(attrs: ServiceAttributes, stack: CloudStack, prereqs: CloudPrerequisites): CloudService;
+export interface CloudServiceConstructor {
+  registry: SubclassRegistry<CloudServiceConstructor>;
 }
 
 export interface Sizeable extends BaseEntity {
@@ -122,10 +124,16 @@ export interface VaultService extends BaseEntity {
   for(service: string, opts?: { root: boolean }): CredentialsProvider;
 }
 
-export interface CloudCollection {
-  add(cloud: CloudProvider): void;
+export interface CloudProvisioner {
+  addCloud(cloud: CloudProvider): void;
   get(provider: ProviderChoice): CloudProvider;
   forEach(callback: (c: CloudProvider) => void): void;
   alias(provider: ProviderChoice, region: string): string | undefined;
   provision(s: CloudStack, srv: CloudService[], obj?: { vault?: VaultService, state?: object /** @todo */ }): void;
+}
+
+export interface SubclassRegistry<T> {
+  items: Map<string, T>;
+  add(classConstructor: T, ...attrs: string[]): void;
+  get(...attrs: string[]): T | undefined;
 }

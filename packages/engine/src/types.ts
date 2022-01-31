@@ -60,7 +60,7 @@ export type CloudAttributes = {
 export type ServiceList = Map<string, CloudService>;
 
 export type ServiceMapping = {
-  [name: string]: FactoryOf<CloudService>;
+  [name: string]: ConstructorOf<CloudService>;
 };
 
 export type RegionList = {

@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 
 import Entity from '@stackmate/lib/entity';
+import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
+import { CloudProviderConstructor, CloudServiceConstructor } from '@stackmate/interfaces';
 
-// eslint-disable-next-line import/prefer-default-export
 export const Attribute = function Attribute(target: Entity, propertyKey: string) {
   if (!(target instanceof Entity)) {
     throw new Error('The `Attribute` decorator only applies to `Entity` objects');
@@ -25,3 +26,19 @@ export const Attribute = function Attribute(target: Entity, propertyKey: string)
     enumerable: true,
   });
 };
+
+export const RegisterableService = function RegisterableService(
+  provider: ProviderChoice,
+  type: ServiceTypeChoice,
+) {
+  return (target: CloudServiceConstructor) => {
+    target.registry.add(target, provider, type);
+    console.log(target.registry.items);
+  }
+};
+
+export const RegisterableCloud = function RegisterableCloud(provider: ProviderChoice) {
+  return (target: CloudProviderConstructor) => {
+    target.registry.add(target, provider);
+  }
+}

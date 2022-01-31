@@ -3,8 +3,9 @@ import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
 import Profile from '@stackmate/core/profile';
+import Registry from '@stackmate/lib/registry';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import { CloudService, CloudServiceConstructor, CloudStack, VaultService } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
@@ -37,6 +38,11 @@ abstract class Service extends Entity implements CloudService {
    * @var {Object} overrides any profile overrides to use
    */
   @Attribute overrides: object = {};
+
+  /**
+   * @var {Registry} registry the registry of subclasses available
+   */
+  static registry = new Registry<CloudServiceConstructor>();
 
   /**
    * @var {Array<ServiceAssociation>} associations the list of associations with other services
@@ -82,7 +88,7 @@ abstract class Service extends Entity implements CloudService {
    * @abstract
    * @void
    */
-  abstract provision(stack: CloudStack, vault: VaultService, providerAlias?: string): void;
+  abstract provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
 
   /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
@@ -189,6 +195,29 @@ abstract class Service extends Entity implements CloudService {
         },
       },
     };
+  }
+
+  /**
+   * Returns the service class to instantiate, based on its provider and type
+   *
+   * @param {ProviderChoice} provider the provider that the service belongs to
+   * @param {ServiceTypeChoice} type the service type
+   * @returns {CloudServiceConstructor} the service class to instantiate
+   */
+  static get(
+    this: CloudServiceConstructor,
+    provider: ProviderChoice,
+    type: ServiceTypeChoice,
+  ): CloudServiceConstructor {
+    const cls = this.registry.get(provider, type);
+
+    if (!cls) {
+      throw new Error(
+        `Service type ${type} is not available for provider ${provider}`,
+      );
+    }
+
+    return cls;
   }
 }
 

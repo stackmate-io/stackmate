@@ -1,9 +1,10 @@
 import { snakeCase } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
+import Registry from '@stackmate/lib/registry';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudProvider, CloudStack, VaultService } from '@stackmate/interfaces';
 import { parseArrayToUniqueValues } from '@stackmate/lib/parsers';
+import { CloudProvider, CloudServiceConstructor, CloudStack, VaultService } from '@stackmate/interfaces';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 
 abstract class Cloud extends Entity implements CloudProvider {
@@ -46,6 +47,11 @@ abstract class Cloud extends Entity implements CloudProvider {
   abstract prerequisites(): CloudPrerequisites;
 
   /**
+ * @var {Registry} registry the registry of subclasses available
+ */
+  static registry = new Registry<CloudServiceConstructor>();
+
+  /**
    * @var {Map} aliases the provider aliases to use, per region
    */
   readonly aliases: Map<string, string | undefined> = new Map();
@@ -77,9 +83,9 @@ abstract class Cloud extends Entity implements CloudProvider {
   validations() {
     return {
       regions: {
-        validateRegions: {
-          availableRegions: Object.values(this.availableRegions),
-        }
+        // validateRegions: {
+        //   availableRegions: Object.values(this.availableRegions),
+        // }
       },
     };
   }
@@ -90,13 +96,31 @@ abstract class Cloud extends Entity implements CloudProvider {
    * We pick a region as a default, then set up an alias for the rest
    */
   protected initialize(): void {
-    const { regions: { defaultRegion = this.defaultRegion, ...regions } } = this.attributes;
+    const { regions } = this.attributes;
+    const [defaultRegion, ...secondaryRegions] = regions;
 
+    this.defaultRegion = defaultRegion;
     this.aliases.set(this.defaultRegion, undefined);
 
-    regions.forEach((region: string) => {
+    secondaryRegions.forEach((region: string) => {
       this.aliases.set(region, snakeCase(`${this.provider}_${region}`));
     });
+  }
+
+  /**
+   * Returns the cloud provider class to instantiate based on the provider's name
+   *
+   * @param {ProviderChoice} provider the provider to return
+   * @returns {CloudServiceConstructor} the provider's class
+   */
+  static get(this: CloudServiceConstructor, provider: ProviderChoice): CloudServiceConstructor {
+    const cls = this.registry.get(provider);
+
+    if (!cls) {
+      throw new Error(`Provider ${provider} is not available`);
+    }
+
+    return cls;
   }
 }
 

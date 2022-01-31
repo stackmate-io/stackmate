@@ -7,12 +7,15 @@ import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
 import AwsRdsService from '@stackmate/clouds/aws/services/rds';
+import { CloudStack } from '@stackmate/interfaces';
+import { RegisterableCloud } from '@stackmate/lib/decorators';
 
 export const AWS_SERVICE_MAPPING: ServiceMapping = {
   [SERVICE_TYPE.DATABASE]: AwsRdsService,
   [SERVICE_TYPE.NETWORKING]: AwsVpcService,
 };
 
+@RegisterableCloud(PROVIDER.AWS)
 class AwsCloud extends Cloud {
   /**
    * @var {String} provider the provider's name
@@ -38,14 +41,14 @@ class AwsCloud extends Cloud {
   /**
    * Registers the cloud provider to the stack
    */
-  bootstrap(): void {
+  provision(stack: CloudStack): void {
     this.aliases.forEach((alias, region) => {
-      const instance = new AwsProvider(this.stack, this.provider, {
+      const instance = new AwsProvider(stack, this.provider, {
         region,
         alias,
         defaultTags: {
           tags: {
-            Environment: this.stack.name,
+            Environment: stack.name,
             Description: DEFAULT_RESOURCE_COMMENT,
           },
         },
@@ -60,11 +63,11 @@ class AwsCloud extends Cloud {
    */
   @Memoize() prerequisites(): CloudPrerequisites {
     return {
-      vpc: this.introduce({
-        type: SERVICE_TYPE.NETWORKING,
-        name: `${this.stack.name}-vpc`,
-        region: this.defaultRegion,
-      }),
+      // vpc: this.introduce({
+      //   type: SERVICE_TYPE.NETWORKING,
+      //   name: `${this.stack.name}-vpc`,
+      //   region: this.defaultRegion,
+      // }),
     };
   }
 }

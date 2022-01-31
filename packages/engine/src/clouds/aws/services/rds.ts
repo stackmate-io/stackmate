@@ -4,6 +4,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/clouds/aws/mixins';
+import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { OneOf } from '@stackmate/types';
 import {
   RDS_ENGINES,
@@ -11,10 +12,12 @@ import {
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
-import { CloudStack, VaultService } from '@stackmate/interfaces';
+import { RegisterableService } from '@stackmate/lib/decorators';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
 const AwsDatabaseService = AwsService(Database);
 
+@RegisterableService(PROVIDER.AWS, SERVICE_TYPE.DATABASE)
 class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
@@ -102,6 +105,7 @@ class AwsRdsService extends AwsDatabaseService {
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
+      /** @todo */
       // provider: this.providerAlias,
       // username: rootCredentials.username,
       // password: rootCredentials.password,

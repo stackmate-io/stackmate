@@ -3,13 +3,16 @@ import { Memoize } from 'typescript-memoize';
 import Vault from '@stackmate/core/vault';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { STORAGE, VAULT_PROVIDER } from '@stackmate/constants';
-import { CloudService, StorageAdapter } from '@stackmate/interfaces';
+import { CloudService, CredentialsResource, StorageAdapter } from '@stackmate/interfaces';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
 import { getStoragAdaptereByType } from '@stackmate/storage';
 import { AttributeParsers, Validations, VaultProviderChoice } from '@stackmate/types';
 
 class AwsParamsVault extends Vault {
+  provide(service: string, key: 'username' | 'password', root: boolean): CredentialsResource {
+    throw new Error('Method not implemented.');
+  }
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -46,7 +49,8 @@ class AwsParamsVault extends Vault {
    * @returns {String} the name space under which the variables are stored
    */
   public get namespace(): string {
-    return `/${this.project}/${this.stage}`;
+    return '/abc/defg'; /** @todo */
+    // `/${this.project}/${this.stage}`;
   }
 
   /**
