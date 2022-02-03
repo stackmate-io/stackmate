@@ -2,7 +2,8 @@ import 'reflect-metadata';
 
 import Entity from '@stackmate/lib/entity';
 import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
-import { CloudProviderConstructor, CloudServiceConstructor } from '@stackmate/interfaces';
+import { CloudRegistry, ServicesRegistry } from '@stackmate/core/registry';
+import { BaseEntityConstructor, CloudProvider, CloudService } from '@stackmate/interfaces';
 
 export const Attribute = function Attribute(target: Entity, propertyKey: string) {
   if (!(target instanceof Entity)) {
@@ -27,18 +28,17 @@ export const Attribute = function Attribute(target: Entity, propertyKey: string)
   });
 };
 
-export const RegisterableService = function RegisterableService(
+export const RegisterService = function RegisterService(
   provider: ProviderChoice,
   type: ServiceTypeChoice,
 ) {
-  return (target: CloudServiceConstructor) => {
-    target.registry.add(target, provider, type);
-    console.log(target.registry.items);
+  return (target: BaseEntityConstructor<CloudService>) => {
+    ServicesRegistry.add(target, provider, type);
   }
 };
 
-export const RegisterableCloud = function RegisterableCloud(provider: ProviderChoice) {
-  return (target: CloudProviderConstructor) => {
-    target.registry.add(target, provider);
+export const RegisterCloud = function RegisterCloud(provider: ProviderChoice) {
+  return (target: BaseEntityConstructor<CloudProvider>) => {
+    CloudRegistry.add(target, provider);
   }
 }

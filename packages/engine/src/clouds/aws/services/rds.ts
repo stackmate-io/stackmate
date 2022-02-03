@@ -6,19 +6,20 @@ import Database from '@stackmate/services/database';
 import AwsService from '@stackmate/clouds/aws/mixins';
 import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { OneOf } from '@stackmate/types';
+import { RegisterService } from '@stackmate/lib/decorators';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
-import { RegisterableService } from '@stackmate/lib/decorators';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
 const AwsDatabaseService = AwsService(Database);
+const { AWS } = PROVIDER;
+const { DATABASE: DB } = SERVICE_TYPE
 
-@RegisterableService(PROVIDER.AWS, SERVICE_TYPE.DATABASE)
-class AwsRdsService extends AwsDatabaseService {
+@RegisterService(AWS, DB) class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
    */

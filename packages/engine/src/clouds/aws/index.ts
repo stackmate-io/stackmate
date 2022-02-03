@@ -8,15 +8,14 @@ import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '
 import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
 import AwsRdsService from '@stackmate/clouds/aws/services/rds';
 import { CloudStack } from '@stackmate/interfaces';
-import { RegisterableCloud } from '@stackmate/lib/decorators';
+import { RegisterCloud } from '@stackmate/lib/decorators';
 
 export const AWS_SERVICE_MAPPING: ServiceMapping = {
   [SERVICE_TYPE.DATABASE]: AwsRdsService,
   [SERVICE_TYPE.NETWORKING]: AwsVpcService,
 };
 
-@RegisterableCloud(PROVIDER.AWS)
-class AwsCloud extends Cloud {
+@RegisterCloud(PROVIDER.AWS) class AwsCloud extends Cloud {
   /**
    * @var {String} provider the provider's name
    * @readonly

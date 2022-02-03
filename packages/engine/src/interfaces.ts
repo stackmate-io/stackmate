@@ -2,10 +2,11 @@ import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes,
+  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes, ConstructorOf,
 } from '@stackmate/types';
 
 export interface BaseEntity {
+  validationMessage: string;
   attributes: EntityAttributes;
   parsers(): AttributeParsers;
   validate(): void;
@@ -31,11 +32,7 @@ export interface CloudProvider extends BaseEntity {
   validations(): Validations & Required<{ regions: object }>;
 }
 
-export interface CloudProviderConstructor {
-  registry: SubclassRegistry<CloudProviderConstructor>;
-}
-
-export interface CloudService extends Deployable {
+export interface CloudService extends BaseEntity {
   readonly name: string;
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
@@ -47,18 +44,16 @@ export interface CloudService extends Deployable {
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
 }
 
-export interface CloudServiceConstructor {
-  registry: SubclassRegistry<CloudServiceConstructor>;
+export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
+  prototype: T;
+  new(...args: any[]): T;
+  factory(this: BaseEntityConstructor<T>, ...args: any[]): T;
 }
 
 export interface Sizeable extends BaseEntity {
   size: string;
   parsers(): AttributeParsers & Required<{ size: Function }>;
   validations(): Validations & Required<{ size: object }>;
-}
-
-export interface EntityConstructor extends BaseEntity {
-  new(...args: any[]): BaseEntity;
 }
 
 export interface Storable extends BaseEntity {

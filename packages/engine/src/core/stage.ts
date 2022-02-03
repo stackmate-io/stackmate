@@ -4,8 +4,8 @@ import Entity from '@stackmate/lib/entity';
 import Vault from '@stackmate/core/vault';
 import Collection from '@stackmate/core/provisioner';
 import { Attribute } from '@stackmate/lib/decorators';
-import { getCloudByProvider } from '@stackmate/clouds';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
+import { CloudRegistry, ServicesRegistry } from '@stackmate/core/registry';
 import { CloudProvisioner, CloudService, CloudStack, ProjectStage } from '@stackmate/interfaces';
 import { AttributeParsers, NormalizedStage, ProjectDefaults, ProviderChoice, Validations } from '@stackmate/types';
 
@@ -94,15 +94,17 @@ class Stage extends Entity implements ProjectStage {
     const servicesByProvider = groupBy(Object.values(this.services), 'provider');
 
     toPairs(servicesByProvider).forEach(([provider, services]) => {
-      // Add the cloud to the collection
-      const cloudAttrs = {
+      const cloud = CloudRegistry.get(provider as ProviderChoice).factory({
         regions: map(services, 'region'),
         defaults: get(this.defaults, provider, {}),
-      };
+      });
 
-      this.provisioner.addCloud(
-        getCloudByProvider(provider as ProviderChoice, cloudAttrs),
-      );
+      this.provisioner.addCloud(cloud);
+
+      services.forEach((attrs) => {
+        const service = ServicesRegistry.get(provider as ProviderChoice, attrs.type).factory(attrs);
+        this.serviceCollection.set(service.name, service);
+      });
     });
   }
 

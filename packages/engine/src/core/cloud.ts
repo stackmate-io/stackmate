@@ -1,10 +1,9 @@
 import { snakeCase } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
-import Registry from '@stackmate/lib/registry';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseArrayToUniqueValues } from '@stackmate/lib/parsers';
-import { CloudProvider, CloudServiceConstructor, CloudStack, VaultService } from '@stackmate/interfaces';
+import { CloudProvider, CloudStack, VaultService } from '@stackmate/interfaces';
 import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
 
 abstract class Cloud extends Entity implements CloudProvider {
@@ -45,11 +44,6 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @returns {CloudPrerequisites} the prerequisites for a service that is deployed in this cloud
    */
   abstract prerequisites(): CloudPrerequisites;
-
-  /**
- * @var {Registry} registry the registry of subclasses available
- */
-  static registry = new Registry<CloudServiceConstructor>();
 
   /**
    * @var {Map} aliases the provider aliases to use, per region
@@ -105,22 +99,6 @@ abstract class Cloud extends Entity implements CloudProvider {
     secondaryRegions.forEach((region: string) => {
       this.aliases.set(region, snakeCase(`${this.provider}_${region}`));
     });
-  }
-
-  /**
-   * Returns the cloud provider class to instantiate based on the provider's name
-   *
-   * @param {ProviderChoice} provider the provider to return
-   * @returns {CloudServiceConstructor} the provider's class
-   */
-  static get(this: CloudServiceConstructor, provider: ProviderChoice): CloudServiceConstructor {
-    const cls = this.registry.get(provider);
-
-    if (!cls) {
-      throw new Error(`Provider ${provider} is not available`);
-    }
-
-    return cls;
   }
 }
 

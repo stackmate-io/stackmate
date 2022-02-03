@@ -2,7 +2,7 @@ import { CloudService } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE, STORAGE, VAULT_PROVIDER } from '@stackmate/constants';
 
 // Utility types
-export type ConstructorOf<T> = { new(...args: any[]): T };
+export type ConstructorOf<T> = Function & { new(...args: any[]): T };
 export type FactoryOf<T> = { factory(...args: any[]): T; }
 export type AbstractConstructor<T = {}> = abstract new (...args: any[]) => T;
 export type ValueOf<T> = T[keyof T];

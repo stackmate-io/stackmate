@@ -1,6 +1,6 @@
-import { SubclassRegistry } from '@stackmate/interfaces';
+import { BaseEntity, BaseEntityConstructor, CloudProvider, CloudService, SubclassRegistry } from '@stackmate/interfaces';
 
-class Registry<T> implements SubclassRegistry<T> {
+class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassRegistry<T> {
   /**
    * @var {Map} items the items in the registry
    */
@@ -22,8 +22,14 @@ class Registry<T> implements SubclassRegistry<T> {
    * @param {Array} attrs the list of attributes to look up the class by
    * @returns {Function} the class constructor
    */
-  get(...attrs: string[]): T | undefined {
-    return this.items.get(this.hash(attrs));
+  get(...attrs: string[]): T {
+    const cls = this.items.get(this.hash(attrs));
+
+    if (!cls) {
+      throw new Error(`We couldn't find a subclass for args ${attrs.join(', ')}`);
+    }
+
+    return cls;
   }
 
   /**
@@ -35,4 +41,10 @@ class Registry<T> implements SubclassRegistry<T> {
   }
 }
 
-export default Registry;
+const CloudRegistry = new Registry<BaseEntityConstructor<CloudProvider>>();
+const ServicesRegistry = new Registry<BaseEntityConstructor<CloudService>>();
+
+export {
+  CloudRegistry,
+  ServicesRegistry,
+}
