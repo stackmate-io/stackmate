@@ -7,7 +7,7 @@ import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getMockStack } from 'tests/mocks';
 import { networkingConfiguration as serviceConfig, stackName } from 'tests/fixtures';
-import { AwsVpcService } from '@stackmate/clouds/aws';
+import { AwsVpcService } from '@stackmate/providers/aws';
 import { getServiceRegisterationResults } from 'tests/helpers';
 
 describe('AwsVpcService', () => {

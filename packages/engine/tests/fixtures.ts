@@ -2,7 +2,7 @@ import faker from 'faker';
 
 import { ProjectConfiguration } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/clouds/aws/constants';
+import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/providers/aws/constants';
 
 export const appName = `test-app-${faker.random.alphaNumeric(6)}`;
 export const stackName = `test-stack-${faker.random.alphaNumeric(12)}`;

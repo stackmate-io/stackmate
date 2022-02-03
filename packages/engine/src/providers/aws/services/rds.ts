@@ -3,7 +3,7 @@ import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/services/database';
-import AwsService from '@stackmate/clouds/aws/mixins';
+import AwsService from '@stackmate/providers/aws/mixins';
 import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { OneOf } from '@stackmate/types';
 import { RegisterService } from '@stackmate/lib/decorators';
@@ -13,7 +13,7 @@ import {
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
-} from '@stackmate/clouds/aws/constants';
+} from '@stackmate/providers/aws/constants';
 
 const { AWS } = PROVIDER;
 const { DATABASE: DB } = SERVICE_TYPE;

@@ -2,10 +2,10 @@ import { Memoize } from 'typescript-memoize';
 import { AwsProvider } from '@cdktf/provider-aws';
 
 import Cloud from '@stackmate/core/cloud';
-import AwsVpcService from '@stackmate/clouds/aws/services/vpc';
-import AwsRdsService from '@stackmate/clouds/aws/services/rds';
+import AwsVpcService from '@stackmate/providers/aws/services/vpc';
+import AwsRdsService from '@stackmate/providers/aws/services/rds';
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/constants';
-import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { CloudPrerequisites, ProviderChoice, RegionList } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { RegisterCloud } from '@stackmate/lib/decorators';

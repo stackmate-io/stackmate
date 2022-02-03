@@ -1,5 +1,5 @@
-import { AwsVpcService } from '@stackmate/clouds/aws';
-import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { AwsVpcService } from '@stackmate/providers/aws';
+import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { PROVIDER } from '@stackmate/constants';
 import { AbstractConstructor, ProviderChoice, RegionList } from '@stackmate/types';
 

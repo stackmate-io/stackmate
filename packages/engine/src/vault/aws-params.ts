@@ -1,7 +1,7 @@
 import { Memoize } from 'typescript-memoize';
 
 import Vault from '@stackmate/core/vault';
-import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { STORAGE, VAULT_PROVIDER } from '@stackmate/constants';
 import { CloudService, CredentialsResource, StorageAdapter } from '@stackmate/interfaces';
 import { Attribute } from '@stackmate/lib/decorators';

@@ -6,7 +6,7 @@ import Networking from '@stackmate/services/networking';
 import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
 import { ProviderChoice, RegionList } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
+import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { CloudStack } from '@stackmate/interfaces';
 import { RegisterService } from '@stackmate/lib/decorators';
 

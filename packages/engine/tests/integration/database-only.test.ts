@@ -1,7 +1,7 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
-import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/clouds/aws/constants';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE, VAULT_PROVIDER } from '@stackmate/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
 import { synthesizeProject } from 'tests/helpers';

@@ -8,7 +8,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getAwsPrerequisites, getMockStack } from 'tests/mocks';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
-import { AwsRdsService } from '@stackmate/clouds/aws';
+import { AwsRdsService } from '@stackmate/providers/aws';
 
 describe('AwsRdsService', () => {
   let mockStack: CloudStack;
