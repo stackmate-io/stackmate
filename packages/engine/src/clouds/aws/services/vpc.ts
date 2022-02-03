@@ -5,15 +5,19 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import Networking from '@stackmate/services/networking';
 import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
 import { ProviderChoice, RegionList } from '@stackmate/types';
-import { PROVIDER } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/clouds/aws/constants';
 import { CloudStack } from '@stackmate/interfaces';
+import { RegisterService } from '@stackmate/lib/decorators';
 
 /**
  * We don't wrap the service with the AwsService mixin
  * because this is a service that gets instantiated when the cloud provider inits
  */
-class AwsVpcService extends Networking {
+const { AWS } = PROVIDER;
+const { NETWORKING } = SERVICE_TYPE;
+
+@RegisterService(AWS, NETWORKING) class AwsVpcService extends Networking {
   /**
  * @var {String} provider the cloud provider used (eg. AWS)
  * @readonly

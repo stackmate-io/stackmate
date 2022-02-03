@@ -1,8 +1,8 @@
 import { isEmpty, isFunction, pick, uniq } from 'lodash';
 
 import { validate } from '@stackmate/lib/validation';
-import { BaseEntity, BaseEntityConstructor } from '@stackmate/interfaces';
-import { AttributeParsers, EntityAttributes, Validations } from '@stackmate/types';
+import { BaseEntity } from '@stackmate/interfaces';
+import { AttributeParsers, ConstructorOf, EntityAttributes, Validations } from '@stackmate/types';
 import { ValidationError } from '@stackmate/lib/errors';
 
 abstract class Entity implements BaseEntity {
@@ -91,6 +91,8 @@ abstract class Entity implements BaseEntity {
     if (!isEmpty(errors)) {
       throw new ValidationError(this.validationMessage, errors);
     }
+
+    this.initialize();
   }
 
   /**
@@ -164,15 +166,14 @@ abstract class Entity implements BaseEntity {
    * @param {Object} attributes the entity's attributes
    * @returns {Entity} the validated entity instance
    */
-  static factory<T extends Entity>(
-    this: BaseEntityConstructor<T>,
+  static factory<T extends BaseEntity>(
+    this: ConstructorOf<T>,
     attributes: object,
     ...args: any[]
   ): T {
     const entity = new this(...args);
     entity.attributes = attributes;
     entity.validate();
-    entity.initialize();
 
     return entity;
   }

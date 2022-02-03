@@ -2,7 +2,7 @@ import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceMapping, ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes, ConstructorOf,
+  ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes, ConstructorOf,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -25,7 +25,6 @@ export interface Deployable extends BaseEntity {
 export interface CloudProvider extends BaseEntity {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
-  readonly serviceMapping: ServiceMapping;
   readonly aliases: Map<string, string | undefined>;
   prerequisites(): CloudPrerequisites;
   provision(stack: CloudStack, vault?: VaultService): void;
@@ -47,7 +46,7 @@ export interface CloudService extends BaseEntity {
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   prototype: T;
   new(...args: any[]): T;
-  factory(this: BaseEntityConstructor<T>, ...args: any[]): T;
+  factory(this: ConstructorOf<T>, ...args: any[]): T;
 }
 
 export interface Sizeable extends BaseEntity {

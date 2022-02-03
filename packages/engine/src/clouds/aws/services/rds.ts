@@ -15,9 +15,10 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/clouds/aws/constants';
 
-const AwsDatabaseService = AwsService(Database);
 const { AWS } = PROVIDER;
-const { DATABASE: DB } = SERVICE_TYPE
+const { DATABASE: DB } = SERVICE_TYPE;
+
+const AwsDatabaseService = AwsService(Database);
 
 @RegisterService(AWS, DB) class AwsRdsService extends AwsDatabaseService {
   /**

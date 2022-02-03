@@ -4,7 +4,7 @@ import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseArrayToUniqueValues } from '@stackmate/lib/parsers';
 import { CloudProvider, CloudStack, VaultService } from '@stackmate/interfaces';
-import { CloudPrerequisites, ProviderChoice, RegionList, ServiceMapping } from '@stackmate/types';
+import { CloudPrerequisites, ProviderChoice, RegionList } from '@stackmate/types';
 
 abstract class Cloud extends Entity implements CloudProvider {
   /**
@@ -25,13 +25,6 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @readonly
    */
   abstract readonly availableRegions: RegionList;
-
-  /**
-   * @var {Object} serviceMapping a key value mapping of {service type => class}
-   * @abstract
-   * @readonly
-   */
-  abstract readonly serviceMapping: ServiceMapping;
 
   /**
    * Provisions the cloud
