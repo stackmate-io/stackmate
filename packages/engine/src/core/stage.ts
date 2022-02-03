@@ -2,7 +2,7 @@ import { get, groupBy, map, toPairs } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Vault from '@stackmate/core/vault';
-import Collection from '@stackmate/core/provisioner';
+import Provisioner from '@stackmate/core/provisioner';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { CloudRegistry, ServicesRegistry } from '@stackmate/core/registry';
@@ -60,7 +60,7 @@ class Stage extends Entity implements ProjectStage {
 
     this.stack = stack;
     this.vault = vault;
-    this.provisioner = new Collection();
+    this.provisioner = new Provisioner();
     this.serviceCollection = new Map();
   }
 
