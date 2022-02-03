@@ -1,7 +1,6 @@
 import { clone, defaultsDeep, fromPairs, merge, omit } from 'lodash';
 
 import { NormalizedProjectConfiguration, NormalizedStage, ProjectConfiguration, ProviderChoice, StageDeclarations } from '@stackmate/types';
-import { VAULT_PROVIDER } from '@stackmate/constants';
 
 /**
  * Normalizes the stages configuration
@@ -62,16 +61,6 @@ export const normalizeStages = (
 };
 
 /**
- * Normalizes the secrets attributes
- *
- * @param {String} region the default region for the project
- * @param {String} provider the project's provider
- */
-export const normalizeSecrets = (secrets: object, region: string) => {
-  return defaultsDeep(secrets, { provider: VAULT_PROVIDER.AWS, region});
-};
-
-/**
  * Normalizes the project's configuration
  *
  * @param {Object} configuration the project configuration
@@ -83,7 +72,7 @@ export const normalizeProject = (configuration: ProjectConfiguration): Normalize
 
   Object.assign(normalized, {
     stages: normalizeStages(stages, provider, region),
-    secrets: normalizeSecrets(secrets, region),
+    secrets: defaultsDeep(secrets, { provider, region }),
     defaults,
   });
 

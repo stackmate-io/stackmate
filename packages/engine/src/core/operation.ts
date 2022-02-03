@@ -1,5 +1,7 @@
+import App from '@stackmate/lib/terraform/app';
 import Project from '@stackmate/core/project';
 import Stage from '@stackmate/core/stage';
+import { CloudApp, CloudStack } from '@stackmate/interfaces';
 
 abstract class Operation {
   /**
@@ -13,6 +15,16 @@ abstract class Operation {
   protected readonly stage: Stage;
 
   /**
+   * @var {CloudApp} app the terraform application to deploy
+   */
+  protected readonly app: CloudApp;
+
+  /**
+   * @var {CloudStack} stack the stack to deploy
+   */
+  protected readonly stack: CloudStack;
+
+  /**
    * Runs the operation
    */
   abstract run(): void;
@@ -24,7 +36,12 @@ abstract class Operation {
   constructor(project: Project, stage: Stage) {
     this.project = project;
     this.stage = stage;
+
+    this.app = new App(project.name);
+    this.stack = this.app.stack(stage.name);
   }
+
+  protected initialize() {}
 
   /**
    * Starts an operation
@@ -40,7 +57,10 @@ abstract class Operation {
   ): Promise<T> {
     const project = await Project.load(projectFile);
     const stage = project.select(stageName);
-    return new this(project, stage);
+    const operation = new this(project, stage);
+    operation.initialize();
+
+    return operation;
   }
 }
 

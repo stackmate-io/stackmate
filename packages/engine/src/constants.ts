@@ -22,10 +22,6 @@ export const PROVIDER = {
   AWS: 'aws',
 } as const;
 
-export const VAULT_PROVIDER = {
-  AWS: 'aws',
-} as const;
-
 export const SERVICE_TYPE = {
   CDN: 'cdn',
   DATABASE: 'database',
@@ -39,6 +35,8 @@ export const SERVICE_TYPE = {
   LOAD_BALANCER: 'loadbalancer',
   ELASTIC_STORAGE: 'elasticstorage',
   NETWORKING: 'networking',
+  VAULT: 'vault',
+  STATE: 'state',
 } as const;
 
 export const REGION: { [name: string]: RegionList } = {

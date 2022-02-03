@@ -1,5 +1,5 @@
 import { CloudService } from '@stackmate/interfaces';
-import { PROVIDER, SERVICE_TYPE, STORAGE, VAULT_PROVIDER } from '@stackmate/constants';
+import { PROVIDER, SERVICE_TYPE, STORAGE } from '@stackmate/constants';
 
 // Utility types
 export type ConstructorOf<T> = Function & { new(...args: any[]): T };
@@ -10,7 +10,6 @@ export type ChoiceOf<T> = T[keyof T];
 export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<infer OneOf> ? OneOf : never;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
-export type VaultProviderChoice = ChoiceOf<typeof VAULT_PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
 export type CredentialsKeyChoice = OneOf<['username', 'password']>;
 

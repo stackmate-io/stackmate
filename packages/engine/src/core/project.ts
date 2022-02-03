@@ -1,16 +1,12 @@
-import { get } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
-import App from '@stackmate/lib/terraform/app';
-import Stage from '@stackmate/core/stage';
 import { Attribute } from '@stackmate/lib/decorators';
 import { normalizeProject } from '@stackmate/lib/normalizers';
 import { StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/storage';
-import { getVaultByProvider } from '@stackmate/vault';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { PROVIDER, STORAGE, FORMAT, VAULT_PROVIDER } from '@stackmate/constants';
+import { PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
   AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes,
@@ -35,7 +31,7 @@ class Project extends Entity {
   /**
    * @var {Object} vault the valult configuration
    */
-  @Attribute secrets: VaultConfiguration = { provider: VAULT_PROVIDER.AWS };
+  @Attribute secrets: VaultConfiguration = {};
 
   /**
    * @var {Object} stages the stages declarations
@@ -56,11 +52,6 @@ class Project extends Entity {
    * @var {String} path the path to the file
    */
   public readonly path: string;
-
-  /**
-   * @var {Stage} activeStage the stage that is currently selected
-   */
-  protected activeStage: Stage;
 
   /**
    * @constructor
@@ -148,45 +139,6 @@ class Project extends Entity {
   */
   @Memoize() public get storage(): StorageAdapter {
     return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
-  }
-
-  /**
-   * @returns {App} the application to deploy
-   */
-  @Memoize() public get app(): App {
-    return new App(this.name);
-  }
-
-  /**
-   * @returns {Stage} the currently selectd stage
-   */
-  public get stage() : Stage {
-    if (!this.activeStage) {
-      throw new Error('You have to select a stage first');
-    }
-
-    return this.activeStage;
-  }
-
-  /**
-   * Selects a workspace to be deployed
-   *
-   * @param {String} stage the workspace's name
-   */
-  select(stage: string) {
-    const { provider = VAULT_PROVIDER.AWS, ...vaultAttributes } = this.secrets;
-
-    const stack = this.app.stack(stage);
-    const vault = getVaultByProvider(stack, provider, vaultAttributes);
-
-    const attributes = {
-      name: stage,
-      services: get(this.stages, stage, {}),
-      defaults: this.defaults,
-    };
-
-    this.activeStage = Stage.factory(attributes, stack, vault);
-    return this.activeStage;
   }
 
   /**

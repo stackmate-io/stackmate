@@ -70,9 +70,9 @@ abstract class Cloud extends Entity implements CloudProvider {
   validations() {
     return {
       regions: {
-        // validateRegions: {
-        //   availableRegions: Object.values(this.availableRegions),
-        // }
+        validateRegionList: {
+          availableRegions: Object.values(this.availableRegions),
+        }
       },
     };
   }

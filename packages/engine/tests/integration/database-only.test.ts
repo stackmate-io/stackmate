@@ -1,8 +1,8 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
-import { PROVIDER, SERVICE_TYPE, VAULT_PROVIDER } from '@stackmate/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
 import { synthesizeProject } from 'tests/helpers';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
@@ -13,7 +13,7 @@ const projectConfig = {
   provider: PROVIDER.AWS,
   region: awsRegion,
   secrets: {
-    provider: VAULT_PROVIDER.AWS,
+    provider: PROVIDER.AWS,
     key: awsKeyArn,
   },
   stages: {
