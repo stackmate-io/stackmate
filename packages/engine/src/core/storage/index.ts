@@ -1,4 +1,4 @@
-import FileStorage from '@stackmate/storage/file';
+import FileStorage from '@stackmate/core/storage/file';
 import { StorageChoice } from '@stackmate/types';
 import { STORAGE } from '@stackmate/constants';
 import { StorageAdapter } from '@stackmate/interfaces';

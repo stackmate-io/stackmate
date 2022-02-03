@@ -2,7 +2,7 @@ import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import Database from '@stackmate/services/database';
+import Database from '@stackmate/core/services/database';
 import AwsService from '@stackmate/providers/aws/mixins';
 import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { OneOf } from '@stackmate/types';

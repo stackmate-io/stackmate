@@ -4,7 +4,7 @@ import Entity from '@stackmate/lib/entity';
 import { Attribute } from '@stackmate/lib/decorators';
 import { normalizeProject } from '@stackmate/lib/normalizers';
 import { StorageAdapter } from '@stackmate/interfaces';
-import { getStoragAdaptereByType } from '@stackmate/storage';
+import { getStoragAdaptereByType } from '@stackmate/core/storage';
 import { parseObject, parseString } from '@stackmate/lib/parsers';
 import { PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
 import {

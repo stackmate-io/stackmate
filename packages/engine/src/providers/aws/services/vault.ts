@@ -1,4 +1,4 @@
-import Vault from '@stackmate/services/vault';
+import Vault from '@stackmate/core/services/vault';
 import AwsService from '@stackmate/providers/aws/mixins';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';

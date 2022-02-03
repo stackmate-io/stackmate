@@ -2,7 +2,7 @@ import { Token } from 'cdktf';
 import { isEmpty, isUndefined } from 'lodash';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
-import Networking from '@stackmate/services/networking';
+import Networking from '@stackmate/core/services/networking';
 import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
 import { ProviderChoice, RegionList } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
