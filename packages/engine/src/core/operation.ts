@@ -1,7 +1,12 @@
+import { get, groupBy, map, toPairs } from 'lodash';
+import { Memoize } from 'typescript-memoize';
+
 import App from '@stackmate/lib/terraform/app';
 import Project from '@stackmate/core/project';
-import Stage from '@stackmate/core/stage';
-import { CloudApp, CloudStack } from '@stackmate/interfaces';
+import { ProviderChoice } from '@stackmate/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { CloudRegistry, ServicesRegistry } from '@stackmate/core/registry';
+import { CloudApp, CloudProvider, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
 
 abstract class Operation {
   /**
@@ -10,9 +15,9 @@ abstract class Operation {
   protected readonly project: Project;
 
   /**
-   * @var {Stage} stage the stage to deploy
+   * @var {String} stage the stage to deploy
    */
-  protected readonly stage: Stage;
+  protected readonly stageName: string;
 
   /**
    * @var {CloudApp} app the terraform application to deploy
@@ -24,6 +29,10 @@ abstract class Operation {
    */
   protected readonly stack: CloudStack;
 
+  protected readonly clouds: Map<ProviderChoice, CloudProvider> = new Map();
+
+  protected readonly services: Map<string, CloudService> = new Map();
+
   /**
    * Runs the operation
    */
@@ -31,17 +40,51 @@ abstract class Operation {
 
   /**
    * @constructor
-   * @param {ProjectStage} stage the stage to perform the operation on
    */
-  constructor(project: Project, stage: Stage) {
+  constructor(project: Project, stageName: string) {
     this.project = project;
-    this.stage = stage;
-
+    this.stageName = stageName;
     this.app = new App(project.name);
-    this.stack = this.app.stack(stage.name);
+    this.stack = this.app.stack(stageName);
+    this.initialize();
   }
 
-  protected initialize() {}
+  protected initialize() {
+    const services = Object.values(get(this.project.stages, this.stageName, {}));
+    const servicesByProvider = groupBy(services, 'provider');
+
+    toPairs(servicesByProvider).forEach(([provider, services]) => {
+      // Populate and register the cloud
+      const cloud = CloudRegistry.get({ provider }).factory({
+        regions: map(services, 'region'),
+        defaults: get(this.project.defaults, provider, {}),
+      });
+
+      this.clouds.set(cloud.provider, cloud);
+
+      // Populate and register the cloud prerequisites
+      cloud.prerequisites().forEach(prereq => {
+        // const prereq = ServicesRegistry.get({ provider, type }).factory(attrs);
+        this.services.set(prereq.name, prereq);
+      });
+
+      // Populate and register the
+      services.forEach(({ type, ...attrs }) => {
+        const service = ServicesRegistry.get({ provider, type }).factory(attrs);
+        this.services.set(service.name, service);
+      });
+    });
+  }
+
+  @Memoize() get vault(): VaultService {
+    const query = { provider: PROVIDER.AWS, type: SERVICE_TYPE.VAULT };
+    const { provider = this.project.provider, ...attributes } = this.project.secrets;
+    return ServicesRegistry.get(query).factory(attributes) as VaultService;
+  }
+
+  @Memoize() get state() {}
+
+  @Memoize() get localState() {}
 
   /**
    * Starts an operation
@@ -56,11 +99,7 @@ abstract class Operation {
     stageName: string,
   ): Promise<T> {
     const project = await Project.load(projectFile);
-    const stage = project.select(stageName);
-    const operation = new this(project, stage);
-    operation.initialize();
-
-    return operation;
+    return new this(project, stageName);
   }
 }
 

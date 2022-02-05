@@ -41,6 +41,7 @@ export interface CloudService extends BaseEntity {
   providerAlias?: string;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
+  provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
 }
 
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
@@ -101,11 +102,6 @@ export interface CloudApp extends TerraformApp {
   stack(name: string): CloudStack;
 }
 
-export interface ProjectStage extends BaseEntity {
-  stack: CloudStack;
-  vault: VaultService;
-}
-
 export interface CredentialsResource extends ITerraformResource {}
 
 export interface CredentialsProvider {
@@ -113,21 +109,12 @@ export interface CredentialsProvider {
   password: CredentialsResource;
 }
 
-export interface VaultService extends BaseEntity {
-  stack: CloudStack;
+export interface VaultService extends CloudService {
   for(service: string, opts?: { root: boolean }): CredentialsProvider;
-}
-
-export interface CloudProvisioner {
-  addCloud(cloud: CloudProvider): void;
-  get(provider: ProviderChoice): CloudProvider;
-  forEach(callback: (c: CloudProvider) => void): void;
-  alias(provider: ProviderChoice, region: string): string | undefined;
-  provision(s: CloudStack, srv: CloudService[], obj?: { vault?: VaultService, state?: object /** @todo */ }): void;
 }
 
 export interface SubclassRegistry<T> {
   items: Map<string, T>;
+  get(attributes: object): T | undefined;
   add(classConstructor: T, ...attrs: string[]): void;
-  get(...attrs: string[]): T | undefined;
 }

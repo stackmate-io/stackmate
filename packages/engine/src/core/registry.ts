@@ -22,7 +22,8 @@ class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassR
    * @param {Array} attrs the list of attributes to look up the class by
    * @returns {Function} the class constructor
    */
-  get(...attrs: string[]): T {
+  get(attributes: object): T {
+    const attrs = Object.values(attributes);
     const cls = this.items.get(this.hash(attrs));
 
     if (!cls) {

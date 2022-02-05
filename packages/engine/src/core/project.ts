@@ -150,9 +150,9 @@ class Project extends Entity {
    */
   static async load(fileName: string): Promise<Project> {
     const project = new Project(fileName);
-    project.attributes = await project.storage.read();
-    project.validate();
-    return project;
+    const attributes = await project.storage.read();
+
+    return Project.factory(attributes);
   }
 }
 

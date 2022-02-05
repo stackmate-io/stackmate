@@ -2,15 +2,15 @@ import Vault from '@stackmate/core/services/vault';
 import AwsService from '@stackmate/providers/aws/mixins';
 import { Attribute } from '@stackmate/lib/decorators';
 import { parseString } from '@stackmate/lib/parsers';
-import { Validations } from '@stackmate/types';
+import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { RegisterService } from '@stackmate/lib/decorators';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { CredentialsResource, CloudStack, VaultService } from '@stackmate/interfaces';
 
-const AwsVaultService = AwsService(Vault);
-
 const { AWS } = PROVIDER;
 const { VAULT } = SERVICE_TYPE;
+
+const AwsVaultService = AwsService(Vault);
 
 @RegisterService(AWS, VAULT) class AwsSsmParamsService extends AwsVaultService {
   /**
@@ -28,6 +28,7 @@ const { VAULT } = SERVICE_TYPE;
    */
   parsers() {
     return {
+      ...super.parsers(),
       key: parseString,
       region: parseString,
     };
@@ -36,8 +37,9 @@ const { VAULT } = SERVICE_TYPE;
   /**
    * @returns {Validations}
    */
-  validations(): Validations {
+  validations() {
     return {
+      ...super.validations(),
       key: {
         presence: {
           message: 'A key in the form of a KMS ARN should be specified',
@@ -51,6 +53,7 @@ const { VAULT } = SERVICE_TYPE;
       region: {
         presence: {
           message: 'A region should be specified',
+          allowEmpty: false,
         },
         inclusion: {
           within: Object.values(AWS_REGIONS),
