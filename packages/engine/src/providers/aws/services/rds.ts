@@ -20,6 +20,12 @@ const { DATABASE: DB } = SERVICE_TYPE;
 
 const AwsDatabaseService = AwsService(Database);
 
+class ProvisionStrategy {
+}
+
+class CreationStrategy {
+}
+
 @RegisterService(AWS, DB) class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes

@@ -20,6 +20,7 @@ export const DEFAULT_OUTPUT_PATH = path.join(os.homedir(), STACKMATE_DIRECTORY, 
 
 export const PROVIDER = {
   AWS: 'aws',
+  FILE: 'file',
 } as const;
 
 export const SERVICE_TYPE = {

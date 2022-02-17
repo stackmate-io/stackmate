@@ -1,7 +1,7 @@
 import Service from '@stackmate/core/service';
+import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { parseCredentials, parseInteger, parseString } from '@stackmate/lib/parsers';
 import { OneOf, ServiceTypeChoice } from '@stackmate/types';
 import { Sizeable, Storable, MultiNode, Versioned } from '@stackmate/interfaces';
 
@@ -64,14 +64,14 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
   parsers() {
     return {
       ...super.parsers(),
-      nodes: parseInteger,
-      port: parseInteger,
-      size: parseString,
-      storage: parseInteger,
-      engine: parseString,
-      database: parseString,
-      version: parseString,
-      rootCredentials: parseCredentials,
+      nodes: Parser.parseInteger,
+      port: Parser.parseInteger,
+      size: Parser.parseString,
+      storage: Parser.parseInteger,
+      engine: Parser.parseString,
+      database: Parser.parseString,
+      version: Parser.parseString,
+      rootCredentials: Parser.parseCredentials,
     };
   }
 

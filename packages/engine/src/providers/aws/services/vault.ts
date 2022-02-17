@@ -1,7 +1,7 @@
 import Vault from '@stackmate/core/services/vault';
 import AwsService from '@stackmate/providers/aws/mixins';
+import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
-import { parseString } from '@stackmate/lib/parsers';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { RegisterService } from '@stackmate/lib/decorators';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
@@ -29,8 +29,8 @@ const AwsVaultService = AwsService(Vault);
   parsers() {
     return {
       ...super.parsers(),
-      key: parseString,
-      region: parseString,
+      key: Parser.parseString,
+      region: Parser.parseString,
     };
   }
 

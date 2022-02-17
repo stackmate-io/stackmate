@@ -2,7 +2,7 @@ import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes, ConstructorOf,
+  ServiceTypeChoice, CloudPrerequisites, Validations, EntityAttributes, ConstructorOf, ServiceAttributes, ServiceScopeChoice,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -15,20 +15,14 @@ export interface BaseEntity {
   setAttribute(name: string, value: any): void;
 }
 
-export interface Deployable extends BaseEntity {
-  identifier: string;
-  isRegistered: boolean;
-  link(target: CloudService): void;
-  provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
-}
-
 export interface CloudProvider extends BaseEntity {
   readonly provider: ProviderChoice;
   readonly regions: RegionList;
   readonly aliases: Map<string, string | undefined>;
   prerequisites(): CloudPrerequisites;
   provision(stack: CloudStack, vault?: VaultService): void;
-  validations(): Validations & Required<{ regions: object }>;
+  validations(): Validations & Required<{ region: object }>;
+  services(attrs: ServiceAttributes[]): CloudService[];
 }
 
 export interface CloudService extends BaseEntity {
@@ -39,9 +33,13 @@ export interface CloudService extends BaseEntity {
   region: string;
   links: Array<string>;
   providerAlias?: string;
+  identifier: string;
+  isRegistered: boolean;
+  link(target: CloudService): void;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
-  provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
+  register(stack: CloudStack): void;
+  scope(name: ServiceScopeChoice): CloudService;
 }
 
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {

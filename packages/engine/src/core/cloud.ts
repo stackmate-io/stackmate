@@ -1,16 +1,22 @@
 import { snakeCase } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
+import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
-import { parseArrayToUniqueValues } from '@stackmate/lib/parsers';
-import { CloudProvider, CloudStack, VaultService } from '@stackmate/interfaces';
-import { CloudPrerequisites, ProviderChoice, RegionList } from '@stackmate/types';
+import { CloudProvider, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import { CloudPrerequisites, ProviderChoice, RegionList, ServiceAttributes } from '@stackmate/types';
+import { ServicesRegistry } from '@stackmate/core/registry';
 
 abstract class Cloud extends Entity implements CloudProvider {
   /**
- * @var {String} region the provider's region
- */
-  @Attribute regions: RegionList;
+   * @var {String} region the provider's region
+   */
+  @Attribute region: string;
+
+  /**
+   * @var {Boolean} isDefault whether this is the default provider
+   */
+  @Attribute isDefault: boolean;
 
   /**
    * @var {String} provider the provider's name
@@ -20,11 +26,11 @@ abstract class Cloud extends Entity implements CloudProvider {
   abstract readonly provider: ProviderChoice;
 
   /**
-   * @var {Object} availableRegions the regions that the provider can deploy resources in
+   * @var {Object} regions the regions that the provider can deploy resources in
    * @abstract
    * @readonly
    */
-  abstract readonly availableRegions: RegionList;
+  abstract readonly regions: RegionList;
 
   /**
    * Provisions the cloud
@@ -60,7 +66,7 @@ abstract class Cloud extends Entity implements CloudProvider {
    */
   parsers() {
     return {
-      regions: parseArrayToUniqueValues,
+      region: Parser.parseString,
     };
   }
 
@@ -68,30 +74,44 @@ abstract class Cloud extends Entity implements CloudProvider {
    * @returns {Validations} the validations to use in the entity
    */
   validations() {
+    const regions = Object.values(this.regions);
+
     return {
-      regions: {
-        validateRegionList: {
-          availableRegions: Object.values(this.availableRegions),
-        }
+      region: {
+        presence: {
+          allowEmpty: false,
+          message: 'You have to provide a region for the provider',
+        },
+        inclusion: {
+          within: regions,
+          message: `The region for this service is invalid. Available options are: ${regions.join(', ')}`,
+        },
       },
     };
   }
 
   /**
-   * Initializes the cloud provider
-   *
-   * We pick a region as a default, then set up an alias for the rest
+   * @returns {String|undefined} the alias for the provider in the stack (eg. aws_eu_central_1)
    */
-  protected initialize(): void {
-    const { regions } = this.attributes;
-    const [defaultRegion, ...secondaryRegions] = regions;
+  public get alias() : string | undefined {
+    if (!this.isDefault) {
+      return snakeCase(`${this.provider}_${this.region}`);
+    }
+  }
 
-    this.defaultRegion = defaultRegion;
-    this.aliases.set(this.defaultRegion, undefined);
-
-    secondaryRegions.forEach((region: string) => {
-      this.aliases.set(region, snakeCase(`${this.provider}_${region}`));
-    });
+  /**
+   * Instantiates a set of cloud services based on certain attributes
+   *
+   * @param {Array<ServiceAttributes>} serviceAttributes the attributes for the services
+   * @returns {Array<CloudService>} the list of cloud service instances
+   */
+  services(serviceAttributes: ServiceAttributes[]): CloudService[] {
+    return serviceAttributes.map(attributes => (
+      ServicesRegistry.get({ type: attributes.type, provider: this.provider }).factory({
+        ...attributes,
+        providerAlias: this.alias,
+      })
+    ));
   }
 }
 

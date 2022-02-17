@@ -2,7 +2,6 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
 import { isObject } from 'lodash';
-import { BaseEntity } from '@stackmate/interfaces';
 
 /**
  * Returns an MD5 hash of an object
@@ -72,7 +71,4 @@ export const getNetworkingCidrBlocks = (
   });
 
   return cidrBlocks;
-};
-
-export const getSubclassesOf = (root: BaseEntity) => {
 };

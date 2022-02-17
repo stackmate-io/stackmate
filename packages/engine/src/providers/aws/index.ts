@@ -20,7 +20,7 @@ import { RegisterCloud } from '@stackmate/lib/decorators';
   /**
    * @var {Array<String>} availableRegions the regions that the cloud is available in
    */
-  readonly availableRegions: RegionList = AWS_REGIONS;
+  readonly regions: RegionList = AWS_REGIONS;
 
   /**
    * @var {Array<AwsProvider>} providerInstances The array of provider instances after bootstrapping

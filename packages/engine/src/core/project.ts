@@ -1,12 +1,13 @@
+import { get } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
+import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { normalizeProject } from '@stackmate/lib/normalizers';
 import { StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/core/storage';
-import { parseObject, parseString } from '@stackmate/lib/parsers';
-import { PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
+import { PROVIDER, STORAGE, FORMAT, SERVICE_TYPE } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
   AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes,
@@ -115,12 +116,12 @@ class Project extends Entity {
    */
   parsers(): AttributeParsers {
     return {
-      name: parseString,
-      region: parseString,
-      provider: parseString,
-      secrets: parseObject,
-      stages: parseObject,
-      defaults: parseObject,
+      name: Parser.parseString,
+      region: Parser.parseString,
+      provider: Parser.parseString,
+      secrets: Parser.parseObject,
+      stages: Parser.parseObject,
+      defaults: Parser.parseObject,
     };
   }
 
@@ -135,10 +136,17 @@ class Project extends Entity {
   }
 
   /**
-  * @var {StorageAdapter} storageAdapter the storage adapter to fetch & push values
+  * @returns {StorageAdapter} storageAdapter the storage adapter to fetch & push values
   */
   @Memoize() public get storage(): StorageAdapter {
     return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
+  }
+
+  @Memoize() public stage(name: string): object[] {
+    return [
+      { type: SERVICE_TYPE.VAULT, ...this.secrets },
+      ...Object.values(get(this.stages, name, {})),
+    ];
   }
 
   /**

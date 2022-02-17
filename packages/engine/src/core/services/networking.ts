@@ -1,8 +1,8 @@
+import Service from '@stackmate/core/service';
+import Parser from '@stackmate/lib/parsers';
 import { DEFAULT_IP, SERVICE_TYPE } from '@stackmate/constants';
 import { ServiceTypeChoice } from '@stackmate/types';
-import Service from '@stackmate/core/service';
 import { Attribute } from '@stackmate/lib/decorators';
-import { parseString } from '@stackmate/lib/parsers';
 
 abstract class Networking extends Service {
   /**
@@ -18,7 +18,7 @@ abstract class Networking extends Service {
   parsers() {
     return {
       ...super.parsers(),
-      ip: parseString,
+      ip: Parser.parseString,
     };
   }
 

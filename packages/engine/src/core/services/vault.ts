@@ -1,23 +1,14 @@
 import Service from '@stackmate/core/service';
 import Credentials from '@stackmate/lib/credentials';
 import { SERVICE_TYPE } from '@stackmate/constants';
+import { CredentialsProvider } from '@stackmate/interfaces';
 import { CredentialsKeyChoice, ServiceTypeChoice } from '@stackmate/types';
-import { CredentialsProvider, CredentialsResource } from '@stackmate/interfaces';
 
 abstract class Vault extends Service {
   /**
    * @var {String} type the type for the service
    */
   readonly type: ServiceTypeChoice = SERVICE_TYPE.VAULT;
-
-  /**
-   * Provisions a credentials resource, either a username or password
-   *
-   * @param {String} service the service to provide the credentials for
-   * @param {String} key
-   * @param {Boolean} root whether we're creating root credentials for
-   */
-  abstract provide(service: string, key: CredentialsKeyChoice, root: boolean): CredentialsResource;
 
   /**
    * Returns the username for a service
@@ -46,9 +37,17 @@ abstract class Vault extends Service {
    */
   for(service: string, { root = false }: { root: boolean }): CredentialsProvider {
     const handler: ProxyHandler<CredentialsProvider> = {
-      get: (_target: object, key: CredentialsKeyChoice, _receiver: object) => (
-        this.provide(service, key, root)
-      ),
+      get: (target: object, key: CredentialsKeyChoice, _receiver: object) => {
+        if (key === 'username') {
+          return this.username.apply(target, [service, root]);
+        }
+
+        if (key === 'password') {
+          return this.password.apply(target, [service]);
+        }
+
+        throw new Error(`Invalid property ${key} specified`);
+      },
     };
 
     return new Proxy(new Credentials(), handler);

@@ -1,12 +1,11 @@
-import { get, groupBy, map, toPairs } from 'lodash';
 import { Memoize } from 'typescript-memoize';
+import { groupBy, head, pick } from 'lodash';
 
-import App from '@stackmate/lib/terraform/app';
 import Project from '@stackmate/core/project';
-import { ProviderChoice } from '@stackmate/types';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { CloudRegistry, ServicesRegistry } from '@stackmate/core/registry';
-import { CloudApp, CloudProvider, CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
+import Provisioner from '@stackmate/core/provisioner';
+import { CloudRegistry } from '@stackmate/core/registry';
+import { SERVICE_TYPE } from '@stackmate/constants';
+import { CloudService } from '@stackmate/interfaces';
 
 abstract class Operation {
   /**
@@ -20,71 +19,49 @@ abstract class Operation {
   protected readonly stageName: string;
 
   /**
-   * @var {CloudApp} app the terraform application to deploy
+   * @var {Provisioner} provisioner the stack handler & provisioner
    */
-  protected readonly app: CloudApp;
+  protected readonly provisioner: Provisioner;
 
   /**
-   * @var {CloudStack} stack the stack to deploy
+   * @var {Object} options any additional options for the operation
    */
-  protected readonly stack: CloudStack;
-
-  protected readonly clouds: Map<ProviderChoice, CloudProvider> = new Map();
-
-  protected readonly services: Map<string, CloudService> = new Map();
-
-  /**
-   * Runs the operation
-   */
-  abstract run(): void;
+  protected readonly options: object = {};
 
   /**
    * @constructor
+   * @param {Project} project the project that the operation refers to
+   * @param {String} stageName the name of the stage we're provisioning
+   * @param {Object} options any additional options for the operation
    */
-  constructor(project: Project, stageName: string) {
+  constructor(project: Project, stageName: string, options: object = {}) {
     this.project = project;
     this.stageName = stageName;
-    this.app = new App(project.name);
-    this.stack = this.app.stack(stageName);
-    this.initialize();
+    this.options = options;
+    this.provisioner = new Provisioner(project.name, stageName);
   }
 
-  protected initialize() {
-    const services = Object.values(get(this.project.stages, this.stageName, {}));
-    const servicesByProvider = groupBy(services, 'provider');
+  @Memoize() get services() {
+    const { secrets, stages: { [this.stageName]: services } } = this.project;
 
-    toPairs(servicesByProvider).forEach(([provider, services]) => {
-      // Populate and register the cloud
-      const cloud = CloudRegistry.get({ provider }).factory({
-        regions: map(services, 'region'),
-        defaults: get(this.project.defaults, provider, {}),
-      });
+    const stageServices = [
+      ...Object.values(services),
+      { type: SERVICE_TYPE.VAULT, ...secrets },
+    ];
 
-      this.clouds.set(cloud.provider, cloud);
+    const instances: CloudService[] = [];
+    const groupped = groupBy(stageServices, ({ provider, region }) => `${provider}-${region}`);
 
-      // Populate and register the cloud prerequisites
-      cloud.prerequisites().forEach(prereq => {
-        // const prereq = ServicesRegistry.get({ provider, type }).factory(attrs);
-        this.services.set(prereq.name, prereq);
-      });
+    Object.values(groupped).map(serviceGroup => {
+      const cloudAttrs = pick(head(serviceGroup), 'provider', 'region');
+      Object.assign(cloudAttrs, { isDefault: cloudAttrs.region === this.project.region });
 
-      // Populate and register the
-      services.forEach(({ type, ...attrs }) => {
-        const service = ServicesRegistry.get({ provider, type }).factory(attrs);
-        this.services.set(service.name, service);
-      });
+      const cloud = CloudRegistry.get(cloudAttrs).factory(cloudAttrs);
+      instances.push(...cloud.services(serviceGroup));
     });
+
+    return instances;
   }
-
-  @Memoize() get vault(): VaultService {
-    const query = { provider: PROVIDER.AWS, type: SERVICE_TYPE.VAULT };
-    const { provider = this.project.provider, ...attributes } = this.project.secrets;
-    return ServicesRegistry.get(query).factory(attributes) as VaultService;
-  }
-
-  @Memoize() get state() {}
-
-  @Memoize() get localState() {}
 
   /**
    * Starts an operation

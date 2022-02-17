@@ -2,13 +2,13 @@ import { merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
+import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
-import { CloudService, CloudStack, VaultService } from '@stackmate/interfaces';
-import { parseArrayToUniqueValues, parseObject, parseString } from '@stackmate/lib/parsers';
+import { CloudService, CloudStack } from '@stackmate/interfaces';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
-  CloudPrerequisites, ServiceTypeChoice, ResourceProfile,
+  CloudPrerequisites, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService {
@@ -74,15 +74,22 @@ abstract class Service extends Entity implements CloudService {
   abstract get isRegistered(): boolean;
 
   /**
-   * Provisions the service's resources
+   * Runs a one-off provision
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @param {VaultService} vault the vault providing the credentials
-   * @param {String} providerAlias the alias for the cloud provider introducing this service
    * @abstract
    * @void
    */
-  abstract provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void;
+  abstract once(stack: CloudStack): void;
+
+  /**
+   * Provisions the service's resources
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @abstract
+   * @void
+   */
+  abstract provision(stack: CloudStack): void;
 
   /**
    * Processes the cloud provider's dependencies. Can be used to extract certain information
@@ -139,11 +146,11 @@ abstract class Service extends Entity implements CloudService {
    */
   parsers() {
     return {
-      name: parseString,
-      region: parseString,
-      links: parseArrayToUniqueValues,
-      profile: parseString,
-      overrides: parseObject,
+      name: Parser.parseString,
+      region: Parser.parseString,
+      links: Parser.parseArrayToUniqueValues,
+      profile: Parser.parseString,
+      overrides: Parser.parseObject,
     };
   }
 
@@ -189,6 +196,44 @@ abstract class Service extends Entity implements CloudService {
         },
       },
     };
+  }
+
+  /**
+   * Applies the scope to the service
+   *
+   * @param scope the scope to apply to the service
+   * @returns {CloudService} the service with the scope applied
+   */
+  scope(scope: ServiceScopeChoice): CloudService {
+    let handlerFunction: (stack: CloudStack) => void;
+
+    switch(scope) {
+      case 'preparable':
+        handlerFunction = this.once;
+        break;
+      case 'provisionable':
+        handlerFunction = this.provision;
+        break;
+      default:
+        throw new Error(`Scope ${scope} is invalid`);
+    }
+
+    Reflect.set(this, 'register', new Proxy(this.register, {
+      apply: (_target, thisArg, args: [stack: CloudStack]) => {
+        return handlerFunction.apply(thisArg, args);
+      },
+    }));
+
+    return this;
+  }
+
+  /**
+   * Registers the service in the stack
+   *
+   * @param {CloudStack} stack the stack to provision
+   */
+  register(stack: CloudStack) {
+    throw new Error('No scope has been applied, you have to use the `scope` method first');
   }
 }
 

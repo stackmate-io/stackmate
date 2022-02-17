@@ -11,285 +11,265 @@ import {
   StagesNormalizedAttributes, VaultConfiguration,
 } from '@stackmate/types';
 
-/**
- * Validates the project's stages
- *
- * @param {Object} stages The stages configuration
- * @returns {String|undefined} The validation error message (if any)
- */
-const validateStages = (stages: StagesNormalizedAttributes) => {
-  if (isEmpty(stages) || !isObject(stages)) {
-    return 'You have to provide a set of stages for the project, in the form of an object';
-  }
-
-  const stageErrors: Array<string> = [];
-
-  Object.keys(stages).forEach((stageName) => {
-    const stage = stages[stageName];
-
-    if (isEmpty(stage)) {
-      return stageErrors.push(
-        `Stage “${stageName}” does not contain any services`,
-      );
+namespace Validator {
+  /**
+   * Validates the project's stages
+   *
+   * @param {Object} stages The stages configuration
+   * @returns {String|undefined} The validation error message (if any)
+   */
+  export const validateStages = (stages: StagesNormalizedAttributes) => {
+    if (isEmpty(stages) || !isObject(stages)) {
+      return 'You have to provide a set of stages for the project, in the form of an object';
     }
 
-    if (Object.values(stage).some((s) => !isObject(s))) {
-      return stageErrors.push(
-        `Stage “${stageName}” contains invalid service configurations. Every service should be declared as an object`,
+    const stageErrors: Array<string> = [];
+
+    Object.keys(stages).forEach((stageName) => {
+      const stage = stages[stageName];
+
+      if (isEmpty(stage)) {
+        return stageErrors.push(
+          `Stage “${stageName}” does not contain any services`,
+        );
+      }
+
+      if (Object.values(stage).some((s) => !isObject(s))) {
+        return stageErrors.push(
+          `Stage “${stageName}” contains invalid service configurations. Every service should be declared as an object`,
+        );
+      }
+
+      const serviceNames = Object.keys(stage);
+      serviceNames.forEach((serviceName) => {
+        const srv = stage[serviceName];
+
+        if (!srv.type || !Object.values(SERVICE_TYPE).includes(srv.type)) {
+          stageErrors.push(
+            `Stage “${stageName}” contains invalid configuration for service “${serviceName}”`,
+          );
+        }
+      });
+    });
+
+    // Make sure the services are properly linked together
+    const invalidLinks: Array<[string, Array<string>]> = [];
+    Object.keys(stages).forEach((stageName) => {
+      const serviceNames = Object.keys(stages[stageName]);
+      const links = uniq(
+        flatten(Object.values(stages[stageName]).map((srv) => srv.links || [])),
       );
-    }
 
-    const serviceNames = Object.keys(stage);
-    serviceNames.forEach((serviceName) => {
-      const srv = stage[serviceName];
-
-      if (!srv.type || !Object.values(SERVICE_TYPE).includes(srv.type)) {
+      const invalidServices = difference(links, serviceNames);
+      if (!isEmpty(invalidServices)) {
         stageErrors.push(
-          `Stage “${stageName}” contains invalid configuration for service “${serviceName}”`,
+          `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`,
         );
       }
     });
-  });
 
-  // Make sure the services are properly linked together
-  const invalidLinks: Array<[string, Array<string>]> = [];
-  Object.keys(stages).forEach((stageName) => {
-    const serviceNames = Object.keys(stages[stageName]);
-    const links = uniq(
-      flatten(Object.values(stages[stageName]).map((srv) => srv.links || [])),
+    if (!isEmpty(stageErrors)) {
+      return stageErrors;
+    }
+  };
+
+  /**
+   * Validates the project's defaults in the configuration file
+   *
+   * @param {ProjectDefaults} defaults the project's defaults
+   * @returns {String|undefined} the error message (if any)
+   */
+  export const validateProjectDefaults = (defaults: ProjectDefaults) => {
+    // Allow defaults not being defined or empty objects
+    if (!defaults || (isObject(defaults) && isEmpty(defaults))) {
+      return;
+    }
+
+    const providers = Object.values(PROVIDER);
+    const hasValidProviderKeys = isObject(defaults) && Object.keys(defaults).some(
+      (prov) => !providers.includes(prov as ProviderChoice),
     );
 
-    const invalidServices = difference(links, serviceNames);
-    if (!isEmpty(invalidServices)) {
-      stageErrors.push(
-        `Stage ${stageName} has invalid links to “${invalidLinks.join('”, “')}”`,
-      );
+    if (!hasValidProviderKeys) {
+      return 'The "defaults" entry should contain valid cloud providers in the mapping';
     }
-  });
+  };
 
-  if (!isEmpty(stageErrors)) {
-    return stageErrors;
+  /**
+   * Validates the project's vault configuration
+   *
+   * @param {VaultConfiguration} secrets The vault configuration
+   * @returns {String|undefined} the error message (if any)
+   */
+  export const validateSecrets = (secrets: VaultConfiguration) => {
+    if (!secrets || !isObject(secrets) || isEmpty(secrets)) {
+      return 'The project does not contain a “secrets” section';
+    }
+
+    const { provider } = secrets;
+    const availableProviders = Object.values(PROVIDER);
+
+    if (!provider || !availableProviders.includes(provider)) {
+      return `You have to specify a valid secrets provider. Available options are: ${availableProviders.join(', ')}`;
+    }
+  };
+
+  /**
+   * Validates the service links in the configuration
+   *
+   * @param {Array<String>} links the list of links to other services
+   * @returns {String|undefined} the error message (if any)
+   */
+  export const validateServiceLinks = (links: Array<string>) => {
+    if (isArray(links) && !links.every((l) => isString(l))) {
+      return 'The service contains an invalid entries under “links“';
+    }
+  };
+
+  /**
+   * Validates credentials
+   *
+   * @param {Credentials} credentials the credentials to validate
+   * @param {Object} options
+   * @param {Boolean} options.requireUserName whether the username is required
+   * @param {Boolean} options.requirePassword whether the password is required
+   * @returns {String|undefined} the error message (if any)
+   */
+  export const validateCredentials = (
+    credentials: CredentialsObject,
+    { requireUserName = true, requirePassword = true } = {},
+  ) => {
+    const { username, password } = credentials;
+    const erroredFields = [];
+
+    if (requireUserName && (!username || !isString(username))) {
+      erroredFields.push('username');
+    }
+
+    if (requirePassword && (!password || !isString(password))) {
+      erroredFields.push('password');
+    }
+
+    if (!isEmpty(erroredFields)) {
+      const n = erroredFields.length;
+      return `The “${erroredFields.join('” and “')}” ${n !== 1 ? 'fields are' : 'field is'} invalid`;
+    }
+  };
+
+  /**
+   * Validates the existence of a file
+   *
+   * @param {String} fileName the name of the file to check whether exists or not
+   * @returns {String}
+   */
+  export const validateFileExistence = (fileName: string) => {
+    if (!fileExistsSync(fileName)) {
+      return `File ${fileName} does not exist`;
+    }
+  };
+
+  /**
+   * Validates whether a given object is an instance of an expected type
+   *
+   * @param {Object} obj the object to check the whether the instance is of the expected type
+   * @param {Object} options
+   * @param {Object} options.expected the expected instance type
+   * @returns {String}
+   */
+  export const validateInstanceType = (
+    obj: object, { expected }: { expected: { new(...args: any[]): any } },
+  ) => {
+    if (isObject(obj) && !(obj instanceof expected)) {
+      return `The object is not a valid instance of ${expected.name}`;
+    }
   }
-};
 
-/**
- * Validates the project's defaults in the configuration file
- *
- * @param {ProjectDefaults} defaults the project's defaults
- * @returns {String|undefined} the error message (if any)
- */
-const validateProjectDefaults = (defaults: ProjectDefaults) => {
-  // Allow defaults not being defined or empty objects
-  if (!defaults || (isObject(defaults) && isEmpty(defaults))) {
-    return;
-  }
+  /**
+   * Validates a version
+   *
+   * @param {String} version the version to validate
+   * @param {Object} options
+   * @param {Array<string>} options.availableVersions the versions available
+   * @returns {String}
+   */
+  export const validateVersion = (
+    version: string,
+    { availableVersions = [] }: { availableVersions?: Array<string> } = {},
+  ) => {
+    if (!version) {
+      return 'You have to define a version';
+    }
 
-  const providers = Object.values(PROVIDER);
-  const hasValidProviderKeys = isObject(defaults) && Object.keys(defaults).some(
-    (prov) => !providers.includes(prov as ProviderChoice),
-  );
+    if (!availableVersions.includes(version)) {
+      return `The version specified is not valid. Available options are: ${availableVersions.join(', ')}`;
+    }
+  };
 
-  if (!hasValidProviderKeys) {
-    return 'The "defaults" entry should contain valid cloud providers in the mapping';
-  }
-};
+  /**
+   * Validates a profile for a service based on the provider and service type
+   *
+   * @param {String} profile the profile's name
+   * @param {Object} options
+   * @param {String} options.provider the cloud provider for the service to apply the profile to
+   * @param {String} options.service the type of the service to apply the profile to
+   * @returns {String}
+   */
+  export const validateServiceProfile = (
+    profile: string,
+    { provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice },
+  ) => {
+    if (profile && !Profile.exists(provider, service, profile)) {
+      return `Invalid profile specified. The “${profile}” profile is not available`;
+    }
+  };
 
-/**
- * Validates the project's vault configuration
- *
- * @param {VaultConfiguration} secrets The vault configuration
- * @returns {String|undefined} the error message (if any)
- */
-const validateSecrets = (secrets: VaultConfiguration) => {
-  if (!secrets || !isObject(secrets) || isEmpty(secrets)) {
-    return 'The project does not contain a “secrets” section';
-  }
+  /**
+   * Validates a profile's overrides
+   *
+   * @param {Object} overrides the profile's overrides
+   * @param {Object} options
+   * @param {String} options.provider the service's cloud provider
+   * @param {String} options.service the service's type
+   * @param {String} options.profile the profile to override
+   * @returns {String}
+   */
+  export const validateProfileOverrides = (
+    overrides: object,
+    { provider, service, profile}: {
+      provider: ProviderChoice, service: ServiceTypeChoice, profile: string
+    },
+  ) => {
+    let profileConfig: object;
 
-  const { provider } = secrets;
-  const availableProviders = Object.values(PROVIDER);
+    try {
+      profileConfig = profile ? Profile.get(provider, service, profile) : {};
+    } catch (error) {
+      return 'The profile specified is invalid, cannot validate the overrides';
+    }
 
-  if (!provider || !availableProviders.includes(provider)) {
-    return `You have to specify a valid secrets provider. Available options are: ${availableProviders.join(', ')}`;
-  }
-};
+    if (!isEmpty(overrides) && !isEmpty(profileConfig) && !isKeySubset(overrides, profileConfig)) {
+      return 'The overrides provided do not comply with the profile selected';
+    }
+  };
 
-/**
- * Validates the service links in the configuration
- *
- * @param {Array<String>} links the list of links to other services
- * @returns {String|undefined} the error message (if any)
- */
-const validateServiceLinks = (links: Array<string>) => {
-  if (isArray(links) && !links.every((l) => isString(l))) {
-    return 'The service contains an invalid entries under “links“';
-  }
-};
+  export const validateRegionList = (
+    regions: Array<string>,
+    { availableRegions = [] }: { availableRegions: Array<string>},
+  ) => {
+    if (isEmpty(regions)) {
+      return 'You have to provide a set of regions for the provider';
+    }
 
-/**
- * Validates credentials
- *
- * @param {Credentials} credentials the credentials to validate
- * @param {Object} options
- * @param {Boolean} options.requireUserName whether the username is required
- * @param {Boolean} options.requirePassword whether the password is required
- * @returns {String|undefined} the error message (if any)
- */
-const validateCredentials = (
-  credentials: CredentialsObject,
-  { requireUserName = true, requirePassword = true } = {},
-) => {
-  const { username, password } = credentials;
-  const erroredFields = [];
-
-  if (requireUserName && (!username || !isString(username))) {
-    erroredFields.push('username');
-  }
-
-  if (requirePassword && (!password || !isString(password))) {
-    erroredFields.push('password');
-  }
-
-  if (!isEmpty(erroredFields)) {
-    const n = erroredFields.length;
-    return `The “${erroredFields.join('” and “')}” ${n !== 1 ? 'fields are' : 'field is'} invalid`;
-  }
-};
-
-/**
- * Validates the existence of a file
- *
- * @param {String} fileName the name of the file to check whether exists or not
- * @returns {String}
- */
-const validateFileExistence = (fileName: string) => {
-  if (!fileExistsSync(fileName)) {
-    return `File ${fileName} does not exist`;
-  }
-};
-
-/**
- * Validates whether a given object is an instance of an expected type
- *
- * @param {Object} obj the object to check the whether the instance is of the expected type
- * @param {Object} options
- * @param {Object} options.expected the expected instance type
- * @returns {String}
- */
-const validateInstanceType = (
-  obj: object, { expected }: { expected: { new(...args: any[]): any } },
-) => {
-  if (isObject(obj) && !(obj instanceof expected)) {
-    return `The object is not a valid instance of ${expected.name}`;
-  }
+    const invalidRegions = difference(regions, availableRegions);
+    if (!isEmpty(invalidRegions)) {
+      return `Invalid regions provided: ${invalidRegions.join(', ')}`;
+    }
+  };
 }
 
-/**
- * Validates a version
- *
- * @param {String} version the version to validate
- * @param {Object} options
- * @param {Array<string>} options.availableVersions the versions available
- * @returns {String}
- */
-const validateVersion = (
-  version: string,
-  { availableVersions = [] }: { availableVersions?: Array<string> } = {},
-) => {
-  if (!version) {
-    return 'You have to define a version';
-  }
-
-  if (!availableVersions.includes(version)) {
-    return `The version specified is not valid. Available options are: ${availableVersions.join(', ')}`;
-  }
-};
-
-/**
- * Validates a profile for a service based on the provider and service type
- *
- * @param {String} profile the profile's name
- * @param {Object} options
- * @param {String} options.provider the cloud provider for the service to apply the profile to
- * @param {String} options.service the type of the service to apply the profile to
- * @returns {String}
- */
-const validateServiceProfile = (
-  profile: string,
-  { provider, service }: { provider: ProviderChoice, service: ServiceTypeChoice },
-) => {
-  if (profile && !Profile.exists(provider, service, profile)) {
-    return `Invalid profile specified. The “${profile}” profile is not available`;
-  }
-};
-
-/**
- * Validates a profile's overrides
- *
- * @param {Object} overrides the profile's overrides
- * @param {Object} options
- * @param {String} options.provider the service's cloud provider
- * @param {String} options.service the service's type
- * @param {String} options.profile the profile to override
- * @returns {String}
- */
-const validateProfileOverrides = (
-  overrides: object,
-  { provider, service, profile}: {
-    provider: ProviderChoice, service: ServiceTypeChoice, profile: string
-  },
-) => {
-  let profileConfig: object;
-
-  try {
-    profileConfig = profile ? Profile.get(provider, service, profile) : {};
-  } catch (error) {
-    return 'The profile specified is invalid, cannot validate the overrides';
-  }
-
-  if (!isEmpty(overrides) && !isEmpty(profileConfig) && !isKeySubset(overrides, profileConfig)) {
-    return 'The overrides provided do not comply with the profile selected';
-  }
-};
-
-const validateRegionList = (
-  regions: Array<string>,
-  { availableRegions = [] }: { availableRegions: Array<string>},
-) => {
-  if (isEmpty(regions)) {
-    return 'You have to provide a set of regions for the provider';
-  }
-
-  const invalidRegions = difference(regions, availableRegions);
-  if (!isEmpty(invalidRegions)) {
-    return `Invalid regions provided: ${invalidRegions.join(', ')}`;
-  }
-};
-
-Object.assign(validate.validators, {
-  validateCredentials,
-  validateFileExistence,
-  validateProjectDefaults,
-  validateProfileOverrides,
-  validateRegionList,
-  validateServiceProfile,
-  validateStages,
-  validateServiceLinks,
-  validateSecrets,
-  validateVersion,
-  validateInstanceType,
-});
+Object.assign(validate.validators, Validator);
 
 export {
-  validateCredentials,
-  validateFileExistence,
-  validateProjectDefaults,
-  validateProfileOverrides,
-  validateRegionList,
-  validateServiceProfile,
-  validateStages,
-  validateServiceLinks,
-  validateSecrets,
-  validateVersion,
-  validateInstanceType,
+  Validator,
   validate,
 };

@@ -12,6 +12,7 @@ export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
 export type CredentialsKeyChoice = OneOf<['username', 'password']>;
+export type ServiceScopeChoice = OneOf<['provisionable', 'preparable']>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
