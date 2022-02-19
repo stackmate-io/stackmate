@@ -12,7 +12,7 @@ export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type StorageChoice = ChoiceOf<typeof STORAGE>;
 export type CredentialsKeyChoice = OneOf<['username', 'password']>;
-export type ServiceScopeChoice = OneOf<['provisionable', 'preparable']>;
+export type ServiceScopeChoice = OneOf<['provisionable', 'preparable', 'destroyable']>;
 
 // Config file types
 export type ServiceAssociationDeclarations = Array<string>;
@@ -28,7 +28,7 @@ export type CredentialsCollection = {
 }
 
 export type ServiceAssociation = {
-  lookup: ConstructorOf<CloudService>;
+  lookup: (a: CloudService) => boolean;
   handler: (a: CloudService) => void;
 };
 

@@ -41,6 +41,9 @@ abstract class Operation {
     this.provisioner = new Provisioner(project.name, stageName);
   }
 
+  /**
+   * @returns {Array<CloudService>} the list of services associated with the stage
+   */
   @Memoize() get services() {
     const { secrets, stages: { [this.stageName]: services } } = this.project;
 

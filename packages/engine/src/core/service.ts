@@ -8,7 +8,7 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { CloudService, CloudStack } from '@stackmate/interfaces';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
-  CloudPrerequisites, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
+  ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
 } from '@stackmate/types';
 
 abstract class Service extends Entity implements CloudService {
@@ -37,17 +37,6 @@ abstract class Service extends Entity implements CloudService {
    * @var {Object} overrides any profile overrides to use
    */
   @Attribute overrides: object = {};
-
-  /**
-   * @var {Array<ServiceAssociation>} associations the list of associations with other services
-   *
-   * @example
-   * [{
-   *   lookup: AwsVpcService,
-   *   handler: (vpc): void => this.handleVpcAssociated(vpc as AwsVpcService),
-   * }];
-   */
-  readonly associations: Array<ServiceAssociation> = [];
 
   /**
    * @var {Array<String>} regions the regions that the service is available in
@@ -91,15 +80,7 @@ abstract class Service extends Entity implements CloudService {
    */
   abstract provision(stack: CloudStack): void;
 
-  /**
-   * Processes the cloud provider's dependencies. Can be used to extract certain information
-   * from the cloud provider's default privisions. (eg. the VPC id from the AWS cloud provider)
-   *
-   * @param {Array<Service>} dependencies the dependencies provided by the cloud provider
-   */
-  set dependencies(dependencies: CloudPrerequisites) {
-    // overload this function in services that it's required to parse the cloud dependencies
-  }
+  destroy(stack: CloudStack): void {}
 
   /**
    * @returns {String} the service's identifier
@@ -120,6 +101,24 @@ abstract class Service extends Entity implements CloudService {
     return merge(profile, this.overrides) as ResourceProfile;
   }
 
+  @Memoize() public associations(): ServiceAssociation[] {
+    const associations = [
+      {
+        lookup: (srv: CloudService) => (srv instanceof Service /* todo: replace with cloud prereq */ && srv.region === this.region && srv.provider === this.provider),
+        handler: (srv) => {},
+      },
+    ];
+
+    this.links.forEach(link => {
+      associations.push({
+        lookup: (srv: CloudService) => (srv.name === link),
+        handler: (srv) => {},
+      });
+    });
+
+    return associations;
+  }
+
   /**
    * Associates the current service with the ones mentioned in the `links` section
    *
@@ -127,11 +126,11 @@ abstract class Service extends Entity implements CloudService {
    */
   public link(target: CloudService) {
     // Find an appropriate handler & run it
-    const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
+    // const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
 
-    if (handler) {
-      handler.call(this, target);
-    }
+    // if (handler) {
+    //   handler.call(this, target);
+    // }
   }
 
   /**
@@ -213,6 +212,9 @@ abstract class Service extends Entity implements CloudService {
         break;
       case 'provisionable':
         handlerFunction = this.provision;
+        break;
+      case 'destroyable':
+        handlerFunction = this.destroy;
         break;
       default:
         throw new Error(`Scope ${scope} is invalid`);

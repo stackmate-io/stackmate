@@ -20,7 +20,7 @@ export const DEFAULT_OUTPUT_PATH = path.join(os.homedir(), STACKMATE_DIRECTORY, 
 
 export const PROVIDER = {
   AWS: 'aws',
-  FILE: 'file',
+  LOCAL: 'local',
 } as const;
 
 export const SERVICE_TYPE = {
@@ -55,10 +55,4 @@ export const STORAGE: { [name: string]: string } = {
 } as const;
 
 // Service defaults
-
-/**
- * @var {Number} DEFAULT_STORAGE the default storage to apply to services (in Gigabytes)
- */
-export const DEFAULT_STORAGE = 30;
-
 export const DEFAULT_IP = '10.0.0.0';

@@ -10,7 +10,8 @@ class PrepareOperation extends Operation {
    * @returns {CloudService} the local state service
    */
   @Memoize() get localState(): CloudService {
-    const state = ServicesRegistry.get({ type: SERVICE_TYPE.STATE, provider: PROVIDER.FILE });
+    const state = ServicesRegistry.get({ type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL });
+    /** @todo set the attributes */
     return state.factory();
   }
 
@@ -18,11 +19,10 @@ class PrepareOperation extends Operation {
    * Prepares the services for provisioning
    */
   run() {
-    this.provisioner.add(this.localState.scope('provisionable'));
-
-    this.services.forEach(srv => {
-      this.provisioner.add(srv.scope('preparable'));
-    });
+    this.provisioner.services = [
+      this.localState.scope('provisionable'),
+      ...this.services.map(srv => srv.scope('preparable')),
+    ];
 
     this.provisioner.process();
   }
