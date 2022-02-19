@@ -26,7 +26,6 @@ class PrepareOperation extends Operation {
 
     this.provisioner.process();
   }
-
 }
 
 export default PrepareOperation;

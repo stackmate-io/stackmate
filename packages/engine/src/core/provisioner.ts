@@ -50,6 +50,23 @@ class Provisioner {
    */
   set services(services: CloudService[]) {
     services.forEach((service) => {
+      // Find the dependencies and dependables for the service
+      services.forEach((dep) => {
+        if (service.isDependingOn(dep)) {
+          const dependencies = this.dependencies.get(service.name) || [];
+          dependencies.push(dep);
+
+          this.dependencies.set(service.name, dependencies);
+        } else if (dep.isDependingOn(service)) {
+          const dependables = this.dependencies.get(service.name) || [];
+          dependables.push(service);
+
+          this.dependables.set(service.name, dependables);
+        }
+      });
+
+      // Calculate the service's priority and add it to the queue
+      this.queue.insert(service, this.priority(service));
     });
   }
 
@@ -62,6 +79,7 @@ class Provisioner {
     this.services.forEach((service) => {
       // Register the service into the stack
       service.register(this.stack);
+
       // Make sure the services that are depended on the current service are linked to it
       const dependables = this.dependables.get(service.name) || [];
       dependables.forEach(dep => dep.link(service));
@@ -81,6 +99,7 @@ class Provisioner {
   protected priority(service: CloudService): number {
     const dependables = this.dependables.get(service.name) || [];
     const dependencies = this.dependencies.get(service.name) || [];
+
     return dependables.length - dependencies.length;
   }
 }

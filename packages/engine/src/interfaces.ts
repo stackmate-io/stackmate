@@ -36,6 +36,7 @@ export interface CloudService extends BaseEntity {
   isRegistered: boolean;
   link(target: CloudService): void;
   associations(): Array<ServiceAssociation>;
+  isDependingOn(service: CloudService): boolean;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
   register(stack: CloudStack): void;

@@ -101,6 +101,18 @@ abstract class Service extends Entity implements CloudService {
     return merge(profile, this.overrides) as ResourceProfile;
   }
 
+  /**
+   * @param {CloudService} service the service to check whether the current one is depending on
+   * @returns {Boolean} whether the current service is depending upon the provided one
+   */
+  isDependingOn(service: CloudService): boolean {
+    if (this.identifier === service.identifier) {
+      return false;
+    }
+
+    return true;
+  }
+
   @Memoize() public associations(): ServiceAssociation[] {
     const associations = [
       {
