@@ -28,8 +28,6 @@ stages:
         - size: 30
           name: test-volume
           mount: /var/www/test
-      links:
-        - cloud
 
     database:
       type: database
@@ -38,14 +36,11 @@ stages:
       profile: production
       links:
         - application
-        - cloud
-        - vault
 
     loadbalancer:
       type: loadbalancer
       links:
         - application
-        - cloud
 
     # routing:
     #   type: routing
