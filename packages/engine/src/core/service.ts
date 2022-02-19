@@ -1,10 +1,11 @@
-import { merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
+import { isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
 import { Attribute } from '@stackmate/lib/decorators';
+import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, CloudStack } from '@stackmate/interfaces';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
@@ -41,7 +42,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @var {Array<String>} regions the regions that the service is available in
    */
-  abstract readonly regions: RegionList;
+  readonly regions: RegionList = {};
 
   /**
    * @var {String} type the service's type
@@ -99,50 +100,6 @@ abstract class Service extends Entity implements CloudService {
 
     const profile = Profile.get(this.provider, this.type, this.profile);
     return merge(profile, this.overrides) as ResourceProfile;
-  }
-
-  /**
-   * @param {CloudService} service the service to check whether the current one is depending on
-   * @returns {Boolean} whether the current service is depending upon the provided one
-   */
-  isDependingOn(service: CloudService): boolean {
-    if (this.identifier === service.identifier) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Memoize() public associations(): ServiceAssociation[] {
-    const associations = [
-      {
-        lookup: (srv: CloudService) => (srv instanceof Service /* todo: replace with cloud prereq */ && srv.region === this.region && srv.provider === this.provider),
-        handler: (srv) => {},
-      },
-    ];
-
-    this.links.forEach(link => {
-      associations.push({
-        lookup: (srv: CloudService) => (srv.name === link),
-        handler: (srv) => {},
-      });
-    });
-
-    return associations;
-  }
-
-  /**
-   * Associates the current service with the ones mentioned in the `links` section
-   *
-   * @param {Service} target the service to link the current service with
-   */
-  public link(target: CloudService) {
-    // Find an appropriate handler & run it
-    // const { handler } = this.associations.find(({ lookup }) => target instanceof lookup) || {};
-
-    // if (handler) {
-    //   handler.call(this, target);
-    // }
   }
 
   /**
@@ -248,6 +205,65 @@ abstract class Service extends Entity implements CloudService {
    */
   register(stack: CloudStack) {
     throw new Error('No scope has been applied, you have to use the `scope` method first');
+  }
+
+  @Memoize() public associations(): ServiceAssociation[] {
+    // Start populating the associations by adding the cloud provider, state and vault
+    return [{
+      lookup: (srv: CloudService) => (
+        srv.type === SERVICE_TYPE.PROVIDER && srv.region === this.region && srv.provider === this.provider
+      ),
+      handler: () => {},
+    }, {
+      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.STATE),
+      handler: () => {}
+    }, {
+      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
+      handler: () => {},
+    }];
+  }
+
+  /**
+   * @param {CloudService} service the service to check whether the current one is depending on
+   * @returns {Boolean} whether the current service is depending upon the provided one
+   */
+  isDependingOn(service: CloudService): boolean {
+    // We're comparing with the current service itself
+    if (this.identifier === service.identifier) {
+      return false;
+    }
+
+    // The target service is included in the links, it is explicitly associated with it
+    if (this.links.includes(service.name)) {
+      return true;
+    }
+
+    // The target service is implicitly linked to the current one
+    const linked = this.associations().filter(({ lookup }) => lookup(service));
+    return linked.length > 0;
+  }
+
+  /**
+   * Associates the current service with the ones mentioned in the `links` section
+   *
+   * @param {Service} target the service to link the current service with
+   * @void
+   */
+  public link(target: CloudService) {
+    // Find the handlers that apply to the associated service
+    const handlers = this.associations().filter(
+      ({ lookup }) => lookup(target),
+    ).map(
+      ({ handler }) => handler,
+    );
+
+    if (isEmpty(handlers)) {
+      throw new Error(
+        `The service ${this.name} cannot be linked to service ${target.name}, no handlers found`,
+      );
+    }
+
+    handlers.forEach(handler => handler.call(this, target));
   }
 }
 

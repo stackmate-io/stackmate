@@ -81,6 +81,7 @@ class Provisioner {
       service.register(this.stack);
 
       // Make sure the services that are depended on the current service are linked to it
+      // Warning: we're passing by reference, which means we're also updating the items in queue
       const dependables = this.dependables.get(service.name) || [];
       dependables.forEach(dep => dep.link(service));
     });
