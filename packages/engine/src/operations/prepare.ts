@@ -20,7 +20,7 @@ class PrepareOperation extends Operation {
    */
   run() {
     this.provisioner.services = [
-      this.localState.scope('provisionable'),
+      this.localState.scope('deployable'),
       ...this.services.map(srv => srv.scope('preparable')),
     ];
 

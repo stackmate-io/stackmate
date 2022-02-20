@@ -4,6 +4,8 @@ import { isEmpty, merge } from 'lodash';
 import Entity from '@stackmate/lib/entity';
 import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
+import Vault from '@stackmate/core/services/vault';
+import Provider from '@stackmate/core//services/provider';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, CloudStack } from '@stackmate/interfaces';
@@ -45,6 +47,11 @@ abstract class Service extends Entity implements CloudService {
   readonly regions: RegionList = {};
 
   /**
+   * @var {String} providerAlias the provider alias
+   */
+  providerAlias?: string | undefined;
+
+  /**
    * @var {String} type the service's type
    * @abstract
    * @readonly
@@ -64,24 +71,38 @@ abstract class Service extends Entity implements CloudService {
   abstract get isRegistered(): boolean;
 
   /**
-   * Runs a one-off provision
+   * Provisioning when we initially prepare a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @abstract
    * @void
    */
-  abstract once(stack: CloudStack): void;
+  onPrepare(stack: CloudStack): void {
+    // no-op. most services are not required when preparing the stage
+  }
 
   /**
-   * Provisions the service's resources
+   * Provisioning when we deploy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  abstract onDeploy(stack: CloudStack): void;
+
+  /**
+   * Provisioning on when we destroy destroy a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
    * @abstract
    * @void
    */
-  abstract provision(stack: CloudStack): void;
+  onDestroy(stack: CloudStack): void {
+    // no-op. this just removes the resources from the stack
+  }
 
-  destroy(stack: CloudStack): void {}
+  /**
+   * @var {Vault} vault the vault service to get credentials from
+   */
+  protected vault: Vault;
 
   /**
    * @returns {String} the service's identifier
@@ -177,13 +198,13 @@ abstract class Service extends Entity implements CloudService {
 
     switch(scope) {
       case 'preparable':
-        handlerFunction = this.once;
+        handlerFunction = this.onPrepare.bind(this);
         break;
-      case 'provisionable':
-        handlerFunction = this.provision;
+      case 'deployable':
+        handlerFunction = this.onDeploy.bind(this);
         break;
       case 'destroyable':
-        handlerFunction = this.destroy;
+        handlerFunction = this.onDestroy.bind(this);
         break;
       default:
         throw new Error(`Scope ${scope} is invalid`);
@@ -199,6 +220,22 @@ abstract class Service extends Entity implements CloudService {
   }
 
   /**
+   * Callback to run when the cloud provider has been registered
+   * @param {CloudService} provider the provider service
+   */
+  onCloudProviderRegistered(provider: Provider) {
+    this.providerAlias = provider.alias;
+  }
+
+  /**
+   * Callback to run when the vault service has been registered
+   * @param {CloudService} vault the vault service
+   */
+  onVaultRegistered(vault: Vault) {
+    this.vault = vault;
+  }
+
+  /**
    * Registers the service in the stack
    *
    * @param {CloudStack} stack the stack to provision
@@ -207,19 +244,20 @@ abstract class Service extends Entity implements CloudService {
     throw new Error('No scope has been applied, you have to use the `scope` method first');
   }
 
+  /**
+   * @returns {Array<ServiceAssociation>} the pairs of lookup and handler functions
+   */
   @Memoize() public associations(): ServiceAssociation[] {
-    // Start populating the associations by adding the cloud provider, state and vault
     return [{
       lookup: (srv: CloudService) => (
-        srv.type === SERVICE_TYPE.PROVIDER && srv.region === this.region && srv.provider === this.provider
+        srv.type === SERVICE_TYPE.PROVIDER
+          && srv.region === this.region
+          && srv.provider === this.provider
       ),
-      handler: () => {},
+      handler: this.onCloudProviderRegistered.bind(this),
     }, {
-      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.STATE),
-      handler: () => {}
-    }, {
-      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
-      handler: () => {},
+      lookup: (srv: CloudService) => (srv instanceof Vault && srv.type === SERVICE_TYPE.VAULT),
+      handler: this.onVaultRegistered.bind(this),
     }];
   }
 
@@ -250,12 +288,17 @@ abstract class Service extends Entity implements CloudService {
    * @void
    */
   public link(target: CloudService) {
+    if (!target.isRegistered) {
+      throw new Error('The service to be linked is not registered to the stack, yet');
+    }
+
+    if (this.isRegistered) {
+      throw new Error('The service is already registered to the stack, we can’t link the service');
+    }
+
     // Find the handlers that apply to the associated service
-    const handlers = this.associations().filter(
-      ({ lookup }) => lookup(target),
-    ).map(
-      ({ handler }) => handler,
-    );
+    const assocs = this.associations();
+    const handlers = assocs.filter(({ lookup }) => lookup(target)).map(({ handler }) => handler);
 
     if (isEmpty(handlers)) {
       throw new Error(

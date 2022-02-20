@@ -41,6 +41,9 @@ export interface CloudService extends BaseEntity {
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
   register(stack: CloudStack): void;
   scope(name: ServiceScopeChoice): CloudService;
+  onPrepare(stack: CloudStack): void;
+  onDeploy(stack: CloudStack): void;
+  onDestroy(stack: CloudStack): void;
 }
 
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
