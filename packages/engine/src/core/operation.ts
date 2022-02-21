@@ -1,5 +1,5 @@
 import { Memoize } from 'typescript-memoize';
-import { groupBy, head, map, pick } from 'lodash';
+import { groupBy, map } from 'lodash';
 
 import Project from '@stackmate/core/project';
 import Provisioner from '@stackmate/core/provisioner';

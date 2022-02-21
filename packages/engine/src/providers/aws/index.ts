@@ -4,10 +4,9 @@ import { AwsProvider } from '@cdktf/provider-aws';
 import Cloud from '@stackmate/core/cloud';
 import AwsVpcService from '@stackmate/providers/aws/services/vpc';
 import AwsRdsService from '@stackmate/providers/aws/services/rds';
-import { DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/constants';
+import { PROVIDER } from '@stackmate/constants';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
-import { CloudPrerequisites, ProviderChoice, RegionList } from '@stackmate/types';
-import { CloudStack } from '@stackmate/interfaces';
+import { ProviderChoice, RegionList, ServiceAttributes } from '@stackmate/types';
 import { RegisterCloud } from '@stackmate/lib/decorators';
 
 @RegisterCloud(PROVIDER.AWS) class AwsCloud extends Cloud {
@@ -20,7 +19,7 @@ import { RegisterCloud } from '@stackmate/lib/decorators';
   /**
    * @var {Array<String>} availableRegions the regions that the cloud is available in
    */
-  readonly regions: RegionList = AWS_REGIONS;
+  readonly availableRegions: RegionList = AWS_REGIONS;
 
   /**
    * @var {Array<AwsProvider>} providerInstances The array of provider instances after bootstrapping
@@ -28,36 +27,10 @@ import { RegisterCloud } from '@stackmate/lib/decorators';
   protected providerInstances: Array<AwsProvider>
 
   /**
-   * Registers the cloud provider to the stack
+   * @returns {Array<ServiceAttributes>} the cloud's prerequisites for the services to be deployed
    */
-  provision(stack: CloudStack): void {
-    this.aliases.forEach((alias, region) => {
-      const instance = new AwsProvider(stack, this.provider, {
-        region,
-        alias,
-        defaultTags: {
-          tags: {
-            Environment: stack.name,
-            Description: DEFAULT_RESOURCE_COMMENT,
-          },
-        },
-      });
-
-      this.providerInstances.push(instance);
-    });
-  }
-
-  /**
-   * @returns {CloudPrerequisites} the cloud's prerequisites for the services to be deployed
-   */
-  @Memoize() prerequisites(): CloudPrerequisites {
-    return {
-      // vpc: this.introduce({
-      //   type: SERVICE_TYPE.NETWORKING,
-      //   name: `${this.stack.name}-vpc`,
-      //   region: this.defaultRegion,
-      // }),
-    };
+  @Memoize() prerequisites(): ServiceAttributes[] {
+    return [];
   }
 }
 

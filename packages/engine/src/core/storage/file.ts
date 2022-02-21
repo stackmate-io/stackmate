@@ -24,6 +24,9 @@ class FileStorage extends Entity implements StorageAdapter {
    */
   public readonly validationMessage: string = 'The file information provided is not valid';
 
+  /**
+   * @returns {Object} the parser functions to apply to the entity's attributes
+   */
   parsers(): AttributeParsers {
     return {
       path: Parser.parseFileName,
@@ -31,6 +34,9 @@ class FileStorage extends Entity implements StorageAdapter {
     };
   }
 
+  /**
+   * @returns {Validations} the validations for the entity
+   */
   validations(): Validations {
     const formats = Object.values(FORMAT);
 

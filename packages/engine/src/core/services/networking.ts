@@ -15,6 +15,9 @@ abstract class Networking extends Service {
    */
   @Attribute ip: string = DEFAULT_IP;
 
+  /**
+   * @returns {Object} the parser functions to apply to the service's attributes
+   */
   parsers() {
     return {
       ...super.parsers(),
@@ -22,6 +25,9 @@ abstract class Networking extends Service {
     };
   }
 
+  /**
+   * @returns {Validations} the validations for the service
+   */
   validations() {
     return {
       ...super.validations(),

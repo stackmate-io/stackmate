@@ -2,7 +2,6 @@ import 'cdktf/lib/testing/adapters/jest';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
 import Profile from '@stackmate/core/profile';
-import { CloudPrerequisites } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getMockStack } from 'tests/mocks';
@@ -12,7 +11,6 @@ import { getServiceRegisterationResults } from 'tests/helpers';
 
 describe('AwsVpcService', () => {
   let mockStack: CloudStack;
-  const prerequisites: CloudPrerequisites = {};
 
   describe('instantiation', () => {
     let service: AwsVpcService;
@@ -23,7 +21,7 @@ describe('AwsVpcService', () => {
 
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, ip } = serviceConfig;
-      service = AwsVpcService.factory(mockStack, prerequisites, serviceConfig);
+      service = AwsVpcService.factory(serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.NETWORKING);
@@ -36,7 +34,7 @@ describe('AwsVpcService', () => {
     });
 
     it('returns the attribute names', () => {
-      service = AwsVpcService.factory(mockStack, prerequisites, serviceConfig);
+      service = AwsVpcService.factory(serviceConfig);
       expect(new Set(service.attributeNames)).toEqual(new Set([
         'name', 'region', 'links', 'profile', 'overrides', 'ip',
       ]));

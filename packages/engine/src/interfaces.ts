@@ -19,6 +19,7 @@ export interface CloudProvider extends BaseEntity {
   readonly provider: ProviderChoice;
   readonly availableRegions: RegionList;
   readonly aliases: Map<string, string | undefined>;
+  prerequisites(): ServiceAttributes[];
   validations(): Validations & Required<{ regions: object }>;
   services(attrs: ServiceAttributes[]): CloudService[];
 }
@@ -104,13 +105,9 @@ export interface CloudApp extends TerraformApp {
 
 export interface CredentialsResource extends ITerraformResource {}
 
-export interface CredentialsProvider {
-  username: CredentialsResource;
-  password: CredentialsResource;
-}
-
 export interface VaultService extends CloudService {
-  for(service: string, opts?: { root: boolean }): CredentialsProvider;
+  username(service: string, root: boolean): CredentialsResource;
+  password(service: string): CredentialsResource;
 }
 
 export interface SubclassRegistry<T> {

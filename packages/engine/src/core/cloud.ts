@@ -75,6 +75,13 @@ abstract class Cloud extends Entity implements CloudProvider {
   }
 
   /**
+   * @returns {Array<ServiceAttributes>} the attributes for any prerequisites
+   */
+  prerequisites(): ServiceAttributes[] {
+    return [];
+  }
+
+  /**
    * Instantiates a set of cloud services based on certain attributes
    *
    * @param {Array<ServiceAttributes>} serviceAttributes the attributes for the services
@@ -86,6 +93,7 @@ abstract class Cloud extends Entity implements CloudProvider {
     const attributes = [
       { type: SERVICE_TYPE.PROVIDER, region: primary },
       ...secondary.map(r => ({ type: SERVICE_TYPE.PROVIDER, r, alias: this.alias(r) })),
+      ...this.prerequisites(),
       ...serviceAttributes,
     ];
 

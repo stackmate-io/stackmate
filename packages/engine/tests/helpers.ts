@@ -12,8 +12,7 @@ import Service from '@stackmate/core/service';
 import Environment from '@stackmate/lib/environment';
 import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
-import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/constants';
-import { getAwsPrerequisites } from 'tests/mocks';
+import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
 
 /**
  *
@@ -79,25 +78,18 @@ export const withEphemeralManifest = (
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
-  provider, serviceClass, serviceConfig, stackName = 'production', withPrerequisites = true,
+  provider, serviceClass, serviceConfig, stackName = 'production',
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
   serviceConfig: object;
   stackName?: string;
-  withPrerequisites?: boolean;
 }): Promise<{
   scope: string;
   variables: object;
   [name: string]: any;
 }> => {
   let prerequisitesGenerator = ({ stack }: { stack: CloudStack }) => ({});
-
-  if (withPrerequisites) {
-    if (provider === PROVIDER.AWS) {
-      prerequisitesGenerator = getAwsPrerequisites;
-    }
-  }
 
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;

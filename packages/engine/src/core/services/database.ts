@@ -59,7 +59,7 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
   abstract readonly sizes: ReadonlyArray<string>;
 
   /**
-   * @returns {Object} the parser functions to apply to the entity's attributes
+   * @returns {Object} the parser functions to apply to the service's attributes
    */
   parsers() {
     return {
@@ -71,14 +71,11 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
       engine: Parser.parseString,
       database: Parser.parseString,
       version: Parser.parseString,
-      rootCredentials: Parser.parseCredentials,
     };
   }
 
   /**
-   * Returns the validations for the service
-   *
-   * @returns {Validations} the validations to run
+   * @returns {Validations} the validations for the service
    */
   validations() {
     return {
@@ -134,12 +131,6 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
           flags: 'i',
           message: 'You can only use letters, numbers and _ for the database name',
         },
-      },
-      rootCredentials: {
-        // validateCredentials: {
-        //   requireUserName: true,
-        //   requirePassword: true,
-        // },
       },
     };
   }
