@@ -30,12 +30,28 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
     securityGroupIds: Array<string> = [];
 
     /**
-     * @param {Object} dependencies the service's dependencies
+     * @param {AwsVpcService} vpc the networking service
      */
-    public set dependencies({ vpc }: { vpc: AwsVpcService }) {
+    onNetworkingRegistered(vpc: AwsVpcService) {
       this.vpcId = vpc.id;
       this.securityGroupIds.push(vpc.securityGroupId);
     }
+
+    // /**
+    //  * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
+    //  */
+    // @Memoize() public associations(): ServiceAssociation[] {
+    //   return [
+    //     ...super.associations(),
+    //     {
+    //     lookup: (srv: CloudService) => (
+    //       srv.type === SERVICE_TYPE.NETWORKING
+    //         // && srv.region === this.region
+    //         && srv.provider === this.provider
+    //     ),
+    //     handler: this.onNetworkingRegistered.bind(this),
+    //   }];
+    // }
   }
 
   return AwsServiceWrapper;

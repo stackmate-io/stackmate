@@ -3,6 +3,7 @@ import Parser from '@stackmate/lib/parsers';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { ServiceTypeChoice } from '@stackmate/types';
 import { Attribute } from '@stackmate/lib/decorators';
+import { TerraformProvider } from 'cdktf';
 
 abstract class Provider extends Service {
   /**
@@ -14,6 +15,18 @@ abstract class Provider extends Service {
    * @var {ServiceTypeChoice} type the service's type
    */
   readonly type: ServiceTypeChoice = SERVICE_TYPE.PROVIDER;
+
+  /**
+   * @var {TerraformProvider} cloudProvider the cloud provider instance
+   */
+  cloudProvider: TerraformProvider;
+
+  /**
+   * @returns {Boolean} whether the provider is registered in the stack
+   */
+  get isRegistered(): boolean {
+    return this.cloudProvider instanceof TerraformProvider;
+  }
 
   /**
    * @returns {Object} the parser functions to apply to the service's attributes

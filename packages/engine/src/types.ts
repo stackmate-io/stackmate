@@ -14,7 +14,7 @@ export type StorageChoice = ChoiceOf<typeof STORAGE>;
 export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
 
 // Config file types
-export type ServiceAssociationDeclarations = Array<string>;
+export type ServiceAssociationDeclarations = string[];
 export type EnvironmentVariablesDeclaration = Record<string, string | number>;
 
 export type CredentialsObject = {

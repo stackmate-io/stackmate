@@ -19,9 +19,9 @@ const { NETWORKING } = SERVICE_TYPE;
 
 @RegisterService(AWS, NETWORKING) class AwsVpcService extends Networking {
   /**
- * @var {String} provider the cloud provider used (eg. AWS)
- * @readonly
- */
+   * @var {String} provider the cloud provider used (eg. AWS)
+   * @readonly
+   */
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
   /**
@@ -48,7 +48,7 @@ const { NETWORKING } = SERVICE_TYPE;
   /**
    * @returns {Boolean} whether the service is registered into the stack
    */
-  public get isRegistered(): boolean {
+  get isRegistered(): boolean {
     return !isUndefined(this.vpc)
       && !isUndefined(this.subnets)
       && !isEmpty(this.subnets)
@@ -90,6 +90,10 @@ const { NETWORKING } = SERVICE_TYPE;
       ...gateway,
       vpcId: this.vpc.id,
     });
+  }
+
+  onDeploy(stack: CloudStack): void {
+    throw new Error('Method not implemented.');
   }
 }
 

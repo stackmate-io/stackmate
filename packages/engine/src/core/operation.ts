@@ -45,10 +45,10 @@ abstract class Operation {
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
   @Memoize() get services() {
-    const { secrets, stages: { [this.stageName]: stageServices } } = this.project;
+    const { secrets: vaultConfig, stages: { [this.stageName]: stageServices } } = this.project;
 
     const allServices = [
-      { type: SERVICE_TYPE.VAULT, ...secrets },
+      { type: SERVICE_TYPE.VAULT, ...vaultConfig },
       ...Object.values(stageServices),
     ];
 

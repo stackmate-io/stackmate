@@ -1,4 +1,5 @@
 import { Memoize } from 'typescript-memoize';
+import { TerraformProvider } from 'cdktf';
 import { isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
@@ -6,6 +7,7 @@ import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
 import Vault from '@stackmate/core/services/vault';
 import Provider from '@stackmate/core//services/provider';
+import Networking from '@stackmate/core/services/networking';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, CloudStack } from '@stackmate/interfaces';
@@ -26,7 +28,7 @@ abstract class Service extends Entity implements CloudService {
   @Attribute region: string;
 
   /**
-   * @var {ServiceAssociationDeclarations} links the list of service names that the current service
+   * @var {String[]} links the list of service names that the current service
    *                                             is associated (linked) with
    */
   @Attribute links: string[] = [];
@@ -42,14 +44,14 @@ abstract class Service extends Entity implements CloudService {
   @Attribute overrides: object = {};
 
   /**
-   * @var {Array<String>} regions the regions that the service is available in
+   * @var {Object} regions the regions that the service is available in
    */
   readonly regions: RegionList = {};
 
   /**
-   * @var {String} providerAlias the provider alias
+   * @var {TerraformProvider} providerAlias the provider alias
    */
-  providerAlias?: string | undefined;
+  providerAlias: TerraformProvider;
 
   /**
    * @var {String} type the service's type
@@ -224,7 +226,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} provider the provider service
    */
   onCloudProviderRegistered(provider: Provider) {
-    this.providerAlias = provider.alias;
+    this.providerAlias = provider.cloudProvider;
   }
 
   /**
@@ -233,6 +235,14 @@ abstract class Service extends Entity implements CloudService {
    */
   onVaultRegistered(vault: Vault) {
     this.vault = vault;
+  }
+
+  /**
+   * @param {AwsVpcService} vpc the networking service
+   */
+  onNetworkingRegistered(vpc: Networking) {
+    this.vpcId = vpc.id;
+    this.securityGroupIds.push(vpc.securityGroupId);
   }
 
   /**
@@ -245,7 +255,7 @@ abstract class Service extends Entity implements CloudService {
   }
 
   /**
-   * @returns {Array<ServiceAssociation>} the pairs of lookup and handler functions
+   * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
    */
   @Memoize() public associations(): ServiceAssociation[] {
     return [{

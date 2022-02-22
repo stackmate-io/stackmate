@@ -1,11 +1,11 @@
-import { isUndefined } from 'lodash';
+import { get, isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/core/services/database';
 import AwsService from '@stackmate/providers/aws/mixins';
-import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { OneOf } from '@stackmate/types';
+import { CloudStack } from '@stackmate/interfaces';
 import { RegisterService } from '@stackmate/lib/decorators';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import {
@@ -19,12 +19,6 @@ const { AWS } = PROVIDER;
 const { DATABASE: DB } = SERVICE_TYPE;
 
 const AwsDatabaseService = AwsService(Database);
-
-class ProvisionStrategy {
-}
-
-class CreationStrategy {
-}
 
 @RegisterService(AWS, DB) class AwsRdsService extends AwsDatabaseService {
   /**
@@ -55,7 +49,7 @@ class CreationStrategy {
   /**
    * @returns {Boolean} whether the service is registered
    */
-  public get isRegistered(): boolean {
+  get isRegistered(): boolean {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
@@ -88,13 +82,13 @@ class CreationStrategy {
           message: 'You have to specify the database version to run',
         },
         validateVersion: {
-          availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
+          availableVersions: get(RDS_MAJOR_VERSIONS_PER_ENGINE, this.engine, []),
         },
       },
     };
   }
 
-  provision(stack: CloudStack, vault: VaultService) {
+  onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
 
     this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
@@ -113,10 +107,9 @@ class CreationStrategy {
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
-      /** @todo */
-      // provider: this.providerAlias,
-      // username: rootCredentials.username,
-      // password: rootCredentials.password,
+      provider: this.providerAlias,
+      username: this.vault.username(this.name, true),
+      password: this.vault.password(this.name),
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
     });
   }

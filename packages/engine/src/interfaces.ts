@@ -1,8 +1,8 @@
-import { App as TerraformApp, ITerraformResource, TerraformStack } from 'cdktf';
+import { App as TerraformApp, TerraformProvider, TerraformStack } from 'cdktf';
 
 import {
   ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceTypeChoice, Validations, EntityAttributes, ConstructorOf, ServiceAttributes, ServiceScopeChoice,
+  ServiceTypeChoice, Validations, EntityAttributes, ConstructorOf, ServiceAttributes, ServiceScopeChoice, AbstractConstructor,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -30,11 +30,11 @@ export interface CloudService extends BaseEntity {
   readonly type: ServiceTypeChoice;
   region: string;
   links: Array<string>;
-  providerAlias?: string;
+  providerAlias: TerraformProvider;
   identifier: string;
-  isRegistered: boolean;
+  get isRegistered(): boolean;
   link(target: CloudService): void;
-  associations(): Array<ServiceAssociation>;
+  associations(): ServiceAssociation[];
   isDependingOn(service: CloudService): boolean;
   parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, region: object, links: object }>;
@@ -103,11 +103,9 @@ export interface CloudApp extends TerraformApp {
   stack(name: string): CloudStack;
 }
 
-export interface CredentialsResource extends ITerraformResource {}
-
 export interface VaultService extends CloudService {
-  username(service: string, root: boolean): CredentialsResource;
-  password(service: string): CredentialsResource;
+  username(service: string, root: boolean): string;
+  password(service: string): string;
 }
 
 export interface SubclassRegistry<T> {
@@ -115,3 +113,5 @@ export interface SubclassRegistry<T> {
   get(attributes: object): T | undefined;
   add(classConstructor: T, ...attrs: string[]): void;
 }
+
+export interface CloudServiceConstructor extends AbstractConstructor<CloudService> {}

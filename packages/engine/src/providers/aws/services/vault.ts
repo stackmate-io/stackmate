@@ -5,7 +5,6 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { RegisterService } from '@stackmate/lib/decorators';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { CredentialsResource, CloudStack, VaultService } from '@stackmate/interfaces';
 
 const { AWS } = PROVIDER;
 const { VAULT } = SERVICE_TYPE;
@@ -63,15 +62,11 @@ const AwsVaultService = AwsService(Vault);
     }
   }
 
-  get isRegistered(): boolean {
+  username(service: string, root: boolean): string {
     throw new Error('Method not implemented.');
   }
 
-  provide(service: string, key: 'username' | 'password', root: boolean): CredentialsResource {
-    throw new Error('Method not implemented.');
-  }
-
-  provision(stack: CloudStack, vault?: VaultService, providerAlias?: string): void {
+  password(service: string): string {
     throw new Error('Method not implemented.');
   }
 }

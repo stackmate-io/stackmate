@@ -14,12 +14,12 @@ abstract class State extends Service {
    *
    * @param {CloudStack} stack the stack to deploy the resource to
    */
-  abstract resource(stack: CloudStack): void;
+  abstract resources(stack: CloudStack): void;
 
   /**
-   * Provisions a data resource for the state
+   * Provisions a data resources for the state
    *
-   * @param {CloudStack} stack the stack to deploy the resource to
+   * @param {CloudStack} stack the stack to deploy the resources to
    */
   abstract data(stack: CloudStack): void;
 
@@ -30,7 +30,7 @@ abstract class State extends Service {
    * @void
    */
   onPrepare(stack: CloudStack): void {
-    this.resource(stack);
+    this.resources(stack);
   }
 
   /**
