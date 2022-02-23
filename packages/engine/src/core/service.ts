@@ -1,13 +1,12 @@
 import { Memoize } from 'typescript-memoize';
-import { TerraformProvider } from 'cdktf';
 import { isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
 import Vault from '@stackmate/core/services/vault';
-import Provider from '@stackmate/core//services/provider';
 import Networking from '@stackmate/core/services/networking';
+import Provider from '@stackmate/core/services/provider';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService, CloudStack } from '@stackmate/interfaces';
@@ -46,12 +45,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @var {Object} regions the regions that the service is available in
    */
-  readonly regions: RegionList = {};
-
-  /**
-   * @var {TerraformProvider} providerAlias the provider alias
-   */
-  providerAlias: TerraformProvider;
+  abstract readonly regions: RegionList;
 
   /**
    * @var {String} type the service's type
@@ -71,6 +65,21 @@ abstract class Service extends Entity implements CloudService {
    * @returns {Boolean} whether the service is registered in the stack
    */
   abstract get isRegistered(): boolean;
+
+  /**
+   * @var {Vault} vault the vault service to get credentials from
+   */
+  vault: Vault;
+
+  /**
+   * @var {Networking} networking the networking service to connect to
+   */
+  networking: Networking;
+
+  /**
+   * @var {Provider} cloudProvider the cloud provider service
+   */
+  cloudProvider: Provider;
 
   /**
    * Provisioning when we initially prepare a stage
@@ -100,11 +109,6 @@ abstract class Service extends Entity implements CloudService {
   onDestroy(stack: CloudStack): void {
     // no-op. this just removes the resources from the stack
   }
-
-  /**
-   * @var {Vault} vault the vault service to get credentials from
-   */
-  protected vault: Vault;
 
   /**
    * @returns {String} the service's identifier
@@ -195,7 +199,7 @@ abstract class Service extends Entity implements CloudService {
    * @param scope the scope to apply to the service
    * @returns {CloudService} the service with the scope applied
    */
-  scope(scope: ServiceScopeChoice): CloudService {
+  scope(scope: ServiceScopeChoice): Service {
     let handlerFunction: (stack: CloudStack) => void;
 
     switch(scope) {
@@ -226,7 +230,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} provider the provider service
    */
   onCloudProviderRegistered(provider: Provider) {
-    this.providerAlias = provider.cloudProvider;
+    this.cloudProvider = provider;
   }
 
   /**
@@ -238,11 +242,10 @@ abstract class Service extends Entity implements CloudService {
   }
 
   /**
-   * @param {AwsVpcService} vpc the networking service
+   * @param {Networking} networking the networking service
    */
-  onNetworkingRegistered(vpc: Networking) {
-    this.vpcId = vpc.id;
-    this.securityGroupIds.push(vpc.securityGroupId);
+  onNetworkingRegistered(networking: Networking) {
+    this.networking = networking;
   }
 
   /**
@@ -266,8 +269,15 @@ abstract class Service extends Entity implements CloudService {
       ),
       handler: this.onCloudProviderRegistered.bind(this),
     }, {
-      lookup: (srv: CloudService) => (srv instanceof Vault && srv.type === SERVICE_TYPE.VAULT),
+      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
       handler: this.onVaultRegistered.bind(this),
+    }, {
+      lookup: (srv: CloudService) => (
+        srv.type === SERVICE_TYPE.NETWORKING
+          && srv.region === this.region
+          && srv.provider === this.provider
+      ),
+      handler: this.onNetworkingRegistered.bind(this),
     }];
   }
 

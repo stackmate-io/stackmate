@@ -18,6 +18,11 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
     readonly regions: RegionList = AWS_REGIONS;
 
     /**
+     * @var {AwsVpcService} networking the networking service to connect to
+     */
+    networking: AwsVpcService;
+
+    /**
      * @var {String} vpcId the vpc id to use in the resources
      * @protected
      */
@@ -36,22 +41,6 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
       this.vpcId = vpc.id;
       this.securityGroupIds.push(vpc.securityGroupId);
     }
-
-    // /**
-    //  * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
-    //  */
-    // @Memoize() public associations(): ServiceAssociation[] {
-    //   return [
-    //     ...super.associations(),
-    //     {
-    //     lookup: (srv: CloudService) => (
-    //       srv.type === SERVICE_TYPE.NETWORKING
-    //         // && srv.region === this.region
-    //         && srv.provider === this.provider
-    //     ),
-    //     handler: this.onNetworkingRegistered.bind(this),
-    //   }];
-    // }
   }
 
   return AwsServiceWrapper;

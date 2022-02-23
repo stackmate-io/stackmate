@@ -30,8 +30,10 @@ export interface CloudService extends BaseEntity {
   readonly type: ServiceTypeChoice;
   region: string;
   links: Array<string>;
-  providerAlias: TerraformProvider;
   identifier: string;
+  vault: CloudService;
+  networking: CloudService;
+  cloudProvider: CloudService;
   get isRegistered(): boolean;
   link(target: CloudService): void;
   associations(): ServiceAssociation[];
