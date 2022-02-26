@@ -43,4 +43,5 @@ class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassR
 }
 
 const ServicesRegistry = new Registry<BaseEntityConstructor<CloudService>>();
+
 export default ServicesRegistry;

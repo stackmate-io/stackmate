@@ -6,17 +6,17 @@ class Provisioner {
   /**
    * @var {CloudApp} app the terraform application to deploy
    */
-  protected readonly app: CloudApp;
+  readonly app: CloudApp;
 
   /**
    * @var {CloudStack} stack the stack to deploy
    */
-  protected readonly stack: CloudStack;
+  readonly stack: CloudStack;
 
   /**
    * @var {PriorityQueue<CloudService>} queue the sorted priority queue that holds the services
    */
-  protected readonly queue: PriorityQueue<CloudService> = new PriorityQueue();
+  readonly queue: PriorityQueue<CloudService> = new PriorityQueue();
 
   /**
    * @var {Map} dependencies a mapping of service name and the services it depends upon

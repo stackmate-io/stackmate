@@ -9,6 +9,11 @@ import { CloudService } from '@stackmate/interfaces';
 
 abstract class Operation {
   /**
+   * @var {Provisioner} provisioner the stack handler & provisioner
+   */
+  readonly provisioner: Provisioner;
+
+  /**
    * @var {Project} project the project to deploy
    */
   protected readonly project: Project;
@@ -17,11 +22,6 @@ abstract class Operation {
    * @var {String} stage the stage to deploy
    */
   protected readonly stageName: string;
-
-  /**
-   * @var {Provisioner} provisioner the stack handler & provisioner
-   */
-  protected readonly provisioner: Provisioner;
 
   /**
    * @var {Object} options any additional options for the operation
@@ -48,8 +48,9 @@ abstract class Operation {
     const { PROVIDER, VAULT } = SERVICE_TYPE;
     const instances: CloudService[] = [];
     const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
+    const stageServices = [{ type: VAULT, ...vault }, ...Object.values(stage)];
 
-    const services = groupBy([{ type: VAULT, ...vault }, ...Object.values(stage)], 'provider');
+    const services = groupBy(stageServices, 'provider');
     Object.keys(services).map(provider => {
       const servicesPerRegion = groupBy(services[provider], 'region');
 
