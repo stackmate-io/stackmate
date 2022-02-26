@@ -45,7 +45,7 @@ abstract class Operation {
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
   @Memoize() get services() {
-    const { CLOUD, VAULT } = SERVICE_TYPE;
+    const { PROVIDER, VAULT } = SERVICE_TYPE;
     const instances: CloudService[] = [];
     const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
 
@@ -54,7 +54,7 @@ abstract class Operation {
       const servicesPerRegion = groupBy(services[provider], 'region');
 
       Object.keys(servicesPerRegion).forEach(region => {
-        const services = [{ type: CLOUD, provider, region }, ...servicesPerRegion[region]];
+        const services = [{ type: PROVIDER, provider, region }, ...servicesPerRegion[region]];
 
         instances.push(
           ...services.map(srv => ServicesRegistry.get({ type: srv.type, provider }).factory(srv)),

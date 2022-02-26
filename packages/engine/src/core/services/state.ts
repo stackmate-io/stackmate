@@ -1,9 +1,9 @@
 import Service from '@stackmate/core/service';
 import { ServiceTypeChoice } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { CloudStack } from '@stackmate/interfaces';
+import { CloudStack, StateService } from '@stackmate/interfaces';
 
-abstract class State extends Service {
+abstract class State extends Service implements StateService {
   /**
    * @var {ServiceTypeChoice} type the service's type
    */

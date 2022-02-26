@@ -71,8 +71,11 @@ const AwsVaultService = AwsService(Vault);
     throw new Error('Method not implemented.');
   }
 
+  onPrepare(stack: CloudStack): void {
+  }
+
   onDeploy(stack: CloudStack): void {
-    throw new Error('Method not implemented.');
+    /* no-op - every change should be introduced through the username / password methods */
   }
 }
 

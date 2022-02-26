@@ -1,5 +1,5 @@
 import { Memoize } from 'typescript-memoize';
-import { isEmpty, merge } from 'lodash';
+import { isEmpty, isObject, merge } from 'lodash';
 
 import Entity from '@stackmate/lib/entity';
 import Parser from '@stackmate/lib/parsers';
@@ -42,7 +42,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @var {Object} regions the regions that the service is available in
    */
-  abstract readonly regions: RegionList;
+  readonly regions: RegionList = {};
 
   /**
    * @var {String} type the service's type
@@ -163,23 +163,11 @@ abstract class Service extends Entity implements CloudService {
    * @returns {Object} the validations to use
    */
   validations() {
-    const regions = Object.values(this.regions);
-
-    return {
+    const validations = {
       name: {
         presence: {
           allowEmpty: false,
           message: 'Every service should have a name',
-        },
-      },
-      region: {
-        presence: {
-          allowEmpty: false,
-          message: 'A region should be provided',
-        },
-        inclusion: {
-          within: regions,
-          message: `The region for this service is invalid. Available options are: ${regions.join(', ')}`,
         },
       },
       links: {
@@ -199,6 +187,25 @@ abstract class Service extends Entity implements CloudService {
         },
       },
     };
+
+    // Only require region to be present if the regions attribute is present
+    if (isObject(this.regions) && !isEmpty(this.regions)) {
+      const regions = Object.values(this.regions);
+      Object.assign(validations, {
+        region: {
+          presence: {
+            allowEmpty: false,
+            message: 'A region should be provided',
+          },
+          inclusion: {
+            within: regions,
+            message: `The region for this service is invalid. Available options are: ${regions.join(', ')}`,
+          },
+        },
+      });
+    }
+
+    return validations;
   }
 
   /**

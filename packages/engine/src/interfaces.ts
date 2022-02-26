@@ -101,6 +101,11 @@ export interface VaultService extends CloudService {
 
 export interface ProviderService extends CloudService {
   resource: TerraformProvider;
+  bootstrap(stack: CloudStack): void;
+  prerequisites(stack: CloudStack): void;
+}
+
+export interface StateService extends CloudService {
 }
 
 export interface SubclassRegistry<T> {

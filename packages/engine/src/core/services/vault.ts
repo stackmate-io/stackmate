@@ -1,4 +1,5 @@
 import Service from '@stackmate/core/service';
+import { CloudStack } from '@stackmate/interfaces';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { ServiceTypeChoice } from '@stackmate/types';
 
@@ -28,6 +29,10 @@ abstract class Vault extends Service {
    */
   get isRegistered(): boolean {
     return true;
+  }
+
+  onDeploy(stack: CloudStack): void {
+    /* no-op - every change should be introduced through the username / password methods */
   }
 }
 

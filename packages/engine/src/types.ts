@@ -167,3 +167,7 @@ export type VaultAttributes = ConfigurationAttributes & {
   key?: string;
   region?: string;
 };
+
+export type PrepareOperationOptions = {
+  statePath: string;
+};
