@@ -1,4 +1,4 @@
-import { BaseEntity, BaseEntityConstructor, CloudProvider, CloudService, SubclassRegistry } from '@stackmate/interfaces';
+import { BaseEntity, BaseEntityConstructor, CloudService, SubclassRegistry } from '@stackmate/interfaces';
 
 class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassRegistry<T> {
   /**
@@ -42,10 +42,5 @@ class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassR
   }
 }
 
-const CloudRegistry = new Registry<BaseEntityConstructor<CloudProvider>>();
 const ServicesRegistry = new Registry<BaseEntityConstructor<CloudService>>();
-
-export {
-  CloudRegistry,
-  ServicesRegistry,
-}
+export default ServicesRegistry;

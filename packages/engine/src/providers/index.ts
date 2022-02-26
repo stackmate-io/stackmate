@@ -1,5 +1,5 @@
-import { AwsCloud } from './aws';
+import { AwsProvider } from './aws';
 
 export {
-  AwsCloud,
+  AwsProvider,
 };

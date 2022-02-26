@@ -107,7 +107,7 @@ const AwsDatabaseService = AwsService(Database);
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
-      // provider: this.cloudProvider.cloudProvider,
+      provider: this.providerService.resource,
       username: this.vault.username(this.name, true),
       password: this.vault.password(this.name),
       dbSubnetGroupName: `db-subnet-${this.identifier}`,

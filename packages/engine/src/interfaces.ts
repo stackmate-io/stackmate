@@ -1,8 +1,9 @@
 import { App as TerraformApp, TerraformProvider, TerraformStack } from 'cdktf';
 
 import {
-  ProviderChoice, RegionList, ServiceAssociation, AttributeParsers,
-  ServiceTypeChoice, Validations, EntityAttributes, ConstructorOf, ServiceAttributes, ServiceScopeChoice, AbstractConstructor,
+  ProviderChoice, ServiceAssociation, AttributeParsers,
+  ServiceScopeChoice, AbstractConstructor, ConstructorOf,
+  ServiceTypeChoice, Validations, EntityAttributes,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -15,15 +16,6 @@ export interface BaseEntity {
   setAttribute(name: string, value: any): void;
 }
 
-export interface CloudProvider extends BaseEntity {
-  readonly provider: ProviderChoice;
-  readonly availableRegions: RegionList;
-  readonly aliases: Map<string, string | undefined>;
-  prerequisites(): ServiceAttributes[];
-  validations(): Validations & Required<{ regions: object }>;
-  services(attrs: ServiceAttributes[]): CloudService[];
-}
-
 export interface CloudService extends BaseEntity {
   readonly name: string;
   readonly provider: ProviderChoice;
@@ -31,15 +23,12 @@ export interface CloudService extends BaseEntity {
   region: string;
   links: Array<string>;
   identifier: string;
-  vault: CloudService;
-  networking: CloudService;
-  cloudProvider: CloudService;
   get isRegistered(): boolean;
   link(target: CloudService): void;
   associations(): ServiceAssociation[];
-  isDependingOn(service: CloudService): boolean;
-  parsers(): AttributeParsers & Required<{ name: Function, region: Function, links: Function }>;
-  validations(): Validations & Required<{ name: object, region: object, links: object }>;
+  isAssociatedWith(service: CloudService): boolean;
+  parsers(): AttributeParsers & Required<{ name: Function, links: Function }>;
+  validations(): Validations & Required<{ name: object, links: object }>;
   register(stack: CloudStack): void;
   scope(name: ServiceScopeChoice): CloudService;
   onPrepare(stack: CloudStack): void;
@@ -108,6 +97,10 @@ export interface CloudApp extends TerraformApp {
 export interface VaultService extends CloudService {
   username(service: string, root: boolean): string;
   password(service: string): string;
+}
+
+export interface ProviderService extends CloudService {
+  resource: TerraformProvider;
 }
 
 export interface SubclassRegistry<T> {

@@ -32,7 +32,6 @@ export const SERVICE_TYPE = {
   LOAD_BALANCER: 'loadbalancer',
   MEMCACHED: 'memcached',
   MAILER: 'mailer',
-  NETWORKING: 'networking',
   PROVIDER: 'provider',
   REDIS: 'redis',
   SSL: 'ssl',

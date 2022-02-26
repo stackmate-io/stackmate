@@ -1,59 +1,34 @@
-import Service from '@stackmate/core/service';
-import Parser from '@stackmate/lib/parsers';
-import { SERVICE_TYPE } from '@stackmate/constants';
-import { ServiceTypeChoice } from '@stackmate/types';
-import { Attribute } from '@stackmate/lib/decorators';
+import { snakeCase } from 'lodash';
 import { TerraformProvider } from 'cdktf';
 
-abstract class Provider extends Service {
-  /**
-   * @var {String} alias the alias for the provider (eg. aws_eu_central_1)
-   */
-  @Attribute alias: string;
+import Service from '@stackmate/core/service';
+import { SERVICE_TYPE } from '@stackmate/constants';
+import { ServiceTypeChoice } from '@stackmate/types';
+import { ProviderService } from '@stackmate/interfaces';
 
+abstract class Provider extends Service implements ProviderService {
   /**
    * @var {ServiceTypeChoice} type the service's type
    */
   readonly type: ServiceTypeChoice = SERVICE_TYPE.PROVIDER;
 
   /**
-   * @var {TerraformProvider} cloudProvider the cloud provider instance
+   * @var {TerraformProvider} resource the provider resource
    */
-  cloudProvider: TerraformProvider;
+  resource: TerraformProvider;
 
   /**
-   * @returns {Boolean} whether the provider is registered in the stack
+   * @returns {Boolean} whether the provider has been registered
    */
   get isRegistered(): boolean {
-    return this.cloudProvider instanceof TerraformProvider;
+    return this.resource instanceof TerraformProvider;
   }
 
   /**
-   * @returns {Object} the parser functions to apply to the service's attributes
+   * @returns {String} the alias to use for the provider
    */
-  parsers() {
-    return {
-      ...super.parsers(),
-      alias: Parser.parseString,
-    };
-  }
-
-  /**
-   * @returns {Validations} the validations for the service
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      alias: {
-        presence: {
-          allowEmpty: false,
-        },
-        format: {
-          pattern: '^([0-9A-Za-z_]+)$',
-          message: 'Please provide a valid alias for the provider',
-        }
-      },
-    };
+  public get alias(): string {
+    return `${snakeCase(this.provider)}_${snakeCase(this.region)}`;
   }
 }
 

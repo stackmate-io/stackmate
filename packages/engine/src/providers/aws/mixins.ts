@@ -1,4 +1,3 @@
-import { AwsVpcService } from '@stackmate/providers/aws';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { PROVIDER } from '@stackmate/constants';
 import { AbstractConstructor, ProviderChoice, RegionList } from '@stackmate/types';
@@ -16,31 +15,6 @@ const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
      * @readonly
      */
     readonly regions: RegionList = AWS_REGIONS;
-
-    /**
-     * @var {AwsVpcService} networking the networking service to connect to
-     */
-    networking: AwsVpcService;
-
-    /**
-     * @var {String} vpcId the vpc id to use in the resources
-     * @protected
-     */
-    vpcId: string;
-
-    /**
-     * @var {Array<String>} securityGroupIds the security group ids for the service
-     * @protected
-     */
-    securityGroupIds: Array<string> = [];
-
-    /**
-     * @param {AwsVpcService} vpc the networking service
-     */
-    onNetworkingRegistered(vpc: AwsVpcService) {
-      this.vpcId = vpc.id;
-      this.securityGroupIds.push(vpc.securityGroupId);
-    }
   }
 
   return AwsServiceWrapper;

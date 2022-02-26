@@ -5,6 +5,7 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { RegisterService } from '@stackmate/lib/decorators';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { CloudStack } from '@stackmate/interfaces';
 
 const { AWS } = PROVIDER;
 const { VAULT } = SERVICE_TYPE;
@@ -67,6 +68,10 @@ const AwsVaultService = AwsService(Vault);
   }
 
   password(service: string): string {
+    throw new Error('Method not implemented.');
+  }
+
+  onDeploy(stack: CloudStack): void {
     throw new Error('Method not implemented.');
   }
 }

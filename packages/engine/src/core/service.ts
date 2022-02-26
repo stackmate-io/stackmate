@@ -4,12 +4,9 @@ import { isEmpty, merge } from 'lodash';
 import Entity from '@stackmate/lib/entity';
 import Parser from '@stackmate/lib/parsers';
 import Profile from '@stackmate/core/profile';
-import Vault from '@stackmate/core/services/vault';
-import Networking from '@stackmate/core/services/networking';
-import Provider from '@stackmate/core/services/provider';
 import { Attribute } from '@stackmate/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/constants';
-import { CloudService, CloudStack } from '@stackmate/interfaces';
+import { CloudService, CloudStack, ProviderService, VaultService } from '@stackmate/interfaces';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
@@ -67,19 +64,14 @@ abstract class Service extends Entity implements CloudService {
   abstract get isRegistered(): boolean;
 
   /**
+   * @var {ProviderService} cloudProvider the cloud provider service
+   */
+  providerService: ProviderService;
+
+  /**
    * @var {Vault} vault the vault service to get credentials from
    */
-  vault: Vault;
-
-  /**
-   * @var {Networking} networking the networking service to connect to
-   */
-  networking: Networking;
-
-  /**
-   * @var {Provider} cloudProvider the cloud provider service
-   */
-  cloudProvider: Provider;
+  vault: VaultService;
 
   /**
    * Provisioning when we initially prepare a stage
@@ -108,6 +100,22 @@ abstract class Service extends Entity implements CloudService {
    */
   onDestroy(stack: CloudStack): void {
     // no-op. this just removes the resources from the stack
+  }
+
+  /**
+   * Callback to run when the cloud provider has been registered
+   * @param {ProviderService} provider the provider service
+   */
+  onProviderRegistered(provider: ProviderService) {
+    this.providerService = provider;
+  }
+
+  /**
+   * Callback to run when the vault service has been registered
+   * @param {CloudService} vault the vault service
+   */
+  onVaultRegistered(vault: VaultService) {
+    this.vault = vault;
   }
 
   /**
@@ -199,7 +207,7 @@ abstract class Service extends Entity implements CloudService {
    * @param scope the scope to apply to the service
    * @returns {CloudService} the service with the scope applied
    */
-  scope(scope: ServiceScopeChoice): Service {
+  scope(scope: ServiceScopeChoice): CloudService {
     let handlerFunction: (stack: CloudStack) => void;
 
     switch(scope) {
@@ -217,35 +225,12 @@ abstract class Service extends Entity implements CloudService {
     }
 
     Reflect.set(this, 'register', new Proxy(this.register, {
-      apply: (_target, thisArg, args: [stack: CloudStack]) => {
-        return handlerFunction.apply(thisArg, args);
-      },
+      apply: (_target, thisArg, args: [stack: CloudStack]) => (
+        handlerFunction.apply(thisArg, args)
+      ),
     }));
 
     return this;
-  }
-
-  /**
-   * Callback to run when the cloud provider has been registered
-   * @param {CloudService} provider the provider service
-   */
-  onCloudProviderRegistered(provider: Provider) {
-    this.cloudProvider = provider;
-  }
-
-  /**
-   * Callback to run when the vault service has been registered
-   * @param {CloudService} vault the vault service
-   */
-  onVaultRegistered(vault: Vault) {
-    this.vault = vault;
-  }
-
-  /**
-   * @param {Networking} networking the networking service
-   */
-  onNetworkingRegistered(networking: Networking) {
-    this.networking = networking;
   }
 
   /**
@@ -267,17 +252,10 @@ abstract class Service extends Entity implements CloudService {
           && srv.region === this.region
           && srv.provider === this.provider
       ),
-      handler: this.onCloudProviderRegistered.bind(this),
+      handler: this.onProviderRegistered.bind(this),
     }, {
       lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
       handler: this.onVaultRegistered.bind(this),
-    }, {
-      lookup: (srv: CloudService) => (
-        srv.type === SERVICE_TYPE.NETWORKING
-          && srv.region === this.region
-          && srv.provider === this.provider
-      ),
-      handler: this.onNetworkingRegistered.bind(this),
     }];
   }
 
@@ -285,7 +263,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} service the service to check whether the current one is depending on
    * @returns {Boolean} whether the current service is depending upon the provided one
    */
-  isDependingOn(service: CloudService): boolean {
+  isAssociatedWith(service: CloudService): boolean {
     // We're comparing with the current service itself
     if (this.identifier === service.identifier) {
       return false;
@@ -314,6 +292,10 @@ abstract class Service extends Entity implements CloudService {
 
     if (this.isRegistered) {
       throw new Error('The service is already registered to the stack, we can’t link the service');
+    }
+
+    if (!this.isAssociatedWith(target)) {
+      throw new Error(`Service ${this.name} is not associated with the ${target.name || target.type} service`);
     }
 
     // Find the handlers that apply to the associated service

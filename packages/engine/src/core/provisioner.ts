@@ -52,12 +52,12 @@ class Provisioner {
     services.forEach((service) => {
       // Find the dependencies and dependables for the service
       services.forEach((dep) => {
-        if (service.isDependingOn(dep)) {
+        if (service.isAssociatedWith(dep)) {
           const dependencies = this.dependencies.get(service.name) || [];
           dependencies.push(dep);
 
           this.dependencies.set(service.name, dependencies);
-        } else if (dep.isDependingOn(service)) {
+        } else if (dep.isAssociatedWith(service)) {
           const dependables = this.dependencies.get(service.name) || [];
           dependables.push(service);
 

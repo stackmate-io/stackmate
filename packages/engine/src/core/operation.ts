@@ -1,9 +1,9 @@
 import { Memoize } from 'typescript-memoize';
-import { groupBy, map } from 'lodash';
+import { groupBy } from 'lodash';
 
 import Project from '@stackmate/core/project';
 import Provisioner from '@stackmate/core/provisioner';
-import { CloudRegistry } from '@stackmate/core/registry';
+import ServicesRegistry from '@stackmate/core/registry';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudService } from '@stackmate/interfaces';
 
@@ -45,22 +45,21 @@ abstract class Operation {
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
   @Memoize() get services() {
-    const { secrets: vaultConfig, stages: { [this.stageName]: stageServices } } = this.project;
-
-    const allServices = [
-      { type: SERVICE_TYPE.VAULT, ...vaultConfig },
-      ...Object.values(stageServices),
-    ];
-
+    const { CLOUD, VAULT } = SERVICE_TYPE;
     const instances: CloudService[] = [];
-    const groupped = groupBy(allServices, 'provider');
+    const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
 
-    Object.keys(groupped).map(provider => {
-      const serviceAttributes = groupped[provider];
-      const regions = map(serviceAttributes, 'region');
+    const services = groupBy([{ type: VAULT, ...vault }, ...Object.values(stage)], 'provider');
+    Object.keys(services).map(provider => {
+      const servicesPerRegion = groupBy(services[provider], 'region');
 
-      const cloud = CloudRegistry.get({ provider }).factory({ regions });
-      instances.push(...cloud.services(serviceAttributes));
+      Object.keys(servicesPerRegion).forEach(region => {
+        const services = [{ type: CLOUD, provider, region }, ...servicesPerRegion[region]];
+
+        instances.push(
+          ...services.map(srv => ServicesRegistry.get({ type: srv.type, provider }).factory(srv)),
+        );
+      });
     });
 
     return instances;
