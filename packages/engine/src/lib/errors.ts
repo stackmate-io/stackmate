@@ -10,7 +10,13 @@ export class ValidationError extends Error {
   errors: ValidationErrorList;
 
   constructor(message: string, errors: ValidationErrorList = {}) {
-    super(message);
+    let msg = message;
+
+    Object.keys(errors).forEach(key => {
+      msg += `\n\t${key}: ${errors[key].join("\n\t\t")}`;
+    });
+
+    super(msg);
 
     this.errors = errors;
   }

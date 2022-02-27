@@ -5,14 +5,12 @@ import Parser from '@stackmate/lib/parsers';
 import Provider from '@stackmate/core/services/provider';
 import { CloudStack } from '@stackmate/interfaces';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { Attribute } from '@stackmate/lib/decorators';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/constants';
 import { ProviderChoice, RegionList } from '@stackmate/types';
-import { Attribute, RegisterService } from '@stackmate/lib/decorators';
 import { getNetworkingCidrBlocks } from '@stackmate/lib/helpers';
 
-const { AWS } = PROVIDER;
-
-@RegisterService(AWS, SERVICE_TYPE.PROVIDER) class AwsProvider extends Provider {
+class AwsProvider extends Provider {
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */

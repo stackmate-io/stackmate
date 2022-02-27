@@ -38,6 +38,16 @@ class Profile {
   }
 
   /**
+   * Checks whether the given profile is the default one
+   *
+   * @param {String} name the profile's name
+   * @returns {Boolean} whether the given profile is the default
+   */
+  static isDefault(name: string): boolean {
+    return name === Profile.DEFAULT;
+  }
+
+  /**
    * Checks whether a profile exists
    *
    * @param {String} provider the cloud provider's name
@@ -45,6 +55,10 @@ class Profile {
    * @param {String} name the profile's name
    */
   static exists(provider: ProviderChoice, service: ServiceTypeChoice, name: string): boolean {
+    if (Profile.isDefault(name)) {
+      return true;
+    }
+
     return fileExistsSync(Profile.path(provider, service, name, { withExtension: true }));
   }
 
@@ -62,6 +76,12 @@ class Profile {
       // eslint-disable-next-line global-require,import/no-dynamic-require
       return require(Profile.path(provider, service, name));
     } catch (error) {
+      // Tolerate missing default profiles so that we avoid
+      // having default.ts files that export an empty object
+      if (Profile.isDefault(name)) {
+        return {};
+      }
+
       throw new ProfileNotFoundError(name);
     }
   }

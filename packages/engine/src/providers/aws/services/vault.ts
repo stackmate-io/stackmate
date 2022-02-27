@@ -3,16 +3,11 @@ import AwsService from '@stackmate/providers/aws/mixins';
 import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
 import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
-import { RegisterService } from '@stackmate/lib/decorators';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { CloudStack } from '@stackmate/interfaces';
-
-const { AWS } = PROVIDER;
-const { VAULT } = SERVICE_TYPE;
 
 const AwsVaultService = AwsService(Vault);
 
-@RegisterService(AWS, VAULT) class AwsSsmParamsService extends AwsVaultService {
+class AwsSsmParamsService extends AwsVaultService {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */

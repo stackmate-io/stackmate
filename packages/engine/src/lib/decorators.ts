@@ -1,9 +1,6 @@
 import 'reflect-metadata';
 
 import Entity from '@stackmate/lib/entity';
-import ServicesRegistry from '@stackmate/core/registry';
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
-import { BaseEntityConstructor, CloudService } from '@stackmate/interfaces';
 
 export const Attribute = function Attribute(target: Entity, propertyKey: string) {
   if (!(target instanceof Entity)) {
@@ -26,13 +23,4 @@ export const Attribute = function Attribute(target: Entity, propertyKey: string)
     configurable: false,
     enumerable: true,
   });
-};
-
-export const RegisterService = function RegisterService(
-  provider: ProviderChoice,
-  type: ServiceTypeChoice,
-) {
-  return (target: BaseEntityConstructor<CloudService>) => {
-    ServicesRegistry.add(target, provider, type);
-  }
 };

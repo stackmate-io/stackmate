@@ -106,7 +106,7 @@ abstract class Service extends Entity implements CloudService {
    * Callback to run when the cloud provider has been registered
    * @param {ProviderService} provider the provider service
    */
-  onProviderRegistered(provider: ProviderService) {
+  onProviderRegistered(provider: ProviderService): void {
     this.providerService = provider;
   }
 
@@ -141,7 +141,7 @@ abstract class Service extends Entity implements CloudService {
    * @returns {String} the message to display when the entity is invalid
    */
   public get validationMessage(): string {
-    return `Invalid configuration for the ${this.name ? `“${this.name}”` : ''} ${this.type} service`;
+    return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
   }
 
   /**

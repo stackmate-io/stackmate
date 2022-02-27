@@ -1,12 +1,12 @@
+import { Testing } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
+import { deployProject } from 'tests/helpers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
-import { synthesizeProject } from 'tests/helpers';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
-import { Testing } from 'cdktf';
 
 const projectConfig = {
   name: 'database-only-project',
@@ -33,7 +33,7 @@ const projectConfig = {
 
 describe('Database only project', () => {
   it('registers the production stage for the project', async () => {
-    const { scope, stack } = await synthesizeProject(projectConfig);
+    const { scope, stack } = await deployProject(projectConfig);
 
     expect(Testing.fullSynth(stack)).toBeValidTerraform();
 

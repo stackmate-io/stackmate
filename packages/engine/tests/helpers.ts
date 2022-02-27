@@ -2,7 +2,6 @@ import fs from 'fs';
 import os from 'os';
 import faker from 'faker';
 import sinon from 'sinon';
-import YAML from 'yaml';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';
@@ -10,6 +9,7 @@ import { Manifest, Testing } from 'cdktf';
 import Project from '@stackmate/core/project';
 import Service from '@stackmate/core/service';
 import Environment from '@stackmate/lib/environment';
+import DeployOperation from '@stackmate/operations/deploy';
 import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice } from '@stackmate/types';
 import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
@@ -89,8 +89,6 @@ export const getServiceRegisterationResults = async ({
   variables: object;
   [name: string]: any;
 }> => {
-  let prerequisitesGenerator = ({ stack }: { stack: CloudStack }) => ({});
-
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;
 
@@ -99,11 +97,8 @@ export const getServiceRegisterationResults = async ({
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stackName });
 
-          const service = serviceClass.factory(
-            serviceConfig, cloudStack, prerequisitesGenerator({ stack: cloudStack }),
-          );
-
-          service.provision(cloudStack);
+          const service = serviceClass.factory(serviceConfig);
+          service.scope('deployable').register(cloudStack);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
 
@@ -131,34 +126,19 @@ export const getServiceRegisterationResults = async ({
  * @param {Object} secrets the service's secrets to be used
  * @returns {Object} the scope as string and stack as object
  */
-export const synthesizeProject = async (
+export const deployProject = async (
   projectConfig: object,
-  secrets: object = {},
   stageName: string = 'production',
+  secrets: object = {},
 ): Promise<{ scope: string, stack: CloudStack, output: string }> => {
   // Set the app's output path to the temp directory
   sinon.stub(Environment, 'get').withArgs(ENVIRONMENT_VARIABLE.OUTPUT_DIR).returns(os.tmpdir());
+  const project = Project.factory(projectConfig);
 
-  const inputPath = joinPaths(os.tmpdir(), 'input-files', '.stackmate', 'config.yml');
+  const operation = new DeployOperation(project, stageName);
+  await operation.run();
 
-  // Stub the readFile that is used in projet file loading, to return the project config we set
-  const readStub = sinon.stub(fs.promises, 'readFile');
-  readStub.withArgs(inputPath).resolves(YAML.stringify(projectConfig));
-  (fs.promises.readFile as sinon.SinonStub).callThrough();
-
-  // Same for the existsSync call
-  const existsStub = sinon.stub(fs, 'existsSync');
-  existsStub.withArgs(inputPath).returns(true);
-  (fs.existsSync as sinon.SinonStub).callThrough();
-
-  const project = await Project.load(inputPath);
-  project.select(stageName).prepare();
-
-  // Restore the stubs
-  readStub.restore();
-  existsStub.restore();
-
-  const { stack } = project.stage;
+  const { provisioner: { stack } } = operation;
 
   return {
     stack,

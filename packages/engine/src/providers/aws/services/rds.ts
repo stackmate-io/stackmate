@@ -1,4 +1,4 @@
-import { get, isUndefined } from 'lodash';
+import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
@@ -6,8 +6,6 @@ import Database from '@stackmate/core/services/database';
 import AwsService from '@stackmate/providers/aws/mixins';
 import { OneOf } from '@stackmate/types';
 import { CloudStack } from '@stackmate/interfaces';
-import { RegisterService } from '@stackmate/lib/decorators';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -15,12 +13,9 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
 } from '@stackmate/providers/aws/constants';
 
-const { AWS } = PROVIDER;
-const { DATABASE: DB } = SERVICE_TYPE;
-
 const AwsDatabaseService = AwsService(Database);
 
-@RegisterService(AWS, DB) class AwsRdsService extends AwsDatabaseService {
+class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
    */
@@ -82,7 +77,7 @@ const AwsDatabaseService = AwsService(Database);
           message: 'You have to specify the database version to run',
         },
         validateVersion: {
-          availableVersions: get(RDS_MAJOR_VERSIONS_PER_ENGINE, this.engine, []),
+          availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
         },
       },
     };

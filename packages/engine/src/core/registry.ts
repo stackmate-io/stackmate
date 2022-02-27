@@ -1,47 +1,33 @@
-import { BaseEntity, BaseEntityConstructor, CloudService, SubclassRegistry } from '@stackmate/interfaces';
+import Registry from '@stackmate/lib/registry';
+import * as AwsServices from '@stackmate/providers/aws';
+import { BaseEntityConstructor, CloudService } from '@stackmate/interfaces';
+import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
-class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassRegistry<T> {
-  /**
-   * @var {Map} items the items in the registry
-   */
-  items: Map<string, T> = new Map();
+interface ServiceConstructor extends BaseEntityConstructor<CloudService> {}
 
+class ServicesRegistry extends Registry<ServiceConstructor> {
   /**
-   * Adds a class to the registry
+   * Adds a service to the registry
    *
-   * @param {Function} classConstructor the class constructor to add
-   * @param {Array} attrs any attributes to hash and look up by
+   * @param {ServiceConstructor} classConstructor the service class to add to the registry
+   * @param {ProviderChoice} provider the provider that the service uses
+   * @param {ServiceTypeChoice} type the service's type
    */
-  add(classConstructor: T, ...attrs: string[]): void {
-    this.items.set(this.hash(attrs), classConstructor);
-  }
-
-  /**
-   * Returns a class constructor based on a set of attributes
-   *
-   * @param {Array} attrs the list of attributes to look up the class by
-   * @returns {Function} the class constructor
-   */
-  get(attributes: object): T {
-    const attrs = Object.values(attributes);
-    const cls = this.items.get(this.hash(attrs));
-
-    if (!cls) {
-      throw new Error(`We couldn't find a subclass for args ${attrs.join(', ')}`);
-    }
-
-    return cls;
-  }
-
-  /**
-   * @param {Array<String>} attrs hashes an array of strings
-   * @returns {String} the hashed string
-   */
-  protected hash(attrs: string[]): string {
-    return attrs.map(att => String(att)).join('-');
+  add(
+    classConstructor: ServiceConstructor,
+    provider: ProviderChoice,
+    type: ServiceTypeChoice,
+  ): void {
+    super.add(classConstructor, provider, type);
   }
 }
 
-const ServicesRegistry = new Registry<BaseEntityConstructor<CloudService>>();
+const registry = new ServicesRegistry();
 
-export default ServicesRegistry;
+// Add the AWS services to the registry
+registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);
+registry.add(AwsServices.Database, PROVIDER.AWS, SERVICE_TYPE.DATABASE);
+registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
+
+export default registry as ServicesRegistry;

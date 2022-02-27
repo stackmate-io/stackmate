@@ -48,14 +48,20 @@ abstract class Operation {
     const { PROVIDER, VAULT } = SERVICE_TYPE;
     const instances: CloudService[] = [];
     const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
-    const stageServices = [{ type: VAULT, ...vault }, ...Object.values(stage)];
+    const stageServices = [
+      { type: VAULT, name: 'project-vault', ...vault },
+      ...Object.values(stage),
+    ];
 
     const services = groupBy(stageServices, 'provider');
     Object.keys(services).map(provider => {
       const servicesPerRegion = groupBy(services[provider], 'region');
 
       Object.keys(servicesPerRegion).forEach(region => {
-        const services = [{ type: PROVIDER, provider, region }, ...servicesPerRegion[region]];
+        const services = [
+          { type: PROVIDER, name: `provider-${provider}-${region}`, provider, region },
+          ...servicesPerRegion[region],
+        ];
 
         instances.push(
           ...services.map(srv => ServicesRegistry.get({ type: srv.type, provider }).factory(srv)),
