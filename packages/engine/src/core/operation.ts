@@ -49,7 +49,7 @@ abstract class Operation {
     const instances: CloudService[] = [];
     const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
     const stageServices = [
-      { type: VAULT, name: 'project-vault', ...vault },
+      { type: VAULT, name: `project-vault-${this.stageName}`, ...vault },
       ...Object.values(stage),
     ];
 

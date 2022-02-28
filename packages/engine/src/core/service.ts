@@ -111,7 +111,7 @@ abstract class Service extends Entity implements CloudService {
    * @returns {String} the service's identifier
    */
   public get identifier(): string {
-    return `${this.provider}-${this.name}`.toLowerCase();
+    return this.name.toLowerCase();
   }
 
   /**
@@ -205,7 +205,6 @@ abstract class Service extends Entity implements CloudService {
    */
   scope(scope: ServiceScopeChoice): CloudService {
     let handlerFunction: (stack: CloudStack) => void;
-    console.log(`Applying scope ${scope} to ${this.identifier}`);
 
     switch(scope) {
       case 'preparable':

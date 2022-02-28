@@ -89,7 +89,9 @@ describe('Entity', () => {
       } catch (error) {
         const err: ValidationError = error as ValidationError;
         expect(err).toBeInstanceOf(ValidationError);
-        expect(err.message).toEqual('The entity is invalid');
+        expect(err.message).toContain('The entity is invalid');
+        expect(err.message).toContain(`name: You have to specify a name to use`);
+        expect(err.message).toContain(`number: The number provided is invalid`);
         expect(err.errors).toBeInstanceOf(Object);
         expect(err.errors).toMatchObject({
           name: ['You have to specify a name to use'],

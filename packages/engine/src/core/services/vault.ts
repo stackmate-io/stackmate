@@ -40,7 +40,6 @@ abstract class Vault extends Service {
 
   onDeploy(stack: CloudStack): void {
     /* no-op - every change should be introduced through the username / password methods */
-    console.log('marking the vault as registered');
     this.registered = true;
   }
 }

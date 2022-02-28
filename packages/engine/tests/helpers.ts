@@ -10,11 +10,13 @@ import Project from '@stackmate/core/project';
 import Service from '@stackmate/core/service';
 import Environment from '@stackmate/lib/environment';
 import DeployOperation from '@stackmate/operations/deploy';
+import ServiceRegistry from '@stackmate/core/registry';
 import { CloudStack } from '@stackmate/interfaces';
-import { FactoryOf, ProviderChoice } from '@stackmate/types';
-import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
+import { FactoryOf, ProviderChoice, ServiceAttributes } from '@stackmate/types';
+import { ENVIRONMENT_VARIABLE, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
 /**
+ * Enhances the terraform stack with the properties we apply in the Stack class
  *
  * @param {TerraformStack} stack the stack to enhance
  * @param {Object} opts
@@ -68,6 +70,46 @@ export const withEphemeralManifest = (
 };
 
 /**
+ * Returns the prerequisites to use for service provisioning
+ *
+ * @param {Object} options
+ * @param {ProviderChoice} options.provider the provider for the prerequisites
+ * @param {String} options.region the rgion for the prerequisites
+ * @returns {Object} the prerequisites for the service registration
+ */
+export const getPrerequisites = (
+  { provider, region }: { provider: ProviderChoice, region: string },
+) => {
+  const cloudProvider = ServiceRegistry.get({ provider, type: SERVICE_TYPE.PROVIDER }).factory({
+    name: `provider-${provider}-default`,
+    provider,
+    region,
+  });
+
+  const vaultAttrs = {
+    name: `project-vault-${provider}`,
+    provider,
+    region,
+  }
+
+  if (provider === PROVIDER.AWS) {
+    const awsAccount = 111122223333;
+    const awsHash = '1234abcd-12ab-34cd-56ef-1234567890ab';
+
+    Object.assign(vaultAttrs, {
+      key: `arn:aws:kms:${region}:${awsAccount}:key/${awsHash}`,
+    });
+  }
+
+  const vault = ServiceRegistry.get({ provider, type: SERVICE_TYPE.VAULT }).factory(vaultAttrs);
+
+  return {
+    cloudProvider: cloudProvider.scope('deployable'),
+    vault: vault.scope('deployable'),
+  };
+};
+
+/**
  * Registers a service into the stack and returns the result
  *
  * @param {Object} options
@@ -82,7 +124,7 @@ export const getServiceRegisterationResults = async ({
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
-  serviceConfig: object;
+  serviceConfig: Omit<ServiceAttributes, 'provider'>;
   stackName?: string;
 }): Promise<{
   scope: string;
@@ -92,13 +134,25 @@ export const getServiceRegisterationResults = async ({
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;
 
+    const { region } = serviceConfig;
+    const { cloudProvider, vault } = getPrerequisites({ provider, region });
+
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stackName });
 
-          const service = serviceClass.factory(serviceConfig);
-          service.scope('deployable').register(cloudStack);
+          const service = serviceClass.factory(serviceConfig).scope('deployable');
+
+          // Register the prerequisites
+          cloudProvider.register(cloudStack);
+          vault.register(cloudStack);
+          service.link(cloudProvider);
+          if (service.isAuthenticatable) {
+            service.link(vault);
+          }
+
+          service.register(cloudStack);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
 

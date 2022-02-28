@@ -68,6 +68,7 @@ describe.only('Database only project', () => {
       engine_version: '8.0',
       identifier: 'mysqldatabase-production',
       instance_class: 'db.t3.micro',
+      multi_az: false,
       port: 3306,
       publicly_accessible: true,
       skip_final_snapshot: false,

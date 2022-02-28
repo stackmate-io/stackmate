@@ -59,11 +59,13 @@ class AwsSsmParamsService extends AwsVaultService {
   }
 
   username(service: string, root: boolean): string {
-    throw new Error('Method not implemented.');
+    // throw new Error('Method not implemented.');
+    return 'richard';
   }
 
   password(service: string): string {
-    throw new Error('Method not implemented.');
+    // throw new Error('Method not implemented.');
+    return 'abc123';
   }
 
   onPrepare(stack: CloudStack): void {

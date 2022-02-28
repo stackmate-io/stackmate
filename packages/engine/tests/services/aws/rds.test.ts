@@ -5,7 +5,7 @@ import Profile from '@stackmate/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
-import { AwsRdsService } from '@stackmate/providers/aws';
+import { Database as AwsRdsService } from '@stackmate/providers/aws';
 
 describe('AwsRdsService', () => {
   describe('instantiation', () => {
@@ -32,8 +32,9 @@ describe('AwsRdsService', () => {
     it('returns the attribute names', () => {
       service = AwsRdsService.factory(serviceConfig);
       expect(new Set(service.attributeNames)).toEqual(new Set([
-        'size', 'storage', 'version', 'database', 'nodes', 'rootCredentials',
-        'engine', 'port', 'name', 'region', 'links', 'profile', 'overrides',
+        'size', 'storage', 'version', 'database', 'nodes',
+        'engine', 'port', 'name', 'region', 'links',
+        'profile', 'overrides',
       ]));
     });
   });
@@ -59,23 +60,26 @@ describe('AwsRdsService', () => {
         backup_retention_period: 0,
         copy_tags_to_snapshot: true,
         count: 1,
-        db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stackName}`,
         delete_automated_backups: true,
         deletion_protection: false,
-        enabled_cloudwatch_logs_exports: ['error'],
         engine: serviceConfig.engine,
         engine_version: serviceConfig.version,
         identifier: `${serviceConfig.name}-${stackName}`,
         instance_class: serviceConfig.size,
         multi_az: false,
         name: serviceConfig.database,
+        db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stackName}`,
+        parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stackName}-params.name}`,
         port: 3306,
         publicly_accessible: true,
         skip_final_snapshot: true,
         storage_type: 'gp2',
-        parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stackName}-params.name}`,
-        // password: `$\{var.${stackName}-${serviceConfig.name}-rootpassword}`,
-        // username: `$\{var.${stackName}-${serviceConfig.name}-rootusername}`,
+        /** @todo */
+        // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports
+        enabled_cloudwatch_logs_exports: ['error'],
+        username: 'richard',
+        password: 'abc123',
+        provider: "aws.aws_eu_central_1",
       });
     });
   });
