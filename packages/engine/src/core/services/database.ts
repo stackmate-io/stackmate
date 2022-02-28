@@ -12,6 +12,11 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
   readonly type: ServiceTypeChoice = SERVICE_TYPE.DATABASE;
 
   /**
+   * @var {Boolean} isAuthenticatable the service should use authentication
+   */
+  readonly isAuthenticatable: boolean = true;
+
+  /**
    * @var {String} size the size for the RDS instance
    */
   @Attribute size: string;

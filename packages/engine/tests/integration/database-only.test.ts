@@ -31,7 +31,7 @@ const projectConfig = {
   },
 };
 
-describe('Database only project', () => {
+describe.only('Database only project', () => {
   it('registers the production stage for the project', async () => {
     const { scope, stack } = await deployProject(projectConfig);
 

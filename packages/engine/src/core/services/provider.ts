@@ -13,6 +13,11 @@ abstract class Provider extends Service implements ProviderService {
   readonly type: ServiceTypeChoice = SERVICE_TYPE.PROVIDER;
 
   /**
+   * @var {Boolean} isAuthenticatable the service should not use authentication
+   */
+  readonly isAuthenticatable: boolean = false;
+
+  /**
    * @var {TerraformProvider} resource the provider resource
    */
   resource: TerraformProvider;

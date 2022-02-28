@@ -23,7 +23,7 @@ class PriorityQueue<T> {
         return;
       }
 
-      if (this.items[index][1] > priority) {
+      if (this.items[index][1] < priority) {
         this.items.splice(index, 0, [item, priority]);
         return;
       }

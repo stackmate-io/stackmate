@@ -68,10 +68,6 @@ class AwsSsmParamsService extends AwsVaultService {
 
   onPrepare(stack: CloudStack): void {
   }
-
-  onDeploy(stack: CloudStack): void {
-    /* no-op - every change should be introduced through the username / password methods */
-  }
 }
 
 export default AwsSsmParamsService;

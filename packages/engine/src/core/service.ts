@@ -59,6 +59,11 @@ abstract class Service extends Entity implements CloudService {
   abstract readonly provider: ProviderChoice;
 
   /**
+   * @var {Boolean} isAuthenticatable whether the service requires credentials
+   */
+  abstract readonly isAuthenticatable: boolean;
+
+  /**
    * @returns {Boolean} whether the service is registered in the stack
    */
   abstract get isRegistered(): boolean;
@@ -100,22 +105,6 @@ abstract class Service extends Entity implements CloudService {
    */
   onDestroy(stack: CloudStack): void {
     // no-op. this just removes the resources from the stack
-  }
-
-  /**
-   * Callback to run when the cloud provider has been registered
-   * @param {ProviderService} provider the provider service
-   */
-  onProviderRegistered(provider: ProviderService): void {
-    this.providerService = provider;
-  }
-
-  /**
-   * Callback to run when the vault service has been registered
-   * @param {CloudService} vault the vault service
-   */
-  onVaultRegistered(vault: VaultService) {
-    this.vault = vault;
   }
 
   /**
@@ -216,6 +205,7 @@ abstract class Service extends Entity implements CloudService {
    */
   scope(scope: ServiceScopeChoice): CloudService {
     let handlerFunction: (stack: CloudStack) => void;
+    console.log(`Applying scope ${scope} to ${this.identifier}`);
 
     switch(scope) {
       case 'preparable':
@@ -253,17 +243,47 @@ abstract class Service extends Entity implements CloudService {
    * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
    */
   @Memoize() public associations(): ServiceAssociation[] {
-    return [{
+    const associations: ServiceAssociation[] = [{
       lookup: (srv: CloudService) => (
         srv.type === SERVICE_TYPE.PROVIDER
           && srv.region === this.region
           && srv.provider === this.provider
       ),
-      handler: this.onProviderRegistered.bind(this),
-    }, {
-      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
-      handler: this.onVaultRegistered.bind(this),
+      handler: (provider) => this.onProviderRegistered(provider as ProviderService),
     }];
+
+    if (this.isAuthenticatable) {
+      associations.push({
+        lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
+        handler: (vault) => this.onVaultRegistered(vault as VaultService),
+      });
+    }
+
+    return associations;
+  }
+
+  /**
+   * Callback to run when the cloud provider has been registered
+   * @param {ProviderService} provider the provider service
+   */
+  onProviderRegistered(provider: ProviderService): void {
+    this.providerService = provider;
+  }
+
+  /**
+   * Callback to run when the vault service has been registered
+   * @param {CloudService} vault the vault service
+   */
+  onVaultRegistered(vault: VaultService) {
+    this.vault = vault;
+  }
+
+  /**
+   * @param {CloudService} service the service to compare with the current one
+   * @returns {Boolean} whether the current service is the same with another one
+   */
+  isSameWith(service: CloudService): boolean {
+    return this.identifier === service.identifier;
   }
 
   /**
@@ -272,7 +292,7 @@ abstract class Service extends Entity implements CloudService {
    */
   isAssociatedWith(service: CloudService): boolean {
     // We're comparing with the current service itself
-    if (this.identifier === service.identifier) {
+    if (this.isSameWith(service)) {
       return false;
     }
 
@@ -294,15 +314,19 @@ abstract class Service extends Entity implements CloudService {
    */
   public link(target: CloudService) {
     if (!target.isRegistered) {
-      throw new Error('The service to be linked is not registered to the stack, yet');
+      throw new Error(`The service ${target.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
+    }
+
+    if (this.isSameWith(target)) {
+      throw new Error(`Attempted to link service ${this.identifier} to itself`);
     }
 
     if (this.isRegistered) {
-      throw new Error('The service is already registered to the stack, we can’t link the service');
+      throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
     }
 
     if (!this.isAssociatedWith(target)) {
-      throw new Error(`Service ${this.name} is not associated with the ${target.name || target.type} service`);
+      throw new Error(`Service ${this.identifier} is not associated with the ${target.identifier} service`);
     }
 
     // Find the handlers that apply to the associated service

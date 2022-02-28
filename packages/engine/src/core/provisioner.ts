@@ -20,11 +20,13 @@ class Provisioner {
 
   /**
    * @var {Map} dependencies a mapping of service name and the services it depends upon
+   *                         ie. they should be registered before service.name is registered
    */
   protected readonly dependencies: Map<string, CloudService[]> = new Map();
 
   /**
    * @var {Map} dependables a mapping of service name and the services that depend upon it
+   *                        ie. service.name should be registered before the dependables are
    */
   protected readonly dependables: Map<string, CloudService[]> = new Map();
 
@@ -58,8 +60,8 @@ class Provisioner {
 
           this.dependencies.set(service.name, dependencies);
         } else if (dep.isAssociatedWith(service)) {
-          const dependables = this.dependencies.get(service.name) || [];
-          dependables.push(service);
+          const dependables = this.dependables.get(service.name) || [];
+          dependables.push(dep);
 
           this.dependables.set(service.name, dependables);
         }

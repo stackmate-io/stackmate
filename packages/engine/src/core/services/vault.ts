@@ -10,6 +10,13 @@ abstract class Vault extends Service {
   readonly type: ServiceTypeChoice = SERVICE_TYPE.VAULT;
 
   /**
+   * @var {Boolean} isAuthenticatable the service should not use authentication
+   */
+  readonly isAuthenticatable: boolean = false;
+
+  private registered: boolean = false;
+
+  /**
    * Returns the username for a service
    *
    * @param {String} service the service to get the username for
@@ -28,11 +35,13 @@ abstract class Vault extends Service {
    * @returns {Boolean} whether the vault is registered in the stack
    */
   get isRegistered(): boolean {
-    return true;
+    return this.registered;
   }
 
   onDeploy(stack: CloudStack): void {
     /* no-op - every change should be introduced through the username / password methods */
+    console.log('marking the vault as registered');
+    this.registered = true;
   }
 }
 

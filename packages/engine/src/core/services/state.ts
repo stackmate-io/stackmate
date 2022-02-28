@@ -10,6 +10,11 @@ abstract class State extends Service implements StateService {
   type: ServiceTypeChoice = SERVICE_TYPE.STATE;
 
   /**
+   * @var {Boolean} isAuthenticatable the service should not use authentication
+   */
+  readonly isAuthenticatable: boolean = false;
+
+  /**
    * Provisions the state storage itself
    *
    * @param {CloudStack} stack the stack to deploy the resource to

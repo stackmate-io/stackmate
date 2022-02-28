@@ -23,6 +23,8 @@ export interface CloudService extends BaseEntity {
   region: string;
   links: Array<string>;
   identifier: string;
+  providerService: ProviderService;
+  vault: VaultService;
   get isRegistered(): boolean;
   link(target: CloudService): void;
   associations(): ServiceAssociation[];
@@ -105,8 +107,7 @@ export interface ProviderService extends CloudService {
   prerequisites(stack: CloudStack): void;
 }
 
-export interface StateService extends CloudService {
-}
+export interface StateService extends CloudService {}
 
 export interface SubclassRegistry<T> {
   items: Map<string, T>;
