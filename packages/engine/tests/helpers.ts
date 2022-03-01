@@ -78,18 +78,27 @@ export const withEphemeralManifest = (
  * @returns {Object} the prerequisites for the service registration
  */
 export const getPrerequisites = (
-  { provider, region }: { provider: ProviderChoice, region: string },
+  { provider, region, projectName, stageName }: {
+    provider: ProviderChoice,
+    region: string,
+    projectName: string,
+    stageName: string,
+  },
 ) => {
   const cloudProvider = ServiceRegistry.get({ provider, type: SERVICE_TYPE.PROVIDER }).factory({
     name: `provider-${provider}-default`,
     provider,
     region,
+    projectName,
+    stageName,
   });
 
   const vaultAttrs = {
     name: `project-vault-${provider}`,
     provider,
     region,
+    projectName,
+    stageName,
   }
 
   if (provider === PROVIDER.AWS) {
@@ -120,12 +129,13 @@ export const getPrerequisites = (
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
-  provider, serviceClass, serviceConfig, stackName = 'production',
+  provider, serviceClass, serviceConfig, projectName = 'sample-project', stageName = 'production',
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
   serviceConfig: Omit<ServiceAttributes, 'provider'>;
-  stackName?: string;
+  projectName?: string;
+  stageName?: string;
 }): Promise<{
   scope: string;
   variables: object;
@@ -135,12 +145,14 @@ export const getServiceRegisterationResults = async ({
     let scope: string;
 
     const { region } = serviceConfig;
-    const { cloudProvider, vault } = getPrerequisites({ provider, region });
+    const { cloudProvider, vault } = getPrerequisites({
+      provider, region, projectName, stageName,
+    });
 
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {
-          const cloudStack = enhanceStack(stack, { name: stackName });
+          const cloudStack = enhanceStack(stack, { name: stageName });
 
           const service = serviceClass.factory(serviceConfig).scope('deployable');
 

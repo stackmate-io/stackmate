@@ -5,13 +5,14 @@ import { NormalizedProjectConfiguration, NormalizedStage, ProjectConfiguration, 
 /**
  * Normalizes the stages configuration
  *
- * @param stages {Object} the stages to normalize
- * @param provider {String} the project's default provider
- * @param region {String} the project's default string
+ * @param {Object} stages the stages to normalize
+ * @param {String} provider the project's default provider
+ * @param {String} region the project's default string
+ * @param {String} projectName the associated project's name
  * @returns {Object} the normalized stages
  */
 export const normalizeStages = (
-  stages: StageDeclarations, provider: ProviderChoice, region: string,
+  stages: StageDeclarations, provider: ProviderChoice, region: string, projectName: string,
 ): { [name: string]: NormalizedStage } => {
   const getSourceDeclaration = (source: string): object => {
     const stg = stages[source];
@@ -38,10 +39,10 @@ export const normalizeStages = (
     }
 
     Object.keys(stage).forEach((name) => {
-      const service = stage[name]!;
+      const service = stage[name];
 
       // Apply the service's name
-      Object.assign(service, { name });
+      Object.assign(service, { name, projectName, stageName });
 
       // Apply the service's provider (if not any)
       if (!service.provider) {
@@ -68,10 +69,10 @@ export const normalizeStages = (
  */
 export const normalizeProject = (configuration: ProjectConfiguration): NormalizedProjectConfiguration => {
   const normalized = clone(configuration) as NormalizedProjectConfiguration;
-  const { provider, region, stages, secrets, defaults = {} } = normalized;
+  const { name: projectName, provider, region, stages, secrets, defaults = {} } = normalized;
 
   Object.assign(normalized, {
-    stages: normalizeStages(stages, provider, region),
+    stages: normalizeStages(stages, provider, region, projectName),
     secrets: defaultsDeep(secrets, { provider, region }),
     defaults,
   });

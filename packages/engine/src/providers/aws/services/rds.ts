@@ -86,7 +86,7 @@ class AwsRdsService extends AwsDatabaseService {
   onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
 
-    this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-${stack.name}-params`, {
+    this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,
       family: this.paramGroupFamily,
     });
@@ -95,7 +95,7 @@ class AwsRdsService extends AwsDatabaseService {
       ...instance,
       allocatedStorage: this.storage,
       count: this.nodes,
-      identifier: `${this.identifier}-${stack.name}`,
+      identifier: this.identifier,
       engine: this.engine,
       engineVersion: this.version,
       instanceClass: this.size,
@@ -105,7 +105,7 @@ class AwsRdsService extends AwsDatabaseService {
       provider: this.providerService.resource,
       username: this.vault.username(this.name, true),
       password: this.vault.password(this.name),
-      dbSubnetGroupName: `db-subnet-${this.identifier}-${stack.name}`,
+      dbSubnetGroupName: `db-subnet-${this.identifier}`,
     });
   }
 }

@@ -46,23 +46,30 @@ abstract class Operation {
    */
   @Memoize() get services() {
     const { PROVIDER, VAULT } = SERVICE_TYPE;
-    const instances: CloudService[] = [];
     const { secrets: vault, stages: { [this.stageName]: stage } } = this.project;
-    const stageServices = [
-      { type: VAULT, name: `project-vault-${this.stageName}`, ...vault },
-      ...Object.values(stage),
-    ];
+    const instances: CloudService[] = [];
+    const defaultArgs = { projectName: this.project.name, stageName: this.stageName };
+    const vaultAttrs = {
+      type: VAULT,
+      name: `project-vault-${this.stageName}`,
+      ...defaultArgs,
+      ...vault,
+    };
 
+    const stageServices = [vaultAttrs, ...Object.values(stage)];
     const services = groupBy(stageServices, 'provider');
     Object.keys(services).map(provider => {
       const servicesPerRegion = groupBy(services[provider], 'region');
-
       Object.keys(servicesPerRegion).forEach(region => {
-        const services = [
-          { type: PROVIDER, name: `provider-${provider}-${region}`, provider, region },
-          ...servicesPerRegion[region],
-        ];
+        const cloudAttrs = {
+          type: PROVIDER,
+          name: `provider-${provider}-${region}`,
+          provider,
+          region,
+          ...defaultArgs,
+        };
 
+        const services = [cloudAttrs, ...servicesPerRegion[region]];
         instances.push(
           ...services.map(srv => ServicesRegistry.get({ type: srv.type, provider }).factory(srv)),
         );

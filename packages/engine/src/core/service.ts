@@ -40,6 +40,16 @@ abstract class Service extends Entity implements CloudService {
   @Attribute overrides: object = {};
 
   /**
+   * @var {String} projectName the name of the project that the
+   */
+  @Attribute projectName: string;
+
+  /**
+   * @var {String} stageName the name of the stage that the service is deployed to
+   */
+  @Attribute stageName: string;
+
+  /**
    * @var {Object} regions the regions that the service is available in
    */
   readonly regions: RegionList = {};
@@ -111,7 +121,7 @@ abstract class Service extends Entity implements CloudService {
    * @returns {String} the service's identifier
    */
   public get identifier(): string {
-    return this.name.toLowerCase();
+    return `${this.name}-${this.stageName}`.toLowerCase();
   }
 
   /**
@@ -143,6 +153,8 @@ abstract class Service extends Entity implements CloudService {
       links: Parser.parseArrayToUniqueValues,
       profile: Parser.parseString,
       overrides: Parser.parseObject,
+      projectName: Parser.parseString,
+      stageName: Parser.parseString,
     };
   }
 
@@ -173,6 +185,18 @@ abstract class Service extends Entity implements CloudService {
           profile: this.profile,
           provider: this.provider,
           service: this.type,
+        },
+      },
+      projectName: {
+        presence: {
+          allowEmpty: false,
+          message: 'The service should be aware of the project’s name',
+        },
+      },
+      stageName: {
+        presence: {
+          allowEmpty: false,
+          message: 'The service should be aware of the stage’s name',
         },
       },
     };

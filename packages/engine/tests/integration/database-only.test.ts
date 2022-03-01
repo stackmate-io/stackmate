@@ -7,8 +7,9 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
 import { awsRegion, awsKeyArn } from 'tests/fixtures';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { normalizeProject } from '@stackmate/lib/normalizers';
 
-const projectConfig = {
+const projectConfig = normalizeProject({
   name: 'database-only-project',
   provider: PROVIDER.AWS,
   region: awsRegion,
@@ -29,7 +30,7 @@ const projectConfig = {
       },
     },
   },
-};
+});
 
 describe.only('Database only project', () => {
   it('registers the production stage for the project', async () => {

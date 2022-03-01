@@ -8,6 +8,8 @@ export const appName = `test-app-${faker.random.alphaNumeric(6)}`;
 export const stackName = `test-stack-${faker.random.alphaNumeric(12)}`;
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 export const awsKeyArn = `arn:aws:kms:${awsRegion}:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`;
+export const projectName = faker.lorem.word();
+export const stageName = faker.lorem.word();
 
 export const networkingConfiguration = {
   name: `${faker.internet.domainWord()}-vpc`,
@@ -26,10 +28,8 @@ export const mysqlDatabaseConfiguration = {
   version: '8.0',
   port: 3306,
   database: 'my_database_name',
-  rootCredentials: {
-    username: faker.internet.userName(),
-    password: faker.internet.password(),
-  },
+  projectName,
+  stageName,
 };
 
 export const fullConfig: ProjectConfiguration = {

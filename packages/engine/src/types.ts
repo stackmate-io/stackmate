@@ -44,6 +44,8 @@ export type ServiceConfigurationDeclarationNormalized = {
   provider: ProviderChoice;
   region: string;
   name: string;
+  projectName: string;
+  stageName: string;
   profile?: string;
   links?: ServiceAssociationDeclarations;
 };
@@ -94,7 +96,7 @@ export type VaultConfiguration = {
 export type ProjectConfiguration = {
   name?: string;
   provider?: string;
-  vault?: VaultConfiguration;
+  secrets?: VaultConfiguration;
   region?: string;
   stages?: StageDeclarations;
   defaults?: ProjectDefaults;

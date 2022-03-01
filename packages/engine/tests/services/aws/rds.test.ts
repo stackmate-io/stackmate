@@ -1,10 +1,11 @@
 import 'cdktf/lib/testing/adapters/jest';
+import { snakeCase } from 'lodash';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Profile from '@stackmate/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig, stackName } from 'tests/fixtures';
+import { mysqlDatabaseConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures';
 import { Database as AwsRdsService } from '@stackmate/providers/aws';
 
 describe('AwsRdsService', () => {
@@ -33,19 +34,21 @@ describe('AwsRdsService', () => {
       service = AwsRdsService.factory(serviceConfig);
       expect(new Set(service.attributeNames)).toEqual(new Set([
         'size', 'storage', 'version', 'database', 'nodes',
+        'profile', 'overrides', 'projectName', 'stageName',
         'engine', 'port', 'name', 'region', 'links',
-        'profile', 'overrides',
       ]));
     });
   });
 
   describe('register', () => {
     it('registers a single-node RDS instance with the default profile', async () => {
+      const { AWS: provider } = PROVIDER;
       const { scope } = await getServiceRegisterationResults({
-        provider: PROVIDER.AWS,
+        provider,
         serviceClass: AwsRdsService,
         serviceConfig,
-        stackName,
+        stageName,
+        projectName,
       });
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
@@ -64,12 +67,13 @@ describe('AwsRdsService', () => {
         deletion_protection: false,
         engine: serviceConfig.engine,
         engine_version: serviceConfig.version,
-        identifier: `${serviceConfig.name}-${stackName}`,
+        identifier: `${serviceConfig.name}-${stageName}`,
         instance_class: serviceConfig.size,
         multi_az: false,
         name: serviceConfig.database,
-        db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stackName}`,
-        parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stackName}-params.name}`,
+        db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stageName}`,
+        parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stageName}-params.name}`,
+        provider: `${provider}.${provider}_${snakeCase(serviceConfig.region)}`,
         port: 3306,
         publicly_accessible: true,
         skip_final_snapshot: true,
@@ -79,7 +83,6 @@ describe('AwsRdsService', () => {
         enabled_cloudwatch_logs_exports: ['error'],
         username: 'richard',
         password: 'abc123',
-        provider: "aws.aws_eu_central_1",
       });
     });
   });
