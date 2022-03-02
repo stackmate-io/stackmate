@@ -1,4 +1,4 @@
-class PriorityQueue<T> {
+class MaxPriorityQueue<T> {
   /**
    * @var {Array} items the items in the priority queue
    */
@@ -17,15 +17,18 @@ class PriorityQueue<T> {
       return;
     }
 
+    let added = false;
     for (let index = 0; index < this.size; index++) {
-      if (index == this.size - 1) {
-        this.items.push([item, priority]);
-        return;
+      // This is a max priority queue, higher priority goes first
+      if (priority > this.items[index][1]) {
+        this.items.splice(index, 0, [item, priority]);
+        added = true;
+        break;
       }
 
-      if (this.items[index][1] < priority) {
-        this.items.splice(index, 0, [item, priority]);
-        return;
+      if (!added) {
+        this.items.push([item, priority]);
+        break;
       }
     }
   }
@@ -85,4 +88,4 @@ class PriorityQueue<T> {
   }
 }
 
-export default PriorityQueue;
+export default MaxPriorityQueue;

@@ -106,6 +106,9 @@ class AwsRdsService extends AwsDatabaseService {
       username: this.vault.username(this.name, true),
       password: this.vault.password(this.name),
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
+      lifecycle: {
+        createBeforeDestroy: true,
+      },
     });
   }
 }

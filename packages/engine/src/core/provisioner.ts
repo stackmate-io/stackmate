@@ -1,6 +1,8 @@
 import App from '@stackmate/lib/terraform/app';
 import PriorityQueue from '@stackmate/lib/queue';
 import { CloudApp, CloudService, CloudStack } from '@stackmate/interfaces';
+import { SERVICE_TYPE } from '@stackmate/constants';
+import { ServiceTypeChoice } from '@stackmate/types';
 
 class Provisioner {
   /**
@@ -29,6 +31,15 @@ class Provisioner {
    *                        ie. service.name should be registered before the dependables are
    */
   protected readonly dependables: Map<string, CloudService[]> = new Map();
+
+  /**
+   * @var {ServiceTypeChoice[]} highPriority the service types that should be higher in the queue
+   */
+  protected readonly highPriority: ServiceTypeChoice[] = [
+    SERVICE_TYPE.PROVIDER,
+    SERVICE_TYPE.VAULT,
+    SERVICE_TYPE.STATE,
+  ];
 
   /**
    * @constructor
@@ -68,7 +79,7 @@ class Provisioner {
       });
 
       // Calculate the service's priority and add it to the queue
-      this.queue.insert(service, this.priority(service));
+      this.queue.insert(service, this.priority(service, services.length));
     });
   }
 
@@ -91,19 +102,26 @@ class Provisioner {
 
   /**
    * Calculates the priority for a service
+   *
+   * The weight is defined as:
+   *    the total number of services if the current one is a high priority service, zero otherwises
+   *
    * The priority is defined as:
-   *  the amount of services that depend on the service specified
-   *    minus
-   *  the amount of services that the service specified depends on
+   *
+   *    the amount of services that depend on the service specified
+   *      minus
+   *    the amount of services that the service specified depends on
    *
    * @param {CloudService} service the service to calculate the priority for
+   * @param {Number} total the total number of services available
    * @returns {Number} the service's priority
    */
-  protected priority(service: CloudService): number {
+  protected priority(service: CloudService, total: number): number {
     const dependables = this.dependables.get(service.name) || [];
     const dependencies = this.dependencies.get(service.name) || [];
+    const weight = this.highPriority.includes(service.type) ? total : 0;
 
-    return dependables.length - dependencies.length;
+    return weight + dependables.length - dependencies.length;
   }
 }
 
