@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/lib/entity';
@@ -7,7 +6,7 @@ import { Attribute } from '@stackmate/lib/decorators';
 import { normalizeProject } from '@stackmate/lib/normalizers';
 import { StorageAdapter } from '@stackmate/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/core/storage';
-import { PROVIDER, STORAGE, FORMAT, SERVICE_TYPE } from '@stackmate/constants';
+import { PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
   AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes,
@@ -140,13 +139,6 @@ class Project extends Entity {
   */
   @Memoize() public get storage(): StorageAdapter {
     return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
-  }
-
-  @Memoize() public stage(name: string): object[] {
-    return [
-      { type: SERVICE_TYPE.VAULT, ...this.secrets },
-      ...Object.values(get(this.stages, name, {})),
-    ];
   }
 
   /**

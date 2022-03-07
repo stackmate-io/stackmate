@@ -1,9 +1,9 @@
 import Service from '@stackmate/core/service';
-import { CloudStack } from '@stackmate/interfaces';
+import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { ServiceTypeChoice } from '@stackmate/types';
 
-abstract class Vault extends Service {
+abstract class Vault extends Service implements VaultService {
   /**
    * @var {String} type the type for the service
    */
@@ -14,22 +14,19 @@ abstract class Vault extends Service {
    */
   readonly isAuthenticatable: boolean = false;
 
+  /**
+   * @var {Boolean} registered whether the service is registered into the stack
+   */
   private registered: boolean = false;
 
   /**
-   * Returns the username for a service
+   * Provides credentials for a service
    *
-   * @param {String} service the service to get the username for
-   * @param {Boolean} root whether we intend to use the username for a root user
+   * @param {String} service the service to provide credentials for
+   * @param {Boolean} root whether the credentials are root credentials
+   * @returns {Object} the username / password pair
    */
-  abstract username(service: string, root: boolean): string;
-
-  /**
-   * Returns the password for a service
-   *
-   * @param {String} service the service to get the password for
-   */
-  abstract password(service: string): string;
+  abstract credentials(service: string, root: boolean): { username: string; password: string };
 
   /**
    * @returns {Boolean} whether the vault is registered in the stack

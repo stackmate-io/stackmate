@@ -7,7 +7,7 @@ import { CloudStack } from '@stackmate/interfaces';
 
 const AwsVaultService = AwsService(Vault);
 
-class AwsSsmParamsService extends AwsVaultService {
+class AwsSecretsManager extends AwsVaultService {
   /**
    * @var {String} key the key arn to use for encryption / decryption
    */
@@ -58,18 +58,19 @@ class AwsSsmParamsService extends AwsVaultService {
     }
   }
 
-  username(service: string, root: boolean): string {
-    // throw new Error('Method not implemented.');
-    return 'richard';
-  }
-
-  password(service: string): string {
-    // throw new Error('Method not implemented.');
-    return 'abc123';
+  /**
+   * Provides credentials for a service
+   *
+   * @param {String} service the service to provide credentials for
+   * @param {Boolean} root whether the credentials are root credentials
+   * @returns {Object} the username / password pair
+   */
+  credentials(service: string, root: boolean): { username: string; password: string } {
+    return { username: 'abc', password: 'abc' };
   }
 
   onPrepare(stack: CloudStack): void {
   }
 }
 
-export default AwsSsmParamsService;
+export default AwsSecretsManager;

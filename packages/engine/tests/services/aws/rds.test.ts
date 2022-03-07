@@ -28,6 +28,7 @@ describe('AwsRdsService', () => {
       expect(service.links).toEqual([]);
       expect(service.profile).toEqual(Profile.DEFAULT);
       expect(service.overrides).toEqual({});
+      expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
     });
 
     it('returns the attribute names', () => {

@@ -12,11 +12,13 @@ export const ENVIRONMENT_VARIABLE = {
 };
 
 export const STACKMATE_DIRECTORY = '.stackmate';
-export const DEFAULT_PROJECT_FILE = path.join(process.cwd(), STACKMATE_DIRECTORY, 'config.yml');
+export const CURRENT_DIRECTORY = path.join(process.cwd(), STACKMATE_DIRECTORY);
+export const APP_HOME_DIRECTORY = path.join(os.homedir(), STACKMATE_DIRECTORY);
+export const DEFAULT_PROJECT_FILE = path.join(CURRENT_DIRECTORY, 'config.yml');
 export const DEFAULT_STAGE = 'production';
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate';
 export const DEBUG_MODE = Boolean(ENV.DEBUG) || false;
-export const DEFAULT_OUTPUT_PATH = path.join(os.homedir(), STACKMATE_DIRECTORY, 'projects');
+export const DEFAULT_OUTPUT_PATH = path.join(APP_HOME_DIRECTORY, 'projects');
 
 export const PROVIDER = {
   AWS: 'aws',

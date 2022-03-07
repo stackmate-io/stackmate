@@ -98,8 +98,7 @@ export interface CloudApp extends TerraformApp {
 }
 
 export interface VaultService extends CloudService {
-  username(service: string, root: boolean): string;
-  password(service: string): string;
+  credentials(service: string, root: boolean): { username: string; password: string };
 }
 
 export interface ProviderService extends CloudService {

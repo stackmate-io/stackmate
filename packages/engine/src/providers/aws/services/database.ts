@@ -85,6 +85,7 @@ class AwsRdsService extends AwsDatabaseService {
 
   onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
+    const { username, password } = this.vault.credentials(this.name, true);
 
     this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,
@@ -103,9 +104,9 @@ class AwsRdsService extends AwsDatabaseService {
       parameterGroupName: this.paramGroup.name,
       port: this.port,
       provider: this.providerService.resource,
-      username: this.vault.username(this.name, true),
-      password: this.vault.password(this.name),
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
+      username,
+      password,
       lifecycle: {
         createBeforeDestroy: true,
       },

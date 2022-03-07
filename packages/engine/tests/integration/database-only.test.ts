@@ -32,7 +32,7 @@ const projectConfig = normalizeProject({
   },
 });
 
-describe.only('Database only project', () => {
+describe('Database only project', () => {
   it('registers the production stage for the project', async () => {
     const { scope, stack } = await deployProject(projectConfig);
 
