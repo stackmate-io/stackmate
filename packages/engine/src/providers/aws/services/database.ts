@@ -11,6 +11,7 @@ import {
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
+  RDS_LOG_EXPORTS_PER_ENGINE,
 } from '@stackmate/providers/aws/constants';
 
 const AwsDatabaseService = AwsService(Database);
@@ -95,9 +96,10 @@ class AwsRdsService extends AwsDatabaseService {
       ...instance,
       allocatedStorage: this.storage,
       count: this.nodes,
-      identifier: this.identifier,
+      enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE.get(this.engine),
       engine: this.engine,
       engineVersion: this.version,
+      identifier: this.identifier,
       instanceClass: this.size,
       name: this.database,
       parameterGroupName: this.paramGroup.name,

@@ -1,5 +1,5 @@
 import 'cdktf/lib/testing/adapters/jest';
-import { snakeCase } from 'lodash';
+import { kebabCase, snakeCase } from 'lodash';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Profile from '@stackmate/core/profile';
@@ -7,6 +7,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures';
 import { Database as AwsRdsService } from '@stackmate/providers/aws';
+import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
 describe('AwsRdsService', () => {
   describe('instantiation', () => {
@@ -44,6 +45,7 @@ describe('AwsRdsService', () => {
   describe('register', () => {
     it('registers a single-node RDS instance with the default profile', async () => {
       const { AWS: provider } = PROVIDER;
+      const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
       const { scope } = await getServiceRegisterationResults({
         provider,
         serviceClass: AwsRdsService,
@@ -54,6 +56,20 @@ describe('AwsRdsService', () => {
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
         family: 'mysql8.0',
+      });
+
+      expect(scope).toHaveResourceWithProperties(SecretsmanagerSecret, {
+        description: `Secrets for the ${serviceConfig.name} service`,
+        name: `/${projectName}/${stageName}/${kebabCase(serviceConfig.name)}`,
+        provider: providerAlias,
+        recovery_window_in_days: 30,
+      });
+
+      expect(scope).toHaveResourceWithProperties(SecretsmanagerSecretVersion, {
+        secret_id: `\${aws_secretsmanager_secret.${snakeCase(serviceConfig.name)}_secrets_secret.id}`,
+        lifecycle: {
+          ignore_changes: ['secret_string'],
+        },
       });
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
@@ -74,16 +90,14 @@ describe('AwsRdsService', () => {
         name: serviceConfig.database,
         db_subnet_group_name: `db-subnet-${serviceConfig.name}-${stageName}`,
         parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stageName}-params.name}`,
-        provider: `${provider}.${provider}_${snakeCase(serviceConfig.region)}`,
+        provider: providerAlias,
         port: 3306,
         publicly_accessible: false,
         skip_final_snapshot: true,
         storage_type: 'gp2',
         username: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "username", "")}`,
         password: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "password", "")}`,
-        /** @todo */
-        // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports
-        enabled_cloudwatch_logs_exports: ['error'],
+        enabled_cloudwatch_logs_exports: ['audit', 'error', 'general', 'slowquery'],
       });
     });
   });

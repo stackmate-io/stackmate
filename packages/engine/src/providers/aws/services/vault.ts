@@ -1,4 +1,4 @@
-import { snakeCase } from 'lodash';
+import { kebabCase, snakeCase } from 'lodash';
 import { Fn, TerraformResource, Token } from 'cdktf';
 import {
   DataAwsSecretsmanagerSecretVersion,
@@ -96,7 +96,7 @@ class AwsSecretsManager extends AwsVaultService {
    * @returns {Object} the username / password pair
    */
   credentials(stack: CloudStack, service: string, opts: VaultCredentialOptions = {}) {
-    const secretName = `/${this.projectName}/${this.stageName}/${service.toLowerCase()}`;
+    const secretName = `/${this.projectName}/${this.stageName}/${kebabCase(service.toLowerCase())}`;
     const { secret, version } = this.resourceProfile;
     const { root, length, special, exclude } = opts;
 

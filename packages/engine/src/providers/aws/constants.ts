@@ -61,3 +61,9 @@ export const RDS_MAJOR_VERSIONS_PER_ENGINE: Map<string, Array<string>> = new Map
   ['mysql', ['8.0', '5.7', '5.6']],
   ['postgres', ['13', '12', '11', '10', '9.6']],
 ]);
+
+export const RDS_LOG_EXPORTS_PER_ENGINE: Map<string, Array<string>> = new Map([
+  ['mariadb', ['audit', 'error', 'general', 'slowquery']],
+  ['mysql', ['audit', 'error', 'general', 'slowquery']],
+  ['postgres', ['postgresql', 'upgrade']],
+]);
