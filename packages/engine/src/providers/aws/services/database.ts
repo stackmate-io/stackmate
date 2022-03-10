@@ -84,9 +84,7 @@ class AwsRdsService extends AwsDatabaseService {
 
   onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
-    const { username, password } = this.vault.credentials(stack, this.name, {
-      root: true,
-    });
+    const { username, password } = this.vault.credentials(stack, this.name, { root: true });
 
     this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,

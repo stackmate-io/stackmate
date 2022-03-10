@@ -92,7 +92,6 @@ abstract class Service extends Entity implements CloudService {
    * Provisioning when we initially prepare a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @void
    */
   onPrepare(stack: CloudStack): void {
     // no-op. most services are not required when preparing the stage
@@ -102,7 +101,6 @@ abstract class Service extends Entity implements CloudService {
    * Provisioning when we deploy a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @void
    */
   abstract onDeploy(stack: CloudStack): void;
 
@@ -111,7 +109,6 @@ abstract class Service extends Entity implements CloudService {
    *
    * @param {CloudStack} stack the stack to provision the service in
    * @abstract
-   * @void
    */
   onDestroy(stack: CloudStack): void {
     // no-op. this just removes the resources from the stack
@@ -330,17 +327,24 @@ abstract class Service extends Entity implements CloudService {
   }
 
   /**
-   * Associates the current service with the ones mentioned in the `links` section
+   * @param {CloudService[]} associated the services associated to the current one
+   */
+  public link(...associated: CloudService[]) {
+    associated.forEach(assoc => this.associate(assoc));
+    return this;
+  }
+
+  /**
+   * Associates the current service with another one
    *
    * @param {Service} target the service to link the current service with
-   * @void
    */
-  public link(target: CloudService) {
-    if (!target.isRegistered) {
-      throw new Error(`The service ${target.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
+  protected associate(association: CloudService) {
+    if (!association.isRegistered) {
+      throw new Error(`The service ${association.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
     }
 
-    if (this.isSameWith(target)) {
+    if (this.isSameWith(association)) {
       throw new Error(`Attempted to link service ${this.identifier} to itself`);
     }
 
@@ -348,21 +352,21 @@ abstract class Service extends Entity implements CloudService {
       throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
     }
 
-    if (!this.isAssociatedWith(target)) {
-      throw new Error(`Service ${this.identifier} is not associated with the ${target.identifier} service`);
+    if (!this.isAssociatedWith(association)) {
+      throw new Error(`Service ${this.identifier} is not associated with the ${association.identifier} service`);
     }
 
     // Find the handlers that apply to the associated service
     const assocs = this.associations();
-    const handlers = assocs.filter(({ lookup }) => lookup(target)).map(({ handler }) => handler);
+    const handlers = assocs.filter(({ lookup }) => lookup(association)).map(({ handler }) => handler);
 
     if (isEmpty(handlers)) {
       throw new Error(
-        `The service ${this.name} cannot be linked to service ${target.name}, no handlers found`,
+        `The service ${this.name} cannot be linked to service ${association.name}, no handlers found`,
       );
     }
 
-    handlers.forEach(handler => handler.call(this, target));
+    handlers.forEach(handler => handler.call(this, association));
   }
 }
 

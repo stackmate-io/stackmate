@@ -78,11 +78,12 @@ export const withEphemeralManifest = (
  * @returns {Object} the prerequisites for the service registration
  */
 export const getPrerequisites = (
-  { provider, region, projectName, stageName }: {
+  { provider, region, projectName, stageName, stack }: {
     provider: ProviderChoice,
     region: string,
     projectName: string,
     stageName: string,
+    stack: CloudStack,
   },
 ) => {
   const cloudProvider = ServiceRegistry.get({ provider, type: SERVICE_TYPE.PROVIDER }).factory({
@@ -91,7 +92,7 @@ export const getPrerequisites = (
     region,
     projectName,
     stageName,
-  });
+  }).scope('deployable');
 
   const vaultAttrs = {
     name: `project-vault-${provider}`,
@@ -110,11 +111,17 @@ export const getPrerequisites = (
     });
   }
 
-  const vault = ServiceRegistry.get({ provider, type: SERVICE_TYPE.VAULT }).factory(vaultAttrs);
+  cloudProvider.register(stack);
+
+  const vault = ServiceRegistry.get({
+    provider, type: SERVICE_TYPE.VAULT,
+  }).factory(vaultAttrs).scope('deployable').link(cloudProvider)
+
+  vault.register(stack);
 
   return {
-    cloudProvider: cloudProvider.scope('deployable'),
-    vault: vault.scope('deployable'),
+    cloudProvider,
+    vault,
   };
 };
 
@@ -145,24 +152,17 @@ export const getServiceRegisterationResults = async ({
     let scope: string;
 
     const { region } = serviceConfig;
-    const { cloudProvider, vault } = getPrerequisites({
-      provider, region, projectName, stageName,
-    });
-
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
+          const { cloudProvider, vault } = getPrerequisites({
+            provider, region, projectName, stageName, stack: cloudStack,
+          });
 
-          const service = serviceClass.factory(serviceConfig).scope('deployable');
-
-          // Register the prerequisites
-          cloudProvider.register(cloudStack);
-          vault.register(cloudStack);
-          service.link(cloudProvider);
-          if (service.isAuthenticatable) {
-            service.link(vault);
-          }
+          const service = serviceClass.factory(serviceConfig).scope('deployable').link(
+            cloudProvider, vault,
+          );
 
           service.register(cloudStack);
 

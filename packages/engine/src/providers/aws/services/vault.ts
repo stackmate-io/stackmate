@@ -1,4 +1,5 @@
-import { Fn, Token } from 'cdktf';
+import { snakeCase } from 'lodash';
+import { Fn, TerraformResource, Token } from 'cdktf';
 import {
   DataAwsSecretsmanagerSecretVersion,
   SecretsmanagerSecret,
@@ -28,14 +29,9 @@ class AwsSecretsManager extends AwsVaultService {
   @Attribute region: string;
 
   /**
-   * @var {Boolean} rotate whether we need to rotate credentials
+   * @var {Object} secrets a
    */
-  @Attribute rotate: boolean = true;
-
-  /**
-   * @var {Number} rotationDays how frequently should we rotate the credentials (in days)
-   */
-  @Attribute rotationDays: number = 60;
+  private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
 
   /**
    * @returns {AttributeParsers}
@@ -45,8 +41,6 @@ class AwsSecretsManager extends AwsVaultService {
       ...super.parsers(),
       key: Parser.parseString,
       region: Parser.parseString,
-      rotate: Parser.parseBoolean,
-      rotationDays: Parser.parseInteger,
     };
   }
 
@@ -76,28 +70,7 @@ class AwsSecretsManager extends AwsVaultService {
           message: 'The region specified is not valid',
         },
       },
-      rotate: {
-        inclusion: {
-          within: [true, false],
-          message: 'You need to provide a value that is either true or false',
-        },
-      },
-      rotationDays: {
-        numericality: {
-          onlyInteger: true,
-          greaterThan: 0,
-          message: 'The rotation days should be an integer, greater than 0',
-        },
-      }
     }
-  }
-
-  /**
-   * @param {String} service the service name to use
-   * @returns {String} the prefix to use for the secret
-   */
-  secretId(service: string): string {
-    return `/${this.projectName}/${this.stageName}/${service}`;
   }
 
   /**
@@ -123,37 +96,38 @@ class AwsSecretsManager extends AwsVaultService {
    * @returns {Object} the username / password pair
    */
   credentials(stack: CloudStack, service: string, opts: VaultCredentialOptions = {}) {
-    const secretId = this.secretId(service);
+    const secretName = `/${this.projectName}/${this.stageName}/${service.toLowerCase()}`;
     const { secret, version } = this.resourceProfile;
     const { root, length, special, exclude } = opts;
 
-    const username = root ? 'root' : 'user';
+    const idPrefix = `${snakeCase(service)}_secrets`;
+    const username = `${snakeCase(service)}_${root ? 'root' : 'user'}`;
     const password = getRandomString({  length, special, exclude });
 
-    const credentials = {
-      username,
-      password,
-    };
-
-    new SecretsmanagerSecret(stack, secretId, {
-      name: secretId,
+    const secretResource = new SecretsmanagerSecret(stack, `${idPrefix}_secret`, {
+      name: secretName,
       description: `Secrets for the ${service} service`,
       provider: this.providerService.resource,
       ...secret,
     });
 
-    new SecretsmanagerSecretVersion(stack, secretId, {
-      secretId,
+    const secretVersionResource = new SecretsmanagerSecretVersion(stack, `${idPrefix}_version`, {
       ...version,
-      secretString: JSON.stringify(credentials),
+      secretId: secretResource.id,
+      secretString: JSON.stringify({ username, password }),
       lifecycle: {
         ignoreChanges: ['secret_string'],
       },
     });
 
-    const data = new DataAwsSecretsmanagerSecretVersion(stack, secretId, {
-      secretId,
+    const data = new DataAwsSecretsmanagerSecretVersion(stack, `${idPrefix}_data`, {
+      secretId: secretResource.id,
       versionId: 'AWSCURRENT',
+    });
+
+    this.secrets.set(service, {
+      secret: secretResource,
+      version: secretVersionResource,
     });
 
     return {

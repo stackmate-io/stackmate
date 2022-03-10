@@ -79,11 +79,11 @@ describe('AwsRdsService', () => {
         publicly_accessible: false,
         skip_final_snapshot: true,
         storage_type: 'gp2',
+        username: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "username", "")}`,
+        password: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "password", "")}`,
         /** @todo */
         // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#enabled_cloudwatch_logs_exports
         enabled_cloudwatch_logs_exports: ['error'],
-        username: 'richard',
-        password: 'abc123',
       });
     });
   });
