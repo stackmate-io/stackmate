@@ -1,7 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
-import { isObject } from 'lodash';
+import { isObject, sampleSize } from 'lodash';
 
 /**
  * Returns an MD5 hash of an object
@@ -71,4 +71,40 @@ export const getNetworkingCidrBlocks = (
   });
 
   return cidrBlocks;
+};
+
+/**
+ * Generates a random string
+ *
+ * @param {Object} opts
+ * @param {Number} opts.length the length of the generated string
+ * @param {Boolean} opts.special whether to allow special characters or not
+ * @param {String[]} opts.exclude the list of characters to exclude
+ * @returns {String} the generated string
+ */
+export const getRandomString = ({
+  length = 16,
+  special = true,
+  safe = true,
+  exclude = [],
+}: {
+  length?: number;
+  special?: Boolean;
+  safe?: Boolean;
+  exclude?: string[];
+} = {}): string => {
+  const unsafe = '\',.|`/"';
+  const alphanumeric = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const specialCharacters = '!#$%&()*+:;-<=>?@[]^_{}~';
+  const characters = [...alphanumeric.split('')];
+
+  if (special) {
+    characters.push(...specialCharacters.split(''));
+
+    if (!safe) {
+      characters.push(...unsafe.split(''));
+    }
+  }
+
+  return sampleSize(characters, length).join('');
 };

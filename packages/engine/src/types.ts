@@ -170,6 +170,13 @@ export type VaultAttributes = ConfigurationAttributes & {
   region?: string;
 };
 
+export type VaultCredentialOptions = {
+  length?: number;
+  root?: Boolean;
+  special?: Boolean;
+  exclude?: string[],
+};
+
 export type PrepareOperationOptions = {
   statePath: string;
 };

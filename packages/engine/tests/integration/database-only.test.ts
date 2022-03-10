@@ -71,7 +71,7 @@ describe('Database only project', () => {
       instance_class: 'db.t3.micro',
       multi_az: false,
       port: 3306,
-      publicly_accessible: true,
+      publicly_accessible: false,
       skip_final_snapshot: false,
       storage_type: 'gp2',
     });

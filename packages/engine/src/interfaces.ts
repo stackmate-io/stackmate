@@ -3,7 +3,7 @@ import { App as TerraformApp, TerraformProvider, TerraformStack } from 'cdktf';
 import {
   ProviderChoice, ServiceAssociation, AttributeParsers,
   ServiceScopeChoice, AbstractConstructor, ConstructorOf,
-  ServiceTypeChoice, Validations, EntityAttributes,
+  ServiceTypeChoice, Validations, EntityAttributes, CredentialsObject, VaultCredentialOptions,
 } from '@stackmate/types';
 
 export interface BaseEntity {
@@ -98,7 +98,7 @@ export interface CloudApp extends TerraformApp {
 }
 
 export interface VaultService extends CloudService {
-  credentials(service: string, root: boolean): { username: string; password: string };
+  credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
 
 export interface ProviderService extends CloudService {

@@ -76,7 +76,7 @@ describe('AwsRdsService', () => {
         parameter_group_name: `$\{aws_db_parameter_group.${serviceConfig.name}-${stageName}-params.name}`,
         provider: `${provider}.${provider}_${snakeCase(serviceConfig.region)}`,
         port: 3306,
-        publicly_accessible: true,
+        publicly_accessible: false,
         skip_final_snapshot: true,
         storage_type: 'gp2',
         /** @todo */

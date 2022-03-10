@@ -10,7 +10,7 @@ const instance: Partial<DbInstanceConfig> = {
   deletionProtection: false,
   enabledCloudwatchLogsExports: ['error'],
   multiAz: false,
-  publiclyAccessible: true,
+  publiclyAccessible: false,
   skipFinalSnapshot: true,
   storageType: 'gp2',
 };

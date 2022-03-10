@@ -48,8 +48,7 @@ class AwsRdsService extends AwsDatabaseService {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
-  @Memoize()
-  public get paramGroupFamily() {
+  @Memoize() public get paramGroupFamily() {
     const triad = RDS_PARAM_FAMILY_MAPPING.find(
       ([engine, version]) => engine === this.engine && this.version.startsWith(version),
     );
@@ -85,7 +84,9 @@ class AwsRdsService extends AwsDatabaseService {
 
   onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
-    const { username, password } = this.vault.credentials(this.name, true);
+    const { username, password } = this.vault.credentials(stack, this.name, {
+      root: true,
+    });
 
     this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,
