@@ -7,7 +7,7 @@ stackmate
 
 This is the Open Source version of [Stackmate.io](https://stackmate.io)
 
-# About Stackamte
+# About Stackmate
 Stackmate's purpose and focus is providing developers with a low-code tool that manages their infrastructure, without any additional knowledge. 
 
 It uses Terraform behind the scenes and abstracts away the HCL part, since the only configuration required is a very small YAML file.
