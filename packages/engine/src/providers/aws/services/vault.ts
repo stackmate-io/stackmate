@@ -10,7 +10,6 @@ import Vault from '@stackmate/core/services/vault';
 import AwsService from '@stackmate/providers/aws/mixins';
 import Parser from '@stackmate/lib/parsers';
 import { Attribute } from '@stackmate/lib/decorators';
-import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
 import { CloudStack } from '@stackmate/interfaces';
 import { VaultCredentialOptions } from '@stackmate/types';
 import { getRandomString } from '@stackmate/lib/helpers';
@@ -24,11 +23,6 @@ class AwsSecretsManager extends AwsVaultService {
   @Attribute key: string;
 
   /**
-   * @var {String} region the region that the params are stored into
-   */
-  @Attribute region: string;
-
-  /**
    * @var {Object} secrets a
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
@@ -40,7 +34,6 @@ class AwsSecretsManager extends AwsVaultService {
     return {
       ...super.parsers(),
       key: Parser.parseString,
-      region: Parser.parseString,
     };
   }
 
@@ -54,20 +47,8 @@ class AwsSecretsManager extends AwsVaultService {
         presence: {
           message: 'A key in the form of a KMS ARN should be specified',
         },
-        format: {
-          pattern: '^arn:aws:[a-z0-9-:]+:[0-9]+(:[a-z0-9]+)?/[a-z0-9-]+$',
-          flags: 'i',
+        validateAwsArn: {
           message: 'Please provide a valid KMS ARN (eg. arn:aws:eu-central-1:11111111/abc-123-abc)',
-        },
-      },
-      region: {
-        presence: {
-          message: 'A region should be specified',
-          allowEmpty: false,
-        },
-        inclusion: {
-          within: Object.values(AWS_REGIONS),
-          message: 'The region specified is not valid',
         },
       },
     }

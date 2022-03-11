@@ -5,13 +5,12 @@ provider: aws
 # The default region to deploy to
 region: eu-central-1
 
-# TODO:
 # Where to store the state by default in the user's home directory
 # state:
-#   storage: s3
-#   path: s3://stackmate-sample-state.s3.eu-central-1.amazonaws.com
+#   provider: aws
+#   bucket: project-name
+#   key: abc/def
 
-# TODO:
 # Where to store the credentials
 # secrets:
 #   provider: aws

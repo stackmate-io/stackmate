@@ -12,7 +12,7 @@ import Environment from '@stackmate/lib/environment';
 import DeployOperation from '@stackmate/operations/deploy';
 import ServiceRegistry from '@stackmate/core/registry';
 import { CloudStack } from '@stackmate/interfaces';
-import { FactoryOf, ProviderChoice, ServiceAttributes } from '@stackmate/types';
+import { FactoryOf, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
 import { ENVIRONMENT_VARIABLE, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
 /**
@@ -78,12 +78,13 @@ export const withEphemeralManifest = (
  * @returns {Object} the prerequisites for the service registration
  */
 export const getPrerequisites = (
-  { provider, region, projectName, stageName, stack }: {
+  { provider, region, projectName, stageName, stack, scope }: {
     provider: ProviderChoice,
     region: string,
     projectName: string,
     stageName: string,
     stack: CloudStack,
+    scope: ServiceScopeChoice,
   },
 ) => {
   const cloudProvider = ServiceRegistry.get({ provider, type: SERVICE_TYPE.PROVIDER }).factory({
@@ -92,7 +93,7 @@ export const getPrerequisites = (
     region,
     projectName,
     stageName,
-  }).scope('deployable');
+  }).scope(scope);
 
   const vaultAttrs = {
     name: `project-vault-${provider}`,
@@ -115,7 +116,7 @@ export const getPrerequisites = (
 
   const vault = ServiceRegistry.get({
     provider, type: SERVICE_TYPE.VAULT,
-  }).factory(vaultAttrs).scope('deployable').link(cloudProvider)
+  }).factory(vaultAttrs).scope(scope).link(cloudProvider);
 
   vault.register(stack);
 
@@ -136,13 +137,19 @@ export const getPrerequisites = (
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
-  provider, serviceClass, serviceConfig, projectName = 'sample-project', stageName = 'production',
+  provider,
+  serviceClass,
+  serviceConfig,
+  projectName = 'sample-project',
+  stageName = 'production',
+  serviceScope = 'deployable',
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
   serviceConfig: Omit<ServiceAttributes, 'provider'>;
   projectName?: string;
   stageName?: string;
+  serviceScope?: ServiceScopeChoice,
 }): Promise<{
   scope: string;
   variables: object;
@@ -157,10 +164,10 @@ export const getServiceRegisterationResults = async ({
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
           const { cloudProvider, vault } = getPrerequisites({
-            provider, region, projectName, stageName, stack: cloudStack,
+            provider, region, projectName, stageName, stack: cloudStack, scope: serviceScope,
           });
 
-          const service = serviceClass.factory(serviceConfig).scope('deployable').link(
+          const service = serviceClass.factory(serviceConfig).scope(serviceScope).link(
             cloudProvider, vault,
           );
 

@@ -98,6 +98,9 @@ describe('AwsRdsService', () => {
         username: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "username", "")}`,
         password: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "password", "")}`,
         enabled_cloudwatch_logs_exports: ['audit', 'error', 'general', 'slowquery'],
+        lifecycle: {
+          create_before_destroy: true,
+        },
       });
     });
   });

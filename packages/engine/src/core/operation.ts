@@ -44,17 +44,15 @@ abstract class Operation {
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
   @Memoize() get services() {
-    const { PROVIDER, VAULT } = SERVICE_TYPE;
-    const { secrets: vaultAttrs, stages: { [this.stageName]: stage } } = this.project;
+    const { PROVIDER, VAULT, STATE } = SERVICE_TYPE;
+    const { secrets, state, stages: { [this.stageName]: stage } } = this.project;
     const serviceAtrs = Object.values(stage);
     const defaults = { projectName: this.project.name, stageName: this.stageName };
 
-    const vault = {
-      name: 'project-vault',
-      type: VAULT,
-      ...defaults,
-      ...vaultAttrs,
-    };
+    const prerequisites = [
+      { name: 'project-vault', type: VAULT, ...defaults, ...secrets },
+      { name: 'project-state', type: STATE, ...defaults, ...state },
+    ];
 
     const providers = uniqBy(serviceAtrs.map(srv => pick(srv, 'provider', 'region')), attrs => (
       Object.keys(attrs).join('-')
@@ -62,7 +60,7 @@ abstract class Operation {
       type: PROVIDER, name: `provider-${provider}-${region}`, provider, region, ...defaults,
     }));
 
-    return [vault, ...providers, ...Object.values(stage)].map(srv => {
+    return [...providers, ...prerequisites, ...Object.values(stage)].map(srv => {
       const { type, provider } = srv;
       return ServicesRegistry.get({ type, provider }).factory({ ...srv, ...defaults });
     });

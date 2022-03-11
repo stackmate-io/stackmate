@@ -89,14 +89,21 @@ export type VaultConfiguration = {
   provider?: ProviderChoice;
   key?: string;
   region?: string;
-  namespace?: string;
   path?: string;
 };
+
+export type StateConfiguration = {
+  provider?: ProviderChoice;
+  key?: string;
+  region?: string;
+  bucket?: string;
+}
 
 export type ProjectConfiguration = {
   name?: string;
   provider?: string;
   secrets?: VaultConfiguration;
+  state?: StateConfiguration;
   region?: string;
   stages?: StageDeclarations;
   defaults?: ProjectDefaults;
@@ -126,6 +133,7 @@ export type NormalizedProjectConfiguration = {
   region: string,
   stages: StagesNormalizedAttributes;
   secrets: VaultConfiguration,
+  state: StateConfiguration,
   defaults: ProjectDefaults;
 };
 

@@ -252,9 +252,28 @@ namespace Validator {
     }
   };
 
+  /**
+   * Validates an AWS ARN
+   *
+   * @param arn the arn to validate
+   * @returns {String}
+   */
+  export const validateAwsArn = (arn: string, { message }: { message?: string } = {}) => {
+    if (!arn.match(/^arn:aws:[a-z0-9-:]+:[0-9]+(:[a-z0-9]+)?\/[a-z0-9-]+$/i)) {
+      return message || 'The provided ARN is not valid';
+    }
+  };
+
+  /**
+   * Validates a region list
+   *
+   * @param {String[]} regions the regions to validate
+   * @param {Object} options
+   * @param {String[]} options.availableRegions the list of available regions
+   * @returns {String}
+   */
   export const validateRegionList = (
-    regions: Array<string>,
-    { availableRegions = [] }: { availableRegions: Array<string>},
+    regions: string[], { availableRegions = [] }: { availableRegions: string[] },
   ) => {
     if (isEmpty(regions)) {
       return 'You have to provide a set of regions for the provider';
