@@ -107,7 +107,10 @@ export interface ProviderService extends CloudService {
   prerequisites(stack: CloudStack): void;
 }
 
-export interface StateService extends CloudService {}
+export interface StateService extends CloudService {
+  backend(stack: CloudStack): void;
+  resources(stack: CloudStack): void;
+}
 
 export interface SubclassRegistry<T> {
   items: Map<string, T>;

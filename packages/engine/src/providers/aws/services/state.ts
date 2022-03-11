@@ -28,13 +28,13 @@ class AwsStateBucket extends AwsStateService {
   /**
    * @var {DataTerraformRemoteStateS3} dataResource the data resource to use when registering the state
    */
-  backend: S3Backend;
+  backendResource: S3Backend;
 
   /**
    * @returns {Boolean} whether the state service is registered
    */
   get isRegistered(): boolean {
-    return Boolean(this.bucket) || Boolean(this.backend);
+    return Boolean(this.bucketResource) || Boolean(this.backendResource);
   }
 
   /**
@@ -97,8 +97,8 @@ class AwsStateBucket extends AwsStateService {
    *
    * @param {CloudStack} stack the stack to register the data resources to
    */
-  data(stack: CloudStack): void {
-    this.backend = new S3Backend(stack, {
+  backend(stack: CloudStack): void {
+    this.backendResource = new S3Backend(stack, {
       acl: 'private',
       bucket: this.bucket,
       encrypt: true,
