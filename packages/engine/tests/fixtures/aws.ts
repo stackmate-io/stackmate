@@ -3,13 +3,10 @@ import faker from 'faker';
 import { ProjectConfiguration } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/providers/aws/constants';
+import { projectName, stageName } from 'tests/fixtures/generic';
 
-export const appName = `test-aws-app-${faker.random.alphaNumeric(6)}`;
-export const stackName = `test-aws-stack-${faker.random.alphaNumeric(12)}`;
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 export const awsKeyArn = `arn:aws:kms:${awsRegion}:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`;
-export const projectName = faker.lorem.word();
-export const stageName = faker.lorem.word();
 
 export const awsProviderConfiguration = {
   type: SERVICE_TYPE.PROVIDER,

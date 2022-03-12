@@ -5,7 +5,7 @@ import { snakeCase } from 'lodash';
 import Profile from '@stackmate/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
-import { stateConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures/aws';
+import { stateConfiguration as serviceConfig } from 'tests/fixtures/aws';
 import { State as AwsS3State } from '@stackmate/providers/aws';
 
 describe('AwsS3State', () => {
@@ -13,7 +13,7 @@ describe('AwsS3State', () => {
     let service: AwsS3State;
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const { name, region, bucket } = serviceConfig;
+      const { name, region, bucket, stageName } = serviceConfig;
 
       service = AwsS3State.factory(serviceConfig);
 
@@ -40,6 +40,7 @@ describe('AwsS3State', () => {
   describe('register to be prepared', () => {
     it('registers the state as a backend resource', async () => {
       const { AWS: provider } = PROVIDER;
+      const { stageName, projectName } = serviceConfig;
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
       const { scope } = await getServiceRegisterationResults({
         provider,

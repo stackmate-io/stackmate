@@ -1,5 +1,6 @@
 import Registry from '@stackmate/lib/registry';
 import * as AwsServices from '@stackmate/providers/aws';
+import * as LocalServices from '@stackmate/providers/local';
 import { BaseEntityConstructor, CloudService } from '@stackmate/interfaces';
 import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
@@ -24,6 +25,9 @@ class ServicesRegistry extends Registry<ServiceConstructor> {
 }
 
 const registry = new ServicesRegistry();
+
+// Add the local services to the registry
+registry.add(LocalServices.State, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
 
 // Add the AWS services to the registry
 registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);

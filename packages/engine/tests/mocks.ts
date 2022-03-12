@@ -6,7 +6,7 @@ import Parser from '@stackmate/lib/parsers';
 import ServiceRegistry from '@stackmate/core/registry';
 import { CloudStack } from '@stackmate/interfaces';
 import { Attribute } from '@stackmate/lib/decorators';
-import { stackName, appName } from 'tests/fixtures/aws';
+import { stackName, appName } from 'tests/fixtures/generic';
 import { AttributeParsers, ServiceAttributes, ServiceScopeChoice, Validations } from '@stackmate/types';
 
 export const getMockApp = (name: string) => (
