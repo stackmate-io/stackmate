@@ -46,14 +46,8 @@ describe('AwsRdsService', () => {
     it('registers a single-node RDS instance with the default profile', async () => {
       const { AWS: provider } = PROVIDER;
       const { stageName, projectName } = serviceConfig;
+      const { scope } = await getServiceRegisterationResults({ serviceConfig });
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
-      const { scope } = await getServiceRegisterationResults({
-        provider,
-        serviceClass: AwsRdsService,
-        serviceConfig,
-        stageName,
-        projectName,
-      });
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
         family: 'mysql8.0',

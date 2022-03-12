@@ -40,14 +40,9 @@ describe('AwsS3State', () => {
   describe('register to be prepared', () => {
     it('registers the state as a backend resource', async () => {
       const { AWS: provider } = PROVIDER;
-      const { stageName, projectName } = serviceConfig;
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
       const { scope } = await getServiceRegisterationResults({
-        provider,
-        serviceClass: AwsS3State,
         serviceConfig,
-        stageName,
-        projectName,
         serviceScope: 'preparable',
       });
 

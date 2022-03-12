@@ -27,6 +27,7 @@ export const awsVaultConfiguration = {
 };
 
 export const stateConfiguration = {
+  provider: PROVIDER.AWS,
   type: SERVICE_TYPE.STATE,
   name: 'aws-state-state',
   bucket: faker.internet.domainWord(),
@@ -36,6 +37,7 @@ export const stateConfiguration = {
 };
 
 export const mysqlDatabaseConfiguration = {
+  provider: PROVIDER.AWS,
   name: 'aws-rds-mysql-database',
   region: awsRegion,
   nodes: 1,

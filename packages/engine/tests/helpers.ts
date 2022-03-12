@@ -7,14 +7,13 @@ import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';
 
 import Project from '@stackmate/core/project';
-import Service from '@stackmate/core/service';
 import Environment from '@stackmate/lib/environment';
 import DeployOperation from '@stackmate/operations/deploy';
 import { CloudStack } from '@stackmate/interfaces';
-import { getMockService } from 'tests/mocks';
-import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
+import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/constants';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
-import { FactoryOf, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
+import { ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
+import { getService } from '@stackmate/core/registry';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -76,28 +75,30 @@ export const withEphemeralManifest = (
  * @param {Object} options
  * @param {ProviderChoice} options.provider the provider for the prerequisites
  * @param {String} options.region the rgion for the prerequisites
- * @returns {Object} the prerequisites for the service registration
+ * @returns {CloudService[]} the prerequisites for the service registration
  */
-export const getPrerequisites = (
-  { provider, region, projectName, stageName, stack, scope }: {
-    provider: ProviderChoice,
-    region: string,
-    projectName: string,
-    stageName: string,
-    stack: CloudStack,
-    scope: ServiceScopeChoice,
-  },
-) => {
-  const cloudProvider = getMockService(awsProviderConfiguration);
+export const getPrerequisites = ({ provider, stack, scope }: {
+  provider: ProviderChoice, stack: CloudStack, scope: ServiceScopeChoice,
+}) => {
+  let providerAttrs;
+  let vaultAttrs;
+
+  switch (provider) {
+    case PROVIDER.AWS:
+      providerAttrs = awsProviderConfiguration;
+      vaultAttrs = awsVaultConfiguration;
+      break;
+    default:
+      throw new Error(`We don't have any prerequisites fixture for ${provider}`);
+  }
+
+  const cloudProvider = getService(providerAttrs, scope);
   cloudProvider.register(stack);
 
-  const vault = getMockService(awsVaultConfiguration).link(cloudProvider);
+  const vault = getService(vaultAttrs, scope).link(cloudProvider);
   vault.register(stack);
 
-  return {
-    cloudProvider,
-    vault,
-  };
+  return [cloudProvider, vault];
 };
 
 /**
@@ -111,19 +112,11 @@ export const getPrerequisites = (
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
-  provider,
-  serviceClass,
   serviceConfig,
-  projectName = 'sample-project',
-  stageName = 'production',
   serviceScope = 'deployable',
   prerequisitesScope = 'deployable',
 }: {
-  provider: ProviderChoice;
-  serviceClass: FactoryOf<Service>;
-  serviceConfig: Omit<ServiceAttributes, 'provider'>;
-  projectName?: string;
-  stageName?: string;
+  serviceConfig: ServiceAttributes;
   serviceScope?: ServiceScopeChoice,
   prerequisitesScope?: ServiceScopeChoice,
 }): Promise<{
@@ -134,23 +127,19 @@ export const getServiceRegisterationResults = async ({
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;
 
-    const { region } = serviceConfig;
+    const { provider, stageName } = serviceConfig;
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
-          const { cloudProvider, vault } = getPrerequisites({
-            provider, region, projectName, stageName, stack: cloudStack, scope: prerequisitesScope,
+          const prerequisites = getPrerequisites({
+            provider, stack: cloudStack, scope: prerequisitesScope,
           });
 
-          const service = serviceClass.factory(serviceConfig).scope(serviceScope).link(
-            cloudProvider, vault,
-          );
-
+          const service = getService(serviceConfig, serviceScope).link(...prerequisites);
           service.register(cloudStack);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
-
           resolve({ service, variables, ...terraform });
         });
       })

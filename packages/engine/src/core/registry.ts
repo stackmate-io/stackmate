@@ -2,7 +2,7 @@ import Registry from '@stackmate/lib/registry';
 import * as AwsServices from '@stackmate/providers/aws';
 import * as LocalServices from '@stackmate/providers/local';
 import { BaseEntityConstructor, CloudService } from '@stackmate/interfaces';
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
+import { ProviderChoice, ServiceAttributes, ServiceScopeChoice, ServiceTypeChoice } from '@stackmate/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 
 interface ServiceConstructor extends BaseEntityConstructor<CloudService> {}
@@ -34,5 +34,19 @@ registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);
 registry.add(AwsServices.Database, PROVIDER.AWS, SERVICE_TYPE.DATABASE);
 registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
 registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
+
+/**
+ * Returns a service instance based on its attributes
+ *
+ * @param attrs the attributes to instantiate the service by
+ * @param scope the scope to apply to the service
+ * @returns {CloudService} the service instantiated and with the scope applied
+ */
+export const getService = (
+  attrs: ServiceAttributes, scope: ServiceScopeChoice = 'deployable',
+) => {
+  const { provider, type } = attrs;
+  return registry.get({ provider, type }).factory(attrs).scope(scope);
+};
 
 export default registry as ServicesRegistry;
