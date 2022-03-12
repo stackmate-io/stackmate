@@ -109,6 +109,9 @@ class Project extends Entity {
       stages: {
         validateStages: {},
       },
+      state: {
+        validateState: {},
+      },
       defaults: {
         validateProjectDefaults: {},
       },
@@ -124,6 +127,7 @@ class Project extends Entity {
       region: Parser.parseString,
       provider: Parser.parseString,
       secrets: Parser.parseObject,
+      state: Parser.parseObject,
       stages: Parser.parseObject,
       defaults: Parser.parseObject,
     };

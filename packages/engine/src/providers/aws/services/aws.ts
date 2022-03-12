@@ -1,5 +1,6 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
+import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import Parser from '@stackmate/lib/parsers';
 import Provider from '@stackmate/core/services/provider';
@@ -42,6 +43,11 @@ class AwsProvider extends Provider {
    * @var {InternetGateway} gateway the internet gateway to use
    */
   gateway: InternetGateway;
+
+  /**
+   * @var {KmsKey} key the KMS key to use across the stack
+   */
+  key: KmsKey;
 
   /**
    * @returns {Object} the parser functions to apply to the service's attributes
@@ -115,6 +121,16 @@ class AwsProvider extends Provider {
     this.gateway = new InternetGateway(stack, `${this.identifier}-gateway`, {
       ...gateway,
       vpcId: this.vpc.id,
+    });
+
+    this.key = new KmsKey(stack, `${this.identifier}-key`, {
+      customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
+      deletionWindowInDays: 30,
+      description: 'Stackmate default encryption key',
+      enableKeyRotation: false,
+      isEnabled: true,
+      keyUsage: 'ENCRYPT_DECRYPT',
+      multiRegion: false,
     });
   }
 

@@ -8,7 +8,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { isKeySubset } from '@stackmate/lib/helpers';
 import {
   CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice,
-  StagesNormalizedAttributes, VaultConfiguration,
+  StagesNormalizedAttributes, StateConfiguration, VaultConfiguration,
 } from '@stackmate/types';
 
 namespace Validator {
@@ -70,6 +70,25 @@ namespace Validator {
 
     if (!isEmpty(stageErrors)) {
       return stageErrors;
+    }
+  };
+
+  /**
+   * Validates the state entry for the project
+   *
+   * @param {StateConfiguration} state the state configuration
+   * @returns {String}
+   */
+  export const validateState = (state: StateConfiguration) => {
+    if (!state || !isObject(state) || isEmpty(state)) {
+      return 'The project does not contain a “state” section';
+    }
+
+    const { provider } = state;
+    const availableProviders = Object.values(PROVIDER);
+
+    if (!provider || !availableProviders.includes(provider)) {
+      return `You have to specify a valid provider for the state. Available options are: ${availableProviders.join(', ')}`;
     }
   };
 
@@ -258,8 +277,14 @@ namespace Validator {
    * @param arn the arn to validate
    * @returns {String}
    */
-  export const validateAwsArn = (arn: string, { message }: { message?: string } = {}) => {
-    if (!arn.match(/^arn:aws:[a-z0-9-:]+:[0-9]+(:[a-z0-9]+)?\/[a-z0-9-]+$/i)) {
+  export const validateAwsArn = (
+    arn: string, { message, required = false }: { message?: string, required?: boolean } = {},
+  ) => {
+    if (!arn && required) {
+      return 'You have to provide a valid ARN';
+    }
+
+    if (arn && !arn.match(/^arn:aws:[a-z0-9-:]+:[0-9]+(:[a-z0-9]+)?\/[a-z0-9-]+$/i)) {
       return message || 'The provided ARN is not valid';
     }
   };

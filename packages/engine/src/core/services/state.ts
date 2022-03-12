@@ -2,17 +2,18 @@ import Service from '@stackmate/core/service';
 import { ServiceTypeChoice } from '@stackmate/types';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CloudStack, StateService } from '@stackmate/interfaces';
+import { Attribute } from '@stackmate/lib/decorators';
 
 abstract class State extends Service implements StateService {
+  /**
+   * @var {String} name the service's name
+   */
+  @Attribute name: string = 'stage-state';
+
   /**
    * @var {ServiceTypeChoice} type the service's type
    */
   type: ServiceTypeChoice = SERVICE_TYPE.STATE;
-
-  /**
-   * @var {Boolean} isAuthenticatable the service should not use authentication
-   */
-  readonly isAuthenticatable: boolean = false;
 
   /**
    * Provisions the state storage itself

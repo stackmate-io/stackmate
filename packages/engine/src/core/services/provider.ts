@@ -13,11 +13,6 @@ abstract class Provider extends Service implements ProviderService {
   readonly type: ServiceTypeChoice = SERVICE_TYPE.PROVIDER;
 
   /**
-   * @var {Boolean} isAuthenticatable the service should not use authentication
-   */
-  readonly isAuthenticatable: boolean = false;
-
-  /**
    * @var {TerraformProvider} resource the provider resource
    */
   resource: TerraformProvider;
@@ -27,6 +22,13 @@ abstract class Provider extends Service implements ProviderService {
    */
   get isRegistered(): boolean {
     return this.resource instanceof TerraformProvider;
+  }
+
+  /**
+   * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
+   */
+  public associations() {
+    return []; // Provider services shouldn't depend on other services
   }
 
   /**

@@ -2,17 +2,18 @@ import Service from '@stackmate/core/service';
 import { CloudStack, VaultService } from '@stackmate/interfaces';
 import { SERVICE_TYPE } from '@stackmate/constants';
 import { CredentialsObject, ServiceTypeChoice, VaultCredentialOptions } from '@stackmate/types';
+import { Attribute } from '@stackmate/lib/decorators';
 
 abstract class Vault extends Service implements VaultService {
+  /**
+   * @var {String} name the name for the service
+   */
+  @Attribute name: string = 'stage-vault';
+
   /**
    * @var {String} type the type for the service
    */
   readonly type: ServiceTypeChoice = SERVICE_TYPE.VAULT;
-
-  /**
-   * @var {Boolean} isAuthenticatable the service should not use authentication
-   */
-  readonly isAuthenticatable: boolean = false;
 
   /**
    * @var {Boolean} registered whether the service is registered into the stack

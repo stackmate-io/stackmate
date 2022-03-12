@@ -29,5 +29,6 @@ const registry = new ServicesRegistry();
 registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);
 registry.add(AwsServices.Database, PROVIDER.AWS, SERVICE_TYPE.DATABASE);
 registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
+registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
 
 export default registry as ServicesRegistry;

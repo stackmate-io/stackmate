@@ -50,8 +50,8 @@ abstract class Operation {
     const defaults = { projectName: this.project.name, stageName: this.stageName };
 
     const prerequisites = [
-      { name: 'project-vault', type: VAULT, ...defaults, ...secrets },
-      { name: 'project-state', type: STATE, ...defaults, ...state },
+      { type: VAULT, ...defaults, ...secrets },
+      { type: STATE, ...defaults, ...state },
     ];
 
     const providers = uniqBy(serviceAtrs.map(srv => pick(srv, 'provider', 'region')), attrs => (

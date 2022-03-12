@@ -17,8 +17,17 @@ export const networkingConfiguration = {
   ip: '12.0.0.0',
 };
 
+export const stateConfiguration = {
+  type: SERVICE_TYPE.STATE,
+  name: 'aws-state-state',
+  bucket: faker.internet.domainWord(),
+  region: awsRegion,
+  projectName,
+  stageName,
+};
+
 export const mysqlDatabaseConfiguration = {
-  name: `${faker.internet.domainWord()}-mysql-database`,
+  name: 'aws-rds-mysql-database',
   region: awsRegion,
   nodes: 1,
   type: SERVICE_TYPE.DATABASE,

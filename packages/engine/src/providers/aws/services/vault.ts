@@ -8,8 +8,6 @@ import {
 
 import Vault from '@stackmate/core/services/vault';
 import AwsService from '@stackmate/providers/aws/mixins';
-import Parser from '@stackmate/lib/parsers';
-import { Attribute } from '@stackmate/lib/decorators';
 import { CloudStack } from '@stackmate/interfaces';
 import { VaultCredentialOptions } from '@stackmate/types';
 import { getRandomString } from '@stackmate/lib/helpers';
@@ -18,41 +16,9 @@ const AwsVaultService = AwsService(Vault);
 
 class AwsSecretsManager extends AwsVaultService {
   /**
-   * @var {String} key the key arn to use for encryption / decryption
-   */
-  @Attribute key: string;
-
-  /**
    * @var {Object} secrets a
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
-
-  /**
-   * @returns {AttributeParsers}
-   */
-  parsers() {
-    return {
-      ...super.parsers(),
-      key: Parser.parseString,
-    };
-  }
-
-  /**
-   * @returns {Validations}
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      key: {
-        presence: {
-          message: 'A key in the form of a KMS ARN should be specified',
-        },
-        validateAwsArn: {
-          message: 'Please provide a valid KMS ARN (eg. arn:aws:eu-central-1:11111111/abc-123-abc)',
-        },
-      },
-    }
-  }
 
   /**
    * Extracts a key from a username / password pair in a data string
@@ -88,6 +54,7 @@ class AwsSecretsManager extends AwsVaultService {
     const secretResource = new SecretsmanagerSecret(stack, `${idPrefix}_secret`, {
       name: secretName,
       description: `Secrets for the ${service} service`,
+      kmsKeyId: this.providerService.key.id,
       provider: this.providerService.resource,
       ...secret,
     });
@@ -115,9 +82,6 @@ class AwsSecretsManager extends AwsVaultService {
       username: this.extract(data.secretString, 'username'),
       password: this.extract(data.secretString, 'password'),
     };
-  }
-
-  onPrepare(stack: CloudStack): void {
   }
 }
 

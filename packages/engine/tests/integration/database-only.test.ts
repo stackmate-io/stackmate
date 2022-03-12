@@ -1,12 +1,12 @@
-import { Testing } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import 'cdktf/lib/testing/adapters/jest';
 
 import { deployProject } from 'tests/helpers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
-import { awsRegion, awsKeyArn } from 'tests/fixtures';
+import { awsRegion } from 'tests/fixtures';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import { normalizeProject } from '@stackmate/lib/normalizers';
 
 const projectConfig = normalizeProject({
@@ -15,7 +15,10 @@ const projectConfig = normalizeProject({
   region: awsRegion,
   secrets: {
     provider: PROVIDER.AWS,
-    key: awsKeyArn,
+  },
+  state: {
+    provider: PROVIDER.AWS,
+    bucket: 'sample-project-state-bucket',
   },
   stages: {
     production: {
@@ -34,9 +37,7 @@ const projectConfig = normalizeProject({
 
 describe('Database only project', () => {
   it('registers the production stage for the project', async () => {
-    const { scope, stack } = await deployProject(projectConfig);
-
-    expect(Testing.fullSynth(stack)).toBeValidTerraform();
+    const { scope } = await deployProject(projectConfig);
 
     expect(scope).toHaveResourceWithProperties(Vpc, {
       cidr_block: '10.0.0.0/16',
@@ -50,6 +51,16 @@ describe('Database only project', () => {
     });
 
     expect(scope).toHaveResource(InternetGateway);
+
+    expect(scope).toHaveResourceWithProperties(KmsKey, {
+      customer_master_key_spec: 'SYMMETRIC_DEFAULT',
+      deletion_window_in_days: 30,
+      description: 'Stackmate default encryption key',
+      enable_key_rotation: false,
+      is_enabled: true,
+      key_usage: 'ENCRYPT_DECRYPT',
+      multi_region: false,
+    });
 
     expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
       family: 'mysql8.0',

@@ -21,19 +21,13 @@ class Provisioner {
   readonly queue: PriorityQueue<CloudService> = new PriorityQueue();
 
   /**
-   * @var {Map} dependencies a mapping of service name and the services it depends upon
-   *                         ie. they should be registered before service.name is registered
-   */
-  protected readonly dependencies: Map<string, CloudService[]> = new Map();
-
-  /**
-   * @var {Map} dependables a mapping of service name and the services that depend upon it
-   *                        ie. service.name should be registered before the dependables are
+   * @var {Map} dependables a mapping of service identifier to the services that are depended
+   *                        by said service. (eg. "provider" has dependables "vault", "state")
    */
   protected readonly dependables: Map<string, CloudService[]> = new Map();
 
   /**
-   * @var {ServiceTypeChoice[]} highPriority the service types that should be higher in the queue
+   * @var {ServiceTypeChoice[]} weights additional weight to add to the priority for services
    */
   protected readonly weights: Map<ServiceTypeChoice, number> = new Map([
     [SERVICE_TYPE.PROVIDER, 100000],
@@ -63,18 +57,13 @@ class Provisioner {
    */
   set services(services: CloudService[]) {
     services.forEach((service) => {
-      // Find the dependencies and dependables for the service
       services.forEach((dep) => {
-        if (service.isAssociatedWith(dep)) {
-          const dependencies = this.dependencies.get(service.name) || [];
-          dependencies.push(dep);
-
-          this.dependencies.set(service.name, dependencies);
-        } else if (dep.isAssociatedWith(service)) {
-          const dependables = this.dependables.get(service.name) || [];
-          dependables.push(dep);
-
-          this.dependables.set(service.name, dependables);
+        if (dep.isDependingUpon(service)) {
+          // Add the "dep" as a dependable of service
+          this.dependables.set(service.identifier, [
+            ...(this.dependables.get(service.identifier) || []),
+            dep,
+          ]);
         }
       });
 
@@ -95,7 +84,7 @@ class Provisioner {
 
       // Make sure the services that are depended on the current service are linked to it
       // Warning: we're passing by reference, which means we're also updating the items in queue
-      const dependables = this.dependables.get(service.name) || [];
+      const dependables = this.dependables.get(service.identifier) || [];
       dependables.forEach(dep => dep.link(service));
     });
   }
@@ -116,11 +105,14 @@ class Provisioner {
    * @returns {Number} the service's priority
    */
   protected priority(service: CloudService): number {
-    const dependables = this.dependables.get(service.name) || [];
-    const dependencies = this.dependencies.get(service.name) || [];
     const weight = this.weights.get(service.type) || 0;
-
-    return weight + dependables.length - dependencies.length;
+    // Get the number of services that the current one is depended by
+    const dependedByCount = this.dependables.get(service.identifier)?.length || 0;
+    // Get the number of services that the current one is depending upon
+    const dependsUponCount =  Array.from(this.dependables.values()).reduce((count, services) => (
+      count + (services.find(s => s.identifier === service.identifier) ? 1 : 0)
+    ), 0);
+    return weight + dependedByCount - dependsUponCount;
   }
 }
 

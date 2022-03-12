@@ -16,11 +16,6 @@ class AwsStateBucket extends AwsStateService {
   @Attribute bucket: string;
 
   /**
-   * @var {String} key the key arn to use for encryption / decryption
-   */
-  @Attribute key: string;
-
-  /**
    * @var {TerraformResource} bucket the bucket to provision
    */
   bucketResource: TerraformResource;
@@ -44,7 +39,6 @@ class AwsStateBucket extends AwsStateService {
     return {
       ...super.parsers(),
       bucket: Parser.parseString,
-      key: Parser.parseString,
     };
   }
 
@@ -54,14 +48,6 @@ class AwsStateBucket extends AwsStateService {
   validations() {
     return {
       ...super.validations(),
-      key: {
-        presence: {
-          message: 'A key in the form of a KMS ARN should be specified',
-        },
-        validateAwsArn: {
-          message: 'Please provide a valid KMS ARN (eg. arn:aws:eu-central-1:11111111/abc-123-abc)',
-        },
-      },
       bucket: {
         presence: {
           message: 'A bucket name is required for the state storage',
@@ -103,7 +89,7 @@ class AwsStateBucket extends AwsStateService {
       bucket: this.bucket,
       encrypt: true,
       key: `${this.projectName}/${this.stageName}/terraform.tfstate`,
-      kmsKeyId: this.key,
+      kmsKeyId: this.providerService.key.id,
       region: this.region,
     });
   }

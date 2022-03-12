@@ -13,7 +13,7 @@ import DeployOperation from '@stackmate/operations/deploy';
 import ServiceRegistry from '@stackmate/core/registry';
 import { CloudStack } from '@stackmate/interfaces';
 import { FactoryOf, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
-import { ENVIRONMENT_VARIABLE, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import { ENVIRONMENT_VARIABLE, SERVICE_TYPE } from '@stackmate/constants';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -95,28 +95,15 @@ export const getPrerequisites = (
     stageName,
   }).scope(scope);
 
-  const vaultAttrs = {
+  cloudProvider.register(stack);
+
+  const vault = ServiceRegistry.get({ provider, type: SERVICE_TYPE.VAULT }).factory({
     name: `project-vault-${provider}`,
     provider,
     region,
     projectName,
     stageName,
-  }
-
-  if (provider === PROVIDER.AWS) {
-    const awsAccount = 111122223333;
-    const awsHash = '1234abcd-12ab-34cd-56ef-1234567890ab';
-
-    Object.assign(vaultAttrs, {
-      key: `arn:aws:kms:${region}:${awsAccount}:key/${awsHash}`,
-    });
-  }
-
-  cloudProvider.register(stack);
-
-  const vault = ServiceRegistry.get({
-    provider, type: SERVICE_TYPE.VAULT,
-  }).factory(vaultAttrs).scope(scope).link(cloudProvider);
+  }).scope(scope).link(cloudProvider);
 
   vault.register(stack);
 
@@ -164,7 +151,7 @@ export const getServiceRegisterationResults = async ({
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
           const { cloudProvider, vault } = getPrerequisites({
-            provider, region, projectName, stageName, stack: cloudStack, scope: serviceScope,
+            provider, region, projectName, stageName, stack: cloudStack, scope: 'deployable',
           });
 
           const service = serviceClass.factory(serviceConfig).scope(serviceScope).link(

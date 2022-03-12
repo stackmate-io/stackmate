@@ -69,11 +69,6 @@ abstract class Service extends Entity implements CloudService {
   abstract readonly provider: ProviderChoice;
 
   /**
-   * @var {Boolean} isAuthenticatable whether the service requires credentials
-   */
-  abstract readonly isAuthenticatable: boolean;
-
-  /**
    * @returns {Boolean} whether the service is registered in the stack
    */
   abstract get isRegistered(): boolean;
@@ -270,14 +265,10 @@ abstract class Service extends Entity implements CloudService {
           && srv.provider === this.provider
       ),
       handler: (provider) => this.onProviderRegistered(provider as ProviderService),
+    }, {
+      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
+      handler: (vault) => this.onVaultRegistered(vault as VaultService),
     }];
-
-    if (this.isAuthenticatable) {
-      associations.push({
-        lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
-        handler: (vault) => this.onVaultRegistered(vault as VaultService),
-      });
-    }
 
     return associations;
   }
@@ -310,7 +301,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} service the service to check whether the current one is depending on
    * @returns {Boolean} whether the current service is depending upon the provided one
    */
-  isAssociatedWith(service: CloudService): boolean {
+  isDependingUpon(service: CloudService): boolean {
     // We're comparing with the current service itself
     if (this.isSameWith(service)) {
       return false;
@@ -352,8 +343,8 @@ abstract class Service extends Entity implements CloudService {
       throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
     }
 
-    if (!this.isAssociatedWith(association)) {
-      throw new Error(`Service ${this.identifier} is not associated with the ${association.identifier} service`);
+    if (!this.isDependingUpon(association)) {
+      throw new Error(`Service ${this.identifier} is not depended upon service of type ${association.type}`);
     }
 
     // Find the handlers that apply to the associated service
