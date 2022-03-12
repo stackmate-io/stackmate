@@ -5,7 +5,7 @@ import { snakeCase } from 'lodash';
 import Profile from '@stackmate/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
-import { stateConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures';
+import { stateConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures/aws';
 import { State as AwsS3State } from '@stackmate/providers/aws';
 
 describe('AwsS3State', () => {

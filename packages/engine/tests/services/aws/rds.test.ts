@@ -5,7 +5,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import Profile from '@stackmate/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures';
+import { mysqlDatabaseConfiguration as serviceConfig, stageName, projectName } from 'tests/fixtures/aws';
 import { Database as AwsRdsService } from '@stackmate/providers/aws';
 import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 

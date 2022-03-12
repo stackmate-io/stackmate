@@ -10,10 +10,11 @@ import Project from '@stackmate/core/project';
 import Service from '@stackmate/core/service';
 import Environment from '@stackmate/lib/environment';
 import DeployOperation from '@stackmate/operations/deploy';
-import ServiceRegistry from '@stackmate/core/registry';
 import { CloudStack } from '@stackmate/interfaces';
+import { getMockService } from 'tests/mocks';
+import { ENVIRONMENT_VARIABLE } from '@stackmate/constants';
+import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
 import { FactoryOf, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
-import { ENVIRONMENT_VARIABLE, SERVICE_TYPE } from '@stackmate/constants';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -87,24 +88,10 @@ export const getPrerequisites = (
     scope: ServiceScopeChoice,
   },
 ) => {
-  const cloudProvider = ServiceRegistry.get({ provider, type: SERVICE_TYPE.PROVIDER }).factory({
-    name: `provider-${provider}-default`,
-    provider,
-    region,
-    projectName,
-    stageName,
-  }).scope(scope);
-
+  const cloudProvider = getMockService(awsProviderConfiguration);
   cloudProvider.register(stack);
 
-  const vault = ServiceRegistry.get({ provider, type: SERVICE_TYPE.VAULT }).factory({
-    name: `project-vault-${provider}`,
-    provider,
-    region,
-    projectName,
-    stageName,
-  }).scope(scope).link(cloudProvider);
-
+  const vault = getMockService(awsVaultConfiguration).link(cloudProvider);
   vault.register(stack);
 
   return {
@@ -130,6 +117,7 @@ export const getServiceRegisterationResults = async ({
   projectName = 'sample-project',
   stageName = 'production',
   serviceScope = 'deployable',
+  prerequisitesScope = 'deployable',
 }: {
   provider: ProviderChoice;
   serviceClass: FactoryOf<Service>;
@@ -137,6 +125,7 @@ export const getServiceRegisterationResults = async ({
   projectName?: string;
   stageName?: string;
   serviceScope?: ServiceScopeChoice,
+  prerequisitesScope?: ServiceScopeChoice,
 }): Promise<{
   scope: string;
   variables: object;
@@ -151,7 +140,7 @@ export const getServiceRegisterationResults = async ({
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
           const { cloudProvider, vault } = getPrerequisites({
-            provider, region, projectName, stageName, stack: cloudStack, scope: 'deployable',
+            provider, region, projectName, stageName, stack: cloudStack, scope: prerequisitesScope,
           });
 
           const service = serviceClass.factory(serviceConfig).scope(serviceScope).link(

@@ -4,7 +4,7 @@ import 'cdktf/lib/testing/adapters/jest';
 import { deployProject } from 'tests/helpers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
-import { awsRegion } from 'tests/fixtures';
+import { awsRegion } from 'tests/fixtures/aws';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import { normalizeProject } from '@stackmate/lib/normalizers';
