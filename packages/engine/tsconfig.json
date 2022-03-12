@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "module": "commonjs",
+    "module": "amd",
     "lib": ["es5", "es6" ],
     "jsx": "react",
     "declaration": true,
-    "outDir": "./lib",
+    "outDir": "./dist",
+    "outFile": "./dist/index.js",
     "rootDir": "./",
+    "rootDirs": ["./src", "./profiles", "./tests"],
     "composite": true,
     "importHelpers": true,
     "strict": true,
@@ -16,7 +18,8 @@
     "baseUrl": "./",
     "paths": {
       "@stackmate/*": ["./src/*"],
-      "tests/*": ["./tests/*"]
+      "tests/*": ["./tests/*"],
+      "profiles/*": ["./profiles/*"],
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,

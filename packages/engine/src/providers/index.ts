@@ -1,4 +1,4 @@
-import { AwsProvider } from './aws';
+import { Provider as AwsProvider } from './aws';
 
 export {
   AwsProvider,

@@ -1,14 +1,17 @@
 {
-  "name": "stackmate",
+  "name": "@stackmate/engine",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stackmate-io/engine"
+  },
   "author": {
     "name": "Fotis Alexandrou (@falexandrou)",
     "url": "https://www.falexandrou.com"
   },
-  "bin": {
-    "stackmate": "./bin/run"
+  "bugs": {
+    "url": "https://github.com/stackmate-io/engine/issues"
   },
-  "bugs": "https://github.com/stackmate-io/stackmate-ce/issues",
   "dependencies": {
     "@cdktf/provider-aws": "5.0.40",
     "cdktf": "0.9.4",
@@ -52,6 +55,7 @@
   },
   "files": [
     "/lib",
+    "/profiles",
     "/npm-shrinkwrap.json"
   ],
   "homepage": "https://stackmate.io",
@@ -64,18 +68,17 @@
     "deployment"
   ],
   "license": "MIT",
-  "main": "lib/index.js",
-  "repository": "https://github.com/stackmate-io/stackmate-ce",
+  "main": "dist/index.js",
   "ts-node": {
     "transpileOnly": true,
-    "files": true
+    "files": false
   },
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "build": "rm -rf lib && tsc --build tsconfig.build.json",
+    "build": "rm -rf dist && tsc --build tsconfig.build.json",
     "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   },
-  "types": "lib/index.d.ts"
+  "types": "dist/index.d.ts"
 }
