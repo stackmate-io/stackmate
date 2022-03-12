@@ -5,22 +5,13 @@ import Operation from '@stackmate/core/operation';
 import ServicesRegistry from '@stackmate/core/registry';
 import { CloudService } from '@stackmate/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { PrepareOperationOptions } from '@stackmate/types';
 
 class PrepareOperation extends Operation {
-  /**
-   * @var {Object} options any additional options for the operation
-   */
-  protected readonly options: PrepareOperationOptions = {
-    statePath: '',
-  };
-
   /**
    * @returns {CloudService} the local state service
    */
   @Memoize() get localState(): CloudService {
-    const { statePath: path } = this.options;
-    const attrs = { type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL, path };
+    const attrs = { type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL };
     return ServicesRegistry.get(pick(attrs, 'type', 'provider')).factory(attrs);
   }
 
