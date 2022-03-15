@@ -17,9 +17,9 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@stackmate/*": ["./src/*"],
-      "tests/*": ["./tests/*"],
-      "profiles/*": ["./profiles/*"],
+      "@stackmate/engine/*": ["./src/*"],
+      "@stackmate/engine/tests/*": ["./tests/*"],
+      "@stackmate/profiles/*": ["./profiles/*"]
     },
     "esModuleInterop": true,
     "experimentalDecorators": true,
