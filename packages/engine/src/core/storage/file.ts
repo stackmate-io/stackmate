@@ -1,12 +1,12 @@
 import YAML from 'yaml';
 import { promises as fsPromises } from 'fs';
 
-import Entity from '@stackmate/lib/entity';
-import Parser from '@stackmate/lib/parsers';
-import { AttributeParsers, Validations } from '@stackmate/types';
-import { StorageAdapter } from '@stackmate/interfaces';
-import { Attribute } from '@stackmate/lib/decorators';
-import { FORMAT } from '@stackmate/constants';
+import Entity from '@stackmate/engine/lib/entity';
+import Parser from '@stackmate/engine/lib/parsers';
+import { AttributeParsers, Validations } from '@stackmate/engine/types';
+import { StorageAdapter } from '@stackmate/engine/interfaces';
+import { Attribute } from '@stackmate/engine/lib/decorators';
+import { FORMAT } from '@stackmate/engine/constants';
 
 class FileStorage extends Entity implements StorageAdapter {
   /**

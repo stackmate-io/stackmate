@@ -4,7 +4,7 @@ import {
   ProviderChoice, ServiceAssociation, AttributeParsers,
   ServiceScopeChoice, AbstractConstructor, ConstructorOf,
   ServiceTypeChoice, Validations, EntityAttributes, CredentialsObject, VaultCredentialOptions,
-} from '@stackmate/types';
+} from '@stackmate/engine/types';
 
 export interface BaseEntity {
   validationMessage: string;

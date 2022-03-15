@@ -1,10 +1,10 @@
 import { pick } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
-import Operation from '@stackmate/core/operation';
-import ServicesRegistry from '@stackmate/core/registry';
-import { CloudService } from '@stackmate/interfaces';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
+import Operation from '@stackmate/engine/core/operation';
+import ServicesRegistry from '@stackmate/engine/core/registry';
+import { CloudService } from '@stackmate/engine/interfaces';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 class PrepareOperation extends Operation {
   /**

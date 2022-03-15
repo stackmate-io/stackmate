@@ -1,7 +1,7 @@
 import os from 'os';
 import path from 'path';
-import { RegionList } from '@stackmate/types';
-import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
+import { RegionList } from '@stackmate/engine/types';
+import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 
 export const { env: ENV } = process;
 export const ENVIRONMENT_VARIABLE = {

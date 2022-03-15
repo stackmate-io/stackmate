@@ -1,4 +1,4 @@
-import LocalState from '@stackmate/providers/local/services/state';
+import LocalState from '@stackmate/engine/providers/local/services/state';
 
 export {
   LocalState as State,

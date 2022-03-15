@@ -1,6 +1,6 @@
 import { clone, defaultsDeep, fromPairs, merge, omit } from 'lodash';
 
-import { NormalizedProjectConfiguration, NormalizedStage, ProjectConfiguration, ProviderChoice, StageDeclarations } from '@stackmate/types';
+import { NormalizedProjectConfiguration, NormalizedStage, ProjectConfiguration, ProviderChoice, StageDeclarations } from '@stackmate/engine/types';
 
 /**
  * Normalizes the stages configuration

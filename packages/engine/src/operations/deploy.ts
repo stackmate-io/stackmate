@@ -1,4 +1,4 @@
-import Operation from '@stackmate/core/operation';
+import Operation from '@stackmate/engine/core/operation';
 
 class DeployOperation extends Operation {
   /**

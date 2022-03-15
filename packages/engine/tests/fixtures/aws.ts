@@ -1,9 +1,9 @@
 import faker from 'faker';
 
-import { ProjectConfiguration } from '@stackmate/types';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/providers/aws/constants';
-import { projectName, stageName } from 'tests/fixtures/generic';
+import { ProjectConfiguration } from '@stackmate/engine/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/engine/providers/aws/constants';
+import { projectName, stageName } from '@stackmate/engine-tests/fixtures/generic';
 
 export const awsRegion = faker.random.arrayElement(Object.values(AWS_REGIONS)) as string;
 export const awsKeyArn = `arn:aws:kms:${awsRegion}:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`;

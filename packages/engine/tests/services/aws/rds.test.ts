@@ -1,13 +1,13 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { kebabCase, snakeCase } from 'lodash';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
-
-import Profile from '@stackmate/core/profile';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { getServiceRegisterationResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures/aws';
-import { Database as AwsRdsService } from '@stackmate/providers/aws';
 import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
+
+import Profile from '@stackmate/engine/core/profile';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { getServiceRegisterationResults } from '@stackmate/engine-tests/helpers';
+import { mysqlDatabaseConfiguration as serviceConfig } from '@stackmate/engine-tests/fixtures/aws';
+import { Database as AwsRdsService } from '@stackmate/engine/providers/aws';
 
 describe('AwsRdsService', () => {
   describe('instantiation', () => {

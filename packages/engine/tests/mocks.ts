@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
-import App from '@stackmate/lib/terraform/app';
-import Stack from '@stackmate/lib/terraform/stack';
-import Entity from '@stackmate/lib/entity';
-import Parser from '@stackmate/lib/parsers';
-import { CloudStack } from '@stackmate/interfaces';
-import { Attribute } from '@stackmate/lib/decorators';
-import { stackName, appName } from 'tests/fixtures/generic';
-import { AttributeParsers, Validations } from '@stackmate/types';
+import App from '@stackmate/engine/lib/terraform/app';
+import Stack from '@stackmate/engine/lib/terraform/stack';
+import Entity from '@stackmate/engine/lib/entity';
+import Parser from '@stackmate/engine/lib/parsers';
+import { CloudStack } from '@stackmate/engine/interfaces';
+import { Attribute } from '@stackmate/engine/lib/decorators';
+import { stackName, appName } from '@stackmate/engine-tests/fixtures/generic';
+import { AttributeParsers, Validations } from '@stackmate/engine/types';
 
 export const getMockApp = (name: string) => (
   new App(name)

@@ -3,13 +3,13 @@ import validate from 'validate.js';
 import { existsSync as fileExistsSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
-import Profile from '@stackmate/core/profile';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { isKeySubset } from '@stackmate/lib/helpers';
+import Profile from '@stackmate/engine/core/profile';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { isKeySubset } from '@stackmate/engine/lib/helpers';
 import {
   CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice,
   StagesNormalizedAttributes, StateConfiguration, VaultConfiguration,
-} from '@stackmate/types';
+} from '@stackmate/engine/types';
 
 namespace Validator {
   /**

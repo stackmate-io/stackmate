@@ -1,4 +1,4 @@
-import { DEFAULT_PROJECT_FILE, DEFAULT_STAGE } from '@stackmate/constants';
+import { DEFAULT_PROJECT_FILE, DEFAULT_STAGE } from '@stackmate/engine/constants';
 
 /**
  * Creates and deploys prerequisites for a stage

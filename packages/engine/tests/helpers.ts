@@ -6,14 +6,14 @@ import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';
 
-import Project from '@stackmate/core/project';
-import Environment from '@stackmate/lib/environment';
-import DeployOperation from '@stackmate/operations/deploy';
-import { CloudStack } from '@stackmate/interfaces';
-import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/constants';
-import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
-import { ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/types';
-import { getService } from '@stackmate/core/registry';
+import Project from '@stackmate/engine/core/project';
+import Environment from '@stackmate/engine/lib/environment';
+import DeployOperation from '@stackmate/engine/operations/deploy';
+import { CloudStack } from '@stackmate/engine/interfaces';
+import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/engine/constants';
+import { awsProviderConfiguration, awsVaultConfiguration } from '@stackmate/engine-tests/fixtures/aws';
+import { ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/engine/types';
+import { getService } from '@stackmate/engine/core/registry';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class

@@ -1,4 +1,4 @@
-import { RegionList } from '@stackmate/types';
+import { RegionList } from '@stackmate/engine/types';
 
 export const AWS_REGIONS: RegionList = {
   EU_CENTRAL_1: 'eu-central-1',

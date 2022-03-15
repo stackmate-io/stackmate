@@ -1,7 +1,7 @@
 import { resolve as resolvePath } from 'path';
 import { isArray, isNil, isNumber, isObject, isString, omitBy, uniq } from 'lodash';
 
-import { CredentialsObject } from '@stackmate/types';
+import { CredentialsObject } from '@stackmate/engine/types';
 
 namespace Parser {
   /**

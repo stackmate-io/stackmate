@@ -1,7 +1,7 @@
-import { AWS_REGIONS } from '@stackmate/providers/aws/constants';
-import { PROVIDER } from '@stackmate/constants';
-import { AbstractConstructor, ProviderChoice, RegionList } from '@stackmate/types';
-import { Provider as AwsProvider } from '@stackmate/providers/aws';
+import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { PROVIDER } from '@stackmate/engine/constants';
+import { AbstractConstructor, ProviderChoice, RegionList } from '@stackmate/engine/types';
+import { Provider as AwsProvider } from '@stackmate/engine/providers/aws';
 
 const AwsService = <TBase extends AbstractConstructor>(Base: TBase) => {
   abstract class AwsServiceWrapper extends Base {

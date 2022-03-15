@@ -1,16 +1,16 @@
 import { Memoize } from 'typescript-memoize';
 
-import Entity from '@stackmate/lib/entity';
-import Parser from '@stackmate/lib/parsers';
-import { Attribute } from '@stackmate/lib/decorators';
-import { normalizeProject } from '@stackmate/lib/normalizers';
-import { StorageAdapter } from '@stackmate/interfaces';
-import { getStoragAdaptereByType } from '@stackmate/core/storage';
-import { PROVIDER, STORAGE, FORMAT } from '@stackmate/constants';
+import Entity from '@stackmate/engine/lib/entity';
+import Parser from '@stackmate/engine/lib/parsers';
+import { Attribute } from '@stackmate/engine/lib/decorators';
+import { normalizeProject } from '@stackmate/engine/lib/normalizers';
+import { StorageAdapter } from '@stackmate/engine/interfaces';
+import { getStoragAdaptereByType } from '@stackmate/engine/core/storage';
+import { PROVIDER, STORAGE, FORMAT } from '@stackmate/engine/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
   AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes, StateConfiguration,
-} from '@stackmate/types';
+} from '@stackmate/engine/types';
 
 class Project extends Entity {
   /**

@@ -1,10 +1,10 @@
 import 'cdktf/lib/testing/adapters/jest';
 import { join as joinPaths } from 'path';
 
-import Profile from '@stackmate/core/profile';
-import { APP_HOME_DIRECTORY, PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { stateConfiguration as serviceConfig } from 'tests/fixtures/local';
-import { State as LocalState } from '@stackmate/providers/local';
+import Profile from '@stackmate/engine/core/profile';
+import { APP_HOME_DIRECTORY, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { stateConfiguration as serviceConfig } from '@stackmate/engine-tests/fixtures/local';
+import { State as LocalState } from '@stackmate/engine/providers/local';
 
 describe('LocalState', () => {
   describe('instantiation', () => {

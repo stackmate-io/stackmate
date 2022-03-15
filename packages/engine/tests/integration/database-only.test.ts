@@ -1,13 +1,13 @@
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
-import 'cdktf/lib/testing/adapters/jest';
-
-import { deployProject } from 'tests/helpers';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/providers/aws/constants';
-import { awsRegion } from 'tests/fixtures/aws';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { normalizeProject } from '@stackmate/lib/normalizers';
+import 'cdktf/lib/testing/adapters/jest';
+
+import { awsRegion } from '@stackmate/engine-tests/fixtures/aws';
+import { deployProject } from '@stackmate/engine-tests/helpers';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
+import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 
 const projectConfig = normalizeProject({
   name: 'database-only-project',

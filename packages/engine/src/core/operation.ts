@@ -1,10 +1,10 @@
 import { Memoize } from 'typescript-memoize';
 import { pick, uniqBy } from 'lodash';
 
-import Project from '@stackmate/core/project';
-import Provisioner from '@stackmate/core/provisioner';
-import ServicesRegistry from '@stackmate/core/registry';
-import { SERVICE_TYPE } from '@stackmate/constants';
+import Project from '@stackmate/engine/core/project';
+import Provisioner from '@stackmate/engine/core/provisioner';
+import ServicesRegistry from '@stackmate/engine/core/registry';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
 
 abstract class Operation {
   /**

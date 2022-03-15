@@ -1,5 +1,5 @@
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/constants';
-import { projectName, stageName } from 'tests/fixtures/generic';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { projectName, stageName } from '@stackmate/engine-tests/fixtures/generic';
 
 export const stateConfiguration = {
   name: 'local-state',

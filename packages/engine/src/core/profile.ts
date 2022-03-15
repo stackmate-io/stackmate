@@ -1,9 +1,10 @@
-import { Memoize } from 'typescript-memoize';
-import { existsSync as fileExistsSync } from 'fs';
-import { join as joinPaths, resolve as resolvePath } from 'path';
+import { join as joinPaths, resolve as resolvePath } from 'node:path';
+import { existsSync as fileExistsSync } from 'node:fs';
 
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/types';
-import { ProfileNotFoundError } from '@stackmate/lib/errors';
+import { Memoize } from 'typescript-memoize';
+
+import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
+import { ProfileNotFoundError } from '@stackmate/engine/lib/errors';
 
 class Profile {
   /**
@@ -15,7 +16,7 @@ class Profile {
   /**
    * @var {String} directory the directory that we store the profiles in
    */
-  static directory: string = resolvePath('profiles');
+  static directory: string = resolvePath(joinPaths(__dirname, '..', 'profiles' ));
 
   /**
    * Returns the absolute path to the profile file
