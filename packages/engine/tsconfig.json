@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "module": "commonjs",
+    "target": "es6",
+    "module": "amd",
     "declaration": true,
     "baseUrl": "./",
     "outDir": "./dist",
+    "outFile": "./dist/index.js",
     "rootDir": "./src",
-    "composite": true,
+    "composite": false,
     "importHelpers": true,
     "strict": true,
     "strictPropertyInitialization": false,

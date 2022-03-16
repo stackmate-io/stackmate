@@ -77,9 +77,10 @@ abstract class Operation {
     this: new (...args: any[]) => T,
     projectFile: string,
     stageName: string,
+    options: object = {},
   ): Promise<T> {
     const project = await Project.load(projectFile);
-    return new this(project, stageName);
+    return new this(project, stageName, options);
   }
 }
 
