@@ -10,3 +10,6 @@ node_modules
 bindings/terraform.so
 tests/output/*
 !tests/output/.keep
+
+# TypeScript incremental compilation cache
+*.tsbuildinfo

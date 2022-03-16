@@ -1,30 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "amd",
-    "lib": ["es5", "es6" ],
-    "jsx": "react",
+    "target": "es2015",
+    "module": "commonjs",
     "declaration": true,
+    "baseUrl": "./",
     "outDir": "./dist",
-    "outFile": "./dist/index.js",
-    "rootDir": "./",
-    "rootDirs": ["./src", "./profiles", "./tests"],
+    "rootDir": "./src",
     "composite": true,
     "importHelpers": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
     "moduleResolution": "node",
-    "baseUrl": "./",
     "paths": {
       "@stackmate/engine/*": [
         "./src/*"
-      ],
-      "@stackmate/engine-tests/*": [
-        "./tests/*"
-      ],
-      "@stackmate/profiles/*": [
-        "./profiles/*"
       ]
     },
     "esModuleInterop": true,
@@ -34,8 +24,7 @@
   },
   "include": [
     "src/**/*",
-    "profiles/**/*",
-    "tests/**/*"
+    "../tests/**/*"
   ],
   "exclude": [
     "node_modules"
