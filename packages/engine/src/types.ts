@@ -184,3 +184,11 @@ export type VaultCredentialOptions = {
   special?: Boolean;
   exclude?: string[],
 };
+
+export type OperationOptions = {
+  outputPath?: string;
+};
+
+export type PrepareOperationOptions = OperationOptions & {
+  statePath?: string;
+}

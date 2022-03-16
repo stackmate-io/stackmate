@@ -2,11 +2,18 @@ import { LocalBackend } from 'cdktf';
 import { join as joinPaths } from 'path';
 
 import State from '@stackmate/engine/core/services/state';
+import Parser from '@stackmate/engine/lib/parsers';
 import { APP_HOME_DIRECTORY, PROVIDER } from '@stackmate/engine/constants';
 import { CloudStack } from '@stackmate/engine/interfaces';
 import { ProviderChoice } from '@stackmate/engine/types';
+import { Attribute } from '@stackmate/engine/lib/decorators';
 
 class LocalState extends State {
+  /**
+   * @var {String} directory the directory to store the output to
+   */
+  @Attribute directory: string;
+
   /**
    * @var {ProviderChoice} provider the provider for the service
    */
@@ -35,7 +42,36 @@ class LocalState extends State {
    * @returns {String} the workspace directory to store the file under
    */
   get workspaceDir(): string {
-    return joinPaths(APP_HOME_DIRECTORY, this.projectName.toLowerCase());
+    if (!this.directory) {
+      return joinPaths(APP_HOME_DIRECTORY, this.projectName.toLowerCase())
+    }
+
+    return this.directory;
+  }
+
+  /**
+   * @returns {Object} the parser functions to apply to the service's attributes
+   */
+  parsers() {
+    return {
+      ...super.parsers(),
+      directory: Parser.parsePath,
+    };
+  }
+
+  /**
+   * @returns {Validations} the validations for the service
+   */
+  validations() {
+    return {
+      ...super.validations(),
+      directory: {
+        validatePathExistence: {
+          required: true,
+          requireDirectory: true,
+        },
+      },
+    };
   }
 
   /**

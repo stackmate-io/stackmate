@@ -83,7 +83,7 @@ namespace Parser {
    * @param {String} path the path to parse
    * @returns {String} the parsed and resolved path
    */
-  export const parseFileName = (path: string) => (
+  export const parsePath = (path: string) => (
     resolvePath(path.trim())
   );
 }

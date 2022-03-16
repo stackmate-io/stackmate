@@ -5,6 +5,7 @@ import Project from '@stackmate/engine/core/project';
 import Provisioner from '@stackmate/engine/core/provisioner';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { OperationOptions } from '@stackmate/engine/types';
 
 abstract class Operation {
   /**
@@ -25,7 +26,7 @@ abstract class Operation {
   /**
    * @var {Object} options any additional options for the operation
    */
-  protected readonly options: object = {};
+  protected readonly options: OperationOptions = {};
 
   /**
    * @constructor
@@ -33,11 +34,13 @@ abstract class Operation {
    * @param {String} stageName the name of the stage we're provisioning
    * @param {Object} options any additional options for the operation
    */
-  constructor(project: Project, stageName: string, options: object = {}) {
+  constructor(project: Project, stageName: string, options: OperationOptions = {}) {
     this.project = project;
     this.stageName = stageName;
     this.options = options;
-    this.provisioner = new Provisioner(project.name, stageName);
+
+    const { outputPath } = this.options;
+    this.provisioner = new Provisioner(project.name, stageName, outputPath);
   }
 
   /**

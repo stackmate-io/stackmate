@@ -29,7 +29,7 @@ class FileStorage extends Entity implements StorageAdapter {
    */
   parsers(): AttributeParsers {
     return {
-      path: Parser.parseFileName,
+      path: Parser.parsePath,
       format: Parser.parseString,
     };
   }
@@ -42,11 +42,9 @@ class FileStorage extends Entity implements StorageAdapter {
 
     return {
       path: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to provide a valid file path',
+        validatePathExistence: {
+          required: true,
         },
-        validateFileExistence: {},
       },
       format: {
         inclusion: {

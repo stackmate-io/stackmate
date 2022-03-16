@@ -41,7 +41,7 @@ class Provisioner {
    * @param {String} stackName the stack's name
    */
   constructor(appName: string, stageName: string, outputPath?: string) {
-    this.app = new App(appName);
+    this.app = new App(appName, { outdir: outputPath });
     this.stack = this.app.stack(stageName);
   }
 
