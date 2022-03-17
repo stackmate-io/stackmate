@@ -46,9 +46,12 @@
     "globby": "^12.0.2",
     "jest": "^27.4.4",
     "nyc": "^15.1.0",
+    "rollup": "^2.70.1",
+    "rollup-plugin-typescript2": "^0.31.2",
     "sinon": "^12.0.1",
     "ts-jest": "^27.1.1",
     "ts-node": "^10.4.0",
+    "ts-transform-paths": "^2.0.3",
     "tsconfig-paths": "^3.11.0",
     "typescript": "^4.5.3"
   },
@@ -74,7 +77,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "build": "rm -rf lib && tsc -b tsconfig.build.json",
+    "build": "rm -rf lib && rollup -c rollup.config.js -o lib/index.js -f cjs",
     "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
