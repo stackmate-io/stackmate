@@ -20,7 +20,7 @@ $ npm install -g stackmate
 $ stackmate COMMAND
 running command...
 $ stackmate (--version)
-stackmate/0.0.0 darwin-x64 node-v16.4.0
+stackmate/0.0.0 darwin-x64 node-v17.4.0
 $ stackmate --help [COMMAND]
 USAGE
   $ stackmate COMMAND
@@ -29,8 +29,6 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`stackmate hello PERSON`](#stackmate-hello-person)
-* [`stackmate hello world`](#stackmate-hello-world)
 * [`stackmate help [COMMAND]`](#stackmate-help-command)
 * [`stackmate plugins`](#stackmate-plugins)
 * [`stackmate plugins:inspect PLUGIN...`](#stackmate-pluginsinspect-plugin)
@@ -38,46 +36,6 @@ USAGE
 * [`stackmate plugins:link PLUGIN`](#stackmate-pluginslink-plugin)
 * [`stackmate plugins:uninstall PLUGIN...`](#stackmate-pluginsuninstall-plugin)
 * [`stackmate plugins update`](#stackmate-plugins-update)
-
-## `stackmate hello PERSON`
-
-Say hello
-
-```
-USAGE
-  $ stackmate hello [PERSON] -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
-
-FLAGS
-  -f, --from=<value>  (required) Whom is saying hello
-
-DESCRIPTION
-  Say hello
-
-EXAMPLES
-  $ oex hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
-```
-
-_See code: [dist/commands/hello/index.ts](https://github.com/stackmate-io/cli/blob/v0.0.0/dist/commands/hello/index.ts)_
-
-## `stackmate hello world`
-
-Say hello world
-
-```
-USAGE
-  $ stackmate hello world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ oex hello world
-  hello world! (./src/commands/hello/world.ts)
-```
 
 ## `stackmate help [COMMAND]`
 

@@ -1,6 +1,6 @@
 import ffi from 'ffi-napi';
 
-import { TERRAFORM_BINDING } from '@stackmate-cli/constants';
+import { TERRAFORM_BINDING } from '@stackmate/cli/constants';
 
 class Runner {
   /**

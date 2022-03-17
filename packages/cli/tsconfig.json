@@ -1,39 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "es2019",
     "module": "commonjs",
-    "lib": [
-      "es5",
-      "es6"
-    ],
-    "jsx": "react",
     "declaration": true,
-    "outDir": "./lib",
-    "rootDir": "./",
-    "composite": true,
-    "importHelpers": true,
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "noUnusedLocals": true,
-    "moduleResolution": "node",
     "baseUrl": "./",
-    "paths": {
-      "@stackmate-cli/*": [
-        "./src/*"
-      ],
-      "tests/*": [
-        "./tests/*"
-      ]
-    },
+    "rootDir": "./",
+    "outDir": "./lib",
+    "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "incremental": false,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noEmit": false,
+    "noEmitOnError": true,
+    "removeComments": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": true,
+    "moduleResolution": "node",
+    "paths": {
+      "@stackmate/cli/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "tests/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "lib"
   ]
 }

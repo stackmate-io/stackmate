@@ -1,6 +1,6 @@
 {
   "name": "stackmate",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Stackmate - launch and deploy cloud infrastructure using 1-line commands",
   "author": "Fotis Alexandrou @falexandrou",
   "bin": {
@@ -8,11 +8,12 @@
   },
   "homepage": "https://github.com/stackmate-io/cli",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "repository": "stackmate-io/cli",
   "files": [
     "/bin",
-    "/dist",
+    "/lib",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
@@ -43,25 +44,25 @@
   "oclif": {
     "bin": "stackmate",
     "dirname": "stackmate",
-    "commands": "./dist/commands",
+    "commands": "lib/commands",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-plugins"
     ],
     "topicSeparator": " ",
     "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
+      "deploy": {
+        "description": "Deploy your infrastructure to the cloud"
       }
     }
   },
   "scripts": {
-    "make-bindings": "go build -o bindings/terraform.so -buildmode=c-shared bindings/terraform.go",
-    "build": "shx rm -rf dist && tsc -b && npm run make-bindings",
+    "go:bindings": "go build -o lib/terraform.so -buildmode=c-shared src/terraform/bindings.go",
+    "build": "shx rm -rf lib && tsc -b tsconfig.build.json && oclif manifest",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "yarn lint",
-    "prepack": "yarn build && oclif manifest && oclif readme",
+    "prepack": "yarn build && oclif readme",
     "test": "mocha --forbid-only \"tests/**/*.test.ts\"",
     "version": "oclif readme && git add README.md"
   },
@@ -71,6 +72,5 @@
   "bugs": "https://github.com/stackmate-io/cli/issues",
   "keywords": [
     "oclif"
-  ],
-  "types": "dist/index.d.ts"
+  ]
 }
