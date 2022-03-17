@@ -6,10 +6,10 @@ import Parser from '@stackmate/engine/lib/parsers';
 import Profile from '@stackmate/engine/core/profile';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { CloudService, CloudStack, ProviderService, VaultService } from '@stackmate/engine/interfaces';
 import {
   RegionList, ServiceAssociation, ProviderChoice,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
+  CloudService, CloudStack, ProviderService, VaultService,
 } from '@stackmate/engine/types';
 
 abstract class Service extends Entity implements CloudService {

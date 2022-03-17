@@ -69,13 +69,12 @@ export const normalizeStages = (
  */
 export const normalizeProject = (configuration: ProjectConfiguration): NormalizedProjectConfiguration => {
   const normalized = clone(configuration) as NormalizedProjectConfiguration;
-  const { name: projectName, provider, region, stages, secrets, state, defaults = {} } = normalized;
+  const { name: projectName, provider, region, stages, secrets, state } = normalized;
 
   Object.assign(normalized, {
     stages: normalizeStages(stages, provider, region, projectName),
     secrets: defaultsDeep(secrets, { provider, region }),
     state: defaultsDeep(state, { provider, region }),
-    defaults,
   });
 
   return normalized;

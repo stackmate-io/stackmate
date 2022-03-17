@@ -3,9 +3,8 @@ import { Memoize } from 'typescript-memoize';
 
 import Operation from '@stackmate/engine/core/operation';
 import ServicesRegistry from '@stackmate/engine/core/registry';
-import { CloudService } from '@stackmate/engine/interfaces';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { PrepareOperationOptions } from '../types';
+import { CloudService, PrepareOperationOptions } from '@stackmate/engine/types';
 
 class PrepareOperation extends Operation {
   /**

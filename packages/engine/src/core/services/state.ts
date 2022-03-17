@@ -1,8 +1,7 @@
 import Service from '@stackmate/engine/core/service';
-import { ServiceTypeChoice } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { CloudStack, StateService } from '@stackmate/engine/interfaces';
 import { Attribute } from '@stackmate/engine/lib/decorators';
+import { CloudStack, StateService, ServiceTypeChoice } from '@stackmate/engine/types';
 
 abstract class State extends Service implements StateService {
   /**

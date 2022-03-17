@@ -1,7 +1,6 @@
 import FileStorage from '@stackmate/engine/core/storage/file';
-import { StorageChoice } from '@stackmate/engine/types';
 import { STORAGE } from '@stackmate/engine/constants';
-import { StorageAdapter } from '@stackmate/engine/interfaces';
+import { StorageAdapter, StorageChoice } from '@stackmate/engine/types';
 
 const getStoragAdaptereByType = (type: StorageChoice, attributes: object): StorageAdapter => {
   let adapter;

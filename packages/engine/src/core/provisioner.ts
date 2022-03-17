@@ -1,8 +1,7 @@
 import App from '@stackmate/engine/lib/terraform/app';
 import PriorityQueue from '@stackmate/engine/lib/queue';
-import { CloudApp, CloudService, CloudStack } from '@stackmate/engine/interfaces';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceTypeChoice } from '@stackmate/engine/types';
+import { ServiceTypeChoice, CloudApp, CloudService, CloudStack } from '@stackmate/engine/types';
 
 class Provisioner {
   /**
@@ -87,6 +86,9 @@ class Provisioner {
       const dependables = this.dependables.get(service.identifier) || [];
       dependables.forEach(dep => dep.link(service));
     });
+
+    // Synthesize the output in the destination directory
+    this.app.synth();
   }
 
   /**

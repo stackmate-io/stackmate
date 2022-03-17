@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "amd",
+    "module": "ES6",
     "declaration": true,
     "baseUrl": "./",
-    "outDir": "./dist",
-    "outFile": "./dist/index.js",
-    "rootDir": "./src",
+    "rootDir": "./",
+    "outDir": "./lib",
     "composite": false,
+    "incremental": false,
     "importHelpers": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "noEmitOnError": true,
+    "removeComments": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
@@ -17,17 +24,14 @@
       "@stackmate/engine/*": [
         "./src/*"
       ]
-    },
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    }
   },
   "include": [
     "src/**/*",
-    "../tests/**/*"
+    "tests/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "lib"
   ]
 }

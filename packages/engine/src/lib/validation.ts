@@ -7,7 +7,7 @@ import Profile from '@stackmate/engine/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { isKeySubset } from '@stackmate/engine/lib/helpers';
 import {
-  CredentialsObject, ProjectDefaults, ProviderChoice, ServiceTypeChoice,
+  CredentialsObject, ProviderChoice, ServiceTypeChoice,
   StagesNormalizedAttributes, StateConfiguration, VaultConfiguration,
 } from '@stackmate/engine/types';
 
@@ -89,28 +89,6 @@ namespace Validator {
 
     if (!provider || !availableProviders.includes(provider)) {
       return `You have to specify a valid provider for the state. Available options are: ${availableProviders.join(', ')}`;
-    }
-  };
-
-  /**
-   * Validates the project's defaults in the configuration file
-   *
-   * @param {ProjectDefaults} defaults the project's defaults
-   * @returns {String|undefined} the error message (if any)
-   */
-  export const validateProjectDefaults = (defaults: ProjectDefaults) => {
-    // Allow defaults not being defined or empty objects
-    if (!defaults || (isObject(defaults) && isEmpty(defaults))) {
-      return;
-    }
-
-    const providers = Object.values(PROVIDER);
-    const hasValidProviderKeys = isObject(defaults) && Object.keys(defaults).some(
-      (prov) => !providers.includes(prov as ProviderChoice),
-    );
-
-    if (!hasValidProviderKeys) {
-      return 'The "defaults" entry should contain valid cloud providers in the mapping';
     }
   };
 

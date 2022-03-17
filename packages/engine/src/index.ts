@@ -3,6 +3,15 @@ import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
 import { OperationOptions, PrepareOperationOptions } from './types';
 
+// Export types
+export * from './types';
+
+// Export constants
+export * from './constants';
+
+// Export Provider constants
+export * from './providers/aws/constants';
+
 /**
  * Provides the configuration to deploy a stage
  *
@@ -11,10 +20,10 @@ import { OperationOptions, PrepareOperationOptions } from './types';
  * @param {Object} options the operation's options
  * @param {String} options.outputPath the path to output the files to (optional)
  */
-export const deployStage = async (
+export const stageDeployment = async (
   projectFile: string, stage: string, options: OperationOptions = {},
 ): Promise<void> => {
-  const operation = await DeployOperation.factory(projectFile, stage);
+  const operation = await DeployOperation.factory(projectFile, stage, options);
   await operation.run();
 };
 
@@ -26,7 +35,7 @@ export const deployStage = async (
  * @param {Object} options the operation's options
  * @param {String} options.outputPath the path to output the files to (optional)
  */
-export const destroyStage = async (
+export const stageDestruction = async (
   projectFile: string, stage: string, options: OperationOptions = {},
 ): Promise<void> => {
   const operation = await DestroyOperation.factory(projectFile, stage, options);
@@ -42,10 +51,9 @@ export const destroyStage = async (
  * @param {String} options.outputPath the path to output the files to (optional)
  * @param {String} options.statePath the path to store the state to
  */
-export const prepareStage = async (
+export const initialPreparation = async (
   projectFile: string, stage: string, options: PrepareOperationOptions = {},
 ): Promise<void> => {
   const operation = await PrepareOperation.factory(projectFile, stage, options);
   await operation.run();
 };
-

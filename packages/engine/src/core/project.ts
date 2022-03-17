@@ -4,12 +4,12 @@ import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
-import { StorageAdapter } from '@stackmate/engine/interfaces';
 import { getStoragAdaptereByType } from '@stackmate/engine/core/storage';
 import { PROVIDER, STORAGE, FORMAT } from '@stackmate/engine/constants';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration, ProjectDefaults, Validations,
-  AttributeParsers, VaultConfiguration, ProviderChoice, StagesNormalizedAttributes, StateConfiguration,
+  ProjectConfiguration, NormalizedProjectConfiguration,
+  StagesNormalizedAttributes, Validations, StorageAdapter,
+  AttributeParsers, VaultConfiguration, ProviderChoice, StateConfiguration,
 } from '@stackmate/engine/types';
 
 class Project extends Entity {
@@ -42,11 +42,6 @@ class Project extends Entity {
    * @var {Object} stages the stages declarations
    */
   @Attribute stages: StagesNormalizedAttributes = {};
-
-  /**
-   * @var {Object} defaults the project's defaults
-   */
-  @Attribute defaults: ProjectDefaults = {};
 
   /**
    * @var {String} validationMessage the error message
@@ -111,9 +106,6 @@ class Project extends Entity {
       },
       state: {
         validateState: {},
-      },
-      defaults: {
-        validateProjectDefaults: {},
       },
     };
   }

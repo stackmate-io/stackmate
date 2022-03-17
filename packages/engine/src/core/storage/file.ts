@@ -3,10 +3,9 @@ import { promises as fsPromises } from 'fs';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
-import { AttributeParsers, Validations } from '@stackmate/engine/types';
-import { StorageAdapter } from '@stackmate/engine/interfaces';
-import { Attribute } from '@stackmate/engine/lib/decorators';
 import { FORMAT } from '@stackmate/engine/constants';
+import { Attribute } from '@stackmate/engine/lib/decorators';
+import { StorageAdapter, AttributeParsers, Validations } from '@stackmate/engine/types';
 
 class FileStorage extends Entity implements StorageAdapter {
   /**

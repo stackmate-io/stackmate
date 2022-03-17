@@ -12,8 +12,8 @@
   "bugs": {
     "url": "https://github.com/stackmate-io/engine/issues"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "@cdktf/provider-aws": "5.0.40",
     "cdktf": "0.9.4",
@@ -56,7 +56,7 @@
     "node": ">=16.0.0"
   },
   "files": [
-    "/dist"
+    "lib/"
   ],
   "homepage": "https://stackmate.io",
   "keywords": [
@@ -74,7 +74,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
-    "build": "rm -rf dist && tsc --build tsconfig.json",
+    "build": "rm -rf lib && tsc -b tsconfig.build.json",
     "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"

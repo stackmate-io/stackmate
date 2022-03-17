@@ -1,4 +1,4 @@
-import { BaseEntity, BaseEntityConstructor, SubclassRegistry } from '@stackmate/engine/interfaces';
+import { BaseEntity, BaseEntityConstructor, SubclassRegistry } from '@stackmate/engine/types';
 
 class Registry<T extends BaseEntityConstructor<BaseEntity>> implements SubclassRegistry<T> {
   /**

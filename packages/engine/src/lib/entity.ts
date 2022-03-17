@@ -1,9 +1,10 @@
 import { isEmpty, isFunction, pick, uniq } from 'lodash';
 
 import { validate } from '@stackmate/engine/lib/validation';
-import { BaseEntity } from '@stackmate/engine/interfaces';
-import { AttributeParsers, ConstructorOf, EntityAttributes, Validations } from '@stackmate/engine/types';
 import { ValidationError } from '@stackmate/engine/lib/errors';
+import {
+  BaseEntity, AttributeParsers, ConstructorOf, EntityAttributes, Validations,
+} from '@stackmate/engine/types';
 
 abstract class Entity implements BaseEntity {
 

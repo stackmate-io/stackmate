@@ -1,9 +1,8 @@
 import 'cdktf/lib/testing/adapters/jest';
-import { join as joinPaths } from 'path';
 
 import Profile from '@stackmate/engine/core/profile';
-import { APP_HOME_DIRECTORY, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { stateConfiguration as serviceConfig } from '@stackmate/engine-tests/fixtures/local';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { stateConfiguration as serviceConfig } from 'tests/fixtures/local';
 import { State as LocalState } from '@stackmate/engine/providers/local';
 
 describe('LocalState', () => {
@@ -45,12 +44,6 @@ describe('LocalState', () => {
 
     it('returns the file path to be used', () => {
       expect(service.path).toEqual(`${service.stageName.toLowerCase()}-initial.tfstate`);
-    });
-
-    it('returns the workspace directory to be used', () => {
-      expect(service.workspaceDir).toEqual(
-        joinPaths(APP_HOME_DIRECTORY, service.projectName.toLowerCase()),
-      );
     });
   });
 });

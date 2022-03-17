@@ -8,9 +8,8 @@ import {
 
 import Vault from '@stackmate/engine/core/services/vault';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
-import { CloudStack } from '@stackmate/engine/interfaces';
-import { VaultCredentialOptions } from '@stackmate/engine/types';
 import { getRandomString } from '@stackmate/engine/lib/helpers';
+import { CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
 
 const AwsVaultService = AwsService(Vault);
 

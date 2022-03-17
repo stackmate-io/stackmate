@@ -2,8 +2,9 @@ import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
-import { Sizeable, Storable, MultiNode, Versioned } from '@stackmate/engine/interfaces';
+import {
+  OneOf, ServiceTypeChoice, Sizeable, Storable, MultiNode, Versioned,
+} from '@stackmate/engine/types';
 
 abstract class Database extends Service implements Sizeable, Storable, MultiNode, Versioned {
   /**

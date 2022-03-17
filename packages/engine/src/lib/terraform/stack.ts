@@ -1,6 +1,6 @@
 import { TerraformStack } from 'cdktf';
 
-import { CloudStack, CloudApp } from '@stackmate/engine/interfaces';
+import { CloudStack, CloudApp } from '@stackmate/engine/types';
 
 class Stack extends TerraformStack implements CloudStack {
   /**

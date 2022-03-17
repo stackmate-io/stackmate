@@ -2,7 +2,7 @@ import { S3Backend, TerraformResource } from 'cdktf';
 
 import State from '@stackmate/engine/core/services/state';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
-import { CloudStack } from '@stackmate/engine/interfaces';
+import { CloudStack } from '@stackmate/engine/types';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import Parser from '@stackmate/engine/lib/parsers';

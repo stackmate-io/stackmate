@@ -1,20 +1,49 @@
-import { App as TerraformApp, TerraformProvider, TerraformStack } from 'cdktf';
+import { TerraformProvider } from 'cdktf';
 
-import {
-  ProviderChoice, ServiceAssociation, AttributeParsers,
-  ServiceScopeChoice, AbstractConstructor, ConstructorOf,
-  ServiceTypeChoice, Validations, EntityAttributes, CredentialsObject, VaultCredentialOptions,
-} from '@stackmate/engine/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-export interface BaseEntity {
-  validationMessage: string;
-  attributes: EntityAttributes;
-  parsers(): AttributeParsers;
-  validate(): void;
-  validations(): Validations;
-  getAttribute(name: string): any;
-  setAttribute(name: string, value: any): void;
-}
+import { AttributeParsers, BaseEntity, Validations } from './entity';
+import { CloudStack, CredentialsObject } from './lib';
+import { VaultCredentialOptions } from './project';
+import { OneOf, ChoiceOf, AbstractConstructorOf } from './util';
+
+export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
+export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
+export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
+export type ServiceAssociationDeclarations = string[];
+
+export type RegionList = {
+  [name: string]: string;
+};
+
+export type ServiceAssociation = {
+  lookup: (a: CloudService) => boolean;
+  handler: (a: CloudService) => void;
+};
+
+export type ServiceConfigurationDeclaration = {
+  type: ServiceTypeChoice;
+  provider?: ProviderChoice;
+  region?: string;
+  profile?: string;
+  links?: ServiceAssociationDeclarations;
+};
+
+export type ServiceConfigurationDeclarationNormalized = {
+  type: ServiceTypeChoice;
+  provider: ProviderChoice;
+  region: string;
+  name: string;
+  projectName: string;
+  stageName: string;
+  profile?: string;
+  links?: ServiceAssociationDeclarations;
+};
+
+// The final attributes that the Service class should expect
+export type ServiceAttributes = ServiceConfigurationDeclarationNormalized;
+
+export type ServiceList = Map<string, CloudService>;
 
 export interface CloudService extends BaseEntity {
   readonly name: string;
@@ -38,12 +67,6 @@ export interface CloudService extends BaseEntity {
   onDestroy(stack: CloudStack): void;
 }
 
-export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
-  prototype: T;
-  new(...args: any[]): T;
-  factory(this: ConstructorOf<T>, ...args: any[]): T;
-}
-
 export interface Sizeable extends BaseEntity {
   size: string;
   parsers(): AttributeParsers & Required<{ size: Function }>;
@@ -54,12 +77,6 @@ export interface Storable extends BaseEntity {
   storage: number;
   parsers(): AttributeParsers & Required<{ size: Function }>;
   validations(): Validations & Required<{ storage: object }>;
-}
-
-export interface Mountable extends BaseEntity {
-  volumes: string; // TODO
-  parsers(): AttributeParsers & Required<{ volumes: Function }>;
-  validations(): Validations & Required<{ volumes: object }>;
 }
 
 export interface MultiNode extends BaseEntity {
@@ -79,23 +96,6 @@ export interface Profilable extends BaseEntity {
   overrides: object;
 }
 
-export interface StorageAdapter {
-  deserialize(serialized: string | object): object;
-  read(): Promise<object>;
-}
-
-export interface CloudStack extends TerraformStack {
-  readonly name: string;
-  readonly app: TerraformApp;
-  readonly appName: string;
-  readonly outputPath: string;
-}
-
-export interface CloudApp extends TerraformApp {
-  readonly name: string;
-  stack(name: string): CloudStack;
-}
-
 export interface VaultService extends CloudService {
   credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
@@ -111,10 +111,5 @@ export interface StateService extends CloudService {
   resources(stack: CloudStack): void;
 }
 
-export interface SubclassRegistry<T> {
-  items: Map<string, T>;
-  get(attributes: object): T | undefined;
-  add(classConstructor: T, ...attrs: string[]): void;
-}
 
-export interface CloudServiceConstructor extends AbstractConstructor<CloudService> {}
+export interface CloudServiceConstructor extends AbstractConstructorOf<CloudService> { }

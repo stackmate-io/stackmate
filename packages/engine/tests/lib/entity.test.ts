@@ -1,7 +1,7 @@
 import faker from 'faker';
 
 import { ValidationError } from '@stackmate/engine/lib/errors';
-import { MockEntity, ExtendedMockEntity, multiply } from '@stackmate/engine-tests/mocks';
+import { MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
 
 describe('Entity', () => {
   describe('setters / getter', () => {

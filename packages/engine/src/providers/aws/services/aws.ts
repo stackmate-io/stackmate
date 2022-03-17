@@ -4,12 +4,11 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import Parser from '@stackmate/engine/lib/parsers';
 import Provider from '@stackmate/engine/core/services/provider';
-import { CloudStack } from '@stackmate/engine/interfaces';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/engine/constants';
-import { ProviderChoice, RegionList } from '@stackmate/engine/types';
 import { getNetworkingCidrBlocks } from '@stackmate/engine/lib/helpers';
+import { CloudStack, ProviderChoice, RegionList } from '@stackmate/engine/types';
 
 class AwsProvider extends Provider {
   /**

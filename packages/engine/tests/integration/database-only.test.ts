@@ -3,8 +3,8 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import 'cdktf/lib/testing/adapters/jest';
 
-import { awsRegion } from '@stackmate/engine-tests/fixtures/aws';
-import { deployProject } from '@stackmate/engine-tests/helpers';
+import { awsRegion } from 'tests/fixtures/aws';
+import { deployProject } from 'tests/helpers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
