@@ -50,9 +50,7 @@
     "rollup-plugin-typescript2": "^0.31.2",
     "sinon": "^12.0.1",
     "ts-jest": "^27.1.1",
-    "ts-node": "^10.4.0",
     "ts-transform-paths": "^2.0.3",
-    "tsconfig-paths": "^3.11.0",
     "typescript": "^4.5.3"
   },
   "engines": {
@@ -71,10 +69,6 @@
     "deployment"
   ],
   "license": "MIT",
-  "ts-node": {
-    "transpileOnly": true,
-    "files": false
-  },
   "scripts": {
     "lint": "eslint . --ext .ts --config .eslintrc",
     "build": "rm -rf lib && rollup -c rollup.config.js -o lib/index.js -f cjs",
