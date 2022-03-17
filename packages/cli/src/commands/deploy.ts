@@ -1,7 +1,7 @@
 import { Command, Flags } from '@oclif/core';
 
-// import { stageDeployment, OperationOptions } from '@stackmate/engine';
-// import { DEFAULT_PROJECT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
+import { stageDeployment, OperationOptions } from '@stackmate/engine';
+import { DEFAULT_PROJECT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 
 class DeployCommand extends Command {
   /**
@@ -24,13 +24,13 @@ class DeployCommand extends Command {
       char: 'f',
       description: 'Which configuration file to use',
       required: false,
-      // default: DEFAULT_PROJECT_FILE,
+      default: DEFAULT_PROJECT_FILE,
     }),
     output: Flags.string({
       char: 'o',
       description: 'Where to store the generated output',
       required: false,
-      // default: DEFAULT_PROJECT_DIRECTORY,
+      default: DEFAULT_PROJECT_DIRECTORY,
     }),
   }
 
@@ -40,9 +40,8 @@ class DeployCommand extends Command {
       flags: { file: projectFile, output: outputPath },
     } = await this.parse(DeployCommand);
 
-    // const options: OperationOptions = { outputPath };
-    console.log({ stage, projectFile, outputPath });
-    // await stageDeployment(projectFile, stage, options);
+    const options: OperationOptions = { outputPath };
+    await stageDeployment(projectFile, stage, options);
   }
 }
 
