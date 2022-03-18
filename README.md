@@ -14,9 +14,6 @@ It uses Terraform behind the scenes and abstracts away the HCL part, since the o
 
 It also embeds some best practices that are known and widely used by Cloud Engineers and SREs.
 
-# About Stackmate engine
-This repository provides the necessary toolkit for the stackmate CLI
-
 # About
 - [Stackmate.io](https://stackmate.io)
 - [@falexandrou on Twitter](https://twitter.com/falexandrou)
