@@ -15,7 +15,6 @@ export const PROVIDER = {
 
 export const SERVICE_TYPE = {
   CDN: 'cdn',
-  DATABASE: 'database',
   DNS: 'dns',
   ELASTIC_STORAGE: 'elasticstorage',
   INSTANCE: 'instance',

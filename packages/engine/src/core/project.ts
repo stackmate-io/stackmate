@@ -1,15 +1,12 @@
-import { Memoize } from 'typescript-memoize';
-
 import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
+import { PROVIDER } from '@stackmate/engine/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
-import { getStoragAdaptereByType } from '@stackmate/engine/core/storage';
-import { PROVIDER, STORAGE, FORMAT } from '@stackmate/engine/constants';
 import {
   ProjectConfiguration, NormalizedProjectConfiguration,
-  StagesNormalizedAttributes, Validations, StorageAdapter,
-  AttributeParsers, VaultConfiguration, ProviderChoice, StateConfiguration,
+  StagesNormalizedAttributes, Validations, StateConfiguration,
+  AttributeParsers, VaultConfiguration, ProviderChoice,
 } from '@stackmate/engine/types';
 
 class Project extends Entity {
@@ -133,27 +130,6 @@ class Project extends Entity {
    */
   normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
     return normalizeProject(configuration);
-  }
-
-  /**
-  * @returns {StorageAdapter} storageAdapter the storage adapter to fetch & push values
-  */
-  @Memoize() public get storage(): StorageAdapter {
-    return getStoragAdaptereByType(STORAGE.FILE, { path: this.path, format: FORMAT.YML });
-  }
-
-  /**
-   * Loads and validates the project
-   *
-   * @param {String} fileName the file name to load the project from
-   * @returns {Project} the project loaded and validated
-   * @async
-   */
-  static async load(fileName: string): Promise<Project> {
-    const project = new Project(fileName);
-    const attributes = await project.storage.read();
-
-    return Project.factory(attributes);
   }
 }
 

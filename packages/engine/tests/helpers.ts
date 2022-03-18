@@ -1,15 +1,13 @@
 import fs from 'fs';
 import os from 'os';
 import faker from 'faker';
-import sinon from 'sinon';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';
 
 import Project from '@stackmate/engine/core/project';
-import Environment from '@stackmate/engine/lib/environment';
 import DeployOperation from '@stackmate/engine/operations/deploy';
-import { ENVIRONMENT_VARIABLE, PROVIDER } from '@stackmate/engine/constants';
+import { PROVIDER } from '@stackmate/engine/constants';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
 import { CloudStack, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/engine/types';
 import { getService } from '@stackmate/engine/core/registry';
@@ -160,20 +158,17 @@ export const getServiceRegisterationResults = async ({
  * @param {Object} projectConfig the project configuration. Should be the object representation
  *                               of the supposed YAML file that represents the project
  * @param {String} stageName the stage name to use
- * @param {Object} secrets the service's secrets to be used
  * @returns {Object} the scope as string and stack as object
  */
-export const deployProject = async (
-  projectConfig: object,
-  stageName: string = 'production',
-  secrets: object = {},
-): Promise<{ scope: string, stack: CloudStack, output: string }> => {
-  // Set the app's output path to the temp directory
-  sinon.stub(Environment, 'get').withArgs(ENVIRONMENT_VARIABLE.OUTPUT_DIR).returns(os.tmpdir());
+export const deployProject = (projectConfig: object, stageName: string = 'production' ): {
+  scope: string, stack: CloudStack, output: string,
+} => {
   const project = Project.factory(projectConfig);
+  const operation = new DeployOperation(project, stageName, {
+    outputPath: os.tmpdir(),
+  });
 
-  const operation = new DeployOperation(project, stageName);
-  await operation.run();
+  operation.synthesize();
 
   const { provisioner: { stack } } = operation;
 

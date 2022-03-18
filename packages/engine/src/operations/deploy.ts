@@ -4,7 +4,7 @@ class DeployOperation extends Operation {
   /**
    * Runs the provisioning process
    */
-  run() {
+  synthesize(): void {
     this.provisioner.services = this.services.map(srv => srv.scope('deployable'));
     this.provisioner.process();
   }

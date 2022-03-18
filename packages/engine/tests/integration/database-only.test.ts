@@ -33,8 +33,8 @@ const projectConfig = normalizeProject({
 });
 
 describe('Database only project', () => {
-  it('registers the production stage for the project', async () => {
-    const { scope } = await deployProject(projectConfig);
+  it('registers the production stage for the project', () => {
+    const { scope } = deployProject(projectConfig);
 
     expect(scope).toHaveResourceWithProperties(Vpc, {
       cidr_block: '10.0.0.0/16',

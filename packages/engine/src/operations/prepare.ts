@@ -24,7 +24,7 @@ class PrepareOperation extends Operation {
   /**
    * Prepares the services for provisioning
    */
-  run() {
+  synthesize(): void {
     this.provisioner.services = [
       this.localState.scope('deployable'),
       ...this.services.map(srv => srv.scope('preparable')),

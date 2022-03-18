@@ -5,7 +5,7 @@ import Project from '@stackmate/engine/core/project';
 import Provisioner from '@stackmate/engine/core/provisioner';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { OperationOptions } from '@stackmate/engine/types';
+import { OperationOptions, ProjectConfiguration } from '@stackmate/engine/types';
 
 abstract class Operation {
   /**
@@ -27,6 +27,11 @@ abstract class Operation {
    * @var {Object} options any additional options for the operation
    */
   protected readonly options: OperationOptions = {};
+
+  /**
+   * Synthesizes the operation's stack
+   */
+  abstract synthesize(): void;
 
   /**
    * @constructor
@@ -76,13 +81,13 @@ abstract class Operation {
    * @param {String} stageName the name of the stage to select
    * @returns {Promise<Operation>}
    */
-  static async factory<T extends Operation>(
+  static factory<T extends Operation>(
     this: new (...args: any[]) => T,
-    projectFile: string,
+    projectConfig: ProjectConfiguration,
     stageName: string,
     options: object = {},
-  ): Promise<T> {
-    const project = await Project.load(projectFile);
+  ): T {
+    const project = Project.factory(projectConfig);
     return new this(project, stageName, options);
   }
 }

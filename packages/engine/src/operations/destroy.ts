@@ -4,7 +4,7 @@ class DestroyOperation extends Operation {
   /**
    * Runs the destroy process
    */
-  run() {
+  synthesize(): void {
     this.provisioner.services = this.services.map(srv => srv.scope('destroyable'));
     this.provisioner.process();
   }

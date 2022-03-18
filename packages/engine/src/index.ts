@@ -1,7 +1,7 @@
 import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
-import { OperationOptions, PrepareOperationOptions } from './types';
+import { OperationOptions, PrepareOperationOptions, ProjectConfiguration } from './types';
 
 // Export types
 export * from './types';
@@ -21,10 +21,10 @@ export * from './providers/aws/constants';
  * @param {String} options.outputPath the path to output the files to (optional)
  */
 export const stageDeployment = async (
-  projectFile: string, stage: string, options: OperationOptions = {},
+  projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
 ): Promise<void> => {
-  const operation = await DeployOperation.factory(projectFile, stage, options);
-  await operation.run();
+  const operation = DeployOperation.factory(projectConfig, stage, options);
+  operation.synthesize();
 };
 
 /**
@@ -36,10 +36,10 @@ export const stageDeployment = async (
  * @param {String} options.outputPath the path to output the files to (optional)
  */
 export const stageDestruction = async (
-  projectFile: string, stage: string, options: OperationOptions = {},
+  projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
 ): Promise<void> => {
-  const operation = await DestroyOperation.factory(projectFile, stage, options);
-  await operation.run();
+  const operation = DestroyOperation.factory(projectConfig, stage, options);
+  operation.synthesize();
 };
 
 /**
@@ -52,8 +52,8 @@ export const stageDestruction = async (
  * @param {String} options.statePath the path to store the state to
  */
 export const initialPreparation = async (
-  projectFile: string, stage: string, options: PrepareOperationOptions = {},
+  projectConfig: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
 ): Promise<void> => {
-  const operation = await PrepareOperation.factory(projectFile, stage, options);
-  await operation.run();
+  const operation = PrepareOperation.factory(projectConfig, stage, options);
+  operation.synthesize();
 };
