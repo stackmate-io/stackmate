@@ -39,6 +39,7 @@
     "@oclif/core": "^1.6.1",
     "@oclif/plugin-help": "^5.1.12",
     "@oclif/plugin-plugins": "^2.1.0",
+    "@stackmate/engine": "^0.0.0",
     "ffi-napi": "^4.0.3",
     "lodash": "4.17.21"
   },
@@ -65,9 +66,9 @@
   },
   "scripts": {
     "go:bindings": "go build -o lib/terraform.so -buildmode=c-shared src/terraform/bindings.go",
-    "build": "rm -rf lib && rollup -c rollup.config.js && oclif manifest",
+    "build": "rimraf lib/* && rollup -c rollup.config.js && oclif manifest",
     "lint": "eslint . --ext .ts",
-    "postpack": "rm -f oclif.manifest.json",
+    "postpack": "rimraf oclif.manifest.json",
     "posttest": "yarn lint",
     "prepack": "yarn build && oclif readme",
     "test": "mocha --forbid-only \"tests/**/*.test.ts\"",

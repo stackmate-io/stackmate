@@ -49,8 +49,8 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "build": "rm -rf lib && rollup -c rollup.config.js",
-    "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
+    "build": "rimraf lib/* && rollup -c rollup.config.js",
+    "test": "rimraf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   }

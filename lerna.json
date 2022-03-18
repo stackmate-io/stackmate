@@ -9,6 +9,7 @@
     "version": {
       "ignoreChanges": [
         "*.md",
+        "examples/**",
         "**/tests/**"
       ],
       "npmClient": "yarn",
