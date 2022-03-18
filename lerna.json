@@ -1,15 +1,15 @@
 {
-  "version": "0.1.1",
+  "version": "0.0.0",
   "packages": [
     "packages/*"
   ],
-  "npmClientArgs": [
-    "--no-lockfile"
-  ],
+  "useWorkspaces": true,
+  "npmClient": "yarn",
   "command": {
     "version": {
       "ignoreChanges": [
         "*.md",
+        "examples/**",
         "**/tests/**"
       ],
       "npmClient": "yarn",

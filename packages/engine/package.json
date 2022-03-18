@@ -1,62 +1,7 @@
 {
   "name": "@stackmate/engine",
-  "version": "0.1.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/stackmate-io/engine"
-  },
-  "author": {
-    "name": "Fotis Alexandrou (@falexandrou)",
-    "url": "https://www.falexandrou.com"
-  },
-  "bugs": {
-    "url": "https://github.com/stackmate-io/engine/issues"
-  },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "dependencies": {
-    "@cdktf/provider-aws": "5.0.40",
-    "cdktf": "0.9.4",
-    "constructs": "^10.0.25",
-    "ip-address": "^8.1.0",
-    "lodash": "^4.17.21",
-    "reflect-metadata": "^0.1.13",
-    "typescript-memoize": "^1.1.0",
-    "validate.js": "^0.13.1"
-  },
-  "devDependencies": {
-    "@sinonjs/fake-timers": "8.1.0",
-    "@types/chai": "^4.2.21",
-    "@types/faker": "^5.5.9",
-    "@types/jest": "^27.0.3",
-    "@types/jsforce": "^1.9.35",
-    "@types/lodash": "^4.14.177",
-    "@types/node": "^16.11.26",
-    "@types/sinon": "^10.0.6",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "chai": "^4.3.4",
-    "eslint": "^8.2.0",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-airbnb-typescript": "^16.1.0",
-    "eslint-plugin-import": "^2.25.2",
-    "faker": "^5.5.3",
-    "globby": "^12.0.2",
-    "jest": "^27.4.4",
-    "rollup": "^2.70.1",
-    "rollup-plugin-typescript2": "^0.31.2",
-    "sinon": "^12.0.1",
-    "ts-jest": "^27.1.1",
-    "ts-transform-paths": "^2.0.3",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.3"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "files": [
-    "lib/"
-  ],
+  "version": "0.0.0",
+  "description": "Engine library for Stackmate",
   "homepage": "https://stackmate.io",
   "keywords": [
     "stackmate",
@@ -67,10 +12,45 @@
     "deployment"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stackmate-io/stackmate",
+    "directory": "packages/engine"
+  },
+  "author": {
+    "name": "Fotis Alexandrou (@falexandrou)",
+    "url": "https://www.falexandrou.com"
+  },
+  "bugs": {
+    "url": "https://github.com/stackmate-io/stackmate/issues"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@cdktf/provider-aws": "5.0.52",
+    "cdktf": "0.9.4",
+    "constructs": "^10.0.91",
+    "ip-address": "^8.1.0",
+    "lodash": "^4.17.21",
+    "reflect-metadata": "^0.1.13",
+    "typescript-memoize": "^1.1.0",
+    "validate.js": "^0.13.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "@types/jsforce": "^1.9.35",
+    "jest": "^27.5.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "lib/"
+  ],
   "scripts": {
-    "lint": "eslint . --ext .ts --config .eslintrc",
-    "build": "rm -rf lib && rollup -c rollup.config.js",
-    "test": "rm -rf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
+    "lint": "eslint . --ext .ts",
+    "build": "rimraf lib/* && rollup -c rollup.config.js",
+    "test": "rimraf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   }

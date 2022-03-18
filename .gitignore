@@ -1,1 +1,14 @@
 *-debug.log
+*-error.log
+.nyc_output
+dist
+lib
+package-lock.json
+tmp
+cdktf.out
+node_modules
+tests/output/*
+!tests/output/.keep
+
+# TypeScript incremental compilation cache
+*.tsbuildinfo
