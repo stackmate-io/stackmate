@@ -1,0 +1,26 @@
+{
+  "version": "0.1.1",
+  "packages": [
+    "packages/*"
+  ],
+  "npmClientArgs": [
+    "--no-lockfile"
+  ],
+  "command": {
+    "version": {
+      "ignoreChanges": [
+        "*.md",
+        "**/tests/**"
+      ],
+      "npmClient": "yarn",
+      "allowBranch": "main",
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "exact": true,
+      "message": "chore(release): publish"
+    },
+    "publish": {
+      "npmClient": "yarn"
+    }
+  }
+}
