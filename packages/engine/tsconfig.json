@@ -23,6 +23,9 @@
     "paths": {
       "@stackmate/engine/*": [
         "./src/*"
+      ],
+      "tests/*": [
+        "./tests/*"
       ]
     }
   },

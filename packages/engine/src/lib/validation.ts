@@ -1,6 +1,8 @@
 /* eslint-disable consistent-return */
+import { resolve as resolvePath } from 'node:path';
+import { existsSync as pathExistsSync, lstatSync } from 'node:fs';
+
 import validate from 'validate.js';
-import { existsSync as pathExistsSync, lstatSync } from 'fs';
 import { difference, flatten, isArray, isEmpty, isObject, isString, uniq } from 'lodash';
 
 import Profile from '@stackmate/engine/core/profile';
@@ -166,12 +168,14 @@ namespace Validator {
       return 'You have to provide a valid file path';
     }
 
-    if (!pathExistsSync(path)) {
-      return `Path ${path} does not exist`;
+    const resolved = resolvePath(path);
+
+    if (!pathExistsSync(resolved)) {
+      return `Path ${resolved} does not exist`;
     }
 
-    if (requireDirectory && !lstatSync(path).isDirectory()) {
-      return `Path ${path} is not a directory`;
+    if (requireDirectory && !lstatSync(resolved).isDirectory()) {
+      return `Path ${resolved} is not a directory`;
     }
   };
 

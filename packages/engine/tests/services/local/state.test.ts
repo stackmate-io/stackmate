@@ -29,8 +29,7 @@ describe('LocalState', () => {
 
     it('returns the attribute names', () => {
       expect(new Set(service.attributeNames)).toEqual(new Set([
-        'profile', 'overrides', 'projectName', 'stageName',
-        'name', 'region', 'links',
+        'profile', 'overrides', 'projectName', 'stageName', 'name', 'region', 'links', 'directory',
       ]));
     });
   });

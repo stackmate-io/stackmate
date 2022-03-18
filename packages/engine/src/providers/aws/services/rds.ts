@@ -15,7 +15,7 @@ import {
 
 const AwsDatabaseService = AwsService(Database);
 
-class AwsRdsService extends AwsDatabaseService {
+abstract class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
    */
@@ -24,7 +24,7 @@ class AwsRdsService extends AwsDatabaseService {
   /**
    * @var {String} engine the database engine to use
    */
-  engine: OneOf<typeof RDS_ENGINES>;
+  abstract engine: OneOf<typeof RDS_ENGINES>;
 
   /**
    * @var {Array<String>} engines the list of database engines available for this service

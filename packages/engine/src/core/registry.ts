@@ -33,7 +33,9 @@ registry.add(LocalServices.State, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
 
 // Add the AWS services to the registry
 registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);
-registry.add(AwsServices.Database, PROVIDER.AWS, SERVICE_TYPE.DATABASE);
+registry.add(AwsServices.MariaDB, PROVIDER.AWS, SERVICE_TYPE.MARIADB);
+registry.add(AwsServices.MySQL, PROVIDER.AWS, SERVICE_TYPE.MYSQL);
+registry.add(AwsServices.PostgreSQL, PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
 registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
 registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
 

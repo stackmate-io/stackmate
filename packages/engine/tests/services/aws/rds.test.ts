@@ -7,24 +7,24 @@ import Profile from '@stackmate/engine/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures/aws';
-import { Database as AwsRdsService } from '@stackmate/engine/providers/aws';
+import { MySQL as AwsRdsService } from '@stackmate/engine/providers/aws';
 
 describe('AwsRdsService', () => {
   describe('instantiation', () => {
     let service: AwsRdsService;
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const { name, region, size, storage, engine, database, stageName } = serviceConfig;
+      const { name, region, size, storage, database, stageName } = serviceConfig;
 
       service = AwsRdsService.factory(serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
-      expect(service.type).toEqual(SERVICE_TYPE.DATABASE);
+      expect(service.type).toEqual(SERVICE_TYPE.MYSQL);
       expect(service.name).toEqual(name);
       expect(service.region).toEqual(region);
       expect(service.size).toEqual(size);
       expect(service.storage).toEqual(storage);
-      expect(service.engine).toEqual(engine);
+      expect(service.engine).toEqual('mysql');
       expect(service.database).toEqual(database);
       expect(service.links).toEqual([]);
       expect(service.profile).toEqual(Profile.DEFAULT);
@@ -77,8 +77,8 @@ describe('AwsRdsService', () => {
         count: 1,
         delete_automated_backups: true,
         deletion_protection: false,
-        engine: serviceConfig.engine,
-        engine_version: serviceConfig.version,
+        engine: 'mysql',
+        engine_version: '8.0',
         identifier: `${serviceConfig.name}-${stageName}`,
         instance_class: serviceConfig.size,
         multi_az: false,

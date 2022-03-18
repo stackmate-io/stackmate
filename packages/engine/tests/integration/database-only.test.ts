@@ -23,13 +23,10 @@ const projectConfig = normalizeProject({
   stages: {
     production: {
       mysqlDatabase: {
-        type: SERVICE_TYPE.DATABASE,
+        type: SERVICE_TYPE.MYSQL,
         size: DEFAULT_RDS_INSTANCE_SIZE,
         profile: 'production',
         storage: 30,
-        version: '8.0',
-        engine: 'mysql',
-        port: 3306,
       },
     },
   },

@@ -41,10 +41,9 @@ export const mysqlDatabaseConfiguration = {
   name: 'aws-rds-mysql-database',
   region: awsRegion,
   nodes: 1,
-  type: SERVICE_TYPE.DATABASE,
+  type: SERVICE_TYPE.MYSQL,
   size: faker.random.arrayElement(RDS_INSTANCE_SIZES),
   storage: faker.datatype.number({ min: 30, max: 100 }),
-  engine: 'mysql',
   version: '8.0',
   port: 3306,
   database: 'my_database_name',
@@ -59,12 +58,6 @@ export const fullConfig: ProjectConfiguration = {
   stages: {
     production: {
       mysqlDatabase: mysqlDatabaseConfiguration,
-    },
-  },
-  defaults: {
-    aws: {
-      'vpc-cidr': '12.0.0.1',
-      'vpc-prefix': 'my-vpc-prefix',
     },
   },
 };

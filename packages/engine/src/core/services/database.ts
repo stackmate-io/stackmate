@@ -1,17 +1,9 @@
 import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import {
-  OneOf, ServiceTypeChoice, Sizeable, Storable, MultiNode, Versioned,
-} from '@stackmate/engine/types';
+import { OneOf, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/engine/types';
 
 abstract class Database extends Service implements Sizeable, Storable, MultiNode, Versioned {
-  /**
-   * @var {String} type the type for the service
-   */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.DATABASE;
-
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -40,7 +32,7 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
   /**
    * @var {String} engine the database engine to use
    */
-  @Attribute engine: OneOf<Array<string>>;
+  abstract engine: OneOf<Array<string>>;
 
   /**
    * @var {Number} the port number to use to connect to the database
