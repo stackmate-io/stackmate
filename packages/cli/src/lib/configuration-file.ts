@@ -4,10 +4,16 @@ import { Memoize } from 'typescript-memoize';
 
 import { FileErrors } from '@stackmate/cli/lib/errors';
 import { FileFormatter, FileReader } from '@stackmate/cli/types';
-import YamlFormatter from '@stackmate/cli/lib/formatters/yaml';
-import JsonFormatter from '@stackmate/cli/lib/formatters/json';
+import YamlFormatter from '@stackmate/cli/lib/formatters/files/yaml';
+import JsonFormatter from '@stackmate/cli/lib/formatters/files/json';
+import { CURRENT_DIRECTORY } from '../constants';
 
-class File implements FileReader {
+/**
+ * Represents a configuration file
+ *
+ * @class Configuration
+ */
+class ConfigurationFile implements FileReader {
   /**
    * @var {String} filename the file's name
    */
@@ -33,7 +39,7 @@ class File implements FileReader {
    * @param {String} filename the file's name
    */
   constructor(filename: string) {
-    this.filename = path.resolve(filename);
+    this.filename = path.resolve(CURRENT_DIRECTORY, filename);
     this.init();
   }
 
@@ -44,7 +50,7 @@ class File implements FileReader {
     this.directory = path.dirname(this.filename);
     this.extension = path.extname(this.filename).toLowerCase();
 
-    switch(this.extension) {
+    switch (this.extension) {
       case '.yml':
       case '.yaml':
         this.formatter = new YamlFormatter();
@@ -123,4 +129,4 @@ class File implements FileReader {
 
 }
 
-export default File;
+export default ConfigurationFile;

@@ -63,6 +63,8 @@
   "scripts": {
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream --parallel",
-    "test": "lerna run test --parallel"
+    "test": "lerna run test --parallel",
+    "cmd:run": "packages/cli/bin/run",
+    "cmd:dev": "packages/cli/bin/dev"
   }
 }
