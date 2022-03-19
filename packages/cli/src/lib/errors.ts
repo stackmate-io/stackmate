@@ -1,72 +1,51 @@
 namespace FileErrors {
-  export class FileDoesNotExistError extends Error {
+  export abstract class FileError extends Error {
     /**
-     * @var {String} filename the file's name
-     */
-    filename: string;
-
-    /**
-     * @constructor
-     * @param {String} filename the file's name
-     */
-    constructor(filename: string) {
-      const msg = `File ${filename} does not exist`;
-      super(msg);
-
-      this.filename = filename;
-    }
-  }
-
-  export class FileNotReadableError extends Error {
-    /**
-     * @var {String} filename the file's name
-     */
-    filename: string;
-
-    /**
-     * @constructor
-     * @param {String} filename the file's name
-     */
-    constructor(filename: string) {
-      const msg = `File ${filename} is not readable`;
-      super(msg);
-
-      this.filename = filename;
-    }
-  }
-
-  export class FileNotWriteableError extends Error {
-    /**
-     * @var {String} filename the file's name
-     */
-    filename: string;
-
-    /**
-     * @constructor
-     * @param {String} filename the file's name
-     */
-    constructor(filename: string) {
-      const msg = `File ${filename} is not writeable`;
-      super(msg);
-
-      this.filename = filename;
-    }
-  }
-
-  export class DirectoryNotWriteableError extends Error {
-    /**
-     * @var {String} path the file's name
+     * @var {String} path the faulty path that is associated to the error
      */
     path: string;
+  }
 
+  export class FileDoesNotExistError extends FileError {
+    /**
+     * @constructor
+     * @param {String} filename the file's name
+     */
+    constructor(filename: string) {
+      super(`File ${filename} does not exist`);
+      this.path = filename;
+    }
+  }
+
+  export class FileNotReadableError extends FileError {
+    /**
+     * @constructor
+     * @param {String} filename the file's name
+     */
+    constructor(filename: string) {
+      super(`File ${filename} is not readable`);
+      this.path = filename;
+    }
+  }
+
+  export class FileNotWriteableError extends FileError {
+    /**
+     * @constructor
+     * @param {String} filename the file's name
+     */
+    constructor(filename: string) {
+      super(`File ${filename} is not writeable`);
+      this.path = filename;
+    }
+  }
+
+  export class DirectoryNotWriteableError extends FileError {
     /**
      * @constructor
      * @param {String} path the file's name
      */
     constructor(path: string) {
-      const msg = `We can't create ${path}, please make sure you have the necessary permissions`;
-      super(msg);
-
+      super(`We can't create ${path}, please make sure you have the necessary permissions`);
       this.path = path;
     }
   }

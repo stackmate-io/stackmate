@@ -4,11 +4,15 @@ import multiInput from 'rollup-plugin-multi-input';
 
 export default {
   input: ['./src/**/*.ts'],
-  output: {
-    exports: 'auto',
-    format: 'cjs',
+  // We're using CommonJS because oclif v1 doesn't work well with ESM
+  // We have to switch to ESM once oclif v2 is out and integrated
+  // See https://github.com/oclif/core/issues/130
+  output: [{
     dir: './dist',
-  },
+    format: 'cjs',
+    exports: 'auto',
+    entryFileNames: '[name].js',
+  }],
   plugins: [
     multiInput(),
     typescript({

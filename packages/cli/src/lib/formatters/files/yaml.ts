@@ -19,7 +19,7 @@ class YamlFormatter implements FileFormatter {
    * @returns {Object} the file's content deserialized to an object
    */
   deserialize(contents: string): object {
-    return JSON.parse(contents);
+    return YAML.parse(contents);
   }
 }
 
