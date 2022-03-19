@@ -7,11 +7,12 @@ export default {
   output: {
     exports: 'auto',
     format: 'cjs',
-    dir: './lib',
+    dir: './dist',
   },
   plugins: [
     multiInput(),
     typescript({
+      build: true,
       tsconfig: "tsconfig.build.json",
       transformers: [pathsTransformer]
     }),

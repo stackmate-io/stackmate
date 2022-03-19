@@ -6,7 +6,7 @@ export default {
   output: {
     exports: 'auto',
     format: 'cjs',
-    dir: './lib',
+    dir: './dist',
   },
   plugins: [
     typescript({

@@ -49,7 +49,7 @@
       "plugin:monorepo/recommended"
     ],
     "ignorePatterns": [
-      "**/lib/**"
+      "**/dist/**"
     ],
     "parserOptions": {
       "project": "./tsconfig.json"

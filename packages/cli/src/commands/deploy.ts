@@ -42,7 +42,7 @@ class DeployCommand extends Command {
 
     const projectConfig: ProjectConfiguration = {};
     const options: OperationOptions = { outputPath };
-    console.log({ projectFile });
+    console.log('---> project file', { projectFile });
     await stageDeployment(projectConfig, stage, options);
   }
 }

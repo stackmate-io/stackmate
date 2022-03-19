@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "es6",
     "module": "es6",
+    "composite": true,
     "declaration": true,
     "baseUrl": "./",
     "rootDir": "./",
-    "outDir": "./lib",
-    "composite": false,
-    "incremental": false,
+    "outDir": "./dist",
+    "incremental": true,
     "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -35,6 +35,6 @@
   ],
   "exclude": [
     "node_modules",
-    "lib"
+    "dist"
   ]
 }

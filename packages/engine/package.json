@@ -24,8 +24,8 @@
   "bugs": {
     "url": "https://github.com/stackmate-io/stackmate/issues"
   },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@cdktf/provider-aws": "5.0.52",
     "cdktf": "0.9.4",
@@ -45,11 +45,11 @@
     "node": ">=16.0.0"
   },
   "files": [
-    "lib/"
+    "dist/"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "build": "rimraf lib/* && rollup -c rollup.config.js",
+    "build": "rimraf dist/* && rollup -c rollup.config.js",
     "test": "rimraf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
