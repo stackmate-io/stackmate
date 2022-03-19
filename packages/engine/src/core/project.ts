@@ -43,7 +43,7 @@ class Project extends Entity {
   /**
    * @var {String} validationMessage the error message
    */
-  readonly validationMessage: string = 'The project’s configuration file is not valid';
+  readonly validationMessage: string = 'The project’s configuration is not valid';
 
   /**
    * @var {String} path the path to the file
