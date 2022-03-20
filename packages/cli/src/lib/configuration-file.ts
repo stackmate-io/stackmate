@@ -64,6 +64,22 @@ class ConfigurationFile implements FileStorage {
   }
 
   /**
+   * Checks whether a certain permission applies for a path
+   *
+   * @param {String} path the path to check
+   * @param {Number} mode the permission to check
+   * @returns {Boolean} whether the permission applies or not
+   */
+  protected hasAccess(path: string, mode: number): boolean {
+    try {
+      fs.accessSync(path, mode);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
    * @returns {Boolean} whether the file exists or not
    */
   @Memoize() get exists(): boolean {
@@ -71,27 +87,28 @@ class ConfigurationFile implements FileStorage {
   }
 
   /**
-   * @returns {Boolean} whether the file is writeable or not
+   * @returns {Boolean} whether the file is readable or not
    */
-  @Memoize() get isWriteable(): boolean {
-    try {
-      fs.accessSync(this.directory, fs.constants.W_OK);
-      return true;
-    } catch (err) {
-      return false;
-    }
+  @Memoize() get readable(): boolean {
+    return this.hasAccess(this.filename, fs.constants.R_OK);
   }
 
   /**
-   * @returns {Boolean} whether the file is readable or not
+   * @returns {Boolean} whether the file is writeable
    */
-  @Memoize() get isReadable(): boolean {
-    try {
-      fs.accessSync(this.filename, fs.constants.R_OK);
-      return true;
-    } catch (err) {
-      return false;
+  @Memoize() get writeable(): boolean {
+    if (!this.exists) {
+      return this.directoryWriteable;
     }
+
+    return this.hasAccess(this.filename, fs.constants.W_OK);
+  }
+
+  /**
+   * @returns {Boolean} whether the file is writeable or not
+   */
+  @Memoize() get directoryWriteable(): boolean {
+    return this.hasAccess(this.directory, fs.constants.W_OK);
   }
 
   /**
@@ -100,7 +117,7 @@ class ConfigurationFile implements FileStorage {
    * @returns {Object} the file's contents
    */
   read(): object {
-    if (!this.isReadable) {
+    if (!this.readable) {
       throw new FileErrors.FileDoesNotExistError(this.filename);
     }
 
@@ -120,8 +137,8 @@ class ConfigurationFile implements FileStorage {
       throw new FileErrors.DirectoryNotWriteableError(this.directory);
     }
 
-    if (!this.isWriteable) {
-      throw new FileErrors.DirectoryNotWriteableError(this.directory);
+    if (!this.writeable) {
+      throw new FileErrors.FileNotWriteableError(this.filename);
     }
 
     fs.writeFileSync(this.filename, this.formatter.serialize(contents));
