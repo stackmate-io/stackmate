@@ -2,8 +2,8 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "@sinonjs/fake-timers": "8.1.0",
     "@faker-js/faker": "^6.0.0",
+    "@sinonjs/fake-timers": "8.1.0",
     "@types/chai": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -49,7 +49,7 @@
       "plugin:monorepo/recommended"
     ],
     "ignorePatterns": [
-      "**/lib/**"
+      "**/dist/**"
     ],
     "parserOptions": {
       "project": "./tsconfig.json"
@@ -63,6 +63,8 @@
   "scripts": {
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream --parallel",
-    "test": "lerna run test --parallel"
+    "test": "lerna run test --parallel",
+    "cmd:run": "packages/cli/bin/run",
+    "cmd:dev": "packages/cli/bin/dev"
   }
 }

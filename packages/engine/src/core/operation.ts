@@ -2,17 +2,20 @@ import { Memoize } from 'typescript-memoize';
 import { pick, uniqBy } from 'lodash';
 
 import Project from '@stackmate/engine/core/project';
-import Provisioner from '@stackmate/engine/core/provisioner';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { OperationOptions, ProjectConfiguration } from '@stackmate/engine/types';
+import { WithStaticType } from '@stackmate/engine/lib/decorators';
+import {
+  CloudService,
+  Provisionable,
+  OperationOptions,
+  ProjectConfiguration,
+  StackmateOperation,
+  OperationFactory,
+} from '@stackmate/engine/types';
 
-abstract class Operation {
-  /**
-   * @var {Provisioner} provisioner the stack handler & provisioner
-   */
-  readonly provisioner: Provisioner;
-
+@WithStaticType<OperationFactory>()
+abstract class Operation implements StackmateOperation {
   /**
    * @var {Project} project the project to deploy
    */
@@ -29,9 +32,9 @@ abstract class Operation {
   protected readonly options: OperationOptions = {};
 
   /**
-   * Synthesizes the operation's stack
+   * @returns {Provisionable} the provisioner with the services assigned
    */
-  abstract synthesize(): void;
+  abstract get provisioner(): Provisionable;
 
   /**
    * @constructor
@@ -43,15 +46,12 @@ abstract class Operation {
     this.project = project;
     this.stageName = stageName;
     this.options = options;
-
-    const { outputPath } = this.options;
-    this.provisioner = new Provisioner(project.name, stageName, outputPath);
   }
 
   /**
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
-  @Memoize() get services() {
+  @Memoize() get services(): CloudService[] {
     const { PROVIDER, VAULT, STATE } = SERVICE_TYPE;
     const { secrets, state, stages: { [this.stageName]: stage } } = this.project;
     const serviceAtrs = Object.values(stage);
@@ -75,13 +75,20 @@ abstract class Operation {
   }
 
   /**
+   * Synthesizes the operation's stack
+   */
+  synthesize(): object {
+    return this.provisioner.process();
+  }
+
+  /**
    * Starts an operation
    *
    * @param {String} projectFile the project file to load
    * @param {String} stageName the name of the stage to select
    * @returns {Promise<Operation>}
    */
-  static factory<T extends Operation>(
+  static factory<T extends StackmateOperation>(
     this: new (...args: any[]) => T,
     projectConfig: ProjectConfiguration,
     stageName: string,

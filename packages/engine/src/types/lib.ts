@@ -1,4 +1,5 @@
-import { App as TerraformApp, TerraformStack } from 'cdktf';
+import { Construct } from 'constructs';
+import { TerraformStack } from 'cdktf';
 
 export type CredentialsObject = {
   username?: string;
@@ -7,12 +8,9 @@ export type CredentialsObject = {
 
 export interface CloudStack extends TerraformStack {
   readonly name: string;
-  readonly app: TerraformApp;
-  readonly appName: string;
-  readonly outputPath: string;
 }
 
-export interface CloudApp extends TerraformApp {
+export interface CloudApp extends Construct {
   readonly name: string;
   stack(name: string): CloudStack;
 }
@@ -21,4 +19,14 @@ export interface SubclassRegistry<T> {
   items: Map<string, T>;
   get(attributes: object): T | undefined;
   add(classConstructor: T, ...attrs: string[]): void;
+}
+
+export interface PriorityQueue<T> {
+  items: [T, number][];
+  size: number;
+  isEmpty: boolean;
+  all: T[];
+  insert(item: T, priority: number): void;
+  peek(): T | null;
+  pop(): T | null;
 }
