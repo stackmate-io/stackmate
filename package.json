@@ -2,8 +2,8 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "@sinonjs/fake-timers": "8.1.0",
     "@faker-js/faker": "^6.0.0",
+    "@sinonjs/fake-timers": "8.1.0",
     "@types/chai": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

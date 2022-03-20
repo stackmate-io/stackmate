@@ -24,3 +24,7 @@ export const Attribute = function Attribute(target: Entity, propertyKey: string)
     enumerable: true,
   });
 };
+
+export const WithStaticType = function WithFactory<T>() {
+  return <U extends T>(constructor: U) => { constructor };
+}

@@ -7,7 +7,7 @@ export const formatValidationError = (
   const lines = [
     colors ? color.bold.red(error) : error,
     ...Object.keys(error.errors).map(path => (
-      `\n${colors ? color.bold.gray(path) : path}: ${path}`
+      `\t${colors ? color.bold.gray(path) : path}: ${error.errors[path].join('\n\t\t')}`
     )),
   ];
 

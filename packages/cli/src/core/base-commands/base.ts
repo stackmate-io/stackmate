@@ -20,12 +20,12 @@ abstract class BaseCommand extends Command {
   /**
    * @var {ArgInput} arguments the arguments used in the command
    */
-  parsedArgs: OutputArgs;
+  protected parsedArgs: OutputArgs;
 
   /**
    * @var {Object} flags the parsed flags
    */
-  parsedFlags: OutputFlags<typeof BaseCommand.flags>;
+  protected parsedFlags: OutputFlags<typeof BaseCommand.flags>;
 
   /**
    * Initializes the commend

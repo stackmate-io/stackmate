@@ -4,16 +4,16 @@ import { PROVIDER } from '@stackmate/engine/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration,
+  ProjectConfiguration, NormalizedProjectConfiguration, StackmateProject,
   StagesNormalizedAttributes, Validations, StateConfiguration,
   AttributeParsers, VaultConfiguration, ProviderChoice,
 } from '@stackmate/engine/types';
 
-class Project extends Entity {
+class Project extends Entity implements StackmateProject {
   /**
    * @var {String} name the project's name
    */
-  @Attribute name: string
+  @Attribute name: string;
 
   /**
    * @var {String} provider the default cloud provider for the project
@@ -44,22 +44,6 @@ class Project extends Entity {
    * @var {String} validationMessage the error message
    */
   readonly validationMessage: string = 'The project’s configuration is not valid';
-
-  /**
-   * @var {String} path the path to the file
-   */
-  public readonly path: string;
-
-  /**
-   * @constructor
-   * @param {String} path the project's file path
-   * @param {String} targetPath the output path for the stack
-   */
-  constructor(path: string) {
-    super();
-
-    this.path = path;
-  }
 
   /**
    * Returns a list of validations to validate the structure of the configuration file with

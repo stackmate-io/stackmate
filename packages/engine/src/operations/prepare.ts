@@ -2,6 +2,7 @@ import { pick } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Operation from '@stackmate/engine/core/operation';
+import Provisioner from '@stackmate/engine/core/provisioner';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { CloudService, PrepareOperationOptions } from '@stackmate/engine/types';
@@ -22,15 +23,19 @@ class PrepareOperation extends Operation {
   }
 
   /**
-   * Prepares the services for provisioning
+   * @returns {Provisioner} the provisioner to use
    */
-  synthesize(): void {
-    this.provisioner.services = [
+  @Memoize() get provisioner(): Provisioner {
+    const provisioner = new Provisioner(
+      this.project.name, this.stageName, this.options.outputPath,
+    );
+
+    provisioner.services = [
       this.localState.scope('deployable'),
       ...this.services.map(srv => srv.scope('preparable')),
     ];
 
-    this.provisioner.process();
+    return provisioner;
   }
 }
 

@@ -1,12 +1,20 @@
+import { Memoize } from 'typescript-memoize';
+
 import Operation from '@stackmate/engine/core/operation';
+import Provisioner from '@stackmate/engine/core/provisioner';
 
 class DestroyOperation extends Operation {
   /**
-   * Runs the destroy process
+   * @returns {Provisioner} the provisioner to use
    */
-  synthesize(): void {
-    this.provisioner.services = this.services.map(srv => srv.scope('destroyable'));
-    this.provisioner.process();
+  @Memoize() get provisioner(): Provisioner {
+    const provisioner = new Provisioner(
+      this.project.name, this.stageName, this.options.outputPath,
+    );
+
+    provisioner.services = this.services.map(srv => srv.scope('destroyable'));
+
+    return provisioner;
   }
 }
 

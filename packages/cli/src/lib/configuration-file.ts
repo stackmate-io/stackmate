@@ -3,17 +3,17 @@ import path from 'node:path';
 import { Memoize } from 'typescript-memoize';
 
 import { FileErrors } from '@stackmate/cli/lib/errors';
-import { FileFormatter, FileReader } from '@stackmate/cli/types';
+import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
+import { FileFormatter, FileStorage } from '@stackmate/cli/types';
 import YamlFormatter from '@stackmate/cli/lib/formatters/files/yaml';
 import JsonFormatter from '@stackmate/cli/lib/formatters/files/json';
-import { CURRENT_DIRECTORY } from '../constants';
 
 /**
  * Represents a configuration file
  *
  * @class Configuration
  */
-class ConfigurationFile implements FileReader {
+class ConfigurationFile implements FileStorage {
   /**
    * @var {String} filename the file's name
    */
@@ -75,7 +75,7 @@ class ConfigurationFile implements FileReader {
    */
   @Memoize() get isWriteable(): boolean {
     try {
-      fs.accessSync(this.filename, fs.constants.W_OK);
+      fs.accessSync(this.directory, fs.constants.W_OK);
       return true;
     } catch (err) {
       return false;
@@ -121,7 +121,7 @@ class ConfigurationFile implements FileReader {
     }
 
     if (!this.isWriteable) {
-      throw new FileErrors.FileNotWriteableError(this.filename);
+      throw new FileErrors.DirectoryNotWriteableError(this.directory);
     }
 
     fs.writeFileSync(this.filename, this.formatter.serialize(contents));

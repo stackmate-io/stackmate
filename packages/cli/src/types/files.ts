@@ -3,7 +3,7 @@ export interface FileFormatter {
   deserialize(contents: string): object;
 }
 
-export interface FileReader {
+export interface FileStorage {
   readonly filename: string;
   read(): object;
   write(contents: object): void;

@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 import { ProjectConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';

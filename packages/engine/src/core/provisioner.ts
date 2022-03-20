@@ -1,9 +1,17 @@
-import App from '@stackmate/engine/lib/terraform/app';
-import PriorityQueue from '@stackmate/engine/lib/queue';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceTypeChoice, CloudApp, CloudService, CloudStack } from '@stackmate/engine/types';
+import { isEmpty } from 'lodash';
 
-class Provisioner {
+import App from '@stackmate/engine/lib/terraform/app';
+import Queue from '@stackmate/engine/lib/queue';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import {
+  CloudApp,
+  CloudService,
+  CloudStack,
+  Provisionable,
+  ServiceTypeChoice,
+} from '@stackmate/engine/types';
+
+class Provisioner implements Provisionable {
   /**
    * @var {CloudApp} app the terraform application to deploy
    */
@@ -15,9 +23,9 @@ class Provisioner {
   readonly stack: CloudStack;
 
   /**
-   * @var {PriorityQueue<CloudService>} queue the sorted priority queue that holds the services
+   * @var {Queue<CloudService>} queue the sorted priority queue that holds the services
    */
-  readonly queue: PriorityQueue<CloudService> = new PriorityQueue();
+  readonly queue: Queue<CloudService> = new Queue();
 
   /**
    * @var {Map} dependables a mapping of service identifier to the services that are depended
@@ -73,8 +81,16 @@ class Provisioner {
 
   /**
    * Processes the services and registers them to the stack
+   *
+   * @throws {Error} when no service has been assigned to the provisioner
    */
-  process() {
+  process(): object {
+    // Even when we need to destroy resources, the service objects should be
+    // assigned to the provisioner (with the 'destroyable' scope applied)
+    if (isEmpty(this.services)) {
+      throw new Error('The service doesn’t have any services assigned to it');
+    }
+
     // The services are ordered by priority, since the queue is a priority queue
     // This means that we register the ones that are depended by the most services first
     this.services.forEach((service) => {
@@ -87,8 +103,8 @@ class Provisioner {
       dependables.forEach(dep => dep.link(service));
     });
 
-    // Synthesize the output in the destination directory
-    this.app.synth();
+    // Return the synthesized stack as an object
+    return this.stack.toTerraform();
   }
 
   /**
