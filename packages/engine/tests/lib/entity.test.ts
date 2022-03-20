@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 import { ValidationError } from '@stackmate/engine/lib/errors';
 import { MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';

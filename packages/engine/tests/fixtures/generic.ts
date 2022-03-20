@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 export const projectName = faker.lorem.word();
 export const stageName = faker.lorem.word();

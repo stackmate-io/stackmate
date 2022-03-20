@@ -3,11 +3,12 @@ import pathsTransformer from "ts-transform-paths";
 
 export default {
   input: './src/index.ts',
-  output: {
-    exports: 'auto',
+  output: [{
+    dir: './dist',
     format: 'cjs',
-    dir: './lib',
-  },
+    exports: 'auto',
+    entryFileNames: '[name].js',
+  }],
   plugins: [
     typescript({
       tsconfig: "tsconfig.build.json",
