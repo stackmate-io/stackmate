@@ -69,7 +69,7 @@
     }
   },
   "scripts": {
-    "go:bindings": "go build -o dist/terraform.so -buildmode=c-shared src/terraform/bindings.go",
+    "go:bindings": "go build -o bin/terraform.so -buildmode=c-shared src/lib/terraform/bindings.go",
     "build": "rimraf dist/* && rollup -c rollup.config.js && oclif manifest",
     "lint": "eslint . --ext .ts",
     "postpack": "rimraf oclif.manifest.json",
