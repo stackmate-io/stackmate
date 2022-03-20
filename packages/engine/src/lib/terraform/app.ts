@@ -1,11 +1,11 @@
 import { Memoize } from 'typescript-memoize';
-import { App as TerraformApp, AppOptions } from 'cdktf';
+import { Construct } from 'constructs';
+import { AppOptions } from 'cdktf';
 
 import Stack from '@stackmate/engine/lib/terraform/stack';
 import { CloudApp, CloudStack } from '@stackmate/engine/types';
-import { DEBUG_MODE } from '@stackmate/engine/constants';
 
-class App extends TerraformApp implements CloudApp {
+class App extends Construct implements CloudApp {
   /**
    * @var {String} name the application's name
    */
@@ -16,11 +16,7 @@ class App extends TerraformApp implements CloudApp {
    * @param {AppOptions} options
    */
   constructor(name: string, options?: AppOptions) {
-    super({
-      stackTraces: DEBUG_MODE,
-      ...options,
-    });
-
+    super(undefined as any, "");
     this.name = name;
   }
 

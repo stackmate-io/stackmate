@@ -73,3 +73,13 @@ export type VaultCredentialOptions = {
   special?: Boolean;
   exclude?: string[],
 };
+
+export interface StackmateProject {
+  name: string;
+  provider: ProviderChoice;
+  region: string;
+  secrets: VaultConfiguration;
+  state: StateConfiguration;
+  stages: StagesNormalizedAttributes;
+  normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration;
+}

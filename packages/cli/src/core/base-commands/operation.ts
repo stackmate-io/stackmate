@@ -1,4 +1,7 @@
+import path from 'node:path';
+
 import { Flags } from '@oclif/core';
+import { kebabCase } from 'lodash';
 
 import BaseCommand from '@stackmate/cli/core/base-commands/base';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
@@ -34,19 +37,29 @@ abstract class OperationCommand extends BaseCommand {
   ];
 
   /**
+   * @returns {Object} the operation's output
+   */
+  abstract get output(): object;
+
+  /**
    * @var {Object} flags the parsed flags
    */
-  parsedFlags: OutputFlags<typeof OperationCommand.flags>;
+  protected parsedFlags: OutputFlags<typeof OperationCommand.flags>;
 
   /**
    * @var {ArgInput} arguments the arguments used in the command
    */
-  parsedArgs: OutputArgs;
+  protected parsedArgs: OutputArgs;
 
   /**
    * @var {String} stage the stage to operate
    */
   protected stage: string;
+
+  /**
+   * @var {String} outputFilename the filename to store the output to
+   */
+  readonly outputFilename: string = 'stackmate.tf.json';
 
   /**
    * @returns {ProjectConfiguration} the project configuration to load from the file
@@ -61,7 +74,14 @@ abstract class OperationCommand extends BaseCommand {
    */
   get outputPath(): string {
     const { output: outputPath } = this.parsedFlags;
-    return outputPath;
+    return path.join(outputPath, kebabCase(this.stage));
+  }
+
+  /**
+   * @returns {ConfigurationFile} the file object to write the output by
+   */
+  get outputFile(): ConfigurationFile {
+    return new ConfigurationFile(path.join(this.outputPath, this.outputFilename));
   }
 
   /**
@@ -70,6 +90,13 @@ abstract class OperationCommand extends BaseCommand {
   async init() {
     await super.init();
     ({ stage: this.stage } = this.parsedArgs);
+  }
+
+  /**
+   * Synthesizes the operation and writes out the output
+   */
+  async run(): Promise<void> {
+    this.outputFile.write(this.output);
   }
 }
 

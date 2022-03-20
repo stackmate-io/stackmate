@@ -1,4 +1,6 @@
-class MaxPriorityQueue<T> {
+import { PriorityQueue } from '@stackmate/engine/types';
+
+class MaxPriorityQueue<T> implements PriorityQueue<T> {
   /**
    * @var {Array} items the items in the priority queue
    */

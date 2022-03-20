@@ -1,6 +1,6 @@
 import fs from 'fs';
 import os from 'os';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';

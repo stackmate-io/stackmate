@@ -23,11 +23,11 @@ export * from './lib/errors';
  * @param {Object} options the operation's options
  * @param {String} options.outputPath the path to output the files to (optional)
  */
-export const stageDeployment = async (
+export const stageDeployment = (
   projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
-): Promise<void> => {
+): object => {
   const operation = DeployOperation.factory(projectConfig, stage, options);
-  operation.synthesize();
+  return operation.synthesize();
 };
 
 /**
@@ -38,11 +38,11 @@ export const stageDeployment = async (
  * @param {Object} options the operation's options
  * @param {String} options.outputPath the path to output the files to (optional)
  */
-export const stageDestruction = async (
+export const stageDestruction = (
   projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
-): Promise<void> => {
+): object => {
   const operation = DestroyOperation.factory(projectConfig, stage, options);
-  operation.synthesize();
+  return operation.synthesize();
 };
 
 /**
@@ -54,9 +54,9 @@ export const stageDestruction = async (
  * @param {String} options.outputPath the path to output the files to (optional)
  * @param {String} options.statePath the path to store the state to
  */
-export const initialPreparation = async (
+export const initialPreparation = (
   projectConfig: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
-): Promise<void> => {
+): object => {
   const operation = PrepareOperation.factory(projectConfig, stage, options);
-  operation.synthesize();
+  return operation.synthesize();
 };
