@@ -5,6 +5,9 @@ export interface FileFormatter {
 
 export interface FileStorage {
   readonly filename: string;
+  exists: boolean;
+  readable: boolean;
+  directoryWriteable: boolean;
   read(): object;
   write(contents: object): void;
 }
