@@ -1783,7 +1783,7 @@
     jest-matcher-utils "^27.0.0"
     pretty-format "^27.0.0"
 
-"@types/jsforce@^1.9.35":
+"@types/jsforce@^1.9.41":
   version "1.9.41"
   resolved "https://registry.yarnpkg.com/@types/jsforce/-/jsforce-1.9.41.tgz#08b31a0d04e14fd5f8a232196e16bc742e22bbed"
   integrity sha512-J0dReK6EPGR98b4fAowqqQqFXH4DGtPxY2lLrZGcuCthrHYkYNrKnfGf2xM1jwiBC5CGdSEDmWEDwRwwmX25tA==
