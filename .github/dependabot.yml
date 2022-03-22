@@ -1,0 +1,49 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    versioning-strategy: increase
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "root-dependencies"
+    open-pull-requests-limit: 100
+    pull-request-branch-name:
+      separator: "-"
+    ignore:
+      - dependency-name: "fs-extra"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "npm"
+    versioning-strategy: increase
+    directory: "/packages/engine"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "engine-dependencies"
+    open-pull-requests-limit: 100
+    pull-request-branch-name:
+      separator: "-"
+    ignore:
+      - dependency-name: "fs-extra"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "npm"
+    versioning-strategy: increase
+    directory: "/packages/cli"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "cli-dependencies"
+    open-pull-requests-limit: 100
+    pull-request-branch-name:
+      separator: "-"
+    ignore:
+      - dependency-name: "fs-extra"
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
