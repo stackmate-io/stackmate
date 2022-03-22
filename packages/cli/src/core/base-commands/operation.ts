@@ -18,13 +18,13 @@ abstract class OperationCommand extends BaseCommand {
     file: Flags.string({
       char: 'f',
       description: 'Which configuration file to use',
-      required: false,
+      required: true,
       default: DEFAULT_PROJECT_FILE,
     }),
     output: Flags.string({
       char: 'o',
       description: 'Where to store the generated output',
-      required: false,
+      required: true,
       default: DEFAULT_PROJECT_DIRECTORY,
     }),
   }
