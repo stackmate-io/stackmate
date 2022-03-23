@@ -3019,10 +3019,10 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
 
-constructs@^10.0.91:
-  version "10.0.91"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.0.91.tgz#ec1e34d7aca3ce034b17e3003ee8f2903e0cdf77"
-  integrity sha512-4sDyF/vMNZywVcOpo+ZrJt4F7X0iLVE+D6KxHn+/UnsmUr4ICa4KzXHVvCtoReyM8G1Q4aOFK+AWQICn+QSK0w==
+constructs@^10.0.93:
+  version "10.0.93"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.0.93.tgz#f4612b88e07e2655cfc0c91cc9ea399045ad26ed"
+  integrity sha512-e35V3dNohrdjKYuJyaICwELff3XU4Nrx8jQ30xz73z89eFpgy7GlVt1QYJNL1/D208vo+ADspGPWdr1+ij3Dow==
 
 content-type@^1.0.4:
   version "1.0.4"
