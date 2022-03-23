@@ -5,7 +5,7 @@ import { kebabCase } from 'lodash';
 
 import BaseCommand from '@stackmate/cli/core/base-commands/base';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
-import { DEFAULT_PROJECT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
+import { DEFAULT_OUTPUT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import { ProjectConfiguration } from '@stackmate/engine';
 import { OutputArgs, OutputFlags } from '@oclif/core/lib/interfaces';
 
@@ -25,7 +25,7 @@ abstract class OperationCommand extends BaseCommand {
       char: 'o',
       description: 'Where to store the generated output',
       required: true,
-      default: DEFAULT_PROJECT_DIRECTORY,
+      default: DEFAULT_OUTPUT_DIRECTORY,
     }),
   }
 
