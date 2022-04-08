@@ -52,7 +52,7 @@
     "@types/ffi-napi": "^4.0.5",
     "@types/mocha": "^9.0.0",
     "mocha": "^9.2.2",
-    "oclif": "^2.6.1"
+    "oclif": "^2.6.3"
   },
   "oclif": {
     "bin": "stackmate",
