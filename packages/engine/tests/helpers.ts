@@ -164,17 +164,14 @@ export const deployProject = (projectConfig: object, stageName: string = 'produc
   scope: string, stack: CloudStack, output: string,
 } => {
   const project = Project.factory(projectConfig);
-  const operation = new DeployOperation(project, stageName, {
-    outputPath: os.tmpdir(),
-  });
-
-  operation.synthesize();
-
+  const outputPath = os.tmpdir();
+  const operation = new DeployOperation(project, stageName, { outputPath });
+  const scope = operation.synthesize();
   const { provisioner: { stack } } = operation;
 
   return {
     stack,
-    scope: JSON.stringify(stack.toTerraform(), null, 2),
-    output: stack.outputPath,
+    scope: JSON.stringify(scope, null, 2),
+    output: outputPath,
   };
 };

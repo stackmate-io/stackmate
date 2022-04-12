@@ -1,12 +1,6 @@
 export const { env: ENV } = process;
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate';
 export const DEBUG_MODE = Boolean(ENV.DEBUG) || false;
-export const ENVIRONMENT_VARIABLE = {
-  OUTPUT_DIR: 'STACKMATE_OUTPUT',
-  AWS_ACCESS_KEY_ID: 'STACKMATE_AWS_ACCESS_KEY_ID',
-  AWS_SECRET_ACCESS_KEY: 'STACKMATE_SECRET_ACCESS_KEY',
-  AWS_SESSION_TOKEN: 'STACKMATE_AWS_SESSION_TOKEN',
-};
 
 export const PROVIDER = {
   AWS: 'aws',
