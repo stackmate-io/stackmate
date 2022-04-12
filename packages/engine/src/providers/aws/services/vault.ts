@@ -48,7 +48,7 @@ class AwsSecretsManager extends AwsVaultService {
 
     const idPrefix = `${snakeCase(service)}_secrets`;
     const username = `${snakeCase(service)}_${root ? 'root' : 'user'}`;
-    const password = getRandomString({  length, special, exclude });
+    const password = getRandomString({ length, special, exclude });
 
     const secretResource = new SecretsmanagerSecret(stack, `${idPrefix}_secret`, {
       name: secretName,

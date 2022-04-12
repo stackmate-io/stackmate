@@ -1,10 +1,19 @@
 import { Command, Flags } from '@oclif/core';
-import { ValidationError } from '@stackmate/engine';
+import { ProjectConfiguration, ValidationError } from '@stackmate/engine';
 import { OutputArgs, OutputFlags } from '@oclif/core/lib/interfaces';
 
+import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import { formatValidationError } from '@stackmate/cli/lib/formatters/errors';
+import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 
 abstract class BaseCommand extends Command {
+  /**
+   * @var {Array} args the command's arguments
+   */
+  static args = [
+    ...(Command.args || []),
+  ];
+
   /**
    * @var {Object} flags the flags available for the command
    * @static
@@ -18,6 +27,16 @@ abstract class BaseCommand extends Command {
   }
 
   /**
+   * Parses a comma separated value
+   *
+   * @param {String} value the value to parse
+   * @returns {String[]} the parsed
+   */
+  static parseCommaSeparatedFlag(value: string) {
+    return value.split(',').map(v => v.trim()).join(',');
+  }
+
+  /**
    * @var {ArgInput} arguments the arguments used in the command
    */
   protected parsedArgs: OutputArgs;
@@ -28,12 +47,17 @@ abstract class BaseCommand extends Command {
   protected parsedFlags: OutputFlags<typeof BaseCommand.flags>;
 
   /**
+   * @returns {ProjectConfiguration} the project configuration to load from the file
+   */
+  get projectConfig(): ProjectConfiguration {
+    return new ConfigurationFile(DEFAULT_PROJECT_FILE).read();
+  }
+
+  /**
    * Initializes the commend
    */
   async init() {
-    const { flags, args } = await this.parse(this.ctor);
-    this.parsedFlags = flags;
-    this.parsedArgs = args;
+    ({ flags: this.parsedFlags, args: this.parsedArgs } = await this.parse(this.ctor))
   }
 
   /**

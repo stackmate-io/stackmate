@@ -1,9 +1,9 @@
 import { defaultsDeep, get } from 'lodash';
 import { PROVIDER, ValueOf } from '@stackmate/engine';
 
+import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 import { PreferenceOptions } from '@stackmate/cli/types/preferences';
 import { PREFERENCES_FILE, PREFERENCES_VERSION } from '@stackmate/cli/constants';
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 
 class Preferences {
   /**
