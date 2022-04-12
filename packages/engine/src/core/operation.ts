@@ -1,25 +1,22 @@
 import { Memoize } from 'typescript-memoize';
-import { pick, uniqBy } from 'lodash';
+import { isEmpty, pick, uniq, uniqBy } from 'lodash';
 
-import Project from '@stackmate/engine/core/project';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { WithStaticType } from '@stackmate/engine/lib/decorators';
 import {
   CloudService,
   Provisionable,
+  ProviderChoice,
   OperationOptions,
-  ProjectConfiguration,
   StackmateOperation,
-  OperationFactory,
+  StackmateProject,
 } from '@stackmate/engine/types';
 
-@WithStaticType<OperationFactory>()
 abstract class Operation implements StackmateOperation {
   /**
-   * @var {Project} project the project to deploy
+   * @var {StackmateProject} project the project to deploy
    */
-  protected readonly project: Project;
+  protected readonly project: StackmateProject;
 
   /**
    * @var {String} stage the stage to deploy
@@ -42,10 +39,21 @@ abstract class Operation implements StackmateOperation {
    * @param {String} stageName the name of the stage we're provisioning
    * @param {Object} options any additional options for the operation
    */
-  constructor(project: Project, stageName: string, options: OperationOptions = {}) {
+  constructor(project: StackmateProject, stageName: string, options: OperationOptions = {}) {
     this.project = project;
     this.stageName = stageName;
     this.options = options;
+  }
+
+  /**
+   * @returns {ProviderChoice[]} the list of providers in the services
+   */
+  get providers(): ProviderChoice[] {
+    if (isEmpty(this.services)) {
+      throw new Error('The service list is empty. Have you set the services?');
+    }
+
+    return uniq(this.services.map(srv => srv.provider));
   }
 
   /**
@@ -79,23 +87,6 @@ abstract class Operation implements StackmateOperation {
    */
   synthesize(): object {
     return this.provisioner.process();
-  }
-
-  /**
-   * Starts an operation
-   *
-   * @param {String} projectFile the project file to load
-   * @param {String} stageName the name of the stage to select
-   * @returns {Promise<Operation>}
-   */
-  static factory<T extends StackmateOperation>(
-    this: new (...args: any[]) => T,
-    projectConfig: ProjectConfiguration,
-    stageName: string,
-    options: object = {},
-  ): T {
-    const project = Project.factory(projectConfig);
-    return new this(project, stageName, options);
   }
 }
 

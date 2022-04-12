@@ -132,7 +132,7 @@ class ConfigurationFile implements FileStorage {
    */
   write(contents: object): void {
     try {
-      fs.mkdirSync(this.directory, { recursive: true });
+      fs.mkdirSync(this.directory, { mode: 0o755, recursive: true });
     } catch (error) {
       throw new FileErrors.DirectoryNotWriteableError(this.directory);
     }

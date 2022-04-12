@@ -1,7 +1,11 @@
+import Project from './core/project';
 import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
-import { OperationOptions, PrepareOperationOptions, ProjectConfiguration } from './types';
+import {
+  OperationConstructor, OperationOptions, PrepareOperationOptions,
+  ProjectConfiguration, StackmateOperation,
+} from './types';
 
 // Export types
 export * from './types';
@@ -16,47 +20,64 @@ export * from './providers/aws/constants';
 export * from './lib/errors';
 
 /**
- * Provides the configuration to deploy a stage
+ * Returns an operation based on a given class
  *
- * @param {String} projectFile the project's configuration file
- * @param {String} stage the name of the stage to deploy
- * @param {Object} options the operation's options
- * @param {String} options.outputPath the path to output the files to (optional)
+ * @param {OperationConstructor} Cls the class to instantiate
+ * @param {ProjectConfiguration} config the project's configuration
+ * @param {String} stage the stage to operate
+ * @param {OperationOptions} options any options to pass to the operation
+ * @returns {StackmateOperation} the operation instance
  */
-export const stageDeployment = (
-  projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
-): object => {
-  const operation = DeployOperation.factory(projectConfig, stage, options);
-  return operation.synthesize();
+const getOperation = (
+  Cls: OperationConstructor,
+  config: ProjectConfiguration,
+  stage: string,
+  options: OperationOptions = {},
+): StackmateOperation => {
+  return new Cls(Project.factory(config), stage, options);
 };
 
-/**
- * Provides the configuration to destroy a stage
- *
- * @param {String} projectFile the project's configuration file
- * @param {String} stage the name of the stage to deploy
- * @param {Object} options the operation's options
- * @param {String} options.outputPath the path to output the files to (optional)
- */
-export const stageDestruction = (
-  projectConfig: ProjectConfiguration, stage: string, options: OperationOptions = {},
-): object => {
-  const operation = DestroyOperation.factory(projectConfig, stage, options);
-  return operation.synthesize();
-};
+// Export operations
+export namespace Operations {
+  /**
+   * Returns a deployment operation
+   *
+   * @param {ProjectConfiguration} config the project's configuration
+   * @param {String} stage the stage to operate
+   * @param {OperationOptions} options any options to pass to the operation
+   * @returns {DeployOperation} the operation instance
+   */
+  export const deployment = (
+    config: ProjectConfiguration, stage: string, options: OperationOptions = {},
+  ) => (
+    getOperation(DeployOperation, config, stage, options)
+  );
 
-/**
- * Provides the configuration to prepare a stage
- *
- * @param {String} projectFile the project's configuration file
- * @param {String} stage the name of the stage to deploy
- * @param {Object} options the operation's options
- * @param {String} options.outputPath the path to output the files to (optional)
- * @param {String} options.statePath the path to store the state to
- */
-export const initialPreparation = (
-  projectConfig: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
-): object => {
-  const operation = PrepareOperation.factory(projectConfig, stage, options);
-  return operation.synthesize();
+  /**
+   * Returns a destruction operation
+   *
+   * @param {ProjectConfiguration} config the project's configuration
+   * @param {String} stage the stage to operate
+   * @param {OperationOptions} options any options to pass to the operation
+   * @returns {DeployOperation} the operation instance
+   */
+  export const destroy = (
+    config: ProjectConfiguration, stage: string, options: OperationOptions = {},
+  ) => (
+    getOperation(DestroyOperation, config, stage, options)
+  );
+
+  /**
+   * Returns a preparation operation
+   *
+   * @param {ProjectConfiguration} config the project's configuration
+   * @param {String} stage the stage to operate
+   * @param {OperationOptions} options any options to pass to the operation
+   * @returns {DeployOperation} the operation instance
+   */
+  export const prepare = (
+    config: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
+  ) => (
+    getOperation(PrepareOperation, config, stage, options)
+  );
 };

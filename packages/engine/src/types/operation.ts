@@ -1,6 +1,6 @@
 import { CloudService } from './service';
-import { ProjectConfiguration } from './project';
 import { CloudApp, CloudStack, PriorityQueue } from './lib';
+import { StackmateProject } from './project';
 
 export type OperationOptions = {
   outputPath?: string;
@@ -20,14 +20,10 @@ export interface Provisionable {
 
 export interface StackmateOperation {
   get services(): CloudService[];
+  get provisioner(): Provisionable;
   synthesize(): object;
 }
 
-export interface OperationFactory {
-  factory<T extends StackmateOperation>(
-    this: new (...args: any[]) => T,
-    projectConfig: ProjectConfiguration,
-    stageName: string,
-    options: object,
-  ): T;
+export interface OperationConstructor {
+  new (project: StackmateProject, stage: string, options: OperationOptions): StackmateOperation;
 }
