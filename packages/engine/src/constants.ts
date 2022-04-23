@@ -26,12 +26,6 @@ export const SERVICE_TYPE = {
   VOLUME: 'volume',
 } as const;
 
-export const FORMAT: { [name: string]: string } = {
-  JSON: 'json',
-  RAW: 'raw',
-  YML: 'yml',
-} as const;
-
 export const STORAGE: { [name: string]: string } = {
   FILE: 'file',
 } as const;

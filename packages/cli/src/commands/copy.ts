@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
+import { parseCommaSeparatedString } from '../lib/helpers';
 
 class StageCopyCommand extends BaseCommand {
   /**
@@ -19,12 +20,12 @@ class StageCopyCommand extends BaseCommand {
       char: 'f',
       default: 'production',
       required: true,
-      parse: async (v: string) => BaseCommand.parseCommaSeparatedFlag(v),
+      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
     }),
     skip: Flags.string({
       char: 's',
       default: '',
-      parse: async (v: string) => BaseCommand.parseCommaSeparatedFlag(v),
+      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
     }),
   };
 

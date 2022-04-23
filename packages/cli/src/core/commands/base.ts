@@ -32,7 +32,7 @@ abstract class BaseCommand extends Command {
    * @param {String} value the value to parse
    * @returns {String[]} the parsed
    */
-  static parseCommaSeparatedFlag(value: string) {
+  static parseCommaSeparatedString(value: string) {
     return value.split(',').map(v => v.trim()).join(',');
   }
 

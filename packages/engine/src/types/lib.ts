@@ -15,12 +15,6 @@ export interface CloudApp extends Construct {
   stack(name: string): CloudStack;
 }
 
-export interface SubclassRegistry<T> {
-  items: Map<string, T>;
-  get(attributes: object): T | undefined;
-  add(classConstructor: T, ...attrs: string[]): void;
-}
-
 export interface PriorityQueue<T> {
   items: [T, number][];
   size: number;
