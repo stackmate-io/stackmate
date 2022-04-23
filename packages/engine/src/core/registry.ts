@@ -1,15 +1,19 @@
-import Registry from '@stackmate/engine/lib/registry';
 import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   ProviderChoice, ServiceAttributes, ServiceScopeChoice,
-  BaseEntityConstructor, CloudService, ServiceTypeChoice,
-} from '@stackmate/engine/types';
+  CloudServiceRegistry, CloudServiceConstructor, ServiceTypeChoice,
+} from '@stackmate/engine/types';;
 
-interface ServiceConstructor extends BaseEntityConstructor<CloudService> {}
+class ServicesRegistry implements CloudServiceRegistry {
+  /**
+   * @var {Object} items the items in the registry
+   */
+  items: {
+    [key in ProviderChoice]?: { [type in ServiceTypeChoice]?: CloudServiceConstructor };
+  } = {};
 
-class ServicesRegistry extends Registry<ServiceConstructor> {
   /**
    * Adds a service to the registry
    *
@@ -18,11 +22,62 @@ class ServicesRegistry extends Registry<ServiceConstructor> {
    * @param {ServiceTypeChoice} type the service's type
    */
   add(
-    classConstructor: ServiceConstructor,
+    classConstructor: CloudServiceConstructor,
     provider: ProviderChoice,
     type: ServiceTypeChoice,
   ): void {
-    super.add(classConstructor, provider, type);
+    if (!this.items[provider]) {
+      this.items[provider] = {};
+    }
+
+    this.items[provider][type] = classConstructor;
+  }
+
+  /**
+   * Gets a service from the registry
+   *
+   * @param {ProviderChoice} provider the provider to get the service type for
+   * @param {ServiceTypeChoice} type the type of the service to get
+   * @returns {CloudServiceConstructor} the service constructor
+   * @throws {Error} if the service is not registered
+   */
+  get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor {
+    if (!this.items[provider]) {
+      throw new Error(`Provider ${provider} is not registered`);
+    }
+
+    if (!this.items[provider][type]) {
+      throw new Error(`Provider ${provider} does not have service ${type} registered`);
+    }
+
+    return this.items[provider][type];
+  }
+
+  /**
+   * Returns whether a service exists for a certain provider
+   *
+   * @param {ProviderChoice} provider the provider to check whether the service exists
+   * @param {ServiceTypeChoice} service the service to check whether exists
+   * @returns {Boolean} whether the provider specified has the service requested
+   */
+  exists(provider: ProviderChoice, service: ServiceTypeChoice): boolean {
+    return Boolean(this.items[provider]) && Boolean(this.items[provider][service]);
+  }
+
+  /**
+   * Returns the available service types for a provider
+   *
+   * @param {ProviderChoice} provider the provider to get the service types
+   */
+  types(provider: ProviderChoice): ServiceTypeChoice[] {
+    if (!this.items[provider]) {
+      return [];
+    }
+
+    return Object.keys(this.items[provider]);
+  }
+
+  providers(service: ServiceTypeChoice): ProviderChoice[] {
   }
 }
 

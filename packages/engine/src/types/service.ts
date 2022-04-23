@@ -2,10 +2,10 @@ import { TerraformProvider } from 'cdktf';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-import { AttributeParsers, BaseEntity, Validations } from './entity';
+import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from './entity';
 import { CloudStack, CredentialsObject } from './lib';
 import { VaultCredentialOptions } from './project';
-import { OneOf, ChoiceOf, AbstractConstructorOf } from './util';
+import { OneOf, ChoiceOf } from './util';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
@@ -111,5 +111,17 @@ export interface StateService extends CloudService {
   resources(stack: CloudStack): void;
 }
 
+export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
+}
 
-export interface CloudServiceConstructor extends AbstractConstructorOf<CloudService> { }
+export interface CloudServiceRegistry {
+  // items: {
+  //   [k in ProviderChoice]?: {
+  //     [s in ServiceTypeChoice]: CloudServiceConstructor
+  //   } | undefined;
+  // };
+  add(
+    classConstructor: CloudServiceConstructor, provider: ProviderChoice, type: ServiceTypeChoice,
+  ): void;
+  get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor;
+}
