@@ -111,15 +111,10 @@ export interface StateService extends CloudService {
   resources(stack: CloudStack): void;
 }
 
-export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
-}
+export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {}
 
 export interface CloudServiceRegistry {
-  // items: {
-  //   [k in ProviderChoice]?: {
-  //     [s in ServiceTypeChoice]: CloudServiceConstructor
-  //   } | undefined;
-  // };
+  items: { [k in ProviderChoice]?: { [s in ServiceTypeChoice]?: CloudServiceConstructor } };
   add(
     classConstructor: CloudServiceConstructor, provider: ProviderChoice, type: ServiceTypeChoice,
   ): void;

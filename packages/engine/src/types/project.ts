@@ -1,3 +1,4 @@
+import { BaseEntity } from './entity';
 import {
   ProviderChoice,
   ServiceAttributes,
@@ -74,7 +75,7 @@ export type VaultCredentialOptions = {
   exclude?: string[],
 };
 
-export interface StackmateProject {
+export interface StackmateProject extends BaseEntity {
   name: string;
   provider: ProviderChoice;
   region: string;

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import { ValidationError } from '@stackmate/engine/lib/errors';
-import { MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
+import { MockEntityWithDefaults, MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
 
 describe('Entity', () => {
   describe('setters / getter', () => {
@@ -97,5 +97,15 @@ describe('Entity', () => {
         });
       }
     });
+  });
+
+  describe('defaults', () => {
+    it('returns the entity’s defaults', () => {
+      const defs = MockEntityWithDefaults.defaults();
+      expect(defs).toMatchObject({
+        name: 'default-name',
+        number: 123456,
+      });
+    })
   });
 });

@@ -1,4 +1,5 @@
 import Project from './core/project';
+import Registry from './core/registry';
 import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
@@ -18,6 +19,12 @@ export * from './providers/aws/constants';
 
 // Export error classes
 export * from './lib/errors';
+
+// Export core objects
+export {
+  Project,
+  Registry,
+};
 
 /**
  * Returns an operation based on a given class

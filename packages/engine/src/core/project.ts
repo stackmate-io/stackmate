@@ -117,4 +117,8 @@ class Project extends Entity implements StackmateProject {
   }
 }
 
+const p = new Project();
+p.attributes = { aaa: 1 };
+p.validate();
+
 export default Project;

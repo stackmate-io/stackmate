@@ -4,6 +4,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/engine/core/services/database';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
+import { Attribute } from '@stackmate/engine/lib/decorators';
 import { CloudStack, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
@@ -11,11 +12,17 @@ import {
   RDS_PARAM_FAMILY_MAPPING,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_LOG_EXPORTS_PER_ENGINE,
+  DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
 const AwsDatabaseService = AwsService(Database);
 
 abstract class AwsRdsService extends AwsDatabaseService {
+  /**
+   * @var {String} size the size for the RDS instance
+   */
+  @Attribute size: string = DEFAULT_RDS_INSTANCE_SIZE;
+
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
    */

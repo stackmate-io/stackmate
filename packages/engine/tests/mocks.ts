@@ -72,3 +72,8 @@ export class ExtendedMockEntity extends MockEntity {
     };
   }
 }
+
+export class MockEntityWithDefaults extends MockEntity {
+  @Attribute name: string = 'default-name';
+  @Attribute number: number = 123456;
+}
