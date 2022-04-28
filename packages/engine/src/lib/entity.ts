@@ -1,4 +1,4 @@
-import { isEmpty, isFunction, pick, uniq } from 'lodash';
+import { isEmpty, isFunction, isNil, omitBy, pick, uniq } from 'lodash';
 
 import { validate } from '@stackmate/engine/lib/validation';
 import { ValidationError } from '@stackmate/engine/lib/errors';
@@ -22,6 +22,11 @@ abstract class Entity implements BaseEntity {
    * @var {String} validationMessage the validation message to use
    */
   public readonly abstract validationMessage: string;
+
+  /**
+   * @var {EntityAttributes} defaultValues the entity's default values
+   */
+  public readonly defaultValues: EntityAttributes = {};
 
   /**
    * @var {Object} attributeState the state of the attributes
@@ -129,6 +134,7 @@ abstract class Entity implements BaseEntity {
       throw new Error(`No parser has been specified for attribute “${name}”`);
     }
 
+    this.defaultValues[name] = value;
     this.attributeState[name] = parser(value);
   }
 
@@ -177,6 +183,16 @@ abstract class Entity implements BaseEntity {
     entity.validate();
 
     return entity;
+  }
+
+  /**
+   * Returns the entity's default values
+   *
+   * @returns {EntityAttributes} the entity's default values
+   */
+  static defaults<T extends BaseEntity>(this: ConstructorOf<T>): Partial<EntityAttributes> {
+    const entity = new this();
+    return omitBy(entity.defaultValues, val => isNil(val) || isEmpty(val));
   }
 }
 

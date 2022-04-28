@@ -57,7 +57,8 @@ class DeployCommand extends OperationCommand {
    */
   async init() {
     await super.init();
-    ({ stage: this.stage } = this.parsedArgs);
+    const { stage } = this.parsedArgs;
+    this.stage = stage;
   }
 
   /**
@@ -67,7 +68,9 @@ class DeployCommand extends OperationCommand {
     const op = Operations.deployment(this.projectConfig, this.stage);
     const { workdir } = exportStackConfiguration(op, this.outputPath, this.filename);
 
-    console.log(workdir);
+    console.log({
+      workdir,
+    });
   }
 }
 

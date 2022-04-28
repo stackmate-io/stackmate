@@ -78,7 +78,7 @@ abstract class Operation implements StackmateOperation {
 
     return [...providers, ...prerequisites, ...Object.values(stage)].map(srv => {
       const { type, provider } = srv;
-      return ServicesRegistry.get({ type, provider }).factory({ ...srv, ...defaults });
+      return ServicesRegistry.get(provider!, type).factory({ ...srv, ...defaults });
     });
   }
 

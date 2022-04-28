@@ -19,6 +19,8 @@ export type ValidationErrorList = {
 export interface BaseEntity {
   validationMessage: string;
   attributes: EntityAttributes;
+  attributeNames: string[];
+  defaultValues: EntityAttributes;
   parsers(): AttributeParsers;
   validate(): void;
   validations(): Validations;
@@ -30,4 +32,5 @@ export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   prototype: T;
   new(...args: any[]): T;
   factory(this: ConstructorOf<T>, ...args: any[]): T;
+  defaults(this: ConstructorOf<T>): Partial<EntityAttributes>;
 }

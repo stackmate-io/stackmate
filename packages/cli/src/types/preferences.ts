@@ -4,4 +4,4 @@ export type PreferenceOptions = {
   version: string;
   defaultProvider: ProviderChoice;
   defaultRegion: string;
-}
+};

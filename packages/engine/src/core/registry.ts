@@ -1,10 +1,12 @@
+import { get, merge } from 'lodash';
+
 import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   ProviderChoice, ServiceAttributes, ServiceScopeChoice,
   CloudServiceRegistry, CloudServiceConstructor, ServiceTypeChoice,
-} from '@stackmate/engine/types';;
+} from '@stackmate/engine/types';
 
 class ServicesRegistry implements CloudServiceRegistry {
   /**
@@ -26,11 +28,9 @@ class ServicesRegistry implements CloudServiceRegistry {
     provider: ProviderChoice,
     type: ServiceTypeChoice,
   ): void {
-    if (!this.items[provider]) {
-      this.items[provider] = {};
-    }
-
-    this.items[provider][type] = classConstructor;
+    this.items = merge(this.items, {
+      [provider]: { [type]: classConstructor },
+    });
   }
 
   /**
@@ -42,15 +42,13 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @throws {Error} if the service is not registered
    */
   get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor {
-    if (!this.items[provider]) {
-      throw new Error(`Provider ${provider} is not registered`);
-    }
+    const cls = get(this.items, `${provider}.${type}`);
 
-    if (!this.items[provider][type]) {
+    if (!cls) {
       throw new Error(`Provider ${provider} does not have service ${type} registered`);
     }
 
-    return this.items[provider][type];
+    return cls;
   }
 
   /**
@@ -61,23 +59,30 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @returns {Boolean} whether the provider specified has the service requested
    */
   exists(provider: ProviderChoice, service: ServiceTypeChoice): boolean {
-    return Boolean(this.items[provider]) && Boolean(this.items[provider][service]);
+    return Boolean(get(this.items, `${provider}.${service}`, null));
   }
 
   /**
    * Returns the available service types for a provider
    *
    * @param {ProviderChoice} provider the provider to get the service types
+   * @returns {ServiceTypeChoice[]} the service types available for the provider
    */
   types(provider: ProviderChoice): ServiceTypeChoice[] {
-    if (!this.items[provider]) {
-      return [];
-    }
-
-    return Object.keys(this.items[provider]);
+    return Object.keys(this.items[provider] || {}) as Array<ServiceTypeChoice>;
   }
 
-  providers(service: ServiceTypeChoice): ProviderChoice[] {
+  /**
+   * Returns the list of available providers
+   *
+   * @returns {ProviderChoice[]} the list of providers available
+   */
+  providers(type: ServiceTypeChoice): ProviderChoice[] {
+    return (Object.keys(this.items) as Array<ProviderChoice>).filter(
+      (provider: ProviderChoice) => (
+        get(this.items, `${provider}.${type}`, null) !== null
+      ),
+    );
   }
 }
 
@@ -105,7 +110,7 @@ export const getService = (
   attrs: ServiceAttributes, scope: ServiceScopeChoice = 'deployable',
 ) => {
   const { provider, type } = attrs;
-  return registry.get({ provider, type }).factory(attrs).scope(scope);
+  return registry.get(provider, type).factory(attrs).scope(scope);
 };
 
 export default registry as ServicesRegistry;
