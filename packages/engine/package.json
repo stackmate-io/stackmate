@@ -39,7 +39,8 @@
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/jsforce": "^1.9.35",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "rollup-plugin-dts": "^4.2.1"
   },
   "engines": {
     "node": ">=16.0.0"

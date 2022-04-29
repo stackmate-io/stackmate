@@ -1,13 +1,12 @@
 import typescript from "rollup-plugin-typescript2";
 import pathsTransformer from "ts-transform-paths";
+import dts from "rollup-plugin-dts";
 
-export default {
+export default [{
   input: './src/index.ts',
   output: [{
-    dir: './dist',
-    format: 'cjs',
-    exports: 'auto',
-    entryFileNames: '[name].js',
+    file: './dist/index.js',
+    format: 'es'
   }],
   plugins: [
     typescript({
@@ -15,4 +14,11 @@ export default {
       transformers: [pathsTransformer]
     }),
   ],
-};
+}, {
+  input: './src/index.ts',
+  output: [{
+    file: './dist/index.d.ts',
+    format: 'es',
+  }],
+  plugins: [dts()],
+}];
