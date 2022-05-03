@@ -4,14 +4,20 @@ import {
   ServiceAttributes,
   ServiceConfigurationDeclaration,
   ServiceConfigurationDeclarationNormalized,
+  ServiceTypeChoice,
 } from './service';
 
 export type StageConfiguration = {
   [srv: string]: ServiceConfigurationDeclaration;
 };
 
+export type StageCopy = {
+  from?: string;
+  skip?: Array<string>;
+}
+
 export type StageDeclarations = {
-  [name: string]: StageConfiguration & { from?: string; skip?: Array<string> };
+  [name: string]: StageConfiguration | StageConfiguration & StageCopy | StageCopy;
 };
 
 export type VaultConfiguration = {
@@ -68,6 +74,16 @@ export type ResourceProfile = {
   [attribute: string]: object;
 };
 
+export type ProjectConfigOptions = {
+  name: string,
+  defaultProvider?: ProviderChoice,
+  defaultRegion?: string,
+  stageNames?: string[],
+  stateProvider?: ProviderChoice,
+  secretsProvider?: ProviderChoice,
+  serviceTypes?: ServiceTypeChoice[],
+};
+
 export type VaultCredentialOptions = {
   length?: number;
   root?: Boolean;
@@ -82,5 +98,4 @@ export interface StackmateProject extends BaseEntity {
   secrets: VaultConfiguration;
   state: StateConfiguration;
   stages: StagesNormalizedAttributes;
-  normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration;
 }

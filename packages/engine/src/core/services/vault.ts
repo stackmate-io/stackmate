@@ -1,6 +1,6 @@
 import Service from '@stackmate/engine/core/service';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
+import { DEFAULT_VAULT_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   CloudStack, VaultService, CredentialsObject, ServiceTypeChoice, VaultCredentialOptions,
 } from '@stackmate/engine/types';
@@ -9,7 +9,7 @@ abstract class Vault extends Service implements VaultService {
   /**
    * @var {String} name the name for the service
    */
-  @Attribute name: string = 'stage-vault';
+  @Attribute name: string = DEFAULT_VAULT_SERVICE_NAME;
 
   /**
    * @var {String} type the type for the service

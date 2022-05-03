@@ -112,13 +112,9 @@ class Project extends Entity implements StackmateProject {
    * @param {Object} configuration the file contents that are to be normalized
    * @returns {Object} the normalized contents
    */
-  normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
+  static normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration {
     return normalizeProject(configuration);
   }
 }
-
-const p = new Project();
-p.attributes = { aaa: 1 };
-p.validate();
 
 export default Project;

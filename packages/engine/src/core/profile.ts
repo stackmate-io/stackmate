@@ -5,13 +5,14 @@ import { Memoize } from 'typescript-memoize';
 
 import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
 import { ProfileNotFoundError } from '@stackmate/engine/lib/errors';
+import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
 
 class Profile {
   /**
    * @var {String} DEFAULT the default profile to use
    * @static
    */
-  static DEFAULT: string = 'default';
+  static DEFAULT: string = DEFAULT_PROFILE_NAME;
 
   /**
    * @var {String} directory the directory that we store the profiles in

@@ -102,8 +102,8 @@ registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
 /**
  * Returns a service instance based on its attributes
  *
- * @param attrs the attributes to instantiate the service by
- * @param scope the scope to apply to the service
+ * @param {ServiceAttributes} attrs the attributes to instantiate the service by
+ * @param {ServiceScopeChoice} scope the scope to apply to the service
  * @returns {CloudService} the service instantiated and with the scope applied
  */
 export const getService = (
