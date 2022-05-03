@@ -92,6 +92,13 @@ namespace Validator {
     if (!provider || !availableProviders.includes(provider)) {
       return `You have to specify a valid provider for the state. Available options are: ${availableProviders.join(', ')}`;
     }
+
+    if (provider === PROVIDER.AWS) {
+      const { bucket } = state;
+      if (!bucket) {
+        return 'You have to specify an S3 bucket to store the state in';
+      }
+    }
   };
 
   /**
