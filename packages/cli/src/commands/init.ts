@@ -3,8 +3,8 @@ import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { fromPairs, kebabCase } from 'lodash';
 import {
-  PROVIDER, SERVICE_TYPE, AWS_REGIONS, CloudServiceConstructor, Project, ProjectConfiguration,
-  ProviderChoice, Registry, ServiceTypeChoice, StackmateProject,
+  PROVIDER, SERVICE_TYPE, AWS_REGIONS, CloudServiceConstructor,
+  ProjectConfiguration, ProviderChoice, Registry, ServiceTypeChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
@@ -78,11 +78,11 @@ class InitCommand extends BaseCommand {
     return srv.defaults();
   }
 
-  @Memoize() get project(): StackmateProject {
+  @Memoize() get project(): Required<ProjectConfiguration> {
     const { name, provider, region, stages, state, secrets, services } = this.parsedFlags;
     const [defaultStage, ...otherStages] = stages;
 
-    const config: Required<ProjectConfiguration> = {
+    return {
       name,
       provider,
       region,
@@ -97,21 +97,21 @@ class InitCommand extends BaseCommand {
         ),
       },
     };
-
-    const project = new Project();
-    project.attributes = config;
-    return project;
   }
 
   async run(): Promise<any> {
-    try {
-      this.project.validate();
-    } catch(err) {
-      console.log(require('util').inspect(err))
-    }
+
+    // const project = new Project();
+    // project.attributes = config;
+    // return project;
+    // try {
+    //   this.project.validate();
+    // } catch(err) {
+    //   console.log(require('util').inspect(err))
+    // }
 
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    projectFile.write(this.project.attributes);
+    // projectFile.write(this.project.attributes);
   }
 }
 
