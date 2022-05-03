@@ -1,13 +1,16 @@
-import { isEmpty, isFunction, isNil, omitBy, pick, uniq } from 'lodash';
+import { isEmpty, isFunction, pick, uniq } from 'lodash';
 
 import { validate } from '@stackmate/engine/lib/validation';
 import { ValidationError } from '@stackmate/engine/lib/errors';
 import {
-  BaseEntity, AttributeParsers, ConstructorOf, EntityAttributes, Validations,
+  BaseEntity,
+  Validations,
+  AttributeParsers,
+  EntityAttributes,
+  BaseEntityConstructor,
 } from '@stackmate/engine/types';
 
 abstract class Entity implements BaseEntity {
-
   /**
    * @returns {Object} the parsers for the attributes
    */
@@ -65,9 +68,7 @@ abstract class Entity implements BaseEntity {
    * @param {Object} values the attribute values to set
    */
   public set attributes(values: EntityAttributes) {
-    const attributes = this.normalize(
-      pick(values, this.attributeNames),
-    );
+    const attributes = pick(values, this.attributeNames);
 
     Object.keys(attributes).forEach((attributeKey) => {
       this.setAttribute(attributeKey, values[attributeKey]);
@@ -168,20 +169,29 @@ abstract class Entity implements BaseEntity {
   protected initialize(): void {}
 
   /**
+   * Normalizes the entity's attributes
+   *
+   * @param {Object} attributes the attributes to normalize
+   * @returns {Object} the normalized attributes
+   */
+  static normalize(attributes: object): object {
+    return attributes;
+  }
+
+  /**
    * Instantiates and validates an entity
    *
    * @param {Object} attributes the entity's attributes
    * @returns {Entity} the validated entity instance
    */
   static factory<T extends BaseEntity>(
-    this: ConstructorOf<T>,
+    this: BaseEntityConstructor<T>,
     attributes: object,
     ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = attributes;
+    entity.attributes = this.normalize(attributes);
     entity.validate();
-
     return entity;
   }
 
@@ -190,9 +200,9 @@ abstract class Entity implements BaseEntity {
    *
    * @returns {EntityAttributes} the entity's default values
    */
-  static defaults<T extends BaseEntity>(this: ConstructorOf<T>): Partial<EntityAttributes> {
+  static defaults<T extends BaseEntity>(this: BaseEntityConstructor<T>): Partial<EntityAttributes> {
     const entity = new this();
-    return omitBy(entity.defaultValues, val => isNil(val) || isEmpty(val));
+    return entity.defaultValues;
   }
 }
 

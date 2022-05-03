@@ -1,13 +1,13 @@
 import Service from '@stackmate/engine/core/service';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
+import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { CloudStack, StateService, ServiceTypeChoice } from '@stackmate/engine/types';
 
 abstract class State extends Service implements StateService {
   /**
    * @var {String} name the service's name
    */
-  @Attribute name: string = 'stage-state';
+  @Attribute name: string = DEFAULT_STATE_SERVICE_NAME;
 
   /**
    * @var {ServiceTypeChoice} type the service's type
