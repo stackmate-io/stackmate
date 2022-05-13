@@ -1,6 +1,7 @@
 import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
 import { CLOUD_PROVIDER, PROVIDER } from '@stackmate/engine/constants';
+import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 import {
@@ -8,7 +9,6 @@ import {
   StagesNormalizedAttributes, Validations, StateConfiguration,
   AttributeParsers, VaultConfiguration, ProviderChoice,
 } from '@stackmate/engine/types';
-import { AWS_REGIONS } from '../providers/aws/constants';
 
 class Project extends Entity implements StackmateProject {
   /**
