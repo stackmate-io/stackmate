@@ -55,13 +55,13 @@ export interface CloudService extends BaseEntity {
   providerService: ProviderService;
   vault: VaultService;
   get isRegistered(): boolean;
-  link(...targets: CloudService[]): CloudService;
+  link(...targets: CloudService[]): ThisType<CloudService>;
+  scope(name: ServiceScopeChoice): ThisType<CloudService>;
   associations(): ServiceAssociation[];
   isDependingUpon(service: CloudService): boolean;
   parsers(): AttributeParsers & Required<{ name: Function, links: Function }>;
   validations(): Validations & Required<{ name: object, links: object }>;
   register(stack: CloudStack): void;
-  scope(name: ServiceScopeChoice): CloudService;
   onPrepare(stack: CloudStack): void;
   onDeploy(stack: CloudStack): void;
   onDestroy(stack: CloudStack): void;
