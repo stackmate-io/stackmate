@@ -1,6 +1,6 @@
 import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
-import { PROVIDER } from '@stackmate/engine/constants';
+import { CLOUD_PROVIDER, PROVIDER } from '@stackmate/engine/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 import {
@@ -8,6 +8,7 @@ import {
   StagesNormalizedAttributes, Validations, StateConfiguration,
   AttributeParsers, VaultConfiguration, ProviderChoice,
 } from '@stackmate/engine/types';
+import { AWS_REGIONS } from '../providers/aws/constants';
 
 class Project extends Entity implements StackmateProject {
   /**
@@ -44,6 +45,43 @@ class Project extends Entity implements StackmateProject {
    * @var {String} validationMessage the error message
    */
   readonly validationMessage: string = 'The project’s configuration is not valid';
+
+  static schema() {
+    return {
+      name: {
+        type: 'string',
+        description: 'The project’s name',
+      },
+      provider: {
+        type: 'string',
+        enum: Object.values(CLOUD_PROVIDER),
+        description: '',
+      },
+      region: {
+        type: 'string',
+        description: '',
+      },
+      secrets: {
+        type: 'object',
+        description: '',
+      },
+      state: {
+        type: 'object',
+        description: '',
+      },
+      stages: {
+        type: 'object',
+        description: '',
+      },
+      required: [
+        'name', 'provider', 'region',
+      ],
+      allOf: [{
+        if: { properties: { provider: { const: PROVIDER.AWS } } },
+        then: { properties: { region: { enum: Object.values(AWS_REGIONS) } } },
+      }],
+    };
+  }
 
   /**
    * Returns a list of validations to validate the structure of the configuration file with

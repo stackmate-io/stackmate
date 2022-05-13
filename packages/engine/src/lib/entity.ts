@@ -76,14 +76,6 @@ abstract class Entity implements BaseEntity {
   }
 
   /**
-   * @param {EntityAttributes} attributes the attributes to normalize
-   * @returns {EntityAttributes} the normalized attributes
-   */
-  normalize(attributes: EntityAttributes): EntityAttributes {
-    return attributes;
-  }
-
-  /**
    * Validates an entity's attributes
    *
    * @param {Object} attributes the entity's attributes to be validated
@@ -171,10 +163,10 @@ abstract class Entity implements BaseEntity {
   /**
    * Normalizes the entity's attributes
    *
-   * @param {Object} attributes the attributes to normalize
-   * @returns {Object} the normalized attributes
+   * @param {EntityAttributes} attributes the attributes to normalize
+   * @returns {EntityAttributes} the normalized attributes
    */
-  static normalize(attributes: object): object {
+  static normalize(attributes: EntityAttributes): EntityAttributes {
     return attributes;
   }
 

@@ -1,3 +1,5 @@
+import { omit } from 'lodash';
+
 export const { env: ENV } = process;
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate';
 export const DEBUG_MODE = Boolean(ENV.DEBUG) || false;
@@ -35,3 +37,5 @@ export const DEFAULT_IP = '10.0.0.0';
 export const DEFAULT_PROFILE_NAME = 'default';
 export const DEFAULT_STATE_SERVICE_NAME = 'stage-state';
 export const DEFAULT_VAULT_SERVICE_NAME = 'stage-vault';
+
+export const CLOUD_PROVIDER = omit(PROVIDER, PROVIDER.LOCAL);

@@ -64,6 +64,9 @@ class Profile {
     return fileExistsSync(Profile.path(provider, service, name, { withExtension: true }));
   }
 
+  static list() {
+  }
+
   /**
    * Loads and returns a profile and applies any overrides
    *
