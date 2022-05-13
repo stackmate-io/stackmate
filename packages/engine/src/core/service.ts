@@ -135,6 +135,26 @@ abstract class Service extends Entity implements CloudService {
     return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
   }
 
+  static schema() {
+    return {
+      name: {
+        type: 'string',
+        pattern: '[a-z0-9_]+',
+        description: 'The name for the service to deploy',
+      },
+      required: ['name'],
+      errorMessage: {
+        _: 'The service configuration is invalid',
+        properties: {
+          name: 'The name for the service should only contain characters, numbers and underscores',
+        },
+        required: {
+          name: 'You have to specify a name for the service'
+        },
+      },
+    }
+  }
+
   /**
    * @returns {Object} the parsers to apply when setting an object attribute
    */
@@ -156,6 +176,8 @@ abstract class Service extends Entity implements CloudService {
    * @returns {Object} the validations to use
    */
   validations() {
+
+
     const validations = {
       name: {
         presence: {
@@ -219,7 +241,7 @@ abstract class Service extends Entity implements CloudService {
    * @param scope the scope to apply to the service
    * @returns {CloudService} the service with the scope applied
    */
-  scope(scope: ServiceScopeChoice): CloudService {
+  scope(scope: ServiceScopeChoice): ThisType<CloudService> {
     let handlerFunction: (stack: CloudStack) => void;
 
     switch(scope) {
@@ -320,7 +342,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @param {CloudService[]} associated the services associated to the current one
    */
-  public link(...associated: CloudService[]) {
+  public link(...associated: CloudService[]): ThisType<CloudService> {
     associated.forEach(assoc => this.associate(assoc));
     return this;
   }

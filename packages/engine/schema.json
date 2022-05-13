@@ -23,7 +23,7 @@
       "type": "object",
       "oneOf": [{
         "type": "object",
-        "properties": {
+        "allOf": [{
           "provider": {
             "type": "string",
             "const": "aws"
@@ -31,7 +31,7 @@
           "bucket": {
             "type": "string"
           }
-        },
+        }],
         "required": [
           "bucket"
         ]
@@ -74,6 +74,9 @@
     }
   },
   "definitions": {
+    "awsVault": {
+      "$id": "/"
+    },
     "mysql": {
       "$id": "/schemas/services/mysql",
       "type": "object",

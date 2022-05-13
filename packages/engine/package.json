@@ -28,6 +28,9 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@cdktf/provider-aws": "5.0.52",
+    "ajv": "^8.11.0",
+    "ajv-errors": "^3.0.0",
+    "ajv-formats": "^2.1.1",
     "cdktf": "0.9.4",
     "constructs": "^10.0.105",
     "ip-address": "^8.1.0",
