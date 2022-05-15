@@ -1,11 +1,10 @@
-import { merge, uniq } from 'lodash';
 import { JSONSchemaType } from 'ajv';
-import { PartialSchema } from 'ajv/dist/types/json-schema';
 
 import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { OneOf, DatabaseService, BaseService, DiffService, Diff } from '@stackmate/engine/types';
+import { OneOf, DatabaseService, BaseService } from '@stackmate/engine/types';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 abstract class Database extends Service implements DatabaseService {
   /**
@@ -132,32 +131,10 @@ abstract class Database extends Service implements DatabaseService {
     };
   }
 
-  static mergeSchemas(target: PartialSchema<Diff<DatabaseService, BaseService>> & { properties: object, required: string[] } ): JSONSchemaType<DatabaseService> {
-    const {
-      properties: sourceProperties = {},
-      required: sourceRequired = [],
-      ...sourceProps
-    } = super.partial();
-
-    const {
-      properties: targetProperties = {},
-      required: targetRequired = [],
-      ...targetProps
-    } = target;
-
-    const merged = merge({}, sourceProps, targetProps);
-
-    return {
-      ...merged,
-      type: 'object',
-      properties: merge({}, sourceProperties, targetProperties),
-      required: uniq([...sourceRequired, ...targetRequired]),
-    };
-  }
-
   static schema(): JSONSchemaType<DatabaseService> {
-    return Database.mergeSchemas({
+    return mergeJsonSchemas<BaseService, DatabaseService>(super.partial(), {
       required: [],
+      type: 'object',
       properties: {
         size: { type: 'string' },
         storage: { type: 'number' },

@@ -10,7 +10,7 @@ import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants'
 import {
   RegionList, ServiceAssociation, ProviderChoice, BaseService,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
-  CloudService, CloudStack, ProviderService, VaultService,
+  CloudService, CloudStack, ProviderService, VaultService, PartialJsonSchema,
 } from '@stackmate/engine/types';
 
 abstract class Service extends Entity implements CloudService, BaseService {
@@ -143,7 +143,7 @@ abstract class Service extends Entity implements CloudService, BaseService {
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static partial(): PartialSchema<BaseService> {
+  static partial(): PartialJsonSchema<BaseService> {
     return {
       type: 'object',
       properties: {
