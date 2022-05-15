@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@types/jest": "^27.5.0",
-    "@types/jsforce": "^1.9.35",
+    "@types/jsforce": "^1.9.42",
     "jest": "^27.5.1"
   },
   "engines": {
