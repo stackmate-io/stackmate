@@ -9,6 +9,7 @@
   "stages": {
     "production": {
       "mysql": {
+        "name": "test",
         "type": "mysql",
         "provider": "aws",
         "region": "eu-central-1",

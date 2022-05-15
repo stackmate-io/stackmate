@@ -1,3 +1,4 @@
+import { PartialSchema } from 'ajv/dist/types/json-schema';
 import { Memoize } from 'typescript-memoize';
 import { isEmpty, isObject, merge } from 'lodash';
 
@@ -5,14 +6,14 @@ import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
 import Profile from '@stackmate/engine/core/profile';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  RegionList, ServiceAssociation, ProviderChoice,
+  RegionList, ServiceAssociation, ProviderChoice, BaseService,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
   CloudService, CloudStack, ProviderService, VaultService,
 } from '@stackmate/engine/types';
 
-abstract class Service extends Entity implements CloudService {
+abstract class Service extends Entity implements CloudService, BaseService {
   /**
    * @var {String} name the service's name
    */
@@ -136,11 +137,37 @@ abstract class Service extends Entity implements CloudService {
   }
 
   static schema() {
+    throw new Error('This method needs to be overloaded in a concrete class');
+  }
+
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static partial(): PartialSchema<BaseService> {
     return {
-      name: {
-        type: 'string',
-        pattern: '[a-z0-9_]+',
-        description: 'The name for the service to deploy',
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          pattern: '[a-z0-9_]+',
+          description: 'The name for the service to deploy',
+        },
+        profile: {
+          type: 'string',
+          default: DEFAULT_PROFILE_NAME,
+          serviceProfile: true,
+        },
+        links: {
+          type: 'array',
+          default: [],
+          serviceLinks: true,
+          items: { type: 'string' },
+        },
+        overrides: {
+          type: 'object',
+          default: {},
+          serviceProfileOverrides: true,
+        },
       },
       required: ['name'],
       errorMessage: {
@@ -152,7 +179,7 @@ abstract class Service extends Entity implements CloudService {
           name: 'You have to specify a name for the service'
         },
       },
-    }
+    };
   }
 
   /**
@@ -176,8 +203,6 @@ abstract class Service extends Entity implements CloudService {
    * @returns {Object} the validations to use
    */
   validations() {
-
-
     const validations = {
       name: {
         presence: {
@@ -241,7 +266,7 @@ abstract class Service extends Entity implements CloudService {
    * @param scope the scope to apply to the service
    * @returns {CloudService} the service with the scope applied
    */
-  scope(scope: ServiceScopeChoice): ThisType<CloudService> {
+  scope(scope: ServiceScopeChoice): CloudService {
     let handlerFunction: (stack: CloudStack) => void;
 
     switch(scope) {
@@ -342,7 +367,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @param {CloudService[]} associated the services associated to the current one
    */
-  public link(...associated: CloudService[]): ThisType<CloudService> {
+  public link(...associated: CloudService[]): CloudService {
     associated.forEach(assoc => this.associate(assoc));
     return this;
   }

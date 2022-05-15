@@ -1,8 +1,22 @@
+import { toPairs } from 'lodash';
+
+import ServiceRegistry from './core/registry';
 import { AWS_REGIONS } from './providers/aws/constants';
 import { PROVIDER, CLOUD_PROVIDER } from './constants';
+import { ProviderChoice } from './types';
 
 const providers = Object.values(CLOUD_PROVIDER);
 const awsRegions = Object.values(AWS_REGIONS);
+
+const serviceDefinitions: { [key: string]: object } = {};
+
+Object.values(PROVIDER).forEach((provider: ProviderChoice) => {
+  const providerServices = ServiceRegistry.items[provider];
+
+  toPairs(providerServices).forEach(([type, ServiceClass]) => {
+    serviceDefinitions[`services/${type}/${provider}`] = ServiceClass.schema();
+  });
+});
 
 const schema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -40,10 +54,9 @@ const schema = {
         errorMessage: 'You should define at least one service for the stage',
         patternProperties: {
           "^[a-z0-9_]+$": {
-            oneOf: [
-              { $ref: '/schemas/services/mysql' },
-              { $ref: '/schemas/services/redis' },
-            ],
+            oneOf: Object.keys(serviceDefinitions).map(
+              (id: string) => ({ $ref: `#/defs/${id}` }),
+            ),
           },
         },
       },
@@ -51,16 +64,16 @@ const schema = {
   },
   allOf: [{
     if: { properties: { provider: { const: PROVIDER.AWS } } },
-    then: { properties: { region: { $ref: '/regions/aws' } } },
+    then: { properties: { region: { $ref: '#/defs/regions/aws' } } },
   }],
   required: ['name', 'provider', 'region'],
   additionalProperties: false,
-  definitions: {
-    awsRegions: {
-      $id: '/regions/aws',
+  $defs: {
+    ...serviceDefinitions,
+    'regions/aws': {
       type: 'string',
       enum: awsRegions,
-      errorMessage: `The region is invalid. Available options are ${awsRegions.join(', ')}`,
+      errorMessage: `The region is invalid. Available options are: ${awsRegions.join(', ')}`,
     },
   },
   errorMessage: {
@@ -79,4 +92,4 @@ const schema = {
   },
 };
 
-export default schema;
+export { schema, serviceDefinitions };

@@ -1,7 +1,10 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
-import { isObject, sampleSize } from 'lodash';
+import { isObject, merge, sampleSize, uniq } from 'lodash';
+import { JSONSchemaType } from 'ajv';
+import { PartialSchema } from 'ajv/dist/types/json-schema';
+import { BaseService, DatabaseService, Diff } from '../types';
 
 /**
  * Returns an MD5 hash of an object
@@ -108,3 +111,63 @@ export const getRandomString = ({
 
   return sampleSize(characters, length).join('');
 };
+
+type DiffService = Diff<DatabaseService, BaseService>;
+type SourceSchema = PartialSchema<BaseService> & { properties: object, required: string[] };
+type TargetSchema = PartialSchema<DiffService> & { properties: object, required: string[] };
+
+export const mergeSchemas = (source: SourceSchema, target: TargetSchema): JSONSchemaType<DatabaseService> => {
+  const {
+    properties: sourceProperties = {},
+    required: sourceRequired = [],
+    ...sourceProps
+  } = source;
+
+  const {
+    properties: targetProperties = {},
+    required: targetRequired = [],
+    ...targetProps
+  } = target;
+
+  const merged = merge({}, sourceProps, targetProps);
+
+  return {
+    ...merged,
+    type: 'object',
+    properties: merge({}, sourceProperties, targetProperties),
+    required: uniq([...sourceRequired, ...targetRequired]),
+  };
+};
+
+
+/*
+type DiffService = Diff<DatabaseService, BaseService>;
+// Diff<T, U>
+
+type SourceSchema<T> = PartialSchema<T> & { properties: object, required: string[] }
+type TargetSchema<U, T> = PartialSchema<DiffService> & { properties: object, required: string[] }
+
+export const mergeJsonSchemas = <BaseService, DatabaseService>(source: SourceSchema<BaseService>, target: TargetSchema<BaseService, DatabaseService>): JSONSchemaType<DatabaseService> => {
+// export const mergeJsonSchemas = <U, T extends U>(source: SourceSchema<U>, target: TargetSchema<U, T>): JSONSchemaType<T> => {
+  const {
+    properties: sourceProperties = {},
+    required: sourceRequired = [],
+    ...sourceProps
+  } = source;
+
+  const {
+    properties: targetProperties = {},
+    required: targetRequired = [],
+    ...targetProps
+  } = target;
+
+  const merged = merge({}, sourceProps, targetProps);
+
+  return {
+    ...merged,
+    type: 'object',
+    properties: merge({}, sourceProperties, targetProperties),
+    required: uniq([...sourceRequired, ...targetRequired]),
+  };
+};
+*/

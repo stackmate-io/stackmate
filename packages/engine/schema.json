@@ -1,6 +1,5 @@
 {
   "$id": "https://json-schema.org/draft/2019-09/schema",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Stackmate configuration file",
   "type": "object",
   "description": "Stackmate configuration file",
@@ -20,10 +19,9 @@
       "type": "string"
     },
     "secrets": {
-      "type": "object",
       "oneOf": [{
         "type": "object",
-        "allOf": [{
+        "properties": {
           "provider": {
             "type": "string",
             "const": "aws"
@@ -31,7 +29,7 @@
           "bucket": {
             "type": "string"
           }
-        }],
+        },
         "required": [
           "bucket"
         ]
@@ -73,34 +71,54 @@
       }
     }
   },
-  "definitions": {
-    "awsVault": {
-      "$id": "/"
+  "$defs": {
+    "base": {
+      "$id": "/schemas/services/base",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" }
+      }
     },
     "mysql": {
       "$id": "/schemas/services/mysql",
       "type": "object",
-      "properties": {
-        "provider": {
-          "type": "string",
-          "enum": [
-            "aws",
-            "digitalocean"
-          ]
-        },
-        "version": { "type": "string", "enum": ["8.0", "5.7"] },
-        "type": {
-          "type": "string",
-          "const": "mysql"
-        },
-        "region": {
-          "type": "string",
-          "enum": [
-            "eu-central-1",
-            "eu-west-2"
-          ]
+      "allOf": [
+        { "$ref": "/schemas/services/base" },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "aws",
+                "digitalocean"
+              ]
+            },
+            "version": {
+              "type": "string",
+              "enum": [
+                "8.0",
+                "5.7"
+              ]
+            },
+            "type": {
+              "type": "string",
+              "const": "mysql"
+            },
+            "region": {
+              "type": "string",
+              "enum": [
+                "eu-central-1",
+                "eu-west-2"
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "redis": {
       "$id": "/schemas/services/redis",
