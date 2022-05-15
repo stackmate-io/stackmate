@@ -1,23 +1,5 @@
-// import { JSONSchemaType } from 'ajv';
+import { PartialSchema } from 'ajv/dist/types/json-schema';
+import { Diff, RequireKeys } from './util';
 
-// export interface JSONSchema<T> extends JSONSchemaType<T> {}
-
-// export type TypeSchemaEntry = {
-//   type: string;
-//   description: string;
-// };
-
-// export interface MinimalRequiredServiceSchema {
-//   name: TypeSchemaEntry;
-//   type: TypeSchemaEntry;
-//   provider: TypeSchemaEntry;
-//   profile: TypeSchemaEntry;
-//   links: TypeSchemaEntry;
-//   overrides: TypeSchemaEntry;
-//   region?: TypeSchemaEntry;
-// }
-
-// export interface BaseService {
-//   name: string;
-//   lastname: string;
-// }
+export type PartialJsonSchema<T> = RequireKeys<PartialSchema<T>, 'properties'>;
+export type TargetJsonSchema<U, T> = RequireKeys<(PartialSchema<(Diff<T, U>)>), 'properties'>;
