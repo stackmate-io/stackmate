@@ -5,7 +5,9 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from './entity';
 import { CloudStack, CredentialsObject } from './lib';
 import { VaultCredentialOptions } from './project';
-import { OneOf, ChoiceOf } from './util';
+import { OneOf, ChoiceOf, Diff } from './util';
+import { JSONSchemaType } from 'ajv';
+import { PartialSchema } from 'ajv/dist/types/json-schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
@@ -55,8 +57,8 @@ export interface CloudService extends BaseEntity {
   providerService: ProviderService;
   vault: VaultService;
   get isRegistered(): boolean;
-  link(...targets: CloudService[]): ThisType<CloudService>;
-  scope(name: ServiceScopeChoice): ThisType<CloudService>;
+  link(...targets: CloudService[]): CloudService;
+  scope(name: ServiceScopeChoice): CloudService;
   associations(): ServiceAssociation[];
   isDependingUpon(service: CloudService): boolean;
   parsers(): AttributeParsers & Required<{ name: Function, links: Function }>;
@@ -111,7 +113,10 @@ export interface StateService extends CloudService {
   resources(stack: CloudStack): void;
 }
 
-export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {}
+export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
+  schema<T>(): JSONSchemaType<T>;
+  partial<T>(): PartialSchema<T>;
+}
 
 export interface CloudServiceRegistry {
   items: { [k in ProviderChoice]?: { [s in ServiceTypeChoice]?: CloudServiceConstructor } };
@@ -120,3 +125,22 @@ export interface CloudServiceRegistry {
   ): void;
   get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor;
 }
+
+// Service class types
+export interface BaseService {
+  name: string;
+  profile: string;
+  links: string[];
+  overrides: object;
+}
+
+export interface DatabaseService extends BaseService {
+  size: string;
+  storage: number;
+  version: string;
+  database: string;
+  nodes: number;
+  port: number;
+}
+
+export type DiffService = Diff<DatabaseService, BaseService>;

@@ -1,9 +1,13 @@
+import { merge, uniq } from 'lodash';
+import { JSONSchemaType } from 'ajv';
+import { PartialSchema } from 'ajv/dist/types/json-schema';
+
 import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { OneOf, Sizeable, Storable, MultiNode, Versioned } from '@stackmate/engine/types';
+import { OneOf, DatabaseService, BaseService, DiffService, Diff } from '@stackmate/engine/types';
 
-abstract class Database extends Service implements Sizeable, Storable, MultiNode, Versioned {
+abstract class Database extends Service implements DatabaseService {
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -30,14 +34,14 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
   @Attribute nodes: number;
 
   /**
-   * @var {String} engine the database engine to use
-   */
-  abstract engine: OneOf<Array<string>>;
-
-  /**
    * @var {Number} the port number to use to connect to the database
    */
   @Attribute port: number;
+
+  /**
+   * @var {String} engine the database engine to use
+   */
+  abstract engine: OneOf<Array<string>>;
 
   /**
    * @var {Array<String>} engines the list of database engines available for this service
@@ -126,6 +130,43 @@ abstract class Database extends Service implements Sizeable, Storable, MultiNode
         },
       },
     };
+  }
+
+  static mergeSchemas(target: PartialSchema<Diff<DatabaseService, BaseService>> & { properties: object, required: string[] } ): JSONSchemaType<DatabaseService> {
+    const {
+      properties: sourceProperties = {},
+      required: sourceRequired = [],
+      ...sourceProps
+    } = super.partial();
+
+    const {
+      properties: targetProperties = {},
+      required: targetRequired = [],
+      ...targetProps
+    } = target;
+
+    const merged = merge({}, sourceProps, targetProps);
+
+    return {
+      ...merged,
+      type: 'object',
+      properties: merge({}, sourceProperties, targetProperties),
+      required: uniq([...sourceRequired, ...targetRequired]),
+    };
+  }
+
+  static schema(): JSONSchemaType<DatabaseService> {
+    return Database.mergeSchemas({
+      required: [],
+      properties: {
+        size: { type: 'string' },
+        storage: { type: 'number' },
+        version: { type: 'string' },
+        database: { type: 'string' },
+        nodes: { type: 'number' },
+        port: { type: 'number' },
+      },
+    });
   }
 }
 

@@ -64,7 +64,7 @@ class Profile {
     return fileExistsSync(Profile.path(provider, service, name, { withExtension: true }));
   }
 
-  static list() {
+  static list(provider: ProviderChoice, type: ServiceTypeChoice) {
   }
 
   /**

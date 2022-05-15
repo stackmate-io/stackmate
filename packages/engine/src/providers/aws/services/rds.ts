@@ -1,4 +1,4 @@
-import { isUndefined } from 'lodash';
+import { isUndefined, merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
@@ -55,6 +55,9 @@ abstract class AwsRdsService extends AwsDatabaseService {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
+  /**
+   * @returns {String} the RDS parameter group family to use when deploying the service
+   */
   @Memoize() public get paramGroupFamily() {
     const triad = RDS_PARAM_FAMILY_MAPPING.find(
       ([engine, version]) => engine === this.engine && this.version.startsWith(version),
@@ -67,6 +70,23 @@ abstract class AwsRdsService extends AwsDatabaseService {
     }
 
     return triad[2];
+  }
+
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static schema() {
+    return merge({}, super.schema(), {
+      engine: {
+        type: 'string',
+        enum: Object.values(RDS_ENGINES),
+      },
+      size: {
+        type: 'string',
+        default: DEFAULT_RDS_INSTANCE_SIZE,
+        enum: RDS_INSTANCE_SIZES,
+      },
+    });
   }
 
   /**

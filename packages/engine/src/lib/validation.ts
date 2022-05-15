@@ -14,6 +14,10 @@ import {
 } from '@stackmate/engine/types';
 
 namespace Validator {
+  export const KEYWORD_PROFILE_EXISTS = 'existingProfile';
+
+  // TODO: Remove below
+
   /**
    * Validates the project's stages
    *

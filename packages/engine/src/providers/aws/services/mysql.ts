@@ -1,8 +1,10 @@
+import { merge } from 'lodash';
+
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
-import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES } from '@stackmate/engine/providers/aws/constants';
+import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService {
   /**
@@ -24,6 +26,33 @@ class AwsMysqlService extends AwsRdsService {
    * @var {Number} port the port to use for connecting
    */
   @Attribute port: number = 3306;
+
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static schema() {
+    return merge({}, super.schema(), {
+      type: {
+        type: 'string',
+        const: SERVICE_TYPE.MYSQL,
+      },
+      engine: {
+        type: 'string',
+        const: 'mysql',
+      },
+      version: {
+        type: 'string',
+        default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql'),
+        enum: RDS_MAJOR_VERSIONS_PER_ENGINE.get('mysql') || [],
+      },
+      port: {
+        type: 'number',
+        default: 3306,
+        minimum: 0,
+        maximum: 65535,
+      },
+    });
+  }
 }
 
 export default AwsMysqlService;
