@@ -6,8 +6,7 @@ import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from
 import { CloudStack, CredentialsObject } from './lib';
 import { VaultCredentialOptions } from './project';
 import { OneOf, ChoiceOf, Diff } from './util';
-import { JSONSchemaType } from 'ajv';
-import { PartialSchema } from 'ajv/dist/types/json-schema';
+import { JsonSchema, PartialJsonSchema } from './schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
@@ -114,8 +113,7 @@ export interface StateService extends CloudService {
 }
 
 export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
-  schema<T>(): JSONSchemaType<T>;
-  partial<T>(): PartialSchema<T>;
+  schema<T>(): JsonSchema<T>;
 }
 
 export interface CloudServiceRegistry {

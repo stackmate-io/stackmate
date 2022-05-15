@@ -1,9 +1,8 @@
 import fs from 'fs';
 import crypto from 'crypto';
-import { JSONSchemaType } from 'ajv';
 import { Address4 } from 'ip-address';
 import { isObject, merge, sampleSize, uniq } from 'lodash';
-import { PartialJsonSchema, TargetJsonSchema } from '@stackmate/engine/types';
+import { JsonSchema, PartialJsonSchema, TargetJsonSchema } from '@stackmate/engine/types';
 
 /**
  * Returns an MD5 hash of an object
@@ -111,7 +110,14 @@ export const getRandomString = ({
   return sampleSize(characters, length).join('');
 };
 
-export const mergeJsonSchemas = <U, T extends U>(source: PartialJsonSchema<U>, target: TargetJsonSchema<U, T>): JSONSchemaType<T> => {
+/**
+ * Merges two JSON schemas into one
+ *
+ * @param {Object} source the source schema
+ * @param {Object} target the target schema
+ * @returns {Object} the final schema
+ */
+export const mergeJsonSchemas = <U, T extends U>(source: PartialJsonSchema<U>, target: TargetJsonSchema<U, T>): JsonSchema<T> => {
   const {
     properties: sourceProperties = {},
     required: sourceRequired = [],
