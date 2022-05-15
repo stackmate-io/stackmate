@@ -36,7 +36,7 @@
     "/oclif.manifest.json"
   ],
   "dependencies": {
-    "@oclif/core": "^1.6.4",
+    "@oclif/core": "^1.8.0",
     "@oclif/plugin-help": "^5.1.12",
     "@oclif/plugin-plugins": "^2.1.0",
     "@stackmate/engine": "^0.0.0",
@@ -49,7 +49,7 @@
   "devDependencies": {
     "@oclif/test": "^2.1.0",
     "@types/ffi-napi": "^4.0.5",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^9.1.1",
     "mocha": "^9.2.2",
     "oclif": "^2.6.3",
     "rollup-plugin-dts": "^4.2.1",
