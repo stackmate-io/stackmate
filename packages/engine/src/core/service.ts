@@ -1,4 +1,3 @@
-import { PartialSchema } from 'ajv/dist/types/json-schema';
 import { Memoize } from 'typescript-memoize';
 import { isEmpty, isObject, merge } from 'lodash';
 
@@ -10,7 +9,7 @@ import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants'
 import {
   RegionList, ServiceAssociation, ProviderChoice, BaseService,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
-  CloudService, CloudStack, ProviderService, VaultService, PartialJsonSchema,
+  CloudService, CloudStack, ProviderService, VaultService, JsonSchema,
 } from '@stackmate/engine/types';
 
 abstract class Service extends Entity implements CloudService, BaseService {
@@ -136,14 +135,10 @@ abstract class Service extends Entity implements CloudService, BaseService {
     return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
   }
 
-  static schema() {
-    throw new Error('This method needs to be overloaded in a concrete class');
-  }
-
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static partial(): PartialJsonSchema<BaseService> {
+  static schema(): JsonSchema<BaseService> {
     return {
       type: 'object',
       properties: {
