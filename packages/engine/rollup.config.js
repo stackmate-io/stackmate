@@ -1,6 +1,5 @@
 import typescript from "rollup-plugin-typescript2";
 import pathsTransformer from "ts-transform-paths";
-import dts from "rollup-plugin-dts";
 
 const tsPlugins = [
   typescript({
@@ -17,8 +16,4 @@ export default [{
   input: './src/index.ts',
   output: [{ file: './dist/index.d.ts', format: 'es' }],
   plugins: [dts()],
-}, {
-  input: './src/schema.ts',
-  output: [{ file: './dist/schema.js', format: 'cjs' }],
-  plugins: tsPlugins,
 }];
