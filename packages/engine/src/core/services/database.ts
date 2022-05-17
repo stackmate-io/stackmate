@@ -1,5 +1,3 @@
-import { JSONSchemaType } from 'ajv';
-
 import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
@@ -136,8 +134,6 @@ abstract class Database extends Service implements DatabaseService {
    */
   static schema(): JsonSchema<DatabaseService> {
     return mergeJsonSchemas<BaseService, DatabaseService>(super.schema(), {
-      required: [],
-      type: 'object',
       properties: {
         size: { type: 'string' },
         storage: { type: 'number' },

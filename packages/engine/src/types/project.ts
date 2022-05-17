@@ -3,7 +3,6 @@ import {
   ProviderChoice,
   ServiceAttributes,
   ServiceConfigurationDeclaration,
-  ServiceConfigurationDeclarationNormalized,
   ServiceTypeChoice,
 } from './service';
 
@@ -50,7 +49,7 @@ export type StagesAttributes = {
 };
 
 export type NormalizedStage = {
-  [serviceName: string]: ServiceConfigurationDeclarationNormalized;
+  [serviceName: string]: ServiceAttributes;
 }
 
 export type StagesNormalizedAttributes = {
@@ -58,7 +57,7 @@ export type StagesNormalizedAttributes = {
 };
 
 export type NormalizedStages = {
-  [name: string]: ServiceConfigurationDeclarationNormalized;
+  [name: string]: ServiceAttributes;
 };
 
 export type NormalizedProjectConfiguration = {
