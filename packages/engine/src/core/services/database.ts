@@ -1,24 +1,15 @@
 import Service from '@stackmate/engine/core/service';
 import Parser from '@stackmate/engine/lib/parsers';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { OneOf, DatabaseService, BaseService, JsonSchema } from '@stackmate/engine/types';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
+import { JsonSchema, BaseServiceSchema, DatabaseServiceSchema, DatabaseService } from '@stackmate/engine/types';
 
 abstract class Database extends Service implements DatabaseService {
-  /**
-   * @var {String} size the size for the RDS instance
-   */
-  @Attribute size: string;
-
   /**
    * @var {Number} storage the storage size for the instance
    */
   @Attribute storage: number;
-
-  /**
-   * @var {String} version the database version to run
-   */
-  @Attribute version: string;
 
   /**
    * @var {String} database the database to create
@@ -26,19 +17,19 @@ abstract class Database extends Service implements DatabaseService {
   @Attribute database: string;
 
   /**
-   * @var {Number} nodes the number of nodes for the database;
+   * @var {String} size the size for the database instance
    */
-  @Attribute nodes: number;
+  abstract size: string;
 
   /**
    * @var {Number} the port number to use to connect to the database
    */
-  @Attribute port: number;
+  abstract port: number;
 
   /**
-   * @var {String} engine the database engine to use
+   * @var {String} version the database version to run
    */
-  abstract engine: OneOf<Array<string>>;
+  abstract version: string;
 
   /**
    * @var {Array<String>} engines the list of database engines available for this service
@@ -132,15 +123,26 @@ abstract class Database extends Service implements DatabaseService {
   /**
    * @returns {Object} the JSON schema to use for validation
    */
-  static schema(): JsonSchema<DatabaseService> {
-    return mergeJsonSchemas<BaseService, DatabaseService>(super.schema(), {
+  static schema(): JsonSchema<DatabaseServiceSchema> {
+    return mergeJsonSchemas<BaseServiceSchema, DatabaseServiceSchema>(super.schema(), {
+      required: ['size', 'storage', 'port'],
       properties: {
-        size: { type: 'string' },
-        storage: { type: 'number' },
-        version: { type: 'string' },
-        database: { type: 'string' },
-        nodes: { type: 'number' },
-        port: { type: 'number' },
+        size: {
+          type: 'string',
+        },
+        storage: {
+          type: 'number',
+          default: DEFAULT_SERVICE_STORAGE,
+        },
+        database: {
+          type: 'string',
+          pattern: '[a-z0-9_]+',
+        },
+        port: {
+          type: 'number',
+          minimum: 0,
+          maximum: 65535,
+        },
       },
     });
   }

@@ -1,5 +1,5 @@
 import { Memoize } from 'typescript-memoize';
-import { isEmpty, isObject, merge } from 'lodash';
+import { fromPairs, isEmpty, isObject, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Parser from '@stackmate/engine/lib/parsers';
@@ -7,12 +7,12 @@ import Profile from '@stackmate/engine/core/profile';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  RegionList, ServiceAssociation, ProviderChoice, BaseService,
-  ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
-  CloudService, CloudStack, ProviderService, VaultService, JsonSchema,
+  RegionList, ServiceAssociation, ProviderChoice, BaseServiceSchema,
+  ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, EntityAttributes,
+  CloudService, CloudStack, ProviderService, VaultService, JsonSchema, CloudServiceConstructor,
 } from '@stackmate/engine/types';
 
-abstract class Service extends Entity implements CloudService, BaseService {
+abstract class Service extends Entity implements CloudService {
   /**
    * @var {String} name the service's name
    */
@@ -133,48 +133,6 @@ abstract class Service extends Entity implements CloudService, BaseService {
    */
   public get validationMessage(): string {
     return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
-  }
-
-  /**
-   * @returns {Object} provides the structure to generate the JSON schema by
-   */
-  static schema(): JsonSchema<BaseService> {
-    return {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          pattern: '[a-z0-9_]+',
-          description: 'The name for the service to deploy',
-        },
-        profile: {
-          type: 'string',
-          default: DEFAULT_PROFILE_NAME,
-          serviceProfile: true,
-        },
-        links: {
-          type: 'array',
-          default: [],
-          serviceLinks: true,
-          items: { type: 'string' },
-        },
-        overrides: {
-          type: 'object',
-          default: {},
-          serviceProfileOverrides: true,
-        },
-      },
-      required: ['name'],
-      errorMessage: {
-        _: 'The service configuration is invalid',
-        properties: {
-          name: 'The name for the service should only contain characters, numbers and underscores',
-        },
-        required: {
-          name: 'You have to specify a name for the service'
-        },
-      },
-    };
   }
 
   /**
@@ -400,6 +358,68 @@ abstract class Service extends Entity implements CloudService, BaseService {
     }
 
     handlers.forEach(handler => handler.call(this, association));
+  }
+
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static schema(): JsonSchema<BaseServiceSchema> {
+    return {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          pattern: '[a-z0-9_]+',
+          description: 'The name for the service to deploy',
+        },
+        profile: {
+          type: 'string',
+          default: DEFAULT_PROFILE_NAME,
+          serviceProfile: true,
+        },
+        links: {
+          type: 'array',
+          default: [],
+          serviceLinks: true,
+          items: { type: 'string' },
+        },
+        overrides: {
+          type: 'object',
+          default: {},
+          serviceProfileOverrides: true,
+        },
+      },
+      required: ['name'],
+      errorMessage: {
+        _: 'The service configuration is invalid',
+        properties: {
+          name: 'The name for the service should only contain characters, numbers and underscores',
+        },
+        required: {
+          name: 'You have to specify a name for the service'
+        },
+      },
+    };
+  }
+
+  /**
+   * Returns the service's default values
+   *
+   * @returns {Object} the service's default values
+   */
+  static defaults(this: CloudServiceConstructor): Partial<EntityAttributes> {
+    const { properties = {} } = this.schema();
+
+    if (isEmpty(properties)) {
+      return {};
+    }
+
+    const pairs = Object.entries(properties).map(([key, property]) => {
+      const { default: defaultValue = null } = property as { default?: any };
+      return [key, defaultValue];
+    });
+
+    return fromPairs(pairs);
   }
 }
 

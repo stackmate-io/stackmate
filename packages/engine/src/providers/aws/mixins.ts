@@ -1,10 +1,10 @@
 import { PROVIDER } from '@stackmate/engine/constants';
 import { AWS_REGIONS, AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { AbstractConstructorOf, ProviderChoice, RegionList } from '@stackmate/engine/types';
+import { AbstractConstructorOf, AwsServiceSchema, BaseServiceSchema, JsonSchema, ProviderChoice, RegionList } from '@stackmate/engine/types';
 import { Provider as AwsProvider } from '@stackmate/engine/providers/aws';
-import { merge } from 'lodash';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-const AwsService = <TBase extends AbstractConstructorOf & { schema: Function }>(
+const AwsService = <TBase extends AbstractConstructorOf & { schema(): JsonSchema<BaseServiceSchema> }>(
   Base: TBase,
   regions: RegionList = AWS_REGIONS,
 ) => {
@@ -16,12 +16,6 @@ const AwsService = <TBase extends AbstractConstructorOf & { schema: Function }>(
     readonly provider: ProviderChoice = PROVIDER.AWS;
 
     /**
-     * @var {Object} regions the list of regions available
-     * @readonly
-     */
-    readonly regions: RegionList = regions;
-
-    /**
      * @var {ProviderService} cloudProvider the cloud provider service
      */
     providerService: AwsProvider;
@@ -29,16 +23,22 @@ const AwsService = <TBase extends AbstractConstructorOf & { schema: Function }>(
     /**
      * @returns {Object} provides the structure to generate the JSON schema by
      */
-    static schema() {
+    static schema(): JsonSchema<AwsServiceSchema> {
       const regionValues = Object.values(regions);
 
-      return merge({}, super.schema(), {
-        region: {
-          type: 'string',
-          enum: regionValues,
-          default: AWS_DEFAULT_REGION,
-          errorMessage: `The region is invalid. Available options are: ${regionValues.join(', ')}`,
-        },
+      return mergeJsonSchemas(super.schema() as JsonSchema<BaseServiceSchema>, {
+        properties: {
+          provider: {
+            type: 'string',
+            const: PROVIDER.AWS,
+          },
+          region: {
+            type: 'string',
+            enum: regionValues,
+            default: AWS_DEFAULT_REGION,
+            errorMessage: `The region is invalid. Available options are: ${regionValues.join(', ')}`,
+          },
+        }
       });
     }
   }

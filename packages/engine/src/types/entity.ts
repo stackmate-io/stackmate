@@ -34,5 +34,4 @@ export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   new(...args: any[]): T;
   normalize(attributes: object): object;
   factory(this: ConstructorOf<T>, ...args: any[]): T;
-  defaults(this: ConstructorOf<T>): Partial<EntityAttributes>;
 }

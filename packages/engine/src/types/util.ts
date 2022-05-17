@@ -7,3 +7,6 @@ export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<in
 export type Diff<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+export type OmitProperties<T extends object, PropType> = {
+  [K in keyof T]-?: T[K] extends PropType ? never : K
+}[keyof T];
