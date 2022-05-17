@@ -130,12 +130,12 @@ export const mergeJsonSchemas = <U, T extends U>(source: PartialJsonSchema<U>, t
     ...targetProps
   } = target;
 
-  const merged = merge({}, sourceProps, targetProps);
+  const merged = merge({}, sourceProps, targetProps) as Partial<JsonSchema<T>>;
 
   return {
     ...merged,
     type: 'object',
-    properties: { ...sourceProperties, ...targetProperties },
+    properties: merge({}, sourceProperties, targetProperties),
     required: uniq([...sourceRequired, ...targetRequired]),
   };
 };

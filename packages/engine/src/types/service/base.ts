@@ -2,11 +2,11 @@ import { TerraformProvider } from 'cdktf';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from './entity';
-import { CloudStack, CredentialsObject } from './lib';
-import { VaultCredentialOptions } from './project';
-import { OneOf, ChoiceOf } from './util';
-import { JsonSchema, BaseService } from './schema';
+import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from '../entity';
+import { CloudStack, CredentialsObject } from '../lib';
+import { VaultCredentialOptions } from '../project';
+import { OneOf, ChoiceOf } from '../util';
+import { JsonSchema, BaseServiceSchema, DatabaseServiceSchema, ProviderServiceSchema, StateServiceSchema, VaultServiceSchema } from '../schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
@@ -38,7 +38,7 @@ export type ServiceAttributes = {
   links?: ServiceAssociationDeclarations;
 };
 
-export interface CloudService extends BaseEntity, BaseService {
+export interface CloudService extends BaseEntity, BaseServiceSchema {
   readonly provider: ProviderChoice;
   readonly type: ServiceTypeChoice;
   region: string;
@@ -60,6 +60,7 @@ export interface CloudService extends BaseEntity, BaseService {
 
 export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
   schema<T>(): JsonSchema<T>;
+  defaults(): { [key: string]: any };
 }
 
 export interface CloudServiceRegistry {
@@ -70,17 +71,19 @@ export interface CloudServiceRegistry {
   get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor;
 }
 
-export interface VaultService extends CloudService {
+export interface DatabaseService extends DatabaseServiceSchema { }
+
+export interface VaultService extends CloudService, VaultServiceSchema {
   credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
 
-export interface ProviderService extends CloudService {
+export interface ProviderService extends CloudService, ProviderServiceSchema {
   resource: TerraformProvider;
   bootstrap(stack: CloudStack): void;
   prerequisites(stack: CloudStack): void;
 }
 
-export interface StateService extends CloudService {
+export interface StateService extends CloudService, StateServiceSchema {
   backend(stack: CloudStack): void;
   resources(stack: CloudStack): void;
 }

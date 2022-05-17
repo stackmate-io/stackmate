@@ -1,11 +1,8 @@
 import { PartialSchema, PropertiesSchema } from 'ajv/dist/types/json-schema';
-import { Diff, OptionalKeys } from '@stackmate/engine/types/util';
+import { Diff, RequireKeys } from '@stackmate/engine/types/util';
 
-export type PartialJsonSchema<T> = OptionalKeys<PartialSchema<T>, 'properties'>;
-export type TargetJsonSchema<U, T> = OptionalKeys<(PartialSchema<(Diff<T, U>)>), 'properties'>;
-export type OmitProperties<T extends object, PropType> = {
-  [K in keyof T]-?: T[K] extends PropType ? never : K
-}[keyof T];
+export type PartialJsonSchema<T> = RequireKeys<PartialSchema<T>, 'properties'>;
+export type TargetJsonSchema<U, T> = JsonSchema<(Diff<T, U>)>;
 
 export interface JsonSchema<T> {
   $ref?: string;
@@ -85,7 +82,7 @@ export interface JsonSchema<T> {
   /**
    * The keys that can exist on the object with the json schema that should validate their value
    */
-  properties?: PropertiesSchema<T>;
+  properties: PropertiesSchema<T>;
 
   /**
    * The key of this object is a regex for which properties the schema applies to
@@ -104,6 +101,7 @@ export interface JsonSchema<T> {
    * Enumerates the values that this schema can be (e.g. {"type": "string", "enum": ["red", "green", "blue"]})
    */
   'enum'?: any[];
+
   /**
    * The basic type of this schema, can be one of [string, number, object, array, boolean, null] or an array of
    * the acceptable types

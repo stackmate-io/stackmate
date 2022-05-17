@@ -1,11 +1,12 @@
-import { isUndefined, merge } from 'lodash';
+import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/engine/core/services/database';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import { CloudStack, OneOf } from '@stackmate/engine/types';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { AwsDatabaseService, AwsDatabaseServiceSchema, CloudStack, JsonSchema, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -15,13 +16,17 @@ import {
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-const AwsDatabaseService = AwsService(Database);
 
-abstract class AwsRdsService extends AwsDatabaseService {
+abstract class AwsRdsService extends AwsService(Database) implements AwsDatabaseService {
   /**
    * @var {String} size the size for the RDS instance
    */
   @Attribute size: string = DEFAULT_RDS_INSTANCE_SIZE;
+
+  /**
+   * @var {String} nodes the numbe of nodes to deploy
+   */
+  @Attribute nodes: number = 1;
 
   /**
    * @var {Array<string>} sizes the list of RDS instance sizes
@@ -73,23 +78,6 @@ abstract class AwsRdsService extends AwsDatabaseService {
   }
 
   /**
-   * @returns {Object} provides the structure to generate the JSON schema by
-   */
-  static schema() {
-    return merge({}, super.schema(), {
-      engine: {
-        type: 'string',
-        enum: Object.values(RDS_ENGINES),
-      },
-      size: {
-        type: 'string',
-        default: DEFAULT_RDS_INSTANCE_SIZE,
-        enum: RDS_INSTANCE_SIZES,
-      },
-    });
-  }
-
-  /**
    * Returns the validations for the service
    *
    * @returns {Validations} the validations to run
@@ -136,6 +124,33 @@ abstract class AwsRdsService extends AwsDatabaseService {
       password,
       lifecycle: {
         createBeforeDestroy: true,
+      },
+    });
+  }
+
+  static schema(): JsonSchema<AwsDatabaseServiceSchema> {
+    return mergeJsonSchemas(super.schema(), {
+      required: ['size', 'nodes', 'engine', 'port'],
+      properties: {
+        size: {
+          type: 'string',
+          default: DEFAULT_RDS_INSTANCE_SIZE,
+          enum: RDS_INSTANCE_SIZES,
+        },
+        nodes: {
+          type: 'number',
+          default: 1,
+          minimum: 1,
+        },
+        engine: {
+          type: 'string',
+          enum: RDS_ENGINES,
+        },
+        port: {
+          type: 'number',
+          minimum: 0,
+          maximum: 65535,
+        },
       },
     });
   }

@@ -1,12 +1,17 @@
-import { MultiNode, Profilable, Sizeable, Storable, Versioned } from './util';
+import { Profilable, Sizeable, Storable } from './util';
 
-export interface BaseService extends Profilable {
+export interface BaseServiceSchema extends Profilable {
   name: string;
   links: string[];
 }
 
-export interface DatabaseService extends BaseService, Sizeable, Storable, MultiNode, Versioned {
-  engine: string;
+export interface DatabaseServiceSchema extends BaseServiceSchema, Sizeable, Storable {
   database: string;
   port: number;
 }
+
+export interface StateServiceSchema extends BaseServiceSchema {}
+
+export interface ProviderServiceSchema extends BaseServiceSchema {}
+
+export interface VaultServiceSchema extends BaseServiceSchema {}

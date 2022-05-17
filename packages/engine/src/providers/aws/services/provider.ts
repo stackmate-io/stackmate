@@ -7,10 +7,11 @@ import Provider from '@stackmate/engine/core/services/provider';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/engine/constants';
-import { getNetworkingCidrBlocks } from '@stackmate/engine/lib/helpers';
-import { CloudStack, ProviderChoice, RegionList } from '@stackmate/engine/types';
+import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { CloudStack, JsonSchema, ProviderChoice, ProviderServiceSchema, RegionList } from '@stackmate/engine/types';
+import { AwsProviderService, AwsProviderServiceSchema } from '@stackmate/engine/types';
 
-class AwsProvider extends Provider {
+class AwsProvider extends Provider implements AwsProviderService {
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */
@@ -144,6 +145,23 @@ class AwsProvider extends Provider {
 
   onDestroy(stack: CloudStack): void {
     this.bootstrap(stack);
+  }
+
+  /**
+   * @returns {Object} the JSON schema to use for validation
+   */
+  static schema(): JsonSchema<AwsProviderServiceSchema> {
+    return mergeJsonSchemas<ProviderServiceSchema, AwsProviderServiceSchema>(super.schema(), {
+      type: 'object',
+      required: ['ip'],
+      properties: {
+        ip: {
+          type: 'string',
+          default: DEFAULT_IP,
+          format: 'ipv4',
+        },
+      },
+    });
   }
 }
 

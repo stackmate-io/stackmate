@@ -37,5 +37,5 @@ export const DEFAULT_IP = '10.0.0.0';
 export const DEFAULT_PROFILE_NAME = 'default';
 export const DEFAULT_STATE_SERVICE_NAME = 'stage-state';
 export const DEFAULT_VAULT_SERVICE_NAME = 'stage-vault';
-
+export const DEFAULT_SERVICE_STORAGE = 30;
 export const CLOUD_PROVIDER = omit(PROVIDER, PROVIDER.LOCAL);

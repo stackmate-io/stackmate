@@ -186,16 +186,6 @@ abstract class Entity implements BaseEntity {
     entity.validate();
     return entity;
   }
-
-  /**
-   * Returns the entity's default values
-   *
-   * @returns {EntityAttributes} the entity's default values
-   */
-  static defaults<T extends BaseEntity>(this: BaseEntityConstructor<T>): Partial<EntityAttributes> {
-    const entity = new this();
-    return entity.defaultValues;
-  }
 }
 
 export default Entity;
