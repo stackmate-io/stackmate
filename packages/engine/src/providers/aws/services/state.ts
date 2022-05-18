@@ -27,26 +27,9 @@ class AwsStateBucket extends AwsStateService {
   /**
    * @returns {Boolean} whether the state service is registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return Boolean(this.bucketResource) || Boolean(this.backendResource);
   }
-
-  /*
-  static schema() {
-    return {
-      bucket: {
-        presence: {
-          message: 'A bucket name is required for the state storage',
-        },
-        format: {
-          pattern: '[a-z0-9-]+',
-          flags: 'i',
-          message: 'The bucket name can only contain alphanumeric characters and dashes',
-        },
-      },
-    }
-  }
-  */
 
   /**
    * Provisions the resources that provide state storage

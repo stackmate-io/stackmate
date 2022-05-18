@@ -25,7 +25,7 @@ class LocalState extends State {
   /**
    * @returns {Boolean} whether the state is registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return true;
   }
 
@@ -34,31 +34,6 @@ class LocalState extends State {
    */
   get path(): string {
     return `${this.stageName.toLowerCase()}-initial.tfstate`;
-  }
-
-  /**
-   * @returns {Object} the parser functions to apply to the service's attributes
-   */
-  parsers() {
-    return {
-      ...super.parsers(),
-      directory: Parser.parsePath,
-    };
-  }
-
-  /**
-   * @returns {Validations} the validations for the service
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      directory: {
-        validatePathExistence: {
-          required: true,
-          requireDirectory: true,
-        },
-      },
-    };
   }
 
   /**

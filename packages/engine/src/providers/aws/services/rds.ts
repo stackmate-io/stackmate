@@ -60,7 +60,7 @@ abstract class AwsRdsService extends AwsDatabase implements AwsDatabaseService {
   /**
    * @returns {Boolean} whether the service is registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 

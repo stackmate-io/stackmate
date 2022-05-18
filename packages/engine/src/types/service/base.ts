@@ -45,7 +45,7 @@ export interface CloudService extends BaseEntity, BaseServiceSchema {
   providerService: ProviderService;
   vault: VaultService;
   identifier: string;
-  get isRegistered(): boolean;
+  isRegistered(): boolean;
   link(...targets: CloudService[]): CloudService;
   scope(name: ServiceScopeChoice): CloudService;
   associations(): ServiceAssociation[];

@@ -21,7 +21,7 @@ abstract class Provider extends Service implements ProviderService {
   /**
    * @returns {Boolean} whether the provider has been registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return this.resource instanceof TerraformProvider;
   }
 
