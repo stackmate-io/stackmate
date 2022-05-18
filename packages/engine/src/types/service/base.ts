@@ -2,10 +2,10 @@ import { TerraformProvider } from 'cdktf';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-import { AttributeParsers, BaseEntity, BaseEntityConstructor, Validations } from '../entity';
+import { BaseEntity, BaseEntityConstructor } from '../entity';
 import { CloudStack, CredentialsObject } from '../lib';
 import { VaultCredentialOptions } from '../project';
-import { OneOf, ChoiceOf } from '../util';
+import { OneOf, ChoiceOf, AbstractConstructorOf } from '../util';
 import { JsonSchema, BaseServiceSchema, DatabaseServiceSchema, ProviderServiceSchema, StateServiceSchema, VaultServiceSchema } from '../schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
@@ -50,8 +50,6 @@ export interface CloudService extends BaseEntity, BaseServiceSchema {
   scope(name: ServiceScopeChoice): CloudService;
   associations(): ServiceAssociation[];
   isDependingUpon(service: CloudService): boolean;
-  parsers(): AttributeParsers & Required<{ name: Function, links: Function }>;
-  validations(): Validations & Required<{ name: object, links: object }>;
   register(stack: CloudStack): void;
   onPrepare(stack: CloudStack): void;
   onDeploy(stack: CloudStack): void;
@@ -61,6 +59,10 @@ export interface CloudService extends BaseEntity, BaseServiceSchema {
 export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
   schema<T>(): JsonSchema<T>;
   defaults(): { [key: string]: any };
+}
+
+export type AbstractCloudServiceConstructor = AbstractConstructorOf<CloudService> & {
+  schema<T extends BaseServiceSchema>(): JsonSchema<T>;
 }
 
 export interface CloudServiceRegistry {

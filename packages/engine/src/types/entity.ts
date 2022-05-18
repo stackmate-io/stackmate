@@ -9,14 +9,10 @@ export type ValidationErrorList = {
 };
 
 export interface BaseEntity {
-  // validationMessage: string;
   get attributes(): EntityAttributes;
   set attributes(attrs: EntityAttributes);
   get attributeNames(): string[];
-  // readonly defaultValues: EntityAttributes;
-  // parsers(): AttributeParsers;
   validate(): void;
-  // validations(): Validations;
   getAttribute(name: string): any;
   setAttribute(name: string, value: any): void;
 }

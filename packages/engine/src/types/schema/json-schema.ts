@@ -1,5 +1,6 @@
 export interface JsonSchema<T> extends BaseJsonSchema {
-  properties?: { [key in keyof T]: BaseJsonSchema };
+  // we can't use keyof for properties because it would result into an unassignable type
+  properties?: Extract<any, T>;
 
   // AJV-error related entry
   errorMessage?: 'string' | {
@@ -29,8 +30,7 @@ interface BaseJsonSchema {
    */
   title?: string;
   /**
-   * More readable form of a one-element "enum"
-   * @see https://tools.ietf.org/html/draft-wright-json-schema-validation-01#section-6.24
+   * Constant value for a property or schema
    */
   const?: any;
   /**

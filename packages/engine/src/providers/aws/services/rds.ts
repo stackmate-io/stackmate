@@ -6,7 +6,11 @@ import Database from '@stackmate/engine/core/services/database';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AwsDatabaseService, AwsDatabaseServiceSchema, CloudStack, DatabaseServiceSchema, JsonSchema, OneOf } from '@stackmate/engine/types';
+import {
+  AwsDatabaseService,
+  AwsDatabaseServiceSchema,
+  CloudStack, JsonSchema, OneOf,
+} from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -109,7 +113,7 @@ abstract class AwsRdsService extends AwsDatabase implements AwsDatabaseService {
   }
 
   static schema(): JsonSchema<AwsDatabaseServiceSchema> {
-    return mergeJsonSchemas<DatabaseServiceSchema, AwsDatabaseServiceSchema>(super.schema(), {
+    return mergeJsonSchemas(super.schema(), {
       required: ['size', 'nodes', 'engine'],
       properties: {
         size: {
