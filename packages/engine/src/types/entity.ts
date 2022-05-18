@@ -1,30 +1,22 @@
 import { ConstructorOf } from './util';
 
-export interface AttributeParsers {
-  [name: string]: Function;
-}
-
 export interface EntityAttributes {
   [name: string]: any;
 }
-
-export type Validations = {
-  [name: string]: object;
-};
 
 export type ValidationErrorList = {
   [attribute: string]: Array<string>;
 };
 
 export interface BaseEntity {
-  validationMessage: string;
+  // validationMessage: string;
   get attributes(): EntityAttributes;
   set attributes(attrs: EntityAttributes);
   get attributeNames(): string[];
-  readonly defaultValues: EntityAttributes;
-  parsers(): AttributeParsers;
+  // readonly defaultValues: EntityAttributes;
+  // parsers(): AttributeParsers;
   validate(): void;
-  validations(): Validations;
+  // validations(): Validations;
   getAttribute(name: string): any;
   setAttribute(name: string, value: any): void;
 }

@@ -1,4 +1,4 @@
-import { RDS_ENGINES } from '@stackmate/engine/providers/aws/constants';
+import { RDS_ENGINES, RDS_INSTANCE_SIZES } from '@stackmate/engine/providers/aws/constants';
 import { BaseServiceSchema, DatabaseServiceSchema, ProviderServiceSchema } from './base';
 import { MultiNode } from './util';
 import { OneOf } from '../../util';
@@ -13,19 +13,13 @@ export interface AwsProviderServiceSchema extends ProviderServiceSchema {
 }
 
 export interface AwsDatabaseServiceSchema extends DatabaseServiceSchema, MultiNode {
+  provider: 'aws';
+  size: OneOf<typeof RDS_INSTANCE_SIZES>;
   engine: OneOf<typeof RDS_ENGINES>;
-  nodes: number;
-  // version: { type: 'string' },
 }
 
-export interface AwsMySQLDatabaseSchema extends AwsDatabaseServiceSchema {
-  engine: 'mysql';
-}
+export interface AwsMySQLDatabaseSchema extends AwsDatabaseServiceSchema {}
 
-export interface AwsPostgreSQLDatabaseSchema extends AwsDatabaseServiceSchema {
+export interface AwsPostgreSQLDatabaseSchema extends AwsDatabaseServiceSchema {}
 
-}
-
-export interface AwsMariaDBDatabaseSchema extends AwsDatabaseServiceSchema {
-
-}
+export interface AwsMariaDBDatabaseSchema extends AwsDatabaseServiceSchema {}

@@ -1,36 +1,11 @@
-import { isEmpty, isFunction, pick, uniq } from 'lodash';
-
-import { validate } from '@stackmate/engine/lib/validation';
-import { ValidationError } from '@stackmate/engine/lib/errors';
+import { pick, uniq } from 'lodash';
 import {
   BaseEntity,
-  Validations,
-  AttributeParsers,
   EntityAttributes,
   BaseEntityConstructor,
 } from '@stackmate/engine/types';
 
 abstract class Entity implements BaseEntity {
-  /**
-   * @returns {Object} the parsers for the attributes
-   */
-  abstract parsers(): AttributeParsers;
-
-  /**
-   * @returns {Object} the validations to use for the entity
-   */
-  abstract validations(): Validations;
-
-  /**
-   * @var {String} validationMessage the validation message to use
-   */
-  public readonly abstract validationMessage: string;
-
-  /**
-   * @var {EntityAttributes} defaultValues the entity's default values
-   */
-  public readonly defaultValues: EntityAttributes = {};
-
   /**
    * @var {Object} attributeState the state of the attributes
    * @private
@@ -83,6 +58,7 @@ abstract class Entity implements BaseEntity {
    * @void
    */
   validate(): void {
+    /*
     const errors = validate.validate(this.attributeState, this.validations(), {
       fullMessages: false,
     });
@@ -90,6 +66,7 @@ abstract class Entity implements BaseEntity {
     if (!isEmpty(errors)) {
       throw new ValidationError(this.validationMessage, errors);
     }
+    */
 
     this.initialize();
   }
@@ -121,14 +98,7 @@ abstract class Entity implements BaseEntity {
    * @param {Any} value the value of the attribute to set
    */
   setAttribute(name: string, value: any): void {
-    const { [name]: parser } = this.parsers();
-
-    if (!isFunction(parser)) {
-      throw new Error(`No parser has been specified for attribute “${name}”`);
-    }
-
-    this.defaultValues[name] = value;
-    this.attributeState[name] = parser(value);
+    this.attributeState[name] = value;
   }
 
   /**

@@ -6,22 +6,22 @@ import Database from '@stackmate/engine/core/services/database';
 import AwsService from '@stackmate/engine/providers/aws/mixins';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AwsDatabaseService, AwsDatabaseServiceSchema, CloudStack, JsonSchema, OneOf } from '@stackmate/engine/types';
+import { AwsDatabaseService, AwsDatabaseServiceSchema, CloudStack, DatabaseServiceSchema, JsonSchema, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
-  RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_LOG_EXPORTS_PER_ENGINE,
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
+const AwsDatabase = AwsService(Database);
 
-abstract class AwsRdsService extends AwsService(Database) implements AwsDatabaseService {
+abstract class AwsRdsService extends AwsDatabase implements AwsDatabaseService {
   /**
    * @var {String} size the size for the RDS instance
    */
-  @Attribute size: string = DEFAULT_RDS_INSTANCE_SIZE;
+  @Attribute size: OneOf<typeof RDS_INSTANCE_SIZES> = DEFAULT_RDS_INSTANCE_SIZE;
 
   /**
    * @var {String} nodes the numbe of nodes to deploy
@@ -77,26 +77,6 @@ abstract class AwsRdsService extends AwsService(Database) implements AwsDatabase
     return triad[2];
   }
 
-  /**
-   * Returns the validations for the service
-   *
-   * @returns {Validations} the validations to run
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      version: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify the database version to run',
-        },
-        validateVersion: {
-          availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
-        },
-      },
-    };
-  }
-
   onDeploy(stack: CloudStack): void {
     const { instance, params } = this.resourceProfile;
     const { username, password } = this.vault.credentials(stack, this.name, { root: true });
@@ -129,8 +109,8 @@ abstract class AwsRdsService extends AwsService(Database) implements AwsDatabase
   }
 
   static schema(): JsonSchema<AwsDatabaseServiceSchema> {
-    return mergeJsonSchemas(super.schema(), {
-      required: ['size', 'nodes', 'engine', 'port'],
+    return mergeJsonSchemas<DatabaseServiceSchema, AwsDatabaseServiceSchema>(super.schema(), {
+      required: ['size', 'nodes', 'engine'],
       properties: {
         size: {
           type: 'string',
@@ -145,11 +125,6 @@ abstract class AwsRdsService extends AwsService(Database) implements AwsDatabase
         engine: {
           type: 'string',
           enum: RDS_ENGINES,
-        },
-        port: {
-          type: 'number',
-          minimum: 0,
-          maximum: 65535,
         },
       },
     });
