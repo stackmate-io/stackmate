@@ -1,7 +1,6 @@
 import { LocalBackend } from 'cdktf';
 
 import State from '@stackmate/engine/core/services/state';
-import Parser from '@stackmate/engine/lib/parsers';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { CloudStack, ProviderChoice } from '@stackmate/engine/types';
 import { Attribute } from '@stackmate/engine/lib/decorators';

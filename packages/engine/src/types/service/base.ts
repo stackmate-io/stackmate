@@ -57,7 +57,7 @@ export interface CloudService extends BaseEntity, BaseServiceSchema {
 }
 
 export interface CloudServiceConstructor extends BaseEntityConstructor<CloudService> {
-  schema<T>(): JsonSchema<T>;
+  schema<T extends BaseServiceSchema>(): JsonSchema<T>;
   defaults(): { [key: string]: any };
 }
 
