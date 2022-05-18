@@ -73,7 +73,7 @@ abstract class Service extends Entity implements CloudService {
   abstract isRegistered(): boolean;
 
   /**
-   * @var {ProviderService} cloudProvider the cloud provider service
+   * @var {ProviderService} providerService the cloud provider service
    */
   providerService: ProviderService;
 
@@ -252,7 +252,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {Service} target the service to link the current service with
    */
   protected associate(association: CloudService) {
-    if (!association.isRegistered) {
+    if (!association.isRegistered()) {
       throw new Error(`The service ${association.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
     }
 
@@ -260,7 +260,7 @@ abstract class Service extends Entity implements CloudService {
       throw new Error(`Attempted to link service ${this.identifier} to itself`);
     }
 
-    if (this.isRegistered) {
+    if (this.isRegistered()) {
       throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
     }
 

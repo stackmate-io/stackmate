@@ -3,7 +3,8 @@ import { AWS_REGIONS, AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import {
   AbstractCloudServiceConstructor,
-  AwsServiceSchema, BaseServiceSchema,
+  AwsProviderService,
+  AwsServiceSchemaG, BaseServiceSchema,
   JsonSchema, ProviderChoice, RegionList,
 } from '@stackmate/engine/types';
 
@@ -11,6 +12,7 @@ const AwsServiceMixin = <TBase extends AbstractCloudServiceConstructor>(
   Base: TBase,
   regions: RegionList = AWS_REGIONS,
 ) => {
+  type AwsWrappedSchema = AwsServiceSchemaG<BaseServiceSchema>;
   abstract class AwsMixin extends Base {
     /**
      * @var {String} provider the cloud provider used (eg. AWS)
@@ -18,10 +20,15 @@ const AwsServiceMixin = <TBase extends AbstractCloudServiceConstructor>(
      */
     readonly provider: ProviderChoice = PROVIDER.AWS;
 
-    static schema(): JsonSchema<AwsServiceSchema> {
+    /**
+     * @var {ProviderService} providerService the cloud provider service
+     */
+    providerService: AwsProviderService;
+
+    static schema(): JsonSchema<AwsWrappedSchema> {
       const regionValues = Object.values(regions);
 
-      return mergeJsonSchemas<BaseServiceSchema, AwsServiceSchema>(super.schema(), {
+      return mergeJsonSchemas<BaseServiceSchema, AwsWrappedSchema>(super.schema<BaseServiceSchema>(), {
         properties: {
           provider: {
             type: 'string',

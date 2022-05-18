@@ -1,9 +1,8 @@
 export interface JsonSchema<T> extends BaseJsonSchema {
-  // we can't use keyof for properties because it would result into an unassignable type
-  properties?: Extract<any, T>;
+  // properties?: { [k in keyof Required<T>]: BaseJsonSchema };
 
   // AJV-error related entry
-  errorMessage?: 'string' | {
+  errorMessage?: string | {
     '_'?: string;
     properties?: { [K in keyof T]?: string; };
     required?: { [K in keyof T]?: string; };
@@ -110,7 +109,7 @@ interface BaseJsonSchema {
   /**
    * Enumerates the values that this schema can be (e.g. {"type": "string", "enum": ["red", "green", "blue"]})
    */
-  'enum'?: any[];
+  'enum'?: any[] | readonly any[];
   /**
    * The basic type of this schema, can be one of [string, number, object, array, boolean, null] or an array of
    * the acceptable types
@@ -136,7 +135,7 @@ interface BaseJsonSchema {
   serviceProfileOverrides?: boolean;
 
   // AJV-error specific
-  errorMessage?: 'string' | {
+  errorMessage?: string | {
     '_'?: string;
     properties?: { [property: string]: string; } | {};
     required?: { [property: string]: string; } | {};
