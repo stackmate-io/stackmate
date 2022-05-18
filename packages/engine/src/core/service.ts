@@ -70,7 +70,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @returns {Boolean} whether the service is registered in the stack
    */
-  abstract get isRegistered(): boolean;
+  abstract isRegistered(): boolean;
 
   /**
    * @var {ProviderService} cloudProvider the cloud provider service

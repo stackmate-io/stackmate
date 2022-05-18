@@ -37,7 +37,7 @@ abstract class Vault extends Service implements VaultService {
   /**
    * @returns {Boolean} whether the vault is registered in the stack
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return this.registered;
   }
 
