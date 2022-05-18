@@ -2,7 +2,6 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import Parser from '@stackmate/engine/lib/parsers';
 import Provider from '@stackmate/engine/core/services/provider';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { Attribute } from '@stackmate/engine/lib/decorators';
@@ -48,35 +47,6 @@ class AwsProvider extends Provider implements AwsProviderService {
    * @var {KmsKey} key the KMS key to use across the stack
    */
   key: KmsKey;
-
-  /**
-   * @returns {Object} the parser functions to apply to the service's attributes
-   */
-  parsers() {
-    return {
-      ...super.parsers(),
-      ip: Parser.parseString,
-    };
-  }
-
-  /**
-   * @returns {Validations} the validations for the service
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      ip: {
-        presence: {
-          allowEmpty: false,
-          message: 'You should define an IP to use as a CIDR block for the networking',
-        },
-        format: {
-          pattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-          message: 'Please provide a valid IPv4 IP for the networking service',
-        }
-      },
-    };
-  }
 
   /**
    * Registers the provider's resource to the stack
@@ -159,8 +129,15 @@ class AwsProvider extends Provider implements AwsProviderService {
           type: 'string',
           default: DEFAULT_IP,
           format: 'ipv4',
+          errorMessage: 'Please provide a valid IPv4 IP for the networking service',
         },
       },
+      errorMessage: {
+        _: 'The AWS provider service is not properly configured',
+        required: {
+          ip: 'You should define an IP to use as the basis for the networking CIDR block',
+        },
+      }
     });
   }
 }

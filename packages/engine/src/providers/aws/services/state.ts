@@ -5,7 +5,6 @@ import AwsService from '@stackmate/engine/providers/aws/mixins';
 import { CloudStack } from '@stackmate/engine/types';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { Attribute } from '@stackmate/engine/lib/decorators';
-import Parser from '@stackmate/engine/lib/parsers';
 
 const AwsStateService = AwsService(State);
 
@@ -32,22 +31,9 @@ class AwsStateBucket extends AwsStateService {
     return Boolean(this.bucketResource) || Boolean(this.backendResource);
   }
 
-  /**
-   * @returns {AttributeParsers}
-   */
-  parsers() {
+  /*
+  static schema() {
     return {
-      ...super.parsers(),
-      bucket: Parser.parseString,
-    };
-  }
-
-  /**
-   * @returns {Validations}
-   */
-  validations() {
-    return {
-      ...super.validations(),
       bucket: {
         presence: {
           message: 'A bucket name is required for the state storage',
@@ -60,6 +46,7 @@ class AwsStateBucket extends AwsStateService {
       },
     }
   }
+  */
 
   /**
    * Provisions the resources that provide state storage

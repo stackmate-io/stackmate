@@ -1,13 +1,12 @@
-import { Profilable, Sizeable, Storable } from './util';
+import { Connectable, Profilable, Storable } from './util';
 
 export interface BaseServiceSchema extends Profilable {
   name: string;
   links: string[];
 }
 
-export interface DatabaseServiceSchema extends BaseServiceSchema, Sizeable, Storable {
+export interface DatabaseServiceSchema extends BaseServiceSchema, Storable, Connectable {
   database: string;
-  port: number;
 }
 
 export interface StateServiceSchema extends BaseServiceSchema {}

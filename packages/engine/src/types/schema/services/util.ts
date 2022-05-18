@@ -18,3 +18,7 @@ export interface Profilable {
   profile: string;
   overrides: object;
 }
+
+export interface Connectable {
+  port: number;
+}

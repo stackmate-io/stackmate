@@ -2,7 +2,7 @@ import { PartialSchema, PropertiesSchema } from 'ajv/dist/types/json-schema';
 import { Diff, RequireKeys } from '@stackmate/engine/types/util';
 
 export type PartialJsonSchema<T> = RequireKeys<PartialSchema<T>, 'properties'>;
-export type TargetJsonSchema<U, T> = JsonSchema<(Diff<T, U>)>;
+export type TargetJsonSchema<U, T> = JsonSchema<(Diff<T, U> | T)>;
 
 export interface JsonSchema<T> {
   $ref?: string;
