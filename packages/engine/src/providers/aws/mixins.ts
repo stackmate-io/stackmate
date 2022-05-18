@@ -2,11 +2,12 @@ import { PROVIDER } from '@stackmate/engine/constants';
 import { AWS_REGIONS, AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import {
-  AbstractCloudServiceConstructor, AwsServiceSchema, BaseServiceSchema, JsonSchema,
-  ProviderChoice, RegionList,
+  AbstractCloudServiceConstructor,
+  AwsServiceSchema, BaseServiceSchema,
+  JsonSchema, ProviderChoice, RegionList,
 } from '@stackmate/engine/types';
 
-const AwsServiceMixin = <TBase extends AbstractCloudServiceConstructor, Schema extends BaseServiceSchema>(
+const AwsServiceMixin = <TBase extends AbstractCloudServiceConstructor>(
   Base: TBase,
   regions: RegionList = AWS_REGIONS,
 ) => {

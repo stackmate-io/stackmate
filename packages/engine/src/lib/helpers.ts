@@ -1,7 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
-import { JsonSchema } from '@stackmate/engine/types';
+import { Diff, JsonSchema } from '@stackmate/engine/types';
 import { isObject, merge, sampleSize, uniq } from 'lodash';
 
 /**
@@ -117,7 +117,10 @@ export const getRandomString = ({
  * @param {Object} target the target schema
  * @returns {Object} the final schema
  */
-export const mergeJsonSchemas = <U, T extends U>(source: JsonSchema<U>, target: JsonSchema<Partial<T>>): JsonSchema<T> => {
+export const mergeJsonSchemas = <U, T extends U>(
+  source: JsonSchema<U>,
+  target: JsonSchema<(Partial<T> & Required<(Diff<T, U>)>)>,
+): JsonSchema<T> => {
   const {
     properties: sourceProperties,
     required: sourceRequired = [],
