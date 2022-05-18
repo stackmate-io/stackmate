@@ -1,8 +1,8 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
+import { JsonSchema } from '@stackmate/engine/types';
 import { isObject, merge, sampleSize, uniq } from 'lodash';
-import { JsonSchema, PartialJsonSchema, TargetJsonSchema } from '@stackmate/engine/types';
 
 /**
  * Returns an MD5 hash of an object
@@ -117,23 +117,21 @@ export const getRandomString = ({
  * @param {Object} target the target schema
  * @returns {Object} the final schema
  */
-export const mergeJsonSchemas = <U, T extends U>(source: PartialJsonSchema<U>, target: TargetJsonSchema<U, T>): JsonSchema<T> => {
+export const mergeJsonSchemas = <U, T extends U>(source: JsonSchema<U>, target: JsonSchema<Partial<T>>): JsonSchema<T> => {
   const {
-    properties: sourceProperties = {},
+    properties: sourceProperties,
     required: sourceRequired = [],
     ...sourceProps
   } = source;
 
   const {
-    properties: targetProperties = {},
+    properties: targetProperties,
     required: targetRequired = [],
     ...targetProps
   } = target;
 
-  const merged = merge({}, sourceProps, targetProps) as Partial<JsonSchema<T>>;
-
   return {
-    ...merged,
+    ...merge({}, sourceProps, targetProps),
     type: 'object',
     properties: merge({}, sourceProperties, targetProperties),
     required: uniq([...sourceRequired, ...targetRequired]),

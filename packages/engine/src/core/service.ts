@@ -1,8 +1,7 @@
 import { Memoize } from 'typescript-memoize';
-import { fromPairs, isEmpty, isObject, merge } from 'lodash';
+import { fromPairs, isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
-import Parser from '@stackmate/engine/lib/parsers';
 import Profile from '@stackmate/engine/core/profile';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -133,84 +132,6 @@ abstract class Service extends Entity implements CloudService {
    */
   public get validationMessage(): string {
     return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
-  }
-
-  /**
-   * @returns {Object} the parsers to apply when setting an object attribute
-   */
-  parsers() {
-    return {
-      name: Parser.parseString,
-      region: Parser.parseString,
-      links: Parser.parseArrayToUniqueValues,
-      profile: Parser.parseString,
-      overrides: Parser.parseObject,
-      projectName: Parser.parseString,
-      stageName: Parser.parseString,
-    };
-  }
-
-  /**
-   * Returns the validations for the service
-   *
-   * @returns {Object} the validations to use
-   */
-  validations() {
-    const validations = {
-      name: {
-        presence: {
-          allowEmpty: false,
-          message: 'Every service should have a name',
-        },
-      },
-      links: {
-        validateServiceLinks: true,
-      },
-      profile: {
-        validateServiceProfile: {
-          provider: this.provider,
-          service: this.type,
-        },
-      },
-      overrides: {
-        validateProfileOverrides: {
-          profile: this.profile,
-          provider: this.provider,
-          service: this.type,
-        },
-      },
-      projectName: {
-        presence: {
-          allowEmpty: false,
-          message: 'The service should be aware of the project’s name',
-        },
-      },
-      stageName: {
-        presence: {
-          allowEmpty: false,
-          message: 'The service should be aware of the stage’s name',
-        },
-      },
-    };
-
-    // Only require region to be present if the regions attribute is present
-    if (isObject(this.regions) && !isEmpty(this.regions)) {
-      const regions = Object.values(this.regions);
-      Object.assign(validations, {
-        region: {
-          presence: {
-            allowEmpty: false,
-            message: 'A region should be provided',
-          },
-          inclusion: {
-            within: regions,
-            message: `The region for this service is invalid. Available options are: ${regions.join(', ')}`,
-          },
-        },
-      });
-    }
-
-    return validations;
   }
 
   /**

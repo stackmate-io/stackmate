@@ -1,10 +1,16 @@
-import { PartialSchema, PropertiesSchema } from 'ajv/dist/types/json-schema';
-import { Diff, RequireKeys } from '@stackmate/engine/types/util';
+export interface JsonSchema<T> extends BaseJsonSchema {
+  properties?: { [key in keyof T]: BaseJsonSchema };
 
-export type PartialJsonSchema<T> = RequireKeys<PartialSchema<T>, 'properties'>;
-export type TargetJsonSchema<U, T> = JsonSchema<(Diff<T, U> | T)>;
+  // AJV-error related entry
+  errorMessage?: 'string' | {
+    '_'?: string;
+    properties?: { [K in keyof T]?: string; };
+    required?: { [K in keyof T]?: string; };
+  };
+}
 
-export interface JsonSchema<T> {
+interface BaseJsonSchema {
+
   $ref?: string;
 
   ///////////////////////////////////////////////////////////////////////////
@@ -22,6 +28,11 @@ export interface JsonSchema<T> {
    * Title of the schema
    */
   title?: string;
+  /**
+   * More readable form of a one-element "enum"
+   * @see https://tools.ietf.org/html/draft-wright-json-schema-validation-01#section-6.24
+   */
+  const?: any;
   /**
    * Schema description
    */
@@ -62,8 +73,8 @@ export interface JsonSchema<T> {
   ///////////////////////////////////////////////////////////////////////////
   // Array Validation
   ///////////////////////////////////////////////////////////////////////////
-  additionalItems?: boolean | JsonSchema<T>;
-  items?: JsonSchema<T> | JsonSchema<T>[];
+  additionalItems?: boolean | BaseJsonSchema;
+  items?: BaseJsonSchema | BaseJsonSchema[];
   maxItems?: number;
   minItems?: number;
   uniqueItems?: boolean;
@@ -74,25 +85,24 @@ export interface JsonSchema<T> {
   maxProperties?: number;
   minProperties?: number;
   required?: string[];
-  additionalProperties?: boolean | JsonSchema<T>;
+  additionalProperties?: boolean | BaseJsonSchema;
   /**
    * Holds simple JSON Schema definitions for referencing from elsewhere
    */
-  definitions?: { [key: string]: JsonSchema<T> };
+  definitions?: { [key: string]: BaseJsonSchema };
   /**
    * The keys that can exist on the object with the json schema that should validate their value
    */
-  properties: PropertiesSchema<T>;
-
+  properties?: { [property: string]: BaseJsonSchema };
   /**
    * The key of this object is a regex for which properties the schema applies to
    */
-  patternProperties?: { [pattern: string]: JsonSchema<T> };
+  patternProperties?: { [pattern: string]: BaseJsonSchema };
   /**
    * If the key is present as a property then the string of properties must also be present.
    * If the value is a JSON Schema then it must also be valid for the object if the key is present.
    */
-  dependencies?: { [key: string]: JsonSchema<T> | string[] };
+  dependencies?: { [key: string]: BaseJsonSchema | string[] };
 
   ///////////////////////////////////////////////////////////////////////////
   // Generic
@@ -101,7 +111,6 @@ export interface JsonSchema<T> {
    * Enumerates the values that this schema can be (e.g. {"type": "string", "enum": ["red", "green", "blue"]})
    */
   'enum'?: any[];
-
   /**
    * The basic type of this schema, can be one of [string, number, object, array, boolean, null] or an array of
    * the acceptable types
@@ -113,24 +122,23 @@ export interface JsonSchema<T> {
   ///////////////////////////////////////////////////////////////////////////
   // Combining Schemas
   ///////////////////////////////////////////////////////////////////////////
-  allOf?: JsonSchema<T>[];
-  anyOf?: JsonSchema<T>[];
-  oneOf?: JsonSchema<T>[];
+  allOf?: BaseJsonSchema[];
+  anyOf?: BaseJsonSchema[];
+  oneOf?: BaseJsonSchema[];
   /**
    * The entity being validated must not match this schema
    */
-  not?: JsonSchema<T>;
+  not?: BaseJsonSchema;
 
-  // AJV-error related entry
+  // Stackmate-specific
+  serviceProfile?: boolean;
+  serviceLinks?: boolean;
+  serviceProfileOverrides?: boolean;
+
+  // AJV-error specific
   errorMessage?: 'string' | {
     '_'?: string;
-
-    properties?: {
-      [K in keyof T]?: string;
-    };
-
-    required?: {
-      [K in keyof T]?: string;
-    }
+    properties?: { [property: string]: string; } | {};
+    required?: { [property: string]: string; } | {};
   };
 }
