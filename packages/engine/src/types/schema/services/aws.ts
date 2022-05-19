@@ -16,7 +16,7 @@ export interface AwsProviderServiceSchema extends AwsServiceSchemaG<ProviderServ
   ip: string;
 }
 
-export interface AwsDatabaseServiceSchema extends AwsServiceSchemaG<DatabaseServiceSchema> {
+export interface AwsDatabaseServiceSchema extends DatabaseServiceSchema {
   size: OneOf<typeof RDS_INSTANCE_SIZES>;
   engine: OneOf<typeof RDS_ENGINES>;
   nodes: number;

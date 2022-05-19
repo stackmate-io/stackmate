@@ -3,14 +3,11 @@ import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import Database from '@stackmate/engine/core/services/database';
-import AwsService from '@stackmate/engine/providers/aws/mixins';
 import { Attribute } from '@stackmate/engine/lib/decorators';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import {
-  AwsDatabaseService,
-  AwsDatabaseServiceSchema,
-  AwsServiceSchemaG,
-  CloudStack, DatabaseServiceSchema, JsonSchema, OneOf,
+  AwsDatabaseService, AwsDatabaseServiceSchema,
+  CloudStack, JsonSchema, OneOf,
 } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
@@ -20,10 +17,7 @@ import {
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-type AwsWrappedSchema = AwsServiceSchemaG<DatabaseServiceSchema>;
-const AwsDatabase = AwsService(Database);
-
-abstract class AwsRdsService extends AwsDatabase implements AwsDatabaseService {
+abstract class AwsRdsService extends Database implements AwsDatabaseService {
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -115,7 +109,7 @@ abstract class AwsRdsService extends AwsDatabase implements AwsDatabaseService {
   }
 
   static schema(): JsonSchema<AwsDatabaseServiceSchema> {
-    return mergeJsonSchemas<AwsWrappedSchema, AwsDatabaseServiceSchema>(super.schema(), {
+    return mergeJsonSchemas<BaseServiceSchema, AwsDatabaseServiceSchema>(super.schema(), {
       required: ['size', 'nodes', 'engine'],
       properties: {
         size: {
