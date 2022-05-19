@@ -1,6 +1,7 @@
 import { Connectable, Profilable, Storable } from './util';
 
 export interface BaseServiceSchema extends Profilable {
+  provider: string;
   name: string;
   links: string[];
 }

@@ -1,5 +1,5 @@
 export interface JsonSchema<T> extends BaseJsonSchema {
-  // properties?: { [k in keyof Required<T>]: BaseJsonSchema };
+  properties?: { [K in keyof T]: BaseJsonSchema };
 
   // AJV-error related entry
   errorMessage?: string | {
@@ -9,7 +9,7 @@ export interface JsonSchema<T> extends BaseJsonSchema {
   };
 }
 
-interface BaseJsonSchema {
+export type BaseJsonSchema = {
 
   $ref?: string;
 
