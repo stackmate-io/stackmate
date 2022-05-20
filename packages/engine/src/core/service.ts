@@ -3,55 +3,51 @@ import { fromPairs, isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
-import { Attribute } from '@stackmate/engine/lib/decorators';
-import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
 import {
-  RegionList, ServiceAssociation, ProviderChoice, BaseServiceSchema,
+  ServiceAssociation, ProviderChoice, ProviderService, AttributesOf, Attribute,
   ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, EntityAttributes,
-  CloudService, CloudStack, ProviderService, VaultService, JsonSchema, CloudServiceConstructor,
+  CloudService, CloudStack, VaultService, JsonSchema, CloudServiceConstructor,
 } from '@stackmate/engine/types';
+
+export type AttributeSet = AttributesOf<CloudService>;
 
 abstract class Service extends Entity implements CloudService {
   /**
    * @var {String} name the service's name
    */
-  @Attribute name: string;
+  name: Attribute<string>;
 
   /**
    * @var {String} region the region the service operates in
    */
-  @Attribute region: string;
+  region: Attribute<string>;
 
   /**
    * @var {String[]} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  @Attribute links: string[] = [];
+  links: Attribute<string[]> = [];
 
   /**
    * @var {String} profile any configuration profile for the service
    */
-  @Attribute profile: string = Profile.DEFAULT;
+  profile: Attribute<string> = Profile.DEFAULT;
 
   /**
    * @var {Object} overrides any profile overrides to use
    */
-  @Attribute overrides: object = {};
+  overrides: Attribute<object> = {};
 
   /**
    * @var {String} projectName the name of the project that the
    */
-  @Attribute projectName: string;
+  projectName: string;
 
   /**
    * @var {String} stageName the name of the stage that the service is deployed to
    */
-  @Attribute stageName: string;
-
-  /**
-   * @var {Object} regions the regions that the service is available in
-   */
-  readonly regions: RegionList = {};
+  stageName: string;
 
   /**
    * @var {String} type the service's type
@@ -128,13 +124,6 @@ abstract class Service extends Entity implements CloudService {
   }
 
   /**
-   * @returns {String} the message to display when the entity is invalid
-   */
-  public get validationMessage(): string {
-    return `Invalid configuration for the ${this.name ? `“${this.name}” ` : ''}${this.type} service`;
-  }
-
-  /**
    * Applies the scope to the service
    *
    * @param scope the scope to apply to the service
@@ -179,19 +168,23 @@ abstract class Service extends Entity implements CloudService {
    * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
    */
   @Memoize() public associations(): ServiceAssociation[] {
-    const associations: ServiceAssociation[] = [{
-      lookup: (srv: CloudService) => (
-        srv.type === SERVICE_TYPE.PROVIDER
-          && srv.region === this.region
-          && srv.provider === this.provider
-      ),
-      handler: (provider) => this.onProviderRegistered(provider as ProviderService),
-    }, {
-      lookup: (srv: CloudService) => (srv.type === SERVICE_TYPE.VAULT),
-      handler: (vault) => this.onVaultRegistered(vault as VaultService),
-    }];
-
-    return associations;
+    return [];
+    // return [{
+    //   lookup: <T extends ProviderService>(srv: ProviderService) => (
+    //     true
+    //     // srv.type === SERVICE_TYPE.PROVIDER
+    //     //   && srv.region === this.region
+    //     //   && srv.provider === this.provider
+    //   ),
+    //   handler: (provider) => {
+    //     if (provider instanceof Provider) {
+    //       this.onProviderRegistered(provider)
+    //     }
+    //   },
+    // }, {
+    //   lookup: <T extends VaultService>(srv: T) => (srv.type === SERVICE_TYPE.VAULT),
+    //   handler: <T extends VaultService>(vault: T) => this.onVaultRegistered(vault),
+    // }];
   }
 
   /**
@@ -284,7 +277,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static schema(): JsonSchema<BaseServiceSchema> {
+  static schema(): JsonSchema<AttributeSet> {
     return {
       type: 'object',
       properties: {

@@ -2,10 +2,9 @@
 import App from '@stackmate/engine/lib/terraform/app';
 import Stack from '@stackmate/engine/lib/terraform/stack';
 import Entity from '@stackmate/engine/lib/entity';
-import Parser from '@stackmate/engine/lib/parsers';
-import { Attribute } from '@stackmate/engine/lib/decorators';
 import { stackName, appName } from 'tests/fixtures/generic';
-import { CloudStack, AttributeParsers, Validations } from '@stackmate/engine/types';
+import { Attribute, AttributesOf, CloudStack, JsonSchema } from '@stackmate/engine/types';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 export const getMockApp = (name: string) => (
   new App(name)
@@ -19,61 +18,68 @@ export const multiply = (value: number, { times = 5 } = {}) => (
   value * times
 );
 
-export class MockEntity extends Entity {
+type MockEntityDesc = {
+  name: Attribute<string>;
+  number: Attribute<number>;
+}
+
+type MockEntityAttributeSet = AttributesOf<MockEntityDesc>;
+
+export class MockEntity extends Entity implements MockEntityDesc {
   public validationMessage: string = 'The entity is invalid';
 
-  @Attribute name: string;
+  name: Attribute<string>;
 
-  @Attribute number: number;
+  number: Attribute<number>;
 
-  parsers(): AttributeParsers {
+  static schema(): JsonSchema<MockEntityAttributeSet> {
     return {
-      name: Parser.parseString,
-      number: multiply,
-    };
-  }
-
-  validations(): Validations {
-    return {
-      name: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify a name to use',
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          type: 'string',
+        },
+        number: {
+          type: 'number',
+          format: 'int32',
+          errorMessage: 'The number provided is invalid',
         },
       },
-      number: {
-        numericality: {
-          message: 'The number provided is invalid',
-        },
-      },
+      errorMessage: {
+        required: {
+          name: 'You have to specify a name to use',
+        }
+      }
     };
   }
 }
 
-export class ExtendedMockEntity extends MockEntity {
-  @Attribute email: string;
+type MockEntityExtendedDesc = {
+  name: Attribute<string>;
+  number: Attribute<number>;
+}
 
-  parsers(): AttributeParsers {
-    return {
-      ...super.parsers(),
-      email: Parser.parseString,
-    };
-  }
+type MockEntityExtendedAttributeSet = AttributesOf<MockEntityExtendedDesc>;
 
-  validations(): Validations {
-    return {
-      ...super.validations(),
-      email: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify an email',
+export class ExtendedMockEntity extends MockEntity implements MockEntityExtendedDesc {
+  email: Attribute<string>;
+
+  static schema(): JsonSchema<MockEntityExtendedAttributeSet> {
+    return mergeJsonSchemas<MockEntityAttributeSet, MockEntityExtendedAttributeSet>(super.schema(), {
+      required: ['email'],
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email',
+          errorMessage: 'You have to specify an email',
         },
       },
-    };
+    });
   }
 }
 
 export class MockEntityWithDefaults extends MockEntity {
-  @Attribute name: string = 'default-name';
-  @Attribute number: number = 123456;
+  name: Attribute<string> = 'default-name';
+  number: Attribute<number> = 123456;
 }

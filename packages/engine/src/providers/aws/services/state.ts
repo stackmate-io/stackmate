@@ -1,18 +1,28 @@
 import { S3Backend, TerraformResource } from 'cdktf';
 
-import State from '@stackmate/engine/core/services/state';
-import AwsService from '@stackmate/engine/providers/aws/mixins';
-import { CloudStack } from '@stackmate/engine/types';
+import AwsService, { AttributeSet as ParentAttributeSet } from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
-import { Attribute } from '@stackmate/engine/lib/decorators';
+import { Attribute, AttributesOf, AwsStateService, CloudStack, JsonSchema, ServiceTypeChoice } from '@stackmate/engine/types';
+import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-const AwsStateService = AwsService(State);
+export type AttributeSet = AttributesOf<AwsStateService>;
 
-class AwsStateBucket extends AwsStateService {
+class AwsState extends AwsService implements AwsStateService {
+  /**
+   * @var {String} name the service's name
+   */
+  name: Attribute<string> = DEFAULT_STATE_SERVICE_NAME;
+
   /**
    * @var {String} bucket the name of the bucket to store the files
    */
-  @Attribute bucket: string;
+  bucket: Attribute<string>;
+
+  /**
+   * @var {ServiceTypeChoice} type the service's type
+   */
+  readonly type: ServiceTypeChoice = SERVICE_TYPE.STATE;
 
   /**
    * @var {TerraformResource} bucket the bucket to provision
@@ -63,6 +73,53 @@ class AwsStateBucket extends AwsStateService {
       region: this.region,
     });
   }
+
+  /**
+   * Provisioning when we initially prepare a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onPrepare(stack: CloudStack): void {
+    this.resources(stack);
+  }
+
+  /**
+   * Provisioning when we deploy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onDeploy(stack: CloudStack): void {
+    this.backend(stack);
+  }
+
+  /**
+   * Provisioning on when we destroy destroy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onDestroy(stack: CloudStack): void {
+    // The state has to be present when destroying resources
+    this.backend(stack);
+  }
+
+  static schema(): JsonSchema<AttributeSet> {
+    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+      required: ['bucket'],
+      properties: {
+        bucket: {
+          type: 'string',
+        },
+      },
+      errorMessage: {
+        required: {
+          bucket: 'You have to provide a bucket to store the state to when using an AWS S3 state',
+        },
+      },
+    });
+  }
 }
 
-export default AwsStateBucket;
+export default AwsState;

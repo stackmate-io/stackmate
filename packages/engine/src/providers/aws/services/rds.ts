@@ -2,13 +2,10 @@ import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import Database from '@stackmate/engine/core/services/database';
-import { Attribute } from '@stackmate/engine/lib/decorators';
+import AwsService, { AttributeSet as ParentAttributeSet } from './base';
+import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import {
-  AwsDatabaseService, AwsDatabaseServiceSchema,
-  CloudStack, JsonSchema, OneOf,
-} from '@stackmate/engine/types';
+import { Attribute, AttributesOf, AwsDatabaseService, CloudStack, JsonSchema, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -17,31 +14,43 @@ import {
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-abstract class AwsRdsService extends Database implements AwsDatabaseService {
+export type AttributeSet = AttributesOf<AwsDatabaseService>;
+
+abstract class AwsRdsService extends AwsService implements AwsDatabaseService {
   /**
    * @var {String} size the size for the RDS instance
    */
-  @Attribute size: OneOf<typeof RDS_INSTANCE_SIZES> = DEFAULT_RDS_INSTANCE_SIZE;
+  size: Attribute<OneOf<typeof RDS_INSTANCE_SIZES>> = DEFAULT_RDS_INSTANCE_SIZE;
 
   /**
    * @var {String} nodes the numbe of nodes to deploy
    */
-  @Attribute nodes: number = 1;
+  nodes: Attribute<number> = 1;
 
   /**
-   * @var {Array<string>} sizes the list of RDS instance sizes
+   * @var {Number} storage the storage size for the instance
    */
-  readonly sizes = RDS_INSTANCE_SIZES;
+  storage: Attribute<number>;
+
+  /**
+   * @var {String} database the database to create
+   */
+  database: Attribute<string>;
+
+  /**
+   * @var {Number} the port number to use to connect to the database
+   */
+  port: Attribute<number>;
+
+  /**
+   * @var {String} version the database version to run
+   */
+  version: Attribute<string>;
 
   /**
    * @var {String} engine the database engine to use
    */
-  abstract engine: OneOf<typeof RDS_ENGINES>;
-
-  /**
-   * @var {Array<String>} engines the list of database engines available for this service
-   */
-  readonly engines: ReadonlyArray<string> = RDS_ENGINES;
+  engine: Attribute<OneOf<typeof RDS_ENGINES>>;
 
   /**
    * @var {DbInstance} instance the rds instance, in case we're deploying a single instance
@@ -108,14 +117,18 @@ abstract class AwsRdsService extends Database implements AwsDatabaseService {
     });
   }
 
-  static schema(): JsonSchema<AwsDatabaseServiceSchema> {
-    return mergeJsonSchemas<BaseServiceSchema, AwsDatabaseServiceSchema>(super.schema(), {
-      required: ['size', 'nodes', 'engine'],
+  static schema(): JsonSchema<AttributeSet> {
+    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+      required: ['size', 'nodes', 'engine', 'port', 'version'],
       properties: {
         size: {
           type: 'string',
           default: DEFAULT_RDS_INSTANCE_SIZE,
           enum: RDS_INSTANCE_SIZES,
+        },
+        storage: {
+          type: 'number',
+          default: DEFAULT_SERVICE_STORAGE,
         },
         nodes: {
           type: 'number',
@@ -125,6 +138,18 @@ abstract class AwsRdsService extends Database implements AwsDatabaseService {
         engine: {
           type: 'string',
           enum: RDS_ENGINES,
+        },
+        version: {
+          type: 'string',
+        },
+        database: {
+          type: 'string',
+          pattern: '[a-z0-9_]+',
+        },
+        port: {
+          type: 'number',
+          minimum: 0,
+          maximum: 65535,
         },
       },
     });

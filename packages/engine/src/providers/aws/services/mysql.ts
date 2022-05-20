@@ -1,11 +1,12 @@
 import { get } from 'lodash';
 
-import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { Attribute } from '@stackmate/engine/lib/decorators';
+import AwsRdsService, { AttributeSet as ParentAttributeSet } from '@stackmate/engine/providers/aws/services/rds';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsDatabaseServiceSchema, AwsMySQLDatabaseSchema, AwsMySQLDatabaseService, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
+import { Attribute, AttributesOf, AwsMySQLDatabaseService, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+
+export type AttributeSet = AttributesOf<AwsMySQLDatabaseService>;
 
 class AwsMysqlService extends AwsRdsService implements AwsMySQLDatabaseService {
   /**
@@ -16,23 +17,23 @@ class AwsMysqlService extends AwsRdsService implements AwsMySQLDatabaseService {
   /**
    * @var {String} engine the engine for the database
    */
-  @Attribute engine: OneOf<typeof RDS_ENGINES> = 'mysql';
+  engine: Attribute<OneOf<typeof RDS_ENGINES>> = 'mysql';
 
   /**
    * @var {String} version the version to provision
    */
-  @Attribute version: string = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql')!;
+  version: Attribute<string> = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql')!;
 
   /**
    * @var {Number} port the port to use for connecting
    */
-  @Attribute port: number = 3306;
+  port: Attribute<number> = 3306;
 
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static schema(): JsonSchema<AwsMySQLDatabaseSchema> {
-    return mergeJsonSchemas<AwsDatabaseServiceSchema, AwsMySQLDatabaseSchema>(super.schema(), {
+  static schema(): JsonSchema<AttributeSet> {
+    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
       properties: {
         type: {
           type: 'string',
