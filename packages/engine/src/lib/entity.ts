@@ -77,7 +77,7 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to look up
    * @returns {Boolean} whether the entity has the attribute specified
    */
-  hasAttribute(name: string): boolean {
+  protected hasAttribute(name: string): boolean {
     return this.attributeNames.includes(name);
   }
 
@@ -87,7 +87,7 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to get
    * @returns {Any}
    */
-  getAttribute(name: string): any {
+  protected getAttribute(name: string): any {
     return this.attributeState[name];
   }
 
@@ -97,7 +97,7 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to set
    * @param {Any} value the value of the attribute to set
    */
-  setAttribute(name: string, value: any): void {
+  protected setAttribute(name: string, value: any): void {
     this.attributeState[name] = value;
   }
 
@@ -148,7 +148,7 @@ abstract class Entity implements BaseEntity {
    */
   static factory<T extends BaseEntity>(
     this: BaseEntityConstructor<T>,
-    attributes: object,
+    attributes: EntityAttributes,
     ...args: any[]
   ): T {
     const entity = new this(...args);

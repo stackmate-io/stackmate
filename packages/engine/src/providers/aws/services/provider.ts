@@ -1,21 +1,17 @@
+import { snakeCase } from 'lodash';
+import { TerraformProvider } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import Provider from '@stackmate/engine/core/services/provider';
-import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { Attribute } from '@stackmate/engine/lib/decorators';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/engine/constants';
+import AwsService, { AttributeSet as ParentAttributeSet } from './base';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { CloudStack, JsonSchema, ProviderChoice, ProviderServiceSchema, RegionList } from '@stackmate/engine/types';
-import { AwsProviderService, AwsProviderServiceSchema } from '@stackmate/engine/types';
+import { CloudStack, JsonSchema, ProviderChoice, AwsProviderService, AttributesOf, Attribute } from '@stackmate/engine/types';
 
-class AwsProvider extends Provider implements AwsProviderService {
-  /**
-   * @var {String} ip the CIDR block to use as a base for the service
-   */
-  @Attribute ip: string = DEFAULT_IP;
+export type AttributeSet = AttributesOf<AwsProviderService>;
 
+class AwsProvider extends AwsService implements AwsProviderService {
   /**
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
@@ -23,10 +19,14 @@ class AwsProvider extends Provider implements AwsProviderService {
   readonly provider: ProviderChoice = PROVIDER.AWS;
 
   /**
-   * @var {Object} regions the list of regions available
-   * @readonly
+   * @var {String} type the service type
    */
-  readonly regions: RegionList = AWS_REGIONS;
+  readonly type = SERVICE_TYPE.PROVIDER;
+
+  /**
+   * @var {String} ip the CIDR block to use as a base for the service
+   */
+  ip: Attribute<string> = DEFAULT_IP;
 
   /**
    * @var {Vpc} vpc the VPC to deploy the resources in
@@ -47,6 +47,25 @@ class AwsProvider extends Provider implements AwsProviderService {
    * @var {KmsKey} key the KMS key to use across the stack
    */
   key: KmsKey;
+
+  /**
+   * @var {TerraformProvider} resource the provider resource
+   */
+  resource: TerraformProvider;
+
+  /**
+   * @returns {Boolean} whether the service is registered in the stack
+   */
+  isRegistered(): boolean {
+    return this.resource instanceof TerraformAwsProvider;
+  }
+
+  /**
+   * @returns {String} the alias to use for the provider
+   */
+  public get alias(): string {
+    return `${snakeCase(this.provider)}_${snakeCase(this.region)}`;
+  }
 
   /**
    * Registers the provider's resource to the stack
@@ -120,9 +139,8 @@ class AwsProvider extends Provider implements AwsProviderService {
   /**
    * @returns {Object} the JSON schema to use for validation
    */
-  static schema(): JsonSchema<AwsProviderServiceSchema> {
-    return mergeJsonSchemas<ProviderServiceSchema, AwsProviderServiceSchema>(super.schema(), {
-      type: 'object',
+  static schema(): JsonSchema<AttributeSet> {
+    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
       required: ['ip'],
       properties: {
         ip: {

@@ -1,4 +1,4 @@
-import { CloudService } from './service';
+import { CloudService } from './services';
 import { CloudApp, CloudStack, PriorityQueue } from './lib';
 import { StackmateProject } from './project';
 
