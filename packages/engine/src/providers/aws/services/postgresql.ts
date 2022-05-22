@@ -1,9 +1,10 @@
+import { get } from 'lodash';
+
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { AWS, OneOf } from '@stackmate/engine/types';
-import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
+import { AWS } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { get } from 'lodash';
+import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> implements AWS.PostgreSQL.Type {
   /**
@@ -14,7 +15,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
   /**
    * @var {String} engine the engine for the database
    */
-  engine: OneOf<typeof RDS_ENGINES> = 'postgres';
+  engine: Extract<typeof RDS_ENGINES[number], 'postgres'> = 'postgres';
 
   /**
    * @var {String} version the version to provision
@@ -41,7 +42,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
           const: 'postgres',
         },
         version: {
-          default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('postgres'),
+          default: get(RDS_DEFAULT_VERSIONS_PER_ENGINE, 'postgres'),
           enum: get(RDS_MAJOR_VERSIONS_PER_ENGINE, 'postgres', []),
         },
         port: {

@@ -1,4 +1,4 @@
-import { JsonSchema } from '@stackmate/engine/types/schema';
+import { BaseJsonSchema } from '@stackmate/engine/types/schema';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AbstractConstructorOf, ChoiceOf, OneOf } from '@stackmate/engine/types/util';
 import { BaseEntityConstructor } from '@stackmate/engine/types/entity';
@@ -30,12 +30,12 @@ export type ServiceAttributes = {
 };
 
 export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Type> {
-  schema<T extends BaseService.Attributes>(): JsonSchema<T>;
+  schema(): BaseJsonSchema;
   defaults(): { [key: string]: any };
 }
 
 export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type> & {
-  schema<T extends BaseService.Attributes>(): JsonSchema<T>;
+  schema(): BaseJsonSchema;
 }
 
 export type ServiceAssociation = {

@@ -6,7 +6,7 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import AwsService from './base';
 import { CloudStack, AWS } from '@stackmate/engine/types';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {

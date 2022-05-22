@@ -3,7 +3,6 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import { OneOf } from '@stackmate/engine/types/util';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { Attribute, AttributesOf, NonAttributesOf } from '@stackmate/engine/types/entity';
@@ -33,10 +32,10 @@ type AwsStateService = AwsService<BaseStateService> & {
   backendResource: S3Backend;
 }
 type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> = AwsService<Srv> & {
-  size: Attribute<OneOf<typeof RDS_INSTANCE_SIZES>>;
+  size: Attribute<typeof RDS_INSTANCE_SIZES[number]>;
   nodes: Attribute<number>;
   database: Attribute<string>;
-  engine: Attribute<OneOf<typeof RDS_ENGINES>>;
+  engine: Attribute<typeof RDS_ENGINES[number]>;
   version: Attribute<string>;
   port: Attribute<number>;
   instance: DbInstance;
@@ -44,13 +43,13 @@ type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> =
 };
 type AwsVaultService = AwsService<BaseVaultService>;
 type AwsMySQLDatabaseService = AwsDatabaseService<BaseMySQLDatabaseService> & {
-  engine: Attribute<'mysql'>;
+  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'mysql'>)>;
 }
 type AwsPostgreSQLDatabaseService = AwsDatabaseService<BasePostgreSQLDatabaseService> & {
-  engine: Attribute<'postgres'>;
+  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'postgres'>)>;
 };
 type AwsMariaDBDatabaseService = AwsDatabaseService<BaseMariaDBDatabaseService> & {
-  engine: Attribute<'mariadb'>;
+  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'mariadb'>)>;
 }
 
 export namespace AWS {
