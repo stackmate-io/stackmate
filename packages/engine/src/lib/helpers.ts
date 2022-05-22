@@ -1,7 +1,8 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import { Address4 } from 'ip-address';
-import { isObject, sampleSize } from 'lodash';
+import { ComplementOf, JsonSchema, } from '@stackmate/engine/types';
+import { isObject, merge, sampleSize, uniq } from 'lodash';
 
 /**
  * Returns an MD5 hash of an object
@@ -107,4 +108,34 @@ export const getRandomString = ({
   }
 
   return sampleSize(characters, length).join('');
+};
+
+/**
+ * Merges two JSON schemas into one
+ *
+ * @param {Object} source the source schema
+ * @param {Object} target the target schema
+ * @returns {Object} the final schema
+ */
+export const mergeJsonSchemas = <Base extends Partial<T>, T extends Base>(
+  source: JsonSchema<Base>,
+  target: JsonSchema<ComplementOf<Base, T>>,
+): JsonSchema<T> => {
+  const {
+    properties: sourceProperties,
+    required: sourceRequired = [],
+    ...sourceProps
+  } = source;
+
+  const {
+    properties: targetProperties,
+    required: targetRequired = [],
+    ...targetProps
+  } = target;
+
+  return {
+    ...merge({}, sourceProps, targetProps),
+    properties: merge({}, sourceProperties, targetProperties),
+    required: uniq([...sourceRequired, ...targetRequired]),
+  };
 };

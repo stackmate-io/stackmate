@@ -6,18 +6,43 @@ import {
   SecretsmanagerSecretVersion,
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
-import Vault from '@stackmate/engine/core/services/vault';
-import AwsService from '@stackmate/engine/providers/aws/mixins';
+import AwsService from './base';
 import { getRandomString } from '@stackmate/engine/lib/helpers';
-import { CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
+import { DEFAULT_VAULT_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { AWS, CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
 
-const AwsVaultService = AwsService(Vault);
+class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Type {
+  /**
+   * @var {String} type the type for the service
+   */
+  readonly type = SERVICE_TYPE.VAULT;
 
-class AwsSecretsManager extends AwsVaultService {
+  /**
+   * @var {String} name the name for the service
+   */
+  name: string = DEFAULT_VAULT_SERVICE_NAME;
+
+  /**
+   * @var {Boolean} registered whether the service is registered into the stack
+   */
+  private registered: boolean = false;
+
   /**
    * @var {Object} secrets a
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
+
+  /**
+   * @returns {Boolean} whether the vault is registered in the stack
+   */
+  isRegistered(): boolean {
+    return this.registered;
+  }
+
+  onDeploy(stack: CloudStack): void {
+    /* no-op - every change should be introduced through the username / password methods */
+    this.registered = true;
+  }
 
   /**
    * Extracts a key from a username / password pair in a data string
@@ -84,4 +109,4 @@ class AwsSecretsManager extends AwsVaultService {
   }
 }
 
-export default AwsSecretsManager;
+export default AwsVault;

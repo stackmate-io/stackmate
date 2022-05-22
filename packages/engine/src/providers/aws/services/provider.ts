@@ -1,32 +1,24 @@
+import { snakeCase } from 'lodash';
+import { TerraformProvider } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import Parser from '@stackmate/engine/lib/parsers';
-import Provider from '@stackmate/engine/core/services/provider';
-import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { Attribute } from '@stackmate/engine/lib/decorators';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER } from '@stackmate/engine/constants';
-import { getNetworkingCidrBlocks } from '@stackmate/engine/lib/helpers';
-import { CloudStack, ProviderChoice, RegionList } from '@stackmate/engine/types';
+import AwsService from './base';
+import { CloudStack, AWS } from '@stackmate/engine/types';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-class AwsProvider extends Provider {
+class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
+  /**
+   * @var {String} type the service type
+   */
+  readonly type = SERVICE_TYPE.PROVIDER;
+
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */
-  @Attribute ip: string = DEFAULT_IP;
-
-  /**
-   * @var {String} provider the cloud provider used (eg. AWS)
-   * @readonly
-   */
-  readonly provider: ProviderChoice = PROVIDER.AWS;
-
-  /**
-   * @var {Object} regions the list of regions available
-   * @readonly
-   */
-  readonly regions: RegionList = AWS_REGIONS;
+  ip: string;
 
   /**
    * @var {Vpc} vpc the VPC to deploy the resources in
@@ -49,32 +41,22 @@ class AwsProvider extends Provider {
   key: KmsKey;
 
   /**
-   * @returns {Object} the parser functions to apply to the service's attributes
+   * @var {TerraformProvider} resource the provider resource
    */
-  parsers() {
-    return {
-      ...super.parsers(),
-      ip: Parser.parseString,
-    };
+  resource: TerraformProvider;
+
+  /**
+   * @returns {Boolean} whether the service is registered in the stack
+   */
+  isRegistered(): boolean {
+    return this.resource instanceof TerraformAwsProvider;
   }
 
   /**
-   * @returns {Validations} the validations for the service
+   * @returns {String} the alias to use for the provider
    */
-  validations() {
-    return {
-      ...super.validations(),
-      ip: {
-        presence: {
-          allowEmpty: false,
-          message: 'You should define an IP to use as a CIDR block for the networking',
-        },
-        format: {
-          pattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-          message: 'Please provide a valid IPv4 IP for the networking service',
-        }
-      },
-    };
+  public get alias(): string {
+    return `${snakeCase(this.provider)}_${snakeCase(this.region)}`;
   }
 
   /**
@@ -98,7 +80,7 @@ class AwsProvider extends Provider {
   /**
    * Provisions the cloud prerequisites to the stack
    *
-   * @param {CloudProvider} stack the stack to deploy the prerequisites to
+   * @param {CloudStack} stack the stack to deploy the prerequisites to
    */
   prerequisites(stack: CloudStack): void {
     const { vpc, subnet, gateway } = this.resourceProfile;
@@ -144,6 +126,29 @@ class AwsProvider extends Provider {
 
   onDestroy(stack: CloudStack): void {
     this.bootstrap(stack);
+  }
+
+  /**
+   * @returns {Object} the JSON schema to use for validation
+   */
+  static schema(): AWS.Provider.Schema {
+    return mergeJsonSchemas(super.schema(), {
+      required: ['ip'],
+      properties: {
+        ip: {
+          type: 'string',
+          default: DEFAULT_IP,
+          format: 'ipv4',
+          errorMessage: 'Please provide a valid IPv4 IP for the networking service',
+        },
+      },
+      errorMessage: {
+        _: 'The AWS provider service is not properly configured',
+        required: {
+          ip: 'You should define an IP to use as the basis for the networking CIDR block',
+        },
+      }
+    });
   }
 }
 

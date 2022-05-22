@@ -14,6 +14,10 @@ import {
 } from '@stackmate/engine/types';
 
 namespace Validator {
+  export const KEYWORD_PROFILE_EXISTS = 'existingProfile';
+
+  // TODO: Remove below
+
   /**
    * Validates the project's stages
    *
@@ -82,7 +86,7 @@ namespace Validator {
    * @returns {String}
    */
   export const validateState = (state: StateConfiguration) => {
-    if (!state || !isObject(state) || isEmpty(state)) {
+    if (!isObject(state)) {
       return 'The project does not contain a “state” section';
     }
 
@@ -101,7 +105,7 @@ namespace Validator {
    * @returns {String|undefined} the error message (if any)
    */
   export const validateSecrets = (secrets: VaultConfiguration) => {
-    if (!secrets || !isObject(secrets) || isEmpty(secrets)) {
+    if (!secrets || !isObject(secrets)) {
       return 'The project does not contain a “secrets” section';
     }
 

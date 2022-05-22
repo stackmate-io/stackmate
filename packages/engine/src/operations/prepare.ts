@@ -1,11 +1,10 @@
-import { pick } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Operation from '@stackmate/engine/core/operation';
 import Provisioner from '@stackmate/engine/core/provisioner';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { CloudService, PrepareOperationOptions } from '@stackmate/engine/types';
+import { BaseService, PrepareOperationOptions } from '@stackmate/engine/types';
 
 class PrepareOperation extends Operation {
   /**
@@ -16,10 +15,10 @@ class PrepareOperation extends Operation {
   /**
    * @returns {CloudService} the local state service
    */
-  @Memoize() get localState(): CloudService {
+  @Memoize() get localState(): BaseService.Type {
     const { statePath } = this.options;
     const attrs = { type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL, directory: statePath };
-    return ServicesRegistry.get(pick(attrs, 'type', 'provider')).factory(attrs);
+    return ServicesRegistry.get(PROVIDER.LOCAL, SERVICE_TYPE.STATE).factory(attrs);
   }
 
   /**

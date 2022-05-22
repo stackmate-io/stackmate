@@ -1,24 +1,24 @@
 import typescript from "rollup-plugin-typescript2";
 import pathsTransformer from "ts-transform-paths";
-import multiInput from 'rollup-plugin-multi-input';
+import dts from "rollup-plugin-dts";
 
-export default {
-  input: ['./src/**/*.ts'],
-  // We're using CommonJS because oclif v1 doesn't work well with ESM
-  // We have to switch to ESM once oclif v2 is out and integrated
-  // See https://github.com/oclif/core/issues/130
+export default [{
+  input: './src/index.ts',
   output: [{
-    dir: './dist',
-    format: 'cjs',
-    exports: 'auto',
-    entryFileNames: '[name].js',
+    file: './dist/index.js',
+    format: 'es'
   }],
   plugins: [
-    multiInput(),
     typescript({
-      build: true,
       tsconfig: "tsconfig.build.json",
       transformers: [pathsTransformer]
     }),
   ],
-};
+}, {
+  input: './src/index.ts',
+  output: [{
+    file: './dist/index.d.ts',
+    format: 'es',
+  }],
+  plugins: [dts()],
+}];

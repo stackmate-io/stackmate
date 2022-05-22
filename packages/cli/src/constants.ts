@@ -6,7 +6,8 @@ export const TERRAFORM_BINDING = path.resolve(path.join(__dirname, '..', 'bin', 
 export const CURRENT_DIRECTORY = process.cwd();
 export const STACKMATE_DIRECTORY = '.stackmate';
 
-export const DEFAULT_PROJECT_FILE = path.join(CURRENT_DIRECTORY, STACKMATE_DIRECTORY, 'config.yml');
+export const DEFAULT_PROJECT_BASE = path.join(CURRENT_DIRECTORY, STACKMATE_DIRECTORY, 'config')
+export const DEFAULT_PROJECT_FILE = `${DEFAULT_PROJECT_BASE}.yml`;
 export const DEFAULT_OUTPUT_DIRECTORY = path.join(CURRENT_DIRECTORY, STACKMATE_DIRECTORY);
 
 export const APP_USER_DIRECTORY = path.join(os.homedir(), STACKMATE_DIRECTORY);
