@@ -4,29 +4,21 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import AwsService, { AttributeSet as ParentAttributeSet } from './base';
+import AwsService from './base';
+import { CloudStack, AWS } from '@stackmate/engine/types';
 import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { CloudStack, JsonSchema, AwsProviderService, AttributesOf, Attribute } from '@stackmate/engine/types';
 
-export type AttributeSet = AttributesOf<AwsProviderService>;
-
-class AwsProvider extends AwsService implements AwsProviderService {
-  /**
-   * @var {String} provider the cloud provider used (eg. AWS)
-   * @readonly
-   */
-  readonly provider: Attribute<typeof PROVIDER.AWS>;
-
+class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
   /**
    * @var {String} type the service type
    */
-  readonly type: Attribute<typeof SERVICE_TYPE.PROVIDER>;
+  readonly type = SERVICE_TYPE.PROVIDER;
 
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */
-  ip: Attribute<string>;
+  ip: string;
 
   /**
    * @var {Vpc} vpc the VPC to deploy the resources in
@@ -88,7 +80,7 @@ class AwsProvider extends AwsService implements AwsProviderService {
   /**
    * Provisions the cloud prerequisites to the stack
    *
-   * @param {CloudProvider} stack the stack to deploy the prerequisites to
+   * @param {CloudStack} stack the stack to deploy the prerequisites to
    */
   prerequisites(stack: CloudStack): void {
     const { vpc, subnet, gateway } = this.resourceProfile;
@@ -139,8 +131,8 @@ class AwsProvider extends AwsService implements AwsProviderService {
   /**
    * @returns {Object} the JSON schema to use for validation
    */
-  static schema(): JsonSchema<AttributeSet> {
-    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+  static schema(): AWS.Provider.Schema {
+    return mergeJsonSchemas(super.schema(), {
       required: ['ip'],
       properties: {
         ip: {

@@ -1,28 +1,26 @@
 import { S3Backend, TerraformResource } from 'cdktf';
 
-import AwsService, { AttributeSet as ParentAttributeSet } from './base';
+import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
-import { Attribute, AttributesOf, AwsStateService, CloudStack, JsonSchema, ServiceTypeChoice } from '@stackmate/engine/types';
+import { AWS, CloudStack } from '@stackmate/engine/types';
 import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-export type AttributeSet = AttributesOf<AwsStateService>;
-
-class AwsState extends AwsService implements AwsStateService {
+class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
   /**
    * @var {ServiceTypeChoice} type the service's type
    */
-  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.STATE;
+  readonly type = SERVICE_TYPE.STATE;
 
   /**
    * @var {String} name the service's name
    */
-  name: Attribute<string> = DEFAULT_STATE_SERVICE_NAME;
+  name: string = DEFAULT_STATE_SERVICE_NAME;
 
   /**
    * @var {String} bucket the name of the bucket to store the files
    */
-  bucket: Attribute<string>;
+  bucket: string;
 
   /**
    * @var {TerraformResource} bucket the bucket to provision
@@ -105,8 +103,11 @@ class AwsState extends AwsService implements AwsStateService {
     this.backend(stack);
   }
 
-  static schema(): JsonSchema<AttributeSet> {
-    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static schema(): AWS.State.Schema {
+    return mergeJsonSchemas(super.schema(), {
       required: ['bucket'],
       properties: {
         bucket: {

@@ -298,6 +298,11 @@
   resolved "https://registry.yarnpkg.com/@cdktf/provider-aws/-/provider-aws-5.0.52.tgz#f13c01a6e51263b9f306c0d45f3307e6c2b44555"
   integrity sha512-FVCL1DNtLiQIm6tcoHepieTZJ5cbGTE2rMqcxNPN2oelXqYTef6ln4iEYg55uRqpSk7STw7kMG8EK8+6zVJlyw==
 
+"@cdktf/provider-local@^0.4.61":
+  version "0.4.61"
+  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.4.61.tgz#aea663503647fe7aa7f11b7450eb325b29e9617a"
+  integrity sha512-YeloyTNvDztRRddVYcw4vtCbQ4zLDo+tlHrdDOo33NatsvtT+fX4/RM/+wf/97xfK2uDgn+7DdT9yhprjaWE2A==
+
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz#33bf4b7b39c178821606f669bbc447a6a629786b"

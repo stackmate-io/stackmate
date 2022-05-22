@@ -9,20 +9,18 @@ import {
 import AwsService from './base';
 import { getRandomString } from '@stackmate/engine/lib/helpers';
 import { DEFAULT_VAULT_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { Attribute, AttributesOf, AwsVaultService, CloudStack, ServiceTypeChoice, VaultCredentialOptions } from '@stackmate/engine/types';
+import { AWS, CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
 
-export type AttributeSet = AttributesOf<AwsVaultService>;
-
-class AwsVault extends AwsService implements AwsVaultService {
+class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Type {
   /**
    * @var {String} type the type for the service
    */
-  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.VAULT;
+  readonly type = SERVICE_TYPE.VAULT;
 
   /**
    * @var {String} name the name for the service
    */
-  name: Attribute<string> = DEFAULT_VAULT_SERVICE_NAME;
+  name: string = DEFAULT_VAULT_SERVICE_NAME;
 
   /**
    * @var {Boolean} registered whether the service is registered into the stack
