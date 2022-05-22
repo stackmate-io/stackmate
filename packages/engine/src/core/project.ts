@@ -1,41 +1,41 @@
 import Entity from '@stackmate/engine/lib/entity';
 import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 import {
-  ProjectConfiguration, NormalizedProjectConfiguration, StackmateProject,
-  StagesNormalizedAttributes, StateConfiguration,
-  VaultConfiguration, ProviderChoice, Attribute,
+  ProjectConfiguration, NormalizedProjectConfiguration, ProviderChoice,
+  StagesNormalizedAttributes, StateConfiguration, VaultConfiguration,
+  Project as StackmateProject
 } from '@stackmate/engine/types';
 
-class Project extends Entity implements StackmateProject {
+class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
   /**
    * @var {String} name the project's name
    */
-  name: Attribute<string>;
+  name: string;
 
   /**
    * @var {String} provider the default cloud provider for the project
    */
-  provider: Attribute<ProviderChoice>;
+  provider: ProviderChoice;
 
   /**
    * @var {String} region the default cloud region for the project
    */
-  region: Attribute<string>;
+  region: string;
 
   /**
    * @var {VaultConfiguration} secrets the vault configuration
    */
-  secrets: Attribute<VaultConfiguration> = {};
+  secrets: VaultConfiguration = {};
 
   /**
    * @var {StateConfiguration} state the state configuration
    */
-  state: Attribute<StateConfiguration> = {};
+  state: StateConfiguration = {};
 
   /**
    * @var {Object} stages the stages declarations
    */
-  stages: Attribute<StagesNormalizedAttributes> = {};
+  stages: StagesNormalizedAttributes = {};
 
   /**
    * Applies arguments in stage services that were skipped for brevity

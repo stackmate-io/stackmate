@@ -7,7 +7,7 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import AwsService, { AttributeSet as ParentAttributeSet } from './base';
 import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { CloudStack, JsonSchema, ProviderChoice, AwsProviderService, AttributesOf, Attribute } from '@stackmate/engine/types';
+import { CloudStack, JsonSchema, AwsProviderService, AttributesOf, Attribute } from '@stackmate/engine/types';
 
 export type AttributeSet = AttributesOf<AwsProviderService>;
 
@@ -16,17 +16,17 @@ class AwsProvider extends AwsService implements AwsProviderService {
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
    */
-  readonly provider: ProviderChoice = PROVIDER.AWS;
+  readonly provider: Attribute<typeof PROVIDER.AWS>;
 
   /**
    * @var {String} type the service type
    */
-  readonly type = SERVICE_TYPE.PROVIDER;
+  readonly type: Attribute<typeof SERVICE_TYPE.PROVIDER>;
 
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */
-  ip: Attribute<string> = DEFAULT_IP;
+  ip: Attribute<string>;
 
   /**
    * @var {Vpc} vpc the VPC to deploy the resources in

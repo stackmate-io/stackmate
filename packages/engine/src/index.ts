@@ -17,7 +17,6 @@ import {
   OperationConstructor,
   OperationOptions,
   PrepareOperationOptions,
-  CloudServiceConstructor,
   ProjectConfiguration,
   ProviderChoice,
   ServiceTypeChoice,
@@ -25,7 +24,8 @@ import {
   ProjectConfigOptions,
   ServiceConfigurationDeclaration,
   EntityAttributes,
-  StackmateProject,
+  ServiceConstructor,
+  Project as StackmateProject,
 } from './types';
 
 // Export types
@@ -61,7 +61,7 @@ const getOperation = (
   stage: string,
   options: OperationOptions = {},
 ): StackmateOperation => {
-  const project = Project.factory<StackmateProject>(config)
+  const project = Project.factory<StackmateProject.Type>(config)
   return new Cls(project, stage, options);
 };
 
@@ -87,7 +87,7 @@ export namespace ProjectConfig {
       ([serviceProvider] = serviceProviders);
     }
 
-    const srv: CloudServiceConstructor = Registry.get(serviceProvider, service);
+    const srv: ServiceConstructor = Registry.get(serviceProvider, service);
     const attrs = { ...srv.defaults(), type: service, provider, region };
 
     return omitBy(attrs, (val, key) => (

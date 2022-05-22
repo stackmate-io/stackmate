@@ -1,10 +1,11 @@
-import { BaseEntity } from './entity';
+import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
+import { JsonSchema } from '@stackmate/engine/types/schema';
 import {
   ProviderChoice,
   ServiceAttributes,
   ServiceConfigurationDeclaration,
   ServiceTypeChoice,
-} from './service';
+} from '@stackmate/engine/types/service';
 
 export type StageConfiguration = {
   [srv: string]: ServiceConfigurationDeclaration;
@@ -90,11 +91,17 @@ export type VaultCredentialOptions = {
   exclude?: string[],
 };
 
-export interface StackmateProject extends BaseEntity {
-  name: string;
-  provider: ProviderChoice;
-  region: string;
-  secrets: VaultConfiguration;
-  state: StateConfiguration;
-  stages: StagesNormalizedAttributes;
+export interface ProjectEntity extends BaseEntity {
+  name: Attribute<string>;
+  provider: Attribute<ProviderChoice>;
+  region: Attribute<string>;
+  secrets: Attribute<VaultConfiguration>;
+  state: Attribute<StateConfiguration>;
+  stages: Attribute<StagesNormalizedAttributes>;
+}
+
+export namespace Project {
+  export type Attributes = AttributesOf<ProjectEntity>;
+  export type Type = Attributes & NonAttributesOf<ProjectEntity>;
+  export type Schema = JsonSchema<Attributes>;
 }

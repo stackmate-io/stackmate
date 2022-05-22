@@ -4,19 +4,19 @@ import { isEmpty, pick, uniq, uniqBy } from 'lodash';
 import ServicesRegistry from '@stackmate/engine/core/registry';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CloudService,
+  Project,
+  BaseService,
   Provisionable,
   ProviderChoice,
   OperationOptions,
   StackmateOperation,
-  StackmateProject,
 } from '@stackmate/engine/types';
 
 abstract class Operation implements StackmateOperation {
   /**
-   * @var {StackmateProject} project the project to deploy
+   * @var {Project.Type} project the project to deploy
    */
-  protected readonly project: StackmateProject;
+  protected readonly project: Project.Type;
 
   /**
    * @var {String} stage the stage to deploy
@@ -39,7 +39,7 @@ abstract class Operation implements StackmateOperation {
    * @param {String} stageName the name of the stage we're provisioning
    * @param {Object} options any additional options for the operation
    */
-  constructor(project: StackmateProject, stageName: string, options: OperationOptions = {}) {
+  constructor(project: Project.Type, stageName: string, options: OperationOptions = {}) {
     this.project = project;
     this.stageName = stageName;
     this.options = options;
@@ -59,7 +59,7 @@ abstract class Operation implements StackmateOperation {
   /**
    * @returns {Array<CloudService>} the list of services associated with the stage
    */
-  @Memoize() get services(): CloudService[] {
+  @Memoize() get services(): BaseService.Type[] {
     const { PROVIDER, VAULT, STATE } = SERVICE_TYPE;
     const { secrets, state, stages: { [this.stageName]: stage } } = this.project;
     const serviceAtrs = Object.values(stage);

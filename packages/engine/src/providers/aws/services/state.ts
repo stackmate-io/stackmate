@@ -10,6 +10,11 @@ export type AttributeSet = AttributesOf<AwsStateService>;
 
 class AwsState extends AwsService implements AwsStateService {
   /**
+   * @var {ServiceTypeChoice} type the service's type
+   */
+  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.STATE;
+
+  /**
    * @var {String} name the service's name
    */
   name: Attribute<string> = DEFAULT_STATE_SERVICE_NAME;
@@ -18,11 +23,6 @@ class AwsState extends AwsService implements AwsStateService {
    * @var {String} bucket the name of the bucket to store the files
    */
   bucket: Attribute<string>;
-
-  /**
-   * @var {ServiceTypeChoice} type the service's type
-   */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.STATE;
 
   /**
    * @var {TerraformResource} bucket the bucket to provision

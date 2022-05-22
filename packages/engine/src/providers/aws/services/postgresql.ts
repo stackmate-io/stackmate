@@ -11,7 +11,7 @@ class AwsPostgreSqlService extends AwsRdsService implements AwsPostgreSqlService
   /**
    * @var {String} type the type for the service
    */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.POSTGRESQL;
+  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.POSTGRESQL;
 
   /**
    * @var {String} engine the engine for the database
