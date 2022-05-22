@@ -45,7 +45,7 @@
     "@types/jsforce": "^1.9.42",
     "jest": "^27.5.1",
     "rollup-plugin-dts": "^4.2.1",
-    "ts-node": "^10.7.0"
+    "ts-node": "^10.8.0"
   },
   "engines": {
     "node": ">=16.0.0"
