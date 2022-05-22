@@ -5,12 +5,12 @@ import {
   BaseEntityConstructor,
 } from '@stackmate/engine/types';
 
-abstract class Entity implements BaseEntity {
+abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
   /**
    * @var {Object} attributeState the state of the attributes
    * @private
    */
-  private attributeState: EntityAttributes = {};
+  private attributeState: Attrs;
 
   /**
    * @returns {Array} the list of attribute names assigned to the entity
@@ -35,14 +35,14 @@ abstract class Entity implements BaseEntity {
   /**
    * @returns {Object} the attributes
    */
-  public get attributes(): EntityAttributes {
+  public get attributes(): Attrs {
     return this.attributeState;
   }
 
   /**
    * @param {Object} values the attribute values to set
    */
-  public set attributes(values: EntityAttributes) {
+  public set attributes(values: Attrs) {
     const attributes = pick(values, this.attributeNames);
 
     Object.keys(attributes).forEach((attributeKey) => {

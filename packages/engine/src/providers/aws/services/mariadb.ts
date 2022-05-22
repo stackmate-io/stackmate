@@ -10,7 +10,7 @@ class AwsMariaDbService extends AwsRdsService implements AwsMariaDBDatabaseServi
   /**
    * @var {String} type the type for the service
    */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.MARIADB;
+  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.MARIADB;
 
   /**
    * @var {String} engine the engine for the database

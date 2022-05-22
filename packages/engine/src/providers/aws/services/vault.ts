@@ -15,14 +15,14 @@ export type AttributeSet = AttributesOf<AwsVaultService>;
 
 class AwsVault extends AwsService implements AwsVaultService {
   /**
+   * @var {String} type the type for the service
+   */
+  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.VAULT;
+
+  /**
    * @var {String} name the name for the service
    */
   name: Attribute<string> = DEFAULT_VAULT_SERVICE_NAME;
-
-  /**
-   * @var {String} type the type for the service
-   */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.VAULT;
 
   /**
    * @var {Boolean} registered whether the service is registered into the stack

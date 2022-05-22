@@ -4,8 +4,8 @@ import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceAttributes, ServiceScopeChoice,
-  CloudServiceRegistry, CloudServiceConstructor, ServiceTypeChoice,
+  ProviderChoice, ServiceAttributes, ServiceScopeChoice, ServiceTypeChoice,
+  ServiceConstructor, ServiceRegistry as CloudServiceRegistry,
 } from '@stackmate/engine/types';
 
 class ServicesRegistry implements CloudServiceRegistry {
@@ -13,7 +13,7 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @var {Object} items the items in the registry
    */
   items: {
-    [key in ProviderChoice]?: { [type in ServiceTypeChoice]?: CloudServiceConstructor };
+    [key in ProviderChoice]?: { [type in ServiceTypeChoice]?: ServiceConstructor };
   } = {};
 
   /**
@@ -24,7 +24,7 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @param {ServiceTypeChoice} type the service's type
    */
   add(
-    classConstructor: CloudServiceConstructor,
+    classConstructor: ServiceConstructor,
     provider: ProviderChoice,
     type: ServiceTypeChoice,
   ): void {
@@ -38,10 +38,10 @@ class ServicesRegistry implements CloudServiceRegistry {
    *
    * @param {ProviderChoice} provider the provider to get the service type for
    * @param {ServiceTypeChoice} type the type of the service to get
-   * @returns {CloudServiceConstructor} the service constructor
+   * @returns {ServiceConstructor} the service constructor
    * @throws {Error} if the service is not registered
    */
-  get(provider: ProviderChoice, type: ServiceTypeChoice): CloudServiceConstructor {
+  get(provider: ProviderChoice, type: ServiceTypeChoice): ServiceConstructor {
     const cls = get(this.items, `${provider}.${type}`);
 
     if (!cls) {

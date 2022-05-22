@@ -3,41 +3,38 @@ import { fromPairs, isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ServiceAssociation, ProviderChoice, ProviderService, AttributesOf, Attribute,
-  ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, EntityAttributes,
-  CloudService, CloudStack, VaultService, JsonSchema, CloudServiceConstructor,
+  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
+  EntityAttributes, CloudStack, ServiceConstructor, BaseService, ServiceAssociation,
 } from '@stackmate/engine/types';
 
-export type AttributeSet = AttributesOf<CloudService>;
-
-abstract class Service extends Entity implements CloudService {
+abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
   /**
    * @var {String} name the service's name
    */
-  name: Attribute<string>;
+  name: string;
 
   /**
    * @var {String} region the region the service operates in
    */
-  region: Attribute<string>;
+  region: string;
 
   /**
    * @var {String[]} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  links: Attribute<string[]> = [];
+  links: string[];
 
   /**
    * @var {String} profile any configuration profile for the service
    */
-  profile: Attribute<string> = Profile.DEFAULT;
+  profile: string;
 
   /**
    * @var {Object} overrides any profile overrides to use
    */
-  overrides: Attribute<object> = {};
+  overrides: object;
 
   /**
    * @var {String} projectName the name of the project that the
@@ -71,12 +68,12 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @var {ProviderService} providerService the cloud provider service
    */
-  providerService: ProviderService;
+  providerService: BaseService.Provider.Type;
 
   /**
    * @var {Vault} vault the vault service to get credentials from
    */
-  vault: VaultService;
+  vault: BaseService.Vault.Type;
 
   /**
    * Provisioning when we initially prepare a stage
@@ -127,9 +124,9 @@ abstract class Service extends Entity implements CloudService {
    * Applies the scope to the service
    *
    * @param scope the scope to apply to the service
-   * @returns {CloudService} the service with the scope applied
+   * @returns {BaseService.Type} the service with the scope applied
    */
-  scope(scope: ServiceScopeChoice): CloudService {
+  scope(scope: ServiceScopeChoice): BaseService.Type {
     let handlerFunction: (stack: CloudStack) => void;
 
     switch(scope) {
@@ -191,7 +188,7 @@ abstract class Service extends Entity implements CloudService {
    * Callback to run when the cloud provider has been registered
    * @param {ProviderService} provider the provider service
    */
-  onProviderRegistered(provider: ProviderService): void {
+  onProviderRegistered(provider: BaseService.Provider.Type): void {
     this.providerService = provider;
   }
 
@@ -199,7 +196,7 @@ abstract class Service extends Entity implements CloudService {
    * Callback to run when the vault service has been registered
    * @param {CloudService} vault the vault service
    */
-  onVaultRegistered(vault: VaultService) {
+  onVaultRegistered(vault: BaseService.Vault.Type) {
     this.vault = vault;
   }
 
@@ -207,7 +204,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} service the service to compare with the current one
    * @returns {Boolean} whether the current service is the same with another one
    */
-  isSameWith(service: CloudService): boolean {
+  isSameWith(service: BaseService.Type): boolean {
     return this.identifier === service.identifier;
   }
 
@@ -215,7 +212,7 @@ abstract class Service extends Entity implements CloudService {
    * @param {CloudService} service the service to check whether the current one is depending on
    * @returns {Boolean} whether the current service is depending upon the provided one
    */
-  isDependingUpon(service: CloudService): boolean {
+  isDependingUpon(service: BaseService.Type): boolean {
     // We're comparing with the current service itself
     if (this.isSameWith(service)) {
       return false;
@@ -234,7 +231,7 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @param {CloudService[]} associated the services associated to the current one
    */
-  public link(...associated: CloudService[]): CloudService {
+  public link(...associated: BaseService.Type[]): BaseService.Type {
     associated.forEach(assoc => this.associate(assoc));
     return this;
   }
@@ -244,7 +241,7 @@ abstract class Service extends Entity implements CloudService {
    *
    * @param {Service} target the service to link the current service with
    */
-  protected associate(association: CloudService) {
+  protected associate(association: BaseService.Type) {
     if (!association.isRegistered()) {
       throw new Error(`The service ${association.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
     }
@@ -277,10 +274,23 @@ abstract class Service extends Entity implements CloudService {
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static schema(): JsonSchema<AttributeSet> {
+  static schema(): BaseService.Schema {
+    const providers = Object.values(PROVIDER);
+    const services = Object.values(SERVICE_TYPE);
+
     return {
       type: 'object',
       properties: {
+        provider: {
+          type: 'string',
+          enum: providers,
+          errorMessage: `You have to specify a valid provider. Available options are: ${providers.join(', ')}`,
+        },
+        type: {
+          type: 'string',
+          enum: services,
+          errorMessage: `You have to specify a valid service type. Available options are: ${services.join(', ')}`,
+        },
         name: {
           type: 'string',
           pattern: '[a-z0-9_]+',
@@ -303,7 +313,7 @@ abstract class Service extends Entity implements CloudService {
           serviceProfileOverrides: true,
         },
       },
-      required: ['name'],
+      required: ['provider', 'name'],
       errorMessage: {
         _: 'The service configuration is invalid',
         properties: {
@@ -321,7 +331,7 @@ abstract class Service extends Entity implements CloudService {
    *
    * @returns {Object} the service's default values
    */
-  static defaults(this: CloudServiceConstructor): Partial<EntityAttributes> {
+  static defaults(this: ServiceConstructor): Partial<EntityAttributes> {
     const { properties = {} } = this.schema();
 
     if (isEmpty(properties)) {

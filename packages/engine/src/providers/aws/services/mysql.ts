@@ -2,17 +2,19 @@ import { get } from 'lodash';
 
 import AwsRdsService, { AttributeSet as ParentAttributeSet } from '@stackmate/engine/providers/aws/services/rds';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { Attribute, AttributesOf, AwsMySQLDatabaseService, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
+import { Attribute, AttributesOf, AwsMySQLDatabaseService, EntityTypeOf, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 export type AttributeSet = AttributesOf<AwsMySQLDatabaseService>;
 
-class AwsMysqlService extends AwsRdsService implements AwsMySQLDatabaseService {
+// Aws.MySQL.Type // Aws.MySQL.Schema // Aws.MySQL.Attributes
+
+class AwsMysqlService extends AwsRdsService implements EntityTypeOf<AwsMySQLDatabaseService> {
   /**
    * @var {String} type the type for the service
    */
-  readonly type: ServiceTypeChoice = SERVICE_TYPE.MYSQL;
+  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.MYSQL;
 
   /**
    * @var {String} engine the engine for the database
@@ -22,12 +24,12 @@ class AwsMysqlService extends AwsRdsService implements AwsMySQLDatabaseService {
   /**
    * @var {String} version the version to provision
    */
-  version: Attribute<string> = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql')!;
+  version = '8.0';
 
   /**
    * @var {Number} port the port to use for connecting
    */
-  port: Attribute<number> = 3306;
+  port = 3306;
 
   /**
    * @returns {Object} provides the structure to generate the JSON schema by

@@ -5,9 +5,9 @@ import Queue from '@stackmate/engine/lib/queue';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   CloudApp,
-  CloudService,
   CloudStack,
   Provisionable,
+  BaseService,
   ServiceTypeChoice,
 } from '@stackmate/engine/types';
 
@@ -25,13 +25,13 @@ class Provisioner implements Provisionable {
   /**
    * @var {Queue<CloudService>} queue the sorted priority queue that holds the services
    */
-  readonly queue: Queue<CloudService> = new Queue();
+  readonly queue: Queue<BaseService.Type> = new Queue();
 
   /**
    * @var {Map} dependables a mapping of service identifier to the services that are depended
    *                        by said service. (eg. "provider" has dependables "vault", "state")
    */
-  protected readonly dependables: Map<string, CloudService[]> = new Map();
+  protected readonly dependables: Map<string, BaseService.Type[]> = new Map();
 
   /**
    * @var {ServiceTypeChoice[]} weights additional weight to add to the priority for services
@@ -55,14 +55,14 @@ class Provisioner implements Provisionable {
   /**
    * @returns {Array<CloudService>} the list of services in the queue
    */
-  get services(): CloudService[] {
+  get services(): BaseService.Type[] {
     return this.queue.all;
   }
 
   /**
-   * @param {Array<CloudService>} services the list of services to add to the queue
+   * @param {Array<BaseService.Type>} services the list of services to add to the queue
    */
-  set services(services: CloudService[]) {
+  set services(services: BaseService.Type[]) {
     services.forEach((service) => {
       services.forEach((dep) => {
         if (dep.isDependingUpon(service)) {
@@ -122,7 +122,7 @@ class Provisioner implements Provisionable {
    * @param {CloudService} service the service to calculate the priority for
    * @returns {Number} the service's priority
    */
-  protected priority(service: CloudService): number {
+  protected priority(service: BaseService.Type): number {
     const weight = this.weights.get(service.type) || 0;
     // Get the number of services that the current one is depended by
     const dependedByCount = this.dependables.get(service.identifier)?.length || 0;

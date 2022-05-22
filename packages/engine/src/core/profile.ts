@@ -3,9 +3,9 @@ import { existsSync as fileExistsSync } from 'node:fs';
 
 import { Memoize } from 'typescript-memoize';
 
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
 import { ProfileNotFoundError } from '@stackmate/engine/lib/errors';
 import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
+import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
 
 class Profile {
   /**

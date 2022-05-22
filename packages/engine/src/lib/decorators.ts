@@ -1,20 +1,21 @@
 import 'reflect-metadata';
 
 import Entity from '@stackmate/engine/lib/entity';
+import { Attribute } from '../types';
 
-export const Attribute = function Attribute(target: Entity, propertyKey: string) {
+export const attr = function Attribute<T>(target: Entity, propertyKey: string) {
   if (!(target instanceof Entity)) {
     throw new Error('The `Attribute` decorator only applies to `Entity` objects');
   }
 
   target.registerAttribute(propertyKey);
 
-  const getter = function getter(this: Entity) {
+  const getter = function getter(this: Entity): Attribute<T> {
     return this.getAttribute(propertyKey);
   };
 
   const setter = function setter(this: Entity, value: any) {
-    this.setAttribute(propertyKey, value);
+    this.setAttribute(propertyKey, value as Attribute<T>);
   };
 
   Object.defineProperty(target, propertyKey, {
