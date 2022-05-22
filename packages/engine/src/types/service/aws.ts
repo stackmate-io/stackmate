@@ -17,6 +17,9 @@ type AwsService<Srv extends BaseCloudService> = Srv & {
   readonly provider: Attribute<typeof PROVIDER.AWS>;
   region: Attribute<typeof AWS_REGIONS[keyof typeof AWS_REGIONS]>;
 }
+type AwsBaseService = AwsService<BaseCloudService> & {
+  providerService: AWS.Provider.Type;
+}
 type AwsProviderService = AwsService<BaseProviderService> & {
   vpc: Vpc;
   subnets: Subnet[];
@@ -28,7 +31,7 @@ type AwsStateService = AwsService<BaseStateService> & {
   bucketResource: TerraformResource;
   backendResource: S3Backend;
 }
-type AwsDatabaseService<Srv extends BaseDatabaseService> = AwsService<Srv> & {
+type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> = AwsService<Srv> & {
   size: Attribute<OneOf<typeof RDS_INSTANCE_SIZES>>;
   nodes: Attribute<number>;
   database: Attribute<string>;
@@ -50,6 +53,11 @@ type AwsMariaDBDatabaseService = AwsDatabaseService<BaseMariaDBDatabaseService> 
 }
 
 export namespace AWS {
+  export namespace Base {
+    export type Attributes = AttributesOf<AwsBaseService>;
+    export type Type = Attributes & NonAttributesOf<AwsBaseService>;
+    export type Schema = JsonSchema<Attributes>;
+  }
   export namespace Provider {
     export type Attributes = AttributesOf<AwsProviderService>;
     export type Type = Attributes & NonAttributesOf<AwsProviderService>;
@@ -63,6 +71,11 @@ export namespace AWS {
   export namespace Vault {
     export type Attributes = AttributesOf<AwsVaultService>;
     export type Type = Attributes & NonAttributesOf<AwsVaultService>;
+    export type Schema = JsonSchema<Attributes>;
+  }
+  export namespace Database {
+    export type Attributes = AttributesOf<AwsDatabaseService>;
+    export type Type = Attributes & NonAttributesOf<AwsDatabaseService>;
     export type Schema = JsonSchema<Attributes>;
   }
   export namespace MySQL {

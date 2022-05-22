@@ -1,33 +1,28 @@
-import Service, { AttributeSet as BaseServiceAttributeSet } from '@stackmate/engine/core/service';
+import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { Attribute, AttributesOf, AwsCloudService, JsonSchema, ProviderChoice } from '@stackmate/engine/types';
+import { AWS } from '@stackmate/engine/types';
 
-// TODO: replace with type
-import AwsProvider from '@stackmate/engine/providers/aws/services/provider';
-
-export type AttributeSet = AttributesOf<AwsCloudService>;
-
-abstract class AwsService extends Service implements AwsCloudService {
+abstract class AwsService extends Service<AWS.Base.Attributes> implements AWS.Base.Type {
   /**
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
    */
-  readonly provider: Attribute<typeof PROVIDER.AWS>;
+  readonly provider: typeof PROVIDER.AWS = PROVIDER.AWS;
 
   /**
    * @var {ProviderService} providerService the cloud provider service
    */
-  providerService: AwsProvider;
+  providerService: AWS.Provider.Type;
 
   /**
    * @returns {JsonSchema}
    */
-  static schema(): JsonSchema<AttributeSet> {
+  static schema(): AWS.Base.Schema {
     const regionValues = Object.values(AWS_DEFAULT_REGION);
 
-    return mergeJsonSchemas<BaseServiceAttributeSet, AttributeSet>(super.schema(), {
+    return mergeJsonSchemas(super.schema(), {
       properties: {
         provider: {
           type: 'string',
