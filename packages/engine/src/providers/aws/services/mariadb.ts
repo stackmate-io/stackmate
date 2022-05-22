@@ -4,7 +4,7 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
-class AwsMariaDbService extends AwsRdsService implements AWS.MariaDB.Type {
+class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements AWS.MariaDB.Type {
   /**
    * @var {String} type the type for the service
    */

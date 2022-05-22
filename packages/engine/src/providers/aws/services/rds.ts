@@ -14,7 +14,7 @@ import {
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-abstract class AwsRdsService extends AwsService implements AWS.Database.Type {
+abstract class AwsRdsService<Attrs = AWS.Database.Attributes> extends AwsService<Attrs> implements AWS.Database.Type {
   /**
    * @var {String} size the size for the RDS instance
    */

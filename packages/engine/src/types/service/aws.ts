@@ -21,6 +21,7 @@ type AwsBaseService = AwsService<BaseCloudService> & {
   providerService: AWS.Provider.Type;
 }
 type AwsProviderService = AwsService<BaseProviderService> & {
+  ip: Attribute<string>;
   vpc: Vpc;
   subnets: Subnet[];
   gateway: InternetGateway;
@@ -65,7 +66,7 @@ export namespace AWS {
   }
   export namespace State {
     export type Attributes = AttributesOf<AwsStateService>;
-    export type Type = Attributes & NonAttributesOf<AwsProviderService>;
+    export type Type = Attributes & NonAttributesOf<AwsStateService>;
     export type Schema = JsonSchema<Attributes>;
   }
   export namespace Vault {

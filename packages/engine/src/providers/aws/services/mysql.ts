@@ -6,7 +6,7 @@ import { AWS, OneOf } from '@stackmate/engine/types';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-class AwsMysqlService extends AwsRdsService implements AWS.MySQL.Type {
+class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
   /**
    * @var {String} type the type for the service
    */

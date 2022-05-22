@@ -1,12 +1,15 @@
 import { LocalBackend } from 'cdktf';
+
 import { PROVIDER } from '@stackmate/engine/constants';
-import { Attribute, AttributesOf, NonAttributesOf } from '@stackmate/engine/types/entity';
 import { JsonSchema } from '@stackmate/engine/types/schema';
+import { Attribute, AttributesOf, NonAttributesOf } from '@stackmate/engine/types/entity';
 import { BaseCloudService, BaseProviderService, BaseStateService } from '@stackmate/engine/types/service/base';
 
-// Local services
 type LocalService<Srv extends BaseCloudService> = Srv & {
   readonly provider: Attribute<typeof PROVIDER.LOCAL>;
+}
+type LocalBaseService = LocalService<BaseCloudService> & {
+  providerService: Local.Provider.Type;
 }
 type LocalProviderService = LocalService<BaseProviderService>;
 type LocalStateService = LocalService<BaseStateService> & {
@@ -16,6 +19,11 @@ type LocalStateService = LocalService<BaseStateService> & {
 };
 
 export namespace Local {
+  export namespace Base {
+    export type Attributes = AttributesOf<LocalBaseService>;
+    export type Type = Attributes & NonAttributesOf<LocalBaseService>;
+    export type Schema = JsonSchema<Attributes>;
+  }
   export namespace Provider {
     export type Attributes = AttributesOf<LocalProviderService>;
     export type Type = Attributes & NonAttributesOf<LocalProviderService>;

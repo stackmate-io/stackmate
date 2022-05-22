@@ -5,7 +5,7 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { get } from 'lodash';
 
-class AwsPostgreSqlService extends AwsRdsService implements AWS.PostgreSQL.Type {
+class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> implements AWS.PostgreSQL.Type {
   /**
    * @var {String} type the type for the service
    */

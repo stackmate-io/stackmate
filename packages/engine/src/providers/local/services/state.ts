@@ -1,21 +1,19 @@
 import { LocalBackend } from 'cdktf';
 
-import State from '@stackmate/engine/core/services-obsolete/state';
-import { PROVIDER } from '@stackmate/engine/constants';
-import { Attribute, AttributesOf, CloudStack, LocalStateService, ProviderChoice } from '@stackmate/engine/types';
+import LocalService from './base';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, Local } from '@stackmate/engine/types';
 
-export type AttributeSet = AttributesOf<LocalStateService>;
-
-class LocalState extends State implements LocalStateService {
-  /**
-   * @var {String} directory the directory to store the output to
-   */
-  directory: Attribute<string>;
-
+class LocalState extends LocalService<Local.State.Attributes> implements Local.State.Type {
   /**
    * @var {ProviderChoice} provider the provider for the service
    */
-  readonly provider: ProviderChoice = PROVIDER.LOCAL;
+  readonly type = SERVICE_TYPE.STATE;
+
+  /**
+   * @var {String} directory the directory to store the output to
+   */
+  directory: string;
 
   /**
    * @var {DataTerraformRemoteStateS3} dataResource the data resource to use when registering the state
