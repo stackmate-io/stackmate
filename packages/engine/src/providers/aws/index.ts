@@ -1,4 +1,4 @@
-import AwsProvider from '@stackmate/engine/providers/aws/services/aws';
+import AwsProvider from '@stackmate/engine/providers/aws/services/provider';
 import AwsSsmParamsService from '@stackmate/engine/providers/aws/services/vault';
 import AwsS3State from '@stackmate/engine/providers/aws/services/state';
 import AwsMariaDbService from '@stackmate/engine/providers/aws/services/mariadb';

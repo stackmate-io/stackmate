@@ -2,34 +2,53 @@ import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import Database from '@stackmate/engine/core/services/database';
-import AwsService from '@stackmate/engine/providers/aws/mixins';
-import { CloudStack, OneOf } from '@stackmate/engine/types';
+import AwsService from '@stackmate/engine/providers/aws/services/base';
+import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { AWS, CloudStack, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
   RDS_PARAM_FAMILY_MAPPING,
-  RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_LOG_EXPORTS_PER_ENGINE,
+  DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-const AwsDatabaseService = AwsService(Database);
-
-abstract class AwsRdsService extends AwsDatabaseService {
+abstract class AwsRdsService<Attrs = AWS.Database.Attributes> extends AwsService<Attrs> implements AWS.Database.Type {
   /**
-   * @var {Array<string>} sizes the list of RDS instance sizes
+   * @var {String} size the size for the RDS instance
    */
-  readonly sizes = RDS_INSTANCE_SIZES;
+  size: OneOf<typeof RDS_INSTANCE_SIZES> = DEFAULT_RDS_INSTANCE_SIZE;
+
+  /**
+   * @var {String} nodes the numbe of nodes to deploy
+   */
+  nodes: number = 1;
+
+  /**
+   * @var {Number} storage the storage size for the instance
+   */
+  storage: number;
+
+  /**
+   * @var {String} database the database to create
+   */
+  database: string;
+
+  /**
+   * @var {Number} the port number to use to connect to the database
+   */
+  port: number;
+
+  /**
+   * @var {String} version the database version to run
+   */
+  version: string;
 
   /**
    * @var {String} engine the database engine to use
    */
-  abstract engine: OneOf<typeof RDS_ENGINES>;
-
-  /**
-   * @var {Array<String>} engines the list of database engines available for this service
-   */
-  readonly engines: ReadonlyArray<string> = RDS_ENGINES;
+  engine: OneOf<typeof RDS_ENGINES>;
 
   /**
    * @var {DbInstance} instance the rds instance, in case we're deploying a single instance
@@ -44,10 +63,13 @@ abstract class AwsRdsService extends AwsDatabaseService {
   /**
    * @returns {Boolean} whether the service is registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
   }
 
+  /**
+   * @returns {String} the RDS parameter group family to use when deploying the service
+   */
   @Memoize() public get paramGroupFamily() {
     const triad = RDS_PARAM_FAMILY_MAPPING.find(
       ([engine, version]) => engine === this.engine && this.version.startsWith(version),
@@ -60,26 +82,6 @@ abstract class AwsRdsService extends AwsDatabaseService {
     }
 
     return triad[2];
-  }
-
-  /**
-   * Returns the validations for the service
-   *
-   * @returns {Validations} the validations to run
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      version: {
-        presence: {
-          allowEmpty: false,
-          message: 'You have to specify the database version to run',
-        },
-        validateVersion: {
-          availableVersions: RDS_MAJOR_VERSIONS_PER_ENGINE.get(this.engine) || [],
-        },
-      },
-    };
   }
 
   onDeploy(stack: CloudStack): void {
@@ -109,6 +111,44 @@ abstract class AwsRdsService extends AwsDatabaseService {
       password,
       lifecycle: {
         createBeforeDestroy: true,
+      },
+    });
+  }
+
+  static schema(): AWS.Database.Schema {
+    return mergeJsonSchemas(super.schema(), {
+      required: ['size', 'nodes', 'engine', 'port', 'version'],
+      properties: {
+        size: {
+          type: 'string',
+          default: DEFAULT_RDS_INSTANCE_SIZE,
+          enum: RDS_INSTANCE_SIZES,
+        },
+        storage: {
+          type: 'number',
+          default: DEFAULT_SERVICE_STORAGE,
+        },
+        nodes: {
+          type: 'number',
+          default: 1,
+          minimum: 1,
+        },
+        engine: {
+          type: 'string',
+          enum: RDS_ENGINES,
+        },
+        version: {
+          type: 'string',
+        },
+        database: {
+          type: 'string',
+          pattern: '[a-z0-9_]+',
+        },
+        port: {
+          type: 'number',
+          minimum: 0,
+          maximum: 65535,
+        },
       },
     });
   }

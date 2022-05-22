@@ -1,19 +1,26 @@
 import { S3Backend, TerraformResource } from 'cdktf';
 
-import State from '@stackmate/engine/core/services/state';
-import AwsService from '@stackmate/engine/providers/aws/mixins';
-import { CloudStack } from '@stackmate/engine/types';
+import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
-import { Attribute } from '@stackmate/engine/lib/decorators';
-import Parser from '@stackmate/engine/lib/parsers';
+import { AWS, CloudStack } from '@stackmate/engine/types';
+import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-const AwsStateService = AwsService(State);
+class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
+  /**
+   * @var {ServiceTypeChoice} type the service's type
+   */
+  readonly type = SERVICE_TYPE.STATE;
 
-class AwsStateBucket extends AwsStateService {
+  /**
+   * @var {String} name the service's name
+   */
+  name: string = DEFAULT_STATE_SERVICE_NAME;
+
   /**
    * @var {String} bucket the name of the bucket to store the files
    */
-  @Attribute bucket: string;
+  bucket: string;
 
   /**
    * @var {TerraformResource} bucket the bucket to provision
@@ -28,37 +35,8 @@ class AwsStateBucket extends AwsStateService {
   /**
    * @returns {Boolean} whether the state service is registered
    */
-  get isRegistered(): boolean {
+  isRegistered(): boolean {
     return Boolean(this.bucketResource) || Boolean(this.backendResource);
-  }
-
-  /**
-   * @returns {AttributeParsers}
-   */
-  parsers() {
-    return {
-      ...super.parsers(),
-      bucket: Parser.parseString,
-    };
-  }
-
-  /**
-   * @returns {Validations}
-   */
-  validations() {
-    return {
-      ...super.validations(),
-      bucket: {
-        presence: {
-          message: 'A bucket name is required for the state storage',
-        },
-        format: {
-          pattern: '[a-z0-9-]+',
-          flags: 'i',
-          message: 'The bucket name can only contain alphanumeric characters and dashes',
-        },
-      },
-    }
   }
 
   /**
@@ -93,6 +71,56 @@ class AwsStateBucket extends AwsStateService {
       region: this.region,
     });
   }
+
+  /**
+   * Provisioning when we initially prepare a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onPrepare(stack: CloudStack): void {
+    this.resources(stack);
+  }
+
+  /**
+   * Provisioning when we deploy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onDeploy(stack: CloudStack): void {
+    this.backend(stack);
+  }
+
+  /**
+   * Provisioning on when we destroy destroy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @void
+   */
+  onDestroy(stack: CloudStack): void {
+    // The state has to be present when destroying resources
+    this.backend(stack);
+  }
+
+  /**
+   * @returns {Object} provides the structure to generate the JSON schema by
+   */
+  static schema(): AWS.State.Schema {
+    return mergeJsonSchemas(super.schema(), {
+      required: ['bucket'],
+      properties: {
+        bucket: {
+          type: 'string',
+        },
+      },
+      errorMessage: {
+        required: {
+          bucket: 'You have to provide a bucket to store the state to when using an AWS S3 state',
+        },
+      },
+    });
+  }
 }
 
-export default AwsStateBucket;
+export default AwsState;

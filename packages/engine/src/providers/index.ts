@@ -1,5 +1,2 @@
-import { Provider as AwsProvider } from './aws';
-
-export {
-  AwsProvider,
-};
+export * as AWS from './aws';
+export * as Local from './local';

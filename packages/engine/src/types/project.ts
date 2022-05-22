@@ -1,16 +1,23 @@
+import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
+import { JsonSchema } from '@stackmate/engine/types/schema';
 import {
   ProviderChoice,
   ServiceAttributes,
   ServiceConfigurationDeclaration,
-  ServiceConfigurationDeclarationNormalized,
-} from './service';
+  ServiceTypeChoice,
+} from '@stackmate/engine/types/service';
 
 export type StageConfiguration = {
   [srv: string]: ServiceConfigurationDeclaration;
 };
 
+export type StageCopy = {
+  from?: string;
+  skip?: Array<string>;
+}
+
 export type StageDeclarations = {
-  [name: string]: StageConfiguration & { from?: string; skip?: Array<string> };
+  [name: string]: StageConfiguration | StageConfiguration & StageCopy | StageCopy;
 };
 
 export type VaultConfiguration = {
@@ -43,7 +50,7 @@ export type StagesAttributes = {
 };
 
 export type NormalizedStage = {
-  [serviceName: string]: ServiceConfigurationDeclarationNormalized;
+  [serviceName: string]: ServiceAttributes;
 }
 
 export type StagesNormalizedAttributes = {
@@ -51,7 +58,7 @@ export type StagesNormalizedAttributes = {
 };
 
 export type NormalizedStages = {
-  [name: string]: ServiceConfigurationDeclarationNormalized;
+  [name: string]: ServiceAttributes;
 };
 
 export type NormalizedProjectConfiguration = {
@@ -67,6 +74,16 @@ export type ResourceProfile = {
   [attribute: string]: object;
 };
 
+export type ProjectConfigOptions = {
+  name: string,
+  defaultProvider?: ProviderChoice,
+  defaultRegion?: string,
+  stageNames?: string[],
+  stateProvider?: ProviderChoice,
+  secretsProvider?: ProviderChoice,
+  serviceTypes?: ServiceTypeChoice[],
+};
+
 export type VaultCredentialOptions = {
   length?: number;
   root?: Boolean;
@@ -74,12 +91,17 @@ export type VaultCredentialOptions = {
   exclude?: string[],
 };
 
-export interface StackmateProject {
-  name: string;
-  provider: ProviderChoice;
-  region: string;
-  secrets: VaultConfiguration;
-  state: StateConfiguration;
-  stages: StagesNormalizedAttributes;
-  normalize(configuration: ProjectConfiguration): NormalizedProjectConfiguration;
+export interface ProjectEntity extends BaseEntity {
+  name: Attribute<string>;
+  provider: Attribute<ProviderChoice>;
+  region: Attribute<string>;
+  secrets: Attribute<VaultConfiguration>;
+  state: Attribute<StateConfiguration>;
+  stages: Attribute<StagesNormalizedAttributes>;
+}
+
+export namespace Project {
+  export type Attributes = AttributesOf<ProjectEntity>;
+  export type Type = Attributes & NonAttributesOf<ProjectEntity>;
+  export type Schema = JsonSchema<Attributes>;
 }

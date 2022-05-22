@@ -1,10 +1,11 @@
 *-debug.log
 *-error.log
 .nyc_output
-dist
+packages/*/dist
 package-lock.json
 tmp
 cdktf.out
+.stackmate
 node_modules
 tests/output/*
 !tests/output/.keep

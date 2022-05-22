@@ -1,80 +1,37 @@
-import { isEmpty, isFunction, pick, uniq } from 'lodash';
-
-import { validate } from '@stackmate/engine/lib/validation';
-import { ValidationError } from '@stackmate/engine/lib/errors';
 import {
-  BaseEntity, AttributeParsers, ConstructorOf, EntityAttributes, Validations,
+  BaseEntity,
+  EntityAttributes,
+  BaseEntityConstructor,
 } from '@stackmate/engine/types';
 
-abstract class Entity implements BaseEntity {
-
-  /**
-   * @returns {Object} the parsers for the attributes
-   */
-  abstract parsers(): AttributeParsers;
-
-  /**
-   * @returns {Object} the validations to use for the entity
-   */
-  abstract validations(): Validations;
-
-  /**
-   * @var {String} validationMessage the validation message to use
-   */
-  public readonly abstract validationMessage: string;
-
+abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
   /**
    * @var {Object} attributeState the state of the attributes
    * @private
    */
-  private attributeState: EntityAttributes = {};
+  private attributeState: Attrs;
 
   /**
    * @returns {Array} the list of attribute names assigned to the entity
    */
-  public get attributeNames(): Array<string> {
-    const attributeNames = Reflect.getOwnMetadata(this.metadataKey, this) || [];
-
-    let baseClass = Reflect.getPrototypeOf(this);
-    while (baseClass instanceof Entity) {
-      const baseMetadataKey = Reflect.get(baseClass, 'metadataKey');
-
-      attributeNames.push(
-        ...(Reflect.getOwnMetadata(baseMetadataKey, baseClass) || []),
-      );
-
-      baseClass = Reflect.getPrototypeOf(baseClass);
-    }
-
-    return uniq(attributeNames);
+  get attributeNames() {
+    return Object.keys(this.attributeState);
   }
 
   /**
    * @returns {Object} the attributes
    */
-  public get attributes(): EntityAttributes {
+  public get attributes(): Attrs {
     return this.attributeState;
   }
 
   /**
    * @param {Object} values the attribute values to set
    */
-  public set attributes(values: EntityAttributes) {
-    const attributes = this.normalize(
-      pick(values, this.attributeNames),
-    );
-
-    Object.keys(attributes).forEach((attributeKey) => {
+  public set attributes(values: Attrs) {
+    Object.keys(values).forEach((attributeKey) => {
       this.setAttribute(attributeKey, values[attributeKey]);
     });
-  }
-
-  /**
-   * @param {EntityAttributes} attributes the attributes to normalize
-   * @returns {EntityAttributes} the normalized attributes
-   */
-  normalize(attributes: EntityAttributes): EntityAttributes {
-    return attributes;
   }
 
   /**
@@ -85,6 +42,7 @@ abstract class Entity implements BaseEntity {
    * @void
    */
   validate(): void {
+    /*
     const errors = validate.validate(this.attributeState, this.validations(), {
       fullMessages: false,
     });
@@ -92,6 +50,7 @@ abstract class Entity implements BaseEntity {
     if (!isEmpty(errors)) {
       throw new ValidationError(this.validationMessage, errors);
     }
+    */
 
     this.initialize();
   }
@@ -102,7 +61,7 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to look up
    * @returns {Boolean} whether the entity has the attribute specified
    */
-  hasAttribute(name: string): boolean {
+  protected hasAttribute(name: string): boolean {
     return this.attributeNames.includes(name);
   }
 
@@ -112,7 +71,7 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to get
    * @returns {Any}
    */
-  getAttribute(name: string): any {
+  protected getAttribute(name: string): any {
     return this.attributeState[name];
   }
 
@@ -122,29 +81,9 @@ abstract class Entity implements BaseEntity {
    * @param {String} name the name of the attribute to set
    * @param {Any} value the value of the attribute to set
    */
-  setAttribute(name: string, value: any): void {
-    const { [name]: parser } = this.parsers();
-
-    if (!isFunction(parser)) {
-      throw new Error(`No parser has been specified for attribute “${name}”`);
-    }
-
-    this.attributeState[name] = parser(value);
-  }
-
-  /**
-   * @param {String} name the attribute name to register
-   */
-  registerAttribute(name: string) {
-    const attributeMetadata = Reflect.getOwnMetadata(this.metadataKey, this) || [];
-    Reflect.defineMetadata(this.metadataKey, [...attributeMetadata, name], this);
-  }
-
-  /**
-   * @returns {String} the metadata key to use
-   */
-  get metadataKey(): string {
-    return `attributes:${this.constructor.name}`.toLowerCase();
+  protected setAttribute(name: keyof Attrs, value: any): void {
+    Object.assign(this, { name: value });
+    this.attributeState[name] = value;
   }
 
   /**
@@ -162,20 +101,29 @@ abstract class Entity implements BaseEntity {
   protected initialize(): void {}
 
   /**
+   * Normalizes the entity's attributes
+   *
+   * @param {EntityAttributes} attributes the attributes to normalize
+   * @returns {EntityAttributes} the normalized attributes
+   */
+  static normalize(attributes: EntityAttributes): EntityAttributes {
+    return attributes;
+  }
+
+  /**
    * Instantiates and validates an entity
    *
    * @param {Object} attributes the entity's attributes
    * @returns {Entity} the validated entity instance
    */
   static factory<T extends BaseEntity>(
-    this: ConstructorOf<T>,
-    attributes: object,
+    this: BaseEntityConstructor<T>,
+    attributes: EntityAttributes,
     ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = attributes;
+    entity.attributes = this.normalize(attributes);
     entity.validate();
-
     return entity;
   }
 }
