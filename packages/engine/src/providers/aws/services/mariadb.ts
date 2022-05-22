@@ -1,5 +1,5 @@
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { AWS, OneOf } from '@stackmate/engine/types';
+import { AWS } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
@@ -13,7 +13,7 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
   /**
    * @var {String} engine the engine for the database
    */
-  engine: OneOf<typeof RDS_ENGINES> = 'mariadb';
+  engine: Extract<typeof RDS_ENGINES[number], 'mariadb'> = 'mariadb';
 
   /**
    * @var {String} version the version to provision

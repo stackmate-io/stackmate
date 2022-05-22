@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
+import { AWS } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AWS, OneOf } from '@stackmate/engine/types';
-import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
   /**
@@ -15,7 +15,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
   /**
    * @var {String} engine the engine for the database
    */
-  engine: OneOf<typeof RDS_ENGINES> = 'mysql';
+  engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
 
   /**
    * @var {String} version the version to provision
@@ -43,7 +43,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
         },
         version: {
           type: 'string',
-          default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql'),
+          default: get(RDS_DEFAULT_VERSIONS_PER_ENGINE, 'mysql'),
           enum: get(RDS_MAJOR_VERSIONS_PER_ENGINE, 'mysql', []),
         },
         port: {
