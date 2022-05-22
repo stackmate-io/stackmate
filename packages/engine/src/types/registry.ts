@@ -1,4 +1,4 @@
-import { ProviderChoice, ServiceTypeChoice, ServiceConstructor } from './service';
+import { ProviderChoice, ServiceTypeChoice, ServiceConstructor } from '@stackmate/engine/types/service';
 
 export interface ServiceRegistry {
   items: { [k in ProviderChoice]?: { [s in ServiceTypeChoice]?: ServiceConstructor } };

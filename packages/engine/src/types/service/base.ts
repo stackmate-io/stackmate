@@ -1,10 +1,13 @@
 import { TerraformProvider } from 'cdktf';
+
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { JsonSchema } from '@stackmate/engine/types/schema';
 import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
-import { ProviderChoice, ServiceScopeChoice, ServiceTypeChoice } from '@stackmate/engine/types/service';
 import { VaultCredentialOptions } from '@stackmate/engine/types/project';
-import { JsonSchema } from '@stackmate/engine/types/schema';
+import {
+  ProviderChoice, ServiceScopeChoice, ServiceTypeChoice, ServiceAssociation,
+} from '@stackmate/engine/types/service/util';
 
 // Base services
 export interface BaseCloudService extends BaseEntity {
@@ -16,9 +19,9 @@ export interface BaseCloudService extends BaseEntity {
   links: Attribute<string[]>;
   profile: Attribute<string>;
   overrides: Attribute<object>;
-  providerService: Base.Provider.Type;
+  providerService: BaseServices.Provider.Type;
   // Common across all services
-  vault: Base.Vault.Type;
+  vault: BaseServices.Vault.Type;
   identifier: string;
   isRegistered(): boolean;
   link(...targets: BaseService.Type[]): BaseService.Type;
@@ -71,7 +74,7 @@ export namespace BaseService {
   export type Schema = JsonSchema<Attributes>;
 }
 
-export namespace Base {
+export namespace BaseServices {
   export namespace Provider {
     export type Attributes = AttributesOf<BaseProviderService>;
     export type Type = Attributes & NonAttributesOf<BaseProviderService>;
@@ -108,8 +111,3 @@ export namespace Base {
     export type Schema = JsonSchema<Attributes>;
   }
 }
-
-export type ServiceAssociation = {
-  lookup: <T extends BaseService.Type>(a: T) => boolean;
-  handler: <T extends BaseService.Type>(a: T) => void;
-};
