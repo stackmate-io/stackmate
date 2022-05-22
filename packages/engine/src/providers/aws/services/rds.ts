@@ -2,10 +2,10 @@ import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import AwsService, { AttributeSet as ParentAttributeSet } from './base';
+import AwsService from '@stackmate/engine/providers/aws/services/base';
 import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { Attribute, AttributesOf, AwsDatabaseService, CloudStack, JsonSchema, OneOf } from '@stackmate/engine/types';
+import { AWS, CloudStack, OneOf } from '@stackmate/engine/types';
 import {
   RDS_ENGINES,
   RDS_INSTANCE_SIZES,
@@ -14,43 +14,41 @@ import {
   DEFAULT_RDS_INSTANCE_SIZE,
 } from '@stackmate/engine/providers/aws/constants';
 
-export type AttributeSet = AttributesOf<AwsDatabaseService>;
-
-abstract class AwsRdsService extends AwsService implements AwsDatabaseService {
+abstract class AwsRdsService extends AwsService implements AWS.Database.Type {
   /**
    * @var {String} size the size for the RDS instance
    */
-  size: Attribute<OneOf<typeof RDS_INSTANCE_SIZES>> = DEFAULT_RDS_INSTANCE_SIZE;
+  size: OneOf<typeof RDS_INSTANCE_SIZES> = DEFAULT_RDS_INSTANCE_SIZE;
 
   /**
    * @var {String} nodes the numbe of nodes to deploy
    */
-  nodes: Attribute<number> = 1;
+  nodes: number = 1;
 
   /**
    * @var {Number} storage the storage size for the instance
    */
-  storage: Attribute<number>;
+  storage: number;
 
   /**
    * @var {String} database the database to create
    */
-  database: Attribute<string>;
+  database: string;
 
   /**
    * @var {Number} the port number to use to connect to the database
    */
-  port: Attribute<number>;
+  port: number;
 
   /**
    * @var {String} version the database version to run
    */
-  version: Attribute<string>;
+  version: string;
 
   /**
    * @var {String} engine the database engine to use
    */
-  engine: Attribute<OneOf<typeof RDS_ENGINES>>;
+  engine: OneOf<typeof RDS_ENGINES>;
 
   /**
    * @var {DbInstance} instance the rds instance, in case we're deploying a single instance
@@ -117,8 +115,8 @@ abstract class AwsRdsService extends AwsService implements AwsDatabaseService {
     });
   }
 
-  static schema(): JsonSchema<AttributeSet> {
-    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+  static schema(): AWS.Database.Schema {
+    return mergeJsonSchemas(super.schema(), {
       required: ['size', 'nodes', 'engine', 'port', 'version'],
       properties: {
         size: {

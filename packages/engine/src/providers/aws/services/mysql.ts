@@ -1,25 +1,21 @@
 import { get } from 'lodash';
 
-import AwsRdsService, { AttributeSet as ParentAttributeSet } from '@stackmate/engine/providers/aws/services/rds';
+import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { Attribute, AttributesOf, AwsMySQLDatabaseService, EntityTypeOf, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
+import { AWS, OneOf } from '@stackmate/engine/types';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
-export type AttributeSet = AttributesOf<AwsMySQLDatabaseService>;
-
-// Aws.MySQL.Type // Aws.MySQL.Schema // Aws.MySQL.Attributes
-
-class AwsMysqlService extends AwsRdsService implements EntityTypeOf<AwsMySQLDatabaseService> {
+class AwsMysqlService extends AwsRdsService implements AWS.MySQL.Type {
   /**
    * @var {String} type the type for the service
    */
-  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.MYSQL;
+  readonly type = SERVICE_TYPE.MYSQL;
 
   /**
    * @var {String} engine the engine for the database
    */
-  engine: Attribute<OneOf<typeof RDS_ENGINES>> = 'mysql';
+  engine: OneOf<typeof RDS_ENGINES> = 'mysql';
 
   /**
    * @var {String} version the version to provision
@@ -34,8 +30,8 @@ class AwsMysqlService extends AwsRdsService implements EntityTypeOf<AwsMySQLData
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
    */
-  static schema(): JsonSchema<AttributeSet> {
-    return mergeJsonSchemas<ParentAttributeSet, AttributeSet>(super.schema(), {
+  static schema(): AWS.MySQL.Schema {
+    return mergeJsonSchemas(super.schema(), {
       properties: {
         type: {
           type: 'string',

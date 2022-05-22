@@ -1,34 +1,32 @@
-import AwsRdsService, { AttributeSet as ParentAttributeSet } from '@stackmate/engine/providers/aws/services/rds';
-import { Attribute, AttributesOf, AwsMariaDBDatabaseService, JsonSchema, OneOf, ServiceTypeChoice } from '@stackmate/engine/types';
-import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
+import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
+import { AWS, OneOf } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
-export type AttributeSet = AttributesOf<AwsMariaDBDatabaseService>;
-
-class AwsMariaDbService extends AwsRdsService implements AwsMariaDBDatabaseService {
+class AwsMariaDbService extends AwsRdsService implements AWS.MariaDB.Type {
   /**
    * @var {String} type the type for the service
    */
-  readonly type: Attribute<ServiceTypeChoice> = SERVICE_TYPE.MARIADB;
+  readonly type = SERVICE_TYPE.MARIADB;
 
   /**
    * @var {String} engine the engine for the database
    */
-  engine: Attribute<OneOf<typeof RDS_ENGINES>> = 'mariadb';
+  engine: OneOf<typeof RDS_ENGINES> = 'mariadb';
 
   /**
    * @var {String} version the version to provision
    */
-  version: Attribute<string> = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mariadb')!;
+  version: string = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mariadb')!;
 
   /**
    * @var {Number} port the port to use for connecting
    */
-  port: Attribute<number> = 3306;
+  port: number = 3306;
 
-  static schema(): JsonSchema<AttributeSet> {
-    return mergeJsonSchemas<ParentAttributeSet, AwsMariaDBDatabaseService>(super.schema(), {
+  static schema(): AWS.MariaDB.Schema {
+    return mergeJsonSchemas(super.schema(), {
       properties: {
         engine: {
           const: 'mariadb',
