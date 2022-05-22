@@ -5,8 +5,8 @@ import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice,
-  EntityAttributes, CloudStack, ServiceConstructor, BaseService, ServiceAssociation,
+  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociation,
+  EntityAttributes, CloudStack, ServiceConstructor, BaseService, BaseServices,
 } from '@stackmate/engine/types';
 
 abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
@@ -68,12 +68,12 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   /**
    * @var {ProviderService} providerService the cloud provider service
    */
-  providerService: BaseService.Provider.Type;
+  providerService: BaseServices.Provider.Type;
 
   /**
    * @var {Vault} vault the vault service to get credentials from
    */
-  vault: BaseService.Vault.Type;
+  vault: BaseServices.Vault.Type;
 
   /**
    * Provisioning when we initially prepare a stage
@@ -188,7 +188,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * Callback to run when the cloud provider has been registered
    * @param {ProviderService} provider the provider service
    */
-  onProviderRegistered(provider: BaseService.Provider.Type): void {
+  onProviderRegistered(provider: BaseServices.Provider.Type): void {
     this.providerService = provider;
   }
 
@@ -196,7 +196,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * Callback to run when the vault service has been registered
    * @param {CloudService} vault the vault service
    */
-  onVaultRegistered(vault: BaseService.Vault.Type) {
+  onVaultRegistered(vault: BaseServices.Vault.Type) {
     this.vault = vault;
   }
 

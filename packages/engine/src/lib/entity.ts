@@ -1,4 +1,3 @@
-import { pick, uniq } from 'lodash';
 import {
   BaseEntity,
   EntityAttributes,
@@ -15,21 +14,8 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
   /**
    * @returns {Array} the list of attribute names assigned to the entity
    */
-  public get attributeNames(): Array<string> {
-    const attributeNames = Reflect.getOwnMetadata(this.metadataKey, this) || [];
-
-    let baseClass = Reflect.getPrototypeOf(this);
-    while (baseClass instanceof Entity) {
-      const baseMetadataKey = Reflect.get(baseClass, 'metadataKey');
-
-      attributeNames.push(
-        ...(Reflect.getOwnMetadata(baseMetadataKey, baseClass) || []),
-      );
-
-      baseClass = Reflect.getPrototypeOf(baseClass);
-    }
-
-    return uniq(attributeNames);
+  get attributeNames() {
+    return Object.keys(this.attributeState);
   }
 
   /**
@@ -43,9 +29,7 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
    * @param {Object} values the attribute values to set
    */
   public set attributes(values: Attrs) {
-    const attributes = pick(values, this.attributeNames);
-
-    Object.keys(attributes).forEach((attributeKey) => {
+    Object.keys(values).forEach((attributeKey) => {
       this.setAttribute(attributeKey, values[attributeKey]);
     });
   }
@@ -97,23 +81,9 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
    * @param {String} name the name of the attribute to set
    * @param {Any} value the value of the attribute to set
    */
-  protected setAttribute(name: string, value: any): void {
+  protected setAttribute(name: keyof Attrs, value: any): void {
+    Object.assign(this, { name: value });
     this.attributeState[name] = value;
-  }
-
-  /**
-   * @param {String} name the attribute name to register
-   */
-  registerAttribute(name: string) {
-    const attributeMetadata = Reflect.getOwnMetadata(this.metadataKey, this) || [];
-    Reflect.defineMetadata(this.metadataKey, [...attributeMetadata, name], this);
-  }
-
-  /**
-   * @returns {String} the metadata key to use
-   */
-  get metadataKey(): string {
-    return `attributes:${this.constructor.name}`.toLowerCase();
   }
 
   /**

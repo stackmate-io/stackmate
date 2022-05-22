@@ -37,3 +37,8 @@ export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Ty
 export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type> & {
   schema<T extends BaseService.Attributes>(): JsonSchema<T>;
 }
+
+export type ServiceAssociation = {
+  lookup: <T extends BaseService.Type>(a: T) => boolean;
+  handler: <T extends BaseService.Type>(a: T) => void;
+};
