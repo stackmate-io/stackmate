@@ -10,7 +10,7 @@ describe('LocalState', () => {
     let service: LocalState;
 
     beforeEach(() => {
-      service = LocalState.factory(serviceConfig);
+      service = LocalState.factory<LocalState>(serviceConfig);
     });
 
     it('instantiates the service and assigns the attributes correctly', () => {
@@ -26,19 +26,13 @@ describe('LocalState', () => {
       expect(service.stageName).toEqual(stageName);
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
     });
-
-    it('returns the attribute names', () => {
-      expect(new Set(service.attributeNames)).toEqual(new Set([
-        'profile', 'overrides', 'projectName', 'stageName', 'name', 'region', 'links', 'directory',
-      ]));
-    });
   });
 
   describe('path information', () => {
     let service: LocalState;
 
     beforeEach(() => {
-      service = LocalState.factory(serviceConfig);
+      service = LocalState.factory<LocalState>(serviceConfig);
     });
 
     it('returns the file path to be used', () => {

@@ -1,11 +1,11 @@
 import { Memoize } from 'typescript-memoize';
-import { fromPairs, isEmpty, merge } from 'lodash';
+import { fromPairs, get, has, isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociation,
+  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociations,
   EntityAttributes, CloudStack, ServiceConstructor, BaseService, BaseServices,
 } from '@stackmate/engine/types';
 
@@ -16,25 +16,20 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   name: string;
 
   /**
-   * @var {String} region the region the service operates in
-   */
-  region: string;
-
-  /**
    * @var {String[]} links the list of service names that the current service
    *                                             is associated (linked) with
    */
-  links: string[];
+  links: string[] = [];
 
   /**
    * @var {String} profile any configuration profile for the service
    */
-  profile: string;
+  profile: string = DEFAULT_PROFILE_NAME;
 
   /**
    * @var {Object} overrides any profile overrides to use
    */
-  overrides: object;
+  overrides: object = {};
 
   /**
    * @var {String} projectName the name of the project that the
@@ -162,42 +157,45 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   }
 
   /**
-   * @returns {ServiceAssociation[]} the pairs of lookup and handler functions
+   * @returns {ServiceAssociations} the pairs of lookup and handler functions
    */
-  @Memoize() public associations(): ServiceAssociation[] {
-    return [];
-    // return [{
-    //   lookup: <T extends ProviderService>(srv: ProviderService) => (
-    //     true
-    //     // srv.type === SERVICE_TYPE.PROVIDER
-    //     //   && srv.region === this.region
-    //     //   && srv.provider === this.provider
-    //   ),
-    //   handler: (provider) => {
-    //     if (provider instanceof Provider) {
-    //       this.onProviderRegistered(provider)
-    //     }
-    //   },
-    // }, {
-    //   lookup: <T extends VaultService>(srv: T) => (srv.type === SERVICE_TYPE.VAULT),
-    //   handler: <T extends VaultService>(vault: T) => this.onVaultRegistered(vault),
-    // }];
+  @Memoize() public associations(): ServiceAssociations {
+    return {
+      [SERVICE_TYPE.PROVIDER]: [(p: BaseServices.Provider.Type) => this.onProviderRegistered(p)],
+      [SERVICE_TYPE.VAULT]: [(v: BaseServices.Vault.Type) => this.onVaultRegistered(v)],
+    }
   }
 
   /**
    * Callback to run when the cloud provider has been registered
    * @param {ProviderService} provider the provider service
    */
-  onProviderRegistered(provider: BaseServices.Provider.Type): void {
-    this.providerService = provider;
+  onProviderRegistered(srv: BaseServices.Provider.Type): void {
+    if (srv.type !== SERVICE_TYPE.PROVIDER) {
+      return;
+    }
+
+    if (srv.provider !== this.provider) {
+      return;
+    }
+
+    this.providerService = srv;
   }
 
   /**
    * Callback to run when the vault service has been registered
    * @param {CloudService} vault the vault service
    */
-  onVaultRegistered(vault: BaseServices.Vault.Type) {
-    this.vault = vault;
+  onVaultRegistered(srv: BaseServices.Vault.Type) {
+    if (srv.type !== SERVICE_TYPE.VAULT) {
+      return;
+    }
+
+    if (srv.provider !== this.provider) {
+      return;
+    }
+
+    this.vault = srv;
   }
 
   /**
@@ -224,8 +222,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
     }
 
     // The target service is implicitly linked to the current one
-    const linked = this.associations().filter(({ lookup }) => lookup(service));
-    return linked.length > 0;
+    return has(this.associations(), service.type);
   }
 
   /**
@@ -259,8 +256,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
     }
 
     // Find the handlers that apply to the associated service
-    const assocs = this.associations();
-    const handlers = assocs.filter(({ lookup }) => lookup(association)).map(({ handler }) => handler);
+    const handlers = get(this.associations(), association.type);
 
     if (isEmpty(handlers)) {
       throw new Error(

@@ -3,7 +3,6 @@ import { existsSync as fileExistsSync } from 'node:fs';
 
 import { Memoize } from 'typescript-memoize';
 
-import { ProfileNotFoundError } from '@stackmate/engine/lib/errors';
 import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
 import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
 
@@ -87,7 +86,7 @@ class Profile {
         return {};
       }
 
-      throw new ProfileNotFoundError(name);
+      throw new Error(`The profile ${name} was not found in the system`);
     }
   }
 }

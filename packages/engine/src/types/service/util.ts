@@ -38,7 +38,6 @@ export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type>
   schema(): BaseJsonSchema;
 }
 
-export type ServiceAssociation = {
-  lookup: <T extends BaseService.Type>(a: T) => boolean;
-  handler: <T extends BaseService.Type>(a: T) => void;
+export type ServiceAssociations = {
+  [key: string]: [Function]
 };
