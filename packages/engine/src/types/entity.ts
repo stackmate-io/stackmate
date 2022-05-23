@@ -13,12 +13,11 @@ export type AttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> 
 export type NonAttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> extends never ? K : never]: T[K] };
 export type EntityTypeOf<T> = AttributesOf<T> & NonAttributesOf<T>;
 export type ValidationErrorList = { [attribute: string]: Array<string>; };
-export type EntityAttributes = { [name: string]: any; }
+export type EntityAttributes = Record<string, any>;
 
 export type BaseEntity = {
   get attributes(): EntityAttributes;
   set attributes(attrs: EntityAttributes);
-  get attributeNames(): (keyof EntityAttributes)[];
   validate(): void;
 }
 

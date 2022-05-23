@@ -9,28 +9,22 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
    * @var {Object} attributeState the state of the attributes
    * @private
    */
-  private attributeState: Attrs;
-
-  /**
-   * @returns {Array} the list of attribute names assigned to the entity
-   */
-  get attributeNames() {
-    return Object.keys(this.attributeState);
-  }
+  private attributeState: Partial<Attrs> = {};
 
   /**
    * @returns {Object} the attributes
    */
-  public get attributes(): Attrs {
+  public get attributes(): Partial<Attrs> {
     return this.attributeState;
   }
 
   /**
    * @param {Object} values the attribute values to set
    */
-  public set attributes(values: Attrs) {
-    Object.keys(values).forEach((attributeKey) => {
-      this.setAttribute(attributeKey, values[attributeKey]);
+  public set attributes(values: Partial<Attrs>) {
+    Object.keys(values).forEach((attributeKey: keyof Attrs) => {
+      Object.assign(this, { [attributeKey]: values[attributeKey] });
+      this.attributeState[attributeKey] = values[attributeKey];
     });
   }
 
@@ -53,37 +47,6 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
     */
 
     this.initialize();
-  }
-
-  /**
-   * Checks whether the entity has the attribute specified
-   *
-   * @param {String} name the name of the attribute to look up
-   * @returns {Boolean} whether the entity has the attribute specified
-   */
-  protected hasAttribute(name: string): boolean {
-    return this.attributeNames.includes(name);
-  }
-
-  /**
-   * Returns the value for an attribute
-   *
-   * @param {String} name the name of the attribute to get
-   * @returns {Any}
-   */
-  protected getAttribute(name: string): any {
-    return this.attributeState[name];
-  }
-
-  /**
-   * Sets an attribute value
-   *
-   * @param {String} name the name of the attribute to set
-   * @param {Any} value the value of the attribute to set
-   */
-  protected setAttribute(name: keyof Attrs, value: any): void {
-    Object.assign(this, { name: value });
-    this.attributeState[name] = value;
   }
 
   /**
@@ -114,12 +77,10 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
    * Instantiates and validates an entity
    *
    * @param {Object} attributes the entity's attributes
-   * @returns {Entity} the validated entity instance
+   * @returns {BaseEntity} the validated entity instance
    */
   static factory<T extends BaseEntity>(
-    this: BaseEntityConstructor<T>,
-    attributes: EntityAttributes,
-    ...args: any[]
+    this: BaseEntityConstructor<T>, attributes: EntityAttributes = {}, ...args: any[]
   ): T {
     const entity = new this(...args);
     entity.attributes = this.normalize(attributes);

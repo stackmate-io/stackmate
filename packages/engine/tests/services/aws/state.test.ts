@@ -15,7 +15,7 @@ describe('AwsS3State', () => {
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, bucket, stageName } = serviceConfig;
 
-      service = AwsS3State.factory(serviceConfig);
+      service = AwsS3State.factory<AwsS3State>(serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.STATE);
@@ -26,14 +26,6 @@ describe('AwsS3State', () => {
       expect(service.profile).toEqual(Profile.DEFAULT);
       expect(service.overrides).toEqual({});
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
-    });
-
-    it('returns the attribute names', () => {
-      service = AwsS3State.factory(serviceConfig);
-      expect(new Set(service.attributeNames)).toEqual(new Set([
-        'profile', 'overrides', 'projectName', 'stageName',
-        'bucket', 'name', 'region', 'links',
-      ]));
     });
   });
 

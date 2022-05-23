@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { ValidationError } from '@stackmate/engine/lib/errors';
-import { MockEntityWithDefaults, MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
+import { MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
 
 describe('Entity', () => {
   describe('setters / getter', () => {
@@ -28,12 +27,6 @@ describe('Entity', () => {
       expect(subject.number).toEqual(multiply(number));
     });
 
-    it('returns the attribute names', () => {
-      subject = new MockEntity();
-      subject.attributes = attributes;
-      expect(subject.attributeNames).toStrictEqual(['name', 'number']);
-    });
-
     it('instantiates an extended object', () => {
       subject = new ExtendedMockEntity();
       subject.attributes = extendedAttributes;
@@ -47,65 +40,6 @@ describe('Entity', () => {
       subject = new ExtendedMockEntity();
       subject.attributes = extendedAttributes;
       expect(subject).toBeInstanceOf(MockEntity);
-      expect(new Set(subject.attributeNames)).toEqual(new Set(['name', 'number', 'email']));
     });
-
-    it('returns whether the attribute exists on the entity', () => {
-      subject = new ExtendedMockEntity();
-      expect(subject.hasAttribute('name')).toBeTruthy();
-      expect(subject.hasAttribute('number')).toBeTruthy();
-      expect(subject.hasAttribute('email')).toBeTruthy();
-      expect(subject.hasAttribute('somethingWeird')).toBeFalsy();
-      expect(subject.hasAttribute('somethingWeirder')).toBeFalsy();
-    });
-  });
-
-  describe('parsers', () => {
-    it('parses the attribute values', () => {
-      const name: string = faker.name.firstName();
-      const number: number = faker.datatype.number();
-
-      const attributes = {
-        name: ` ${name} `, // notice the spaces
-        number: String(number),
-      };
-
-      const subject = new MockEntity();
-      subject.attributes = attributes;
-      expect(subject).toBeInstanceOf(MockEntity);
-      expect(subject.name).toEqual(name);
-      expect(subject.number).toEqual(multiply(number));
-    });
-  });
-
-  describe('validators', () => {
-    it('raises validation errors', () => {
-      const subject = new MockEntity();
-      subject.attributes = { name: '', number: 'abc' };
-      expect(subject).toBeInstanceOf(MockEntity);
-      try {
-        subject.validate();
-        throw new Error('Expected to throw within `validate` but did not');
-      } catch (error) {
-        const err: ValidationError = error as ValidationError;
-        expect(err).toBeInstanceOf(ValidationError);
-        expect(err.message).toEqual('The entity is invalid');
-        expect(err.errors).toBeInstanceOf(Object);
-        expect(err.errors).toMatchObject({
-          name: ['You have to specify a name to use'],
-          number: ['The number provided is invalid'],
-        });
-      }
-    });
-  });
-
-  describe('defaults', () => {
-    it('returns the entity’s defaults', () => {
-      const defs = MockEntityWithDefaults.defaults();
-      expect(defs).toMatchObject({
-        name: 'default-name',
-        number: 123456,
-      });
-    })
   });
 });

@@ -28,7 +28,7 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
   /**
    * @var {Number} storage the storage size for the instance
    */
-  storage: number;
+  storage: number = DEFAULT_SERVICE_STORAGE;
 
   /**
    * @var {String} database the database to create
