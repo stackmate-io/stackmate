@@ -16,11 +16,6 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   name: string;
 
   /**
-   * @var {String} region the region the service operates in
-   */
-  region: string;
-
-  /**
    * @var {String[]} links the list of service names that the current service
    *                                             is associated (linked) with
    */
@@ -175,16 +170,32 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * Callback to run when the cloud provider has been registered
    * @param {ProviderService} provider the provider service
    */
-  onProviderRegistered(provider: BaseServices.Provider.Type): void {
-    this.providerService = provider;
+  onProviderRegistered(srv: BaseServices.Provider.Type): void {
+    if (srv.type !== SERVICE_TYPE.PROVIDER) {
+      return;
+    }
+
+    if (srv.provider !== this.provider) {
+      return;
+    }
+
+    this.providerService = srv;
   }
 
   /**
    * Callback to run when the vault service has been registered
    * @param {CloudService} vault the vault service
    */
-  onVaultRegistered(vault: BaseServices.Vault.Type) {
-    this.vault = vault;
+  onVaultRegistered(srv: BaseServices.Vault.Type) {
+    if (srv.type !== SERVICE_TYPE.VAULT) {
+      return;
+    }
+
+    if (srv.provider !== this.provider) {
+      return;
+    }
+
+    this.vault = srv;
   }
 
   /**

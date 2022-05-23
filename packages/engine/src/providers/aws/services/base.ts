@@ -12,9 +12,26 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
   readonly provider: typeof PROVIDER.AWS = PROVIDER.AWS;
 
   /**
+   * @var {String} region the region the service operates in
+   */
+  region: string = AWS_DEFAULT_REGION;
+
+  /**
    * @var {ProviderService} providerService the cloud provider service
    */
   providerService: AWS.Provider.Type;
+
+  /**
+   * Callback to run when the cloud provider has been registered
+   * @param {ProviderService} provider the provider service
+   */
+  onProviderRegistered(srv: AWS.Provider.Type): void {
+    if (srv.region !== this.region) {
+      return;
+    }
+
+    super.onProviderRegistered(srv);
+  }
 
   /**
    * @returns {JsonSchema}
