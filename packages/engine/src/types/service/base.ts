@@ -6,7 +6,7 @@ import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
 import { VaultCredentialOptions } from '@stackmate/engine/types/project';
 import {
-  ProviderChoice, ServiceScopeChoice, ServiceTypeChoice, ServiceAssociation,
+  ProviderChoice, ServiceScopeChoice, ServiceTypeChoice, ServiceAssociations,
 } from '@stackmate/engine/types/service/util';
 
 // Base services
@@ -26,7 +26,7 @@ export interface BaseCloudService extends BaseEntity {
   isRegistered(): boolean;
   link(...targets: BaseService.Type[]): BaseService.Type;
   scope(name: ServiceScopeChoice): BaseService.Type;
-  associations(): ServiceAssociation[];
+  associations(): ServiceAssociations;
   isDependingUpon(service: BaseService.Type): boolean;
   register(stack: CloudStack): void;
   onPrepare(stack: CloudStack): void;

@@ -25,9 +25,3 @@ export class ValidationError extends Error {
     this.errors = errors;
   }
 }
-
-export class ProfileNotFoundError extends Error {
-  constructor(profileName: string) {
-    super(`The profile ${profileName} was not found in the system`);
-  }
-}

@@ -158,7 +158,7 @@ export namespace ProjectConfig {
 
     let errors = {};
     try {
-      Project.factory(config);
+      Project.factory<Project>(config);
     } catch (err) {
       if (err instanceof ValidationError) {
         errors = err.errors;
