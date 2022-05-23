@@ -18,7 +18,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   /**
    * @var {String} ip the CIDR block to use as a base for the service
    */
-  ip: string;
+  ip: string = DEFAULT_IP;
 
   /**
    * @var {Vpc} vpc the VPC to deploy the resources in

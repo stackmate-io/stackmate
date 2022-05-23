@@ -3,7 +3,7 @@ import App from '@stackmate/engine/lib/terraform/app';
 import Stack from '@stackmate/engine/lib/terraform/stack';
 import Entity from '@stackmate/engine/lib/entity';
 import { stackName, appName } from 'tests/fixtures/generic';
-import { Attribute, AttributesOf, CloudStack, JsonSchema } from '@stackmate/engine/types';
+import { Attribute, AttributesOf, CloudStack, JsonSchema, NonAttributesOf } from '@stackmate/engine/types';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 export const getMockApp = (name: string) => (
@@ -23,16 +23,15 @@ type MockEntityDesc = {
   number: Attribute<number>;
 }
 
-type MockEntityAttributeSet = AttributesOf<MockEntityDesc>;
+type MockEntityAttributes = AttributesOf<MockEntityDesc>;
+type MockEntityType = MockEntityAttributes & NonAttributesOf<MockEntityDesc>
 
-export class MockEntity extends Entity implements MockEntityDesc {
+export class MockEntity extends Entity<MockEntityAttributes> implements MockEntityType {
   public validationMessage: string = 'The entity is invalid';
+  name: string;
+  number: number;
 
-  name: Attribute<string>;
-
-  number: Attribute<number>;
-
-  static schema(): JsonSchema<MockEntityAttributeSet> {
+  static schema(): JsonSchema<MockEntityAttributes> {
     return {
       type: 'object',
       required: ['name'],
@@ -55,18 +54,18 @@ export class MockEntity extends Entity implements MockEntityDesc {
   }
 }
 
-type MockEntityExtendedDesc = {
-  name: Attribute<string>;
-  number: Attribute<number>;
+type MockEntityExtendedDesc = MockEntityDesc & {
+  email: Attribute<string>;
 }
 
-type MockEntityExtendedAttributeSet = AttributesOf<MockEntityExtendedDesc>;
+type MockEntityExtendedAttributes = AttributesOf<MockEntityExtendedDesc>;
+type MockEntityExtendedType = MockEntityExtendedAttributes & NonAttributesOf<MockEntityExtendedDesc>;
 
-export class ExtendedMockEntity extends MockEntity implements MockEntityExtendedDesc {
-  email: Attribute<string>;
+export class ExtendedMockEntity extends MockEntity implements MockEntityExtendedType {
+  email: string;
 
-  static schema(): JsonSchema<MockEntityExtendedAttributeSet> {
-    return mergeJsonSchemas<MockEntityAttributeSet, MockEntityExtendedAttributeSet>(super.schema(), {
+  static schema(): JsonSchema<MockEntityExtendedAttributes> {
+    return mergeJsonSchemas(super.schema(), {
       required: ['email'],
       properties: {
         email: {
@@ -80,6 +79,6 @@ export class ExtendedMockEntity extends MockEntity implements MockEntityExtended
 }
 
 export class MockEntityWithDefaults extends MockEntity {
-  name: Attribute<string> = 'default-name';
-  number: Attribute<number> = 123456;
+  name: string = 'abc123456';
+  number: number = 123456;
 }

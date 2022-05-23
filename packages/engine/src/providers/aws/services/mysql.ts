@@ -20,7 +20,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
   /**
    * @var {String} version the version to provision
    */
-  version = '8.0';
+  version = RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql')!;
 
   /**
    * @var {Number} port the port to use for connecting

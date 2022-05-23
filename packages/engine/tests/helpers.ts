@@ -163,7 +163,7 @@ export const getServiceRegisterationResults = async ({
 export const deployProject = (projectConfig: object, stageName: string = 'production' ): {
   scope: string, stack: CloudStack, output: string,
 } => {
-  const project = Project.factory(projectConfig);
+  const project = Project.factory<Project>(projectConfig);
   const outputPath = os.tmpdir();
   const operation = new DeployOperation(project, stageName, { outputPath });
   const scope = operation.synthesize();

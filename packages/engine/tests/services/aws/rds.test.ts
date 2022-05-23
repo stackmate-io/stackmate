@@ -16,7 +16,7 @@ describe('AwsRdsService', () => {
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, size, storage, database, stageName } = serviceConfig;
 
-      service = AwsRdsService.factory(serviceConfig);
+      service = AwsRdsService.factory<AwsRdsService>(serviceConfig);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.MYSQL);
@@ -30,15 +30,6 @@ describe('AwsRdsService', () => {
       expect(service.profile).toEqual(Profile.DEFAULT);
       expect(service.overrides).toEqual({});
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
-    });
-
-    it('returns the attribute names', () => {
-      service = AwsRdsService.factory(serviceConfig);
-      expect(new Set(service.attributeNames)).toEqual(new Set([
-        'size', 'storage', 'version', 'database', 'nodes',
-        'profile', 'overrides', 'projectName', 'stageName',
-        'engine', 'port', 'name', 'region', 'links',
-      ]));
     });
   });
 
