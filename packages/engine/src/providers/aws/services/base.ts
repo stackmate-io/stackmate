@@ -1,8 +1,8 @@
 import Service from '@stackmate/engine/core/service';
+import { AWS } from '@stackmate/engine/types';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { AWS } from '@stackmate/engine/types';
 
 abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
   /**
@@ -52,6 +52,11 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
           errorMessage: `The region is invalid. Available options are: ${regionValues.join(', ')}`,
         },
       },
+    });
+  }
+
+  static defaults(): AWS.Base.Defaults {
+    return Object.assign({}, super.defaults(), {
     });
   }
 }

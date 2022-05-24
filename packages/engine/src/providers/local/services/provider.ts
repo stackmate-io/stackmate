@@ -28,7 +28,7 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
    * @returns {String} the alias to use for the provider
    */
   public get alias(): string {
-    return `${snakeCase(this.provider)}_${snakeCase(this.region)}`;
+    return `${snakeCase(this.provider)}_${this.type}`;
   }
 
   /**

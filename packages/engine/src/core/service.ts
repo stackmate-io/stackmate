@@ -1,12 +1,12 @@
 import { Memoize } from 'typescript-memoize';
-import { fromPairs, get, has, isEmpty, merge } from 'lodash';
+import { get, has, isEmpty, merge } from 'lodash';
 
 import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociations,
-  EntityAttributes, CloudStack, ServiceConstructor, BaseService, BaseServices,
+  CloudStack, BaseService, BaseServices,
 } from '@stackmate/engine/types';
 
 abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
@@ -320,26 +320,6 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
         },
       },
     };
-  }
-
-  /**
-   * Returns the service's default values
-   *
-   * @returns {Object} the service's default values
-   */
-  static defaults(this: ServiceConstructor): Partial<EntityAttributes> {
-    const { properties = {} } = this.schema();
-
-    if (isEmpty(properties)) {
-      return {};
-    }
-
-    const pairs = Object.entries(properties).map(([key, property]) => {
-      const { default: defaultValue = null } = property as { default?: any };
-      return [key, defaultValue];
-    });
-
-    return fromPairs(pairs);
   }
 }
 

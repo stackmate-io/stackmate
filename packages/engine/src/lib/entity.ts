@@ -64,16 +64,6 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
   protected initialize(): void {}
 
   /**
-   * Normalizes the entity's attributes
-   *
-   * @param {EntityAttributes} attributes the attributes to normalize
-   * @returns {EntityAttributes} the normalized attributes
-   */
-  static normalize(attributes: EntityAttributes): EntityAttributes {
-    return attributes;
-  }
-
-  /**
    * Instantiates and validates an entity
    *
    * @param {Object} attributes the entity's attributes
@@ -83,7 +73,7 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
     this: BaseEntityConstructor<T>, attributes: EntityAttributes = {}, ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = this.normalize(attributes);
+    entity.attributes = attributes;
     entity.validate();
     return entity;
   }

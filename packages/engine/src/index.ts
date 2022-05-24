@@ -1,4 +1,4 @@
-import { fromPairs, isEmpty, isNil, omitBy } from 'lodash';
+import { fromPairs } from 'lodash';
 
 import Project from './core/project';
 import Registry from './core/registry';
@@ -6,26 +6,15 @@ import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
 import { AWS_REGIONS } from './providers/aws/constants';
-import { ValidationError } from './lib/errors';
+import { generateWords } from './lib/helpers';
+import { DEFAULT_REGION, PROVIDER, SERVICE_TYPE } from './constants';
 import {
-  DEFAULT_PROFILE_NAME,
-  DEFAULT_STATE_SERVICE_NAME,
-  DEFAULT_VAULT_SERVICE_NAME,
-  PROVIDER, SERVICE_TYPE,
-} from './constants';
-import {
-  OperationConstructor,
   OperationOptions,
   PrepareOperationOptions,
-  ProjectConfiguration,
-  ProviderChoice,
   ServiceTypeChoice,
-  StackmateOperation,
-  ProjectConfigOptions,
-  ServiceConfigurationDeclaration,
-  EntityAttributes,
-  ServiceConstructor,
+  ProjectConfigCreationOptions,
   Project as StackmateProject,
+  ProjectConfiguration,
 } from './types';
 
 // Export types
@@ -46,57 +35,8 @@ export {
   Registry,
 };
 
-/**
- * Returns an operation based on a given class
- *
- * @param {OperationConstructor} Cls the class to instantiate
- * @param {ProjectConfiguration} config the project's configuration
- * @param {String} stage the stage to operate
- * @param {OperationOptions} options any options to pass to the operation
- * @returns {StackmateOperation} the operation instance
- */
-const getOperation = (
-  Cls: OperationConstructor,
-  config: ProjectConfiguration,
-  stage: string,
-  options: OperationOptions = {},
-): StackmateOperation => {
-  const project = Project.factory<StackmateProject.Type>(config)
-  return new Cls(project, stage, options);
-};
-
 // Project configuration
 export namespace ProjectConfig {
-  /**
-   * Returns the service's defaults
-   *
-   * @param {ProviderChoice} provider the provider to get the service attributes for
-   * @param {ServiceTypeChoice} service the service type
-   * @returns {Object} the service's defaults
-   */
-  export const serviceDefaults = (
-    provider: ProviderChoice,
-    service: ServiceTypeChoice,
-    region: string,
-    impliedDefaults: Partial<EntityAttributes> = {},
-  ): Partial<ServiceConfigurationDeclaration> => {
-    let serviceProvider: ProviderChoice = provider;
-    const serviceProviders = Registry.providers(service);
-
-    if (!serviceProviders.includes(provider)) {
-      ([serviceProvider] = serviceProviders);
-    }
-
-    const srv: ServiceConstructor = Registry.get(serviceProvider, service);
-    const attrs = { ...srv.defaults(), type: service, provider, region };
-
-    return omitBy(attrs, (val, key) => (
-      isNil(val) || isEmpty(val) || (
-        Boolean(impliedDefaults[key]) && impliedDefaults[key] === val
-      )
-    ));
-  }
-
   /**
    * Populates a project's configuration by
    *
@@ -111,62 +51,41 @@ export namespace ProjectConfig {
    * @returns {EntityAttributes}
    */
   export const populate = ({
-    name,
+    projectName = '',
     defaultProvider = PROVIDER.AWS,
     stateProvider = PROVIDER.AWS,
     secretsProvider = PROVIDER.AWS,
     defaultRegion = AWS_REGIONS.EU_CENTRAL_1,
     stageNames = ['production'],
     serviceTypes = [],
-  }: ProjectConfigOptions): [ProjectConfiguration, object] => {
+  }: ProjectConfigCreationOptions): ProjectConfiguration => {
     const [defaultStage, ...otherStages] = stageNames;
-    const impliedDefaults = {
-      provider: defaultProvider,
-      region: defaultRegion,
-      profile: DEFAULT_PROFILE_NAME,
-    };
-
-    const state = serviceDefaults(stateProvider, SERVICE_TYPE.STATE, defaultRegion, {
-      ...impliedDefaults,
-      type: SERVICE_TYPE.STATE,
-      name: DEFAULT_STATE_SERVICE_NAME,
-    });
-
-    const secrets = serviceDefaults(secretsProvider, SERVICE_TYPE.VAULT, defaultRegion, {
-      ...impliedDefaults,
-      type: SERVICE_TYPE.VAULT,
-      name: DEFAULT_VAULT_SERVICE_NAME,
-    });
+    const provider = defaultProvider || PROVIDER.AWS;
+    const region = defaultRegion || DEFAULT_REGION[provider];
+    const name = projectName || generateWords({ words: 2 });
 
     const config = {
       name,
-      provider: defaultProvider,
-      region: defaultRegion,
-      state,
-      secrets,
+      provider,
+      region,
+      state: Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config(),
+      secrets: Registry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config(),
       stages: {
         [defaultStage]: fromPairs(
-          serviceTypes.map((service: ServiceTypeChoice) => (
-            [service, serviceDefaults(defaultProvider, service, defaultRegion, impliedDefaults)]
+          serviceTypes.map((type: ServiceTypeChoice) => (
+            [generateWords({ suffix: type }), Registry.get(provider, type).config()]
           )),
         ),
         ...fromPairs(
-          otherStages.map((stg: string) => ([stg, { from: defaultStage }])),
+          otherStages.map((stg: string) => ([stg, { copy: defaultStage }])),
         ),
       },
     };
 
-    let errors = {};
-    try {
-      Project.factory<Project>(config);
-    } catch (err) {
-      if (err instanceof ValidationError) {
-        errors = err.errors;
-        console.log('errors', require('util').inspect(err));
-      }
-    }
+    // Validate the configuration
+    Project.factory<StackmateProject.Type>(config);
 
-    return [config, errors];
+    return config;
   };
 }
 
@@ -181,9 +100,9 @@ export namespace Operations {
    * @returns {DeployOperation} the operation instance
    */
   export const deployment = (
-    config: ProjectConfiguration, stage: string, options: OperationOptions = {},
+    config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
   ) => (
-    getOperation(DeployOperation, config, stage, options)
+    new DeployOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
   );
 
   /**
@@ -195,9 +114,9 @@ export namespace Operations {
    * @returns {DeployOperation} the operation instance
    */
   export const destroy = (
-    config: ProjectConfiguration, stage: string, options: OperationOptions = {},
+    config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
   ) => (
-    getOperation(DestroyOperation, config, stage, options)
+    new DestroyOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
   );
 
   /**
@@ -209,8 +128,8 @@ export namespace Operations {
    * @returns {DeployOperation} the operation instance
    */
   export const prepare = (
-    config: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
+    config: StackmateProject.Attributes, stage: string, options: PrepareOperationOptions = {},
   ) => (
-    getOperation(PrepareOperation, config, stage, options)
+    new PrepareOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
   );
 };

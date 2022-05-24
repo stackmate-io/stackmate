@@ -4,9 +4,13 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
-import { VaultCredentialOptions } from '@stackmate/engine/types/project';
 import {
-  ProviderChoice, ServiceScopeChoice, ServiceTypeChoice, ServiceAssociations,
+  ProviderChoice,
+  ServiceScopeChoice,
+  ServiceTypeChoice,
+  ServiceAssociations,
+  VaultCredentialOptions,
+  CloudProviderChoice,
 } from '@stackmate/engine/types/service/util';
 
 // Base services
@@ -23,6 +27,7 @@ export interface BaseCloudService extends BaseEntity {
   // Common across all services
   vault: BaseServices.Vault.Type;
   identifier: string;
+  region?: Attribute<string>;
   isRegistered(): boolean;
   link(...targets: BaseService.Type[]): BaseService.Type;
   scope(name: ServiceScopeChoice): BaseService.Type;
@@ -59,6 +64,7 @@ export interface BaseProviderService extends BaseCloudService {
 }
 
 export interface BaseVaultService extends BaseCloudService {
+  readonly provider: Attribute<CloudProviderChoice>;
   readonly type: Attribute<typeof SERVICE_TYPE.VAULT>;
   credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
@@ -72,6 +78,7 @@ export namespace BaseService {
   export type Attributes = AttributesOf<BaseCloudService>;
   export type Type = Attributes & NonAttributesOf<BaseCloudService>;
   export type Schema = JsonSchema<Attributes>;
+  export type Defaults = Omit<Attributes, 'provider' | 'type'>;
 }
 
 export namespace BaseServices {

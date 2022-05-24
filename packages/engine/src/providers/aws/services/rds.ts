@@ -133,10 +133,6 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
           default: 1,
           minimum: 1,
         },
-        engine: {
-          type: 'string',
-          enum: RDS_ENGINES,
-        },
         version: {
           type: 'string',
         },

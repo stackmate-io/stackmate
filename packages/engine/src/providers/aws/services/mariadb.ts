@@ -13,7 +13,7 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
   /**
    * @var {String} engine the engine for the database
    */
-  engine: Extract<typeof RDS_ENGINES[number], 'mariadb'> = 'mariadb';
+  readonly engine: Extract<typeof RDS_ENGINES[number], 'mariadb'> = 'mariadb';
 
   /**
    * @var {String} version the version to provision
@@ -28,9 +28,6 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
   static schema(): AWS.MariaDB.Schema {
     return mergeJsonSchemas(super.schema(), {
       properties: {
-        engine: {
-          const: 'mariadb',
-        },
         vesion: {
           default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mariadb'),
           enum: RDS_MAJOR_VERSIONS_PER_ENGINE.get('mariadb'),

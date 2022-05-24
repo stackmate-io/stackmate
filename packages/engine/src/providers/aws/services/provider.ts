@@ -45,6 +45,10 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
    */
   resource: TerraformProvider;
 
+  get name(): string {
+    return 'abc-defg';
+  }
+
   /**
    * @returns {Boolean} whether the service is registered in the stack
    */

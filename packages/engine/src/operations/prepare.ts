@@ -29,10 +29,13 @@ class PrepareOperation extends Operation {
       this.project.name, this.stageName, this.options.outputPath,
     );
 
-    provisioner.services = [
-      this.localState.scope('deployable'),
-      ...this.services.map(srv => srv.scope('preparable')),
-    ];
+    const services = this.services.filter(
+      srv => srv.type !== SERVICE_TYPE.STATE,
+    ).map(
+      srv => srv.scope('preparable'),
+    );
+
+    provisioner.services = [this.localState.scope('deployable'), ...services ];
 
     return provisioner;
   }

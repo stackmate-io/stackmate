@@ -1,103 +1,65 @@
-import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
 import { JsonSchema } from '@stackmate/engine/types/schema';
+import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
 import {
-  ProviderChoice,
-  ServiceAttributes,
-  ServiceConfigurationDeclaration,
+  BaseService,
+  BaseServices,
+  CloudProviderChoice,
+  CloudServiceAttributes,
+  CloudServiceConfiguration,
   ServiceTypeChoice,
+  StateServiceAttributes,
+  VaultServiceAttributes,
 } from '@stackmate/engine/types/service';
 
+export type StageCopy = { copy?: string, skip?: string[] };
 export type StageConfiguration = {
-  [srv: string]: ServiceConfigurationDeclaration;
+  [service: string]: CloudServiceConfiguration<CloudServiceAttributes>;
 };
-
-export type StageCopy = {
-  from?: string;
-  skip?: Array<string>;
-}
-
-export type StageDeclarations = {
-  [name: string]: StageConfiguration | StageConfiguration & StageCopy | StageCopy;
+export type StagesConfiguration = {
+  [stage: string]: StageConfiguration & StageCopy | StageCopy;
 };
-
-export type VaultConfiguration = {
-  provider?: ProviderChoice;
-  key?: string;
-  region?: string;
-  path?: string;
-};
-
-export type StateConfiguration = {
-  provider?: ProviderChoice;
-  key?: string;
-  region?: string;
-  bucket?: string;
-}
-
 export type ProjectConfiguration = {
-  name?: string;
-  provider?: string;
-  secrets?: VaultConfiguration;
-  state?: StateConfiguration;
-  region?: string;
-  stages?: StageDeclarations;
+  name: string;
+  provider: CloudProviderChoice;
+  region: string;
+  state?: StateServiceAttributes;
+  secrets?: VaultServiceAttributes;
+  stages: StagesConfiguration;
 };
 
-export type StagesAttributes = {
-  [name: string]: {
-    [serviceName: string]: ServiceAttributes;
-  };
-};
 
-export type NormalizedStage = {
-  [serviceName: string]: ServiceAttributes;
+const p: ProjectConfiguration = {
+  name: 'omg',
+  provider: 'aws',
+  region: 'eu-central-1',
+  state: {
+    provider: 'local',
+  },
+  stages: {
+    production: {
+      database: {
+        name: 'omg',
+        type: 'mariadb',
+        database: 'omg',
+        profile: 'default'
+      },
+    },
+    staging: {
+      copy: 'production',
+      skip: ['database'],
+    }
+  }
 }
 
-export type StagesNormalizedAttributes = {
-  [name: string]: NormalizedStage;
-};
-
-export type NormalizedStages = {
-  [name: string]: ServiceAttributes;
-};
-
-export type NormalizedProjectConfiguration = {
-  name: string;
-  provider: ProviderChoice,
-  region: string,
-  stages: StagesNormalizedAttributes;
-  secrets: VaultConfiguration,
-  state: StateConfiguration,
-};
-
-export type ResourceProfile = {
-  [attribute: string]: object;
-};
-
-export type ProjectConfigOptions = {
-  name: string,
-  defaultProvider?: ProviderChoice,
-  defaultRegion?: string,
-  stageNames?: string[],
-  stateProvider?: ProviderChoice,
-  secretsProvider?: ProviderChoice,
-  serviceTypes?: ServiceTypeChoice[],
-};
-
-export type VaultCredentialOptions = {
-  length?: number;
-  root?: Boolean;
-  special?: Boolean;
-  exclude?: string[],
-};
 
 export interface ProjectEntity extends BaseEntity {
   name: Attribute<string>;
-  provider: Attribute<ProviderChoice>;
+  provider: Attribute<CloudProviderChoice>;
   region: Attribute<string>;
-  secrets: Attribute<VaultConfiguration>;
-  state: Attribute<StateConfiguration>;
-  stages: Attribute<StagesNormalizedAttributes>;
+  secrets: Attribute<BaseServices.Vault.Attributes>;
+  state: Attribute<BaseServices.State.Attributes>;
+  stages: Attribute<StagesConfiguration>;
+  stage(name: string): BaseService.Type[];
 }
 
 export namespace Project {
@@ -105,3 +67,14 @@ export namespace Project {
   export type Type = Attributes & NonAttributesOf<ProjectEntity>;
   export type Schema = JsonSchema<Attributes>;
 }
+
+// Options to provide when creating a project
+export type ProjectConfigCreationOptions = {
+  projectName?: string,
+  defaultProvider?: CloudProviderChoice,
+  defaultRegion?: string,
+  stageNames?: string[],
+  stateProvider?: CloudProviderChoice,
+  secretsProvider?: CloudProviderChoice,
+  serviceTypes?: ServiceTypeChoice[],
+};

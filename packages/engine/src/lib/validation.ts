@@ -10,7 +10,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { isKeySubset } from '@stackmate/engine/lib/helpers';
 import {
   CredentialsObject, ProviderChoice, ServiceTypeChoice,
-  StagesNormalizedAttributes, StateConfiguration, VaultConfiguration,
+  StateConfiguration, VaultConfiguration,
 } from '@stackmate/engine/types';
 
 namespace Validator {
@@ -24,7 +24,7 @@ namespace Validator {
    * @param {Object} stages The stages configuration
    * @returns {String|undefined} The validation error message (if any)
    */
-  export const validateStages = (stages: StagesNormalizedAttributes) => {
+  export const validateStages = (stages: { [name: string]: object }) => {
     if (isEmpty(stages) || !isObject(stages)) {
       return 'You have to provide a set of stages for the project, in the form of an object';
     }
