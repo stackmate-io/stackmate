@@ -298,10 +298,10 @@
   resolved "https://registry.yarnpkg.com/@cdktf/provider-aws/-/provider-aws-5.0.52.tgz#f13c01a6e51263b9f306c0d45f3307e6c2b44555"
   integrity sha512-FVCL1DNtLiQIm6tcoHepieTZJ5cbGTE2rMqcxNPN2oelXqYTef6ln4iEYg55uRqpSk7STw7kMG8EK8+6zVJlyw==
 
-"@cdktf/provider-local@^0.4.62":
-  version "0.4.62"
-  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.4.62.tgz#fe140b88b1e999061a413e110b47edb61bde4359"
-  integrity sha512-UDqgCee20HRsw6x3MWPTFNUPXbwEkAYV/CPoGdjdzB06ms6cq1Q+5HJLtjuqJtOMPQ+x5s9h2WLUu8WUgwPFTQ==
+"@cdktf/provider-local@^0.4.64":
+  version "0.4.64"
+  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.4.64.tgz#8f0bc72ff9d5c40c79fb7a1b0cf6309d2072da2b"
+  integrity sha512-Cnwmk7o5+0DqBICE2FPT9cuhVzuCpqfBHbSC6s9FvFMiAK0Il5r8e20G7oN132dkKbmj/+6ZpMATvrgxz0tZNA==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -3082,10 +3082,10 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
 
-constructs@^10.1.14:
-  version "10.1.14"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.14.tgz#ffdcb3df479b4fc38ca95ed1c46fe1ee68b63940"
-  integrity sha512-EMyPTSRrUXQLv8Y1k7Y0zHJfjmsywC5wcbhgNQLT3OTXdo8kVbHckHBbmjuIHw05rdf5rKmg92wzpLbHjh5yiQ==
+constructs@^10.1.15:
+  version "10.1.16"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.16.tgz#01acfd7e7dcf86f386a37e70006fde37f17c6355"
+  integrity sha512-X5jdsYqpQ+d7jQZd1Cwoi5QQLNm3QrRYdVcHMB2WiCzjfjxOhcCELj2jEdJtAYprj5m6wg4hXhSHdCL7Rgj+Ow==
 
 content-type@^1.0.4:
   version "1.0.4"
