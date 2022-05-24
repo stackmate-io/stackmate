@@ -15,7 +15,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
   /**
    * @var {String} engine the engine for the database
    */
-  engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
+  readonly engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
 
   /**
    * @var {String} version the version to provision
@@ -36,10 +36,6 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
         type: {
           type: 'string',
           const: SERVICE_TYPE.MYSQL,
-        },
-        engine: {
-          type: 'string',
-          const: 'mysql',
         },
         version: {
           type: 'string',

@@ -1,8 +1,5 @@
-import { Memoize } from 'typescript-memoize';
-import { isEmpty, pick, uniq, uniqBy } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
-import ServicesRegistry from '@stackmate/engine/core/registry';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   Project,
   BaseService,
@@ -24,6 +21,11 @@ abstract class Operation implements StackmateOperation {
   protected readonly stageName: string;
 
   /**
+   * @var {BaseService.Type[]} services the list of services to deploy
+   */
+  readonly services: BaseService.Type[]
+
+  /**
    * @var {Object} options any additional options for the operation
    */
   protected readonly options: OperationOptions = {};
@@ -39,9 +41,8 @@ abstract class Operation implements StackmateOperation {
    * @param {String} stageName the name of the stage we're provisioning
    * @param {Object} options any additional options for the operation
    */
-  constructor(project: Project.Type, stageName: string, options: OperationOptions = {}) {
-    this.project = project;
-    this.stageName = stageName;
+  constructor(services: BaseService.Type[], options: OperationOptions = {}) {
+    this.services = services;
     this.options = options;
   }
 
@@ -54,32 +55,6 @@ abstract class Operation implements StackmateOperation {
     }
 
     return uniq(this.services.map(srv => srv.provider));
-  }
-
-  /**
-   * @returns {Array<CloudService>} the list of services associated with the stage
-   */
-  @Memoize() get services(): BaseService.Type[] {
-    const { PROVIDER, VAULT, STATE } = SERVICE_TYPE;
-    const { secrets, state, stages: { [this.stageName]: stage } } = this.project;
-    const serviceAtrs = Object.values(stage);
-    const defaults = { projectName: this.project.name, stageName: this.stageName };
-
-    const prerequisites = [
-      { type: VAULT, ...defaults, ...secrets },
-      { type: STATE, ...defaults, ...state },
-    ];
-
-    const providers = uniqBy(serviceAtrs.map(srv => pick(srv, 'provider', 'region')), attrs => (
-      Object.keys(attrs).join('-')
-    )).map(({ provider, region }) => ({
-      type: PROVIDER, name: `provider-${provider}-${region}`, provider, region, ...defaults,
-    }));
-
-    return [...providers, ...prerequisites, ...Object.values(stage)].map(srv => {
-      const { type, provider } = srv;
-      return ServicesRegistry.get(provider!, type).factory({ ...srv, ...defaults });
-    });
   }
 
   /**

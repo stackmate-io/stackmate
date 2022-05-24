@@ -9,7 +9,7 @@ import Project from '@stackmate/engine/core/project';
 import DeployOperation from '@stackmate/engine/operations/deploy';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
-import { CloudStack, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/engine/types';
+import { BaseService, CloudStack, ProviderChoice, ServiceScopeChoice } from '@stackmate/engine/types';
 import { getService } from '@stackmate/engine/core/registry';
 
 /**
@@ -109,11 +109,13 @@ export const getPrerequisites = ({ provider, stack, scope }: {
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
+  stageName,
   serviceConfig,
   serviceScope = 'deployable',
   prerequisitesScope = 'deployable',
 }: {
-  serviceConfig: ServiceAttributes;
+  stageName: string,
+  serviceConfig: BaseService.Attributes;
   serviceScope?: ServiceScopeChoice,
   prerequisitesScope?: ServiceScopeChoice,
 }): Promise<{
@@ -124,7 +126,7 @@ export const getServiceRegisterationResults = async ({
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;
 
-    const { provider, stageName } = serviceConfig;
+    const { provider } = serviceConfig;
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {

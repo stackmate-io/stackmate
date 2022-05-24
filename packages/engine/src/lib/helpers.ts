@@ -1,5 +1,6 @@
 import fs from 'fs';
 import crypto from 'crypto';
+import wordGenerator from 'project-name-generator';
 import { Address4 } from 'ip-address';
 import { ComplementOf, JsonSchema, } from '@stackmate/engine/types';
 import { isObject, merge, sampleSize, uniq } from 'lodash';
@@ -139,3 +140,18 @@ export const mergeJsonSchemas = <Base extends Partial<T>, T extends Base>(
     required: uniq([...sourceRequired, ...targetRequired]),
   };
 };
+
+/**
+ * Generates a random string that kind of makes sense
+ *
+ * @param {Object} options the options for the generation
+ * @param {String} options.prefix any prefix to include to the generated words
+ * @param {Number} options.words the number of words to generate
+ * @param {String} options.suffix any prefix to include to the generated words
+ * @returns {String} the generated words
+ */
+export const generateWords = (
+  { prefix = '', words = 2, suffix = '' }: { prefix?: string, words?: number, suffix?: string } = {},
+): string => (
+  `${prefix}${wordGenerator({ words }).dashed}`
+);

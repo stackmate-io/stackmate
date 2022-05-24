@@ -24,6 +24,5 @@ export type BaseEntity = {
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   prototype: T;
   new(...args: any[]): T;
-  normalize(attributes: EntityAttributes): EntityAttributes;
   factory(this: ConstructorOf<T>, ...args: any[]): T;
 }

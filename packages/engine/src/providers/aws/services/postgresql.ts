@@ -15,7 +15,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
   /**
    * @var {String} engine the engine for the database
    */
-  engine: Extract<typeof RDS_ENGINES[number], 'postgres'> = 'postgres';
+  readonly engine: Extract<typeof RDS_ENGINES[number], 'postgres'> = 'postgres';
 
   /**
    * @var {String} version the version to provision
@@ -36,10 +36,6 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
         type: {
           type: 'string',
           const: SERVICE_TYPE.POSTGRESQL,
-        },
-        engine: {
-          type: 'string',
-          const: 'postgres',
         },
         version: {
           default: get(RDS_DEFAULT_VERSIONS_PER_ENGINE, 'postgres'),

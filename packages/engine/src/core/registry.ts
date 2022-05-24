@@ -4,7 +4,7 @@ import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceAttributes, ServiceScopeChoice, ServiceTypeChoice,
+  ProviderChoice, BaseService, ServiceScopeChoice, ServiceTypeChoice,
   ServiceConstructor, ServiceRegistry as CloudServiceRegistry,
 } from '@stackmate/engine/types';
 
@@ -102,12 +102,12 @@ registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
 /**
  * Returns a service instance based on its attributes
  *
- * @param {ServiceAttributes} attrs the attributes to instantiate the service by
+ * @param {BaseService.Attributes} attrs the attributes to instantiate the service by
  * @param {ServiceScopeChoice} scope the scope to apply to the service
  * @returns {CloudService} the service instantiated and with the scope applied
  */
-export const getService = (
-  attrs: ServiceAttributes, scope: ServiceScopeChoice = 'deployable',
+export const getService = <T extends BaseService.Attributes>(
+  attrs: T, scope: ServiceScopeChoice = 'deployable',
 ) => {
   const { provider, type } = attrs;
   return registry.get(provider, type).factory(attrs).scope(scope);

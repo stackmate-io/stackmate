@@ -32,10 +32,10 @@ type AwsStateService = AwsService<BaseStateService> & {
   backendResource: S3Backend;
 }
 type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> = AwsService<Srv> & {
+  readonly engine: typeof RDS_ENGINES[number];
   size: Attribute<typeof RDS_INSTANCE_SIZES[number]>;
   nodes: Attribute<number>;
   database: Attribute<string>;
-  engine: Attribute<typeof RDS_ENGINES[number]>;
   version: Attribute<string>;
   port: Attribute<number>;
   instance: DbInstance;
@@ -43,13 +43,13 @@ type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> =
 };
 type AwsVaultService = AwsService<BaseVaultService>;
 type AwsMySQLDatabaseService = AwsDatabaseService<BaseMySQLDatabaseService> & {
-  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'mysql'>)>;
+  readonly engine: Extract<typeof RDS_ENGINES[number], 'mysql'>;
 }
 type AwsPostgreSQLDatabaseService = AwsDatabaseService<BasePostgreSQLDatabaseService> & {
-  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'postgres'>)>;
+  engine: Extract<typeof RDS_ENGINES[number], 'postgres'>;
 };
 type AwsMariaDBDatabaseService = AwsDatabaseService<BaseMariaDBDatabaseService> & {
-  engine: Attribute<(Extract<typeof RDS_ENGINES[number], 'mariadb'>)>;
+  engine: Extract<typeof RDS_ENGINES[number], 'mariadb'>;
 }
 
 export namespace AWS {
