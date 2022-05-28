@@ -1,4 +1,4 @@
-import { fromPairs } from 'lodash';
+import { camelCase, fromPairs } from 'lodash';
 
 import Project from './core/project';
 import Registry from './core/registry';
@@ -6,7 +6,7 @@ import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
 import { AWS_REGIONS } from './providers/aws/constants';
-import { generateWords } from './lib/helpers';
+import { generateWords, uniqueIdentifier } from './lib/helpers';
 import { DEFAULT_REGION, PROVIDER, SERVICE_TYPE } from './constants';
 import {
   OperationOptions,
@@ -62,12 +62,17 @@ export namespace ProjectConfig {
     stageNames = ['production'],
     serviceTypes = [],
   }: ProjectConfigCreationOptions): ProjectConfiguration => {
-    const [defaultStage, ...otherStages] = stageNames;
+    const [stageName, ...otherStages] = stageNames;
     const provider = defaultProvider || PROVIDER.AWS;
     const region = defaultRegion || DEFAULT_REGION[provider];
     const name = projectName || generateWords({ words: 2 });
-    const state = Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config();
-    const vault = Registry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config();
+
+    const state = Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config({
+      projectName: name, stageName,
+    });
+    const vault = Registry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config({
+      projectName: name, stageName,
+    });
 
     const config = {
       name,
@@ -76,13 +81,19 @@ export namespace ProjectConfig {
       state: state as CoreServiceConfiguration<StateServiceAttributes>,
       secrets: vault as CoreServiceConfiguration<VaultServiceAttributes>,
       stages: {
-        [defaultStage]: fromPairs(
-          serviceTypes.map((type: ServiceTypeChoice) => (
-            [generateWords({ suffix: type }), Registry.get(provider, type).config()]
-          )),
+        [stageName]: fromPairs(
+          serviceTypes.map((type: ServiceTypeChoice) => {
+            const cfg = Registry.get(provider, type).config({
+              projectName: name,
+              stageName: stageName,
+            });
+
+            const serviceName = camelCase(cfg.name || uniqueIdentifier(type, { stageName }));
+            return [serviceName, cfg];
+          }),
         ),
         ...fromPairs(
-          otherStages.map((stg: string) => ([stg, { copy: defaultStage }])),
+          otherStages.map((stg: string) => ([stg, { copy: stageName }])),
         ),
       },
     };

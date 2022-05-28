@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { hashString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> implements AWS.PostgreSQL.Type {
@@ -57,10 +57,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
     return {
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.POSTGRESQL,
-      name: [
-        'postgresql-database',
-        stageName ? hashString(stageName) : '',
-      ].join('-'),
+      name: uniqueIdentifier(SERVICE_TYPE.POSTGRESQL, { stageName }),
     };
   }
 }

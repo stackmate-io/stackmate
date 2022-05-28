@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { hashString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
@@ -61,10 +61,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
     return {
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.MYSQL,
-      name: [
-        'mysql-database',
-        stageName ? hashString(stageName) : '',
-      ].join('-'),
+      name: uniqueIdentifier(SERVICE_TYPE.MYSQL, { stageName }),
     };
   }
 }

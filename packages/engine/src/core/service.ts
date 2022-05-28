@@ -5,8 +5,14 @@ import Entity from '@stackmate/engine/lib/entity';
 import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociations,
-  CloudStack, BaseService, BaseServices, CloudServiceConfiguration,
+  CloudStack,
+  BaseService,
+  BaseServices,
+  ResourceProfile,
+  ProviderChoice,
+  ServiceTypeChoice,
+  ServiceScopeChoice,
+  ServiceAssociations,
 } from '@stackmate/engine/types';
 
 abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
