@@ -1,7 +1,7 @@
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { AWS, CloudServiceConfiguration, CoreServiceConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { hashString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
+import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements AWS.MariaDB.Type {
@@ -48,10 +48,7 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
     return {
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.MARIADB,
-      name: [
-        'mariadb-database',
-        stageName ? hashString(stageName) : '',
-      ].join('-'),
+      name: uniqueIdentifier(SERVICE_TYPE.MARIADB, { stageName }),
     };
   }
 }

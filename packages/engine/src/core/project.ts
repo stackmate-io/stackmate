@@ -1,7 +1,8 @@
-import { has, isEmpty, isEqual, omitBy } from 'lodash';
+import { has } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';
 import Entity from '@stackmate/engine/lib/entity';
+import { uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   BaseServices,
@@ -53,54 +54,42 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
     const servicesAttributes = [
       this.getStateServiceAttributes(),
       this.getVaultServiceAttributes(),
-      ...this.getProvidersAttributes(cloudServices),
       ...cloudServices,
     ];
 
-    return servicesAttributes.map((srv) => {
+    // Instantiate the services
+    const services = servicesAttributes.map((srv) => {
       const { provider = this.provider, region = this.region, type, ...attrs } = srv;
       return Registry.get(provider, type).factory({ ...attrs, region }, defaults);
     });
+
+    // Append the provider services
+    const providers = this.getProviderServices(services)
+    services.push(...providers);
+
+    return providers;
   }
 
-  protected getStateServiceAttributes(): BaseService.Attributes {
+  /**
+   * @returns {BaseServices.State.Attributes} the attributes for the state service
+   */
+  protected getStateServiceAttributes(): BaseServices.State.Attributes {
     const { provider = this.provider, region = this.region, ...attrs } = this.state;
     return { ...attrs, provider, region };
   }
 
-  protected getVaultServiceAttributes(): BaseService.Attributes {
+  /**
+   * @returns {BaseServices.Vault.Attributes} the attributes for the vault service
+   */
+  protected getVaultServiceAttributes(): BaseServices.Vault.Attributes {
     const { provider = this.provider, region = this.region, ...attrs } = this.secrets;
     return { ...attrs, provider, region };
   }
 
-  protected getProvidersAttributes(services: BaseService.Attributes[]): BaseService.Attributes[] {
-    const regions: Map<ProviderChoice, Set<string>> = new Map();
-
-    // Iterate the services and keep a mapping of
-    // provider => unique set of regions
-    services.forEach(({ provider = this.provider, region = this.region }) => {
-      const providerRegions = regions.get(provider) || new Set();
-      providerRegions.add(region);
-      regions.set(provider, providerRegions);
-    });
-
-    const providerAttributes: BaseService.Type[] = [];
-    regions.forEach((providerRegions, provider) => {
-      providerRegions.forEach((region) => {
-        providerAttributes.push(
-          Registry.get(provider, SERVICE_TYPE.PROVIDER).factory({ region }),
-        );
-      })
-    })
-
-    return providerAttributes;
-  }
-
   /**
-   *
-   * @param {String} stage
-   * @param {String[]} without
-   * @returns {BaseService.Type[]}
+   * @param {String} stage the stage to get the service attributes for
+   * @param {String[]} without the service names to skip
+   * @returns {BaseService.Attributes[]} the attributes for the cloud services
    */
   protected getCloudServiceAttributes(stage: string, without: string[] = []): BaseService.Attributes[] {
     if (!has(this.stages, stage)) {
@@ -121,6 +110,34 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       const { provider = this.provider, region = this.region, type, ...attrs } = srv;
       return { ...attrs, region };
     });
+  }
+
+  /**
+   * @returns {BaseServices.Provider.Type} the attributes for the provider services
+   */
+  protected getProviderServices(services: BaseService.Attributes[]): BaseService.Type[] {
+    const regions: Map<ProviderChoice, Set<string>> = new Map();
+
+    // Iterate the services and keep a mapping of provider => unique set of regions
+    services.forEach(({ provider = this.provider, region = this.region }) => {
+      const providerRegions = regions.get(provider) || new Set();
+      providerRegions.add(region);
+      regions.set(provider, providerRegions);
+    });
+
+    const providers: BaseService.Type[] = [];
+    regions.forEach((providerRegions, provider) => {
+      providerRegions.forEach((region) => {
+        const providerService = Registry.get(provider, SERVICE_TYPE.PROVIDER).factory({
+          region,
+          name: uniqueIdentifier(`provider-${provider}`, { region }),
+        });
+
+        providers.push(providerService);
+      })
+    })
+
+    return providers;
   }
 }
 

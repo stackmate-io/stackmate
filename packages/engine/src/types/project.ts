@@ -28,31 +28,6 @@ export type ProjectConfiguration = {
   stages: StagesConfiguration;
 };
 
-
-const p: ProjectConfiguration = {
-  name: 'omg',
-  provider: 'aws',
-  region: 'eu-central-1',
-  state: {
-    provider: 'local',
-  },
-  stages: {
-    production: {
-      database: {
-        name: 'omg',
-        type: 'mariadb',
-        database: 'omg',
-        profile: 'default'
-      },
-    },
-    staging: {
-      copy: 'production',
-      skip: ['database'],
-    }
-  }
-}
-
-
 export interface ProjectEntity extends BaseEntity {
   name: Attribute<string>;
   provider: Attribute<CloudProviderChoice>;

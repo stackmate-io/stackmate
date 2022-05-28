@@ -165,3 +165,19 @@ export const generateWords = (
 ): string => (
   `${prefix}${wordGenerator({ words }).dashed}`
 );
+
+/**
+ * Returns an identifier that is highly likely to be unique
+ *
+ * @param {String} prefix any prefix to use
+ * @param {object} hashable the hashable object
+ * @param {String} separator the separator to use for joining the parts
+ * @returns {String} the unique identifier
+ */
+export const uniqueIdentifier = (
+  prefix = '', hashable: object = {}, separator: string = '-',
+): string => {
+  const uuid = crypto.randomUUID();
+  const hash = hashObject(hashable);
+  return [prefix, hashString(`${uuid}${hash}`)].join(separator);
+};
