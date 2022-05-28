@@ -3,8 +3,8 @@ import { TerraformProvider } from 'cdktf';
 import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
 
 import LocalService from './base';
-import { CloudStack, Local } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, Local } from '@stackmate/engine/types';
 
 class LocalProvder extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
   /**

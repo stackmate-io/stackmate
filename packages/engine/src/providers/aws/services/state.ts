@@ -2,9 +2,9 @@ import { S3Backend, TerraformResource } from 'cdktf';
 
 import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
-import { AWS, CloudStack } from '@stackmate/engine/types';
-import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { AWS, CloudStack, CoreServiceConfiguration } from '@stackmate/engine/types';
+import { DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { hashString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
   /**
@@ -120,6 +120,21 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
         },
       },
     });
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config({ projectName = '', stageName = '' } = {}): CoreServiceConfiguration<AWS.State.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+      bucket: [
+        'stackmate-state',
+        projectName ? hashString(projectName) : '',
+        stageName].join('-'),
+    };
   }
 }
 

@@ -15,6 +15,9 @@ import {
   ProjectConfigCreationOptions,
   Project as StackmateProject,
   ProjectConfiguration,
+  CoreServiceConfiguration,
+  StateServiceAttributes,
+  VaultServiceAttributes,
 } from './types';
 
 // Export types
@@ -63,13 +66,15 @@ export namespace ProjectConfig {
     const provider = defaultProvider || PROVIDER.AWS;
     const region = defaultRegion || DEFAULT_REGION[provider];
     const name = projectName || generateWords({ words: 2 });
+    const state = Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config();
+    const vault = Registry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config();
 
     const config = {
       name,
       provider,
       region,
-      state: Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config(),
-      secrets: Registry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config(),
+      state: state as CoreServiceConfiguration<StateServiceAttributes>,
+      secrets: vault as CoreServiceConfiguration<VaultServiceAttributes>,
       stages: {
         [defaultStage]: fromPairs(
           serviceTypes.map((type: ServiceTypeChoice) => (

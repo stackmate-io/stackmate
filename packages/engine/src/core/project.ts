@@ -1,4 +1,4 @@
-import { has } from 'lodash';
+import { has, isEmpty, isEqual, omitBy } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';
 import Entity from '@stackmate/engine/lib/entity';
@@ -50,13 +50,14 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   stage(name: string): BaseService.Type[] {
     const cloudServices = this.getCloudServiceAttributes(name);
     const defaults = { projectName: this.name, stageName: name };
-
-    return [
+    const servicesAttributes = [
       this.getStateServiceAttributes(),
       this.getVaultServiceAttributes(),
       ...this.getProvidersAttributes(cloudServices),
       ...cloudServices,
-    ].map((srv) => {
+    ];
+
+    return servicesAttributes.map((srv) => {
       const { provider = this.provider, region = this.region, type, ...attrs } = srv;
       return Registry.get(provider, type).factory({ ...attrs, region }, defaults);
     });

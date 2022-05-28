@@ -2,7 +2,7 @@ import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { Local } from '@stackmate/engine/types';
+import { CoreServiceConfiguration, Local } from '@stackmate/engine/types';
 
 abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service<Attrs> implements Local.Base.Type {
   /**
@@ -36,6 +36,17 @@ abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service
         },
       },
     });
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config(): CoreServiceConfiguration<Local.Base.Attributes> {
+    return {
+      provider: 'local',
+    };
   }
 }
 

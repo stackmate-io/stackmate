@@ -2,7 +2,7 @@ import { LocalBackend } from 'cdktf';
 
 import LocalService from './base';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { CloudStack, Local } from '@stackmate/engine/types';
+import { CloudStack, CoreServiceConfiguration, Local } from '@stackmate/engine/types';
 
 class LocalState extends LocalService<Local.State.Attributes> implements Local.State.Type {
   /**
@@ -84,6 +84,17 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
   onDestroy(stack: CloudStack): void {
     // The state has to be present when destroying resources
     this.backend(stack);
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config(): CoreServiceConfiguration<Local.State.Attributes> {
+    return {
+      provider: 'local',
+    };
   }
 }
 

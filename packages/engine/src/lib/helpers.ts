@@ -6,13 +6,23 @@ import { ComplementOf, JsonSchema, } from '@stackmate/engine/types';
 import { isObject, merge, sampleSize, uniq } from 'lodash';
 
 /**
+ * Returns an MD5 hash of a string
+ *
+ * @param {String} str the string to create a hash from
+ * @returns {String} the md5 hash
+ */
+export const hashString = (str: string): string => (
+  crypto.createHash('md5').update(str).digest('hex').toString()
+);
+
+/**
  * Returns an MD5 hash of an object
  *
  * @param {Object} obj the object to create a hash from
  * @returns {String} the md5 hash
  */
 export const hashObject = (obj: object): string => (
-  crypto.createHash('md5').update(JSON.stringify(obj)).digest('hex').toString()
+  hashString(JSON.stringify(obj))
 );
 
 /**

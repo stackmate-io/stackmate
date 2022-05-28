@@ -6,7 +6,7 @@ import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociations,
-  CloudStack, BaseService, BaseServices,
+  CloudStack, BaseService, BaseServices, CloudServiceConfiguration,
 } from '@stackmate/engine/types';
 
 abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
@@ -320,6 +320,15 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
         },
       },
     };
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config() {
+    throw new Error('The config() method is not available for this service');
   }
 }
 

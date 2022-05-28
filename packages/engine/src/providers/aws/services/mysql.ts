@@ -1,9 +1,9 @@
 import { get } from 'lodash';
 
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { AWS } from '@stackmate/engine/types';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { hashString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
@@ -11,11 +11,6 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
    * @var {String} type the type for the service
    */
   readonly type = SERVICE_TYPE.MYSQL;
-
-  /**
-   * @var {String} engine the engine for the database
-   */
-  readonly engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
 
   /**
    * @var {String} version the version to provision
@@ -26,6 +21,11 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
    * @var {Number} port the port to use for connecting
    */
   port = 3306;
+
+  /**
+   * @var {String} engine the engine for the database
+   */
+  readonly engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
 
   /**
    * @returns {Object} provides the structure to generate the JSON schema by
@@ -50,6 +50,22 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
         },
       }
     });
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.MySQL.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+      type: SERVICE_TYPE.MYSQL,
+      name: [
+        'mysql-database',
+        stageName ? hashString(stageName) : '',
+      ].join('-'),
+    };
   }
 }
 
