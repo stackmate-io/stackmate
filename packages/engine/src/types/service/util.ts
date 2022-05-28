@@ -1,8 +1,8 @@
 import { BaseJsonSchema } from '@stackmate/engine/types/schema';
+import { BaseService } from '@stackmate/engine/types/service/base';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AbstractConstructorOf, ChoiceOf, OneOf, RequireKeys } from '@stackmate/engine/types/util';
 import { BaseEntityConstructor } from '@stackmate/engine/types/entity';
-import { BaseService } from '@stackmate/engine/types/service/base';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
@@ -31,7 +31,7 @@ export type ConfigurationOptions<T extends BaseService.Attributes> = CloudServic
 
 export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Type> {
   schema(): BaseJsonSchema;
-  config<T extends BaseService.Attributes>(): CloudServiceConfiguration<T> | CoreServiceConfiguration<T>;
+  config(opts?: { projectName?: string; stageName?: string }): Partial<BaseService.Attributes>;
 }
 
 export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type> & {

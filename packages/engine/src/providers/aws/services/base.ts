@@ -54,11 +54,6 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
       },
     });
   }
-
-  static defaults(): AWS.Base.Defaults {
-    return Object.assign({}, super.defaults(), {
-    });
-  }
 }
 
 export default AwsService;

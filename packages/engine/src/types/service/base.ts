@@ -70,6 +70,7 @@ export interface BaseVaultService extends BaseCloudService {
 }
 
 export interface BaseStateService extends BaseCloudService {
+  readonly type: Attribute<typeof SERVICE_TYPE.STATE>;
   backend(stack: CloudStack): void;
   resources(stack: CloudStack): void;
 }

@@ -6,6 +6,7 @@ import {
   CloudProviderChoice,
   CloudServiceAttributes,
   CloudServiceConfiguration,
+  CoreServiceConfiguration,
   ServiceTypeChoice,
   StateServiceAttributes,
   VaultServiceAttributes,
@@ -22,8 +23,8 @@ export type ProjectConfiguration = {
   name: string;
   provider: CloudProviderChoice;
   region: string;
-  state?: StateServiceAttributes;
-  secrets?: VaultServiceAttributes;
+  state?: CoreServiceConfiguration<StateServiceAttributes>;
+  secrets?: CoreServiceConfiguration<VaultServiceAttributes>;
   stages: StagesConfiguration;
 };
 

@@ -8,8 +8,8 @@ import {
 
 import AwsService from './base';
 import { getRandomString } from '@stackmate/engine/lib/helpers';
-import { DEFAULT_VAULT_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AWS, CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
+import { DEFAULT_VAULT_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { AWS, CloudStack, CoreServiceConfiguration, VaultCredentialOptions } from '@stackmate/engine/types';
 
 class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Type {
   /**
@@ -105,6 +105,17 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
     return {
       username: this.extract(data.secretString, 'username'),
       password: this.extract(data.secretString, 'password'),
+    };
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
     };
   }
 }

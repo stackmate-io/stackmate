@@ -5,8 +5,8 @@ import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import AwsService from './base';
-import { CloudStack, AWS } from '@stackmate/engine/types';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, AWS, CoreServiceConfiguration } from '@stackmate/engine/types';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
@@ -153,6 +153,17 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
         },
       }
     });
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config(): CoreServiceConfiguration<AWS.Provider.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 
