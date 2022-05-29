@@ -13,9 +13,17 @@ import {
   ServiceTypeChoice,
   ServiceScopeChoice,
   ServiceAssociations,
+  ConfigurationOptions,
+  EntityAttributes,
 } from '@stackmate/engine/types';
 
-abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
+abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'project';
+
   /**
    * @var {String} name the service's name
    */
@@ -274,13 +282,14 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   }
 
   /**
-   * @returns {Object} provides the structure to generate the JSON schema by
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): BaseService.Schema {
     const providers = Object.values(PROVIDER);
     const services = Object.values(SERVICE_TYPE);
 
     return {
+      $id: this.schemaId,
       type: 'object',
       properties: {
         provider: {
@@ -295,8 +304,9 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
         },
         name: {
           type: 'string',
-          pattern: '[a-z0-9_]+',
+          pattern: '[a-zA-Z0-9_]+',
           description: 'The name for the service to deploy',
+          errorMessage: 'The name for the service should only contain characters, numbers and underscores',
         },
         profile: {
           type: 'string',
@@ -315,14 +325,12 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
           serviceProfileOverrides: true,
         },
       },
-      required: ['provider', 'name'],
+      required: ['name', 'type'],
       errorMessage: {
         _: 'The service configuration is invalid',
-        properties: {
-          name: 'The name for the service should only contain characters, numbers and underscores',
-        },
         required: {
-          name: 'You have to specify a name for the service'
+          name: 'You have to specify a name for the service',
+          type: `You need to specify a service type. Available options are: ${services.join(', ')}`,
         },
       },
     };
@@ -333,7 +341,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * @param {Object} options the options for the configuration
    * @returns {Object} the attributes
    */
-  static config() {
+  static config(): ConfigurationOptions<BaseService.Attributes> {
     throw new Error('The config() method is not available for this service');
   }
 }

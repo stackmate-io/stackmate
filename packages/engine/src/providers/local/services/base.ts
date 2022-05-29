@@ -6,6 +6,12 @@ import { CoreServiceConfiguration, Local } from '@stackmate/engine/types';
 
 abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service<Attrs> implements Local.Base.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/local/base';
+
+  /**
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
    */
@@ -17,16 +23,18 @@ abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service
   providerService: Local.Provider.Type;
 
   /**
-   * @returns {JsonSchema}
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): Local.Base.Schema {
     const regionValues = Object.values(AWS_DEFAULT_REGION);
 
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       properties: {
         provider: {
           type: 'string',
-          const: PROVIDER.AWS,
+          const: PROVIDER.LOCAL,
+          enum: [PROVIDER.LOCAL],
         },
         region: {
           type: 'string',
@@ -45,7 +53,7 @@ abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service
    */
   static config(): CoreServiceConfiguration<Local.Base.Attributes> {
     return {
-      provider: 'local',
+      provider: PROVIDER.LOCAL,
     };
   }
 }

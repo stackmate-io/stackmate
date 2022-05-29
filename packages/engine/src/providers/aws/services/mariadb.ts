@@ -6,6 +6,12 @@ import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_EN
 
 class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements AWS.MariaDB.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/mariadb';
+
+  /**
    * @var {String} type the type for the service
    */
   readonly type = SERVICE_TYPE.MARIADB;
@@ -25,8 +31,12 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
    */
   port: number = 3306;
 
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
   static schema(): AWS.MariaDB.Schema {
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       properties: {
         vesion: {
           default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mariadb'),

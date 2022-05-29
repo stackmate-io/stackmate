@@ -1,10 +1,16 @@
 import Service from '@stackmate/engine/core/service';
-import { AWS } from '@stackmate/engine/types';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
+import { AWS, ConfigurationOptions } from '@stackmate/engine/types';
+import { AWS_DEFAULT_REGION, AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 
-abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
+abstract class AwsService<Attrs extends AWS.Base.Attributes = AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/base';
+
   /**
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
@@ -34,17 +40,19 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
   }
 
   /**
-   * @returns {JsonSchema}
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Base.Schema {
-    const regionValues = Object.values(AWS_DEFAULT_REGION);
+    const regionValues = Object.values(AWS_REGIONS);
 
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       properties: {
-        provider: {
-          type: 'string',
-          const: PROVIDER.AWS,
-        },
+        // provider: {
+        //   type: 'string',
+        //   enum: [PROVIDER.AWS],
+        //   const: PROVIDER.AWS,
+        // },
         region: {
           type: 'string',
           enum: regionValues,
@@ -53,6 +61,17 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
         },
       },
     });
+  }
+
+  /**
+   * Returns the attributes to use when populating the initial configuration
+   * @param {Object} options the options for the configuration
+   * @returns {Object} the attributes
+   */
+  static config(): ConfigurationOptions<AWS.Base.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 

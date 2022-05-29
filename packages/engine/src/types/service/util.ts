@@ -1,4 +1,3 @@
-import { BaseJsonSchema } from '@stackmate/engine/types/schema';
 import { BaseService } from '@stackmate/engine/types/service/base';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AbstractConstructorOf, ChoiceOf, OneOf, RequireKeys } from '@stackmate/engine/types/util';
@@ -30,14 +29,8 @@ export type CoreServiceConfiguration<T extends BaseService.Attributes> = Partial
 export type ConfigurationOptions<T extends BaseService.Attributes> = CloudServiceConfiguration<T> | CoreServiceConfiguration<T>;
 
 export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Type> {
-  schema(): BaseJsonSchema;
   config(opts?: { projectName?: string; stageName?: string }): Partial<BaseService.Attributes>;
 }
 
-export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type> & {
-  schema(): BaseJsonSchema;
-}
-
-export type ServiceAssociations = {
-  [key: string]: [Function]
-};
+export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type>;
+export type ServiceAssociations = { [key: string]: [Function] };

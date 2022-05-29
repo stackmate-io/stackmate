@@ -11,6 +11,12 @@ import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/provider';
+
+  /**
    * @var {String} type the service type
    */
   readonly type = SERVICE_TYPE.PROVIDER;
@@ -129,11 +135,11 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   }
 
   /**
-   * @returns {Object} the JSON schema to use for validation
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Provider.Schema {
     return mergeJsonSchemas(super.schema(), {
-      required: ['ip'],
+      $id: this.schemaId,
       properties: {
         ip: {
           type: 'string',
@@ -144,10 +150,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
       },
       errorMessage: {
         _: 'The AWS provider service is not properly configured',
-        required: {
-          ip: 'You should define an IP to use as the basis for the networking CIDR block',
-        },
-      }
+      },
     });
   }
 

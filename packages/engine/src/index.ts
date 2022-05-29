@@ -29,9 +29,6 @@ export * from './constants';
 // Export Provider constants
 export * from './providers/aws/constants';
 
-// Export error classes
-export * from './lib/errors';
-
 // Export core objects
 export {
   Project,

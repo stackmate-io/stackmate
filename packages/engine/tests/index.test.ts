@@ -1,11 +1,24 @@
-import { isEmpty, isNil, omitBy } from 'lodash';
-import { ProjectConfig, SERVICE_TYPE } from '../src';
+import { Validation } from '@stackmate/engine/core/validation';
 
-test('Project population', () => {
-  const project = ProjectConfig.populate({
-    name: 'my-super-project',
-    serviceTypes: [SERVICE_TYPE.MYSQL, SERVICE_TYPE.POSTGRESQL],
-    stageNames: ['production', 'staging', 'uat'],
-  });
-  console.log(require('util').inspect(omitBy(project, (v) => isNil(v) || isEmpty(v) ), { depth: 30 }));
+const config = {
+  name: 'some project',
+  provider: 'aws',
+  region: 'eu-central-1',
+  state: {
+    provider: 'aws',
+    bucket: 'abc-defg',
+  },
+  stages: {
+    production: {
+      database: {
+        type: 'mysql',
+        name: 'mydatabase',
+        database: 'mysqldb',
+      }
+    }
+  }
+};
+
+test('project validation', () => {
+  Validation.run(config);
 });
