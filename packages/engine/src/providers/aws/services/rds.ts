@@ -16,6 +16,12 @@ import {
 
 abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsService<Attrs> implements AWS.Database.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/rds';
+
+  /**
    * @var {String} size the size for the RDS instance
    */
   size: OneOf<typeof RDS_INSTANCE_SIZES> = DEFAULT_RDS_INSTANCE_SIZE;
@@ -115,9 +121,12 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
     });
   }
 
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
   static schema(): AWS.Database.Schema {
     return mergeJsonSchemas(super.schema(), {
-      required: ['size', 'nodes', 'engine', 'port', 'version'],
+      $id: this.schemaId,
       properties: {
         size: {
           type: 'string',

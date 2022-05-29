@@ -8,6 +8,12 @@ import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helper
 
 class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/state';
+
+  /**
    * @var {ServiceTypeChoice} type the service's type
    */
   readonly type = SERVICE_TYPE.STATE;
@@ -104,12 +110,19 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
   }
 
   /**
-   * @returns {Object} provides the structure to generate the JSON schema by
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.State.Schema {
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       required: ['bucket'],
       properties: {
+        name: {
+          default: DEFAULT_STATE_SERVICE_NAME,
+        },
+        type: {
+          default: SERVICE_TYPE.STATE,
+        },
         bucket: {
           type: 'string',
         },

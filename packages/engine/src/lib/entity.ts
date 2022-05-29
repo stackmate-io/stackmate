@@ -1,10 +1,18 @@
+import { Validation } from '@stackmate/engine/core/validation';
 import {
   BaseEntity,
   EntityAttributes,
   BaseEntityConstructor,
+  BaseJsonSchema,
 } from '@stackmate/engine/types';
 
-abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
+abstract class Entity<Attrs extends EntityAttributes = {}> implements BaseEntity {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'base/entity';
+
   /**
    * @var {Object} attributeState the state of the attributes
    * @private
@@ -29,39 +37,11 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
   }
 
   /**
-   * Validates an entity's attributes
-   *
-   * @param {Object} attributes the entity's attributes to be validated
-   * @throws {ValidationError} when the attributes are invalid
-   * @void
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
-  validate(): void {
-    /*
-    const errors = validate.validate(this.attributeState, this.validations(), {
-      fullMessages: false,
-    });
-
-    if (!isEmpty(errors)) {
-      throw new ValidationError(this.validationMessage, errors);
-    }
-    */
-
-    this.initialize();
+  static schema(): BaseJsonSchema {
+    throw new Error('An entity should provide its own schema');
   }
-
-  /**
-   * Initializes the entity.
-   *
-   * The main issue is that we can't set attributes in the constructor, due to a property
-   * initialization issue in TypeScript. This method runs after the entity has been
-   * instantiated and validated and allows us to perform actions with attributes in place
-   *
-   * @see https://github.com/microsoft/TypeScript/issues/13525
-   * @see https://github.com/microsoft/TypeScript/issues/1617
-   * @see https://github.com/microsoft/TypeScript/issues/10634s
-   * @see https://stackoverflow.com/questions/43595943/why-are-derived-class-property-values-not-seen-in-the-base-class-constructor/43595944
-   */
-  protected initialize(): void {}
 
   /**
    * Instantiates and validates an entity
@@ -73,8 +53,7 @@ abstract class Entity<Attrs extends EntityAttributes> implements BaseEntity {
     this: BaseEntityConstructor<T>, attributes: EntityAttributes = {}, ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = attributes;
-    entity.validate();
+    entity.attributes = Validation.run(attributes, this.schemaId);
     return entity;
   }
 }

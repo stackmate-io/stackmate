@@ -1,7 +1,9 @@
 import { ProviderChoice, ServiceTypeChoice, ServiceConstructor } from '@stackmate/engine/types/service';
 
+export type TypeServiceMapping = Map<ServiceTypeChoice, ServiceConstructor>;
+
 export interface ServiceRegistry {
-  items: { [k in ProviderChoice]?: { [s in ServiceTypeChoice]?: ServiceConstructor } };
+  items: Map<ProviderChoice, TypeServiceMapping>;
   add(
     classConstructor: ServiceConstructor, provider: ProviderChoice, type: ServiceTypeChoice,
   ): void;

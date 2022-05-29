@@ -1,5 +1,3 @@
-import { get } from 'lodash';
-
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -7,6 +5,12 @@ import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helper
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/mysql';
+
   /**
    * @var {String} type the type for the service
    */
@@ -28,19 +32,24 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
   readonly engine: Extract<typeof RDS_ENGINES[number], 'mysql'> = 'mysql';
 
   /**
-   * @returns {Object} provides the structure to generate the JSON schema by
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.MySQL.Schema {
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       properties: {
         type: {
           type: 'string',
           const: SERVICE_TYPE.MYSQL,
         },
+        database: {
+          type: 'string',
+          enum: ['mysqldb']
+        },
         version: {
           type: 'string',
-          default: get(RDS_DEFAULT_VERSIONS_PER_ENGINE, 'mysql'),
-          enum: get(RDS_MAJOR_VERSIONS_PER_ENGINE, 'mysql', []),
+          default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mysql'),
+          enum: RDS_MAJOR_VERSIONS_PER_ENGINE.get('mysql'),
         },
         port: {
           type: 'number',

@@ -8,6 +8,12 @@ import { CloudStack, Local } from '@stackmate/engine/types';
 
 class LocalProvder extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
   /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/local/provider';
+
+  /**
    * @var {String} type the service type
    */
   readonly type = SERVICE_TYPE.PROVIDER;

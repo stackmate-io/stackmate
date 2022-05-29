@@ -1,95 +1,157 @@
-import { toPairs } from 'lodash';
+import fs from 'node:fs';
 
-import ServiceRegistry from './core/registry';
-import { AWS_REGIONS } from './providers/aws/constants';
-import { PROVIDER, CLOUD_PROVIDER } from './constants';
-import { ProviderChoice } from './types';
+import Ajv from 'ajv';
+import { without } from 'lodash';
 
-const providers = Object.values(CLOUD_PROVIDER);
-const awsRegions = Object.values(AWS_REGIONS);
+import { JSON_SCHEMA_PATH, SERVICE_TYPE } from './constants';
 
-const serviceDefinitions: { [key: string]: object } = {};
+import Project from '@stackmate/engine/core/project';
+import Registry from '@stackmate/engine/core/registry';
+import { CLOUD_PROVIDER } from '@stackmate/engine/constants';
+import {
+  BaseJsonSchema,
+  CloudProviderChoice,
+  Project as StackmateProject,
+  ServiceTypeChoice,
+} from '@stackmate/engine/types';
 
-Object.values(PROVIDER).forEach((provider: ProviderChoice) => {
-  const providerServices = ServiceRegistry.items[provider];
+type SchemaBranch = 'state' | 'secrets' | 'cloudServices';
 
-  toPairs(providerServices).forEach(([type, ServiceClass]) => {
-    serviceDefinitions[`services/${type}/${provider}`] = ServiceClass.schema();
-  });
-});
+/**
+ * @param {SchemaBranch} branch the branch to select
+ * @param {BaseJsonSchema} props the properties to assign to the branhc
+ * @returns {BaseJsonSchema} the schema branch
+ */
+const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonSchema => {
+  if (branch === 'secrets') {
+    return { properties: { secrets: props } }
+  }
 
-const schema = {
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  name: {
-    type: 'string',
-    pattern: '[a-z0-9-_./]+',
-    description: 'The name of the project in a URL-friendly format',
-  },
-  provider: {
-    type: 'string',
-    enum: providers,
-    description: 'The default provider for your cloud services',
-  },
-  region: {
-    type: 'string',
-    description: 'The default region for the provider you have selected',
-  },
-  secrets: {
-    type: 'object',
-    description: 'How would you like your services secrets to be stored',
-  },
-  state: {
-    type: 'object',
-    description: 'Where would you like your Terraform state to be stored',
-  },
-  stages: {
-    type: 'object',
-    description: 'The deployment stages for your projects',
-    errorMessage: 'You should define at least one stage to deploy',
-    minProperties: 1,
-    patternProperties: {
-      "^[a-z0-9_]+$": {
-        type: "object",
-        minProperties: 1,
-        errorMessage: 'You should define at least one service for the stage',
+  if (branch === 'state') {
+    return { properties: { state: props } }
+  }
+
+  return {
+    properties: {
+      stages: {
         patternProperties: {
-          "^[a-z0-9_]+$": {
-            oneOf: Object.keys(serviceDefinitions).map(
-              (id: string) => ({ $ref: `#/defs/${id}` }),
-            ),
+          [Project.keyPattern]: {
+            patternProperties: {
+              [Project.keyPattern]: props,
+            },
           },
         },
       },
     },
-  },
-  allOf: [{
-    if: { properties: { provider: { const: PROVIDER.AWS } } },
-    then: { properties: { region: { $ref: '#/defs/regions/aws' } } },
-  }],
-  required: ['name', 'provider', 'region'],
-  additionalProperties: false,
-  $defs: {
-    ...serviceDefinitions,
-    'regions/aws': {
-      type: 'string',
-      enum: awsRegions,
-      errorMessage: `The region is invalid. Available options are: ${awsRegions.join(', ')}`,
-    },
-  },
-  errorMessage: {
-    _: 'The configuration for the project is invalid',
-    type: 'The configuration should be an object',
-    additionalPropertis: 'You added properties that are not valid, please remove those',
-    properties: {
-      name: 'The name for the project only accepts characters, numbers, dashes, underscores, dots and forward slashes',
-      provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
-    },
-    required: {
-      name: 'You need to set a name for the project',
-      provider: 'You need to set a default provider for the project',
-      region: 'You need to set a default region for the project',
-    },
-  },
+  };
 };
 
-export { schema, serviceDefinitions };
+/**
+ * Returns the service schema definitions and type discriminations
+ * that should be applied into the schema conditionals
+ *
+ * @param {CloudProviderChoice} provider the provider whose services we need to get the schema for
+ * @returns {Object}
+ */
+const getServiceSchemaEntries = (provider: CloudProviderChoice): {
+  definitions: { [key: string]: BaseJsonSchema },
+  conditions: BaseJsonSchema[],
+} => {
+  const services = Registry.items.get(provider);
+
+  if (!services?.size) {
+    throw new Error(`There are no services registered for ${provider}`);
+  }
+
+  const definitions: { [path: string]: BaseJsonSchema } = {};
+  const conditions: BaseJsonSchema[] = [];
+
+  // Split the service types into the corresponding branch so that
+  // we create additional conditions for the services, state and secrets branches
+  const branches: Map<SchemaBranch, ServiceTypeChoice[]> = new Map([
+    ['state', [SERVICE_TYPE.STATE]],
+    ['secrets', [SERVICE_TYPE.VAULT]],
+    ['cloudServices', without(
+      Object.values(SERVICE_TYPE), SERVICE_TYPE.STATE, SERVICE_TYPE.VAULT, SERVICE_TYPE.PROVIDER,
+    )],
+  ]);
+
+  for (const entry of branches) {
+    const [branch, serviceTypes] = entry;
+    const typeDiscriminations: BaseJsonSchema[] = [];
+
+    for (const serviceType of serviceTypes) {
+      const serviceClass = services.get(serviceType);
+
+      if (!serviceClass) {
+        continue;
+      }
+
+      // Add the service type discriminations
+      typeDiscriminations.push({
+        if: { properties: { type: { const: serviceType } } },
+        then: { $ref: serviceClass.schemaId },
+      });
+
+      // Add the service definition
+      Object.assign(definitions, { [serviceClass.schemaId]: serviceClass.schema() });
+    }
+
+    conditions.push({
+      if: {
+        // The provider is either defined at root level,
+        // or is explicitly defined in the service definition
+        anyOf: [
+          {
+            // root provider is aws, nested provider is not defined
+            allOf: [
+              { properties: { provider: { const: provider } } },
+              getSchemaBranch(branch, { properties: { provider: { const: null } } }),
+            ],
+          },
+          // Provider is explicitly set to aws on the service type
+          getSchemaBranch(branch, { properties: { provider: { const: provider } } }),
+        ],
+      },
+      // In case this condition is true, we should apply another set of conditions
+      // discriminated by service type, referencing the corresponding service's schema
+      then: getSchemaBranch(branch, { allOf: typeDiscriminations }),
+    });
+  }
+
+  return {
+    definitions,
+    conditions,
+  };
+};
+
+/**
+ * @returns {StackmateProject.Schema} the schema to use for validation
+ */
+export const getSchema = (): StackmateProject.Schema => {
+  let schema = { ...Project.schema() };
+
+  // Apply the provider services
+  Object.values(CLOUD_PROVIDER).forEach(provider => {
+    const { definitions, conditions } = getServiceSchemaEntries(provider);
+
+    // Merge the service definitions and conditions
+    schema = Object.assign({}, schema, {
+      $defs: { ...(schema.$defs || {}), ...definitions },
+      allOf: [...(schema.allOf || []), ...conditions],
+    });
+  });
+
+  return schema;
+};
+
+const schema = getSchema();
+const ajv = new Ajv();
+
+if (!ajv.validateSchema(schema)) {
+  console.error('Schema is invalid', ajv.errors);
+  process.exit(1);
+}
+
+fs.writeFileSync(JSON_SCHEMA_PATH, JSON.stringify(schema, null, 2));
+console.log('JSON schema generated under', JSON_SCHEMA_PATH);

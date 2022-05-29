@@ -14,10 +14,6 @@ export const getMockStack = ({ app = getMockApp(appName), name = stackName } = {
   new Stack(app, name)
 );
 
-export const multiply = (value: number, { times = 5 } = {}) => (
-  value * times
-);
-
 type MockEntityDesc = {
   name: Attribute<string>;
   number: Attribute<number>;
