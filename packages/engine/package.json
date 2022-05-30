@@ -44,7 +44,7 @@
     "@types/jest": "^27.5.0",
     "@types/jsforce": "^1.9.42",
     "jest": "^27.5.1",
-    "rollup-plugin-dts": "^4.2.1",
+    "rollup-plugin-dts": "^4.2.2",
     "ts-node": "^10.8.0"
   },
   "engines": {
