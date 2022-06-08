@@ -33,7 +33,7 @@
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "cdktf": "0.9.4",
-    "constructs": "^10.1.28",
+    "constructs": "^10.1.32",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
