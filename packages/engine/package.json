@@ -28,7 +28,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@cdktf/provider-aws": "5.0.52",
-    "@cdktf/provider-local": "^0.5.13",
+    "@cdktf/provider-local": "^0.5.15",
     "ajv": "^8.11.0",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
