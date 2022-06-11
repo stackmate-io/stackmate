@@ -85,6 +85,25 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   vault: BaseServices.Vault.Type;
 
   /**
+   * Provisioning when we deploy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   */
+  abstract onDeploy(stack: CloudStack): void;
+
+  /**
+   * @constructor
+   * @param {String} projectName the project's name
+   * @param {String} stageName the stage's name
+   */
+  constructor(projectName: string, stageName: string) {
+    super();
+
+    this.projectName = projectName;
+    this.stageName = stageName;
+  }
+
+  /**
    * Provisioning when we initially prepare a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
@@ -92,13 +111,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   onPrepare(stack: CloudStack): void {
     // no-op. most services are not required when preparing the stage
   }
-
-  /**
-   * Provisioning when we deploy a stage
-   *
-   * @param {CloudStack} stack the stack to provision the service in
-   */
-  abstract onDeploy(stack: CloudStack): void;
 
   /**
    * Provisioning on when we destroy destroy a stage
