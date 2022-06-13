@@ -338,6 +338,27 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
         },
       },
       required: ['name', 'type'],
+      if: {
+        properties: {
+          type: {
+            anyOf: [
+              { const: SERVICE_TYPE.PROVIDER },
+              { const: SERVICE_TYPE.STATE },
+              { const: SERVICE_TYPE.VAULT },
+            ],
+          },
+        },
+      },
+      then: {
+        errorMessage: 'You cannot provide profile, links or overrides for this type of service',
+        not: {
+          anyOf: [
+            { required: ['profile'] },
+            { required: ['links'] },
+            { required: ['overrides'] },
+          ],
+        },
+      },
       errorMessage: {
         _: 'The service configuration is invalid',
         required: {
