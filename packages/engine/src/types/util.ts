@@ -7,7 +7,7 @@ export type OneOf<T extends ReadonlyArray<unknown>> = T extends ReadonlyArray<in
 export type ComplementOf<Base, T extends Base, K extends keyof Base = keyof Base> = Omit<T, K>;
 export type Diff<T, U> = Pick<T, Extract<keyof T, keyof U>>;
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+export type RequireKeys<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 export type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] }
 export type IsExact<Left, Right> =(<U>() => U extends Left ? 1 : 0) extends (<U>() => U extends Right ? 1 : 0) ? true : false;
 export type IfEquals<T, U, Y = unknown, N = never> = (<G>() => G extends T ? 1 : 2) extends (<G>() => G extends U ? 1 : 2) ? Y : N;

@@ -19,6 +19,12 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   static schemaId: string = 'services/aws/vault';
 
   /**
+   * @var {Number} recoveryDays the number of days we can recover a secret
+   * @static
+   */
+  static recoveryDays: number = 30;
+
+  /**
    * @var {String} type the type for the service
    */
   readonly type = SERVICE_TYPE.VAULT;
@@ -86,6 +92,7 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
       description: `Secrets for the ${service} service`,
       kmsKeyId: this.providerService.key.id,
       provider: this.providerService.resource,
+      recoveryWindowInDays: AwsVault.recoveryDays,
       ...secret,
     });
 

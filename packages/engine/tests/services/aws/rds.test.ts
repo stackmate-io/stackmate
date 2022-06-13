@@ -5,6 +5,7 @@ import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provid
 
 import Profile from '@stackmate/engine/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { projectName, stageName } from 'tests/fixtures/generic';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures/aws';
 import { MySQL as AwsRdsService } from '@stackmate/engine/providers/aws';
@@ -14,9 +15,9 @@ describe('AwsRdsService', () => {
     let service: AwsRdsService;
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const { name, region, size, storage, database, stageName } = serviceConfig;
+      const { name, region, size, storage, database } = serviceConfig;
 
-      service = AwsRdsService.factory<AwsRdsService>(serviceConfig);
+      service = AwsRdsService.factory<AwsRdsService>(serviceConfig, projectName, stageName);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.MYSQL);
@@ -36,8 +37,10 @@ describe('AwsRdsService', () => {
   describe('register', () => {
     it('registers a single-node RDS instance with the default profile', async () => {
       const { AWS: provider } = PROVIDER;
-      const { stageName, projectName } = serviceConfig;
-      const { scope } = await getServiceRegisterationResults({ serviceConfig });
+      const { scope } = await getServiceRegisterationResults({
+        projectName, stageName, serviceConfig,
+      });
+
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
@@ -60,12 +63,12 @@ describe('AwsRdsService', () => {
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
         allocated_storage: serviceConfig.storage,
+        count: 1,
         allow_major_version_upgrade: false,
         apply_immediately: true,
         auto_minor_version_upgrade: true,
         backup_retention_period: 0,
         copy_tags_to_snapshot: true,
-        count: 1,
         delete_automated_backups: true,
         deletion_protection: false,
         engine: 'mysql',

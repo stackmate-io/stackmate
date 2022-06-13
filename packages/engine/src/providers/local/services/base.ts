@@ -1,7 +1,6 @@
 import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
 import { CoreServiceConfiguration, Local } from '@stackmate/engine/types';
 
 abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service<Attrs> implements Local.Base.Type {
@@ -26,21 +25,14 @@ abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): Local.Base.Schema {
-    const regionValues = Object.values(AWS_DEFAULT_REGION);
-
     return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
+      additionalProperties: false,
       properties: {
         provider: {
           type: 'string',
           const: PROVIDER.LOCAL,
           enum: [PROVIDER.LOCAL],
-        },
-        region: {
-          type: 'string',
-          enum: regionValues,
-          default: String(AWS_DEFAULT_REGION),
-          errorMessage: `The region is invalid. Available options are: ${regionValues.join(', ')}`,
         },
       },
     });

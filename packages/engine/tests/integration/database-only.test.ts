@@ -24,6 +24,7 @@ const projectConfig = {
       mysqlDatabase: {
         type: SERVICE_TYPE.MYSQL,
         size: DEFAULT_RDS_INSTANCE_SIZE,
+        name: 'mysqlDatabase',
         profile: 'production',
         storage: 30,
       },

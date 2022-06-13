@@ -5,7 +5,6 @@ import {
   BaseService,
   Provisionable,
   ProviderChoice,
-  OperationOptions,
   StackmateOperation,
 } from '@stackmate/engine/types';
 
@@ -23,27 +22,26 @@ abstract class Operation implements StackmateOperation {
   /**
    * @var {BaseService.Type[]} services the list of services to deploy
    */
-  readonly services: BaseService.Type[]
-
-  /**
-   * @var {Object} options any additional options for the operation
-   */
-  protected readonly options: OperationOptions = {};
+  readonly services: BaseService.Type[];
 
   /**
    * @returns {Provisionable} the provisioner with the services assigned
    */
-  abstract get provisioner(): Provisionable;
+  readonly provisioner: Provisionable;
+
+  /**
+   * Registers the services in the provisioner
+   */
+  abstract registerServices(): void;
 
   /**
    * @constructor
-   * @param {Project} project the project that the operation refers to
-   * @param {String} stageName the name of the stage we're provisioning
-   * @param {Object} options any additional options for the operation
+   * @param {BaseService.Type[]} services the project's services
+   * @param {Provisionable} provisioner the stack to deploy the services to
    */
-  constructor(services: BaseService.Type[], options: OperationOptions = {}) {
+  constructor(services: BaseService.Type[], provisioner: Provisionable) {
     this.services = services;
-    this.options = options;
+    this.provisioner = provisioner;
   }
 
   /**
@@ -61,6 +59,7 @@ abstract class Operation implements StackmateOperation {
    * Synthesizes the operation's stack
    */
   synthesize(): object {
+    this.registerServices();
     return this.provisioner.process();
   }
 }

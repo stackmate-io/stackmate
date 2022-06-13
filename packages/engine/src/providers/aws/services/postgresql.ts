@@ -44,7 +44,6 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
         },
         database: {
           type: 'string',
-          enum: ['postgresqldb']
         },
         version: {
           default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('postgres'),

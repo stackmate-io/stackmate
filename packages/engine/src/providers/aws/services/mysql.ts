@@ -44,7 +44,6 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
         },
         database: {
           type: 'string',
-          enum: ['mysqldb']
         },
         version: {
           type: 'string',
