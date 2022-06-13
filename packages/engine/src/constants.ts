@@ -32,6 +32,7 @@ export const SERVICE_TYPE = {
 } as const;
 
 export const JSON_SCHEMA_PATH = path.resolve('stackmate.schema.json');
+export const PROFILES_PATH = path.resolve('profiles');
 export const CORE_SERVICE_TYPES = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.STATE, SERVICE_TYPE.VAULT];
 export const STORAGE: { [name: string]: string } = { FILE: 'file' } as const;
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
