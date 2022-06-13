@@ -6,8 +6,9 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
-import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { EntityAttributes, Project as StackmateProject } from '@stackmate/engine/types';
+import Profile from './profile';
 
 const readSchema = () => {
   if (!fs.existsSync(JSON_SCHEMA_PATH)) {
@@ -50,9 +51,7 @@ ajv.addKeyword({
   keyword: 'serviceLinks',
   type: 'array',
   error: {
-    message() {
-      return 'Invalid service links defined';
-    }
+    message: 'Invalid service links defined',
   },
   validate(schema: any, links: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt) {
     // We should allow service links only for cloud services
@@ -72,6 +71,66 @@ ajv.addKeyword({
     const irrelevantServices = difference(links, serviceNames);
     return isEmpty(irrelevantServices);
   },
+});
+
+ajv.addKeyword({
+  keyword: 'serviceProfile',
+  type: 'string',
+  error: {
+    message: 'Invalid service profile defined',
+  },
+  validate(schema: any, profile: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt) {
+    const type = get(dataCxt?.parentData, 'type');
+    const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
+
+    if (!provider || !type) {
+      throw new Error('The provider and service type should be specified')
+    }
+
+    if (
+      type === SERVICE_TYPE.STATE || type == SERVICE_TYPE.VAULT || type === SERVICE_TYPE.PROVIDER
+    ) {
+      return true;
+    }
+
+    try {
+      Profile.get(provider, type, profile);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  },
+});
+
+ajv.addKeyword({
+  keyword: 'serviceProfileOverrides',
+  type: 'object',
+  error: {
+    message: 'Invalid profile overrides defined',
+  },
+  validate(schema: any, overrides: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt) {
+    const type = get(dataCxt?.parentData, 'type');
+    const profile = get(dataCxt?.parentData, 'profile', DEFAULT_PROFILE_NAME);
+    const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
+
+    if (!provider || !type) {
+      throw new Error('The provider and service type should be specified')
+    }
+
+    if (
+      type === SERVICE_TYPE.STATE || type == SERVICE_TYPE.VAULT || type === SERVICE_TYPE.PROVIDER
+    ) {
+      return true;
+    }
+
+    try {
+      const serviceOverrides = Profile.get(provider, type, profile);
+      const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
+      return isEmpty(irrelevantKeys);
+    } catch (err) {
+      return false;
+    }
+  }
 })
 
 ajv.compile<StackmateProject.Schema>(SCHEMA);

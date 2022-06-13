@@ -135,8 +135,8 @@ export type BaseJsonSchema = {
   then?: BaseJsonSchema;
 
   // Stackmate-specific
-  serviceProfile?: boolean;
   serviceLinks?: boolean;
+  serviceProfile?: boolean;
   serviceProfileOverrides?: boolean;
 
   // AJV-error specific

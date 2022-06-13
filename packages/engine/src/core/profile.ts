@@ -1,9 +1,9 @@
-import { join as joinPaths, resolve as resolvePath } from 'node:path';
+import { join as joinPaths } from 'node:path';
 import { existsSync as fileExistsSync } from 'node:fs';
 
 import { Memoize } from 'typescript-memoize';
 
-import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, PROFILES_PATH } from '@stackmate/engine/constants';
 import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/types';
 
 class Profile {
@@ -16,7 +16,7 @@ class Profile {
   /**
    * @var {String} directory the directory that we store the profiles in
    */
-  static directory: string = resolvePath(joinPaths(__dirname, '..', 'profiles' ));
+  static directory: string = PROFILES_PATH;
 
   /**
    * Returns the absolute path to the profile file

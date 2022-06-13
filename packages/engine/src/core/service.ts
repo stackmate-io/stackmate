@@ -350,7 +350,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
 
   /**
    * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
    * @returns {Object} the attributes
    */
   static config(): ConfigurationOptions<BaseService.Attributes> {
