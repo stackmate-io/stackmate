@@ -6,7 +6,7 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
 import { EntityAttributes, Project as StackmateProject } from '@stackmate/engine/types';
 import Profile from './profile';
 
@@ -84,13 +84,7 @@ ajv.addKeyword({
     const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
 
     if (!provider || !type) {
-      throw new Error('The provider and service type should be specified')
-    }
-
-    if (
-      type === SERVICE_TYPE.STATE || type == SERVICE_TYPE.VAULT || type === SERVICE_TYPE.PROVIDER
-    ) {
-      return true;
+      return false;
     }
 
     try {
@@ -114,13 +108,7 @@ ajv.addKeyword({
     const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
 
     if (!provider || !type) {
-      throw new Error('The provider and service type should be specified')
-    }
-
-    if (
-      type === SERVICE_TYPE.STATE || type == SERVICE_TYPE.VAULT || type === SERVICE_TYPE.PROVIDER
-    ) {
-      return true;
+      return false;
     }
 
     try {
