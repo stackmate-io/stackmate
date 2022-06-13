@@ -2,6 +2,7 @@ import { camelCase, fromPairs } from 'lodash';
 
 import Project from './core/project';
 import Registry from './core/registry';
+import Provisioner from './core/provisioner';
 import DeployOperation from './operations/deploy';
 import DestroyOperation from './operations/destroy';
 import PrepareOperation from './operations/prepare';
@@ -114,9 +115,11 @@ export namespace Operations {
    */
   export const deployment = (
     config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
-  ) => (
-    new DeployOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
-  );
+  ) => {
+    const project = Project.factory<StackmateProject.Type>(config);
+    const provisioner = new Provisioner(project.name, stage, options.outputPath);
+    return new DeployOperation(project.stage(stage), provisioner);
+  };
 
   /**
    * Returns a destruction operation
@@ -128,9 +131,11 @@ export namespace Operations {
    */
   export const destroy = (
     config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
-  ) => (
-    new DestroyOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
-  );
+  ) => {
+    const project = Project.factory<StackmateProject.Type>(config);
+    const provisioner = new Provisioner(project.name, stage, options.outputPath);
+    return new DestroyOperation(project.stage(stage), provisioner);
+  };
 
   /**
    * Returns a preparation operation
@@ -142,7 +147,22 @@ export namespace Operations {
    */
   export const prepare = (
     config: StackmateProject.Attributes, stage: string, options: PrepareOperationOptions = {},
-  ) => (
-    new PrepareOperation(Project.factory<StackmateProject.Type>(config).stage(stage), options)
-  );
+  ) => {
+    const project = Project.factory<StackmateProject.Type>(config);
+    const provisioner = new Provisioner(project.name, stage, options.outputPath);
+    const stateAttrs = {
+      type: SERVICE_TYPE.STATE,
+      provider: PROVIDER.LOCAL,
+      directory: options.statePath,
+    };
+
+    const services = [
+      ...project.stage(stage).filter(srv => srv.type !== SERVICE_TYPE.STATE),
+      Registry.get(PROVIDER.LOCAL, SERVICE_TYPE.STATE).factory(
+        stateAttrs, project.name, stage,
+      ),
+    ];
+
+    return new PrepareOperation(services, provisioner);
+  };
 };

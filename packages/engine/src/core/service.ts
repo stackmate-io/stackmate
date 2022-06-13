@@ -99,6 +99,14 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   constructor(projectName: string, stageName: string) {
     super();
 
+    if (!projectName) {
+      throw new Error('You have to provide a projectName for the service');
+    }
+
+    if (!stageName) {
+      throw new Error('You have to provide a stageName for the service')
+    }
+
     this.projectName = projectName;
     this.stageName = stageName;
   }
@@ -205,6 +213,10 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
       return;
     }
 
+    if (srv.region !== get(this, 'region', null)) {
+      return;
+    }
+
     this.providerService = srv;
   }
 
@@ -273,9 +285,9 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
       throw new Error(`Attempted to link service ${this.identifier} to itself`);
     }
 
-    if (this.isRegistered()) {
-      throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
-    }
+    // if (this.isRegistered()) {
+    //   throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the ${association.identifier} service`);
+    // }
 
     if (!this.isDependingUpon(association)) {
       throw new Error(`Service ${this.identifier} is not depended upon service of type ${association.type}`);
@@ -338,27 +350,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
         },
       },
       required: ['name', 'type'],
-      if: {
-        properties: {
-          type: {
-            anyOf: [
-              { const: SERVICE_TYPE.PROVIDER },
-              { const: SERVICE_TYPE.STATE },
-              { const: SERVICE_TYPE.VAULT },
-            ],
-          },
-        },
-      },
-      then: {
-        errorMessage: 'You cannot provide profile, links or overrides for this type of service',
-        not: {
-          anyOf: [
-            { required: ['profile'] },
-            { required: ['links'] },
-            { required: ['overrides'] },
-          ],
-        },
-      },
       errorMessage: {
         _: 'The service configuration is invalid',
         required: {

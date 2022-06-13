@@ -18,7 +18,8 @@ export interface Provisionable {
 }
 
 export interface StackmateOperation {
-  get services(): BaseService.Type[];
-  get provisioner(): Provisionable;
+  readonly provisioner: Provisionable;
+  readonly services: BaseService.Type[];
   synthesize(): object;
+  registerServices(): void;
 }

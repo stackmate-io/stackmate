@@ -1,17 +1,17 @@
 import fs from 'node:fs';
 
 import Ajv from 'ajv';
-import { without } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { JSON_SCHEMA_PATH, SERVICE_TYPE } from './constants';
 
 import Project from '@stackmate/engine/core/project';
 import Registry from '@stackmate/engine/core/registry';
-import { CLOUD_PROVIDER } from '@stackmate/engine/constants';
+import { PROVIDER } from '@stackmate/engine/constants';
 import {
   BaseJsonSchema,
-  CloudProviderChoice,
   Project as StackmateProject,
+  ProviderChoice,
   ServiceTypeChoice,
 } from '@stackmate/engine/types';
 
@@ -50,10 +50,10 @@ const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonS
  * Returns the service schema definitions and type discriminations
  * that should be applied into the schema conditionals
  *
- * @param {CloudProviderChoice} provider the provider whose services we need to get the schema for
+ * @param {ProviderChoice} provider the provider whose services we need to get the schema for
  * @returns {Object}
  */
-const getServiceSchemaEntries = (provider: CloudProviderChoice): {
+const getServiceSchemaEntries = (provider: ProviderChoice): {
   definitions: { [key: string]: BaseJsonSchema },
   conditions: BaseJsonSchema[],
 } => {
@@ -71,9 +71,7 @@ const getServiceSchemaEntries = (provider: CloudProviderChoice): {
   const branches: Map<SchemaBranch, ServiceTypeChoice[]> = new Map([
     ['state', [SERVICE_TYPE.STATE]],
     ['secrets', [SERVICE_TYPE.VAULT]],
-    ['cloudServices', without(
-      Object.values(SERVICE_TYPE), SERVICE_TYPE.STATE, SERVICE_TYPE.VAULT, SERVICE_TYPE.PROVIDER,
-    )],
+    ['cloudServices', Object.values(SERVICE_TYPE)],
   ]);
 
   for (const entry of branches) {
@@ -95,6 +93,10 @@ const getServiceSchemaEntries = (provider: CloudProviderChoice): {
 
       // Add the service definition
       Object.assign(definitions, { [serviceClass.schemaId]: serviceClass.schema() });
+    }
+
+    if (isEmpty(typeDiscriminations)) {
+      continue;
     }
 
     conditions.push({
@@ -132,7 +134,7 @@ export const getSchema = (): StackmateProject.Schema => {
   let schema = { ...Project.schema() };
 
   // Apply the provider services
-  Object.values(CLOUD_PROVIDER).forEach(provider => {
+  Object.values(PROVIDER).forEach(provider => {
     const { definitions, conditions } = getServiceSchemaEntries(provider);
 
     // Merge the service definitions and conditions

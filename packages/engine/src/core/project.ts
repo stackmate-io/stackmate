@@ -4,7 +4,7 @@ import Registry from '@stackmate/engine/core/registry';
 import Entity from '@stackmate/engine/lib/entity';
 import { uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   BaseServices,
   StagesConfiguration,
@@ -62,9 +62,9 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
    * @param {String} name the name of the stage in the project to return services for
    * @returns {Service[]}
    */
-  stage(name: string): BaseService.Type[] {
-    const cloudServices = this.getCloudServiceAttributes(name);
-    const defaults = { projectName: this.name, stageName: name };
+  stage(stageName: string): BaseService.Type[] {
+    const cloudServices = this.getCloudServiceAttributes(stageName);
+    const defaults = [this.name, stageName];
     const servicesAttributes = [
       this.getStateServiceAttributes(),
       this.getVaultServiceAttributes(),
@@ -72,16 +72,15 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
     ];
 
     // Instantiate the services
-    const services = servicesAttributes.map((srv) => {
+    return [
+      ...this.getProviderServiceAttributes(servicesAttributes),
+      ...servicesAttributes,
+    ].map((srv) => {
       const { provider = this.provider, region = this.region, type, ...attrs } = srv;
-      return Registry.get(provider, type).factory({ ...attrs, provider, region, type }, defaults);
+      return Registry.get(provider, type).factory(
+        { ...attrs, provider, region, type }, ...defaults,
+      );
     });
-
-    // Append the provider services
-    const providers = this.getProviderServices(services)
-    services.push(...providers);
-
-    return services;
   }
 
   /**
@@ -133,7 +132,7 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   /**
    * @returns {BaseServices.Provider.Type} the attributes for the provider services
    */
-  protected getProviderServices(services: BaseService.Attributes[]): BaseService.Type[] {
+  protected getProviderServiceAttributes(services: BaseService.Attributes[]): BaseServices.Provider.Attributes[] {
     const regions: Map<ProviderChoice, Set<string>> = new Map();
 
     // Iterate the services and keep a mapping of provider => unique set of regions
@@ -143,20 +142,22 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       regions.set(provider, providerRegions);
     });
 
-    const providers: BaseService.Type[] = [];
+    const providerAttributes: BaseServices.Provider.Attributes[] = [];
     regions.forEach((providerRegions, provider) => {
       providerRegions.forEach((region) => {
-        const providerService = Registry.get(provider, SERVICE_TYPE.PROVIDER).factory({
-          region,
+        providerAttributes.push({
           type: SERVICE_TYPE.PROVIDER,
           name: uniqueIdentifier(`provider-${provider}`, { region }),
+          provider,
+          region,
+          links: [],
+          profile: DEFAULT_PROFILE_NAME,
+          overrides: {},
         });
-
-        providers.push(providerService);
       })
     })
 
-    return providers;
+    return providerAttributes;
   }
 
   /**

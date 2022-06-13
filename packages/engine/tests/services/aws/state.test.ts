@@ -3,7 +3,7 @@ import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { snakeCase } from 'lodash';
 
 import Profile from '@stackmate/engine/core/profile';
-import { stageName } from 'tests/fixtures/generic';
+import { projectName, stageName } from 'tests/fixtures/generic';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getServiceRegisterationResults } from 'tests/helpers';
 import { stateConfiguration as serviceConfig } from 'tests/fixtures/aws';
@@ -16,7 +16,7 @@ describe('AwsS3State', () => {
     it('instantiates the service and assigns the attributes correctly', () => {
       const { name, region, bucket } = serviceConfig;
 
-      service = AwsS3State.factory<AwsS3State>(serviceConfig);
+      service = AwsS3State.factory<AwsS3State>(serviceConfig, projectName, stageName);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.STATE);
@@ -36,6 +36,7 @@ describe('AwsS3State', () => {
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
       const { scope } = await getServiceRegisterationResults({
         stageName,
+        projectName,
         serviceConfig,
         serviceScope: 'preparable',
       });

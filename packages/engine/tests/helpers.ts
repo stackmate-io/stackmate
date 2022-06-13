@@ -7,10 +7,18 @@ import { Manifest, Testing } from 'cdktf';
 
 import Project from '@stackmate/engine/core/project';
 import DeployOperation from '@stackmate/engine/operations/deploy';
+import Registry from '@stackmate/engine/core/registry';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
-import { BaseService, CloudStack, ProviderChoice, ServiceScopeChoice } from '@stackmate/engine/types';
-import { getService } from '@stackmate/engine/core/registry';
+import {
+  BaseService,
+  CloudStack,
+  ProviderChoice,
+  RequireKeys,
+  ServiceScopeChoice,
+  Project as StackmateProject
+} from '@stackmate/engine/types';
+import Provisioner from '@stackmate/engine/core/provisioner';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -71,11 +79,17 @@ export const withEphemeralManifest = (
  *
  * @param {Object} options
  * @param {ProviderChoice} options.provider the provider for the prerequisites
- * @param {String} options.region the rgion for the prerequisites
+ * @param {String} options.region the region for the prerequisites
+ * @param {String} options.projectName the project's name
+ * @param {String} options.stageName the stage's name
  * @returns {CloudService[]} the prerequisites for the service registration
  */
-export const getPrerequisites = ({ provider, stack, scope }: {
-  provider: ProviderChoice, stack: CloudStack, scope: ServiceScopeChoice,
+export const getPrerequisites = ({ provider, stack, scope, projectName, stageName }: {
+  provider: ProviderChoice,
+  stack: CloudStack,
+  scope: ServiceScopeChoice,
+  projectName: string;
+  stageName: string;
 }) => {
   let providerAttrs;
   let vaultAttrs;
@@ -89,10 +103,20 @@ export const getPrerequisites = ({ provider, stack, scope }: {
       throw new Error(`We don't have any prerequisites fixture for ${provider}`);
   }
 
-  const cloudProvider = getService(providerAttrs, scope);
+  const cloudProvider = Registry.get(
+    providerAttrs.provider, providerAttrs.type,
+  ).factory(
+    providerAttrs, projectName, stageName,
+  ).scope(scope);
+
   cloudProvider.register(stack);
 
-  const vault = getService(vaultAttrs, scope).link(cloudProvider);
+  const vault = Registry.get(
+    vaultAttrs.provider, vaultAttrs.type,
+  ).factory(
+    vaultAttrs, projectName, stageName,
+  ).scope(scope).link(cloudProvider);
+
   vault.register(stack);
 
   return [cloudProvider, vault];
@@ -110,12 +134,14 @@ export const getPrerequisites = ({ provider, stack, scope }: {
  */
 export const getServiceRegisterationResults = async ({
   stageName,
+  projectName,
   serviceConfig,
   serviceScope = 'deployable',
   prerequisitesScope = 'deployable',
 }: {
-  stageName: string,
-  serviceConfig: BaseService.Attributes;
+  projectName: string;
+  stageName: string;
+  serviceConfig: RequireKeys<BaseService.Attributes, 'provider' | 'type'>
   serviceScope?: ServiceScopeChoice,
   prerequisitesScope?: ServiceScopeChoice,
 }): Promise<{
@@ -132,10 +158,14 @@ export const getServiceRegisterationResults = async ({
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
           const prerequisites = getPrerequisites({
-            provider, stack: cloudStack, scope: prerequisitesScope,
+            provider, stack: cloudStack, scope: prerequisitesScope, projectName, stageName,
           });
 
-          const service = getService(serviceConfig, serviceScope).link(...prerequisites);
+          const service = Registry.get(
+            serviceConfig.provider, serviceConfig.type,
+          ).factory(
+            serviceConfig, projectName, stageName,
+          ).scope(serviceScope).link(...prerequisites);
           service.register(cloudStack);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
@@ -162,12 +192,20 @@ export const getServiceRegisterationResults = async ({
  * @param {String} stageName the stage name to use
  * @returns {Object} the scope as string and stack as object
  */
-export const deployProject = (projectConfig: object, stageName: string = 'production' ): {
+export const deployProject = (
+  projectConfig: object,
+  projectName: string = faker.lorem.word(),
+  stageName: string = 'production',
+): {
   scope: string, stack: CloudStack, output: string,
 } => {
-  const project = Project.factory<Project>(projectConfig);
+  const project = Project.factory<StackmateProject.Type>(projectConfig, projectName, stageName);
   const outputPath = os.tmpdir();
-  const operation = new DeployOperation(project, stageName, { outputPath });
+  const provisioner = new Provisioner(projectName, stageName, outputPath);
+
+  const services = project.stage(stageName);
+  const operation = new DeployOperation(services, provisioner);
+
   const scope = operation.synthesize();
   const { provisioner: { stack } } = operation;
 

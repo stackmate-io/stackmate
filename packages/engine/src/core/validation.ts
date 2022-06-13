@@ -32,8 +32,6 @@ export const getServiceNamesFromPath = (path: string, data: object = {}): string
   return Object.keys(get(data, ['stages', stageName]));
 }
 
-const SCHEMA = readSchema();
-
 const ajv = new Ajv({
   allErrors: true,
   discriminator: true,
@@ -121,9 +119,10 @@ ajv.addKeyword({
   }
 })
 
-ajv.compile<StackmateProject.Schema>(SCHEMA);
-
 const validate = (attributes: EntityAttributes, schemaId: string = ''): EntityAttributes => {
+  const SCHEMA = readSchema();
+  ajv.compile<StackmateProject.Schema>(SCHEMA);
+
   const validAttributes = { ...attributes };
   const runValidations = ajv.getSchema(schemaId);
 
@@ -147,5 +146,4 @@ const validate = (attributes: EntityAttributes, schemaId: string = ''): EntityAt
 
 export namespace Validation {
   export const run = validate;
-  export const schema = SCHEMA;
 };

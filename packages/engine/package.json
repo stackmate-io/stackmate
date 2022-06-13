@@ -46,8 +46,8 @@
     "@types/jsforce": "^1.9.42",
     "@types/project-name-generator": "^2.1.1",
     "jest": "^27.5.1",
-    "rollup-plugin-dts": "^4.2.2",
     "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-dts": "^4.2.2",
     "ts-node": "^10.8.1",
     "tsconfig-paths": "^4.0.0"
   },
@@ -59,9 +59,9 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "build": "rimraf dist/* && npm run schema:generate && rollup -c rollup.config.js",
+    "build": "rimraf dist/* && yarn schema:generate && rollup -c rollup.config.js",
     "schema:generate": "ts-node -P tsconfig.tsnode.json -r tsconfig-paths/register src/schema.ts",
-    "test": "rimraf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
+    "test": "rimraf tests/output/* && yarn schema:generate && jest --bail --verbose --detectOpenHandles --watchAll",
     "test:ci": "npm run lint && npm run test",
     "test:all": "npm run test tests/**/*.test.ts"
   }

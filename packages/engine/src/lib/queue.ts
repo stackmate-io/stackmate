@@ -27,11 +27,10 @@ class MaxPriorityQueue<T> implements PriorityQueue<T> {
         added = true;
         break;
       }
+    }
 
-      if (!added) {
-        this.items.push([item, priority]);
-        break;
-      }
+    if (!added) {
+      this.items.push([item, priority]);
     }
   }
 
