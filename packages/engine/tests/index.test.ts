@@ -1,4 +1,4 @@
-import { Validation } from '@stackmate/engine/core/validation';
+import { validate } from '@stackmate/engine/core/validation';
 
 const config = {
   name: 'some project',
@@ -20,5 +20,5 @@ const config = {
 };
 
 test('project validation', () => {
-  Validation.run(config);
+  validate(config);
 });

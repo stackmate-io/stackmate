@@ -1,7 +1,7 @@
+import 'cdktf/lib/testing/adapters/jest';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import 'cdktf/lib/testing/adapters/jest';
 
 import { awsRegion } from 'tests/fixtures/aws';
 import { deployProject } from 'tests/helpers';

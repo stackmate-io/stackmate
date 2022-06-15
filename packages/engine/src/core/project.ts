@@ -12,10 +12,10 @@ import {
   BaseService,
   ProviderChoice,
   BaseEntityConstructor,
-  ProjectConfiguration,
+  StackmateProject,
 } from '@stackmate/engine/types';
 
-class Project extends Entity<ProjectConfiguration.Attributes> implements ProjectConfiguration.Type {
+class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
   /**
    * @var {String} schemaId the schema id for the entity
    * @static
@@ -163,7 +163,7 @@ class Project extends Entity<ProjectConfiguration.Attributes> implements Project
   /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
-  static schema(this: BaseEntityConstructor<ProjectConfiguration.Type>): ProjectConfiguration.Schema {
+  static schema(this: BaseEntityConstructor<StackmateProject.Type>): StackmateProject.Schema {
     const providers = Object.values(CLOUD_PROVIDER);
     const awsRegions = Object.values(AWS_REGIONS);
 

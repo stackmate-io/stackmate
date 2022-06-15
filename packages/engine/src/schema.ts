@@ -10,7 +10,7 @@ import Registry from '@stackmate/engine/core/registry';
 import { PROVIDER } from '@stackmate/engine/constants';
 import {
   BaseJsonSchema,
-  ProjectConfiguration,
+  StackmateProject,
   ProviderChoice,
   ServiceTypeChoice,
 } from '@stackmate/engine/types';
@@ -130,7 +130,7 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
 /**
  * @returns {StackmateProject.Schema} the schema to use for validation
  */
-export const getSchema = (): ProjectConfiguration.Schema => {
+export const getSchema = (): StackmateProject.Schema => {
   let schema = { ...Project.schema() };
 
   // Apply the provider services

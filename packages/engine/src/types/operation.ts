@@ -1,3 +1,4 @@
+import { CloudStack } from '@stackmate/engine/types/lib';
 import { BaseService } from '@stackmate/engine/types/service';
 
 export type OperationOptions = {
@@ -14,7 +15,8 @@ export type EnvironmentVariable = {
 }
 
 export interface StackProvisioner {
+  readonly stack: CloudStack;
   environment(): EnvironmentVariable[];
   register(...services: BaseService.Type[]): void;
-  generate(): object;
+  synthesize(): object;
 }

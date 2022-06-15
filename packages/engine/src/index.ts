@@ -1,7 +1,6 @@
 import Project from './core/project';
 import Registry from './core/registry';
 
-// Export constants
 export * from './constants';
 export * from './providers/aws/constants';
 

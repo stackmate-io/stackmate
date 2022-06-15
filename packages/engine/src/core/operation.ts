@@ -6,7 +6,8 @@ import {
   OperationOptions,
   StackProvisioner,
   PrepareOperationOptions,
-  ProjectConfiguration as StackmateProject,
+  StackmateProject,
+  ProjectConfiguration,
 } from '@stackmate/engine/types';
 
 /**
@@ -18,7 +19,7 @@ import {
  * @returns {StackProvisioner} the operation instance
  */
 export const deployment = (
-  config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
+  config: ProjectConfiguration, stage: string, options: OperationOptions = {},
 ): StackProvisioner => {
   const project = Project.factory<StackmateProject.Type>(config);
 
@@ -39,7 +40,7 @@ export const deployment = (
  * @returns {StackProvisioner} the operation instance
  */
 export const destroy = (
-  config: StackmateProject.Attributes, stage: string, options: OperationOptions = {},
+  config: ProjectConfiguration, stage: string, options: OperationOptions = {},
 ): StackProvisioner => {
   const project = Project.factory<StackmateProject.Type>(config);
 
@@ -60,7 +61,7 @@ export const destroy = (
  * @returns {StackProvisioner} the operation instance
  */
 export const prepare = (
-  config: StackmateProject.Attributes, stage: string, options: PrepareOperationOptions = {},
+  config: ProjectConfiguration, stage: string, options: PrepareOperationOptions = {},
 ) => {
   const project = Project.factory<StackmateProject.Type>(config);
 

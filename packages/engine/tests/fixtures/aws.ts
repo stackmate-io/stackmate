@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { Project } from '@stackmate/engine/types';
+import { ProjectConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AWS_REGIONS, RDS_INSTANCE_SIZES } from '@stackmate/engine/providers/aws/constants';
 
@@ -42,7 +42,7 @@ export const mysqlDatabaseConfiguration = {
   database: 'my_database_name',
 };
 
-export const fullConfig: Partial<Project.Attributes> = {
+export const fullConfig: ProjectConfiguration = {
   name: 'full-config',
   provider: 'aws',
   region: 'eu-central-1',
