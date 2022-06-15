@@ -41,6 +41,11 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   gateway: InternetGateway;
 
   /**
+   * @var {TerraformAwsProvider} resource the AWS provider resource
+   */
+  resource: TerraformAwsProvider;
+
+  /**
    * @var {KmsKey} key the KMS key to use across the stack
    */
   key: KmsKey;
@@ -58,7 +63,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
    * @param {CloudStack} stack the stack to register the provider to
    */
   bootstrap(stack: CloudStack): void {
-    new TerraformAwsProvider(stack, this.provider, {
+    this.resource = new TerraformAwsProvider(stack, this.provider, {
       region: this.region,
       alias: this.alias,
       defaultTags: {
@@ -142,9 +147,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config(): CoreServiceConfiguration<AWS.Provider.Attributes> {
     return {

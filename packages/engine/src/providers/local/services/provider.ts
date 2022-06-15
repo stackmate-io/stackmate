@@ -1,5 +1,5 @@
 import { snakeCase } from 'lodash';
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
+import { LocalProvider, LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
 
 import LocalService from './base';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -16,6 +16,12 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
    * @var {String} type the service type
    */
   readonly type = SERVICE_TYPE.PROVIDER;
+
+  /**
+   * This is added just for consistency, no need to boostrap the local provider
+   * @var {LocalProvder} resource the local provider resource
+   */
+  resource: LocalProvider;
 
   /**
    * @returns {String} the alias to use for the provider

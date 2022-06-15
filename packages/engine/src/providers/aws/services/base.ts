@@ -61,9 +61,7 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes = AWS.Base.Attribute
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config(): ConfigurationOptions<AWS.Base.Attributes> {
     return {

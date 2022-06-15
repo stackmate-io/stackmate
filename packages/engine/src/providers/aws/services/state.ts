@@ -2,9 +2,10 @@ import { S3Backend } from 'cdktf';
 
 import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
-import { AWS, CloudStack, CoreServiceConfiguration } from '@stackmate/engine/types';
+import { AWS, CloudStack, CoreServiceConfiguration, RequireKeys } from '@stackmate/engine/types';
 import { DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
+import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
 class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
   /**
@@ -33,11 +34,11 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    *
    * @param {CloudStack} stack the stack to register the resources to
    */
-  resources(stack: CloudStack): void {
+  resources(stack: CloudStack, prerequisites: RequireKeys<AwsServicePrerequisites, 'provider'>): void {
     new S3Bucket(stack, this.identifier, {
       acl: 'private',
       bucket: this.bucket,
-      provider: this.providerService.resource,
+      provider: prerequisites.provider.resource,
       versioning: {
         enabled: true,
         mfaDelete: true,
@@ -50,13 +51,13 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    *
    * @param {CloudStack} stack the stack to register the data resources to
    */
-  backend(stack: CloudStack): void {
+  backend(stack: CloudStack, prerequisites: RequireKeys<AwsServicePrerequisites, 'provider'>): void {
     new S3Backend(stack, {
       acl: 'private',
       bucket: this.bucket,
       encrypt: true,
       key: `${this.projectName}/${this.stageName}/terraform.tfstate`,
-      kmsKeyId: this.providerService.key.id,
+      kmsKeyId: prerequisites.provider.key.id,
       region: this.region,
     });
   }
@@ -67,8 +68,8 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @param {CloudStack} stack the stack to provision the service in
    * @void
    */
-  onPrepare(stack: CloudStack): void {
-    this.resources(stack);
+  onPrepare(stack: CloudStack, prerequisites: RequireKeys<AwsServicePrerequisites, 'provider'>): void {
+    this.resources(stack, prerequisites);
   }
 
   /**
@@ -77,8 +78,8 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @param {CloudStack} stack the stack to provision the service in
    * @void
    */
-  onDeploy(stack: CloudStack): void {
-    this.backend(stack);
+  onDeploy(stack: CloudStack, prerequisites: RequireKeys<AwsServicePrerequisites, 'provider'>): void {
+    this.backend(stack, prerequisites);
   }
 
   /**
@@ -87,9 +88,9 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @param {CloudStack} stack the stack to provision the service in
    * @void
    */
-  onDestroy(stack: CloudStack): void {
+  onDestroy(stack: CloudStack, prerequisites: RequireKeys<AwsServicePrerequisites, 'provider'>): void {
     // The state has to be present when destroying resources
-    this.backend(stack);
+    this.backend(stack, prerequisites);
   }
 
   /**
@@ -121,7 +122,7 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
   /**
    * Returns the attributes to use when populating the initial configuration
    * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ projectName = '' } = {}): CoreServiceConfiguration<AWS.State.Attributes> {
     return {

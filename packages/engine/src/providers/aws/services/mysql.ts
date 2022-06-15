@@ -61,9 +61,7 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.MySQL.Attributes> {
     return {

@@ -71,13 +71,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   abstract readonly provider: ProviderChoice;
 
   /**
-   * Provisioning when we deploy a stage
-   *
-   * @param {CloudStack} stack the stack to provision the service in
-   */
-  abstract onDeploy(stack: CloudStack): void;
-
-  /**
    * @returns {EnvironmentVariable[]} the environment variables required to provision the service
    */
   abstract environment(): EnvironmentVariable[];
@@ -103,11 +96,20 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   }
 
   /**
+   * Provisioning when we deploy a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
+   */
+  abstract onDeploy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+
+  /**
    * Provisioning when we initially prepare a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
-  onPrepare(stack: CloudStack): void {
+  onPrepare(stack: CloudStack, prerequisites: ServicePrerequisites): void {
     // no-op. most services are not required when preparing the stage
   }
 
@@ -115,9 +117,9 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
    * Provisioning on when we destroy destroy a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @abstract
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
-  onDestroy(stack: CloudStack): void {
+  onDestroy(stack: CloudStack, prerequisites: ServicePrerequisites): void {
     // no-op. this just removes the resources from the stack
   }
 
@@ -176,6 +178,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
    * Registers the service in the stack
    *
    * @param {CloudStack} stack the stack to provision
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
   provisions(stack: CloudStack, prerequisites: ServicePrerequisites) {
     throw new Error('No scope has been applied, you have to use the `scope` method first');
@@ -244,8 +247,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config(): ConfigurationOptions<BaseService.Attributes> {
     throw new Error('The config() method is not available for this service');
