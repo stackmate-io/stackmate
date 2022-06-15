@@ -32,7 +32,7 @@
   "include": [
     "src/**/*",
     "tests/**/*",
-    "profiles/**/*"
+    "src/profiles/**/*"
   ],
   "exclude": [
     "node_modules",
