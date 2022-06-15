@@ -1,7 +1,7 @@
 import { LocalBackend } from 'cdktf';
 
 import LocalService from './base';
-import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { CloudStack, CoreServiceConfiguration, Local } from '@stackmate/engine/types';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
@@ -87,13 +87,11 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config(): CoreServiceConfiguration<Local.State.Attributes> {
     return {
-      provider: 'local',
+      provider: PROVIDER.LOCAL,
     };
   }
 

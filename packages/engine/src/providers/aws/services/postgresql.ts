@@ -57,9 +57,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.PostgreSQL.Attributes> {
     return {

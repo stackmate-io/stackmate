@@ -1,3 +1,5 @@
+import { TerraformProvider } from 'cdktf';
+
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
@@ -54,20 +56,21 @@ export interface BaseMariaDBDatabaseService extends BaseDatabaseService {
 
 export interface BaseProviderService extends BaseCloudService {
   readonly type: Attribute<typeof SERVICE_TYPE.PROVIDER>;
-  bootstrap(stack: CloudStack): void;
-  prerequisites(stack: CloudStack): void;
+  resource: TerraformProvider;
+  bootstrap(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  prerequisites(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export interface BaseVaultService extends BaseCloudService {
   readonly provider: Attribute<CloudProviderChoice>;
   readonly type: Attribute<typeof SERVICE_TYPE.VAULT>;
-  credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
+  credentials(stack: CloudStack, provider: BaseServices.Provider.Type, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
 
 export interface BaseStateService extends BaseCloudService {
   readonly type: Attribute<typeof SERVICE_TYPE.STATE>;
-  backend(stack: CloudStack): void;
-  resources(stack: CloudStack): void;
+  resources(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  backend(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export namespace BaseService {

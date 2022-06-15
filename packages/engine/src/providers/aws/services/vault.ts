@@ -10,6 +10,7 @@ import AwsService from './base';
 import { getRandomString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { DEFAULT_VAULT_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AWS, CloudStack, CoreServiceConfiguration, VaultCredentialOptions } from '@stackmate/engine/types';
+import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
 class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Type {
   /**
@@ -39,7 +40,7 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
 
-  onDeploy(stack: CloudStack): void {
+  onDeploy(stack: CloudStack, prerequisites: AwsServicePrerequisites): void {
     /* no-op - every change should be introduced through the username / password methods */
   }
 
@@ -57,6 +58,8 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   /**
    * Provides credentials for a service
    *
+   * @param {CloudStack} stack the stack to register the credentials to
+   * @param {BaseServices.Provider.Type} provider the cloud provider instance
    * @param {String} service the service to provide credentials for
    * @param {Object} opts options to pass along the credentials generation
    * @param {Number} opts.length the length of the generated string
@@ -65,7 +68,7 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
    * @param {String[]} opts.exclude the list of special characters to exclude
    * @returns {Object} the username / password pair
    */
-  credentials(stack: CloudStack, service: string, opts: VaultCredentialOptions = {}) {
+  credentials(stack: CloudStack, provider: AWS.Provider.Type, service: string, opts: VaultCredentialOptions = {}) {
     const secretName = `/${this.projectName}/${this.stageName}/${kebabCase(service.toLowerCase())}`;
     const { secret, version } = this.resourceProfile;
     const { root, length, special, exclude } = opts;
@@ -77,8 +80,8 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
     const secretResource = new SecretsmanagerSecret(stack, `${idPrefix}_secret`, {
       name: secretName,
       description: `Secrets for the ${service} service`,
-      kmsKeyId: this.providerService.key.id,
-      provider: this.providerService.resource,
+      kmsKeyId: provider.key.id,
+      provider: provider.resource,
       recoveryWindowInDays: AwsVault.recoveryDays,
       ...secret,
     });
@@ -109,9 +112,7 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   }
 
   /**
-   * Returns the attributes to use when populating the initial configuration
-   * @param {Object} options the options for the configuration
-   * @returns {Object} the attributes
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
     return {
