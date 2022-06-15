@@ -47,9 +47,8 @@ export const fullConfig: ProjectConfiguration = {
   name: 'full-config',
   provider: 'aws',
   region: 'eu-central-1',
-  stages: {
-    production: {
-      mysqlDatabase: mysqlDatabaseConfiguration,
-    },
-  },
+  stages: [{
+    name: 'production',
+    services: [mysqlDatabaseConfiguration],
+  }],
 };

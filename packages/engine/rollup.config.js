@@ -14,7 +14,7 @@ export default [{
       transformers: [pathsTransformer]
     }),
     copy({
-      targets: [{ src: 'stackmate.schema.json', dest: 'dist/' }],
+      targets: [{ src: './src/stackmate.schema.json', dest: './dist/' }],
     }),
   ],
 }, {
