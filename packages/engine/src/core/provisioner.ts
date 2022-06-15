@@ -1,5 +1,5 @@
 import { Memoize } from 'typescript-memoize';
-import { isEmpty, sortBy, uniqBy } from 'lodash';
+import { isEmpty, orderBy, uniqBy } from 'lodash';
 
 import App from '@stackmate/engine/lib/terraform/app';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -14,6 +14,11 @@ import {
 
 class Provisioner implements StackProvisioner {
   /**
+   * @var {CloudStack} stack the cloud stack context to deploy services on
+   */
+  readonly stack: CloudStack;
+
+  /**
    * @var {BaseServices.State.Type} state the project's state service
    */
   protected state: BaseServices.State.Type;
@@ -26,22 +31,17 @@ class Provisioner implements StackProvisioner {
   /**
    * @var {BaseServices.Provider.Type[]} providers the list of providers for the services
    */
-  protected providers: BaseServices.Provider.Type[];
+  protected providers: BaseServices.Provider.Type[] = [];
 
   /**
    * @var {BaseService.Type[]} services the list of cloud services to deploy
    */
-  protected services: BaseService.Type[];
-
-  /**
-   * @var {CloudStack} stack the cloud stack context to deploy services on
-   */
-  protected stack: CloudStack;
+  protected services: BaseService.Type[] = [];
 
   /**
    * @var {String} registered the list of service identifiers that are registered to the stack
    */
-  protected registered: string[];
+  protected registered: string[] = [];
 
   /**
    * @var {Map} environments the environment variables required by the services
@@ -52,9 +52,9 @@ class Provisioner implements StackProvisioner {
    * @var {Map} priorities the priorities to register services by
    */
   readonly priorities: Map<ServiceTypeChoice, number> = new Map([
-    [SERVICE_TYPE.PROVIDER, 1],
-    [SERVICE_TYPE.VAULT, 2],
-    [SERVICE_TYPE.STATE, 3],
+    [SERVICE_TYPE.PROVIDER, 100],
+    [SERVICE_TYPE.VAULT, 90],
+    [SERVICE_TYPE.STATE, 80],
   ]);
 
   /**
@@ -76,10 +76,12 @@ class Provisioner implements StackProvisioner {
   register(...srvs: BaseService.Type[]) {
     // Order the services by priorities so that we make sure that we first register
     // "provider" service types, then the vault, the state and everything else afterwards
-    sortBy(srvs, [(srv) => this.priorities.get(srv.type) || -1]).forEach(this.registerService);
+    orderBy(srvs, [srv => (this.priorities.get(srv.type) || 0)], ['desc']).forEach(
+      service => this.registerService(service),
+    );
 
     // Now that the services are registered, apply the links for the cloud services only
-    this.services.forEach(this.applyLinks);
+    this.services.forEach(s => this.applyLinks(s));
   }
 
   /**
@@ -92,7 +94,7 @@ class Provisioner implements StackProvisioner {
   /**
    * @returns {Object} the object describing the stack
    */
-  generate(): object {
+  synthesize(): object {
     return this.stack.toTerraform();
   }
 

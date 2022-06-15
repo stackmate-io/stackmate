@@ -15,3 +15,4 @@ export type OmitProperties<T extends object, PropType> = { [K in keyof T]-?: T[K
 export type FilteredKeys<T, U> = { [P in keyof T]: T[P] extends U ? P : never }[keyof T];
 export type FilteredProperties<T, U> = { [K in FilteredKeys<T, U>]: T[K]; };
 export type OptionalPropertiesOf<T extends object> = OmitNever<Exclude<{ [K in keyof T]: T extends Record<K, T[K]> ? never : K }, undefined>>;
+export type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
