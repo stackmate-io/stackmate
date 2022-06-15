@@ -1,4 +1,4 @@
-import { has, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';
 import Entity from '@stackmate/engine/core/entity';
@@ -7,12 +7,12 @@ import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   BaseServices,
-  StagesConfiguration,
   CloudProviderChoice,
   BaseService,
   ProviderChoice,
   BaseEntityConstructor,
   StackmateProject,
+  StageConfiguration,
 } from '@stackmate/engine/types';
 
 class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
@@ -21,12 +21,6 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
    * @static
    */
   static schemaId: string = '';  // this is the root schema
-
-  /**
-   * @var {String} keyPattern the key pattern for the schema's properties
-   * @static
-   */
-  static keyPattern: string = '^[a-zA-Z0-9_]+$';
 
   /**
    * @var {String} name the project's name
@@ -56,7 +50,7 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   /**
    * @var {Object} stages the stages declarations
    */
-  stages: StagesConfiguration = {};
+  stages: StageConfiguration[] = [];
 
   /**
    * @param {String} name the name of the stage in the project to return services for
@@ -109,11 +103,22 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       throw new Error('There aren’t any stages defined for the project');
     }
 
-    if (!has(this.stages, stage)) {
+    const stageConfiguration = this.stages.find(s => s.name === stage);
+    if (!stageConfiguration) {
       throw new Error(`Stage ${stage} is not available in the project`);
     }
 
-    const { copy: copyFrom = null, skip: skipServices = [], ...stageServices } = this.stages[stage];
+    const {
+      copy: copyFrom = null,
+      skip: skipServices = [],
+      services: stageServices = [],
+    } = stageConfiguration;
+
+    if (isEmpty(stageServices) && !copyFrom) {
+      throw new Error(
+        `Stage ${stage} is improperly configured. It doesn't provide any services or stage to copy from`,
+      );
+    }
 
     const services = [];
 
@@ -121,11 +126,19 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       services.push(...this.getCloudServiceAttributes(copyFrom, skipServices));
     }
 
-    services.push(...Object.values(stageServices).filter(srv => !without.includes(srv.name)));
+    services.push(...stageServices.filter(srv => !without.includes(srv.name)));
 
-    return services.map(srv => {
-      const { provider = this.provider, region = this.region, ...attrs } = srv;
-      return { ...attrs, provider, region };
+    return services.map((srv) => {
+      const {
+        provider = this.provider,
+        region = this.region,
+        links = [],
+        profile = DEFAULT_PROFILE_NAME,
+        overrides = {},
+        ...attrs
+      } = srv;
+
+      return { ...attrs, provider, region, links, profile, overrides };
     });
   }
 
@@ -193,17 +206,23 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
           description: 'Where would you like your Terraform state to be stored',
         },
         stages: {
-          type: 'object',
+          type: 'array',
           description: 'The deployment stages for your projects',
           errorMessage: 'The stages configuration is invalid',
-          minProperties: 1,
-          patternProperties: {
-            [Project.keyPattern]: {
-              type: 'object',
-              minProperties: 1,
-              errorMessage: 'You need to either define at least one service or copy another stage’s configuration',
-              patternProperties: {
-                [Project.keyPattern]: {
+          minItems: 1,
+          items: {
+            type: 'object',
+            oneOf: [
+              { required: ['name', 'services'] },
+              { required: ['name', 'copy'] },
+            ],
+            properties: {
+              name: {
+                type: 'string',
+              },
+              services: {
+                type: 'array',
+                items: {
                   type: 'object',
                   additionalProperties: true,
                   required: ['name', 'type'],
@@ -218,6 +237,15 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
                       type: 'string',
                     },
                   },
+                },
+              },
+              copy: {
+                type: 'string',
+              },
+              skip: {
+                type: 'array',
+                items: {
+                  type: 'string',
                 },
               },
             },

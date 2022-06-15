@@ -19,7 +19,7 @@ type SchemaBranch = 'state' | 'secrets' | 'cloudServices';
 
 /**
  * @param {SchemaBranch} branch the branch to select
- * @param {BaseJsonSchema} props the properties to assign to the branhc
+ * @param {BaseJsonSchema} props the properties to assign to the branch
  * @returns {BaseJsonSchema} the schema branch
  */
 const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonSchema => {
@@ -34,10 +34,10 @@ const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonS
   return {
     properties: {
       stages: {
-        patternProperties: {
-          [Project.keyPattern]: {
-            patternProperties: {
-              [Project.keyPattern]: props,
+        items: {
+          properties: {
+            services: {
+              items: props,
             },
           },
         },

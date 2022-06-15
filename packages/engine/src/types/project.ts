@@ -1,4 +1,5 @@
 import { JsonSchema } from '@stackmate/engine/types/schema';
+import { RequireKeys } from '@stackmate/engine/types/util';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
 import {
   BaseService,
@@ -11,15 +12,14 @@ import {
   VaultServiceAttributes,
 } from '@stackmate/engine/types/service';
 
-export type StageCopy = { copy?: string, skip?: string[] };
-
-export type StageConfiguration = {
-  [service: string]: CloudServiceConfiguration<CloudServiceAttributes>;
+type BaseStageConfiguration = {
+  name: string;
+  services?: CloudServiceConfiguration<CloudServiceAttributes>[],
+  copy?: string;
+  skip?: string[];
 };
 
-export type StagesConfiguration = {
-  [stage: string]: StageConfiguration & StageCopy | StageCopy;
-};
+export type StageConfiguration = RequireKeys<BaseStageConfiguration, 'name' | 'services'> | RequireKeys<BaseStageConfiguration, 'name' | 'copy'>;
 
 export type ProjectConfiguration = {
   name: string;
@@ -27,7 +27,7 @@ export type ProjectConfiguration = {
   region: string;
   state?: CoreServiceConfiguration<StateServiceAttributes>;
   secrets?: CoreServiceConfiguration<VaultServiceAttributes>;
-  stages: StagesConfiguration;
+  stages: StageConfiguration[];
 };
 
 export interface ProjectEntity extends BaseEntity {
@@ -36,7 +36,7 @@ export interface ProjectEntity extends BaseEntity {
   region: Attribute<string>;
   secrets: Attribute<BaseServices.Vault.Attributes>;
   state: Attribute<BaseServices.State.Attributes>;
-  stages: Attribute<StagesConfiguration>;
+  stages: Attribute<StageConfiguration[]>;
   stage(name: string): BaseService.Type[];
 }
 
