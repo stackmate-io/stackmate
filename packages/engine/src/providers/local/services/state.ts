@@ -28,18 +28,6 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
   directory: string;
 
   /**
-   * @var {DataTerraformRemoteStateS3} dataResource the data resource to use when registering the state
-   */
-  backendResource: LocalBackend;
-
-  /**
-   * @returns {Boolean} whether the state is registered
-   */
-  isRegistered(): boolean {
-    return true;
-  }
-
-  /**
    * @returns {String} the path to store the local file under
    */
   get path(): string {
@@ -52,7 +40,7 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
    * @param {CloudStack} stack the stack to deploy the resources to
    */
   backend(stack: CloudStack): void {
-    this.backendResource = new LocalBackend(stack, {
+    new LocalBackend(stack, {
       path: this.path,
       workspaceDir: this.directory,
     });

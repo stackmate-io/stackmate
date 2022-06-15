@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import App from '@stackmate/engine/lib/terraform/app';
 import Stack from '@stackmate/engine/lib/terraform/stack';
-import Entity from '@stackmate/engine/lib/entity';
+import Entity from '@stackmate/engine/core/entity';
 import { stackName, appName } from 'tests/fixtures/generic';
 import { Attribute, AttributesOf, CloudStack, JsonSchema, NonAttributesOf } from '@stackmate/engine/types';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';

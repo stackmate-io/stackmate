@@ -1,4 +1,3 @@
-import { CloudApp, CloudStack, PriorityQueue } from '@stackmate/engine/types/lib';
 import { BaseService } from '@stackmate/engine/types/service';
 
 export type OperationOptions = {
@@ -9,17 +8,13 @@ export type PrepareOperationOptions = OperationOptions & {
   statePath?: string;
 }
 
-export interface Provisionable {
-  readonly app: CloudApp;
-  readonly stack: CloudStack;
-  readonly queue: PriorityQueue<BaseService.Type>;
-  services: BaseService.Type[];
-  process(): object;
+export type EnvironmentVariable = {
+  name: string;
+  description: string;
 }
 
-export interface StackmateOperation {
-  readonly provisioner: Provisionable;
-  readonly services: BaseService.Type[];
-  synthesize(): object;
-  registerServices(): void;
+export interface StackProvisioner {
+  environment(): EnvironmentVariable[];
+  register(...services: BaseService.Type[]): void;
+  generate(): object;
 }

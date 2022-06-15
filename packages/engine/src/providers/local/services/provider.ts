@@ -1,5 +1,4 @@
 import { snakeCase } from 'lodash';
-import { TerraformProvider } from 'cdktf';
 import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
 
 import LocalService from './base';
@@ -19,18 +18,6 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
   readonly type = SERVICE_TYPE.PROVIDER;
 
   /**
-   * @var {TerraformProvider} resource the provider resource
-   */
-  resource: TerraformProvider;
-
-  /**
-   * @returns {Boolean} whether the service is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.resource instanceof TerraformLocalProvider;
-  }
-
-  /**
    * @returns {String} the alias to use for the provider
    */
   public get alias(): string {
@@ -43,7 +30,7 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
    * @param {CloudStack} stack the stack to register the provider to
    */
   bootstrap(stack: CloudStack): void {
-    this.resource = new TerraformLocalProvider(stack, this.provider, {
+    new TerraformLocalProvider(stack, this.provider, {
       alias: this.alias,
     });
   }

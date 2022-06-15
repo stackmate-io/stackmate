@@ -35,25 +35,12 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   name: string = DEFAULT_VAULT_SERVICE_NAME;
 
   /**
-   * @var {Boolean} registered whether the service is registered into the stack
-   */
-  private registered: boolean = false;
-
-  /**
    * @var {Object} secrets a
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
 
-  /**
-   * @returns {Boolean} whether the vault is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.registered;
-  }
-
   onDeploy(stack: CloudStack): void {
     /* no-op - every change should be introduced through the username / password methods */
-    this.registered = true;
   }
 
   /**

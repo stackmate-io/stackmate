@@ -9,6 +9,7 @@ import Project from '@stackmate/engine/core/project';
 import DeployOperation from '@stackmate/engine/operations/deploy';
 import Registry from '@stackmate/engine/core/registry';
 import { PROVIDER } from '@stackmate/engine/constants';
+import Provisioner from '@stackmate/engine/core/provisioner';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
 import {
   BaseService,
@@ -16,9 +17,8 @@ import {
   ProviderChoice,
   RequireKeys,
   ServiceScopeChoice,
-  Project as StackmateProject
+  ProjectConfiguration,
 } from '@stackmate/engine/types';
-import Provisioner from '@stackmate/engine/core/provisioner';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -199,7 +199,7 @@ export const deployProject = (
 ): {
   scope: string, stack: CloudStack, output: string,
 } => {
-  const project = Project.factory<StackmateProject.Type>(projectConfig, projectName, stageName);
+  const project = Project.factory<ProjectConfiguration.Type>(projectConfig, projectName, stageName);
   const outputPath = os.tmpdir();
   const provisioner = new Provisioner(projectName, stageName, outputPath);
 

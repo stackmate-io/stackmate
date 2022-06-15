@@ -1,4 +1,3 @@
-import { S3Backend, TerraformResource } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
@@ -15,10 +14,8 @@ import {
 type AwsService<Srv extends BaseCloudService> = Srv & {
   readonly provider: Attribute<typeof PROVIDER.AWS>;
   region: Attribute<typeof AWS_REGIONS[keyof typeof AWS_REGIONS]>;
-}
-type AwsBaseService = AwsService<BaseCloudService> & {
-  providerService: AWS.Provider.Type;
-}
+};
+type AwsBaseService = AwsService<BaseCloudService>;
 type AwsProviderService = AwsService<BaseProviderService> & {
   ip: Attribute<string>;
   vpc: Vpc;
@@ -28,8 +25,6 @@ type AwsProviderService = AwsService<BaseProviderService> & {
 };
 type AwsStateService = AwsService<BaseStateService> & {
   bucket: Attribute<string>;
-  bucketResource: TerraformResource;
-  backendResource: S3Backend;
 }
 type AwsDatabaseService<Srv extends BaseDatabaseService = BaseDatabaseService> = AwsService<Srv> & {
   readonly engine: typeof RDS_ENGINES[number];

@@ -2,7 +2,7 @@ import { AWS } from './aws';
 import { Local } from './local'
 
 export { AWS, Local };
-export { BaseServices, BaseService } from './base';
+export * from './base';
 export * from './util';
 
 export type VaultServiceAttributes = AWS.Vault.Attributes;

@@ -1,4 +1,4 @@
-import { S3Backend, TerraformResource } from 'cdktf';
+import { S3Backend } from 'cdktf';
 
 import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
@@ -29,29 +29,12 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
   bucket: string;
 
   /**
-   * @var {TerraformResource} bucket the bucket to provision
-   */
-  bucketResource: TerraformResource;
-
-  /**
-   * @var {DataTerraformRemoteStateS3} dataResource the data resource to use when registering the state
-   */
-  backendResource: S3Backend;
-
-  /**
-   * @returns {Boolean} whether the state service is registered
-   */
-  isRegistered(): boolean {
-    return Boolean(this.bucketResource) || Boolean(this.backendResource);
-  }
-
-  /**
    * Provisions the resources that provide state storage
    *
    * @param {CloudStack} stack the stack to register the resources to
    */
   resources(stack: CloudStack): void {
-    this.bucketResource = new S3Bucket(stack, this.identifier, {
+    new S3Bucket(stack, this.identifier, {
       acl: 'private',
       bucket: this.bucket,
       provider: this.providerService.resource,
@@ -68,7 +51,7 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @param {CloudStack} stack the stack to register the data resources to
    */
   backend(stack: CloudStack): void {
-    this.backendResource = new S3Backend(stack, {
+    new S3Backend(stack, {
       acl: 'private',
       bucket: this.bucket,
       encrypt: true,

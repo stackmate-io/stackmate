@@ -36,7 +36,6 @@
     "constructs": "^10.1.32",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21",
-    "project-name-generator": "^2.1.9",
     "reflect-metadata": "^0.1.13",
     "typescript-memoize": "^1.1.0",
     "validate.js": "^0.13.1"

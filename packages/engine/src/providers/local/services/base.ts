@@ -1,7 +1,7 @@
 import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { CoreServiceConfiguration, Local } from '@stackmate/engine/types';
+import { CoreServiceConfiguration, EnvironmentVariable, Local } from '@stackmate/engine/types';
 
 abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service<Attrs> implements Local.Base.Type {
   /**
@@ -11,15 +11,17 @@ abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service
   static schemaId: string = 'services/local/base';
 
   /**
-   * @var {String} provider the cloud provider used (eg. AWS)
+   * @var {String} provider the cloud provider used (eg. Local)
    * @readonly
    */
   readonly provider = PROVIDER.LOCAL;
 
   /**
-   * @var {ProviderService} providerService the cloud provider service
+   * @returns {EnvironmentVariable[]} the list of environment variables to use when provisioning local services
    */
-  providerService: Local.Provider.Type;
+  environment(): EnvironmentVariable[] {
+    return [];
+  }
 
   /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
