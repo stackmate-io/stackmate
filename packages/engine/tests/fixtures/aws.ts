@@ -39,6 +39,7 @@ export const mysqlDatabaseConfiguration = {
   storage: faker.datatype.number({ min: 30, max: 100 }),
   version: '8.0',
   port: 3306,
+  profile: 'production',
   database: 'my_database_name',
 };
 
