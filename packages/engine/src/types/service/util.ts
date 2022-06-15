@@ -33,4 +33,10 @@ export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Ty
 }
 
 export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type>;
-export type ServiceAssociations = { [key: string]: [Function] };
+
+export type ServiceAssociation = {
+  match: Function,
+  handler: Function,
+};
+
+export type ServiceAssociations = ServiceAssociation[];

@@ -1,5 +1,3 @@
-import { LocalBackend } from 'cdktf';
-
 import { PROVIDER } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { Attribute, AttributesOf, NonAttributesOf } from '@stackmate/engine/types/entity';
@@ -7,14 +5,11 @@ import { BaseCloudService, BaseProviderService, BaseStateService } from '@stackm
 
 type LocalService<Srv extends BaseCloudService> = Srv & {
   readonly provider: Attribute<typeof PROVIDER.LOCAL>;
-}
-type LocalBaseService = LocalService<BaseCloudService> & {
-  providerService: Local.Provider.Type;
-}
+};
+type LocalBaseService = LocalService<BaseCloudService>;
 type LocalProviderService = LocalService<BaseProviderService>;
 type LocalStateService = LocalService<BaseStateService> & {
   directory: Attribute<string>;
-  backendResource: LocalBackend;
   get path(): string;
 };
 

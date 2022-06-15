@@ -1,4 +1,4 @@
-import { Validation } from '@stackmate/engine/core/validation';
+import { validate } from '@stackmate/engine/core/validation';
 import {
   BaseEntity,
   EntityAttributes,
@@ -53,7 +53,7 @@ abstract class Entity<Attrs extends EntityAttributes = {}> implements BaseEntity
     this: BaseEntityConstructor<T>, attributes: EntityAttributes = {}, ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = Validation.run(attributes, this.schemaId);
+    entity.attributes = validate(attributes, this.schemaId);
     return entity;
   }
 }

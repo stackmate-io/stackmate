@@ -28,6 +28,12 @@ const projectConfig = {
         profile: 'production',
         storage: 30,
       },
+      postgresDb: {
+        type: SERVICE_TYPE.POSTGRESQL,
+        size: DEFAULT_RDS_INSTANCE_SIZE,
+        name: 'postgresDb',
+        storage: 30,
+      },
     },
   },
 };

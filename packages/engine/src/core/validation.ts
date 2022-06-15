@@ -7,7 +7,7 @@ import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { EntityAttributes, Project as StackmateProject } from '@stackmate/engine/types';
+import { EntityAttributes, ProjectConfiguration } from '@stackmate/engine/types';
 import Profile from './profile';
 
 const readSchema = () => {
@@ -119,9 +119,9 @@ ajv.addKeyword({
   }
 })
 
-const validate = (attributes: EntityAttributes, schemaId: string = ''): EntityAttributes => {
+export const validate = (attributes: EntityAttributes, schemaId: string = ''): EntityAttributes => {
   const SCHEMA = readSchema();
-  ajv.compile<StackmateProject.Schema>(SCHEMA);
+  ajv.compile<ProjectConfiguration.Schema>(SCHEMA);
 
   const validAttributes = { ...attributes };
   const runValidations = ajv.getSchema(schemaId);
@@ -142,8 +142,4 @@ const validate = (attributes: EntityAttributes, schemaId: string = ''): EntityAt
   }
 
   return validAttributes;
-};
-
-export namespace Validation {
-  export const run = validate;
 };

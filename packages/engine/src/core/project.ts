@@ -1,7 +1,7 @@
 import { has, isEmpty } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';
-import Entity from '@stackmate/engine/lib/entity';
+import Entity from '@stackmate/engine/core/entity';
 import { uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -9,13 +9,13 @@ import {
   BaseServices,
   StagesConfiguration,
   CloudProviderChoice,
-  Project as StackmateProject,
   BaseService,
   ProviderChoice,
   BaseEntityConstructor,
+  ProjectConfiguration,
 } from '@stackmate/engine/types';
 
-class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
+class Project extends Entity<ProjectConfiguration.Attributes> implements ProjectConfiguration.Type {
   /**
    * @var {String} schemaId the schema id for the entity
    * @static
@@ -163,7 +163,7 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
-  static schema(this: BaseEntityConstructor<StackmateProject.Type>): StackmateProject.Schema {
+  static schema(this: BaseEntityConstructor<ProjectConfiguration.Type>): ProjectConfiguration.Schema {
     const providers = Object.values(CLOUD_PROVIDER);
     const awsRegions = Object.values(AWS_REGIONS);
 

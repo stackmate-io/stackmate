@@ -67,13 +67,6 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
   public paramGroup: DbParameterGroup;
 
   /**
-   * @returns {Boolean} whether the service is registered
-   */
-  isRegistered(): boolean {
-    return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
-  }
-
-  /**
    * @returns {String} the RDS parameter group family to use when deploying the service
    */
   @Memoize() public get paramGroupFamily() {

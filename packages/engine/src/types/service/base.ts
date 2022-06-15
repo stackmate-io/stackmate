@@ -1,9 +1,8 @@
-import { TerraformProvider } from 'cdktf';
-
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
+import { EnvironmentVariable } from '@stackmate/engine/types/operation';
 import {
   ProviderChoice,
   ServiceScopeChoice,
@@ -13,30 +12,27 @@ import {
   CloudProviderChoice,
 } from '@stackmate/engine/types/service/util';
 
-// Base services
+export type ServicePrerequisites = {
+  provider?: BaseServices.Provider.Type;
+  vault?: BaseServices.Vault.Type;
+};
+
 export interface BaseCloudService extends BaseEntity {
-  // Discrimination for the service
   readonly provider: Attribute<ProviderChoice>;
   readonly type: Attribute<ServiceTypeChoice>;
-  // Attributes
   name: Attribute<string>;
   links: Attribute<string[]>;
   profile: Attribute<string>;
   overrides: Attribute<object>;
-  providerService: BaseServices.Provider.Type;
-  // Common across all services
-  vault: BaseServices.Vault.Type;
   identifier: string;
   region?: Attribute<string>;
-  isRegistered(): boolean;
-  link(...targets: BaseService.Type[]): BaseService.Type;
   scope(name: ServiceScopeChoice): BaseService.Type;
+  environment(): EnvironmentVariable[];
   associations(): ServiceAssociations;
-  isDependingUpon(service: BaseService.Type): boolean;
-  register(stack: CloudStack): void;
-  onPrepare(stack: CloudStack): void;
-  onDeploy(stack: CloudStack): void;
-  onDestroy(stack: CloudStack): void;
+  onPrepare(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  onDeploy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  onDestroy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  provisions(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export interface BaseDatabaseService extends BaseCloudService {
@@ -58,7 +54,6 @@ export interface BaseMariaDBDatabaseService extends BaseDatabaseService {
 
 export interface BaseProviderService extends BaseCloudService {
   readonly type: Attribute<typeof SERVICE_TYPE.PROVIDER>;
-  resource: TerraformProvider;
   bootstrap(stack: CloudStack): void;
   prerequisites(stack: CloudStack): void;
 }

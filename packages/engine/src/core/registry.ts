@@ -4,8 +4,11 @@ import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, BaseService, ServiceScopeChoice, ServiceTypeChoice,
-  ServiceConstructor, ServiceRegistry as CloudServiceRegistry, TypeServiceMapping, RequireKeys,
+  ProviderChoice,
+  ServiceTypeChoice,
+  ServiceConstructor,
+  TypeServiceMapping,
+  ServiceRegistry as CloudServiceRegistry,
 } from '@stackmate/engine/types';
 
 class ServicesRegistry implements CloudServiceRegistry {
@@ -97,19 +100,5 @@ registry.add(AwsServices.MySQL, PROVIDER.AWS, SERVICE_TYPE.MYSQL);
 registry.add(AwsServices.PostgreSQL, PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
 registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
 registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
-
-/**
- * Returns a service instance based on its attributes
- *
- * @param {BaseService.Attributes} attrs the attributes to instantiate the service by
- * @param {ServiceScopeChoice} scope the scope to apply to the service
- * @returns {CloudService} the service instantiated and with the scope applied
- */
-export const getService = <T extends BaseService.Attributes>(
-  attrs: RequireKeys<T, 'provider' | 'type'>, scope: ServiceScopeChoice = 'deployable',
-) => {
-  const { provider, type } = attrs;
-  return registry.get(provider, type).factory(attrs).scope(scope);
-};
 
 export default registry as ServicesRegistry;

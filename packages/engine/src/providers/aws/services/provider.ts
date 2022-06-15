@@ -1,5 +1,4 @@
 import { snakeCase } from 'lodash';
-import { TerraformProvider } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
@@ -47,18 +46,6 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   key: KmsKey;
 
   /**
-   * @var {TerraformProvider} resource the provider resource
-   */
-  resource: TerraformProvider;
-
-  /**
-   * @returns {Boolean} whether the service is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.resource instanceof TerraformAwsProvider;
-  }
-
-  /**
    * @returns {String} the alias to use for the provider
    */
   public get alias(): string {
@@ -71,7 +58,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
    * @param {CloudStack} stack the stack to register the provider to
    */
   bootstrap(stack: CloudStack): void {
-    this.resource = new TerraformAwsProvider(stack, this.provider, {
+    new TerraformAwsProvider(stack, this.provider, {
       region: this.region,
       alias: this.alias,
       defaultTags: {

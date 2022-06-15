@@ -7,7 +7,6 @@ import {
   CloudServiceAttributes,
   CloudServiceConfiguration,
   CoreServiceConfiguration,
-  ServiceTypeChoice,
   StateServiceAttributes,
   VaultServiceAttributes,
 } from '@stackmate/engine/types/service';
@@ -27,7 +26,6 @@ export type ProjectConfiguration = {
   secrets?: CoreServiceConfiguration<VaultServiceAttributes>;
   stages: StagesConfiguration;
 };
-
 export interface ProjectEntity extends BaseEntity {
   name: Attribute<string>;
   provider: Attribute<CloudProviderChoice>;
@@ -37,20 +35,8 @@ export interface ProjectEntity extends BaseEntity {
   stages: Attribute<StagesConfiguration>;
   stage(name: string): BaseService.Type[];
 }
-
-export namespace Project {
+export namespace ProjectConfiguration {
   export type Attributes = AttributesOf<ProjectEntity>;
   export type Type = Attributes & NonAttributesOf<ProjectEntity>;
   export type Schema = JsonSchema<Attributes>;
 }
-
-// Options to provide when creating a project
-export type ProjectConfigCreationOptions = {
-  projectName?: string,
-  defaultProvider?: CloudProviderChoice,
-  defaultRegion?: string,
-  stageNames?: string[],
-  stateProvider?: CloudProviderChoice,
-  secretsProvider?: CloudProviderChoice,
-  serviceTypes?: ServiceTypeChoice[],
-};
