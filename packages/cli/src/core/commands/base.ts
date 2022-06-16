@@ -1,9 +1,8 @@
 import { Command, Flags } from '@oclif/core';
-import { ProjectConfiguration, ValidationError } from '@stackmate/engine';
+import { ProjectConfiguration } from '@stackmate/engine';
 import { OutputArgs, OutputFlags } from '@oclif/core/lib/interfaces';
 
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { formatValidationError } from '@stackmate/cli/lib/formatters/errors';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 
 abstract class BaseCommand extends Command {
@@ -50,14 +49,14 @@ abstract class BaseCommand extends Command {
    * @returns {ProjectConfiguration} the project configuration to load from the file
    */
   get projectConfig(): ProjectConfiguration {
-    return new ConfigurationFile(DEFAULT_PROJECT_FILE).read();
+    return new ConfigurationFile(DEFAULT_PROJECT_FILE).read() as ProjectConfiguration;
   }
 
   /**
    * Initializes the commend
    */
   async init() {
-    ({ flags: this.parsedFlags, args: this.parsedArgs } = await this.parse(this.ctor))
+    ({ flags: this.parsedFlags, args: this.parsedArgs } = await this.parse(this.ctor));
   }
 
   /**
@@ -66,14 +65,14 @@ abstract class BaseCommand extends Command {
    * @param {Error} err the error thrown
    * @returns {any}
    */
-  async catch(err: Error & { exitCode?: number | undefined; }): Promise<any> {
-    if (err instanceof ValidationError) {
-      formatValidationError(err, this, { colors: this.parsedFlags.colors });
-      this.exit(1);
-    }
+  // async catch(err: Error & { exitCode?: number | undefined; }): Promise<any> {
+  //   if (err instanceof ValidationError) {
+  //     formatValidationError(err, this, { colors: this.parsedFlags.colors });
+  //     this.exit(1);
+  //   }
 
-    return super.catch(err);
-  }
+  //   return super.catch(err);
+  // }
 }
 
 export default BaseCommand;

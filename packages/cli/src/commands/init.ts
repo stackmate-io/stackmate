@@ -3,8 +3,8 @@ import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { kebabCase } from 'lodash';
 import {
-  PROVIDER, SERVICE_TYPE, AWS_REGIONS, ServiceConstructor,
-  ProjectConfiguration, ProviderChoice, ServiceRegistry, ServiceTypeChoice,
+  PROVIDER, AWS_REGIONS, ServiceConstructor,
+  ProjectConfiguration, ProviderChoice, ServiceTypeChoice, ServiceRegistry,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
@@ -79,15 +79,15 @@ class InitCommand extends BaseCommand {
   }
 
   @Memoize() get project(): Required<ProjectConfiguration> {
-    const { name, provider, region, stages, state, secrets, services } = this.parsedFlags;
+    const { name, provider, region, stages, services } = this.parsedFlags;
     const [defaultStage, ...otherStages] = stages;
 
     return {
       name,
       provider,
       region,
-      state: this.serviceAttributes(state, SERVICE_TYPE.STATE),
-      secrets: this.serviceAttributes(secrets, SERVICE_TYPE.VAULT),
+      state: { provider },
+      secrets: { provider },
       stages: [
         {
           name: defaultStage,
