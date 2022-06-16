@@ -105,8 +105,9 @@ class InitCommand extends BaseCommand {
 
   async run(): Promise<any> {
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    console.log({ projectFile });
-    console.log({ attrs: this.project });
+    this.log('Test', projectFile);
+    // console.log({ projectFile });
+    // console.log({ attrs: this.project });
   }
 }
 

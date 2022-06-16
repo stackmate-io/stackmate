@@ -41,14 +41,12 @@
     "@oclif/plugin-plugins": "^2.1.0",
     "@stackmate/engine": "^0.0.0",
     "chalk": "^5.0.1",
-    "ffi-napi": "^4.0.3",
     "lodash": "4.17.21",
     "typescript-memoize": "^1.1.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.18.2",
-    "@types/ffi-napi": "^4.0.5",
     "@types/jest": "^28.1.1",
     "jest": "^28.1.1",
     "oclif": "^2.6.3",
