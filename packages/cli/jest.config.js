@@ -1,4 +1,5 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+const { join } = require('path');
 const { compilerOptions: { paths } } = require('./tsconfig');
 const { pathsToModuleNameMapper } = require('ts-jest');
 
@@ -9,13 +10,18 @@ module.exports = {
   globals: {
     "ts-jest": {
       "tsconfig": "tsconfig.json",
-      "diagnostics": true
-    }
+      "diagnostics": true,
+    },
   },
   transform: {
-    "^.+\\.ts$": "ts-jest"
+    "^.+\\.ts$": "ts-jest",
+    "engine/.+\\.ts$": "ts-jest",
+    "engine/.+\\.js$": "babel-jest",
   },
-  moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
+  moduleNameMapper: {
+    ...pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
+    '^@stackmate/engine/(.*)$': join(__dirname, '..', 'engine', 'src', '$1'),
+  },
   moduleFileExtensions: [
     "ts",
     "js"

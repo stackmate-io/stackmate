@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
+    "lib": ["ES5", "ES6", "ESNext"],
     "downlevelIteration": true,
     "composite": false,
     "declaration": true,
