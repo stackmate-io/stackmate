@@ -1,6 +1,7 @@
 import { validate } from '@stackmate/engine/core/validation';
+import { ProjectConfiguration } from '../src';
 
-const config = {
+const config: ProjectConfiguration = {
   name: 'some project',
   provider: 'aws',
   region: 'eu-central-1',
@@ -8,15 +9,14 @@ const config = {
     provider: 'aws',
     bucket: 'abc-defg',
   },
-  stages: {
-    production: {
-      database: {
-        type: 'mysql',
-        name: 'mydatabase',
-        database: 'mysqldb',
-      }
-    }
-  }
+  stages: [{
+    name: 'production',
+    services: [{
+      type: 'mysql',
+      name: 'mydatabase',
+      database: 'mysqldb',
+    }],
+  }],
 };
 
 test('project validation', () => {

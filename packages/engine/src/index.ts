@@ -5,7 +5,7 @@ export * from './constants';
 export * from './providers/aws/constants';
 
 export * as Operation from './core/operation';
-export * as Types from './types';
+export * from './types';
 
 export {
   Project,
