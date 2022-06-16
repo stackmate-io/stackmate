@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { argv } from 'node:process';
 
 import Ajv from 'ajv';
 import { isEmpty } from 'lodash';
@@ -155,5 +156,8 @@ if (!ajv.validateSchema(schema)) {
   process.exit(1);
 }
 
-fs.writeFileSync(JSON_SCHEMA_PATH, JSON.stringify(schema, null, 2));
-console.log('JSON schema generated under', JSON_SCHEMA_PATH);
+const [filePath] = argv.slice(2);
+const jsonSchemaDest = filePath || JSON_SCHEMA_PATH;
+
+fs.writeFileSync(jsonSchemaDest, JSON.stringify(schema, null, 2));
+console.log('JSON schema generated under', jsonSchemaDest);

@@ -53,7 +53,8 @@
     "oclif": "^2.6.3",
     "rollup-plugin-dts": "^4.2.2",
     "ts-jest": "^28.0.5",
-    "ts-node": "^10.8.1"
+    "ts-node": "^10.8.1",
+    "tsc-alias": "^1.6.10"
   },
   "oclif": {
     "bin": "stackmate",
@@ -70,11 +71,9 @@
     }
   },
   "scripts": {
-    "go:bindings": "go build -o bin/terraform.so -buildmode=c-shared src/lib/terraform/bindings.go",
     "build": "rimraf dist/* && rollup -c rollup.config.js && oclif manifest",
     "lint": "eslint . --ext .ts",
     "postpack": "rimraf oclif.manifest.json",
-    "posttest": "yarn lint",
     "prepack": "yarn build && oclif readme",
     "test": "jest --bail --verbose --detectOpenHandles --watchAll",
     "manifest": "oclif manifest",

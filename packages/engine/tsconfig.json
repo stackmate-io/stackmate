@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es6",
+    "target": "es5",
+    "downlevelIteration": true,
     "composite": false,
-    "declaration": false,
+    "declaration": true,
     "baseUrl": "./",
     "rootDir": "./",
     "outDir": "./dist",

@@ -9,7 +9,8 @@
     }
   },
   "include": [
-    "src/**/*",
+    "./src/index.ts",
+    "./src/profiles"
   ],
   "exclude": [
     "node_modules",
