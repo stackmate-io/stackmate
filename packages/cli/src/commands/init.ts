@@ -79,8 +79,8 @@ class InitCommand extends BaseCommand {
   }
 
   @Memoize() get project(): Required<ProjectConfiguration> {
-    const { name, provider, region, stages, services } = this.parsedFlags;
-    const [defaultStage, ...otherStages] = stages;
+    const { name, provider, region, /* stages, services */ } = this.parsedFlags;
+    // const [defaultStage, ...otherStages] = stages;
 
     return {
       name,
@@ -88,18 +88,18 @@ class InitCommand extends BaseCommand {
       region,
       state: { provider },
       secrets: { provider },
-      stages: [
-        {
-          name: defaultStage,
-          services: services.map(
-            (service: ServiceTypeChoice) => this.serviceAttributes(provider, service),
-          ),
-        },
-        ...otherStages.map((stg: string) => ({
-          name: stg,
-          copy: defaultStage,
-        })),
-      ],
+      stages: [],
+      //   {
+      //     name: defaultStage,
+      //     services: services.map(
+      //       (service: ServiceTypeChoice) => this.serviceAttributes(provider, service),
+      //     ),
+      //   },
+      //   ...otherStages.map((stg: string) => ({
+      //     name: stg,
+      //     copy: defaultStage,
+      //   })),
+      // ],
     };
   }
 
