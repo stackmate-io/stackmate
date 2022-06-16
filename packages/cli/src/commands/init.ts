@@ -1,10 +1,10 @@
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
-import { fromPairs, kebabCase } from 'lodash';
+import { kebabCase } from 'lodash';
 import {
-  PROVIDER, SERVICE_TYPE, AWS_REGIONS, CloudServiceConstructor,
-  ProjectConfiguration, ProviderChoice, Registry, ServiceTypeChoice,
+  PROVIDER, SERVICE_TYPE, AWS_REGIONS, ServiceConstructor,
+  ProjectConfiguration, ProviderChoice, ServiceRegistry, ServiceTypeChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
@@ -68,14 +68,14 @@ class InitCommand extends BaseCommand {
 
   serviceAttributes(provider: ProviderChoice, service: ServiceTypeChoice) {
     let serviceProvider: ProviderChoice = provider;
-    const serviceProviders = Registry.providers(service);
+    const serviceProviders = ServiceRegistry.providers(service);
 
     if (!serviceProviders.includes(provider)) {
       ([serviceProvider] = serviceProviders);
     }
 
-    const srv: CloudServiceConstructor = Registry.get(serviceProvider, service);
-    return srv.defaults();
+    const srv: ServiceConstructor = ServiceRegistry.get(serviceProvider, service);
+    return srv.config();
   }
 
   @Memoize() get project(): Required<ProjectConfiguration> {
@@ -88,30 +88,25 @@ class InitCommand extends BaseCommand {
       region,
       state: this.serviceAttributes(state, SERVICE_TYPE.STATE),
       secrets: this.serviceAttributes(secrets, SERVICE_TYPE.VAULT),
-      stages: {
-        [defaultStage]: services.map(
-          (service: ServiceTypeChoice) => this.serviceAttributes(provider, service),
-        ),
-        ...fromPairs(
-          otherStages.map((stg: string) => ([stg, { from: defaultStage }])),
-        ),
-      },
+      stages: [
+        {
+          name: defaultStage,
+          services: services.map(
+            (service: ServiceTypeChoice) => this.serviceAttributes(provider, service),
+          ),
+        },
+        ...otherStages.map((stg: string) => ({
+          name: stg,
+          copy: defaultStage,
+        })),
+      ],
     };
   }
 
   async run(): Promise<any> {
-
-    // const project = new Project();
-    // project.attributes = config;
-    // return project;
-    // try {
-    //   this.project.validate();
-    // } catch(err) {
-    //   console.log(require('util').inspect(err))
-    // }
-
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    // projectFile.write(this.project.attributes);
+    console.log({ projectFile });
+    console.log({ attrs: this.project });
   }
 }
 
