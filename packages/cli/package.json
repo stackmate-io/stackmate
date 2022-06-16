@@ -74,12 +74,12 @@
     "lint": "eslint . --ext .ts",
     "postpack": "rimraf oclif.manifest.json",
     "prepack": "yarn build && oclif readme",
-    "test": "jest --bail --verbose --detectOpenHandles --watchAll",
     "manifest": "oclif manifest",
     "command:dev": "./bin/dev",
     "command:run": "./bin/run",
     "version": "oclif readme && git add README.md",
-    "test:ci": "jest --bail --verbose --detectOpenHandles"
+    "test": "jest --bail --verbose --detectOpenHandles",
+    "test:watch": "yarn test:all --watchAll"
   },
   "engines": {
     "node": ">=12.0.0"
