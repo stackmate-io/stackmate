@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import { argv } from 'node:process';
 
 import Ajv from 'ajv';
-import { isEmpty } from 'lodash';
 
 import { JSON_SCHEMA_PATH, SERVICE_TYPE } from './constants';
 
@@ -96,7 +95,7 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
       Object.assign(definitions, { [serviceClass.schemaId]: serviceClass.schema() });
     }
 
-    if (isEmpty(typeDiscriminations)) {
+    if (!typeDiscriminations.length) {
       continue;
     }
 

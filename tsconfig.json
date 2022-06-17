@@ -11,10 +11,6 @@
     "declaration": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "rootDirs": [
-      "packages/cli",
-      "packages/engine"
-    ],
     "outDir": "dist",
     "incremental": false,
     "importHelpers": true,

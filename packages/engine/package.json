@@ -57,12 +57,9 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "prebuild": "rimraf dist/*",
-    "build": "yarn tsc -p ../../tsconfig.build.json",
+    "build": "yarn tsc -p ./tsconfig.build.json",
     "postbuild": "yarn tsc-alias && yarn schema:generate:dist",
     "schema:generate": "ts-node -r tsconfig-paths/register src/schema.ts",
-    "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json",
-    "pretest": "rimraf tests/output/* && yarn schema:generate",
-    "test": "jest -c ../../jest.config.js --bail --verbose --detectOpenHandles",
-    "test:watch": "yarn test --watchAll"
+    "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json"
   }
 }

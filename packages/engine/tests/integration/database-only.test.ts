@@ -3,8 +3,8 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
-import { awsRegion } from 'tests/fixtures/aws';
-import { deployProject } from 'tests/helpers';
+import { awsRegion } from 'tests/engine/fixtures/aws';
+import { deployProject } from 'tests/engine/helpers';
 import { ProjectConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';

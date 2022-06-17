@@ -8,7 +8,7 @@ import { Manifest, Testing } from 'cdktf';
 import Registry from '@stackmate/engine/core/registry';
 import { deployment } from '@stackmate/engine/core/operation';
 import { PROVIDER } from '@stackmate/engine/constants';
-import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
+import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/engine/fixtures/aws';
 import {
   BaseService,
   CloudStack,

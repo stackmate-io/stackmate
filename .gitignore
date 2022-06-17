@@ -8,8 +8,6 @@ tmp
 cdktf.out
 .stackmate
 node_modules
-tests/output/*
-!tests/output/.keep
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
