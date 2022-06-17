@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/jest": "^28.1.1",
-    "jest": "^28.1.1",
+    "jest": "27.5.1",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "tsc-alias": "^1.6.10",
@@ -57,11 +57,12 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "prebuild": "rimraf dist/*",
-    "build": "yarn tsc -p tsconfig.build.json",
+    "build": "yarn tsc -p ../../tsconfig.build.json",
     "postbuild": "yarn tsc-alias && yarn schema:generate:dist",
-    "schema:generate": "ts-node -P tsconfig.build.json -r tsconfig-paths/register src/schema.ts",
+    "schema:generate": "ts-node -r tsconfig-paths/register src/schema.ts",
     "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json",
-    "test": "rimraf tests/output/* && yarn schema:generate && jest --bail --verbose --detectOpenHandles",
+    "pretest": "rimraf tests/output/* && yarn schema:generate",
+    "test": "jest -c ../../jest.config.js --bail --verbose --detectOpenHandles",
     "test:watch": "yarn test --watchAll"
   }
 }

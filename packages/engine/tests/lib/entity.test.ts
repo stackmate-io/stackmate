@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { MockEntity, ExtendedMockEntity } from 'tests/mocks';
+import { MockEntity, ExtendedMockEntity } from 'tests/engine/mocks';
 
 describe('Entity', () => {
   describe('setters / getter', () => {

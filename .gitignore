@@ -13,3 +13,6 @@ tests/output/*
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
+
+# Jest
+.jestcache
