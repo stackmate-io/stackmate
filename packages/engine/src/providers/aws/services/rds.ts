@@ -1,8 +1,8 @@
-import { isUndefined } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import AwsService from '@stackmate/engine/providers/aws/services/base';
+import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { AWS, CloudStack, OneOf } from '@stackmate/engine/types';
@@ -15,6 +15,12 @@ import {
 } from '@stackmate/engine/providers/aws/constants';
 
 abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsService<Attrs> implements AWS.Database.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/rds';
+
   /**
    * @var {String} size the size for the RDS instance
    */
@@ -61,13 +67,6 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
   public paramGroup: DbParameterGroup;
 
   /**
-   * @returns {Boolean} whether the service is registered
-   */
-  isRegistered(): boolean {
-    return !isUndefined(this.instance) && !isUndefined(this.paramGroup);
-  }
-
-  /**
    * @returns {String} the RDS parameter group family to use when deploying the service
    */
   @Memoize() public get paramGroupFamily() {
@@ -84,9 +83,10 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
     return triad[2];
   }
 
-  onDeploy(stack: CloudStack): void {
+  onDeploy(stack: CloudStack, prerequisites: Required<AwsServicePrerequisites>): void {
+    const { vault, provider } = prerequisites;
     const { instance, params } = this.resourceProfile;
-    const { username, password } = this.vault.credentials(stack, this.name, { root: true });
+    const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
 
     this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
       ...params,
@@ -105,7 +105,7 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
       name: this.database,
       parameterGroupName: this.paramGroup.name,
       port: this.port,
-      provider: this.providerService.resource,
+      provider: provider.resource,
       dbSubnetGroupName: `db-subnet-${this.identifier}`,
       username,
       password,
@@ -115,9 +115,12 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
     });
   }
 
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
   static schema(): AWS.Database.Schema {
     return mergeJsonSchemas(super.schema(), {
-      required: ['size', 'nodes', 'engine', 'port', 'version'],
+      $id: this.schemaId,
       properties: {
         size: {
           type: 'string',
@@ -132,10 +135,6 @@ abstract class AwsRdsService<Attrs extends AWS.Database.Attributes> extends AwsS
           type: 'number',
           default: 1,
           minimum: 1,
-        },
-        engine: {
-          type: 'string',
-          enum: RDS_ENGINES,
         },
         version: {
           type: 'string',

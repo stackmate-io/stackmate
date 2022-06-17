@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+env:
+  CI: false
+
+jobs:
+  deploy:
+    name: test
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+      - name: Setup node
+        uses: actions/setup-node@v2
+      - name: Install dependencies
+        run: yarn --immutable
+      - name: Test
+        run: yarn test

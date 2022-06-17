@@ -3,10 +3,10 @@ import { kebabCase, snakeCase } from 'lodash';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
-import Profile from '@stackmate/engine/core/profile';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getServiceRegisterationResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures/aws';
+import { projectName, stageName } from 'tests/engine/fixtures/generic';
+import { getServiceRegisterationResults } from 'tests/engine/helpers';
+import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/engine/fixtures/aws';
 import { MySQL as AwsRdsService } from '@stackmate/engine/providers/aws';
 
 describe('AwsRdsService', () => {
@@ -14,9 +14,9 @@ describe('AwsRdsService', () => {
     let service: AwsRdsService;
 
     it('instantiates the service and assigns the attributes correctly', () => {
-      const { name, region, size, storage, database, stageName } = serviceConfig;
+      const { name, region, size, storage, database } = serviceConfig;
 
-      service = AwsRdsService.factory<AwsRdsService>(serviceConfig);
+      service = AwsRdsService.factory<AwsRdsService>(serviceConfig, projectName, stageName);
 
       expect(service.provider).toEqual(PROVIDER.AWS);
       expect(service.type).toEqual(SERVICE_TYPE.MYSQL);
@@ -27,7 +27,7 @@ describe('AwsRdsService', () => {
       expect(service.engine).toEqual('mysql');
       expect(service.database).toEqual(database);
       expect(service.links).toEqual([]);
-      expect(service.profile).toEqual(Profile.DEFAULT);
+      expect(service.profile).toEqual('production');
       expect(service.overrides).toEqual({});
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
     });
@@ -36,8 +36,10 @@ describe('AwsRdsService', () => {
   describe('register', () => {
     it('registers a single-node RDS instance with the default profile', async () => {
       const { AWS: provider } = PROVIDER;
-      const { stageName, projectName } = serviceConfig;
-      const { scope } = await getServiceRegisterationResults({ serviceConfig });
+      const { scope } = await getServiceRegisterationResults({
+        projectName, stageName, serviceConfig,
+      });
+
       const providerAlias = `${provider}.${provider}_${snakeCase(serviceConfig.region)}`;
 
       expect(scope).toHaveResourceWithProperties(DbParameterGroup, {
@@ -60,14 +62,15 @@ describe('AwsRdsService', () => {
 
       expect(scope).toHaveResourceWithProperties(DbInstance, {
         allocated_storage: serviceConfig.storage,
+        count: 1,
         allow_major_version_upgrade: false,
         apply_immediately: true,
-        auto_minor_version_upgrade: true,
-        backup_retention_period: 0,
+        auto_minor_version_upgrade: false,
+        backup_retention_period: 30,
         copy_tags_to_snapshot: true,
-        count: 1,
-        delete_automated_backups: true,
-        deletion_protection: false,
+        delete_automated_backups: false,
+        deletion_protection: true,
+        enabled_cloudwatch_logs_exports: ['audit', 'error', 'general', 'slowquery'],
         engine: 'mysql',
         engine_version: '8.0',
         identifier: `${serviceConfig.name}-${stageName}`,
@@ -79,14 +82,11 @@ describe('AwsRdsService', () => {
         provider: providerAlias,
         port: 3306,
         publicly_accessible: false,
-        skip_final_snapshot: true,
+        skip_final_snapshot: false,
         storage_type: 'gp2',
         username: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "username", "")}`,
         password: `\${lookup(jsondecode(data.aws_secretsmanager_secret_version.${snakeCase(serviceConfig.name)}_secrets_data.secret_string), "password", "")}`,
-        enabled_cloudwatch_logs_exports: ['audit', 'error', 'general', 'slowquery'],
-        lifecycle: {
-          create_before_destroy: true,
-        },
+        lifecycle: { create_before_destroy: true },
       });
     });
   });

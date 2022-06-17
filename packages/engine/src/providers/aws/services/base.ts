@@ -1,10 +1,16 @@
 import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { AWS } from '@stackmate/engine/types';
+import { AWS, ConfigurationOptions, EnvironmentVariable } from '@stackmate/engine/types';
+import { AWS_DEFAULT_REGION, AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 
-abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
+abstract class AwsService<Attrs extends AWS.Base.Attributes = AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/base';
+
   /**
    * @var {String} provider the cloud provider used (eg. AWS)
    * @readonly
@@ -17,33 +23,32 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
   region: string = AWS_DEFAULT_REGION;
 
   /**
-   * @var {ProviderService} providerService the cloud provider service
+   * @returns {EnvironmentVariable[]} the list of environment variables to use when provisioning AWS services
    */
-  providerService: AWS.Provider.Type;
-
-  /**
-   * Callback to run when the cloud provider has been registered
-   * @param {ProviderService} provider the provider service
-   */
-  onProviderRegistered(srv: AWS.Provider.Type): void {
-    if (srv.region !== this.region) {
-      return;
-    }
-
-    super.onProviderRegistered(srv);
+  environment(): EnvironmentVariable[] {
+    return [{
+      name: 'STACKMATE_AWS_ACCESS_KEY_ID',
+      description: 'The AWS Access key ID to use with Stackmate',
+    }, {
+      name: 'STACKMATE_AWS_SECRET_ACCESS_ID',
+      description: 'The AWS Secret access ID to use with Stackmate',
+    }];
   }
 
   /**
-   * @returns {JsonSchema}
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Base.Schema {
-    const regionValues = Object.values(AWS_DEFAULT_REGION);
+    const regionValues = Object.values(AWS_REGIONS);
 
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
       properties: {
         provider: {
           type: 'string',
+          enum: [PROVIDER.AWS],
           const: PROVIDER.AWS,
+          default: PROVIDER.AWS,
         },
         region: {
           type: 'string',
@@ -53,6 +58,15 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes> extends Service<Att
         },
       },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): ConfigurationOptions<AWS.Base.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 

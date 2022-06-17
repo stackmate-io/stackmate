@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { MockEntity, ExtendedMockEntity, multiply } from 'tests/mocks';
+import { MockEntity, ExtendedMockEntity } from 'tests/engine/mocks';
 
 describe('Entity', () => {
   describe('setters / getter', () => {
@@ -24,7 +24,7 @@ describe('Entity', () => {
       subject.attributes = attributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(subject.name).toEqual(name);
-      expect(subject.number).toEqual(multiply(number));
+      expect(subject.number).toEqual(number);
     });
 
     it('instantiates an extended object', () => {
@@ -32,7 +32,7 @@ describe('Entity', () => {
       subject.attributes = extendedAttributes;
       expect(subject).toBeInstanceOf(MockEntity);
       expect(subject.name).toEqual(name);
-      expect(subject.number).toEqual(multiply(number));
+      expect(subject.number).toEqual(number);
       expect(subject.email).toEqual(email);
     });
 

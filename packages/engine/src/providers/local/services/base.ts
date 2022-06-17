@@ -1,41 +1,52 @@
 import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { Local } from '@stackmate/engine/types';
+import { CoreServiceConfiguration, EnvironmentVariable, Local } from '@stackmate/engine/types';
 
 abstract class LocalService<Attrs extends Local.Base.Attributes> extends Service<Attrs> implements Local.Base.Type {
   /**
-   * @var {String} provider the cloud provider used (eg. AWS)
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/local/base';
+
+  /**
+   * @var {String} provider the cloud provider used (eg. Local)
    * @readonly
    */
   readonly provider = PROVIDER.LOCAL;
 
   /**
-   * @var {ProviderService} providerService the cloud provider service
+   * @returns {EnvironmentVariable[]} the list of environment variables to use when provisioning local services
    */
-  providerService: Local.Provider.Type;
+  environment(): EnvironmentVariable[] {
+    return [];
+  }
 
   /**
-   * @returns {JsonSchema}
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): Local.Base.Schema {
-    const regionValues = Object.values(AWS_DEFAULT_REGION);
-
     return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
+      additionalProperties: false,
       properties: {
         provider: {
           type: 'string',
-          const: PROVIDER.AWS,
-        },
-        region: {
-          type: 'string',
-          enum: regionValues,
-          default: String(AWS_DEFAULT_REGION),
-          errorMessage: `The region is invalid. Available options are: ${regionValues.join(', ')}`,
+          const: PROVIDER.LOCAL,
+          enum: [PROVIDER.LOCAL],
         },
       },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<Local.Base.Attributes> {
+    return {
+      provider: PROVIDER.LOCAL,
+    };
   }
 }
 

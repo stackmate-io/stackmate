@@ -1,20 +1,21 @@
-import { get, merge } from 'lodash';
+import { get } from 'lodash';
 
 import * as AwsServices from '@stackmate/engine/providers/aws';
 import * as LocalServices from '@stackmate/engine/providers/local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceAttributes, ServiceScopeChoice, ServiceTypeChoice,
-  ServiceConstructor, ServiceRegistry as CloudServiceRegistry,
+  ProviderChoice,
+  ServiceTypeChoice,
+  ServiceConstructor,
+  TypeServiceMapping,
+  ServiceRegistry as CloudServiceRegistry,
 } from '@stackmate/engine/types';
 
 class ServicesRegistry implements CloudServiceRegistry {
   /**
    * @var {Object} items the items in the registry
    */
-  items: {
-    [key in ProviderChoice]?: { [type in ServiceTypeChoice]?: ServiceConstructor };
-  } = {};
+  readonly items: Map<ProviderChoice, TypeServiceMapping> = new Map();
 
   /**
    * Adds a service to the registry
@@ -28,9 +29,9 @@ class ServicesRegistry implements CloudServiceRegistry {
     provider: ProviderChoice,
     type: ServiceTypeChoice,
   ): void {
-    this.items = merge(this.items, {
-      [provider]: { [type]: classConstructor },
-    });
+    const providerServices = this.items.get(provider) || new Map();
+    providerServices.set(type, classConstructor);
+    this.items.set(provider, providerServices)
   }
 
   /**
@@ -42,13 +43,13 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @throws {Error} if the service is not registered
    */
   get(provider: ProviderChoice, type: ServiceTypeChoice): ServiceConstructor {
-    const cls = get(this.items, `${provider}.${type}`);
+    const service = this.items.get(provider)?.get(type);
 
-    if (!cls) {
+    if (!service) {
       throw new Error(`Provider ${provider} does not have service ${type} registered`);
     }
 
-    return cls;
+    return service;
   }
 
   /**
@@ -69,7 +70,7 @@ class ServicesRegistry implements CloudServiceRegistry {
    * @returns {ServiceTypeChoice[]} the service types available for the provider
    */
   types(provider: ProviderChoice): ServiceTypeChoice[] {
-    return Object.keys(this.items[provider] || {}) as Array<ServiceTypeChoice>;
+    return Object.keys(this.items.get(provider) || {}) as Array<ServiceTypeChoice>;
   }
 
   /**
@@ -89,6 +90,7 @@ class ServicesRegistry implements CloudServiceRegistry {
 const registry = new ServicesRegistry();
 
 // Add the local services to the registry
+registry.add(LocalServices.Provider, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
 registry.add(LocalServices.State, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
 
 // Add the AWS services to the registry
@@ -98,19 +100,5 @@ registry.add(AwsServices.MySQL, PROVIDER.AWS, SERVICE_TYPE.MYSQL);
 registry.add(AwsServices.PostgreSQL, PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
 registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
 registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
-
-/**
- * Returns a service instance based on its attributes
- *
- * @param {ServiceAttributes} attrs the attributes to instantiate the service by
- * @param {ServiceScopeChoice} scope the scope to apply to the service
- * @returns {CloudService} the service instantiated and with the scope applied
- */
-export const getService = (
-  attrs: ServiceAttributes, scope: ServiceScopeChoice = 'deployable',
-) => {
-  const { provider, type } = attrs;
-  return registry.get(provider, type).factory(attrs).scope(scope);
-};
 
 export default registry as ServicesRegistry;

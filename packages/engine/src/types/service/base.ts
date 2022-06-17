@@ -4,34 +4,37 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { CloudStack, CredentialsObject } from '@stackmate/engine/types/lib';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
-import { VaultCredentialOptions } from '@stackmate/engine/types/project';
+import { EnvironmentVariable } from '@stackmate/engine/types/operation';
 import {
-  ProviderChoice, ServiceScopeChoice, ServiceTypeChoice, ServiceAssociations,
+  ProviderChoice,
+  ServiceScopeChoice,
+  ServiceTypeChoice,
+  ServiceAssociations,
+  VaultCredentialOptions,
+  CloudProviderChoice,
 } from '@stackmate/engine/types/service/util';
 
-// Base services
+export type ServicePrerequisites = {
+  provider?: BaseServices.Provider.Type;
+  vault?: BaseServices.Vault.Type;
+};
+
 export interface BaseCloudService extends BaseEntity {
-  // Discrimination for the service
   readonly provider: Attribute<ProviderChoice>;
   readonly type: Attribute<ServiceTypeChoice>;
-  // Attributes
   name: Attribute<string>;
   links: Attribute<string[]>;
   profile: Attribute<string>;
   overrides: Attribute<object>;
-  providerService: BaseServices.Provider.Type;
-  // Common across all services
-  vault: BaseServices.Vault.Type;
   identifier: string;
-  isRegistered(): boolean;
-  link(...targets: BaseService.Type[]): BaseService.Type;
+  region?: Attribute<string>;
   scope(name: ServiceScopeChoice): BaseService.Type;
+  environment(): EnvironmentVariable[];
   associations(): ServiceAssociations;
-  isDependingUpon(service: BaseService.Type): boolean;
-  register(stack: CloudStack): void;
-  onPrepare(stack: CloudStack): void;
-  onDeploy(stack: CloudStack): void;
-  onDestroy(stack: CloudStack): void;
+  onPrepare(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  onDeploy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  onDestroy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  provisions(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export interface BaseDatabaseService extends BaseCloudService {
@@ -54,24 +57,27 @@ export interface BaseMariaDBDatabaseService extends BaseDatabaseService {
 export interface BaseProviderService extends BaseCloudService {
   readonly type: Attribute<typeof SERVICE_TYPE.PROVIDER>;
   resource: TerraformProvider;
-  bootstrap(stack: CloudStack): void;
-  prerequisites(stack: CloudStack): void;
+  bootstrap(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  prerequisites(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export interface BaseVaultService extends BaseCloudService {
+  readonly provider: Attribute<CloudProviderChoice>;
   readonly type: Attribute<typeof SERVICE_TYPE.VAULT>;
-  credentials(stack: CloudStack, service: string, opts?: VaultCredentialOptions): CredentialsObject;
+  credentials(stack: CloudStack, provider: BaseServices.Provider.Type, service: string, opts?: VaultCredentialOptions): CredentialsObject;
 }
 
 export interface BaseStateService extends BaseCloudService {
-  backend(stack: CloudStack): void;
-  resources(stack: CloudStack): void;
+  readonly type: Attribute<typeof SERVICE_TYPE.STATE>;
+  resources(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+  backend(stack: CloudStack, prerequisites: ServicePrerequisites): void;
 }
 
 export namespace BaseService {
   export type Attributes = AttributesOf<BaseCloudService>;
   export type Type = Attributes & NonAttributesOf<BaseCloudService>;
   export type Schema = JsonSchema<Attributes>;
+  export type Defaults = Omit<Attributes, 'provider' | 'type'>;
 }
 
 export namespace BaseServices {

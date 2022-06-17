@@ -1,31 +1,31 @@
 import { LocalBackend } from 'cdktf';
 
 import LocalService from './base';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { CloudStack, Local } from '@stackmate/engine/types';
+import { DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, CoreServiceConfiguration, Local } from '@stackmate/engine/types';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class LocalState extends LocalService<Local.State.Attributes> implements Local.State.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/local/state';
+
   /**
    * @var {ProviderChoice} provider the provider for the service
    */
   readonly type = SERVICE_TYPE.STATE;
 
   /**
+   * @var {String} name the service's name
+   */
+  name: string = DEFAULT_STATE_SERVICE_NAME;
+
+  /**
    * @var {String} directory the directory to store the output to
    */
   directory: string;
-
-  /**
-   * @var {DataTerraformRemoteStateS3} dataResource the data resource to use when registering the state
-   */
-  backendResource: LocalBackend;
-
-  /**
-   * @returns {Boolean} whether the state is registered
-   */
-  isRegistered(): boolean {
-    return true;
-  }
 
   /**
    * @returns {String} the path to store the local file under
@@ -40,7 +40,7 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
    * @param {CloudStack} stack the stack to deploy the resources to
    */
   backend(stack: CloudStack): void {
-    this.backendResource = new LocalBackend(stack, {
+    new LocalBackend(stack, {
       path: this.path,
       workspaceDir: this.directory,
     });
@@ -84,6 +84,32 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
   onDestroy(stack: CloudStack): void {
     // The state has to be present when destroying resources
     this.backend(stack);
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<Local.State.Attributes> {
+    return {
+      provider: PROVIDER.LOCAL,
+    };
+  }
+
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
+  static schema(): Local.State.Schema {
+    return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
+      properties: {
+        name: {
+          default: DEFAULT_STATE_SERVICE_NAME,
+        },
+        type: {
+          default: SERVICE_TYPE.STATE,
+        },
+      },
+    });
   }
 }
 

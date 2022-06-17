@@ -1,34 +1,33 @@
 import { snakeCase } from 'lodash';
-import { TerraformProvider } from 'cdktf';
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
+import { LocalProvider, LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
 
 import LocalService from './base';
-import { CloudStack, Local } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, Local } from '@stackmate/engine/types';
 
 class LocalProvder extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/local/provider';
+
   /**
    * @var {String} type the service type
    */
   readonly type = SERVICE_TYPE.PROVIDER;
 
   /**
-   * @var {TerraformProvider} resource the provider resource
+   * This is added just for consistency, no need to boostrap the local provider
+   * @var {LocalProvder} resource the local provider resource
    */
-  resource: TerraformProvider;
-
-  /**
-   * @returns {Boolean} whether the service is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.resource instanceof TerraformLocalProvider;
-  }
+  resource: LocalProvider;
 
   /**
    * @returns {String} the alias to use for the provider
    */
   public get alias(): string {
-    return `${snakeCase(this.provider)}_${snakeCase(this.region)}`;
+    return `${snakeCase(this.provider)}_${this.type}`;
   }
 
   /**
@@ -37,7 +36,7 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
    * @param {CloudStack} stack the stack to register the provider to
    */
   bootstrap(stack: CloudStack): void {
-    this.resource = new TerraformLocalProvider(stack, this.provider, {
+    new TerraformLocalProvider(stack, this.provider, {
       alias: this.alias,
     });
   }

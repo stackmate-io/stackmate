@@ -7,11 +7,24 @@ import {
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
 import AwsService from './base';
-import { getRandomString } from '@stackmate/engine/lib/helpers';
-import { DEFAULT_VAULT_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AWS, CloudStack, VaultCredentialOptions } from '@stackmate/engine/types';
+import { getRandomString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { DEFAULT_VAULT_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { AWS, CloudStack, CoreServiceConfiguration, VaultCredentialOptions } from '@stackmate/engine/types';
+import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
 class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/vault';
+
+  /**
+   * @var {Number} recoveryDays the number of days we can recover a secret
+   * @static
+   */
+  static recoveryDays: number = 30;
+
   /**
    * @var {String} type the type for the service
    */
@@ -23,25 +36,12 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   name: string = DEFAULT_VAULT_SERVICE_NAME;
 
   /**
-   * @var {Boolean} registered whether the service is registered into the stack
-   */
-  private registered: boolean = false;
-
-  /**
    * @var {Object} secrets a
    */
   private secrets: Map<string, { secret: TerraformResource, version: TerraformResource }> = new Map();
 
-  /**
-   * @returns {Boolean} whether the vault is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.registered;
-  }
-
-  onDeploy(stack: CloudStack): void {
+  onDeploy(stack: CloudStack, prerequisites: AwsServicePrerequisites): void {
     /* no-op - every change should be introduced through the username / password methods */
-    this.registered = true;
   }
 
   /**
@@ -58,6 +58,8 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   /**
    * Provides credentials for a service
    *
+   * @param {CloudStack} stack the stack to register the credentials to
+   * @param {BaseServices.Provider.Type} provider the cloud provider instance
    * @param {String} service the service to provide credentials for
    * @param {Object} opts options to pass along the credentials generation
    * @param {Number} opts.length the length of the generated string
@@ -66,7 +68,7 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
    * @param {String[]} opts.exclude the list of special characters to exclude
    * @returns {Object} the username / password pair
    */
-  credentials(stack: CloudStack, service: string, opts: VaultCredentialOptions = {}) {
+  credentials(stack: CloudStack, provider: AWS.Provider.Type, service: string, opts: VaultCredentialOptions = {}) {
     const secretName = `/${this.projectName}/${this.stageName}/${kebabCase(service.toLowerCase())}`;
     const { secret, version } = this.resourceProfile;
     const { root, length, special, exclude } = opts;
@@ -78,8 +80,9 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
     const secretResource = new SecretsmanagerSecret(stack, `${idPrefix}_secret`, {
       name: secretName,
       description: `Secrets for the ${service} service`,
-      kmsKeyId: this.providerService.key.id,
-      provider: this.providerService.resource,
+      kmsKeyId: provider.key.id,
+      provider: provider.resource,
+      recoveryWindowInDays: AwsVault.recoveryDays,
       ...secret,
     });
 
@@ -106,6 +109,32 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
       username: this.extract(data.secretString, 'username'),
       password: this.extract(data.secretString, 'password'),
     };
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
+  }
+
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
+  static schema(): AWS.Vault.Schema {
+    return mergeJsonSchemas(super.schema(), {
+      $id: this.schemaId,
+      properties: {
+        name: {
+          default: DEFAULT_VAULT_SERVICE_NAME,
+        },
+        type: {
+          default: SERVICE_TYPE.VAULT,
+        },
+      },
+    });
   }
 }
 

@@ -5,12 +5,19 @@ import { join as joinPaths } from 'path';
 import { Construct } from 'constructs';
 import { Manifest, Testing } from 'cdktf';
 
-import Project from '@stackmate/engine/core/project';
-import DeployOperation from '@stackmate/engine/operations/deploy';
+import Registry from '@stackmate/engine/core/registry';
+import { deployment } from '@stackmate/engine/core/operation';
 import { PROVIDER } from '@stackmate/engine/constants';
-import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/fixtures/aws';
-import { CloudStack, ProviderChoice, ServiceAttributes, ServiceScopeChoice } from '@stackmate/engine/types';
-import { getService } from '@stackmate/engine/core/registry';
+import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/engine/fixtures/aws';
+import {
+  BaseService,
+  CloudStack,
+  ProviderChoice,
+  RequireKeys,
+  ServiceScopeChoice,
+  ProjectConfiguration,
+  BaseServices,
+} from '@stackmate/engine/types';
 
 /**
  * Enhances the terraform stack with the properties we apply in the Stack class
@@ -41,8 +48,7 @@ export const enhanceStack = (
  * Writes out the stack as a JSON file
  *
  * @param {Object} obj the object to store on the json file
- * @param {String} targetPath the path to write the output to
- * @param {String} filename the target filename
+ * @param {String} targetDir the path to write the output to
  */
 export const writeManifestFile = (obj: object, targetDir: string): string => {
   const fileName = joinPaths(targetDir, Manifest.fileName);
@@ -71,12 +77,21 @@ export const withEphemeralManifest = (
  *
  * @param {Object} options
  * @param {ProviderChoice} options.provider the provider for the prerequisites
- * @param {String} options.region the rgion for the prerequisites
+ * @param {String} options.region the region for the prerequisites
+ * @param {String} options.projectName the project's name
+ * @param {String} options.stageName the stage's name
  * @returns {CloudService[]} the prerequisites for the service registration
  */
-export const getPrerequisites = ({ provider, stack, scope }: {
-  provider: ProviderChoice, stack: CloudStack, scope: ServiceScopeChoice,
-}) => {
+export const getPrerequisites = ({ provider, stack, scope, projectName, stageName }: {
+  provider: ProviderChoice,
+  stack: CloudStack,
+  scope: ServiceScopeChoice,
+  projectName: string;
+  stageName: string;
+}): {
+  provider: BaseServices.Provider.Type,
+  vault: BaseServices.Vault.Type,
+} => {
   let providerAttrs;
   let vaultAttrs;
 
@@ -89,13 +104,26 @@ export const getPrerequisites = ({ provider, stack, scope }: {
       throw new Error(`We don't have any prerequisites fixture for ${provider}`);
   }
 
-  const cloudProvider = getService(providerAttrs, scope);
-  cloudProvider.register(stack);
+  const cloudProvider = Registry.get(
+    providerAttrs.provider, providerAttrs.type,
+  ).factory(
+    providerAttrs, projectName, stageName,
+  ).scope(scope) as BaseServices.Provider.Type;
 
-  const vault = getService(vaultAttrs, scope).link(cloudProvider);
-  vault.register(stack);
+  cloudProvider.provisions(stack, {});
 
-  return [cloudProvider, vault];
+  const vault = Registry.get(
+    vaultAttrs.provider, vaultAttrs.type,
+  ).factory(
+    vaultAttrs, projectName, stageName,
+  ).scope(scope) as BaseServices.Vault.Type;
+
+  vault.provisions(stack, { provider: cloudProvider });
+
+  return {
+    provider: cloudProvider,
+    vault,
+  };
 };
 
 /**
@@ -109,11 +137,15 @@ export const getPrerequisites = ({ provider, stack, scope }: {
  * @returns {Promise<Object>}
  */
 export const getServiceRegisterationResults = async ({
+  stageName,
+  projectName,
   serviceConfig,
   serviceScope = 'deployable',
   prerequisitesScope = 'deployable',
 }: {
-  serviceConfig: ServiceAttributes;
+  projectName: string;
+  stageName: string;
+  serviceConfig: RequireKeys<BaseService.Attributes, 'provider' | 'type'>
   serviceScope?: ServiceScopeChoice,
   prerequisitesScope?: ServiceScopeChoice,
 }): Promise<{
@@ -124,17 +156,22 @@ export const getServiceRegisterationResults = async ({
   const synthesize = (): Promise<{ [name: string]: any }> => {
     let scope: string;
 
-    const { provider, stageName } = serviceConfig;
+    const { provider } = serviceConfig;
     const synth = (): Promise<{ [name: string]: any }> => (
       new Promise((resolve) => {
         scope = Testing.synthScope((stack) => {
           const cloudStack = enhanceStack(stack, { name: stageName });
           const prerequisites = getPrerequisites({
-            provider, stack: cloudStack, scope: prerequisitesScope,
+            provider, stack: cloudStack, scope: prerequisitesScope, projectName, stageName,
           });
 
-          const service = getService(serviceConfig, serviceScope).link(...prerequisites);
-          service.register(cloudStack);
+          const service = Registry.get(
+            serviceConfig.provider, serviceConfig.type,
+          ).factory(
+            serviceConfig, projectName, stageName,
+          ).scope(serviceScope);
+
+          service.provisions(cloudStack, prerequisites);
 
           const { variable: variables, ...terraform } = cloudStack.toTerraform();
           resolve({ service, variables, ...terraform });
@@ -160,17 +197,17 @@ export const getServiceRegisterationResults = async ({
  * @param {String} stageName the stage name to use
  * @returns {Object} the scope as string and stack as object
  */
-export const deployProject = (projectConfig: object, stageName: string = 'production' ): {
+export const deployProject = (
+  projectConfig: ProjectConfiguration, stageName: string = 'production',
+): {
   scope: string, stack: CloudStack, output: string,
 } => {
-  const project = Project.factory<Project>(projectConfig);
   const outputPath = os.tmpdir();
-  const operation = new DeployOperation(project, stageName, { outputPath });
-  const scope = operation.synthesize();
-  const { provisioner: { stack } } = operation;
+  const provisioner = deployment(projectConfig, stageName, { outputPath });
+  const scope = provisioner.synthesize();
 
   return {
-    stack,
+    stack: provisioner.stack,
     scope: JSON.stringify(scope, null, 2),
     output: outputPath,
   };

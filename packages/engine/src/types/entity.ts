@@ -1,4 +1,5 @@
-import { ConstructorOf } from '@stackmate/engine/types/util';
+import { AbstractConstructorOf, ConstructorOf } from '@stackmate/engine/types/util';
+import { BaseJsonSchema } from '@stackmate/engine/types/schema';
 
 /**
  * These two types sole pupose is for us to be able to distinguish attributes
@@ -12,18 +13,17 @@ export type ExtractBaseAttributeType<T> = T extends Attribute<infer X> ? X : nev
 export type AttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> extends never ? never : K]: ExtractBaseAttributeType<T[K]> };
 export type NonAttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> extends never ? K : never]: T[K] };
 export type EntityTypeOf<T> = AttributesOf<T> & NonAttributesOf<T>;
-export type ValidationErrorList = { [attribute: string]: Array<string>; };
 export type EntityAttributes = Record<string, any>;
 
 export type BaseEntity = {
   get attributes(): EntityAttributes;
   set attributes(attrs: EntityAttributes);
-  validate(): void;
 }
 
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   prototype: T;
   new(...args: any[]): T;
-  normalize(attributes: EntityAttributes): EntityAttributes;
+  schemaId: string;
+  schema(this: ConstructorOf<T> | AbstractConstructorOf<T>): BaseJsonSchema;
   factory(this: ConstructorOf<T>, ...args: any[]): T;
 }

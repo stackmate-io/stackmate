@@ -1,5 +1,10 @@
 import { color } from '@oclif/color';
-import { ValidationError } from '@stackmate/engine';
+
+type ValidationError = {
+  errors: {
+    [path: string]: string[];
+  },
+}
 
 export const formatValidationError = (
   error: ValidationError, logger: { log: Function }, { colors = true }: { colors: boolean },

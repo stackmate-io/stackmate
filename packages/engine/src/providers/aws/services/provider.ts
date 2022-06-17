@@ -1,15 +1,20 @@
 import { snakeCase } from 'lodash';
-import { TerraformProvider } from 'cdktf';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import AwsService from './base';
-import { CloudStack, AWS } from '@stackmate/engine/types';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CloudStack, AWS, CoreServiceConfiguration } from '@stackmate/engine/types';
+import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'services/aws/provider';
+
   /**
    * @var {String} type the service type
    */
@@ -36,21 +41,14 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   gateway: InternetGateway;
 
   /**
+   * @var {TerraformAwsProvider} resource the AWS provider resource
+   */
+  resource: TerraformAwsProvider;
+
+  /**
    * @var {KmsKey} key the KMS key to use across the stack
    */
   key: KmsKey;
-
-  /**
-   * @var {TerraformProvider} resource the provider resource
-   */
-  resource: TerraformProvider;
-
-  /**
-   * @returns {Boolean} whether the service is registered in the stack
-   */
-  isRegistered(): boolean {
-    return this.resource instanceof TerraformAwsProvider;
-  }
 
   /**
    * @returns {String} the alias to use for the provider
@@ -129,11 +127,11 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
   }
 
   /**
-   * @returns {Object} the JSON schema to use for validation
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Provider.Schema {
     return mergeJsonSchemas(super.schema(), {
-      required: ['ip'],
+      $id: this.schemaId,
       properties: {
         ip: {
           type: 'string',
@@ -144,11 +142,17 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
       },
       errorMessage: {
         _: 'The AWS provider service is not properly configured',
-        required: {
-          ip: 'You should define an IP to use as the basis for the networking CIDR block',
-        },
-      }
+      },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<AWS.Provider.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 

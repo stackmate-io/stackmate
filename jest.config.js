@@ -3,7 +3,9 @@ const { compilerOptions: { paths } } = require('./tsconfig');
 const { pathsToModuleNameMapper } = require('ts-jest');
 
 module.exports = {
+  bail: true,
   clearMocks: true,
+  cacheDirectory: '<rootDir>/.jestcache',
   preset: 'ts-jest',
   testEnvironment: 'node',
   globals: {
@@ -12,13 +14,22 @@ module.exports = {
       "diagnostics": true
     }
   },
+  extensionsToTreatAsEsm: [".ts"],
   transform: {
     "^.+\\.ts$": "ts-jest"
   },
+  roots: [
+    "<rootDir>/packages/cli",
+    "<rootDir>/packages/engine",
+  ],
+  modulePaths: [
+    "<rootDir>/packages/cli",
+    "<rootDir>/packages/engine",
+  ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
   moduleFileExtensions: [
     "ts",
     "js"
   ],
-  setupFilesAfterEnv: ['./jest.setup.js'],
 };
