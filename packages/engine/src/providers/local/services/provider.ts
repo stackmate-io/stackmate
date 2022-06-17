@@ -2,8 +2,9 @@ import { snakeCase } from 'lodash';
 import { LocalProvider, LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
 
 import LocalService from './base';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { CloudStack, Local } from '@stackmate/engine/types';
+import { CORE_SERVICE_SKIPPED_PROPERTIES, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
 
 class LocalProvder extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
   /**
@@ -60,6 +61,19 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
 
   onDestroy(stack: CloudStack): void {
     this.bootstrap(stack);
+  }
+
+  /**
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
+   */
+  static schema(): Local.Provider.Schema {
+    return mergeJsonSchemas(
+      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
+      $id: this.schemaId,
+      errorMessage: {
+        _: 'The local provider service is not properly configured',
+      },
+    });
   }
 }
 
