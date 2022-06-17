@@ -63,8 +63,10 @@
   "scripts": {
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream --parallel",
-    "test": "lerna run test --parallel",
     "cmd:run": "packages/cli/bin/run",
-    "cmd:dev": "packages/cli/bin/dev"
+    "cmd:dev": "packages/cli/bin/dev",
+    "pretest": "lerna run --scope @stackmate/engine schema:generate",
+    "test": "jest --bail --verbose --detectOpenHandles",
+    "test:watch": "yarn test --watchAll"
   }
 }

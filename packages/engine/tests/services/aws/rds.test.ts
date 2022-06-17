@@ -4,9 +4,9 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { projectName, stageName } from 'tests/fixtures/generic';
-import { getServiceRegisterationResults } from 'tests/helpers';
-import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/fixtures/aws';
+import { projectName, stageName } from 'tests/engine/fixtures/generic';
+import { getServiceRegisterationResults } from 'tests/engine/helpers';
+import { mysqlDatabaseConfiguration as serviceConfig } from 'tests/engine/fixtures/aws';
 import { MySQL as AwsRdsService } from '@stackmate/engine/providers/aws';
 
 describe('AwsRdsService', () => {

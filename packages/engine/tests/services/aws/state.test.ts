@@ -3,11 +3,11 @@ import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { snakeCase } from 'lodash';
 
 import Profile from '@stackmate/engine/core/profile';
-import { projectName, stageName } from 'tests/fixtures/generic';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getServiceRegisterationResults } from 'tests/helpers';
-import { stateConfiguration as serviceConfig } from 'tests/fixtures/aws';
 import { State as AwsS3State } from '@stackmate/engine/providers/aws';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { projectName, stageName } from 'tests/engine/fixtures/generic';
+import { getServiceRegisterationResults } from 'tests/engine/helpers';
+import { stateConfiguration as serviceConfig } from 'tests/engine/fixtures/aws';
 
 describe('AwsS3State', () => {
   describe('instantiation', () => {

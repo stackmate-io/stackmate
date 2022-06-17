@@ -70,15 +70,10 @@
   },
   "scripts": {
     "build": "rimraf dist/* && rollup -c rollup.config.js && oclif manifest",
-    "lint": "eslint . --ext .ts",
     "postpack": "rimraf oclif.manifest.json",
     "prepack": "yarn build && oclif readme",
     "manifest": "oclif manifest",
-    "command:dev": "./bin/dev",
-    "command:run": "./bin/run",
-    "version": "oclif readme && git add README.md",
-    "test": "jest --bail --verbose --detectOpenHandles",
-    "test:watch": "yarn test:all --watchAll"
+    "version": "oclif readme && git add README.md"
   },
   "engines": {
     "node": ">=12.0.0"
