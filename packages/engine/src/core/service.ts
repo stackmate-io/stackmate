@@ -201,6 +201,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
     return {
       $id: this.schemaId,
       type: 'object',
+      additionalProperties: false,
       properties: {
         provider: {
           type: 'string',
