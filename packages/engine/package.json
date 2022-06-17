@@ -41,11 +41,12 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@types/jest": "^27.5.0",
-    "@types/jsforce": "^1.9.42",
-    "jest": "^27.5.1",
-    "rollup-plugin-dts": "^4.2.2",
-    "ts-node": "^10.8.1"
+    "@types/jest": "^28.1.1",
+    "jest": "27.5.1",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.1",
+    "tsc-alias": "^1.6.10",
+    "tsconfig-paths": "^4.0.0"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -55,9 +56,10 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "build": "rimraf dist/* && rollup -c rollup.config.js",
-    "test": "rimraf tests/output/* && jest --bail --verbose --detectOpenHandles --watchAll",
-    "test:ci": "npm run lint && npm run test",
-    "test:all": "npm run test tests/**/*.test.ts"
+    "prebuild": "rimraf dist/*",
+    "build": "yarn tsc -p ./tsconfig.build.json",
+    "postbuild": "yarn tsc-alias && yarn schema:generate:dist",
+    "schema:generate": "ts-node -r tsconfig-paths/register src/schema.ts",
+    "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json"
   }
 }

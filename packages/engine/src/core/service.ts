@@ -1,15 +1,30 @@
+import { merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
-import { fromPairs, get, has, isEmpty, merge } from 'lodash';
 
-import Entity from '@stackmate/engine/lib/entity';
+import Entity from '@stackmate/engine/core/entity';
 import Profile from '@stackmate/engine/core/profile';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  ProviderChoice, ServiceTypeChoice, ResourceProfile, ServiceScopeChoice, ServiceAssociations,
-  EntityAttributes, CloudStack, ServiceConstructor, BaseService, BaseServices,
+  CloudStack,
+  BaseService,
+  ResourceProfile,
+  ProviderChoice,
+  ServiceTypeChoice,
+  ServiceScopeChoice,
+  ServiceAssociations,
+  ConfigurationOptions,
+  EntityAttributes,
+  ServicePrerequisites,
+  EnvironmentVariable,
 } from '@stackmate/engine/types';
 
-abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
+abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> extends Entity<Attrs> implements BaseService.Type {
+  /**
+   * @var {String} schemaId the schema id for the entity
+   * @static
+   */
+  static schemaId: string = 'project';
+
   /**
    * @var {String} name the service's name
    */
@@ -56,57 +71,69 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
   abstract readonly provider: ProviderChoice;
 
   /**
-   * @returns {Boolean} whether the service is registered in the stack
+   * @returns {EnvironmentVariable[]} the environment variables required to provision the service
    */
-  abstract isRegistered(): boolean;
+  abstract environment(): EnvironmentVariable[];
 
   /**
-   * @var {ProviderService} providerService the cloud provider service
+   * @constructor
+   * @param {String} projectName the project's name
+   * @param {String} stageName the stage's name
    */
-  providerService: BaseServices.Provider.Type;
+  constructor(projectName: string, stageName: string) {
+    super();
 
-  /**
-   * @var {Vault} vault the vault service to get credentials from
-   */
-  vault: BaseServices.Vault.Type;
+    if (!projectName) {
+      throw new Error('You have to provide a projectName for the service');
+    }
 
-  /**
-   * Provisioning when we initially prepare a stage
-   *
-   * @param {CloudStack} stack the stack to provision the service in
-   */
-  onPrepare(stack: CloudStack): void {
-    // no-op. most services are not required when preparing the stage
+    if (!stageName) {
+      throw new Error('You have to provide a stageName for the service')
+    }
+
+    this.projectName = projectName;
+    this.stageName = stageName;
   }
 
   /**
    * Provisioning when we deploy a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
-  abstract onDeploy(stack: CloudStack): void;
+  abstract onDeploy(stack: CloudStack, prerequisites: ServicePrerequisites): void;
+
+  /**
+   * Provisioning when we initially prepare a stage
+   *
+   * @param {CloudStack} stack the stack to provision the service in
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
+   */
+  onPrepare(stack: CloudStack, prerequisites: ServicePrerequisites): void {
+    // no-op. most services are not required when preparing the stage
+  }
 
   /**
    * Provisioning on when we destroy destroy a stage
    *
    * @param {CloudStack} stack the stack to provision the service in
-   * @abstract
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
-  onDestroy(stack: CloudStack): void {
+  onDestroy(stack: CloudStack, prerequisites: ServicePrerequisites): void {
     // no-op. this just removes the resources from the stack
   }
 
   /**
    * @returns {String} the service's identifier
    */
-  public get identifier(): string {
+  get identifier(): string {
     return `${this.name}-${this.stageName}`.toLowerCase();
   }
 
   /**
    * @returns {Object} the profile to use for the resources
    */
-  @Memoize() public get resourceProfile(): ResourceProfile {
+  @Memoize() get resourceProfile(): ResourceProfile {
     if (!this.profile) {
       return {};
     }
@@ -122,7 +149,7 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * @returns {BaseService.Type} the service with the scope applied
    */
   scope(scope: ServiceScopeChoice): BaseService.Type {
-    let handlerFunction: (stack: CloudStack) => void;
+    let handlerFunction: (stack: CloudStack, prerequisites: ServicePrerequisites) => void;
 
     switch(scope) {
       case 'preparable':
@@ -138,8 +165,8 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
         throw new Error(`Scope ${scope} is invalid`);
     }
 
-    Reflect.set(this, 'register', new Proxy(this.register, {
-      apply: (_target, thisArg, args: [stack: CloudStack]) => (
+    Reflect.set(this, 'provisions', new Proxy(this.provisions, {
+      apply: (_target, thisArg, args: [s: CloudStack, p: ServicePrerequisites]) => (
         handlerFunction.apply(thisArg, args)
       ),
     }));
@@ -151,130 +178,28 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
    * Registers the service in the stack
    *
    * @param {CloudStack} stack the stack to provision
+   * @param {ServicePrerequisites} prerequisites the services prerequisites
    */
-  register(stack: CloudStack) {
+  provisions(stack: CloudStack, prerequisites: ServicePrerequisites) {
     throw new Error('No scope has been applied, you have to use the `scope` method first');
   }
 
   /**
    * @returns {ServiceAssociations} the pairs of lookup and handler functions
    */
-  @Memoize() public associations(): ServiceAssociations {
-    return {
-      [SERVICE_TYPE.PROVIDER]: [(p: BaseServices.Provider.Type) => this.onProviderRegistered(p)],
-      [SERVICE_TYPE.VAULT]: [(v: BaseServices.Vault.Type) => this.onVaultRegistered(v)],
-    }
+  associations(): ServiceAssociations {
+    return [];
   }
 
   /**
-   * Callback to run when the cloud provider has been registered
-   * @param {ProviderService} provider the provider service
-   */
-  onProviderRegistered(srv: BaseServices.Provider.Type): void {
-    if (srv.type !== SERVICE_TYPE.PROVIDER) {
-      return;
-    }
-
-    if (srv.provider !== this.provider) {
-      return;
-    }
-
-    this.providerService = srv;
-  }
-
-  /**
-   * Callback to run when the vault service has been registered
-   * @param {CloudService} vault the vault service
-   */
-  onVaultRegistered(srv: BaseServices.Vault.Type) {
-    if (srv.type !== SERVICE_TYPE.VAULT) {
-      return;
-    }
-
-    if (srv.provider !== this.provider) {
-      return;
-    }
-
-    this.vault = srv;
-  }
-
-  /**
-   * @param {CloudService} service the service to compare with the current one
-   * @returns {Boolean} whether the current service is the same with another one
-   */
-  isSameWith(service: BaseService.Type): boolean {
-    return this.identifier === service.identifier;
-  }
-
-  /**
-   * @param {CloudService} service the service to check whether the current one is depending on
-   * @returns {Boolean} whether the current service is depending upon the provided one
-   */
-  isDependingUpon(service: BaseService.Type): boolean {
-    // We're comparing with the current service itself
-    if (this.isSameWith(service)) {
-      return false;
-    }
-
-    // The target service is included in the links, it is explicitly associated with it
-    if (this.links.includes(service.name)) {
-      return true;
-    }
-
-    // The target service is implicitly linked to the current one
-    return has(this.associations(), service.type);
-  }
-
-  /**
-   * @param {CloudService[]} associated the services associated to the current one
-   */
-  public link(...associated: BaseService.Type[]): BaseService.Type {
-    associated.forEach(assoc => this.associate(assoc));
-    return this;
-  }
-
-  /**
-   * Associates the current service with another one
-   *
-   * @param {Service} target the service to link the current service with
-   */
-  protected associate(association: BaseService.Type) {
-    if (!association.isRegistered()) {
-      throw new Error(`The service ${association.identifier} which is to be linked to ${this.identifier}, is not registered to the stack yet`);
-    }
-
-    if (this.isSameWith(association)) {
-      throw new Error(`Attempted to link service ${this.identifier} to itself`);
-    }
-
-    if (this.isRegistered()) {
-      throw new Error(`Service ${this.identifier} is already registered to the stack, we can’t link the service`);
-    }
-
-    if (!this.isDependingUpon(association)) {
-      throw new Error(`Service ${this.identifier} is not depended upon service of type ${association.type}`);
-    }
-
-    // Find the handlers that apply to the associated service
-    const handlers = get(this.associations(), association.type);
-
-    if (isEmpty(handlers)) {
-      throw new Error(
-        `The service ${this.name} cannot be linked to service ${association.name}, no handlers found`,
-      );
-    }
-
-    handlers.forEach(handler => handler.call(this, association));
-  }
-
-  /**
-   * @returns {Object} provides the structure to generate the JSON schema by
+   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): BaseService.Schema {
     const providers = Object.values(PROVIDER);
     const services = Object.values(SERVICE_TYPE);
 
     return {
+      $id: this.schemaId,
       type: 'object',
       properties: {
         provider: {
@@ -289,8 +214,9 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
         },
         name: {
           type: 'string',
-          pattern: '[a-z0-9_]+',
+          pattern: '[a-zA-Z0-9_]+',
           description: 'The name for the service to deploy',
+          errorMessage: 'The name for the service should only contain characters, numbers and underscores',
         },
         profile: {
           type: 'string',
@@ -309,37 +235,22 @@ abstract class Service<Attrs = BaseService.Attributes> extends Entity<Attrs> imp
           serviceProfileOverrides: true,
         },
       },
-      required: ['provider', 'name'],
+      required: ['name', 'type'],
       errorMessage: {
         _: 'The service configuration is invalid',
-        properties: {
-          name: 'The name for the service should only contain characters, numbers and underscores',
-        },
         required: {
-          name: 'You have to specify a name for the service'
+          name: 'You have to specify a name for the service',
+          type: `You need to specify a service type. Available options are: ${services.join(', ')}`,
         },
       },
     };
   }
 
   /**
-   * Returns the service's default values
-   *
-   * @returns {Object} the service's default values
+   * @returns {Object} the attributes to use when populating the initial configuration
    */
-  static defaults(this: ServiceConstructor): Partial<EntityAttributes> {
-    const { properties = {} } = this.schema();
-
-    if (isEmpty(properties)) {
-      return {};
-    }
-
-    const pairs = Object.entries(properties).map(([key, property]) => {
-      const { default: defaultValue = null } = property as { default?: any };
-      return [key, defaultValue];
-    });
-
-    return fromPairs(pairs);
+  static config(): ConfigurationOptions<BaseService.Attributes> {
+    throw new Error('The config() method is not available for this service');
   }
 }
 

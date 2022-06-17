@@ -1,136 +1,208 @@
-import { isEmpty } from 'lodash';
+import { Memoize } from 'typescript-memoize';
+import { isEmpty, orderBy, uniqBy } from 'lodash';
 
 import App from '@stackmate/engine/lib/terraform/app';
-import Queue from '@stackmate/engine/lib/queue';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CloudApp,
-  CloudStack,
-  Provisionable,
   BaseService,
+  BaseServices,
   ServiceTypeChoice,
+  CloudStack,
+  StackProvisioner,
+  EnvironmentVariable,
 } from '@stackmate/engine/types';
 
-class Provisioner implements Provisionable {
+class Provisioner implements StackProvisioner {
   /**
-   * @var {CloudApp} app the terraform application to deploy
-   */
-  readonly app: CloudApp;
-
-  /**
-   * @var {CloudStack} stack the stack to deploy
+   * @var {CloudStack} stack the cloud stack context to deploy services on
    */
   readonly stack: CloudStack;
 
   /**
-   * @var {Queue<CloudService>} queue the sorted priority queue that holds the services
+   * @var {BaseServices.State.Type} state the project's state service
    */
-  readonly queue: Queue<BaseService.Type> = new Queue();
+  protected state: BaseServices.State.Type;
 
   /**
-   * @var {Map} dependables a mapping of service identifier to the services that are depended
-   *                        by said service. (eg. "provider" has dependables "vault", "state")
+   * @var {BaseServices.Vault.Type} vault the project's vault service
    */
-  protected readonly dependables: Map<string, BaseService.Type[]> = new Map();
+  protected vault: BaseServices.Vault.Type;
 
   /**
-   * @var {ServiceTypeChoice[]} weights additional weight to add to the priority for services
+   * @var {BaseServices.Provider.Type[]} providers the list of providers for the services
    */
-  protected readonly weights: Map<ServiceTypeChoice, number> = new Map([
-    [SERVICE_TYPE.PROVIDER, 100000],
-    [SERVICE_TYPE.STATE, 99999],
-    [SERVICE_TYPE.VAULT, 99998],
+  protected providers: BaseServices.Provider.Type[] = [];
+
+  /**
+   * @var {BaseService.Type[]} services the list of cloud services to deploy
+   */
+  protected services: BaseService.Type[] = [];
+
+  /**
+   * @var {String} registered the list of service identifiers that are registered to the stack
+   */
+  protected registered: string[] = [];
+
+  /**
+   * @var {Map} environments the environment variables required by the services
+   */
+  protected environments: EnvironmentVariable[] = [];
+
+  /**
+   * @var {Map} priorities the priorities to register services by
+   */
+  readonly priorities: Map<ServiceTypeChoice, number> = new Map([
+    [SERVICE_TYPE.PROVIDER, 100],
+    [SERVICE_TYPE.VAULT, 90],
+    [SERVICE_TYPE.STATE, 80],
   ]);
 
   /**
    * @constructor
    * @param {String} appName the application's name
    * @param {String} stackName the stack's name
+   * @param {String} outputPath the path to write the output for
    */
-  constructor(appName: string, stageName: string, outputPath?: string) {
-    this.app = new App(appName, { outdir: outputPath });
-    this.stack = this.app.stack(stageName);
+  constructor(appName: string, stackName: string, outputPath?: string) {
+    const app = new App(appName, { outdir: outputPath });
+    this.stack = app.stack(stackName);
   }
 
   /**
-   * @returns {Array<CloudService>} the list of services in the queue
-   */
-  get services(): BaseService.Type[] {
-    return this.queue.all;
-  }
-
-  /**
-   * @param {Array<BaseService.Type>} services the list of services to add to the queue
-   */
-  set services(services: BaseService.Type[]) {
-    services.forEach((service) => {
-      services.forEach((dep) => {
-        if (dep.isDependingUpon(service)) {
-          // Add the "dep" as a dependable of service
-          this.dependables.set(service.identifier, [
-            ...(this.dependables.get(service.identifier) || []),
-            dep,
-          ]);
-        }
-      });
-
-      // Calculate the service's priority and add it to the queue
-      this.queue.insert(service, this.priority(service));
-    });
-  }
-
-  /**
-   * Processes the services and registers them to the stack
+   * Registers a list of services into the stack
    *
-   * @throws {Error} when no service has been assigned to the provisioner
+   * @param {BaseService.Type[]} srvs the services to register
    */
-  process(): object {
-    // Even when we need to destroy resources, the service objects should be
-    // assigned to the provisioner (with the 'destroyable' scope applied)
-    if (isEmpty(this.services)) {
-      throw new Error('The service doesn’t have any services assigned to it');
-    }
+  register(...srvs: BaseService.Type[]) {
+    // Order the services by priorities so that we make sure that we first register
+    // "provider" service types, then the vault, the state and everything else afterwards
+    orderBy(srvs, [srv => (this.priorities.get(srv.type) || 0)], ['desc']).forEach(
+      service => this.registerService(service),
+    );
 
-    // The services are ordered by priority, since the queue is a priority queue
-    // This means that we register the ones that are depended by the most services first
-    this.services.forEach((service) => {
-      // Register the service into the stack
-      service.register(this.stack);
+    // Now that the services are registered, apply the links for the cloud services only
+    this.services.forEach(s => this.applyLinks(s));
+  }
 
-      // Make sure the services that are depended on the current service are linked to it
-      // Warning: we're passing by reference, which means we're also updating the items in queue
-      const dependables = this.dependables.get(service.identifier) || [];
-      dependables.forEach(dep => dep.link(service));
-    });
+  /**
+   * Returns the list of environment variables required to run the stack
+   */
+  @Memoize() environment() {
+    return uniqBy(this.environments, (env) => env.name);
+  }
 
-    // Return the synthesized stack as an object
+  /**
+   * @returns {Object} the object describing the stack
+   */
+  synthesize(): object {
     return this.stack.toTerraform();
   }
 
   /**
-   * Calculates the priority for a service
+   * Registers a service into the stack
    *
-   * The weight is defined as:
-   *    the number assigned in the weights mapping for certain services, zero otherwises
-   *
-   * The priority is defined as:
-   *
-   *    the amount of services that depend on the service specified
-   *      minus
-   *    the amount of services that the service specified depends on
-   *
-   * @param {CloudService} service the service to calculate the priority for
-   * @returns {Number} the service's priority
+   * @param {BaseService.Type} service the service to register
    */
-  protected priority(service: BaseService.Type): number {
-    const weight = this.weights.get(service.type) || 0;
-    // Get the number of services that the current one is depended by
-    const dependedByCount = this.dependables.get(service.identifier)?.length || 0;
-    // Get the number of services that the current one is depending upon
-    const dependsUponCount =  Array.from(this.dependables.values()).reduce((count, services) => (
-      count + (services.find(s => s.identifier === service.identifier) ? 1 : 0)
-    ), 0);
-    return weight + dependedByCount - dependsUponCount;
+  protected registerService(service: BaseService.Type) {
+    let prerequisites = {};
+
+    if (this.registered.includes(service.identifier)) {
+      throw new Error(
+        `Service ${service.identifier} of type ${service.type} is already registered into the stack`,
+      );
+    }
+
+    switch(service.type) {
+      case SERVICE_TYPE.STATE:
+        prerequisites = { provider: this.getProviderFor(service) };
+        this.state = service as BaseServices.State.Type;
+        break;
+      case SERVICE_TYPE.VAULT:
+        prerequisites = { provider: this.getProviderFor(service) };
+        this.vault = service as BaseServices.Vault.Type;
+        break;
+      case SERVICE_TYPE.PROVIDER:
+        this.providers.push(service as BaseServices.Provider.Type);
+        break;
+      default:
+        if (!this.vault) {
+          throw new Error(
+            'No vault service available. Did you forget to register it prior to the service?',
+          );
+        }
+        prerequisites = { vault: this.vault, provider: this.getProviderFor(service) };
+        this.services.push(service);
+        break;
+    }
+
+    // Register the provisions into the stack
+    service.provisions(this.stack, prerequisites);
+
+    // Copy the environment variables required
+    this.environments.push(...service.environment());
+  }
+
+  /**
+   * Links a service with its dependencies
+   *
+   * @param {BaseService.Type} service the service to link
+   */
+  protected applyLinks(service: BaseService.Type) {
+    if (isEmpty(service.links)) {
+      return;
+    }
+
+    this.services.filter(
+      srv => service.links.includes(srv.name),
+    ).forEach(
+      linked => this.associateServices(service, linked),
+    );
+  }
+
+  /**
+   * Associates two services
+   * @param {BaseService.Type} target the service apply the links to
+   * @param {BaseService.Type} linked the linked service
+   */
+  protected associateServices(target: BaseService.Type, linked: BaseService.Type) {
+    // Skip linking to the same service
+    if (target.identifier === linked.identifier) {
+      return;
+    }
+
+    // Find the handlers for every associated service
+    // The linked service should pass the `match` function test,
+    // and should contain a set of handler functions
+    target.associations().forEach(({ match, handler }) => {
+      // No handlers, or the service didn't match, bail...
+      if (!match(linked)) {
+        throw new Error(
+          `Service ${target.name} of type ${target.type} is linked to service ${linked.name} of type ${linked.type} but there wasn't any handler match in associations()`,
+        );
+      }
+
+      // Apply the target service as a "this" context and pass the linked one and stack as args
+      handler.call(target, linked, this.stack);
+    });
+  }
+
+  /**
+   * Returns the provider instance that is registered into the stack, for a given service
+   *
+   * @param {BaseService.Type} service the service to get the registered provider for
+   * @returns {BaseServices.Provider.Type} the provider instance
+   */
+  protected getProviderFor(service: BaseService.Type): BaseServices.Provider.Type {
+    const { provider, region = null } = service;
+    const instance = this.providers.find(p => p.provider === provider && p.region === region);
+
+    if (!instance) {
+      throw new Error(
+        `No provider found for service ${service.identifier} or isn’t yet registered into the stack`,
+      );
+    }
+
+    return instance;
   }
 }
 

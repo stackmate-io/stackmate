@@ -4,13 +4,15 @@ export interface JsonSchema<T> extends BaseJsonSchema {
   // AJV-error related entry
   errorMessage?: string | {
     '_'?: string;
+    type?: string;
+    additionalProperties?: string;
     properties?: { [K in keyof T]?: string; };
     required?: { [K in keyof T]?: string; };
   };
 }
 
 export type BaseJsonSchema = {
-
+  $id?: string;
   $ref?: string;
 
   ///////////////////////////////////////////////////////////////////////////
@@ -88,6 +90,7 @@ export type BaseJsonSchema = {
   /**
    * Holds simple JSON Schema definitions for referencing from elsewhere
    */
+  $defs?: { [key: string]: BaseJsonSchema };
   definitions?: { [key: string]: BaseJsonSchema };
   /**
    * The keys that can exist on the object with the json schema that should validate their value
@@ -128,15 +131,19 @@ export type BaseJsonSchema = {
    * The entity being validated must not match this schema
    */
   not?: BaseJsonSchema;
+  if?: BaseJsonSchema;
+  then?: BaseJsonSchema;
 
   // Stackmate-specific
-  serviceProfile?: boolean;
   serviceLinks?: boolean;
+  serviceProfile?: boolean;
   serviceProfileOverrides?: boolean;
 
   // AJV-error specific
   errorMessage?: string | {
     '_'?: string;
+    type?: string;
+    additionalProperties?: string;
     properties?: { [property: string]: string; } | {};
     required?: { [property: string]: string; } | {};
   };

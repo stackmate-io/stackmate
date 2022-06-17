@@ -41,19 +41,18 @@
     "@oclif/plugin-plugins": "^2.1.0",
     "@stackmate/engine": "^0.0.0",
     "chalk": "^5.0.1",
-    "ffi-napi": "^4.0.3",
     "lodash": "4.17.21",
     "typescript-memoize": "^1.1.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@oclif/test": "^2.1.0",
-    "@types/ffi-napi": "^4.0.5",
-    "@types/mocha": "^9.1.1",
-    "mocha": "^9.2.2",
+    "@types/jest": "^28.1.1",
+    "jest": "27.5.1",
     "oclif": "^2.6.3",
     "rollup-plugin-dts": "^4.2.2",
-    "ts-node": "^10.8.1"
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.1",
+    "tsc-alias": "^1.6.10"
   },
   "oclif": {
     "bin": "stackmate",
@@ -70,16 +69,10 @@
     }
   },
   "scripts": {
-    "go:bindings": "go build -o bin/terraform.so -buildmode=c-shared src/lib/terraform/bindings.go",
     "build": "rimraf dist/* && rollup -c rollup.config.js && oclif manifest",
-    "lint": "eslint . --ext .ts",
     "postpack": "rimraf oclif.manifest.json",
-    "posttest": "yarn lint",
     "prepack": "yarn build && oclif readme",
-    "test": "mocha --forbid-only \"tests/**/*.test.ts\"",
     "manifest": "oclif manifest",
-    "command:dev": "./bin/dev",
-    "command:run": "./bin/run",
     "version": "oclif readme && git add README.md"
   },
   "engines": {

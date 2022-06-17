@@ -1,14 +1,16 @@
 *-debug.log
 *-error.log
 .nyc_output
-packages/*/dist
+dist
+stackmate.schema.json
 package-lock.json
 tmp
 cdktf.out
 .stackmate
 node_modules
-tests/output/*
-!tests/output/.keep
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
+
+# Jest
+.jestcache

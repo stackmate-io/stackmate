@@ -57,7 +57,7 @@ class Preferences {
    * @param {any} value the value to set
    */
   set(key: keyof PreferenceOptions, value: ValueOf<PreferenceOptions>) {
-    this.options[key] = value;
+    // this.options[key] = value;
   }
 
   /**

@@ -6,7 +6,7 @@ export const AWS_REGIONS: RegionList = {
 
 export const AWS_DEFAULT_REGION = AWS_REGIONS.EU_CENTRAL_1;
 
-export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro';
+export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const;
 
 export const DEFAULT_RDS_ENGINE = 'mysql';
 

@@ -1,15 +1,15 @@
+import 'cdktf/lib/testing/adapters/jest';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import 'cdktf/lib/testing/adapters/jest';
 
-import { awsRegion } from 'tests/fixtures/aws';
-import { deployProject } from 'tests/helpers';
+import { awsRegion } from 'tests/engine/fixtures/aws';
+import { deployProject } from 'tests/engine/helpers';
+import { ProjectConfiguration } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
-import { normalizeProject } from '@stackmate/engine/lib/normalizers';
 
-const projectConfig = normalizeProject({
+const projectConfig: ProjectConfiguration = {
   name: 'database-only-project',
   provider: PROVIDER.AWS,
   region: awsRegion,
@@ -20,17 +20,22 @@ const projectConfig = normalizeProject({
     provider: PROVIDER.AWS,
     bucket: 'sample-project-state-bucket',
   },
-  stages: {
-    production: {
-      mysqlDatabase: {
-        type: SERVICE_TYPE.MYSQL,
-        size: DEFAULT_RDS_INSTANCE_SIZE,
-        profile: 'production',
-        storage: 30,
-      },
-    },
-  },
-});
+  stages: [{
+    name: 'production',
+    services: [{
+      type: SERVICE_TYPE.MYSQL,
+      size: DEFAULT_RDS_INSTANCE_SIZE,
+      name: 'mysqlDatabase',
+      profile: 'production',
+      storage: 30,
+    }, {
+      type: SERVICE_TYPE.POSTGRESQL,
+      size: DEFAULT_RDS_INSTANCE_SIZE,
+      name: 'postgresDb',
+      storage: 30,
+    }],
+  }],
+};
 
 describe('Database only project', () => {
   it('registers the production stage for the project', () => {

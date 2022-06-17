@@ -1,10 +1,21 @@
-import {expect, test} from '@oclif/test'
+import InitCommand from '@stackmate/cli/commands/init';
 
-describe('hello', () => {
-  test
-  .stdout()
-  .command(['hello', 'friend', '--from=oclif'])
-  .it('runs hello cmd', ctx => {
-    expect(ctx.stdout).to.contain('hello friend from oclif!')
-  })
-})
+describe('Init Command', () => {
+  let results: string = '';
+
+  beforeEach(() => {
+    results = '';
+
+    jest.spyOn(process.stdout, 'write').mockImplementation(val => {
+      results += val.toString();
+      return true;
+    });
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('should temporarily do nothing', async () => {
+    await InitCommand.run([]);
+    expect(results).toContain('Test');
+  });
+});
