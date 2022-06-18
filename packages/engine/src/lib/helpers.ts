@@ -154,21 +154,32 @@ export const mergeJsonSchemas = <Base extends Partial<T>, T extends Base>(
  * Prevents assignments to a set of JSON schema properties
  *
  * @param {BaseJsonSchema} schema the schema to exclude the properties from
- * @param {String[]} properties the list of properties to exclude
+ * @param {String[]} props the list of properties to exclude
  * @returns {BaseJsonSchema} the schema with the conditions assigned
  */
 export const preventJsonSchemaProperties = <Schema extends BaseJsonSchema>(
-  schema: Schema, ...properties: string[]
+  schema: Schema, ...props: string[]
 ): Schema => {
-  const required = without(schema.required || [], ...properties);
-  const notConditions = properties.map(prop => ({
-    errorMessage: `The “${prop}” property is not allowed here`,
-    not: { required: [prop] },
-  }));
+  const required = without(schema.required || [], ...props);
+  const notConditions: BaseJsonSchema[] = [];
+  const properties = { ...(schema.properties || {}) };
+
+  props.forEach(prop => {
+    // Prevent assignment to these properties by using { "not": { "required": [...] } }
+    notConditions.push({
+      errorMessage: `The “${prop}” property is not allowed here`,
+      not: { required: [prop] },
+    });
+
+    // Remove implicit assignment from default
+    Object.assign(properties, { [prop]: omit(properties[prop], 'default') })
+  });
+
 
   const updated = {
     ...schema,
     allOf: [...(schema.allOf || []), ...notConditions],
+    properties,
   };
 
   return !isEmpty(required) ? { ...updated, required } : omit(updated, 'required') as Schema;

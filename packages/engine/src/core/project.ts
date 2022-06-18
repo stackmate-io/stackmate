@@ -13,6 +13,7 @@ import {
   BaseEntityConstructor,
   StackmateProject,
   StageConfiguration,
+  CoreServiceConfiguration,
 } from '@stackmate/engine/types';
 
 class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
@@ -66,15 +67,20 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
     ];
 
     // Instantiate the services
-    return [
-      ...this.getProviderServiceAttributes(servicesAttributes),
-      ...servicesAttributes,
-    ].map((srv) => {
+    const services = servicesAttributes.map((srv) => {
       const { provider = this.provider, region = this.region, type, ...attrs } = srv;
       return Registry.get(provider, type).factory(
         { ...attrs, provider, region, type }, ...defaults,
       );
     });
+
+    this.getProviderServiceAttributes(servicesAttributes).forEach((attrs) => {
+      services.push(
+        Registry.get(attrs.provider, SERVICE_TYPE.PROVIDER).factory(attrs, ...defaults)
+      );
+    });
+
+    return services;
   }
 
   /**
@@ -145,7 +151,7 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   /**
    * @returns {BaseServices.Provider.Type} the attributes for the provider services
    */
-  protected getProviderServiceAttributes(services: BaseService.Attributes[]): BaseServices.Provider.Attributes[] {
+  protected getProviders(services: BaseService.Attributes[], defaults: object = {}): BaseServices.Provider.Type[] {
     const regions: Map<ProviderChoice, Set<string>> = new Map();
 
     // Iterate the services and keep a mapping of provider => unique set of regions
@@ -155,22 +161,17 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       regions.set(provider, providerRegions);
     });
 
-    const providerAttributes: BaseServices.Provider.Attributes[] = [];
+    const providers: BaseServices.Provider.Type[] = [];
+
     regions.forEach((providerRegions, provider) => {
       providerRegions.forEach((region) => {
-        providerAttributes.push({
-          type: SERVICE_TYPE.PROVIDER,
-          name: uniqueIdentifier(`provider-${provider}`, { region }),
-          provider,
-          region,
-          links: [],
-          profile: DEFAULT_PROFILE_NAME,
-          overrides: {},
-        });
+        providers.push(
+          Registry.get(provider, SERVICE_TYPE.PROVIDER).factory({ region }, ...defaults)
+        );
       })
     })
 
-    return providerAttributes;
+    return providers;
   }
 
   /**
