@@ -1,14 +1,20 @@
 #!/usr/bin/env node
-
-const oclif = require('@oclif/core')
-
-const path = require('path')
+const path = require('path');
+const oclif = require('@oclif/core');
 const project = path.join(__dirname, '..', 'tsconfig.json')
+
+const tsConfig = require(project);
+const tsConfigPaths = require('tsconfig-paths');
+
+tsConfigPaths.register({
+  baseUrl: './src',
+  paths: tsConfig.compilerOptions.paths,
+});
 
 // In dev mode -> use ts-node and dev plugins
 process.env.NODE_ENV = 'development'
 
-require('ts-node').register({project})
+require('ts-node').register({ project })
 
 // In dev mode, always show stack traces
 oclif.settings.debug = true;
