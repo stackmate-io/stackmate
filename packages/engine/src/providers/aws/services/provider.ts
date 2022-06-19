@@ -5,8 +5,8 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import AwsService from './base';
 import { CloudStack, AWS, CoreServiceConfiguration } from '@stackmate/engine/types';
-import { DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getNetworkingCidrBlocks, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { getNetworkingCidrBlocks, mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
   /**
@@ -130,7 +130,8 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Provider.Schema {
-    return mergeJsonSchemas(super.schema(), {
+    return mergeJsonSchemas(
+      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
       $id: this.schemaId,
       properties: {
         ip: {
@@ -138,6 +139,11 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
           default: DEFAULT_IP,
           format: 'ipv4',
           errorMessage: 'Please provide a valid IPv4 IP for the networking service',
+        },
+        type: {
+          const: SERVICE_TYPE.PROVIDER,
+          enum: [SERVICE_TYPE.PROVIDER],
+          default: SERVICE_TYPE.PROVIDER,
         },
       },
       errorMessage: {

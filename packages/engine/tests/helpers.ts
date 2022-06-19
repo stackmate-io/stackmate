@@ -7,7 +7,7 @@ import { Manifest, Testing } from 'cdktf';
 
 import Registry from '@stackmate/engine/core/registry';
 import { deployment } from '@stackmate/engine/core/operation';
-import { PROVIDER } from '@stackmate/engine/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { awsProviderConfiguration, awsVaultConfiguration } from 'tests/engine/fixtures/aws';
 import {
   BaseService,
@@ -105,7 +105,7 @@ export const getPrerequisites = ({ provider, stack, scope, projectName, stageNam
   }
 
   const cloudProvider = Registry.get(
-    providerAttrs.provider, providerAttrs.type,
+    providerAttrs.provider, SERVICE_TYPE.PROVIDER,
   ).factory(
     providerAttrs, projectName, stageName,
   ).scope(scope) as BaseServices.Provider.Type;
@@ -113,7 +113,7 @@ export const getPrerequisites = ({ provider, stack, scope, projectName, stageNam
   cloudProvider.provisions(stack, {});
 
   const vault = Registry.get(
-    vaultAttrs.provider, vaultAttrs.type,
+    vaultAttrs.provider, SERVICE_TYPE.VAULT,
   ).factory(
     vaultAttrs, projectName, stageName,
   ).scope(scope) as BaseServices.Vault.Type;

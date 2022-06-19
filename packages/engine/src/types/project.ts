@@ -1,3 +1,4 @@
+import { StateServiceConfiguration, VaultServiceConfiguration } from '@stackmate/engine/types/service';
 import { JsonSchema } from '@stackmate/engine/types/schema';
 import { RequireKeys } from '@stackmate/engine/types/util';
 import { Attribute, AttributesOf, BaseEntity, NonAttributesOf } from '@stackmate/engine/types/entity';
@@ -7,9 +8,6 @@ import {
   CloudProviderChoice,
   CloudServiceAttributes,
   CloudServiceConfiguration,
-  CoreServiceConfiguration,
-  StateServiceAttributes,
-  VaultServiceAttributes,
 } from '@stackmate/engine/types/service';
 
 type BaseStageConfiguration = {
@@ -25,8 +23,8 @@ export type ProjectConfiguration = {
   name: string;
   provider: CloudProviderChoice;
   region: string;
-  state?: CoreServiceConfiguration<StateServiceAttributes>;
-  secrets?: CoreServiceConfiguration<VaultServiceAttributes>;
+  state?: StateServiceConfiguration;
+  secrets?: VaultServiceConfiguration;
   stages: StageConfiguration[];
 };
 
