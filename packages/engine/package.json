@@ -36,9 +36,7 @@
     "constructs": "^10.1.41",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21",
-    "reflect-metadata": "^0.1.13",
-    "typescript-memoize": "^1.1.0",
-    "validate.js": "^0.13.1"
+    "typescript-memoize": "^1.1.0"
   },
   "devDependencies": {
     "@types/jest": "^28.1.1",
@@ -57,7 +55,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "prebuild": "rimraf dist/*",
-    "build": "yarn tsc -p ./tsconfig.build.json",
+    "build": "tsc -p ./tsconfig.build.json",
     "postbuild": "yarn tsc-alias && yarn schema:generate:dist",
     "schema:generate": "ts-node -r tsconfig-paths/register src/schema.ts",
     "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json"
