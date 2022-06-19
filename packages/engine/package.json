@@ -56,7 +56,7 @@
     "lint": "eslint . --ext .ts",
     "prebuild": "rimraf dist/*",
     "build": "tsc -p ./tsconfig.build.json",
-    "postbuild": "yarn tsc-alias && yarn schema:generate:dist",
+    "postbuild": "tsc-alias -p tsconfig.build.json && yarn schema:generate:dist",
     "schema:generate": "ts-node -r tsconfig-paths/register src/schema.ts",
     "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json"
   }

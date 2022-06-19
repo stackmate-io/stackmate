@@ -68,11 +68,13 @@
     }
   },
   "scripts": {
-    "build": "rimraf dist/* && tsc -p tsconfig.build.json && oclif manifest",
+    "build": "rimraf dist/* && tsc -p tsconfig.build.json",
+    "postbuild": "tsc-alias -p tsconfig.build.json && yarn oclif:manifest",
     "postpack": "rimraf oclif.manifest.json",
-    "prepack": "yarn build && oclif manifest && oclif readme",
-    "manifest": "oclif manifest",
-    "version": "oclif readme && git add README.md"
+    "prepack": "yarn build && yarn oclif:manifest && yarn run oclif:readme",
+    "oclif:paths": "ts-node -p tsconfig.build.json -r tsconfig-paths/register ./bin/run",
+    "oclif:manifest": "yarn run oclif:paths manifest",
+    "oclif:readme": "yarn run oclif:paths readme"
   },
   "engines": {
     "node": ">=12.0.0"

@@ -60,7 +60,7 @@
     "cmd:run": "packages/cli/bin/run",
     "cmd:dev": "packages/cli/bin/dev",
     "pretest": "lerna run --scope @stackmate/engine schema:generate",
-    "test": "jest --bail --verbose --detectOpenHandles",
+    "test": "jest --verbose --detectOpenHandles",
     "test:watch": "yarn test --watchAll"
   }
 }
