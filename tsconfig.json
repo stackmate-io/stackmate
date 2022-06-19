@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2019",
     "lib": [
       "es5",
       "es6",
@@ -16,6 +16,7 @@
     "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "module": "commonjs",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

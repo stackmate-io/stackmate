@@ -2,15 +2,20 @@
 *-error.log
 .nyc_output
 dist
-stackmate.schema.json
 package-lock.json
 tmp
-cdktf.out
-.stackmate
 node_modules
+
+# Stackmate specific
+.stackmate
+cdktf.out
+stackmate.schema.json
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
 
 # Jest
 .jestcache
+
+# Oclif specific
+oclif.manifest.json
