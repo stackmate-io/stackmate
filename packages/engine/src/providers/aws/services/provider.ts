@@ -140,6 +140,11 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
           format: 'ipv4',
           errorMessage: 'Please provide a valid IPv4 IP for the networking service',
         },
+        type: {
+          const: SERVICE_TYPE.PROVIDER,
+          enum: [SERVICE_TYPE.PROVIDER],
+          default: SERVICE_TYPE.PROVIDER,
+        },
       },
       errorMessage: {
         _: 'The AWS provider service is not properly configured',

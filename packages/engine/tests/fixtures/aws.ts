@@ -8,17 +8,19 @@ export const awsRegion = faker.helpers.arrayElement(Object.values(AWS_REGIONS)) 
 export const awsKeyArn = `arn:aws:kms:${awsRegion}:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`;
 
 export const awsProviderConfiguration = {
-  name: `provider-${PROVIDER.AWS}-default`,
+  name: `provider-${PROVIDER.AWS}-test`,
   provider: PROVIDER.AWS,
   region: awsRegion,
 };
 
 export const awsVaultConfiguration = {
+  name: `vault-${PROVIDER.AWS}-test`,
   provider: PROVIDER.AWS,
   region: awsRegion,
 };
 
 export const stateConfiguration = {
+  name: `state-${PROVIDER.AWS}-test`,
   provider: PROVIDER.AWS,
   bucket: faker.internet.domainWord(),
   region: awsRegion,

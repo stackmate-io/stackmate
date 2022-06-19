@@ -36,7 +36,7 @@ export const PROFILES_PATH = path.resolve(__dirname, 'profiles');
 export const CORE_SERVICE_TYPES = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.STATE, SERVICE_TYPE.VAULT];
 export const STORAGE: { [name: string]: string } = { FILE: 'file' } as const;
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
-export const CORE_SERVICE_SKIPPED_PROPERTIES = ['type', 'links', 'overrides', 'profile'] as const;
+export const CORE_SERVICE_SKIPPED_PROPERTIES = ['links', 'overrides', 'profile'] as const;
 
 // Service defaults
 export const DEFAULT_IP = '10.0.0.0';
