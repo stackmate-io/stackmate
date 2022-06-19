@@ -1,5 +1,5 @@
 import { validate } from '@stackmate/engine/core/validation';
-import { ProjectConfiguration } from '../src';
+import { ProjectConfiguration } from '@stackmate/engine/types';
 
 const config: ProjectConfiguration = {
   name: 'some project',
