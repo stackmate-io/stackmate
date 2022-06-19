@@ -3,7 +3,6 @@ const { compilerOptions: { paths } } = require('./tsconfig');
 const { pathsToModuleNameMapper } = require('ts-jest');
 
 module.exports = {
-  bail: true,
   clearMocks: true,
   cacheDirectory: '<rootDir>/.jestcache',
   preset: 'ts-jest',

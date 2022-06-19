@@ -2,10 +2,13 @@
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
+    "rootDir": "./src",
     "paths": {
-      "@stackmate/engine/*": [
+      "@stackmate/cli": [
+        "src"
+      ],
+      "@stackmate/cli/*": [
         "src/*"
       ]
     }
@@ -16,8 +19,7 @@
   "exclude": [
     "dist",
     "node_modules",
-    "tests",
-    "src/schema.ts"
+    "tests"
   ],
   "tsc-alias": {
     "verbose": true,
