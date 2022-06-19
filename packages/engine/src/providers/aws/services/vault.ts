@@ -132,6 +132,8 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
           default: DEFAULT_VAULT_SERVICE_NAME,
         },
         type: {
+          const: SERVICE_TYPE.VAULT,
+          enum: [SERVICE_TYPE.VAULT],
           default: SERVICE_TYPE.VAULT,
         },
       },

@@ -107,6 +107,8 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
           default: DEFAULT_STATE_SERVICE_NAME,
         },
         type: {
+          const: SERVICE_TYPE.STATE,
+          enum: [SERVICE_TYPE.STATE],
           default: SERVICE_TYPE.STATE,
         },
       },

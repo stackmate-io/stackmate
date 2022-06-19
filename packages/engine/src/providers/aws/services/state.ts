@@ -106,6 +106,8 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
           default: DEFAULT_STATE_SERVICE_NAME,
         },
         type: {
+          const: SERVICE_TYPE.STATE,
+          enum: [SERVICE_TYPE.STATE],
           default: SERVICE_TYPE.STATE,
         },
         bucket: {

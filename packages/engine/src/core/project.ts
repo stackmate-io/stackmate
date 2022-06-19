@@ -2,7 +2,6 @@ import { isEmpty } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';
 import Entity from '@stackmate/engine/core/entity';
-import { uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
@@ -13,7 +12,6 @@ import {
   BaseEntityConstructor,
   StackmateProject,
   StageConfiguration,
-  CoreServiceConfiguration,
 } from '@stackmate/engine/types';
 
 class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
@@ -54,64 +52,74 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
   stages: StageConfiguration[] = [];
 
   /**
-   * @param {String} name the name of the stage in the project to return services for
+   * Instantiates the services for a stage
+   *
+   * @param {String} stageName the name of the stage in the project to return services for
    * @returns {Service[]}
    */
   stage(stageName: string): BaseService.Type[] {
-    const cloudServices = this.getCloudServiceAttributes(stageName);
-    const defaults = [this.name, stageName];
-    const servicesAttributes = [
-      this.getStateServiceAttributes(),
-      this.getVaultServiceAttributes(),
-      ...cloudServices,
-    ];
-
     // Instantiate the services
-    const services = servicesAttributes.map((srv) => {
-      const { provider = this.provider, region = this.region, type, ...attrs } = srv;
-      return Registry.get(provider, type).factory(
-        { ...attrs, provider, region, type }, ...defaults,
-      );
-    });
+    const services = this.getCloudServices(stageName);
 
-    this.getProviderServiceAttributes(servicesAttributes).forEach((attrs) => {
-      services.push(
-        Registry.get(attrs.provider, SERVICE_TYPE.PROVIDER).factory(attrs, ...defaults)
-      );
-    });
-
-    return services;
+    return [
+      ...services,
+      ...this.getProviders(services, stageName),
+      this.getState(stageName),
+      this.getVault(stageName),
+    ];
   }
 
   /**
-   * @returns {BaseServices.State.Attributes} the attributes for the state service
+   * Returns the state service for the project
+   *
+   * @param {String} stageName the name of the stage to get the state for
+   * @returns {BaseService.Type} the attributes for the state service
    */
-  protected getStateServiceAttributes(): BaseServices.State.Attributes {
-    const { provider = this.provider, region = this.region, ...attrs } = this.state || {};
-    return { ...attrs, provider, region, type: SERVICE_TYPE.STATE, name: `${this.name}-state` };
+  protected getState(stageName: string): BaseService.Type {
+    const {
+      provider = this.provider,
+      region = this.region,
+      name = `${this.name}-project-state`,
+      ...attrs
+    } = this.state || {};
+
+    return Registry.get(provider, SERVICE_TYPE.STATE).factory(
+      { ...attrs, provider, region, name }, this.name, stageName,
+    );
   }
 
   /**
-   * @returns {BaseServices.Vault.Attributes} the attributes for the vault service
+   * Returns the vault service for the project
+   *
+   * @param {String} stageName the name of the stage to get the vault for
+   * @returns {BaseService.Type} the attributes for the vault service
    */
-  protected getVaultServiceAttributes(): BaseServices.Vault.Attributes {
-    const { provider = this.provider, region = this.region, ...attrs } = this.secrets || {};
-    return { ...attrs, provider, region, type: SERVICE_TYPE.VAULT, name: `${this.name}-secrets` };
+  protected getVault(stageName: string): BaseService.Type {
+    const {
+      provider = this.provider,
+      region = this.region,
+      name = `${this.name}-project-vault`,
+      ...attrs
+    } = this.secrets || {};
+
+    return Registry.get(provider, SERVICE_TYPE.VAULT).factory(
+      { ...attrs, provider, name, region }, this.name, stageName,
+    );
   }
 
   /**
-   * @param {String} stage the stage to get the service attributes for
+   * @param {String} stageName the stage to get the service attributes for
    * @param {String[]} without the service names to skip
    * @returns {BaseService.Attributes[]} the attributes for the cloud services
    */
-  protected getCloudServiceAttributes(stage: string, without: string[] = []): BaseService.Attributes[] {
+  protected getCloudServices(stageName: string, without: string[] = []): BaseService.Type[] {
     if (isEmpty(this.stages)) {
       throw new Error('There aren’t any stages defined for the project');
     }
 
-    const stageConfiguration = this.stages.find(s => s.name === stage);
+    const stageConfiguration = this.stages.find(s => s.name === stageName);
     if (!stageConfiguration) {
-      throw new Error(`Stage ${stage} is not available in the project`);
+      throw new Error(`Stage ${stageName} is not available in the project`);
     }
 
     const {
@@ -122,20 +130,21 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
 
     if (isEmpty(stageServices) && !copyFrom) {
       throw new Error(
-        `Stage ${stage} is improperly configured. It doesn't provide any services or stage to copy from`,
+        `Stage ${stageName} is improperly configured. It doesn't provide any services or stage to copy from`,
       );
     }
 
     const services = [];
 
     if (copyFrom) {
-      services.push(...this.getCloudServiceAttributes(copyFrom, skipServices));
+      services.push(...this.getCloudServices(copyFrom, skipServices));
     }
 
     services.push(...stageServices.filter(srv => !without.includes(srv.name)));
 
     return services.map((srv) => {
       const {
+        type,
         provider = this.provider,
         region = this.region,
         links = [],
@@ -144,14 +153,16 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
         ...attrs
       } = srv;
 
-      return { ...attrs, provider, region, links, profile, overrides };
+      return Registry.get(provider, type).factory(
+        { ...attrs, type, provider, region, links, profile, overrides }, this.name, stageName,
+      );
     });
   }
 
   /**
    * @returns {BaseServices.Provider.Type} the attributes for the provider services
    */
-  protected getProviders(services: BaseService.Attributes[], defaults: object = {}): BaseServices.Provider.Type[] {
+  protected getProviders(services: BaseService.Attributes[], stageName: string): BaseService.Type[] {
     const regions: Map<ProviderChoice, Set<string>> = new Map();
 
     // Iterate the services and keep a mapping of provider => unique set of regions
@@ -161,15 +172,17 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
       regions.set(provider, providerRegions);
     });
 
-    const providers: BaseServices.Provider.Type[] = [];
+    const providers: BaseService.Type[] = [];
 
     regions.forEach((providerRegions, provider) => {
       providerRegions.forEach((region) => {
         providers.push(
-          Registry.get(provider, SERVICE_TYPE.PROVIDER).factory({ region }, ...defaults)
+          Registry.get(provider, SERVICE_TYPE.PROVIDER).factory(
+            { region, name: `provider-${provider}-${region}-${stageName}` }, this.name, stageName,
+          )
         );
       })
-    })
+    });
 
     return providers;
   }

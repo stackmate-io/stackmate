@@ -37,7 +37,7 @@ describe('AwsS3State', () => {
       const { scope } = await getServiceRegisterationResults({
         stageName,
         projectName,
-        serviceConfig,
+        serviceConfig: { ...serviceConfig, type: SERVICE_TYPE.STATE },
         serviceScope: 'preparable',
       });
 

@@ -70,6 +70,13 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
     return mergeJsonSchemas(
       preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
       $id: this.schemaId,
+      properties: {
+        type: {
+          const: SERVICE_TYPE.PROVIDER,
+          enum: [SERVICE_TYPE.PROVIDER],
+          default: SERVICE_TYPE.PROVIDER,
+        },
+      },
       errorMessage: {
         _: 'The local provider service is not properly configured',
       },
