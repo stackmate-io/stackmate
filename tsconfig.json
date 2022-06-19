@@ -7,7 +7,7 @@
       "esnext"
     ],
     "downlevelIteration": true,
-    "composite": false,
+    "composite": true,
     "declaration": true,
     "baseUrl": ".",
     "rootDir": ".",
@@ -47,6 +47,14 @@
       ]
     }
   },
+  "references": [
+    {
+      "path": "packages/cli"
+    },
+    {
+      "path": "packages/engine"
+    }
+  ],
   "include": [
     "packages/cli/src/**/*",
     "packages/cli/tests/**/*",
