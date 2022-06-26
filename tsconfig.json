@@ -12,7 +12,6 @@
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
-    "incremental": false,
     "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -27,14 +26,8 @@
     "noUnusedLocals": true,
     "moduleResolution": "node",
     "paths": {
-      "@stackmate/cli": [
-        "packages/cli/src"
-      ],
       "@stackmate/cli/*": [
         "packages/cli/src/*"
-      ],
-      "@stackmate/engine": [
-        "packages/engine/src"
       ],
       "@stackmate/engine/*": [
         "packages/engine/src/*"
@@ -67,6 +60,9 @@
     "dist"
   ],
   "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ],
     "transpileOnly": true,
     "files": true
   }

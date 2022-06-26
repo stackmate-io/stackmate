@@ -6,7 +6,7 @@ import { CloudStack, Local } from '@stackmate/engine/types';
 import { CORE_SERVICE_SKIPPED_PROPERTIES, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
 
-class LocalProvder extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
+class LocalProviderService extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
   /**
    * @var {String} schemaId the schema id for the entity
    * @static
@@ -84,4 +84,4 @@ class LocalProvder extends LocalService<Local.Provider.Attributes> implements Lo
   }
 }
 
-export default LocalProvder;
+export default LocalProviderService;

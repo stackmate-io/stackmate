@@ -250,7 +250,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   /**
    * @returns {Object} the attributes to use when populating the initial configuration
    */
-  static config(): ConfigurationOptions<BaseService.Attributes> {
+  static config({ projectName = '', stageName = '' }): ConfigurationOptions<BaseService.Attributes> {
     throw new Error('The config() method is not available for this service');
   }
 }

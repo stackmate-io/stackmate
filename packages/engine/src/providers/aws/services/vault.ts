@@ -112,15 +112,6 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   }
 
   /**
-   * @returns {Object} the attributes to use when populating the initial configuration
-   */
-  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
-    return {
-      provider: PROVIDER.AWS,
-    };
-  }
-
-  /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Vault.Schema {
@@ -138,6 +129,15 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
         },
       },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 

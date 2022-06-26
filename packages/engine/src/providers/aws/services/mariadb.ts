@@ -1,5 +1,5 @@
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
 import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
@@ -54,7 +54,7 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.MariaDB.Attributes> {
     return {
-      provider: PROVIDER.AWS,
+      ...super.config({ stageName }),
       type: SERVICE_TYPE.MARIADB,
       name: uniqueIdentifier(SERVICE_TYPE.MARIADB, { stageName }),
     };
