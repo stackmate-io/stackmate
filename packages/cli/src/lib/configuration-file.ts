@@ -5,8 +5,8 @@ import { Memoize } from 'typescript-memoize';
 import { FileErrors } from '@stackmate/cli/lib/errors';
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { FileFormatter, FileStorage } from '@stackmate/cli/types';
-import YamlFormatter from '@stackmate/cli/lib/formatters/files/yaml';
-import JsonFormatter from '@stackmate/cli/lib/formatters/files/json';
+import YamlFormatter from '@stackmate/cli/lib/formatters/yaml-formatter';
+import JsonFormatter from '@stackmate/cli/lib/formatters/json-formatter';
 
 /**
  * Represents a configuration file

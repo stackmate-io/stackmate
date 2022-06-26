@@ -4,6 +4,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
+    "composite": false,
+    "module": "commonjs",
     "paths": {
       "@stackmate/cli/*": [
         "src/*"
