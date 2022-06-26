@@ -50,7 +50,7 @@
     "@types/ini": "^1.3.31",
     "@types/jest": "^28.1.1",
     "jest": "27.5.1",
-    "oclif": "2",
+    "oclif": "^3.0.1",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
     "tsc-alias": "^1.6.11",
@@ -61,7 +61,8 @@
     "dirname": "stackmate",
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
     ],
     "topicSeparator": " ",
     "topics": {
@@ -73,12 +74,10 @@
   "scripts": {
     "prebuild": "rimraf dist/*",
     "build": "tsc -p tsconfig.build.json",
-    "postbuild": "tsc-alias -p tsconfig.build.json && yarn oclif:manifest",
+    "postbuild": "tsc-alias -p tsconfig.build.json && rimraf tsconfig.build.tsbuildinfo && oclif manifest",
     "postpack": "rimraf oclif.manifest.json",
-    "prepack": "yarn build && yarn oclif:manifest && yarn run oclif:readme",
-    "oclif:paths": "ts-node -p tsconfig.build.json -r tsconfig-paths/register ./bin/run",
-    "oclif:manifest": "yarn oclif:paths manifest",
-    "oclif:readme": "yarn oclif:paths readme"
+    "prepack": "yarn build && oclif manifest && oclif readme",
+    "manifest": "oclif manifest"
   },
   "engines": {
     "node": ">=12.0.0"
