@@ -1,6 +1,6 @@
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
@@ -61,7 +61,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.PostgreSQL.Attributes> {
     return {
-      provider: PROVIDER.AWS,
+      ...super.config({ stageName }),
       type: SERVICE_TYPE.POSTGRESQL,
       name: uniqueIdentifier(SERVICE_TYPE.POSTGRESQL, { stageName }),
     };

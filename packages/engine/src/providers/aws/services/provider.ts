@@ -1,11 +1,11 @@
-import { snakeCase } from 'lodash';
+import { omit, snakeCase } from 'lodash';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 
 import AwsService from './base';
 import { CloudStack, AWS, CoreServiceConfiguration } from '@stackmate/engine/types';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_IP, DEFAULT_RESOURCE_COMMENT, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getNetworkingCidrBlocks, mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
 
 class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Provider.Type {
@@ -157,7 +157,7 @@ class AwsProvider extends AwsService<AWS.Provider.Attributes> implements AWS.Pro
    */
   static config(): CoreServiceConfiguration<AWS.Provider.Attributes> {
     return {
-      provider: PROVIDER.AWS,
+      ...omit(super.config(), 'type'),
     };
   }
 }

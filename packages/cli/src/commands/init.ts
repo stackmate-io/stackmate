@@ -7,10 +7,12 @@ import {
   ProjectConfiguration, ProviderChoice, ServiceTypeChoice, ServiceRegistry,
 } from '@stackmate/engine';
 
-import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
+// import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
+import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { parseCommaSeparatedString } from '@stackmate/cli/lib/helpers';
 import BaseCommand from '@stackmate/cli/core/commands/base';
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
+// import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
+import { getRepository } from '@stackmate/cli/core/generator';
 
 class InitCommand extends BaseCommand {
   /**
@@ -104,8 +106,8 @@ class InitCommand extends BaseCommand {
   }
 
   async run(): Promise<any> {
-    const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    this.log('Test', projectFile);
+    // const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
+    getRepository();
     // console.log({ projectFile });
     // console.log({ attrs: this.project });
   }

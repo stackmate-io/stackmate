@@ -2,7 +2,7 @@ import { defaultsDeep, get } from 'lodash';
 import { PROVIDER, ValueOf } from '@stackmate/engine';
 
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
-import { PreferenceOptions } from '@stackmate/cli/types/preferences';
+import { PreferenceOptions } from '@stackmate/cli/types';
 import { PREFERENCES_FILE, PREFERENCES_VERSION } from '@stackmate/cli/constants';
 
 class Preferences {

@@ -1,9 +1,10 @@
+import { omit } from 'lodash';
 import { S3Backend } from 'cdktf';
 
 import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { AWS, CloudStack, CoreServiceConfiguration, RequireKeys } from '@stackmate/engine/types';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { mergeJsonSchemas, preventJsonSchemaProperties, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
@@ -129,7 +130,7 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    */
   static config({ projectName = '' } = {}): CoreServiceConfiguration<AWS.State.Attributes> {
     return {
-      provider: PROVIDER.AWS,
+      ...omit(super.config({ projectName }), 'type'),
       bucket: uniqueIdentifier('stackmate-state', { projectName }),
     };
   }

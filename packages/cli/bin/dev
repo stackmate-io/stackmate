@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
 const oclif = require('@oclif/core');
-const project = path.join(__dirname, '..', 'tsconfig.json')
+const project = path.join(__dirname, '..', '..', '..', 'tsconfig.json')
 
 const tsConfig = require(project);
 const tsConfigPaths = require('tsconfig-paths');
