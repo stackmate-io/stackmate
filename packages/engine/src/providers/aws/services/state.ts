@@ -4,8 +4,8 @@ import { S3Backend } from 'cdktf';
 import AwsService from './base';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { AWS, CloudStack, CoreServiceConfiguration, RequireKeys } from '@stackmate/engine/types';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { mergeJsonSchemas, preventJsonSchemaProperties, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
+import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
 class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
@@ -98,8 +98,7 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.State.Schema {
-    return mergeJsonSchemas(
-      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
+    return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
       required: ['bucket'],
       properties: {

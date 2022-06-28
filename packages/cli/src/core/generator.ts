@@ -1,19 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
-
 import ini from 'ini';
-import { camelCase } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
+
 import {
-  AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, PROVIDER, StackmateProject,
+  AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, PROVIDER,
   ServiceRegistry, SERVICE_TYPE, uniqueIdentifier, Project, CloudServiceAttributes,
   StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
 } from '@stackmate/engine';
 
-
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { ProjectConfigCreationOptions } from '@stackmate/cli/types';
 
-export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')) => {
+export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')): string | undefined => {
   if (!fs.existsSync(fileName)) {
     return;
   }
@@ -24,10 +23,12 @@ export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'c
   }
 
   const config = ini.parse(contents.toString('utf-8'));
-  console.log(config);
-};
+  if (!config || !config['remote "origin"']) {
+    return;
+  }
 
-export const extractProjectNameFromRepository = () => {
+  const { ['remote "origin"']: { url } } = config;
+  return url.replace(/^([^\:\/]+)[:\/]{1}(?<owner>[^\/]+)\/(?<repo>[^.]+)(\.git)?$/i, '$2/$3');
 };
 
 export const createProject = ({
@@ -39,6 +40,14 @@ export const createProject = ({
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions
 ): ProjectConfiguration => {
+  if (isEmpty(stageNames)) {
+    throw new Error('You need to provide the names for the project’s stages');
+  }
+
+  if (isEmpty(serviceTypes)) {
+    throw new Error('You need to provide at least one service to be deployed');
+  }
+
   const [stageName, ...otherStages] = stageNames;
   const provider = defaultProvider || PROVIDER.AWS;
   const region = defaultRegion || DEFAULT_REGION[provider];
@@ -85,7 +94,7 @@ export const createProject = ({
   };
 
   // Validate the configuration
-  Project.factory<StackmateProject.Type>(config);
+  Project.validate(config, { useDefaults: false });
 
   return config;
 };

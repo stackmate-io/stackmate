@@ -3,8 +3,8 @@ import { LocalProvider, LocalProvider as TerraformLocalProvider } from '@cdktf/p
 
 import LocalService from './base';
 import { CloudStack, Local } from '@stackmate/engine/types';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 
 class LocalProviderService extends LocalService<Local.Provider.Attributes> implements Local.Provider.Type {
   /**
@@ -67,8 +67,7 @@ class LocalProviderService extends LocalService<Local.Provider.Attributes> imple
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): Local.Provider.Schema {
-    return mergeJsonSchemas(
-      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
+    return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
       properties: {
         type: {
