@@ -38,7 +38,7 @@ class AwsMariaDbService extends AwsRdsService<AWS.MariaDB.Attributes> implements
     return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
       properties: {
-        vesion: {
+        version: {
           default: RDS_DEFAULT_VERSIONS_PER_ENGINE.get('mariadb'),
           enum: RDS_MAJOR_VERSIONS_PER_ENGINE.get('mariadb'),
         },

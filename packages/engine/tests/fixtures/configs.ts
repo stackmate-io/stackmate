@@ -1,8 +1,7 @@
-import { validate } from '@stackmate/engine/core/validation';
-import { ProjectConfiguration } from '@stackmate/engine/types';
+import { ProjectConfiguration } from 'packages/engine/dist';
 
-const config: ProjectConfiguration = {
-  name: 'some project',
+export const awsMinimalDatabaseState: ProjectConfiguration = {
+  name: 'some-project',
   provider: 'aws',
   region: 'eu-central-1',
   state: {
@@ -18,7 +17,3 @@ const config: ProjectConfiguration = {
     }],
   }],
 };
-
-test('project validation', () => {
-  validate(config);
-});
