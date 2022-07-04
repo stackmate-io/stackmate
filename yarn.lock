@@ -289,10 +289,10 @@
   resolved "https://registry.yarnpkg.com/@cdktf/provider-aws/-/provider-aws-5.0.52.tgz#f13c01a6e51263b9f306c0d45f3307e6c2b44555"
   integrity sha512-FVCL1DNtLiQIm6tcoHepieTZJ5cbGTE2rMqcxNPN2oelXqYTef6ln4iEYg55uRqpSk7STw7kMG8EK8+6zVJlyw==
 
-"@cdktf/provider-local@^0.5.34":
-  version "0.5.34"
-  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.5.34.tgz#fad1a941cd22874d3659082781fa9d425c7fac2c"
-  integrity sha512-6L45WLEeVGX1gmlYH5bu3vuT1UgRdpGF0Ex1y8yH0OqSywqXJqQHucAcrMHK/Ty+ZtSRHNxP1zRYRvWRPSHYLw==
+"@cdktf/provider-local@^0.5.42":
+  version "0.5.42"
+  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.5.42.tgz#3257db341f1e8ee174b6006e06a4184cd7a7e13d"
+  integrity sha512-AFse+Ccg83uWUyxwkbQ7bv2dDrOY+KXgIphu2bjiGBFqI31OgQJSkajqHB+wd/4jmQGh5O24yrza7/1cnjFAsQ==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
