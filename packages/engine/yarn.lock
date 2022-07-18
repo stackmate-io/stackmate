@@ -497,10 +497,10 @@
   resolved "https://registry.yarnpkg.com/@cdktf/provider-aws/-/provider-aws-5.0.52.tgz#f13c01a6e51263b9f306c0d45f3307e6c2b44555"
   integrity sha512-FVCL1DNtLiQIm6tcoHepieTZJ5cbGTE2rMqcxNPN2oelXqYTef6ln4iEYg55uRqpSk7STw7kMG8EK8+6zVJlyw==
 
-"@cdktf/provider-local@^0.5.28":
-  version "0.5.28"
-  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.5.28.tgz#1afa82083d968dd9d0389e952cb7270c3a802005"
-  integrity sha512-PVsGMie9ZG4TxbL9oeiajgDde5EJ9ggvOO1dl/6e3xNVJienV42LBotStecTf/gkM4Faj0gtAySybFd3KOP5BA==
+"@cdktf/provider-local@^0.5.34":
+  version "0.5.55"
+  resolved "https://registry.yarnpkg.com/@cdktf/provider-local/-/provider-local-0.5.55.tgz#848305c1b1edf24be54d84d4894b230a25476aeb"
+  integrity sha512-CHzunnS5+/BVKaSOIwAP0GyisqYFGQ2Cq18x0mRBUtHXtLJwdKpnx5F2lhh1c3ewepWp/kiSaqaOjkqg5RUkEw==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -1355,10 +1355,10 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
-constructs@^10.1.42:
-  version "10.1.42"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.42.tgz#dc21bfa7d024a1c81c0982b69ed4585e4e9d5712"
-  integrity sha512-5AELa/PFtZG+WTjn9HoXhqsDZYV6l3J7Li9xw6vREYVMasF8cnVbTZvA4crP1gIyKtBAxAlnZCmzmCbicnH6eg==
+constructs@^10.1.49:
+  version "10.1.49"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.49.tgz#75b6e3f1441ee974452919547d6ea80ea3234044"
+  integrity sha512-dvJW6ErIlk1qAYbVFzD+S7Efhl+rqXIEDvnzyYde/nzRT2E9uj6EXA+kky8xWBVFDrHukR8+6+QEDo0bXRFfCQ==
 
 convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   version "1.8.0"
