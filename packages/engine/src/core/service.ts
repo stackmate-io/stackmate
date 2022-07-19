@@ -6,9 +6,7 @@ import Profile from '@stackmate/engine/core/profile';
 import {
   PROVIDER,
   SERVICE_TYPE,
-  CORE_SERVICE_TYPES,
   DEFAULT_PROFILE_NAME,
-  CORE_SERVICE_SKIPPED_PROPERTIES,
 } from '@stackmate/engine/constants';
 import {
   CloudStack,
@@ -250,21 +248,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
           type: `You need to specify a service type. Available options are: ${services.join(', ')}`,
         },
       },
-      if: {
-        // Core services
-        anyOf: CORE_SERVICE_TYPES.map(srv => ({ properties: { type: { const: srv } } })),
-      },
-      then: {
-        // Prevent certain attributes from being assigned
-        allOf: CORE_SERVICE_SKIPPED_PROPERTIES.map(prop => ({
-          not: { required: [prop] },
-          errorMessage: `The “${prop}” property is not allowed here`,
-        })),
-      },
-      else: {
-        // otherwise, require the name and type to be present
-        required: ['name', 'type'],
-      }
     };
   }
 
