@@ -7,7 +7,7 @@ import { JSON_SCHEMA_PATH, SERVICE_TYPE } from './constants';
 
 import Project from '@stackmate/engine/core/project';
 import Registry from '@stackmate/engine/core/registry';
-import { PROVIDER } from '@stackmate/engine/constants';
+import { PROVIDER, CLOUD_SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   BaseJsonSchema,
   StackmateProject,
@@ -24,17 +24,25 @@ type SchemaBranch = 'state' | 'secrets' | 'cloudServices';
  */
 const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonSchema => {
   if (branch === 'secrets') {
-    return { properties: { secrets: props } }
+    return {
+      required: ['secrets'],
+      properties: { secrets: props },
+    };
   }
 
   if (branch === 'state') {
-    return { properties: { state: props } }
+    return {
+      required: ['state'],
+      properties: { state: props },
+    };
   }
 
   return {
+    required: ['stages'],
     properties: {
       stages: {
         items: {
+          required: ['services'],
           properties: {
             services: {
               items: props,
@@ -71,12 +79,11 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
   const branches: Map<SchemaBranch, ServiceTypeChoice[]> = new Map([
     ['state', [SERVICE_TYPE.STATE]],
     ['secrets', [SERVICE_TYPE.VAULT]],
-    ['cloudServices', Object.values(SERVICE_TYPE)],
+    ['cloudServices', Object.values(CLOUD_SERVICE_TYPE) as ServiceTypeChoice[]],
   ]);
 
   for (const entry of branches) {
     const [branch, serviceTypes] = entry;
-    const typeDiscriminations: BaseJsonSchema[] = [];
 
     for (const serviceType of serviceTypes) {
       const serviceClass = services.get(serviceType);
@@ -85,40 +92,36 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
         continue;
       }
 
-      // Add the service type discriminations
-      typeDiscriminations.push({
-        if: { properties: { type: { const: serviceType } } },
-        then: { $ref: serviceClass.schemaId },
+      conditions.push({
+        if: {
+          // The provider is either defined at root level,
+          // or is explicitly defined in the service definition
+          anyOf: [
+            {
+              // root provider is defined, nested provider is not
+              allOf: [
+                {
+                  required: ['provider'],
+                  properties: { provider: { const: provider } },
+                },
+                getSchemaBranch(branch, { not: { required: ['provider'] } }),
+              ],
+            },
+            // Provider is explicitly defined on the service type
+            getSchemaBranch(branch, {
+              required: ['provider'],
+              properties: { provider: { const: provider } },
+            }),
+          ],
+        },
+        // In case this condition is true, we should apply another set of conditions
+        // discriminated by service type, referencing the corresponding service's schema
+        then: getSchemaBranch(branch, { $ref: serviceClass.schemaId }),
       });
 
       // Add the service definition
       Object.assign(definitions, { [serviceClass.schemaId]: serviceClass.schema() });
     }
-
-    if (!typeDiscriminations.length) {
-      continue;
-    }
-
-    conditions.push({
-      if: {
-        // The provider is either defined at root level,
-        // or is explicitly defined in the service definition
-        anyOf: [
-          {
-            // root provider is aws, nested provider is not defined
-            allOf: [
-              { properties: { provider: { const: provider } } },
-              getSchemaBranch(branch, { properties: { provider: { const: null } } }),
-            ],
-          },
-          // Provider is explicitly set to aws on the service type
-          getSchemaBranch(branch, { properties: { provider: { const: provider } } }),
-        ],
-      },
-      // In case this condition is true, we should apply another set of conditions
-      // discriminated by service type, referencing the corresponding service's schema
-      then: getSchemaBranch(branch, { allOf: typeDiscriminations }),
-    });
   }
 
   return {
@@ -159,4 +162,4 @@ const [filePath] = argv.slice(2);
 const jsonSchemaDest = filePath || JSON_SCHEMA_PATH;
 
 fs.writeFileSync(jsonSchemaDest, JSON.stringify(schema, null, 2));
-console.log('JSON schema generated under', jsonSchemaDest);
+console.info('JSON schema generated under', jsonSchemaDest);
