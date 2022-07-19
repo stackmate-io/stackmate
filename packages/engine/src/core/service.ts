@@ -208,6 +208,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
       $id: this.schemaId,
       type: 'object',
       additionalProperties: false,
+      required: [],
       properties: {
         provider: {
           type: 'string',
@@ -258,7 +259,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
         allOf: CORE_SERVICE_SKIPPED_PROPERTIES.map(prop => ({
           not: { required: [prop] },
           errorMessage: `The “${prop}” property is not allowed here`,
-          properties: { [prop]: { default: null } },
         })),
       },
       else: {

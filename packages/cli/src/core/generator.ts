@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase, isEmpty, omitBy } from 'lodash';
 
 import {
   AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, PROVIDER,
   ServiceRegistry, SERVICE_TYPE, uniqueIdentifier, Project, CloudServiceAttributes,
   StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
+  StageConfiguration, BaseService, ConfigurationOptions,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -31,6 +32,18 @@ export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'c
   return url.replace(/^([^\:\/]+)[:\/]{1}(?<owner>[^\/]+)\/(?<repo>[^.]+)(\.git)?$/i, '$2/$3');
 };
 
+// Attributes that are implied in the service configuration and are
+const rootImpliedAttributes = ['provider', 'region'];
+
+const skipImpliedAttributes = (
+  serviceConfig: object,
+  rootConfig: Partial<ProjectConfiguration>,
+) => (
+  omitBy(serviceConfig, (value, key) => (
+    rootImpliedAttributes.includes(key) && rootConfig[key as keyof typeof rootConfig] === value
+  ))
+);
+
 export const createProject = ({
   projectName,
   defaultProvider = PROVIDER.AWS,
@@ -38,7 +51,7 @@ export const createProject = ({
   secretsProvider = PROVIDER.AWS,
   defaultRegion = AWS_REGIONS.EU_CENTRAL_1,
   stageNames = ['production'],
-  serviceTypes = []}: ProjectConfigCreationOptions
+  serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
   if (isEmpty(stageNames)) {
     throw new Error('You need to provide the names for the project’s stages');
@@ -52,49 +65,66 @@ export const createProject = ({
   const provider = defaultProvider || PROVIDER.AWS;
   const region = defaultRegion || DEFAULT_REGION[provider];
 
-  const state = ServiceRegistry.get(stateProvider || provider, SERVICE_TYPE.STATE).config({
+  const stateConfig = ServiceRegistry.get(stateProvider || provider, SERVICE_TYPE.STATE).config({
     projectName, stageName,
   }) as StateServiceConfiguration;
 
-  const vault = ServiceRegistry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config({
+  const vaultConfig = ServiceRegistry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config({
     projectName, stageName,
   }) as VaultServiceConfiguration;
 
-  const config: ProjectConfiguration = {
+  const rootConfig: Omit<ProjectConfiguration, 'stages'> = {
     name: projectName,
     provider,
     region,
-    state,
-    secrets: vault,
-    stages: [
-      {
-        name: stageName,
-        services: serviceTypes.map((type) => {
-          const config = ServiceRegistry.get(provider, type).config({
-            projectName,
-            stageName,
-          });
-
-          const ret = {
-            ...config,
-            type: type,
-            name: camelCase(config.name || uniqueIdentifier(type, { stageName })),
-          };
-
-          return ret as CloudServiceConfiguration<CloudServiceAttributes>;
-        }),
-      },
-      ...otherStages.map(
-        (stg: string) => ({
-          name: stg,
-          copy: stageName,
-        }),
-      ),
-    ],
   };
+
+  const secrets = skipImpliedAttributes(vaultConfig, rootConfig);
+  const state = skipImpliedAttributes(stateConfig, rootConfig);
+
+  const stages: StageConfiguration[] = [
+    {
+      name: stageName,
+      services: serviceTypes.map((type) => {
+        const baseConfig = ServiceRegistry.get(provider, type).config({
+          projectName,
+          stageName,
+        });
+
+        const config: ConfigurationOptions<BaseService.Attributes> = skipImpliedAttributes(
+          baseConfig, rootConfig,
+        );
+
+        const ret = {
+          ...config,
+          type: type,
+          name: camelCase(uniqueIdentifier(type, { stageName })),
+        };
+
+        return ret as CloudServiceConfiguration<CloudServiceAttributes>;
+      }),
+    },
+    ...otherStages.map(
+      (stg: string) => ({
+        name: stg,
+        copy: stageName,
+      }),
+    ),
+  ];
+
+  const config: ProjectConfiguration = {
+    ...rootConfig,
+    ...(!isEmpty(secrets) ? { secrets } : {}),
+    ...(!isEmpty(state) ? { state } : {}),
+    stages,
+  };
+
+  console.log('before', require('util').inspect(config, { depth: 30 }));
 
   // Validate the configuration
   Project.validate(config, { useDefaults: false });
+
+  console.log('after', require('util').inspect(config, { depth: 30 }));
 
   return config;
 };

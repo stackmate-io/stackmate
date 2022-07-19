@@ -11,6 +11,8 @@ import { AjvOptions, EntityAttributes, StackmateProject } from '@stackmate/engin
 import Profile from './profile';
 
 const readSchema = () => {
+  console.debug('Using JSON schema path', JSON_SCHEMA_PATH);
+
   if (!fs.existsSync(JSON_SCHEMA_PATH)) {
     throw new Error('JSON Schema file not found');
   }
