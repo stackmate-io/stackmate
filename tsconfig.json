@@ -7,7 +7,7 @@
       "esnext"
     ],
     "downlevelIteration": true,
-    "composite": true,
+    "composite": false,
     "declaration": true,
     "baseUrl": ".",
     "rootDir": ".",
