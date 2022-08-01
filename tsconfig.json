@@ -56,8 +56,8 @@
     "packages/engine/src/profiles/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "dist"
+    "**/node_modules",
+    "**/dist"
   ],
   "ts-node": {
     "require": [
