@@ -4,8 +4,8 @@ import ini from 'ini';
 import { camelCase, isEmpty, omitBy } from 'lodash';
 
 import {
-  AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, PROVIDER,
-  ServiceRegistry, SERVICE_TYPE, uniqueIdentifier, Project, CloudServiceAttributes,
+  AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, Project, PROVIDER,
+  ServiceRegistry, SERVICE_TYPE, uniqueIdentifier, CloudServiceAttributes,
   StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
   StageConfiguration, BaseService, ConfigurationOptions,
 } from '@stackmate/engine';
@@ -53,15 +53,18 @@ export const createProject = ({
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
-  if (isEmpty(stageNames)) {
+  const validStageNames = stageNames.filter(st => Boolean(st));
+  const validServiceTypes = serviceTypes.filter(st => Boolean(st));
+
+  if (isEmpty(validStageNames)) {
     throw new Error('You need to provide the names for the project’s stages');
   }
 
-  if (isEmpty(serviceTypes)) {
+  if (isEmpty(validServiceTypes)) {
     throw new Error('You need to provide at least one service to be deployed');
   }
 
-  const [stageName, ...otherStages] = stageNames;
+  const [stageName, ...otherStages] = validStageNames;
   const provider = defaultProvider || PROVIDER.AWS;
   const region = defaultRegion || DEFAULT_REGION[provider];
 
@@ -85,7 +88,7 @@ export const createProject = ({
   const stages: StageConfiguration[] = [
     {
       name: stageName,
-      services: serviceTypes.map((type) => {
+      services: validServiceTypes.map((type) => {
         const baseConfig = ServiceRegistry.get(provider, type).config({
           projectName,
           stageName,
@@ -119,12 +122,8 @@ export const createProject = ({
     stages,
   };
 
-  console.log('before', require('util').inspect(config, { depth: 30 }));
-
   // Validate the configuration
   Project.validate(config, { useDefaults: false });
-
-  console.log('after', require('util').inspect(config, { depth: 30 }));
 
   return config;
 };
