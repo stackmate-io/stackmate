@@ -1,7 +1,7 @@
 import Service from '@stackmate/engine/core/service';
 import { PROVIDER } from '@stackmate/engine/constants';
 import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
-import { AWS, ConfigurationOptions, EnvironmentVariable } from '@stackmate/engine/types';
+import { AWS, CoreServiceConfiguration, EnvironmentVariable } from '@stackmate/engine/types';
 import { AWS_DEFAULT_REGION, AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
 
 abstract class AwsService<Attrs extends AWS.Base.Attributes = AWS.Base.Attributes> extends Service<Attrs> implements AWS.Base.Type {
@@ -63,7 +63,7 @@ abstract class AwsService<Attrs extends AWS.Base.Attributes = AWS.Base.Attribute
   /**
    * @returns {Object} the attributes to use when populating the initial configuration
    */
-  static config(): ConfigurationOptions<AWS.Base.Attributes> {
+  static config({ projectName = '', stageName = '' } = {}): CoreServiceConfiguration<AWS.Base.Attributes> {
     return {
       provider: PROVIDER.AWS,
     };

@@ -1505,7 +1505,7 @@
   resolved "https://registry.yarnpkg.com/@oclif/linewrap/-/linewrap-1.0.0.tgz#aedcb64b479d4db7be24196384897b5000901d91"
   integrity sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==
 
-"@oclif/plugin-help@^5.1.11", "@oclif/plugin-help@^5.1.12":
+"@oclif/plugin-help@^5.1.12":
   version "5.1.12"
   resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.12.tgz#24a18631eb9b22cb55e1a3b8e4f6039fd42727e6"
   integrity sha512-HvH/RubJxqCinP0vUWQLTOboT+SfjfL8h40s+PymkWaldIcXlpoRaJX50vz+SjZIs7uewZwEk8fzLqpF/BWXlg==
@@ -1769,6 +1769,11 @@
   integrity sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==
   dependencies:
     "@types/node" "*"
+
+"@types/ini@^1.3.31":
+  version "1.3.31"
+  resolved "https://registry.yarnpkg.com/@types/ini/-/ini-1.3.31.tgz#c78541a187bd88d5c73e990711c9d85214800d1b"
+  integrity sha512-8ecxxaG4AlVEM1k9+BsziMw8UsX0qy3jYI1ad/71RrDZ+rdL6aZB0wLfAuflQiDhkD5o4yJ0uPK3OSUic3fG0w==
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.4"
@@ -2315,9 +2320,9 @@ at-least-node@^1.0.0:
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
 aws-sdk@^2.1069.0:
-  version "2.1157.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1157.0.tgz#d00b5ea932439de38e19435b48a6a2b38aa7c805"
-  integrity sha512-30t+zhCECib8uaggd0Du8ifab4vtJjgVvNKxHWTpiLa3deTnM+0K7x3pwM99zxw0gLDxAUet/oURaoPJHwk/5Q==
+  version "2.1162.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1162.0.tgz#e19ff30f255e5c4021eaf02a80ec0a368a4712a0"
+  integrity sha512-tRDAa5GOqSkphVR/Yhc8eyLcV9ZGTgmZ7kY5ODJDMw52Cd/92kXfe6YDoFWFLyeA/z5H9o/2uZ6+3CjU96Ap/g==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -4657,6 +4662,11 @@ ini@^1.3.2, ini@^1.3.4:
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.8.tgz#a29da425b48806f34767a4efce397269af28432c"
   integrity sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
 
+ini@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-3.0.0.tgz#2f6de95006923aa75feed8894f5686165adc08f1"
+  integrity sha512-TxYQaeNW/N8ymDvwAxPyRbhMBtnEwuvaTYpOQkFx1nSeusgezHniEc/l35Vo4iCq/mMiTJbpD7oYxN98hFlfmw==
+
 init-package-json@^2.0.2:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/init-package-json/-/init-package-json-2.0.5.tgz#78b85f3c36014db42d8f32117252504f68022646"
@@ -5905,9 +5915,9 @@ lru-cache@^6.0.0:
     yallist "^4.0.0"
 
 lru-cache@^7.7.1:
-  version "7.10.1"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.10.1.tgz#db577f42a94c168f676b638d15da8fb073448cab"
-  integrity sha512-BQuhQxPuRl79J5zSXRP+uNzPOyZw2oFI9JLRQ80XswSvg21KMKNtQza9eF42rfI/3Z40RvzBdXgziEkudzjo8A==
+  version "7.10.2"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.10.2.tgz#aab494e0768ce94f199ef553ffe0a362f2a58bb9"
+  integrity sha512-9zDbhgmXAUvUMPV81A705K3tVzcPiZL3Bf5/5JC/FjYJlLZ5AJCeqIRFHJqyBppiLosqF+uKB7p8/RDXylqBIw==
 
 make-dir@^2.1.0:
   version "2.1.0"
@@ -5930,9 +5940,9 @@ make-error@1.x, make-error@^1.1.1:
   integrity sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==
 
 make-fetch-happen@^10.0.1:
-  version "10.1.7"
-  resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-10.1.7.tgz#b1402cb3c9fad92b380ff3a863cdae5414a42f76"
-  integrity sha512-J/2xa2+7zlIUKqfyXDCXFpH3ypxO4k3rgkZHPSZkyUYcBT/hM80M3oyKLM/9dVriZFiGeGGS2Ei+0v2zfhqj3Q==
+  version "10.1.8"
+  resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-10.1.8.tgz#3b6e93dd8d8fdb76c0d7bf32e617f37c3108435a"
+  integrity sha512-0ASJbG12Au6+N5I84W+8FhGS6iM8MyzvZady+zaQAu+6IOaESFzCLLD0AR1sAFF3Jufi8bxm586ABN6hWd3k7g==
   dependencies:
     agentkeepalive "^4.2.1"
     cacache "^16.1.0"
@@ -6201,10 +6211,17 @@ minipass@^2.6.0, minipass@^2.9.0:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
 
-minipass@^3.0.0, minipass@^3.1.0, minipass@^3.1.1, minipass@^3.1.3, minipass@^3.1.6:
+minipass@^3.0.0, minipass@^3.1.0, minipass@^3.1.1, minipass@^3.1.3:
   version "3.1.6"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.1.6.tgz#3b8150aa688a711a1521af5e8779c1d3bb4f45ee"
   integrity sha512-rty5kpw9/z8SX9dmxblFA6edItUmwJgMeYDZRrwlIVN27i8gysGbznJwUggw2V/FVqFSDdWy040ZPS811DYAqQ==
+  dependencies:
+    yallist "^4.0.0"
+
+minipass@^3.1.6:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.3.3.tgz#fd1f0e6c06449c10dadda72618b59c00f3d6378d"
+  integrity sha512-N0BOsdFAlNRfmwMhjAsLVWOk7Ljmeb39iqFlsV1At+jqRhSUP9yeof8FyJu4imaJiSUp8vQebWD/guZwGQC8iA==
   dependencies:
     yallist "^4.0.0"
 
@@ -6652,13 +6669,13 @@ object.values@^1.1.5:
     define-properties "^1.1.3"
     es-abstract "^1.19.1"
 
-oclif@2:
-  version "2.6.3"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-2.6.3.tgz#77295d8342a41bfebcf13f7eba260d26ff5d92ef"
-  integrity sha512-t3w1GnDrZ9GnlO2WxdTRIlb5EmfLo7fkcpKo95q+03HoL4GVUNneraVymyUTYEBsvMyWcX8PbVkcMai/HhBydA==
+oclif@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-3.0.1.tgz#f10bd702b4b2b22f849d57951882e0bd8aa9246c"
+  integrity sha512-DZZ53DFbDBai6doGTyVCkYWYBj9u+pXStZf8LMV5ttyr9vY9YL/d8kFpYk5OrUz8PuU81JU2Jo3ZV+4QzZFfug==
   dependencies:
     "@oclif/core" "^1.6.4"
-    "@oclif/plugin-help" "^5.1.11"
+    "@oclif/plugin-help" "^5.1.12"
     "@oclif/plugin-not-found" "^2.3.1"
     "@oclif/plugin-warn-if-update-available" "^2.0.4"
     aws-sdk "^2.1069.0"

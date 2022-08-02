@@ -8,7 +8,6 @@ import { BaseJsonSchema } from '@stackmate/engine/types/schema';
  */
 declare const internalID: unique symbol;
 export type Attribute<T> = T & { [internalID]: T };
-
 export type ExtractBaseAttributeType<T> = T extends Attribute<infer X> ? X : never
 export type AttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> extends never ? never : K]: ExtractBaseAttributeType<T[K]> };
 export type NonAttributesOf<T> = { [K in keyof T as ExtractBaseAttributeType<T[K]> extends never ? K : never]: T[K] };
@@ -18,7 +17,7 @@ export type EntityAttributes = Record<string, any>;
 export type BaseEntity = {
   get attributes(): EntityAttributes;
   set attributes(attrs: EntityAttributes);
-}
+};
 
 export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   prototype: T;
@@ -26,4 +25,15 @@ export interface BaseEntityConstructor<T extends BaseEntity> extends Function {
   schemaId: string;
   schema(this: ConstructorOf<T> | AbstractConstructorOf<T>): BaseJsonSchema;
   factory(this: ConstructorOf<T>, ...args: any[]): T;
+  validate(this: ConstructorOf<T>, options?: AjvOptions): EntityAttributes;
 }
+
+export type AjvOptions = {
+  useDefaults?: boolean;
+  allErrors?: boolean;
+  discriminator?: boolean;
+  removeAdditional?: boolean;
+  coerceTypes?: boolean;
+  allowMatchingProperties?: boolean;
+  strict?: boolean;
+};

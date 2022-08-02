@@ -3,7 +3,11 @@ import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/engine/core/entity';
 import Profile from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import {
+  PROVIDER,
+  SERVICE_TYPE,
+  DEFAULT_PROFILE_NAME,
+} from '@stackmate/engine/constants';
 import {
   CloudStack,
   BaseService,
@@ -202,6 +206,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
       $id: this.schemaId,
       type: 'object',
       additionalProperties: false,
+      required: [],
       properties: {
         provider: {
           type: 'string',
@@ -236,7 +241,6 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
           serviceProfileOverrides: true,
         },
       },
-      required: ['name', 'type'],
       errorMessage: {
         _: 'The service configuration is invalid',
         required: {
@@ -250,7 +254,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
   /**
    * @returns {Object} the attributes to use when populating the initial configuration
    */
-  static config(): ConfigurationOptions<BaseService.Attributes> {
+  static config({ projectName = '', stageName = '' }): ConfigurationOptions<BaseService.Attributes> {
     throw new Error('The config() method is not available for this service');
   }
 }

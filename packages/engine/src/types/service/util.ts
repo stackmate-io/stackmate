@@ -20,7 +20,7 @@ export type VaultCredentialOptions = {
 
 // For the cloud services that are available in the stages configuration,
 // the minimal requirement would be the name and type
-export type CloudServiceConfiguration<T extends BaseService.Attributes> = RequireKeys<Partial<T>, 'name' | 'type'>;
+export type CloudServiceConfiguration<T extends BaseService.Attributes> = RequireKeys<T, 'name' | 'type'>;
 
 // For the required services (eg. state & vault) configuration, the configuration
 // should skip all of the base class's attributes **except** the provider,
@@ -30,7 +30,7 @@ export type CoreServiceConfiguration<T extends BaseService.Attributes> = Partial
 export type ConfigurationOptions<T extends BaseService.Attributes> = CloudServiceConfiguration<T> | CoreServiceConfiguration<T>;
 
 export interface ServiceConstructor extends BaseEntityConstructor<BaseService.Type> {
-  config(opts?: { projectName?: string; stageName?: string }): Partial<BaseService.Attributes>;
+  config(opts?: { projectName?: string; stageName?: string }): ConfigurationOptions<BaseService.Attributes>,
 }
 
 export type AbstractServiceConstructor = AbstractConstructorOf<BaseService.Type>;

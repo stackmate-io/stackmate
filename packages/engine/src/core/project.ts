@@ -19,7 +19,7 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
    * @var {String} schemaId the schema id for the entity
    * @static
    */
-  static schemaId: string = '';  // this is the root schema
+  static schemaId: string = 'StackmateProject';  // this is the root schema
 
   /**
    * @var {String} name the project's name
@@ -195,6 +195,8 @@ class Project extends Entity<StackmateProject.Attributes> implements StackmatePr
     const awsRegions = Object.values(AWS_REGIONS);
 
     return {
+      $id: this.schemaId,
+      $schema: 'http://json-schema.org/draft-07/schema',
       type: 'object',
       properties: {
         name: {

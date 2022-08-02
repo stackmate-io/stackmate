@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
+    "composite": false,
     "paths": {
       "@stackmate/engine/*": [
         "src/*"
