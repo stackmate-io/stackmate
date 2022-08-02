@@ -92,6 +92,12 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
         continue;
       }
 
+      let typeDiscrimination: { [p: string]: BaseJsonSchema } = {};
+
+      if (branch === 'cloudServices') {
+        typeDiscrimination = { type: { const: serviceType } };
+      }
+
       conditions.push({
         if: {
           // The provider is either defined at root level,
@@ -102,15 +108,25 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
               allOf: [
                 {
                   required: ['provider'],
-                  properties: { provider: { const: provider } },
+                  properties: {
+                    ...typeDiscrimination,
+                    provider: { const: provider },
+                  },
                 },
-                getSchemaBranch(branch, { not: { required: ['provider'] } }),
+                // provider at service level is absent
+                getSchemaBranch(branch, {
+                  not: { required: ['provider'] },
+                  properties: typeDiscrimination,
+                }),
               ],
             },
             // Provider is explicitly defined on the service type
             getSchemaBranch(branch, {
               required: ['provider'],
-              properties: { provider: { const: provider } },
+              properties: {
+                ...typeDiscrimination,
+                provider: { const: provider },
+              },
             }),
           ],
         },

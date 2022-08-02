@@ -7,12 +7,12 @@ import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { AjvOptions, EntityAttributes, StackmateProject } from '@stackmate/engine/types';
+import { AjvOptions, EntityAttributes, BaseJsonSchema } from '@stackmate/engine/types';
 import Profile from './profile';
 
-const readSchema = () => {
-  console.debug('Using JSON schema path', JSON_SCHEMA_PATH);
+const ajvInstance: Ajv | null = null;
 
+const readSchema = (): BaseJsonSchema => {
   if (!fs.existsSync(JSON_SCHEMA_PATH)) {
     throw new Error('JSON Schema file not found');
   }
@@ -43,6 +43,10 @@ const getAjv = ({
   allowMatchingProperties = true,
   strict = false,
 }: AjvOptions): Ajv => {
+  if (ajvInstance) {
+    return ajvInstance;
+  }
+
   const ajv = new Ajv({
     useDefaults,
     allErrors,
@@ -130,6 +134,9 @@ const getAjv = ({
     }
   });
 
+  const schema = readSchema();
+  ajv.addSchema(schema);
+
   return ajv;
 };
 
@@ -137,13 +144,9 @@ export const validate = (
   attributes: EntityAttributes, schemaId: string = '', ajvOptions: AjvOptions = {},
 ): EntityAttributes => {
   const ajv = getAjv(ajvOptions);
-  const SCHEMA = readSchema();
-
-  ajv.compile<StackmateProject.Schema>(SCHEMA);
-
   const validAttributes = { ...attributes };
-  const runValidations = ajv.getSchema(schemaId);
 
+  const runValidations = ajv.getSchema(schemaId);
   if (!runValidations) {
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
@@ -151,10 +154,10 @@ export const validate = (
   const isValid = runValidations(attributes);
 
   if (!isValid) {
-    const errors = runValidations.errors;
+    const errors = ajv.errors;
 
     const { inspect } = require('util');
-    console.log(inspect(errors, { depth: 30 }));
+    console.debug(inspect(errors, { depth: 30 }));
 
     throw new Error('oops');
   }

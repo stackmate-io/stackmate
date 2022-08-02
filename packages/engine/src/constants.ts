@@ -36,7 +36,7 @@ export const PROFILES_PATH = path.resolve(__dirname, 'profiles');
 export const CORE_SERVICE_TYPES = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.STATE, SERVICE_TYPE.VAULT];
 export const STORAGE: { [name: string]: string } = { FILE: 'file' } as const;
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
-export const CLOUD_SERVICE_TYPE = omit({ ...SERVICE_TYPE }, 'PROVIDER', 'STATE', 'VAULT');
+export const CLOUD_SERVICE_TYPE = omit({ ...SERVICE_TYPE }, 'STATE', 'VAULT');
 export const CORE_SERVICE_TYPE = omit({ ...SERVICE_TYPE }, ...Object.keys(CLOUD_SERVICE_TYPE));
 export const CORE_SERVICE_SKIPPED_PROPERTIES = ['name', 'type', 'links', 'overrides', 'profile'] as const;
 
