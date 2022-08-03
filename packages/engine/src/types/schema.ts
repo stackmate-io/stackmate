@@ -133,6 +133,7 @@ export type BaseJsonSchema = {
   not?: BaseJsonSchema;
   if?: BaseJsonSchema;
   then?: BaseJsonSchema;
+  else?: BaseJsonSchema;
 
   // Stackmate-specific
   serviceLinks?: boolean;

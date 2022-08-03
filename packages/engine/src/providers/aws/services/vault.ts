@@ -7,8 +7,8 @@ import {
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
 import AwsService from './base';
-import { getRandomString, mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_VAULT_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { getRandomString, mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { DEFAULT_VAULT_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AWS, CloudStack, CoreServiceConfiguration, VaultCredentialOptions } from '@stackmate/engine/types';
 import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
@@ -112,20 +112,10 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
   }
 
   /**
-   * @returns {Object} the attributes to use when populating the initial configuration
-   */
-  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
-    return {
-      provider: PROVIDER.AWS,
-    };
-  }
-
-  /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): AWS.Vault.Schema {
-    return mergeJsonSchemas(
-      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
+    return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
       properties: {
         name: {
@@ -138,6 +128,15 @@ class AwsVault extends AwsService<AWS.Vault.Attributes> implements AWS.Vault.Typ
         },
       },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<AWS.Vault.Attributes> {
+    return {
+      provider: PROVIDER.AWS,
+    };
   }
 }
 

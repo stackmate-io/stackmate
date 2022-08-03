@@ -3,14 +3,15 @@ import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { kebabCase } from 'lodash';
 import {
-  PROVIDER, AWS_REGIONS, ServiceConstructor,
-  ProjectConfiguration, ProviderChoice, ServiceTypeChoice, ServiceRegistry,
+  PROVIDER, AWS_REGIONS, ServiceConstructor, ServiceRegistry, AvailableServiceChoice,
+  ProjectConfiguration, ProviderChoice, ServiceTypeChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import { parseCommaSeparatedString } from '@stackmate/cli/lib/helpers';
+import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import BaseCommand from '@stackmate/cli/core/commands/base';
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
+import ConfigurationFile from '../lib/configuration-file';
 
 class InitCommand extends BaseCommand {
   /**
@@ -25,17 +26,13 @@ class InitCommand extends BaseCommand {
    */
   static flags = {
     ...BaseCommand.flags,
-    services: Flags.string({
-      char: 'w',
-      name: 'with',
-      default: '',
-      multiple: true,
-      required: true,
-      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
-    }),
     name: Flags.string({
       char: 'n',
-      default: kebabCase(CURRENT_DIRECTORY),
+    }),
+    services: Flags.string({
+      char: 'w',
+      default: '',
+      required: true,
     }),
     provider: Flags.string({
       char: 'p',
@@ -57,7 +54,6 @@ class InitCommand extends BaseCommand {
     stages: Flags.string({
       char: 's',
       default: 'production',
-      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
     }),
   };
 
@@ -78,36 +74,38 @@ class InitCommand extends BaseCommand {
     return srv.config();
   }
 
-  @Memoize() get project(): Required<ProjectConfiguration> {
-    const { name, provider, region, /* stages, services */ } = this.parsedFlags;
-    // const [defaultStage, ...otherStages] = stages;
+  @Memoize() get projectName(): string {
+    const { name } = this.parsedFlags;
 
-    return {
-      name,
-      provider,
-      region,
-      state: { provider },
-      secrets: { provider },
-      stages: [],
-      //   {
-      //     name: defaultStage,
-      //     services: services.map(
-      //       (service: ServiceTypeChoice) => this.serviceAttributes(provider, service),
-      //     ),
-      //   },
-      //   ...otherStages.map((stg: string) => ({
-      //     name: stg,
-      //     copy: defaultStage,
-      //   })),
-      // ],
-    };
+    if (name) {
+      return name;
+    }
+
+    const repository = getRepository();
+    if (repository) {
+      return kebabCase(repository)
+    }
+
+    return kebabCase(CURRENT_DIRECTORY);
+  }
+
+  @Memoize() get project(): ProjectConfiguration {
+    const { provider, region, secrets, state, stages, services } = this.parsedFlags;
+
+    return createProject({
+      projectName: this.projectName,
+      defaultProvider: provider,
+      defaultRegion: region,
+      secretsProvider: secrets,
+      stateProvider: state,
+      stageNames: parseCommaSeparatedString(stages),
+      serviceTypes: parseCommaSeparatedString(services) as AvailableServiceChoice[],
+    });
   }
 
   async run(): Promise<any> {
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    this.log('Test', projectFile);
-    // console.log({ projectFile });
-    // console.log({ attrs: this.project });
+    projectFile.write(this.project);
   }
 }
 

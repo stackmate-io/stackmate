@@ -4,6 +4,7 @@ import {
   EntityAttributes,
   BaseEntityConstructor,
   BaseJsonSchema,
+  AjvOptions,
 } from '@stackmate/engine/types';
 
 abstract class Entity<Attrs extends EntityAttributes = {}> implements BaseEntity {
@@ -44,6 +45,16 @@ abstract class Entity<Attrs extends EntityAttributes = {}> implements BaseEntity
   }
 
   /**
+   * Validates the entity's attributes
+   * @param {Object} attributes the attributes to validate
+   * @param {AjvOptions} options any options to pass to AJV
+   * @returns {EntityAttributes}
+   */
+  static validate(attributes: EntityAttributes, options: AjvOptions = {}): EntityAttributes {
+    return validate(attributes, this.schemaId, options);
+  }
+
+  /**
    * Instantiates and validates an entity
    *
    * @param {Object} attributes the entity's attributes
@@ -53,7 +64,7 @@ abstract class Entity<Attrs extends EntityAttributes = {}> implements BaseEntity
     this: BaseEntityConstructor<T>, attributes: EntityAttributes = {}, ...args: any[]
   ): T {
     const entity = new this(...args);
-    entity.attributes = validate(attributes, this.schemaId);
+    entity.attributes = this.validate(attributes)
     return entity;
   }
 }

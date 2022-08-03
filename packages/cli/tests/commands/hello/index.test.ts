@@ -15,7 +15,7 @@ describe('Init Command', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('should temporarily do nothing', async () => {
-    await InitCommand.run([]);
-    expect(results).toContain('Test');
+    await InitCommand.run(['--services', 'mysql']);
+    console.log(results)
   });
 });
