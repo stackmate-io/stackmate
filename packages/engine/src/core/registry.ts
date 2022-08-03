@@ -90,7 +90,7 @@ class ServicesRegistry implements CloudServiceRegistry {
 const registry = new ServicesRegistry();
 
 // Add the local services to the registry
-registry.add(LocalServices.Provider, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
+registry.add(LocalServices.Provider, PROVIDER.LOCAL, SERVICE_TYPE.PROVIDER);
 registry.add(LocalServices.State, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
 
 // Add the AWS services to the registry

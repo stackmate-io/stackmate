@@ -14,6 +14,8 @@ export type CloudServiceAttributes = AWS.MySQL.Attributes
   | AWS.PostgreSQL.Attributes
   | AWS.MariaDB.Attributes;
 
+export type AvailableServiceChoice = Pick<CloudServiceAttributes, 'type'>['type'];
+
 // types for project configuration
 export type VaultServiceConfiguration = CoreServiceConfiguration<AWS.Vault.Attributes>;
 export type StateServiceConfiguration = CoreServiceConfiguration<AWS.State.Attributes>

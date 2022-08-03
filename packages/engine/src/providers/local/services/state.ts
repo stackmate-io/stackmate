@@ -1,9 +1,10 @@
+import { omit } from 'lodash';
 import { LocalBackend } from 'cdktf';
 
 import LocalService from './base';
-import { CORE_SERVICE_SKIPPED_PROPERTIES, DEFAULT_STATE_SERVICE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
+import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { CloudStack, CoreServiceConfiguration, Local } from '@stackmate/engine/types';
-import { mergeJsonSchemas, preventJsonSchemaProperties } from '@stackmate/engine/lib/helpers';
 
 class LocalState extends LocalService<Local.State.Attributes> implements Local.State.Type {
   /**
@@ -87,20 +88,10 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
   }
 
   /**
-   * @returns {Object} the attributes to use when populating the initial configuration
-   */
-  static config(): CoreServiceConfiguration<Local.State.Attributes> {
-    return {
-      provider: PROVIDER.LOCAL,
-    };
-  }
-
-  /**
    * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
    */
   static schema(): Local.State.Schema {
-    return mergeJsonSchemas(
-      preventJsonSchemaProperties(super.schema(), ...CORE_SERVICE_SKIPPED_PROPERTIES), {
+    return mergeJsonSchemas(super.schema(), {
       $id: this.schemaId,
       properties: {
         name: {
@@ -113,6 +104,15 @@ class LocalState extends LocalService<Local.State.Attributes> implements Local.S
         },
       },
     });
+  }
+
+  /**
+   * @returns {Object} the attributes to use when populating the initial configuration
+   */
+  static config(): CoreServiceConfiguration<Local.State.Attributes> {
+    return {
+      ...omit(super.config(), 'type'),
+    };
   }
 }
 
