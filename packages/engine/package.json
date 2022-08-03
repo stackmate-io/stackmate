@@ -32,7 +32,7 @@
     "ajv": "^8.11.0",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
-    "cdktf": "0.11.2",
+    "cdktf": "0.12.0",
     "constructs": "^10.1.42",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21",
@@ -43,7 +43,7 @@
     "jest": "27.5.1",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.1",
-    "tsc-alias": "^1.6.11",
+    "tsc-alias": "^1.7.0",
     "tsconfig-paths": "^4.0.0"
   },
   "engines": {
