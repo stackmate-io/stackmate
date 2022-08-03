@@ -52,7 +52,7 @@
     "jest": "27.5.1",
     "oclif": "^3.0.1",
     "ts-jest": "^28.0.5",
-    "ts-node": "^10.8.1",
+    "ts-node": "^10.9.1",
     "tsc-alias": "^1.7.0",
     "tsconfig-paths": "^4.0.0"
   },
