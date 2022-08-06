@@ -1355,10 +1355,10 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
-constructs@^10.1.64:
-  version "10.1.65"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.65.tgz#383ca30b71e6f47d7f6c66ac1389498a93e16c72"
-  integrity sha512-GTb1xCN4CcUW4UxMvEGqVpmOZsEZYaE3kFN/KHAGTX2eCbMwrJaruEURyB7yttAdkOTwCkmPPDoWhRUMerKDfw==
+constructs@^10.1.67:
+  version "10.1.67"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.67.tgz#8a8e1a30228c0cc9c2af20c777d92f1f28323564"
+  integrity sha512-KhzH9QQmlgRRqwL5/+Arg/e9Nk7XAwYV4kBHNYf9cpRluACdaDSTJV2JPICwioWHSdkHoq8ChtQAgIq5KcNEnA==
 
 convert-source-map@^1.4.0, convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   version "1.8.0"
@@ -3245,10 +3245,10 @@ ts-jest@^28.0.5:
     semver "7.x"
     yargs-parser "^21.0.1"
 
-ts-node@^10.8.1:
-  version "10.8.1"
-  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.8.1.tgz#ea2bd3459011b52699d7e88daa55a45a1af4f066"
-  integrity sha512-Wwsnao4DQoJsN034wePSg5nZiw4YKXf56mPIAeD6wVmiv+RytNSWqc2f3fKvcUoV+Yn2+yocD71VOfQHbmVX4g==
+ts-node@^10.9.1:
+  version "10.9.1"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.9.1.tgz#e73de9102958af9e1f0b168a6ff320e25adcff4b"
+  integrity sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==
   dependencies:
     "@cspotcode/source-map-support" "^0.8.0"
     "@tsconfig/node10" "^1.0.7"
