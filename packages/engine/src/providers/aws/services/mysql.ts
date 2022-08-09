@@ -1,7 +1,7 @@
 import AwsRdsService from '@stackmate/engine/providers/aws/services/rds';
 import { AWS, CloudServiceConfiguration } from '@stackmate/engine/types';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
+import { mergeJsonSchemas } from '@stackmate/engine/lib/helpers';
 import { RDS_DEFAULT_VERSIONS_PER_ENGINE, RDS_ENGINES, RDS_MAJOR_VERSIONS_PER_ENGINE } from '@stackmate/engine/providers/aws/constants';
 
 class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS.MySQL.Type {
@@ -64,10 +64,16 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
    * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.MySQL.Attributes> {
+    console.log({
+      ...super.config({ stageName }),
+      type: SERVICE_TYPE.MYSQL,
+      name: 'mysql-database',
+    });
+
     return {
       ...super.config({ stageName }),
       type: SERVICE_TYPE.MYSQL,
-      name: uniqueIdentifier(SERVICE_TYPE.MYSQL, { stageName }),
+      name: 'mysql-database',
     };
   }
 }

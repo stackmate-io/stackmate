@@ -2,7 +2,7 @@ import { createProject } from '@stackmate/cli/core/generator';
 
 describe('Project generator', () => {
   it('creates a project', () => {
-    createProject({
+    const config = createProject({
       projectName: 'some-project-name',
       defaultProvider: 'aws',
       defaultRegion: 'eu-central-1',
@@ -11,5 +11,7 @@ describe('Project generator', () => {
       stageNames: ['production', 'staging'],
       stateProvider: 'aws',
     });
+
+    console.log(require('util').inspect(config, { depth: 30 }));
   });
 });
