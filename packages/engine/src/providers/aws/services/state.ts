@@ -8,6 +8,9 @@ import { DEFAULT_STATE_SERVICE_NAME, SERVICE_TYPE } from '@stackmate/engine/cons
 import { mergeJsonSchemas, uniqueIdentifier } from '@stackmate/engine/lib/helpers';
 import { AwsServicePrerequisites } from '@stackmate/engine/types/service/aws';
 
+const SUFFIX_HASH_LENGTH = 8;
+const S3_MAX_NAME_LENGTH = 63;
+
 class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Type {
   /**
    * @var {String} schemaId the schema id for the entity
@@ -128,9 +131,15 @@ class AwsState extends AwsService<AWS.State.Attributes> implements AWS.State.Typ
    * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ projectName = '' } = {}): CoreServiceConfiguration<AWS.State.Attributes> {
+    // S3 buckets are of maximum 63 chars, we need to limit the prefix to it,
+    // also providing some room for a unique suffix hash
+    const prefix = `stackmate-state-${projectName}`.substring(
+      0, S3_MAX_NAME_LENGTH - SUFFIX_HASH_LENGTH,
+    );
+
     return {
       ...omit(super.config({ projectName }), 'type'),
-      bucket: uniqueIdentifier('stackmate-state', { projectName }),
+      bucket: uniqueIdentifier(prefix, { projectName }, { length: SUFFIX_HASH_LENGTH }),
     };
   }
 }

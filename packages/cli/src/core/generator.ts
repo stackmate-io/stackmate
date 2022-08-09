@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { camelCase, isEmpty, omitBy } from 'lodash';
+import { isEmpty, omitBy } from 'lodash';
 
 import {
-  AWS_REGIONS, DEFAULT_REGION, ProjectConfiguration, Project, PROVIDER,
-  ServiceRegistry, SERVICE_TYPE, uniqueIdentifier, CloudServiceAttributes,
+  AWS_REGIONS, DEFAULT_REGION, SERVICE_TYPE, PROVIDER,
+  ServiceRegistry, ProjectConfiguration, Project, CloudServiceAttributes,
   StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
   StageConfiguration, BaseService, ConfigurationOptions,
 } from '@stackmate/engine';
@@ -101,7 +101,6 @@ export const createProject = ({
         const ret = {
           ...config,
           type: type,
-          name: camelCase(uniqueIdentifier(type, { stageName })),
         };
 
         return ret as CloudServiceConfiguration<CloudServiceAttributes>;
