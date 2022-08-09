@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
-import { OutputArgs, OutputFlags } from '@oclif/core/lib/interfaces';
+import { FlagInput, OutputArgs } from '@oclif/core/lib/interfaces';
 
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
@@ -43,7 +43,7 @@ abstract class BaseCommand extends Command {
   /**
    * @var {Object} flags the parsed flags
    */
-  protected parsedFlags: OutputFlags<typeof BaseCommand.flags>;
+  protected parsedFlags: FlagInput;
 
   /**
    * @returns {ProjectConfiguration} the project configuration to load from the file
