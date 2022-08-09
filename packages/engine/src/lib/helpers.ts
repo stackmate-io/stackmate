@@ -155,13 +155,17 @@ export const mergeJsonSchemas = <Base extends Partial<T>, T extends Base>(
  *
  * @param {String} prefix any prefix to use
  * @param {object} hashable the hashable object
- * @param {String} separator the separator to use for joining the parts
+ * @param {Object} options any additional options to provide
+ * @param {String} options.separator the separator to use for joining the parts
+ * @param {Number} options.length the length of the token
  * @returns {String} the unique identifier
  */
 export const uniqueIdentifier = (
-  prefix = '', hashable: object = {}, separator: string = '-',
+  prefix = '',
+  hashable: object = {},
+  { separator = '-', length = null }: { separator?: string, length?: number | null } = {},
 ): string => {
-  const uuid = crypto.randomUUID();
-  const hash = hashObject(hashable);
-  return [prefix, hashString(`${uuid}${hash}`)].join(separator);
+  const hash = hashString(`${crypto.randomUUID()}${hashObject(hashable)}`);
+  const token = length ? hash.substring(0, length - 1) : hash;
+  return [prefix, token].join(separator);
 };
