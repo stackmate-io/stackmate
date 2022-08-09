@@ -3028,10 +3028,10 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
 
-constructs@^10.1.67:
-  version "10.1.70"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.70.tgz#b2de1590b755306618b11d085dce042c115efe3a"
-  integrity sha512-6qdvuw4D+Oef7GNwbuXFpGcR/qpOPApZjNOHwV1Tp+bkAWF7lQT+2zXqoCtVr51y5TO8Tpc63Va7yT1UCYkS3A==
+constructs@^10.1.70:
+  version "10.1.71"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.71.tgz#0f76a157862cc9ab8943ef6bf807e36f634552be"
+  integrity sha512-nvjfjxqAkgOXljN+Qb2QndtmpjjrltwQ4d1+DL9OII38VnwtbGSvkpKao3CucXERj2JV8zTDx6leRSMgz6QIjw==
 
 content-type@^1.0.4:
   version "1.0.4"
