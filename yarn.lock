@@ -2712,10 +2712,10 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==
 
-cdktf@0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.12.0.tgz#abd82f4235916318e019f6ae70bc6280984b6a77"
-  integrity sha512-xxI8Ish+80+/Aue9CyHMABiTJqI51ge7SGzcRDP/ytr1hDjWY/48zo4qd+CqgkFb1ZC73a848A9oH15xaIQ/mA==
+cdktf@0.12.1:
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.12.1.tgz#9b08f3a5a8f2dde3570c16bb2d5925b3b7b03a02"
+  integrity sha512-0ytcza16gH/efdhXXBPLpjiBH0+ZpcaZe5aDywUwVTGyKEZbTLXb3xZQyJswr5OAQqyE5uMnGW5K5TNW3qQi6w==
   dependencies:
     archiver "5.3.1"
     json-stable-stringify "^1.0.1"
