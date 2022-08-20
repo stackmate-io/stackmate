@@ -16,3 +16,6 @@ export type FilteredKeys<T, U> = { [P in keyof T]: T[P] extends U ? P : never }[
 export type FilteredProperties<T, U> = { [K in FilteredKeys<T, U>]: T[K]; };
 export type OptionalPropertiesOf<T extends object> = OmitNever<Exclude<{ [K in keyof T]: T extends Record<K, T[K]> ? never : K }, undefined>>;
 export type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+export type Either<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : (T | U);
+export type OneOfType<T extends unknown[]> = T extends [infer P1, infer P2] ? Either<P1, P2> : T extends [infer Only, ...infer Rest] ? Either<Only, OneOfType<Rest>> : never;

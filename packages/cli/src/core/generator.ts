@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { isEmpty, omitBy } from 'lodash';
+import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
   AWS_REGIONS, DEFAULT_REGION, SERVICE_TYPE, PROVIDER,
   ServiceRegistry, ProjectConfiguration, Project, CloudServiceAttributes,
   StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
-  StageConfiguration, BaseService, ConfigurationOptions,
+  StageConfiguration, BaseService, ConfigurationOptions, ServiceTypeChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -35,13 +35,13 @@ export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'c
 // Attributes that are implied in the service configuration and are
 const rootImpliedAttributes = ['provider', 'region'];
 
-const skipImpliedAttributes = (
-  serviceConfig: object,
+const skipImpliedAttributes = <T extends ConfigurationOptions<BaseService.Attributes>>(
+  serviceConfig: T,
   rootConfig: Partial<ProjectConfiguration>,
-) => (
+): T => (
   omitBy(serviceConfig, (value, key) => (
     rootImpliedAttributes.includes(key) && rootConfig[key as keyof typeof rootConfig] === value
-  ))
+  )) as T
 );
 
 export const createProject = ({
@@ -53,8 +53,10 @@ export const createProject = ({
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
-  const validStageNames = stageNames.filter(st => Boolean(st));
-  const validServiceTypes = serviceTypes.filter(st => Boolean(st));
+  const validServiceTypes = serviceTypes.filter(st => Object.values(SERVICE_TYPE).includes(st));
+  const validStageNames = uniq(stageNames.filter(st => Boolean(st)));
+  const serviceTypeCounts = countBy(validServiceTypes, String);
+  const addedServiceTypes: Map<ServiceTypeChoice, number> = new Map();
 
   if (isEmpty(validStageNames)) {
     throw new Error('You need to provide the names for the project’s stages');
@@ -92,18 +94,21 @@ export const createProject = ({
         const baseConfig = ServiceRegistry.get(provider, type).config({
           projectName,
           stageName,
-        });
+        }) as CloudServiceConfiguration<BaseService.Attributes>;
 
-        const config: ConfigurationOptions<BaseService.Attributes> = skipImpliedAttributes(
+        const config = skipImpliedAttributes<CloudServiceConfiguration<BaseService.Attributes>>(
           baseConfig, rootConfig,
         );
 
-        const ret = {
-          ...config,
-          type: type,
-        };
+        let name = config.name;
 
-        return ret as CloudServiceConfiguration<CloudServiceAttributes>;
+        if (serviceTypeCounts[type] > 1) {
+          const count = (addedServiceTypes.get(type) || 0) + 1;
+          addedServiceTypes.set(type, count);
+          name = `${name}-${count}`;
+        }
+
+        return { ...config, name, type } as CloudServiceConfiguration<CloudServiceAttributes>;
       }),
     },
     ...otherStages.map(
