@@ -64,12 +64,6 @@ class AwsMysqlService extends AwsRdsService<AWS.MySQL.Attributes> implements AWS
    * @returns {Object} the attributes to use when populating the initial configuration
    */
   static config({ stageName = '' } = {}): CloudServiceConfiguration<AWS.MySQL.Attributes> {
-    console.log({
-      ...super.config({ stageName }),
-      type: SERVICE_TYPE.MYSQL,
-      name: 'mysql-database',
-    });
-
     return {
       ...super.config({ stageName }),
       type: SERVICE_TYPE.MYSQL,
