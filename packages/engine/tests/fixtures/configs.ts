@@ -1,11 +1,10 @@
-import { ProjectConfiguration } from 'packages/engine/dist';
+import { ProjectConfiguration } from '@stackmate/engine';
 
 export const awsMinimalDatabaseState: ProjectConfiguration = {
   name: 'some-project',
   provider: 'aws',
   region: 'eu-central-1',
   state: {
-    provider: 'aws',
     bucket: 'abc-defg',
   },
   stages: [{
