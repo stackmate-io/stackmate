@@ -9,13 +9,14 @@ export * from './util';
 
 // Generic union types
 export type VaultServiceAttributes = AWS.Vault.Attributes;
-export type StateServiceAttributes = AWS.State.Attributes | Local.State.Attributes;
-export type ProviderSerivceAttributes = AWS.Provider.Attributes | Local.Provider.Attributes;
-export type CloudServiceAttributes = AWS.MySQL.Attributes
-  | AWS.PostgreSQL.Attributes
-  | AWS.MariaDB.Attributes;
-
 export type AvailableServiceChoice = Pick<CloudServiceAttributes, 'type'>['type'];
+export type StateServiceAttributes = OneOfType<[AWS.State.Attributes, Local.State.Attributes]>;
+export type ProviderSerivceAttributes = OneOfType<[AWS.Provider.Attributes, Local.Provider.Attributes]>;
+export type CloudServiceAttributes = OneOfType<[
+  AWS.MySQL.Attributes,
+  AWS.PostgreSQL.Attributes,
+  AWS.MariaDB.Attributes,
+]>;
 
 // types for project configuration
 export type VaultServiceConfiguration = CoreServiceConfiguration<AWS.Vault.Attributes>;
