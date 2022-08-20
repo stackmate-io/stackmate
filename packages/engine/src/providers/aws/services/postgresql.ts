@@ -63,7 +63,7 @@ class AwsPostgreSqlService extends AwsRdsService<AWS.PostgreSQL.Attributes> impl
     return {
       ...super.config({ stageName }),
       type: SERVICE_TYPE.POSTGRESQL,
-      name: 'postgres-database',
+      name: 'postgresql-database',
     };
   }
 }
