@@ -4,6 +4,10 @@ import {
   BaseService, ProjectConfiguration, PROVIDER, SERVICE_TYPE, StackmateProject,
 } from '@stackmate/engine';
 import Project from '@stackmate/engine/core/project';
+import AwsProvider from '@stackmate/engine/providers/aws/services/provider';
+import AwsVault from '@stackmate/engine/providers/aws/services/vault';
+import AwsState from '@stackmate/engine/providers/aws/services/state';
+import AwsMysqlService from '@stackmate/engine/providers/aws/services/mysql';
 
 const projectFixture: ProjectConfiguration = {
   name: 'some-project',
@@ -43,28 +47,28 @@ describe('Project', () => {
       services = Project.factory<StackmateProject.Type>(projectFixture).stage('production');
     });
 
-    it('should feature a provider service for AWS', () => (
-      expect(services.filter(
+    it('should feature a provider service for AWS', () => {
+      expect(services.find(
         srv => srv.type === SERVICE_TYPE.PROVIDER && srv.provider === PROVIDER.AWS,
-      )).not.toBeNull()
-    ));
+      )).toBeInstanceOf(AwsProvider)
+    });
 
     it('should feature a state service', () => (
-      expect(services.filter(
+      expect(services.find(
         srv => srv.type === SERVICE_TYPE.STATE && srv.provider === PROVIDER.AWS,
-      )).not.toBeNull()
+      )).toBeInstanceOf(AwsState)
     ));
 
     it('should feature a vault service', () => (
-      expect(services.filter(
+      expect(services.find(
         srv => srv.type === SERVICE_TYPE.VAULT && srv.provider === PROVIDER.AWS,
-      )).not.toBeNull()
+      )).toBeInstanceOf(AwsVault)
     ));
 
     it('should feature a mysql service, according to the fixture', () => (
-      expect(services.filter(
+      expect(services.find(
         srv => srv.type === SERVICE_TYPE.MYSQL && srv.provider === PROVIDER.AWS,
-      )).not.toBeNull()
+      )).toBeInstanceOf(AwsMysqlService)
     ));
   });
 });
