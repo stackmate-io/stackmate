@@ -22,10 +22,10 @@
 
 
 ## What is Stackmate.io
-[Stackmate.io](https://stackmate.io) is an open source project that aims to make infrastructure as code easy and accessible to everyone. By using a very simple YAML file, you can generate your Terraform configuration and deploy it automatically.
+[Stackmate.io](https://stackmate.io) is an open source project that aims to make infrastructure as code easy and accessible to everyone. By using a very simple YAML file, you can generate your [Terraform](https://www.terraform.io/) configuration and deploy it automatically.
 
 ## Why Stackmate.io
-Stackmate is the perfect solution for the busy professional; by using what you already know, you can deploy your AWS services using sane defaults.
+Stackmate is the perfect solution for the busy professional; by using what you already know, you can deploy your AWS services using sane defaults. It's built on top of [CDK for Terraform](https://www.terraform.io/cdktf) and provides solutions for commonly used cloud services.
 
 ## Get support
 - 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/2)
