@@ -1,21 +1,38 @@
-Stackmate
-=========
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/301123/185978300-f0f8d5e5-e2ce-44e2-b507-be6d8d9a3f4b.png" alt="Stackmate logo" />
+</p>
 
--------
-## Work in progress
-----------
+<p align="center">
+  <a href="https://stackmate.io">
+    🏡 Website
+  </a>
+  &nbsp;
+  <a href="https://github.com/orgs/stackmate-io/projects/2">
+    🧭 Roadmap
+  </a>
+  &nbsp;
+  <a href="https://github.com/stackmate-io/stackmate/issues/new">
+    🐞 Report an issue
+  </a>
+  &nbsp;
+  <a href="https://docs.stackmate.io">
+    📖 Documentation
+  </a>
+</p>
 
-This is the Open Source version of [Stackmate.io](https://stackmate.io)
 
-# About Stackmate
-Stackmate's purpose and focus is providing developers with a low-code tool that manages their infrastructure, without any additional knowledge. 
+## What is Stackmate.io
+[Stackmate.io](https://stackmate.io) is an open source project that aims to make infrastructure as code easy and accessible to everyone. By using a very simple YAML file, you can generate your Terraform configuration and deploy it automatically.
 
-It uses Terraform behind the scenes and abstracts away the HCL part, since the only configuration required is a very small YAML file.
+## Why Stackmate.io
+Stackmate is the perfect solution for the busy professional; by using what you already know, you can deploy your AWS services using sane defaults.
 
-It also embeds some best practices that are known and widely used by Cloud Engineers and SREs.
+## Get support
+- 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/2)
+- 🐞 For bug reports, issues, questions feature requests, [create a GitHub issue in this repository](https://github.com/stackmate-io/stackmate/issues/new)
+- 📖 Our documentation can be found at [docs.stackmate.io](https://docs.stackmate.io)
+- 📧 Contact us at https://stackmate.io/contact/
+- ❤️ Follow us on Twitter at [@stackmate](https://twitter.com/stackmate) and [@falexandrou](https://twitter.com/falexandrou)
 
-# About
-- [Stackmate.io](https://stackmate.io)
-- [@falexandrou on Twitter](https://twitter.com/falexandrou)
-- [@falexandrou on LinkedIn](https://linkedin.com)
-- [falexandrou.com](https://www.falexandrou.com)
+### Disclaimer
+This is work in progress. An outdated Python / Ansible version lives in [this repository](https://github.com/falexandrou/python-ansible-deployer)
