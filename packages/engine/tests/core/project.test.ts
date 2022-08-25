@@ -26,7 +26,6 @@ const projectFixture: ProjectConfiguration = {
   }],
 };
 
-
 describe('Project', () => {
   describe('validate', () => {
     it('validates a correct configuration', () => {
