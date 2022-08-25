@@ -41,7 +41,7 @@
     "@oclif/plugin-plugins": "^2.1.0",
     "@stackmate/engine": "^0.0.0",
     "chalk": "^5.0.1",
-    "ini": "^3.0.0",
+    "ini": "^3.0.1",
     "lodash": "4.17.21",
     "typescript-memoize": "^1.1.0",
     "yaml": "^1.10.2"
