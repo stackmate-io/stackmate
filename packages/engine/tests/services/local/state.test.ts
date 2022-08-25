@@ -1,10 +1,9 @@
 import 'cdktf/lib/testing/adapters/jest';
 
-import Profile from '@stackmate/engine/core/profile';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { stateConfiguration as serviceConfig } from 'tests/engine/fixtures/local';
 import { State as LocalState } from '@stackmate/engine/providers/local';
 import { projectName, stageName } from 'tests/engine/fixtures/generic';
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 describe('LocalState', () => {
   describe('instantiation', () => {
@@ -21,7 +20,7 @@ describe('LocalState', () => {
       expect(service.type).toEqual(SERVICE_TYPE.STATE);
       expect(service.name).toEqual(name);
       expect(service.links).toEqual([]);
-      expect(service.profile).toEqual(Profile.DEFAULT);
+      expect(service.profile).toEqual(DEFAULT_PROFILE_NAME);
       expect(service.overrides).toEqual({});
       expect(service.stageName).toEqual(stageName);
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());

@@ -6,9 +6,9 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
+import { getServiceProfile } from './profile';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
 import { AjvOptions, EntityAttributes, BaseJsonSchema } from '@stackmate/engine/types';
-import Profile from './profile';
 
 const ajvInstance: Ajv | null = null;
 
@@ -101,7 +101,7 @@ const getAjv = ({
       }
 
       try {
-        Profile.get(provider, type, profile);
+        getServiceProfile(provider, type, profile);
         return true;
       } catch (err) {
         return false;
@@ -125,7 +125,7 @@ const getAjv = ({
       }
 
       try {
-        const serviceOverrides = Profile.get(provider, type, profile);
+        const serviceOverrides = getServiceProfile(provider, type, profile);
         const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
         return isEmpty(irrelevantKeys);
       } catch (err) {
