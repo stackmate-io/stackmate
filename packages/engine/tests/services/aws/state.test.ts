@@ -2,12 +2,11 @@ import 'cdktf/lib/testing/adapters/jest';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { snakeCase } from 'lodash';
 
-import Profile from '@stackmate/engine/core/profile';
 import { State as AwsS3State } from '@stackmate/engine/providers/aws';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { projectName, stageName } from 'tests/engine/fixtures/generic';
 import { getServiceRegisterationResults } from 'tests/engine/helpers';
 import { stateConfiguration as serviceConfig } from 'tests/engine/fixtures/aws';
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 describe('AwsS3State', () => {
   describe('instantiation', () => {
@@ -24,7 +23,7 @@ describe('AwsS3State', () => {
       expect(service.region).toEqual(region);
       expect(service.bucket).toEqual(bucket);
       expect(service.links).toEqual([]);
-      expect(service.profile).toEqual(Profile.DEFAULT);
+      expect(service.profile).toEqual(DEFAULT_PROFILE_NAME);
       expect(service.overrides).toEqual({});
       expect(service.identifier).toEqual(`${name}-${stageName}`.toLowerCase());
     });
