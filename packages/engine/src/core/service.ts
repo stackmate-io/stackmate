@@ -2,7 +2,7 @@ import { merge } from 'lodash';
 import { Memoize } from 'typescript-memoize';
 
 import Entity from '@stackmate/engine/core/entity';
-import Profile from '@stackmate/engine/core/profile';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
 import {
   PROVIDER,
   SERVICE_TYPE,
@@ -142,7 +142,7 @@ abstract class Service<Attrs extends EntityAttributes = BaseService.Attributes> 
       return {};
     }
 
-    const profile = Profile.get(this.provider, this.type, this.profile);
+    const profile = getServiceProfile(this.provider, this.type, this.profile);
     return merge(profile, this.overrides) as ResourceProfile;
   }
 
