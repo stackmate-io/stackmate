@@ -2678,13 +2678,14 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==
 
-cdktf@0.12.1:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.12.1.tgz#9b08f3a5a8f2dde3570c16bb2d5925b3b7b03a02"
-  integrity sha512-0ytcza16gH/efdhXXBPLpjiBH0+ZpcaZe5aDywUwVTGyKEZbTLXb3xZQyJswr5OAQqyE5uMnGW5K5TNW3qQi6w==
+cdktf@0.12.2:
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.12.2.tgz#eb09340e423f0dc85c1935b8ba7c9fb571a984ac"
+  integrity sha512-eawyoDZexYsymjXpa0YOBI+blN+eri6QToJifuCkNVUtC5v/grfo2Ev4thvL0zxCKNeS/6XU0CifEz51L6t2QA==
   dependencies:
     archiver "5.3.1"
     json-stable-stringify "^1.0.1"
+    semver "^7.3.7"
 
 chai@^4.3.6:
   version "4.3.6"
@@ -3046,10 +3047,10 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==
 
-constructs@^10.1.83:
-  version "10.1.83"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.83.tgz#45c6f33b20d76b5f3132cf51362a8e267a8504da"
-  integrity sha512-SXwMtiEMgM5Nmzubk2lHXVCHrSLwzNGyz7ZiV5piLUzmzbm7WQl/o5gzSJTUDPbNa/2JcY3lXYeb1AcCM+2GuQ==
+constructs@^10.1.86:
+  version "10.1.90"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.90.tgz#d137be1933ea8904ea84de36d9ddde8224a2c55a"
+  integrity sha512-Ml8OpG1TheafXy4tYW2NhIc9T7gkMK0vQnd3JyhA69+8PUD834EjZznbzyYLaAplwNjn2p32t58bkgzPeLTrRg==
 
 content-type@^1.0.4:
   version "1.0.4"
