@@ -1,302 +1,280 @@
-import { isEmpty } from 'lodash';
+import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
+
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import Registry from '@stackmate/engine/core/registry';
-import Entity from '@stackmate/engine/core/entity';
-import { AWS_REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  BaseServices,
-  CloudProviderChoice,
-  BaseService,
-  ProviderChoice,
-  BaseEntityConstructor,
-  StackmateProject,
-  StageConfiguration,
-} from '@stackmate/engine/types';
+  getCloudServiceConditionals, getCoreServiceConditional, getRegionConditional, getRegionsSchema, JsonSchema,
+} from '@stackmate/engine/core/schema';
+import {
+  CloudServiceAttributes, CloudProviderChoice, CoreServiceAttributes,
+  BaseServiceAttributes, isCoreService, CloudService, CoreService, ProviderChoice,
+} from '@stackmate/engine/core/service';
 
-class Project extends Entity<StackmateProject.Attributes> implements StackmateProject.Type {
-  /**
-   * @var {String} schemaId the schema id for the entity
-   * @static
-   */
-  static schemaId: string = 'StackmateProject';  // this is the root schema
-
-  /**
-   * @var {String} name the project's name
-   */
+/**
+ * @type {StageConfiguration} the configuration for the project stages
+ */
+type StageConfiguration = {
   name: string;
+  services?: CloudServiceAttributes[],
+  copy?: string;
+  skip?: string[];
+};
 
-  /**
-   * @var {String} provider the default cloud provider for the project
-   */
+/**
+ * @type {Project} a project object
+ */
+export type Project = {
+  name: string;
   provider: CloudProviderChoice;
-
-  /**
-   * @var {String} region the default cloud region for the project
-   */
   region: string;
+  stages: StageConfiguration[];
+  secrets: Omit<CoreServiceAttributes, 'type'>;
+  state: Omit<CoreServiceAttributes, 'type'>;
+};
 
-  /**
-   * @var {VaultConfiguration} secrets the vault configuration
-   */
-  secrets: BaseServices.Vault.Attributes;
+/**
+ * @type {ProjectConfiguration} the configuration object that creates a project
+ */
+export type ProjectConfiguration = Partial<Project>;
 
-  /**
-   * @var {BaseServices} state the state configuration
-   */
-  state: BaseServices.State.Attributes;
+/**
+ * Returns the list of services that are managed by the given stage
+ *
+ * @param {ProjectConfiguration} config the configuration object
+ * @param {String} stage the stage to get
+ * @param {String[]} skippedServices any names of services to skip (when copying the stage)
+ * @returns {CloudServiceAttributes[]} the cloud services deployed by this stage
+ */
+export const getStage = (
+  config: ProjectConfiguration, stage: string, skippedServices: string[] = [],
+): CloudServiceAttributes[] => {
+  const { provider: projectProvider, region: projectRegion = null, stages = [] } = config;
 
-  /**
-   * @var {Object} stages the stages declarations
-   */
-  stages: StageConfiguration[] = [];
-
-  /**
-   * Instantiates the services for a stage
-   *
-   * @param {String} stageName the name of the stage in the project to return services for
-   * @returns {Service[]}
-   */
-  stage(stageName: string): BaseService.Type[] {
-    // Instantiate the services
-    const services = this.getCloudServices(stageName);
-
-    return [
-      ...services,
-      ...this.getProviders(services, stageName),
-      this.getState(stageName),
-      this.getVault(stageName),
-    ];
+  if (isEmpty(stages)) {
+    throw new Error('There aren’t any stages defined for the project');
   }
 
-  /**
-   * Returns the state service for the project
-   *
-   * @param {String} stageName the name of the stage to get the state for
-   * @returns {BaseService.Type} the attributes for the state service
-   */
-  protected getState(stageName: string): BaseService.Type {
-    const {
-      provider = this.provider,
-      region = this.region,
-      name = `${this.name}-project-state`,
-      ...attrs
-    } = this.state || {};
+  const stageConfiguration = stages.find(s => s.name === stage);
 
-    return Registry.get(provider, SERVICE_TYPE.STATE).factory(
-      { ...attrs, provider, region, name }, this.name, stageName,
+  if (!stageConfiguration) {
+    throw new Error(`Stage ${stage} is not available in the project`);
+  }
+
+  const {
+    copy: copyFrom = null,
+    skip = [],
+    services: stageServices = [],
+  } = stageConfiguration;
+
+  if (isEmpty(stageServices) && !copyFrom) {
+    throw new Error(
+      `Stage ${stage} is improperly configured. It doesn't provide any services or stage to copy from`,
     );
   }
 
-  /**
-   * Returns the vault service for the project
-   *
-   * @param {String} stageName the name of the stage to get the vault for
-   * @returns {BaseService.Type} the attributes for the vault service
-   */
-  protected getVault(stageName: string): BaseService.Type {
-    const {
-      provider = this.provider,
-      region = this.region,
-      name = `${this.name}-project-vault`,
-      ...attrs
-    } = this.secrets || {};
+  const services = [];
 
-    return Registry.get(provider, SERVICE_TYPE.VAULT).factory(
-      { ...attrs, provider, name, region }, this.name, stageName,
-    );
+  if (copyFrom) {
+    services.push(...getStage(config, copyFrom, skip));
   }
 
-  /**
-   * @param {String} stageName the stage to get the service attributes for
-   * @param {String[]} without the service names to skip
-   * @returns {BaseService.Attributes[]} the attributes for the cloud services
-   */
-  protected getCloudServices(stageName: string, without: string[] = []): BaseService.Type[] {
-    if (isEmpty(this.stages)) {
-      throw new Error('There aren’t any stages defined for the project');
-    }
+  services.push(...stageServices.filter(srv => !skippedServices.includes(srv.name)));
 
-    const stageConfiguration = this.stages.find(s => s.name === stageName);
-    if (!stageConfiguration) {
-      throw new Error(`Stage ${stageName} is not available in the project`);
-    }
+  // Form the cloud services configurations
+  return services.map(srv => defaults({ ...srv }, {
+    provider: projectProvider,
+    region: projectRegion,
+  }));
+};
 
-    const {
-      copy: copyFrom = null,
-      skip: skipServices = [],
-      services: stageServices = [],
-    } = stageConfiguration;
+/**
+ * Returns the configuration for the provider services, given a list of cloud services
+ * We basically extract provider and region from the service list and return relevant configs
+ *
+ * @param {ProjectConfiguration} config the project configuration object
+ * @param {String} stage the stage to get provider configurations for
+ * @param {CloudServiceAttributes[]} services the services to get the provider configurations by
+ * @returns {CoreServiceAttributes[]} the provider configurations
+ */
+export const getProviderConfigurations = (config: ProjectConfiguration, stage: string, services: CloudServiceAttributes[] = []): CoreServiceAttributes[] => {
+  const { provider: projectProvider, region: projectRegion } = config;
 
-    if (isEmpty(stageServices) && !copyFrom) {
-      throw new Error(
-        `Stage ${stageName} is improperly configured. It doesn't provide any services or stage to copy from`,
-      );
-    }
-
-    const services = [];
-
-    if (copyFrom) {
-      services.push(...this.getCloudServices(copyFrom, skipServices));
-    }
-
-    services.push(...stageServices.filter(srv => !without.includes(srv.name)));
-
-    return services.map((srv) => {
-      const {
-        type,
-        provider = this.provider,
-        region = this.region,
-        links = [],
-        profile = DEFAULT_PROFILE_NAME,
-        overrides = {},
-        ...attrs
-      } = srv;
-
-      return Registry.get(provider, type).factory(
-        { ...attrs, type, provider, region, links, profile, overrides }, this.name, stageName,
-      );
-    });
+  if (!projectProvider) {
+    throw new Error('There is no provider set for the project');
   }
 
-  /**
-   * @returns {BaseServices.Provider.Type} the attributes for the provider services
-   */
-  protected getProviders(services: BaseService.Attributes[], stageName: string): BaseService.Type[] {
-    const regions: Map<ProviderChoice, Set<string>> = new Map();
+  const providers = services.map(({ provider = projectProvider, region = projectRegion }) => ({
+    provider,
+    region,
+    name: `provider-${provider}-${region}-${stage}`,
+    type: SERVICE_TYPE.PROVIDER,
+  }));
 
-    // Iterate the services and keep a mapping of provider => unique set of regions
-    services.forEach(({ provider = this.provider, region = this.region }) => {
-      const providerRegions = regions.get(provider) || new Set();
-      providerRegions.add(region);
-      regions.set(provider, providerRegions);
-    });
+  return uniqBy(
+    providers, ({ provider, region }) => (`provider-${provider}-region-${region || 'default'}`),
+  );
+};
 
-    const providers: BaseService.Type[] = [];
+/**
+ * Returns the service configurations for the project and stage
+ *
+ * @param {ProjectConfiguration} config the project configuration object
+ * @param {String} stage the name of the stage to get configurations for
+ * @returns {BaseServiceAttributes[]} the configurations for the services to deploy
+ */
+export const getServiceConfigurations = (
+  config: ProjectConfiguration, stage: string,
+): BaseServiceAttributes[] => {
+  const {
+    provider: projectProvider,
+    region: projectRegion,
+    name: projectName,
+    state: {
+      provider: stateProvider = projectProvider,
+      region: stateRegion = projectRegion,
+    } = {},
+    secrets: {
+      provider: secretsProvider = projectProvider,
+      region: secretsRegion = projectRegion,
+    } = {},
+  } = config;
 
-    regions.forEach((providerRegions, provider) => {
-      providerRegions.forEach((region) => {
-        providers.push(
-          Registry.get(provider, SERVICE_TYPE.PROVIDER).factory(
-            { region, name: `provider-${provider}-${region}-${stageName}` }, this.name, stageName,
-          )
-        );
-      })
-    });
-
-    return providers;
+  if (!projectProvider) {
+    throw new Error('There is no provider set for the project');
   }
 
-  /**
-   * @returns {BaseJsonSchema} provides the JSON schema to validate the entity by
-   */
-  static schema(this: BaseEntityConstructor<StackmateProject.Type>): StackmateProject.Schema {
-    const providers = Object.values(CLOUD_PROVIDER);
-    const awsRegions = Object.values(AWS_REGIONS);
+  const cloudServices = getStage(config, stage);
+  const providers = getProviderConfigurations(config, stage, cloudServices);
 
-    return {
-      $id: this.schemaId,
-      $schema: 'http://json-schema.org/draft-07/schema',
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-          pattern: '[a-zA-Z0-9-_./]+',
-          description: 'The name of the project in a URL-friendly format',
-        },
-        provider: {
-          type: 'string',
-          enum: providers,
-          description: 'The default provider for your cloud services',
-        },
-        region: {
-          type: 'string',
-          description: 'The default region for the provider you have selected',
-        },
-        secrets: {
+  // Predefined / core services => state & secrets
+  const state = {
+    type: SERVICE_TYPE.STATE,
+    provider: (stateProvider || projectProvider),
+    region: (stateRegion || projectRegion),
+    name: `${projectName}-project-state`,
+  };
+
+  const secrets = {
+    type: SERVICE_TYPE.SECRETS,
+    provider: (secretsProvider || projectProvider),
+    region: (secretsRegion || projectRegion),
+    name: `${projectName}-project-secrets-vault`,
+  };
+
+  return [
+    ...providers,
+    ...cloudServices,
+    state,
+    secrets,
+  ];
+};
+
+export const getProjectSchema = (schemaId: string): JsonSchema<Project> => {
+  const providers = Registry.providers();
+  const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
+    Registry.regions.entries()
+  ).map(([provider, regions]) => ([
+    provider, getRegionsSchema(provider, Array.from(regions)),
+  ]));
+
+  return {
+    $id: schemaId,
+    $schema: 'http://json-schema.org/draft-07/schema',
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        pattern: '[a-zA-Z0-9-_./]+',
+        description: 'The name of the project in a URL-friendly format',
+      },
+      provider: {
+        type: 'string',
+        enum: providers,
+        description: 'The default provider for your cloud services',
+      },
+      region: {
+        type: 'string',
+        description: 'The default region for the provider you have selected',
+      },
+      secrets: {
+        type: 'object',
+        description: 'How would you like your services secrets to be stored',
+      },
+      state: {
+        type: 'object',
+        description: 'Where would you like your Terraform state to be stored',
+      },
+      stages: {
+        type: 'array',
+        description: 'The deployment stages for your projects',
+        errorMessage: 'The stages configuration is invalid',
+        minItems: 1,
+        items: {
           type: 'object',
-          description: 'How would you like your services secrets to be stored',
-        },
-        state: {
-          type: 'object',
-          description: 'Where would you like your Terraform state to be stored',
-        },
-        stages: {
-          type: 'array',
-          description: 'The deployment stages for your projects',
-          errorMessage: 'The stages configuration is invalid',
-          minItems: 1,
-          items: {
-            type: 'object',
-            oneOf: [
-              { required: ['name', 'services'] },
-              { required: ['name', 'copy'] },
-            ],
-            properties: {
-              name: {
-                type: 'string',
-              },
-              services: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  additionalProperties: true,
-                  required: ['name', 'type'],
-                  properties: {
-                    name: {
-                      type: 'string',
-                    },
-                    type: {
-                      type: 'string',
-                    },
-                    provider: {
-                      type: 'string',
-                    },
-                  },
+          oneOf: [
+            { required: ['name', 'services'] },
+            { required: ['name', 'copy'] },
+          ],
+          properties: {
+            name: {
+              type: 'string',
+              description: 'The name of the stage',
+            },
+            services: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: true,
+                required: ['name', 'type'],
+                properties: {
+                  name: { type: 'string' },
+                  type: { type: 'string' },
+                  provider: { type: 'string' },
                 },
               },
-              copy: {
-                type: 'string',
-              },
-              skip: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                },
-              },
+            },
+            copy: {
+              type: 'string',
+              description: 'The name of the stage to copy configuration from',
+            },
+            skip: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'The names of services to skip when copying the aforementioned stage',
             },
           },
         },
       },
-      required: ['name', 'provider', 'region', 'stages'],
-      allOf: [{
-        if: { properties: { provider: { const: PROVIDER.AWS } } },
-        then: { properties: { region: { $ref: 'regions/aws' } } },
-      }],
-      $defs: {
-        'regions/aws': {
-          $id: 'regions/aws',
-          type: 'string',
-          enum: awsRegions,
-          errorMessage: `The region is invalid. Available options are: ${awsRegions.join(', ')}`,
-        },
+    },
+    required: ['name', 'provider', 'region', 'stages'],
+    allOf: [
+      ...Registry.items.map(service => (
+        isCoreService(service.type)
+          ? getCoreServiceConditional(service as CoreService)
+          : getCloudServiceConditionals(service as CloudService)
+      )),
+      ...regions.map(
+        ([provider, schema]) => getRegionConditional(provider, schema),
+      ),
+    ],
+    $defs: {
+      ...fromPairs(Registry.items.map(service => [service.schemaId, service.schema])),
+      ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
+    },
+    errorMessage: {
+      _: 'The configuration for the project is invalid',
+      type: 'The configuration should be an object',
+      properties: {
+        name: 'The name for the project only accepts characters, numbers, dashes, underscores, dots and forward slashes',
+        provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
       },
-      errorMessage: {
-        _: 'The configuration for the project is invalid',
-        type: 'The configuration should be an object',
-        properties: {
-          name: 'The name for the project only accepts characters, numbers, dashes, underscores, dots and forward slashes',
-          provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
-        },
-        required: {
-          name: 'You need to set a name for the project',
-          provider: 'You need to set a default provider for the project',
-          region: 'You need to set a default region for the project',
-          stages: 'You should define at least one stage to deploy',
-        },
+      required: {
+        name: 'You need to set a name for the project',
+        provider: 'You need to set a default provider for the project',
+        region: 'You need to set a default region for the project',
+        stages: 'You should define at least one stage to deploy',
       },
-    };
-  }
-}
-
-export default Project;
+    },
+  };
+};
