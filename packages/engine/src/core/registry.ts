@@ -1,104 +1,104 @@
-import { get } from 'lodash';
+import { uniq } from 'lodash';
 
+import { BaseService, BaseServiceAttributes } from '@stackmate/engine/core/service';
+import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
 import * as AwsServices from '@stackmate/engine/providers/aws';
-import * as LocalServices from '@stackmate/engine/providers/local';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import {
-  ProviderChoice,
-  ServiceTypeChoice,
-  ServiceConstructor,
-  TypeServiceMapping,
-  ServiceRegistry as CloudServiceRegistry,
-} from '@stackmate/engine/types';
 
-class ServicesRegistry implements CloudServiceRegistry {
+export type ServicesRegistry = {
+  readonly items: BaseService[];
+  readonly regions: Map<ProviderChoice, Set<string>>;
+  providers(): ProviderChoice[];
+  get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService;
+  ofType(type: ServiceTypeChoice): BaseService[];
+  ofProvider(provider: ProviderChoice): BaseService[];
+  fromConfig(config: BaseServiceAttributes): BaseService;
+};
+
+class Registry implements ServicesRegistry {
   /**
-   * @var {Object} items the items in the registry
+   * @var {BaseServices[]} items the service items in the registry
+   * @readonly
    */
-  readonly items: Map<ProviderChoice, TypeServiceMapping> = new Map();
+  readonly items: BaseService[] = [];
 
   /**
-   * Adds a service to the registry
-   *
-   * @param {ServiceConstructor} classConstructor the service class to add to the registry
-   * @param {ProviderChoice} provider the provider that the service uses
-   * @param {ServiceTypeChoice} type the service's type
+   * @var {Map<ProviderChoice, readonly string[]>} regions the regions available per provider
+   * @readonly
    */
-  add(
-    classConstructor: ServiceConstructor,
-    provider: ProviderChoice,
-    type: ServiceTypeChoice,
-  ): void {
-    const providerServices = this.items.get(provider) || new Map();
-    providerServices.set(type, classConstructor);
-    this.items.set(provider, providerServices)
+  readonly regions: Map<ProviderChoice, Set<string>> = new Map();
+
+  /**
+   * @param {BaseService[]} services any services to initialize the registry with
+   * @constructor
+   */
+  constructor(...services: BaseService[]) {
+    this.items.push(...services);
+
+    // Extract the regions from each service and group them by provider
+    services.forEach(({ provider, regions }) => {
+      const updated = Array.from(this.regions.get(provider) || []).concat(regions || []);
+      this.regions.set(provider, new Set(updated));
+    });
   }
 
   /**
-   * Gets a service from the registry
-   *
-   * @param {ProviderChoice} provider the provider to get the service type for
-   * @param {ServiceTypeChoice} type the type of the service to get
-   * @returns {ServiceConstructor} the service constructor
-   * @throws {Error} if the service is not registered
+   * @returns {ProviderChoice[]} the providers whose services are available in the registry
    */
-  get(provider: ProviderChoice, type: ServiceTypeChoice): ServiceConstructor {
-    const service = this.items.get(provider)?.get(type);
+  providers(): ProviderChoice[] {
+    return uniq(this.items.map(s => s.provider));
+  }
+
+  /**
+   * Returns services of a specific service type
+   *
+   * @param {ServiceTypeChoice} type the type to look services up by
+   * @returns {BaseService[]} ths services returned
+   */
+  ofType(type: ServiceTypeChoice): BaseService[] {
+    return this.items.filter(s => s.type === type);
+  }
+
+  /**
+   * Returns services of a specific service provider
+   *
+   * @param {ProviderChoice} provider the provider to look services up by
+   * @returns {BaseService[]} ths services returned
+   */
+  ofProvider(provider: ProviderChoice): BaseService[] {
+    return this.items.filter(s => s.provider === provider);
+  }
+
+  /**
+   * Finds and returns a service in the registry by provider and service type
+   *
+   * @param {ProviderChoice} provider the provide to find the service by
+   * @param {ServiceTypeChoice} type the type to find the service by
+   * @returns {BaseService} the service returned
+   * @throws {Error} if the service is not found
+   */
+  get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService {
+    const service = this.items.find(s => s.provider === provider && s.type === type);
 
     if (!service) {
-      throw new Error(`Provider ${provider} does not have service ${type} registered`);
+      throw new Error(`Service ${type} for provider ${provider} was not found`);
     }
 
     return service;
   }
 
   /**
-   * Returns whether a service exists for a certain provider
+   * Finds and returns a service in the registry given its configuration
    *
-   * @param {ProviderChoice} provider the provider to check whether the service exists
-   * @param {ServiceTypeChoice} service the service to check whether exists
-   * @returns {Boolean} whether the provider specified has the service requested
+   * @param {BaseServiceAttributes} config the service configuration
+   * @returns {BaseService} the service matching the configuration
+   * @throws {Error} if the service is not found
    */
-  exists(provider: ProviderChoice, service: ServiceTypeChoice): boolean {
-    return Boolean(get(this.items, `${provider}.${service}`, null));
-  }
-
-  /**
-   * Returns the available service types for a provider
-   *
-   * @param {ProviderChoice} provider the provider to get the service types
-   * @returns {ServiceTypeChoice[]} the service types available for the provider
-   */
-  types(provider: ProviderChoice): ServiceTypeChoice[] {
-    return Object.keys(this.items.get(provider) || {}) as Array<ServiceTypeChoice>;
-  }
-
-  /**
-   * Returns the list of available providers
-   *
-   * @returns {ProviderChoice[]} the list of providers available
-   */
-  providers(type: ServiceTypeChoice): ProviderChoice[] {
-    return (Object.keys(this.items) as Array<ProviderChoice>).filter(
-      (provider: ProviderChoice) => (
-        get(this.items, `${provider}.${type}`, null) !== null
-      ),
-    );
+  fromConfig(config: BaseServiceAttributes): BaseService {
+    const { provider, type } = config;
+    return this.get(provider, type);
   }
 }
 
-const registry = new ServicesRegistry();
-
-// Add the local services to the registry
-registry.add(LocalServices.Provider, PROVIDER.LOCAL, SERVICE_TYPE.PROVIDER);
-registry.add(LocalServices.State, PROVIDER.LOCAL, SERVICE_TYPE.STATE);
-
-// Add the AWS services to the registry
-registry.add(AwsServices.Provider, PROVIDER.AWS, SERVICE_TYPE.PROVIDER);
-registry.add(AwsServices.MariaDB, PROVIDER.AWS, SERVICE_TYPE.MARIADB);
-registry.add(AwsServices.MySQL, PROVIDER.AWS, SERVICE_TYPE.MYSQL);
-registry.add(AwsServices.PostgreSQL, PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
-registry.add(AwsServices.Vault, PROVIDER.AWS, SERVICE_TYPE.VAULT);
-registry.add(AwsServices.State, PROVIDER.AWS, SERVICE_TYPE.STATE);
-
-export default registry as ServicesRegistry;
+export default new Registry(
+  ...Object.values(AwsServices),
+) as Registry;
