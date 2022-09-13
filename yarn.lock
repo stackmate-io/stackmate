@@ -3053,10 +3053,10 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==
 
-constructs@^10.1.95:
-  version "10.1.95"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.95.tgz#9169d4c9d9b6d49d92750c6652c13b58fd29cdd7"
-  integrity sha512-1DQi86eF+FoKLfOnR+lNraxZ9cnTdK5EfnbHiR3Nto8kcOdIeaL4TdSJXKhnjs5g562mGUp6FLPBJH27/DNmJw==
+constructs@^10.1.101:
+  version "10.1.101"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.101.tgz#107c03c6e711ec357f9a4ff2a9cedac33d1b6e56"
+  integrity sha512-aaSEs7bcPs8i+ekugb8bnBCKc9t+ef2SjGcQKRo6w/sO+STOjD+AgTddqkaAHTb5/nK1F9SAwpZXpz6bbVy/eQ==
 
 content-type@^1.0.4:
   version "1.0.4"
