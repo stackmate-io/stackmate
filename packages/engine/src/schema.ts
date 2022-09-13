@@ -5,7 +5,7 @@ import Ajv from 'ajv';
 
 import { JSON_SCHEMA_PATH, SERVICE_TYPE } from './constants';
 
-import Project from '@stackmate/engine/core/project';
+import Project from '@stackmate/engine/core/project-obsolete';
 import Registry from '@stackmate/engine/core/registry';
 import { PROVIDER, CLOUD_SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
@@ -13,27 +13,26 @@ import {
   StackmateProject,
   ProviderChoice,
   ServiceTypeChoice,
+  JsonSchema,
 } from '@stackmate/engine/types';
+import { isEmpty } from 'lodash';
 
-type SchemaBranch = 'state' | 'secrets' | 'cloudServices';
+type SchemaBranch = keyof Pick<Project, 'state' | 'secrets' | 'stages'>;
 
 /**
+ * Returns the corresponding JSON schema structure by configuration branch (eg. state or secrets)
+ *
  * @param {SchemaBranch} branch the branch to select
  * @param {BaseJsonSchema} props the properties to assign to the branch
  * @returns {BaseJsonSchema} the schema branch
  */
-const getSchemaBranch = (branch: SchemaBranch, props: BaseJsonSchema): BaseJsonSchema => {
-  if (branch === 'secrets') {
+const getSchemaByBranch = (
+  branch: SchemaBranch, props: JsonSchema<{ secrets: object}>,
+): BaseJsonSchema => {
+  if (branch === 'secrets' || branch === 'state') {
     return {
-      required: ['secrets'],
-      properties: { secrets: props },
-    };
-  }
-
-  if (branch === 'state') {
-    return {
-      required: ['state'],
-      properties: { state: props },
+      required: [branch],
+      properties: { [branch]: props },
     };
   }
 
@@ -65,36 +64,36 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
   definitions: { [key: string]: BaseJsonSchema },
   conditions: BaseJsonSchema[],
 } => {
-  const services = Registry.items.get(provider);
+  const services = Registry.ofProvider(provider);
 
-  if (!services?.size) {
+  if (isEmpty(services)) {
     throw new Error(`There are no services registered for ${provider}`);
   }
 
-  const definitions: { [path: string]: BaseJsonSchema } = {};
-  const conditions: BaseJsonSchema[] = [];
+  const definitions: { [path: string]: JsonSchema } = {};
+  const conditions: JsonSchema[] = [];
 
   // Split the service types into the corresponding branch so that
   // we create additional conditions for the services, state and secrets branches
   const branches: Map<SchemaBranch, ServiceTypeChoice[]> = new Map([
     ['state', [SERVICE_TYPE.STATE]],
     ['secrets', [SERVICE_TYPE.VAULT]],
-    ['cloudServices', Object.values(CLOUD_SERVICE_TYPE) as ServiceTypeChoice[]],
+    ['stages', Object.values(CLOUD_SERVICE_TYPE) as ServiceTypeChoice[]],
   ]);
 
   for (const entry of branches) {
     const [branch, serviceTypes] = entry;
 
     for (const serviceType of serviceTypes) {
-      const serviceClass = services.get(serviceType);
+      const service = services.find(s => s.type === serviceType);
 
-      if (!serviceClass) {
+      if (!service) {
         continue;
       }
 
-      let typeDiscrimination: { [p: string]: BaseJsonSchema } = {};
+      let typeDiscrimination: { [p: string]: JsonSchema } = {};
 
-      if (branch === 'cloudServices') {
+      if (branch === 'stages') {
         typeDiscrimination = { type: { const: serviceType } };
       }
 
@@ -114,14 +113,14 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
                   },
                 },
                 // provider at service level is absent
-                getSchemaBranch(branch, {
+                getSchemaByBranch(branch, {
                   not: { required: ['provider'] },
                   properties: typeDiscrimination,
                 }),
               ],
             },
             // Provider is explicitly defined on the service type
-            getSchemaBranch(branch, {
+            getSchemaByBranch(branch, {
               required: ['provider'],
               properties: {
                 ...typeDiscrimination,
@@ -132,11 +131,11 @@ const getServiceSchemaEntries = (provider: ProviderChoice): {
         },
         // In case this condition is true, we should apply another set of conditions
         // discriminated by service type, referencing the corresponding service's schema
-        then: getSchemaBranch(branch, { $ref: serviceClass.schemaId }),
+        then: getSchemaByBranch(branch, { $ref: service.schemaId }),
       });
 
       // Add the service definition
-      Object.assign(definitions, { [serviceClass.schemaId]: serviceClass.schema() });
+      Object.assign(definitions, { [service.schemaId]: service.schema });
     }
   }
 

@@ -1,3 +1,21 @@
+/**
+ * @link https://github.com/sindresorhus/type-fest/blob/main/source/entry.d.ts
+ * @link https://catchts.com/FP-style
+ */
+type MapKey<BaseType> = BaseType extends Map<infer KeyType, unknown> ? KeyType : never;
+type MapValue<BaseType> = BaseType extends Map<unknown, infer ValueType> ? ValueType : never;
+export type ArrayEntry<BaseType extends readonly unknown[]> = [number, BaseType[number]];
+export type MapEntry<BaseType> = [MapKey<BaseType>, MapValue<BaseType>];
+export type ObjectEntry<BaseType> = [keyof BaseType, BaseType[keyof BaseType]];
+export type SetEntry<BaseType> = BaseType extends Set<infer ItemType> ? [ItemType, ItemType] : never;
+export type Entry<BaseType> =
+  BaseType extends Map<unknown, unknown> ? MapEntry<BaseType>
+  : BaseType extends Set<unknown> ? SetEntry<BaseType>
+  : BaseType extends readonly unknown[] ? ArrayEntry<BaseType>
+  : BaseType extends object ? ObjectEntry<BaseType>
+  : never;
+export type Fn = (a: any) => any;
+export type Obj = Record<string, any>;
 export type ConstructorOf<T> = Function & { new(...args: any[]): T; prototype: T };
 export type FactoryOf<T> = { factory(...args: any[]): T; }
 export type AbstractConstructorOf<T = {}> = abstract new (...args: any[]) => T;
@@ -19,3 +37,8 @@ export type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type Either<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : (T | U);
 export type OneOfType<T extends unknown[]> = T extends [infer P1, infer P2] ? Either<P1, P2> : T extends [infer Only, ...infer Rest] ? Either<Only, OneOfType<Rest>> : never;
+export type Head<T extends any[]> = T extends [infer H, ...infer _] ? H : never;
+export type Last<T extends any[]> = T extends [infer _] ? never : T extends [...infer _, infer Tl] ? Tl : never;
+export type FirstParameterOf<T extends Fn[]> = Head<T> extends Fn ? Head<Parameters<Head<T>>> : never;
+export type LastParameterOf<T extends Fn[]> = Last<T> extends Fn ? Head<Parameters<Last<T>>> : never;
+export type MinMax = { min?: number, max?: number };
