@@ -8,7 +8,7 @@ import addErrors from 'ajv-errors';
 
 import { getServiceProfile } from './profile';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { AjvOptions, EntityAttributes, BaseJsonSchema } from '@stackmate/engine/types';
+// import { AjvOptions, EntityAttributes, BaseJsonSchema } from '@stackmate/engine/types';
 
 const ajvInstance: Ajv | null = null;
 

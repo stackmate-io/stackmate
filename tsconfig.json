@@ -12,6 +12,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
+    "strictFunctionTypes": false,
     "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -21,6 +22,7 @@
     "strict": true,
     "noEmit": false,
     "noEmitOnError": true,
+    "noErrorTruncation": true,
     "removeComments": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
@@ -60,7 +62,7 @@
     "packages/engine/src/**/*",
     "packages/engine/tests/**/*",
     "packages/engine/src/profiles/**/*"
-  ],
+, "packages/engine/tests-obsolete/project.test.ts", "packages/engine/tests-obsolete/local.state.test.ts", "packages/engine/tests-obsolete/rds.test.ts"  ],
   "exclude": [
     "**/node_modules",
     "**/dist"
