@@ -10,19 +10,29 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
+export type Provisions = Record<string, Construct>;
 
+/**
+ * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
+ */
 export type ProvisionHandler = (
-  config: object, stack: Stack, requirements: Record<string, Construct>,
-) => Record<string, Construct>;
+  config: object, stack: Stack, requirements: Provisions,
+) => Provisions;
 
+/**
+ * @type {ServiceAssociation} the configuration object for associating a service with another
+ */
 export type ServiceAssociation = {
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
   as: string,
   where: (config: object, linkedConfig: object) => boolean,
-  handler: (config: object, stack: Stack) => OneOfType<[Construct, Construct[], Record<string, Construct>]>;
+  handler: (config: object, stack: Stack) => OneOfType<[Construct, Construct[], Provisions]>;
 };
 
+/**
+ * @type {ServiceEnvironment} the environment variable required by a service
+ */
 export type ServiceEnvironment = {
   name: string;
   required: boolean;
@@ -69,7 +79,6 @@ export type Service<Setup extends BaseServiceAttributes> = {
 export type CoreService = Service<CoreServiceAttributes>;
 export type CloudService = Service<CloudServiceAttributes>;
 export type BaseService = CoreService | CloudService;
-export type ServiceCollection = Record<ProviderChoice, BaseService>;
 
 /**
  * Returns a base core service (one that cannot be part of a stage)
@@ -79,7 +88,7 @@ export type ServiceCollection = Record<ProviderChoice, BaseService>;
  * @returns {Service<Obj>} the core service
  */
 export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): CoreService => {
-  const schemaId = `/services/${provider}/${type}`;
+  const schemaId = `services/${provider}/${type}`;
   const schema: ServiceSchema<CoreServiceAttributes> = {
     $id: schemaId,
     type: 'object',

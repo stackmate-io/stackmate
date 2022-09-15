@@ -7,7 +7,9 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import { Obj } from '@stackmate/engine/types';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
+import { ServiceEnvironment } from '@stackmate/engine/core/service';
+import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
 const ajvInstance: Ajv | null = null;
 
@@ -165,25 +167,53 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
   });
 
   const schema = readSchemaFile();
-  ajv.addSchema(schema);
+  ajv.addSchema(schema, schema.$id);
 
   return ajv;
 };
 
 /**
+ * Loads the main json schema into ajv
+ *
+ * @param {Ajv} ajv the ajv instance
+ * @param {String} schemaKey the key to use for the ajv schema cache
+ * @param {Object} opts additional options
+ * @param {Boolean} opts.refresh whether to refresh the schema on the ajv instance
+ * @void
+ */
+export const loadJsonSchema = (ajv: Ajv, schemaKey = 'json-schema', { refresh = false } = {}) => {
+  if (ajv.schemas[schemaKey] && !refresh) {
+    return;
+  } else if (refresh) {
+    ajv.removeSchema(schemaKey);
+  }
+
+  ajv.addSchema(readSchemaFile(), schemaKey);
+};
+
+/**
  * Validates an attribute-set against a schema id found in the schema
  *
- * @param {Object} attributes the data to validate
  * @param {String} schemaId the schema id to use for validation
+ * @param {Object} attributes the data to validate
  * @param {AjvOptions} ajvOptions any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
 export const validate = <T extends Obj = {}>(
-  attributes: T, schemaId: string = '', ajvOptions: AjvOptions = {},
+  schemaId: string, attributes: T, ajvOptions: AjvOptions = {},
 ): T => {
-  const ajv = getAjv(ajvOptions);
-  const validAttributes = { ...attributes };
+  if (!schemaId) {
+    throw new Error('A schema ID should be provided');
+  }
 
+  if (isEmpty(attributes)) {
+    throw new Error('A set of validatable attributes needs to be provided');
+  }
+
+  const ajv = getAjv(ajvOptions);
+  loadJsonSchema(ajv);
+
+  const validAttributes = { ...attributes };
   const runValidations = ajv.getSchema(schemaId);
   if (!runValidations) {
     throw new Error(`Invalid schema definition “${schemaId}”`);
@@ -200,3 +230,20 @@ export const validate = <T extends Obj = {}>(
 
   return validAttributes;
 };
+
+/**
+ * Validates an operation's environment variables
+ *
+ * @param {ServiceEnvironment[]} vars the environment variables to validate
+ * @throws {Error} if the environment is not properly set up
+ */
+export const validateEnvironment = (vars: ServiceEnvironment[], env = process.env) => {};
+
+/**
+ * Validates a project configuration
+ *
+ * @returns {Function<Project>} the validated project
+ */
+export const validateProject = () => (config: ProjectConfiguration): Project => (
+  validate(JSON_SCHEMA_ROOT, config) as Project
+);
