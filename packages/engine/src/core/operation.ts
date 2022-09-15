@@ -7,6 +7,7 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
 import { BaseService, BaseServiceAttributes, Provisions, ServiceEnvironment, ServiceScopeChoice } from '@stackmate/engine/core/service';
+import { getServiceProfile } from './profile';
 
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
@@ -26,8 +27,6 @@ export type Operation = {
   readonly provisionables: Provisionable[];
   register(provisionable: Provisionable): void;
   environment(): ServiceEnvironment[];
-  isProvisioned(provisionable: Provisionable['id']): boolean;
-  markProvisioned(provisionable: Provisionable['id'], provisions: Provisions): void;
   process(): object;
 };
 
@@ -100,7 +99,7 @@ class StageOperation implements Operation {
       return;
     }
 
-    const { config, service: { schemaId, handlers, associations = [] } } = provisionable;
+    const { config, service, service: { handlers, associations = [] } } = provisionable;
 
     const registrationHandler = handlers.get(this.scope);
     // Item has no handler for the current scope, bail...
@@ -110,7 +109,7 @@ class StageOperation implements Operation {
     }
 
     // Validate the configuration
-    validate(schemaId, config);
+    validate(service.schemaId, config);
 
     // Start extracting the service's requirements
     const requirements = {};
@@ -155,26 +154,6 @@ class StageOperation implements Operation {
     validateEnvironment(this.environment());
     this.provisionables.forEach(provisionable => this.register(provisionable));
     return this.stack.context.toTerraform();
-  }
-
-  /**
-   * Checks if the ID of a provisionable is registered into the stack
-   *
-   * @param {String} id the id of the provisionable to check
-   * @returns {Boolean} whether the provisionable has been provisioned into the stack
-   */
-  isProvisioned(id: Provisionable['id']): boolean {
-    return this.provisions.has(id);
-  }
-
-  /**
-   * Registers a provisionable and its provisions into the stack
-   *
-   * @param {String} id the provisionable's id
-   * @param {Provisions} provisions the provisions associated
-   */
-  markProvisioned(id: Provisionable['id'], provisions: Provisions): void {
-    this.provisions.set(id, provisions);
   }
 };
 

@@ -1,7 +1,9 @@
 import { join as joinPaths } from 'node:path';
 
+import { merge } from 'lodash';
+
 import { PROFILES_PATH } from '@stackmate/engine/constants';
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
+import { BaseServiceAttributes, ProfilableAttributes, ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
 
 /**
  * Returns the absolute path to the profile file
@@ -39,4 +41,17 @@ export const getServiceProfile = (
   } catch (error) {
     throw new Error(`The profile ${name} was not found in the system`);
   }
+};
+
+/**
+ * Merges the service's requested profile with any overrides
+ *
+ * @param {BaseServiceAttributes & ProfilableAttributes} config the service configuration
+ * @returns {Object} the result of merging the profile with the service's overrides
+ */
+export const getResourcesProfile = <T extends BaseServiceAttributes & ProfilableAttributes>(
+  config: T,
+): object => {
+  const profile = getServiceProfile(config.provider, config.type, config.profile);
+  return merge(profile, config.overrides);
 };

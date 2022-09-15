@@ -35,8 +35,7 @@
     "cdktf": "0.12.2",
     "constructs": "^10.1.95",
     "ip-address": "^8.1.0",
-    "lodash": "^4.17.21",
-    "typescript-memoize": "^1.1.0"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/jest": "^28.1.1",
