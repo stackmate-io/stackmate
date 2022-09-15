@@ -1,7 +1,4 @@
-import { Construct } from 'constructs';
 import { TerraformStack, App as TerraformApp, AppOptions } from 'cdktf';
-
-import { BaseServiceAttributes } from '@stackmate/engine/core/service';
 
 /**
  * @type {Stack} the stage's stack
@@ -11,9 +8,6 @@ export type Stack = {
   readonly context: TerraformStack,
   readonly projectName: string;
   readonly stageName: string;
-  readonly provisions: object[];
-  hasProvisionsFor(a: object): boolean;
-  markProvisioned(a: object): void;
 };
 
 class StageStack implements Stack {
@@ -48,11 +42,6 @@ class StageStack implements Stack {
   readonly stageName: string;
 
   /**
-   * @var {Construct[]}
-   */
-  readonly provisions: Construct[];
-
-  /**
    * @constructor
    * @param {String} projectName the project's name
    * @param {String} stageName the stage's name
@@ -64,24 +53,6 @@ class StageStack implements Stack {
     this.app = new TerraformApp(options);
     this.id = `${this.projectName}/${this.stageName}`;
     this.context = new TerraformStack(this.app, this.id);
-  }
-
-  /**
-   * Returns whether a certain config object has provisions in the stack
-   *
-   * @param {BaseServiceAttributes} config the configuration to check whether we have provisions for
-   * @returns {Boolean} whether a certain config object has provisions in the stack
-   */
-  hasProvisionsFor(config: BaseServiceAttributes): boolean {
-    return true;
-  }
-
-  /**
-   * Marks a configuration object as provisioned
-   *
-   * @param {BaseServiceAttributes} config the configuration to mark as provisioned
-   */
-  markProvisioned(config: BaseServiceAttributes): void {
   }
 }
 

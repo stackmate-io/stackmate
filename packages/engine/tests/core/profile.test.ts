@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert';
 
 import { getProfilePath, getServiceProfile } from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME, PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
+import { DEFAULT_PROFILE_NAME, PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 describe('getProfilePath', () => {
   it('returns the path for a profile', () => {

@@ -1,11 +1,13 @@
 import { pipe } from 'lodash/fp';
 import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import Registry from '@stackmate/engine/core/registry';
+import { validateProject } from '@stackmate/engine/core/validation';
 import {
-  getCloudServiceConditional, getCoreServiceConditional, getRegionConditional, getRegionsSchema, JsonSchema,
+  getCloudServiceConditional, getCoreServiceConditional,
+  getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 import {
   CloudServiceAttributes, CloudProviderChoice, CoreServiceAttributes,
@@ -175,7 +177,7 @@ export const getServiceConfigurations = (stage: string): (config: Project) => Ba
  * @returns {JsonSchema<Project>}
  */
 export const getProjectSchema = (
-  projectSchemaId: string = 'StackmateConfiguration',
+  projectSchemaId: string = JSON_SCHEMA_ROOT,
 ): JsonSchema<Project> => {
   const providers = Registry.providers();
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
@@ -283,14 +285,6 @@ export const getProjectSchema = (
       },
     },
   };
-};
-
-/**
- * Validates a project configuration
- *
- * @returns {Function<Project>} the validated project
- */
-export const validateProject = () => (config: ProjectConfiguration): Project => {
 };
 
 /**
