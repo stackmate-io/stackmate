@@ -11,11 +11,11 @@ export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
 
-type ProvisionHandler = (
+export type ProvisionHandler = (
   config: object, stack: Stack, requirements: Record<string, Construct>,
 ) => Record<string, Construct>;
 
-type ServiceAssociation = {
+export type ServiceAssociation = {
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
   as: string,
@@ -23,7 +23,7 @@ type ServiceAssociation = {
   handler: (config: object, stack: Stack) => OneOfType<[Construct, Construct[], Record<string, Construct>]>;
 };
 
-type ServiceEnvironment = {
+export type ServiceEnvironment = {
   name: string;
   required: boolean;
   description?: string;
@@ -53,7 +53,7 @@ export type CloudServiceAttributes = CoreServiceAttributes & {
 export type BaseServiceAttributes = CoreServiceAttributes | CloudServiceAttributes;
 
 /**
- * @type {Service}
+ * @type {Service} accepts a set of service attributes and returns a Service object
  */
 export type Service<Setup extends BaseServiceAttributes> = {
   provider: ProviderChoice;
