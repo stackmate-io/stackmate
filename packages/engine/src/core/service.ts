@@ -17,7 +17,10 @@ export type ServiceRequirements = Record<string, Provisions>;
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
  */
 export type ProvisionHandler<T extends BaseServiceAttributes = BaseServiceAttributes> = (
-  config: T, stack: Stack, requirements: ServiceRequirements,
+  config: ServiceConfiguration<T>,
+  stack: Stack,
+  requirements: ServiceRequirements,
+  opts?: object,
 ) => Provisions;
 
 /**
@@ -60,6 +63,14 @@ export type CloudServiceAttributes = CoreServiceAttributes & {
  * @type {BaseServiceAttributes} a union of the base service attribute sets
  */
 export type BaseServiceAttributes = CoreServiceAttributes | CloudServiceAttributes;
+
+/**
+ * @type {ServiceConfiguration} the service configuration after it's been parsed
+ */
+export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAttributes> = T & {
+  id: string;
+  name: string;
+};
 
 /**
  * @type {Service} accepts a set of service attributes and returns a Service object
@@ -215,16 +226,15 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * match, using the `handler` function. The `handler` function returns the data to be used
  * as `requirements` when provisioning the service.
  *
- * @param {ServiceTypeChoice} from the (source) service to associate
- * @param {ServiceAssociation} association the association configuration
+ * @param {ServiceAssociation[]} associations the association configurations
  * @see {ServiceAssociation}
  * @returns {Function<Service>}
  */
 export const associate = <C extends BaseServiceAttributes>(
-  from: ServiceTypeChoice, association: Omit<ServiceAssociation, 'from'>,
+  ...associations: ServiceAssociation[]
 ) => <T extends Service<C>>(service: T): T => ({
   ...service,
-  associations: [...service.associations, { from, ...association }],
+  associations: [...service.associations, ...associations],
 });
 
 /**
@@ -299,7 +309,7 @@ export type SizeableAttributes = { size: string };
 /**
  * Adds size support to a service (eg. the database instance size)
  *
- * @param {string[]} sizes the available sizes for the service
+ * @param {String[]} sizes the available sizes for the service
  * @param {String} defaultSize the default size for the service
  * @returns {Function<Service>}
  */
@@ -488,13 +498,14 @@ export type EngineAttributes<T extends string = string> = { engine: T };
 /**
  * Adds engine support to a service (eg. database or cache engine to run)
  *
- * @param {string} engine the engine for the service
+ * @param {String} engine the engine for the service
  * @returns {Function<Service>}
  */
 export const ofEngine = <C extends BaseServiceAttributes>(
-  engine: string,
+  engine: string, isRequired = false,
 ) => withSchema<C, EngineAttributes>({
   type: 'object',
+  required: isRequired ? ['engine'] : [],
   properties: {
     engine: {
       type: 'string',
@@ -513,11 +524,13 @@ export type DatabaseAttributes = { database: string };
 /**
  * Adds engine support to a service (eg. database or cache engine to run)
  *
- * @param {string} engine the engine for the service
  * @returns {Function<Service>}
  */
-export const withDatabase = <C extends BaseServiceAttributes>() => withSchema<C, DatabaseAttributes>({
+export const withDatabase = <C extends BaseServiceAttributes>(
+  isRequired = false,
+) => withSchema<C, DatabaseAttributes>({
   type: 'object',
+  required: isRequired ? ['database'] : [],
   properties: {
     database: {
       type: 'string',

@@ -6,8 +6,10 @@ import { hashObject } from '@stackmate/engine/lib';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
-import { BaseService, BaseServiceAttributes, Provisions, ServiceEnvironment, ServiceScopeChoice } from '@stackmate/engine/core/service';
-import { getServiceProfile } from './profile';
+import {
+  BaseService, BaseServiceAttributes, Provisions,
+  ServiceConfiguration, ServiceEnvironment, ServiceScopeChoice,
+} from '@stackmate/engine/core/service';
 
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
@@ -167,7 +169,7 @@ class StageOperation implements Operation {
  */
 const getOperation = (
   projectName: string, stageName: string, scope: ServiceScopeChoice,
-) => (services: BaseServiceAttributes[]): Operation => {
+) => (services: ServiceConfiguration[]): Operation => {
   const stack = getStack(projectName, stageName);
   return new StageOperation(services, stack, scope);
 };

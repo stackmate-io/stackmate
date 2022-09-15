@@ -16,6 +16,7 @@ import {
   Service, ofEngine, inRegions, multiNode, storable, profilable, withHandler,
   EngineAttributes, RegionalAttributes, SizeableAttributes, VersionableAttributes,
   MultiNodeAttributes, StorableAttributes, ProfilableAttributes, ProvisionHandler,
+  ServiceAssociation, associate,
 } from '@stackmate/engine/core/service';
 
 const engine: RdsEngine = 'postgres';
@@ -46,9 +47,44 @@ const base = getCloudService(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
 export const onDeployment: ProvisionHandler<AwsPostgreSQLAttributes> = (
   config, stack, requirements,
 ) => {
+  /*
+  const { vault, provider } = prerequisites;
+  const { instance, params } = this.resourceProfile;
+  const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
+
+  this.paramGroup = new DbParameterGroup(stack, `${this.identifier}-params`, {
+    ...params,
+    family: this.paramGroupFamily,
+  });
+
+  this.instance = new DbInstance(stack, this.name, {
+    ...instance,
+    allocatedStorage: this.storage,
+    count: this.nodes,
+    enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE.get(this.engine),
+    engine: this.engine,
+    engineVersion: this.version,
+    identifier: this.identifier,
+    instanceClass: this.size,
+    name: this.database,
+    parameterGroupName: this.paramGroup.name,
+    port: this.port,
+    provider: provider.resource,
+    dbSubnetGroupName: `db-subnet-${this.identifier}`,
+    username,
+    password,
+    lifecycle: {
+      createBeforeDestroy: true,
+    },
+  });
+  */
 };
 
+const associations: ServiceAssociation[] = [{
+}];
+
 export const AWSPostgreSQL: Service<AwsPostgreSQLAttributes> = pipe(
+  associate(...associations),
   inRegions(REGIONS, DEFAULT_REGION),
   sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
   versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
