@@ -1,10 +1,18 @@
+import fs from 'node:fs';
 import { merge, uniq } from 'lodash';
 
 import { Obj } from '@stackmate/engine/types';
 import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service';
+import { JSON_SCHEMA_PATH } from '../constants';
 
+/**
+ * @type {SchemaType} the allowed values for the `type` property in JSON schemas
+ */
 type SchemaType = "string" | "number" | "object" | "array" | "boolean" | "null";
 
+/**
+ * @type {JsonSchema<T>} the JSON schema type
+ */
 export type JsonSchema<T = undefined> = {
   $id?: string;
   $ref?: string;
@@ -195,6 +203,17 @@ export const mergeServiceSchemas = <A extends Obj = {}, B extends Obj = {}>(
   };
 };
 
+/**
+ * Every service in the schema, needs a condition which allows for the `provider` and `region`
+ * attributes in the service configuration to be empty and use the project's equivalents.
+ * This function returns the condition required to allow this check
+ *
+ * @param {ProviderChoice} provider service's provider
+ * @param {String} serviceSchemaId service's schema id
+ * @param {JsonSchema} typeDiscrimination type discrimination schema
+ * @param {Function<JsonSchema>} subSchemaGenerator function that generates the service's subschema
+ * @returns {JsonSchema}
+ */
 export const getServiceSchemaCondition = (
   provider: ProviderChoice,
   serviceSchemaId: string,
@@ -237,7 +256,14 @@ export const getServiceSchemaCondition = (
   then: subSchemaGenerator({ $ref: serviceSchemaId }),
 });
 
-export const getCloudServiceConditionals = (service: CloudService): JsonSchema => (
+/**
+ * Returns a conditional schema for a Cloud service which allows the `provider` and `region`
+ * attributes to be empty, then use the ones specified at project level
+ *
+ * @param {CloudService} service the service to get the conditional schema for
+ * @returns {JsonSchema} the conditional schema
+ */
+export const getCloudServiceConditional = (service: CloudService): JsonSchema => (
   getServiceSchemaCondition(
     service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
       required: ['stages'],
@@ -257,6 +283,14 @@ export const getCloudServiceConditionals = (service: CloudService): JsonSchema =
   )
 );
 
+/**
+ * Same with the cloud service schema conditionals, it generates the schema required
+ * for the core services
+ *
+ * @param {CloudService} service the service to get the conditional schema for
+ * @returns {JsonSchema} the conditional schema
+ * @see {getCloudServiceConditional}
+ */
 export const getCoreServiceConditional = (service: CoreService): JsonSchema => (
   getServiceSchemaCondition(
     service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
@@ -266,6 +300,13 @@ export const getCoreServiceConditional = (service: CoreService): JsonSchema => (
   )
 );
 
+/**
+ * Returns the schema for a set of a provider's regions
+ *
+ * @param {ProviderChoice} provider the provider to register the regions for
+ * @param {String[]} regions the regions available for the provider
+ * @returns {JsonSchema} the regions schema
+ */
 export const getRegionsSchema = (
   provider: ProviderChoice, regions: string[],
 ): JsonSchema<string> => ({
@@ -275,6 +316,15 @@ export const getRegionsSchema = (
   errorMessage: `The region is invalid. Available options are: ${regions.join(', ')}`,
 });
 
+/**
+ * Returns a conditional schema for the regions, that allows us to validate different
+ * regions per provider (at project level)
+ *
+ * @param {ProviderChoice} provider the provider associated with the regions
+ * @param {JsonSchema} schema the regions schema definition
+ * @returns {JsonSchema} the conditionals for the regions
+ * @see {getRegionsSchema}
+ */
 export const getRegionConditional = (provider: ProviderChoice, schema: JsonSchema<string>) => {
   if (!schema.$id) {
     throw new Error('The $id property should be defined in the schema');
@@ -284,4 +334,19 @@ export const getRegionConditional = (provider: ProviderChoice, schema: JsonSchem
     if: { properties: { provider: { const: provider } } },
     then: { properties: { region: { $ref: schema.$id } } },
   };
+};
+
+/**
+ * Returns the stored JSON schema file. The schema is generated at build time and is
+ * bundled within the app's distribution files.
+ *
+ * @returns {JsonSchema} the schema
+ */
+export const readSchemaFile = (): JsonSchema<Obj> => {
+  if (!fs.existsSync(JSON_SCHEMA_PATH)) {
+    throw new Error('JSON Schema file not found');
+  }
+
+  const content = fs.readFileSync(JSON_SCHEMA_PATH).toString();
+  return JSON.parse(content);
 };

@@ -1,10 +1,11 @@
+import { pipe } from 'lodash/fp';
 import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import Registry from '@stackmate/engine/core/registry';
 import {
-  getCloudServiceConditionals, getCoreServiceConditional, getRegionConditional, getRegionsSchema, JsonSchema,
+  getCloudServiceConditional, getCoreServiceConditional, getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 import {
   CloudServiceAttributes, CloudProviderChoice, CoreServiceAttributes,
@@ -39,14 +40,14 @@ export type Project = {
 export type ProjectConfiguration = Partial<Project>;
 
 /**
- * Returns the list of services that are managed by the given stage
+ * Returns the list of the cloud services that are managed by the given stage
  *
  * @param {ProjectConfiguration} config the configuration object
  * @param {String} stage the stage to get
  * @param {String[]} skippedServices any names of services to skip (when copying the stage)
  * @returns {CloudServiceAttributes[]} the cloud services deployed by this stage
  */
-export const getStage = (
+export const getCloudServices = (
   config: ProjectConfiguration, stage: string, skippedServices: string[] = [],
 ): CloudServiceAttributes[] => {
   const { provider: projectProvider, region: projectRegion = null, stages = [] } = config;
@@ -76,7 +77,7 @@ export const getStage = (
   const services = [];
 
   if (copyFrom) {
-    services.push(...getStage(config, copyFrom, skip));
+    services.push(...getCloudServices(config, copyFrom, skip));
   }
 
   services.push(...stageServices.filter(srv => !skippedServices.includes(srv.name)));
@@ -119,13 +120,10 @@ export const getProviderConfigurations = (config: ProjectConfiguration, stage: s
 /**
  * Returns the service configurations for the project and stage
  *
- * @param {ProjectConfiguration} config the project configuration object
  * @param {String} stage the name of the stage to get configurations for
- * @returns {BaseServiceAttributes[]} the configurations for the services to deploy
+ * @returns {Function<BaseServiceAttributes[]>} the configurations for the services to deploy
  */
-export const getServiceConfigurations = (
-  config: ProjectConfiguration, stage: string,
-): BaseServiceAttributes[] => {
+export const getServiceConfigurations = (stage: string): (config: Project) => BaseServiceAttributes[] => (config) => {
   const {
     provider: projectProvider,
     region: projectRegion,
@@ -144,7 +142,7 @@ export const getServiceConfigurations = (
     throw new Error('There is no provider set for the project');
   }
 
-  const cloudServices = getStage(config, stage);
+  const cloudServices = getCloudServices(config, stage);
   const providers = getProviderConfigurations(config, stage, cloudServices);
 
   // Predefined / core services => state & secrets
@@ -170,7 +168,15 @@ export const getServiceConfigurations = (
   ];
 };
 
-export const getProjectSchema = (schemaId: string): JsonSchema<Project> => {
+/**
+ * Populates the project schema
+ *
+ * @param {String} projectSchemaId the root (project) schema id
+ * @returns {JsonSchema<Project>}
+ */
+export const getProjectSchema = (
+  projectSchemaId: string = 'StackmateConfiguration',
+): JsonSchema<Project> => {
   const providers = Registry.providers();
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
@@ -179,7 +185,7 @@ export const getProjectSchema = (schemaId: string): JsonSchema<Project> => {
   ]));
 
   return {
-    $id: schemaId,
+    $id: projectSchemaId,
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
     properties: {
@@ -252,7 +258,7 @@ export const getProjectSchema = (schemaId: string): JsonSchema<Project> => {
       ...Registry.items.map(service => (
         isCoreService(service.type)
           ? getCoreServiceConditional(service as CoreService)
-          : getCloudServiceConditionals(service as CloudService)
+          : getCloudServiceConditional(service as CloudService)
       )),
       ...regions.map(
         ([provider, schema]) => getRegionConditional(provider, schema),
@@ -277,4 +283,38 @@ export const getProjectSchema = (schemaId: string): JsonSchema<Project> => {
       },
     },
   };
+};
+
+/**
+ * Validates a project configuration
+ *
+ * @returns {Function<Project>} the validated project
+ */
+export const validateProject = () => (config: ProjectConfiguration): Project => {
+};
+
+/**
+ * Returns the stage's service attributes
+ *
+ * @param {ProjectConfiguration} stage the stage to return the services for
+ * @returns {BaseServiceAttributes[]} the stage's services
+ */
+export const getStageServices = (
+  stage: string,
+): (config: ProjectConfiguration) => BaseServiceAttributes[] => (
+  config: ProjectConfiguration,
+): BaseServiceAttributes[] => pipe(
+  validateProject(),
+  getServiceConfigurations(stage),
+)(config);
+
+/**
+ * Replaces the state of the project with a local one
+ *
+ * @returns {Function<BaseServiceAttributes[]>} the services
+ */
+export const withLocalState = (): (services: BaseServiceAttributes[]) => BaseServiceAttributes[] => (services) => {
+  return services.map(
+    srv => (srv.type === SERVICE_TYPE.STATE ? { ...srv, provider: PROVIDER.LOCAL } : srv),
+  );
 };
