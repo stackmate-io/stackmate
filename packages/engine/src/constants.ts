@@ -29,7 +29,10 @@ export const SERVICE_TYPE = {
   VOLUME: 'volume',
 } as const;
 
+// Json Schema
 export const JSON_SCHEMA_PATH = path.resolve(__dirname, 'stackmate.schema.json');
+export const JSON_SCHEMA_ROOT = 'StackmateProject';
+
 export const PROFILES_PATH = path.resolve(__dirname, 'profiles');
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
 
