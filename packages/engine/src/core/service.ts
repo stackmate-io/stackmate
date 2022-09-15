@@ -2,8 +2,8 @@ import { pipe } from 'lodash/fp';
 import { Construct } from 'constructs';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { OneOfType, Obj, MinMax, ChoiceOf, OneOf } from '@stackmate/engine/types';
-import { CLOUD_PROVIDER, DEFAULT_SERVICE_STORAGE, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Obj, MinMax, ChoiceOf, OneOf } from '@stackmate/engine/types';
+import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
@@ -11,12 +11,13 @@ export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
 export type Provisions = Record<string, Construct>;
+export type ServiceRequirements = Record<string, Provisions>;
 
 /**
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
  */
-export type ProvisionHandler = (
-  config: object, stack: Stack, requirements: Provisions,
+export type ProvisionHandler<T extends BaseServiceAttributes = BaseServiceAttributes> = (
+  config: T, stack: Stack, requirements: ServiceRequirements,
 ) => Provisions;
 
 /**
@@ -27,7 +28,7 @@ export type ServiceAssociation = {
   scope: ServiceScopeChoice,
   as: string,
   where: (config: object, linkedConfig: object) => boolean,
-  handler: (config: object, stack: Stack) => OneOfType<[Construct, Construct[], Provisions]>;
+  handler: (config: object, stack: Stack) => Provisions;
 };
 
 /**
@@ -53,8 +54,6 @@ export type CoreServiceAttributes = {
  */
 export type CloudServiceAttributes = CoreServiceAttributes & {
   name: string;
-  links: string[];
-  overrides: object;
 };
 
 /**
@@ -143,17 +142,6 @@ export const getCloudService = (provider: ProviderChoice, type: ServiceTypeChoic
         pattern: '[a-zA-Z0-9_]+',
         description: 'The name for the service to deploy',
         errorMessage: 'The name for the service should only contain characters, numbers and underscores',
-      },
-      links: {
-        type: 'array',
-        default: [],
-        serviceLinks: true,
-        items: { type: 'string' },
-      },
-      overrides: {
-        type: 'object',
-        default: {},
-        serviceProfileOverrides: true,
       },
     },
   };
@@ -246,7 +234,7 @@ export const associate = <C extends BaseServiceAttributes>(
  * @param {ProvisionHandler} handler the handler that provisions the service
  * @returns {Function<Service>}
  */
-export const onProvision = <C extends BaseServiceAttributes>(
+export const withHandler = <C extends BaseServiceAttributes>(
   scope: ServiceScopeChoice, handler: ProvisionHandler,
 ) => <T extends Service<C>>(service: T): T => {
   if (service.handlers.has(scope)) {
@@ -275,6 +263,11 @@ export const environment = <C extends BaseServiceAttributes>(
 });
 
 /**
+ * @type {RegionalAttributes} region-specific attributes
+ */
+export type RegionalAttributes<T extends string = string> = { region: T };
+
+/**
  * Enhances a service to support regions
  *
  * @param {String[]} regions the regions that the service can be provisioned in
@@ -299,6 +292,11 @@ export const inRegions = <C extends BaseServiceAttributes>(
 );
 
 /**
+ * @type {SizeableAttributes} size attributes
+ */
+export type SizeableAttributes = { size: string };
+
+/**
  * Adds size support to a service (eg. the database instance size)
  *
  * @param {string[]} sizes the available sizes for the service
@@ -320,6 +318,11 @@ export const sizeable = <C extends BaseServiceAttributes>(
 });
 
 /**
+ * @type {StorableAttributes} storage specific attributes
+ */
+export type StorableAttributes = { storage: number };
+
+/**
  * Adds storage support to a service (eg. the database storage size)
  *
  * @param {Number} defaultValue the default value to use for storage
@@ -328,9 +331,9 @@ export const sizeable = <C extends BaseServiceAttributes>(
  * @param {Number} opts.max the maximum size for the service's storage
  * @returns {Function<Service>}
  */
-export const storeable = <C extends BaseServiceAttributes>(
+export const storable = <C extends BaseServiceAttributes>(
   defaultValue = DEFAULT_SERVICE_STORAGE, { min = 1, max = 100_000 }: MinMax = {},
-) => withSchema<C, { storage: number }>({
+) => withSchema<C, StorableAttributes>({
   type: 'object',
   properties: {
     storage: {
@@ -342,6 +345,11 @@ export const storeable = <C extends BaseServiceAttributes>(
     },
   }
 });
+
+/**
+ * @type {ConnectableAttributes} port-specific attributes
+ */
+export type ConnectableAttributes = { port: number };
 
 /**
  * Adds TCP port connection support to a service (eg. the port 3306 for a MySQL database)
@@ -368,6 +376,11 @@ export const connectable = <C extends BaseServiceAttributes>(
 });
 
 /**
+ * @type {MultiNodeAttributes} nodes attributes
+ */
+export type MultiNodeAttributes = { nodes: number };
+
+/**
  * Adds multiple-node support to a service (eg. multiple app server instances)
  *
  * @param {Number} defaultNodes the default number of nodes
@@ -378,7 +391,7 @@ export const connectable = <C extends BaseServiceAttributes>(
  */
 export const multiNode = <C extends BaseServiceAttributes>(
   defaultNodes = 1, { min = 1, max = 10_000 }: MinMax = {},
-) => withSchema<C, { nodes: number }>({
+) => withSchema<C, MultiNodeAttributes>({
   type: 'object',
   properties: {
     nodes: {
@@ -392,15 +405,20 @@ export const multiNode = <C extends BaseServiceAttributes>(
 });
 
 /**
+ * @type {VersionableAttributes} version attributes
+ */
+export type VersionableAttributes = { version: string };
+
+/**
  * Adds version support to a service (eg. database version to run)
  *
- * @param {string} versions the versions available to the service
+ * @param {String} versions the versions available to the service
  * @param {String} defaultVersion the default version for the service
  * @returns {Function<Service>}
  */
 export const versioned = <C extends BaseServiceAttributes>(
   versions: readonly string[], defaultVersion: string,
-) => withSchema<C, { version: string }>({
+) => withSchema<C, VersionableAttributes>({
   type: 'object',
   properties: {
     version: {
@@ -412,6 +430,62 @@ export const versioned = <C extends BaseServiceAttributes>(
 });
 
 /**
+ * @type {Profilable} profile-related attributes
+ */
+export type ProfilableAttributes = { profile: string, overrides: object }
+
+/**
+ * Adds profile support to a service
+ *
+ * @param {String} defaultProfile the profile to use by default
+ * @returns {Function<Service>}
+ */
+export const profilable = <C extends BaseServiceAttributes>(
+  defaultProfile: string = DEFAULT_PROFILE_NAME,
+) => withSchema<C, ProfilableAttributes>({
+  type: 'object',
+  properties: {
+    profile: {
+      type: 'string',
+      default: defaultProfile,
+      serviceProfile: true,
+    },
+    overrides: {
+      type: 'object',
+      default: {},
+      serviceProfileOverrides: true,
+    },
+  }
+});
+
+/**
+ * @type {LinkableAttributes} link attributes
+ */
+export type LinkableAttributes = { links: string[] };
+
+/**
+ * Adds link support to a service (allows it to be linked to other services)
+ *
+ * @returns {Function<Service>}
+ */
+export const linkable = <C extends BaseServiceAttributes>() => withSchema<C, LinkableAttributes>({
+  type: 'object',
+  properties: {
+    links: {
+      type: 'array',
+      default: [],
+      serviceLinks: true,
+      items: { type: 'string' },
+    },
+  }
+});
+
+/**
+ * @type {EngineAttributes} engine attributes
+ */
+export type EngineAttributes<T extends string = string> = { engine: T };
+
+/**
  * Adds engine support to a service (eg. database or cache engine to run)
  *
  * @param {string} engine the engine for the service
@@ -419,7 +493,7 @@ export const versioned = <C extends BaseServiceAttributes>(
  */
 export const ofEngine = <C extends BaseServiceAttributes>(
   engine: string,
-) => withSchema<C, { engine: string }>({
+) => withSchema<C, EngineAttributes>({
   type: 'object',
   properties: {
     engine: {
@@ -427,6 +501,28 @@ export const ofEngine = <C extends BaseServiceAttributes>(
       enum: [engine],
       default: engine,
       errorMessage: `The engine can only be ${engine}`,
+    },
+  }
+});
+
+/**
+ * @type {DatabaseAttributes} database attributes
+ */
+export type DatabaseAttributes = { database: string };
+
+/**
+ * Adds engine support to a service (eg. database or cache engine to run)
+ *
+ * @param {string} engine the engine for the service
+ * @returns {Function<Service>}
+ */
+export const withDatabase = <C extends BaseServiceAttributes>() => withSchema<C, DatabaseAttributes>({
+  type: 'object',
+  properties: {
+    database: {
+      type: 'string',
+      pattern: '[a-z0-9_]+',
+      errorMessage: 'The database property is invalid',
     },
   }
 });
