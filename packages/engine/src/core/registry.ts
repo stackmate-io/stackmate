@@ -1,8 +1,9 @@
 import { uniq } from 'lodash';
 
-import { BaseService, BaseServiceAttributes } from '@stackmate/engine/core/service';
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
 import * as AwsServices from '@stackmate/engine/providers/aws';
+import {
+  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes,
+} from '@stackmate/engine/core/service';
 
 export type ServicesRegistry = {
   readonly items: BaseService[];

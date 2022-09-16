@@ -1,9 +1,8 @@
-import { pipe } from 'lodash/fp';
 import { Construct } from 'constructs';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, MinMax, ChoiceOf, OneOf } from '@stackmate/engine/types';
-import { CLOUD_PROVIDER, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Obj, ChoiceOf, OneOf } from '@stackmate/engine/types';
+import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
@@ -26,12 +25,12 @@ export type ProvisionHandler<T extends BaseServiceAttributes = BaseServiceAttrib
 /**
  * @type {ServiceAssociation} the configuration object for associating a service with another
  */
-export type ServiceAssociation = {
+export type ServiceAssociation<T extends BaseServiceAttributes, U extends BaseServiceAttributes = BaseServiceAttributes> = {
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
   as: string,
-  where: (config: object, linkedConfig: object) => boolean,
-  handler: (config: object, stack: Stack) => Provisions;
+  where: (config: T, linkedConfig: U) => boolean,
+  handler: (config: T, stack: Stack) => Provisions;
 };
 
 /**
@@ -49,7 +48,7 @@ export type ServiceEnvironment = {
 export type CoreServiceAttributes = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  region?: string;
+  // region?: string;
 };
 
 /**
@@ -78,12 +77,11 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
 export type Service<Setup extends BaseServiceAttributes> = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   environment: ServiceEnvironment[];
-  associations: ServiceAssociation[];
+  associations: ServiceAssociation<Setup>[];
 };
 
 export type CoreService = Service<CoreServiceAttributes>;
@@ -231,7 +229,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @returns {Function<Service>}
  */
 export const associate = <C extends BaseServiceAttributes>(
-  ...associations: ServiceAssociation[]
+  ...associations: ServiceAssociation<C>[]
 ) => <T extends Service<C>>(service: T): T => ({
   ...service,
   associations: [...service.associations, ...associations],
@@ -265,277 +263,9 @@ export const withHandler = <C extends BaseServiceAttributes>(
  * @param {Boolean} required whether the variable's presence is required
  * @returns {Function<Service>}
  */
-export const environment = <C extends BaseServiceAttributes>(
+export const withEnvironment = <C extends BaseServiceAttributes>(
   name: string, description: string, required: boolean = false,
 ) => <T extends Service<C>>(service: T): T => ({
   ...service,
   environment: [...service.environment, { name, required, description }],
-});
-
-/**
- * @type {RegionalAttributes} region-specific attributes
- */
-export type RegionalAttributes<T extends string = string> = { region: T };
-
-/**
- * Enhances a service to support regions
- *
- * @param {String[]} regions the regions that the service can be provisioned in
- * @param {String} defaultRegion the default region to provision the service in
- * @returns {Function<Service>}
- */
-export const inRegions = <C extends BaseServiceAttributes>(
-  regions: readonly string[], defaultRegion: string,
-) => pipe(
-  withServiceAttributes({ regions }),
-  withSchema<C, { region: string }>({
-    type: 'object',
-    properties: {
-      region: {
-        type: 'string',
-        enum: regions,
-        default: defaultRegion,
-        errorMessage: `The region is invalid. Available options are: ${regions.join(', ')}`
-      },
-    },
-  }),
-);
-
-/**
- * @type {SizeableAttributes} size attributes
- */
-export type SizeableAttributes = { size: string };
-
-/**
- * Adds size support to a service (eg. the database instance size)
- *
- * @param {String[]} sizes the available sizes for the service
- * @param {String} defaultSize the default size for the service
- * @returns {Function<Service>}
- */
-export const sizeable = <C extends BaseServiceAttributes>(
-  sizes: readonly string[], defaultSize: string,
-) => withSchema<C, { size: string }>({
-  type: 'object',
-  properties: {
-    size: {
-      type: 'string',
-      enum: sizes,
-      default: defaultSize,
-      errorMessage: `The size is invalid. Available options are: ${sizes.join(', ')}`
-    },
-  }
-});
-
-/**
- * @type {StorableAttributes} storage specific attributes
- */
-export type StorableAttributes = { storage: number };
-
-/**
- * Adds storage support to a service (eg. the database storage size)
- *
- * @param {Number} defaultValue the default value to use for storage
- * @param {Object} opts
- * @param {Number} opts.min the minimum size for the service's storage
- * @param {Number} opts.max the maximum size for the service's storage
- * @returns {Function<Service>}
- */
-export const storable = <C extends BaseServiceAttributes>(
-  defaultValue = DEFAULT_SERVICE_STORAGE, { min = 1, max = 100_000 }: MinMax = {},
-) => withSchema<C, StorableAttributes>({
-  type: 'object',
-  properties: {
-    storage: {
-      type: 'number',
-      minimum: min,
-      maximum: max,
-      default: defaultValue,
-      errorMessage: `The storage should be between ${min} and ${max}`,
-    },
-  }
-});
-
-/**
- * @type {ConnectableAttributes} port-specific attributes
- */
-export type ConnectableAttributes = { port: number };
-
-/**
- * Adds TCP port connection support to a service (eg. the port 3306 for a MySQL database)
- *
- * @param {Number} defaultPort the default port that the service accepts connections in
- * @param {Object} opts
- * @param {Number} opts.min the minimum port number
- * @param {Number} opts.max the maximum port number
- * @returns {Function<Service>}
- */
-export const connectable = <C extends BaseServiceAttributes>(
-  defaultPort: number, { min = 1, max = 65_535 }: MinMax = {},
-) => withSchema<C, { port: number }>({
-  type: 'object',
-  properties: {
-    port: {
-      type: 'number',
-      minimum: min,
-      maximum: max,
-      default: defaultPort,
-      errorMessage: `The port should be between ${min} and ${max}`,
-    },
-  }
-});
-
-/**
- * @type {MultiNodeAttributes} nodes attributes
- */
-export type MultiNodeAttributes = { nodes: number };
-
-/**
- * Adds multiple-node support to a service (eg. multiple app server instances)
- *
- * @param {Number} defaultNodes the default number of nodes
- * @param {Object} opts
- * @param {Number} opts.min the minimum number of nodes
- * @param {Number} opts.max the maximum number of nodes
- * @returns {Function<Service>}
- */
-export const multiNode = <C extends BaseServiceAttributes>(
-  defaultNodes = 1, { min = 1, max = 10_000 }: MinMax = {},
-) => withSchema<C, MultiNodeAttributes>({
-  type: 'object',
-  properties: {
-    nodes: {
-      type: 'number',
-      minimum: min,
-      maximum: max,
-      default: defaultNodes,
-      errorMessage: `The nodes should be between ${min} and ${max}`,
-    },
-  }
-});
-
-/**
- * @type {VersionableAttributes} version attributes
- */
-export type VersionableAttributes = { version: string };
-
-/**
- * Adds version support to a service (eg. database version to run)
- *
- * @param {String} versions the versions available to the service
- * @param {String} defaultVersion the default version for the service
- * @returns {Function<Service>}
- */
-export const versioned = <C extends BaseServiceAttributes>(
-  versions: readonly string[], defaultVersion: string,
-) => withSchema<C, VersionableAttributes>({
-  type: 'object',
-  properties: {
-    version: {
-      type: 'string',
-      enum: versions,
-      default: defaultVersion,
-    },
-  }
-});
-
-/**
- * @type {Profilable} profile-related attributes
- */
-export type ProfilableAttributes = { profile: string, overrides: object }
-
-/**
- * Adds profile support to a service
- *
- * @param {String} defaultProfile the profile to use by default
- * @returns {Function<Service>}
- */
-export const profilable = <C extends BaseServiceAttributes>(
-  defaultProfile: string = DEFAULT_PROFILE_NAME,
-) => withSchema<C, ProfilableAttributes>({
-  type: 'object',
-  properties: {
-    profile: {
-      type: 'string',
-      default: defaultProfile,
-      serviceProfile: true,
-    },
-    overrides: {
-      type: 'object',
-      default: {},
-      serviceProfileOverrides: true,
-    },
-  }
-});
-
-/**
- * @type {LinkableAttributes} link attributes
- */
-export type LinkableAttributes = { links: string[] };
-
-/**
- * Adds link support to a service (allows it to be linked to other services)
- *
- * @returns {Function<Service>}
- */
-export const linkable = <C extends BaseServiceAttributes>() => withSchema<C, LinkableAttributes>({
-  type: 'object',
-  properties: {
-    links: {
-      type: 'array',
-      default: [],
-      serviceLinks: true,
-      items: { type: 'string' },
-    },
-  }
-});
-
-/**
- * @type {EngineAttributes} engine attributes
- */
-export type EngineAttributes<T extends string = string> = { engine: T };
-
-/**
- * Adds engine support to a service (eg. database or cache engine to run)
- *
- * @param {String} engine the engine for the service
- * @returns {Function<Service>}
- */
-export const ofEngine = <C extends BaseServiceAttributes>(
-  engine: string, isRequired = false,
-) => withSchema<C, EngineAttributes>({
-  type: 'object',
-  required: isRequired ? ['engine'] : [],
-  properties: {
-    engine: {
-      type: 'string',
-      enum: [engine],
-      default: engine,
-      errorMessage: `The engine can only be ${engine}`,
-    },
-  }
-});
-
-/**
- * @type {DatabaseAttributes} database attributes
- */
-export type DatabaseAttributes = { database: string };
-
-/**
- * Adds engine support to a service (eg. database or cache engine to run)
- *
- * @returns {Function<Service>}
- */
-export const withDatabase = <C extends BaseServiceAttributes>(
-  isRequired = false,
-) => withSchema<C, DatabaseAttributes>({
-  type: 'object',
-  required: isRequired ? ['database'] : [],
-  properties: {
-    database: {
-      type: 'string',
-      pattern: '[a-z0-9_]+',
-      errorMessage: 'The database property is invalid',
-    },
-  }
 });

@@ -12,11 +12,10 @@ import {
   DEFAULT_REGION,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  CloudServiceAttributes, getCloudService, sizeable, versioned, withDatabase,
-  Service, ofEngine, inRegions, multiNode, storable, profilable, withHandler,
-  EngineAttributes, RegionalAttributes, SizeableAttributes, VersionableAttributes,
+  CloudServiceAttributes, getCloudService, versioned, Service, withEngine, withRegions, multiNode, storable, profilable, withHandler,
+  EngineAttributes, RegionalAttributes, VersioningAttributes,
   MultiNodeAttributes, StorableAttributes, ProfilableAttributes, ProvisionHandler,
-  ServiceAssociation, associate,
+  ServiceAssociation, associate, sizeable, SizeableAttributes, withDatabase,
 } from '@stackmate/engine/core/service';
 
 const engine: RdsEngine = 'postgres';
@@ -25,7 +24,7 @@ export type AwsPostgreSQLAttributes = CloudServiceAttributes
   & EngineAttributes<typeof engine>
   & RegionalAttributes<OneOf<typeof REGIONS>>
   & SizeableAttributes
-  & VersionableAttributes
+  & VersioningAttributes
   & MultiNodeAttributes
   & StorableAttributes
   & ProfilableAttributes & {
@@ -80,16 +79,21 @@ export const onDeployment: ProvisionHandler<AwsPostgreSQLAttributes> = (
   */
 };
 
-const associations: ServiceAssociation[] = [{
+const associations: ServiceAssociation<AwsPostgreSQLAttributes>[] = [{
+  from: 'provider',
+  as: 'providerInstance',
+  scope: 'deployable',
+  where: (config, linkedConfig): boolean => {},
+  handler: (config, stack) => {},
 }];
 
 export const AWSPostgreSQL: Service<AwsPostgreSQLAttributes> = pipe(
-  associate(...associations),
-  inRegions(REGIONS, DEFAULT_REGION),
+  // associate(...associations),
+  withRegions(REGIONS, DEFAULT_REGION),
   sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
   versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
   storable(),
-  ofEngine(engine),
+  withEngine(engine),
   multiNode(),
   profilable(),
   withDatabase(),

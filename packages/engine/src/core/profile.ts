@@ -3,7 +3,9 @@ import { join as joinPaths } from 'node:path';
 import { merge } from 'lodash';
 
 import { PROFILES_PATH } from '@stackmate/engine/constants';
-import { BaseServiceAttributes, ProfilableAttributes, ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
+import {
+  BaseServiceAttributes, ProviderChoice, ServiceTypeChoice, ProfilableAttributes,
+} from '@stackmate/engine/core/service';
 
 /**
  * Returns the absolute path to the profile file

@@ -7,8 +7,8 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import { Obj } from '@stackmate/engine/types';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { ServiceEnvironment } from '@stackmate/engine/core/service';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
 const ajvInstance: Ajv | null = null;
