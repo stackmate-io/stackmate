@@ -1,7 +1,8 @@
-import { Construct } from 'constructs';
+import { Dictionary } from 'lodash';
+import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, ChoiceOf, OneOf } from '@stackmate/engine/types';
+import { Obj, ChoiceOf, OneOf, OmitNever, ArrowFunc } from '@stackmate/engine/types';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
@@ -9,28 +10,67 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
-export type Provisions = Record<string, Construct>;
-export type ServiceRequirements = Record<string, Provisions>;
+export type Provisions = Record<string, TerraformResource | TerraformProvider | TerraformDataSource>;
+
+/**
+ * @type {Association}
+ * @private
+ */
+type Association = {
+  from: ServiceTypeChoice,
+  scope: ServiceScopeChoice,
+  handler: (config: Provisionable, stack: Stack) => Provisions,
+  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+};
+
+/**
+ * @type {Provisionable} represents a piece of configuration and service to be deployed
+ */
+export type Provisionable = {
+  id: string;
+  config: BaseServiceAttributes;
+  service: BaseService;
+};
+
+/**
+ * @type {ProvisionAssociationRequirements} extracts a service's requirements from its associations
+ */
+export type ProvisionAssociationRequirements<
+  Associations extends Dictionary<Association>,
+  S extends ServiceScopeChoice,
+> = OmitNever<{
+  [K in keyof Associations]: Associations[K] extends {
+    scope: infer Scope extends ServiceScopeChoice,
+    handler: infer Func extends ArrowFunc, [p: string]: any }
+      ? Scope extends S ? ReturnType<Func> : never
+      : never
+}>;
 
 /**
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
  */
-export type ProvisionHandler<T extends BaseServiceAttributes = BaseServiceAttributes> = (
+export type ProvisionHandler<T extends BaseServiceAttributes, P extends Provisions = Provisions> = (
   config: ServiceConfiguration<T>,
   stack: Stack,
-  requirements: ServiceRequirements,
+  requirements: Dictionary<Provisions>,
   opts?: object,
-) => Provisions;
+) => P;
 
 /**
  * @type {ServiceAssociation} the configuration object for associating a service with another
+ * @param {ServiceTypeChoice}
+ * @param {ServiceScopeChoice}
+ * @param {Provisions}
  */
-export type ServiceAssociation<T extends BaseServiceAttributes, U extends BaseServiceAttributes = BaseServiceAttributes> = {
-  from: ServiceTypeChoice,
-  scope: ServiceScopeChoice,
-  as: string,
-  where: (config: T, linkedConfig: U) => boolean,
-  handler: (config: T, stack: Stack) => Provisions;
+export type ServiceAssociation<
+  S extends ServiceTypeChoice,
+  C extends ServiceScopeChoice,
+  T extends Provisions
+  > = Association & {
+  from: S,
+  scope: C,
+  handler: (config: Provisionable, stack: Stack) => T,
+  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
 };
 
 /**
@@ -48,7 +88,7 @@ export type ServiceEnvironment = {
 export type CoreServiceAttributes = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  // region?: string;
+  region?: string;
 };
 
 /**
@@ -73,15 +113,21 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
 
 /**
  * @type {Service} accepts a set of service attributes and returns a Service object
+ * @param {BaseServiceAttributes}
+ * @param {Associations}
  */
-export type Service<Setup extends BaseServiceAttributes> = {
+export type Service<
+  Setup extends BaseServiceAttributes,
+  Associations extends Dictionary<Association> = {},
+> = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
+  regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
-  handlers: Map<ServiceScopeChoice, ProvisionHandler>;
+  handlers: Map<ServiceScopeChoice, ProvisionHandler<Setup>>;
   environment: ServiceEnvironment[];
-  associations: ServiceAssociation<Setup>[];
+  associations: Associations;
 };
 
 export type CoreService = Service<CoreServiceAttributes>;
@@ -115,6 +161,9 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
         default: type,
         errorMessage: `You have to specify a valid service type, "${type}" is invalid`,
       },
+      region: {
+        type: 'string',
+      },
     },
     errorMessage: {
       _: 'The service configuration is invalid',
@@ -128,7 +177,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
     schemaId,
     handlers: new Map(),
     environment: [],
-    associations: [],
+    associations: {},
   };
 };
 
@@ -269,3 +318,7 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   ...service,
   environment: [...service.environment, { name, required, description }],
 });
+
+export const assertRequirementsSatisfied = () => {
+
+};

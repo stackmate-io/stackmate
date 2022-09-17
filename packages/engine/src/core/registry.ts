@@ -36,7 +36,7 @@ class Registry implements ServicesRegistry {
     this.items.push(...services);
 
     // Extract the regions from each service and group them by provider
-    services.forEach(({ provider, regions }) => {
+    services.forEach(({ provider, regions = [] }) => {
       const updated = Array.from(this.regions.get(provider) || []).concat(regions || []);
       this.regions.set(provider, new Set(updated));
     });

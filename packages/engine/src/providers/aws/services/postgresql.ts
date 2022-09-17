@@ -1,4 +1,5 @@
 import { pipe } from 'lodash/fp';
+import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import { OneOf } from '@stackmate/engine/types';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -12,10 +13,15 @@ import {
   DEFAULT_REGION,
 } from '@stackmate/engine/providers/aws/constants';
 import {
+  AwsProviderAttributes,
+  AwsProviderDeployableProvisions,
+  ProviderProvisionable,
+} from '@stackmate/engine/providers/aws/services/provider';
+import {
   CloudServiceAttributes, getCloudService, versioned, Service, withEngine, withRegions, multiNode, storable, profilable, withHandler,
   EngineAttributes, RegionalAttributes, VersioningAttributes,
   MultiNodeAttributes, StorableAttributes, ProfilableAttributes, ProvisionHandler,
-  ServiceAssociation, associate, sizeable, SizeableAttributes, withDatabase,
+  ServiceAssociation, sizeable, SizeableAttributes, withDatabase, ProvisionAssociationRequirements,
 } from '@stackmate/engine/core/service';
 
 const engine: RdsEngine = 'postgres';
@@ -33,7 +39,34 @@ export type AwsPostgreSQLAttributes = CloudServiceAttributes
   database: string;
 };
 
-const base = getCloudService(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
+export type AWSPostgreSQLDeployableProvisions = {
+  paramGroup: DbParameterGroup
+  dbInstance: DbInstance,
+};
+
+type DatabaseAssociations = {
+  awsProvider: ServiceAssociation<typeof SERVICE_TYPE.PROVIDER, 'deployable', Pick<AwsProviderDeployableProvisions, 'provider'>>,
+};
+
+export type AWSPostgreSQLService = Service<AwsPostgreSQLAttributes, DatabaseAssociations>;
+
+const associations: DatabaseAssociations = {
+  awsProvider: {
+    from: SERVICE_TYPE.PROVIDER,
+    scope: 'deployable',
+    where: (config: AwsPostgreSQLAttributes, linked: AwsProviderAttributes) => (
+      config.provider === linked.provider && config.region === linked.region
+    ),
+    handler: (provider: ProviderProvisionable, stack) => {
+    },
+  },
+  credentials: {},
+  masterCredentials: {},
+};
+
+const base = pipe(
+  // associate<AwsPostgreSQLAttributes>(...associations),
+)(getCloudService(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL));
 
 /**
  * Provisions the service
@@ -43,11 +76,11 @@ const base = getCloudService(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL);
  * @param {ServiceRequirements} requirements the service's requirements
  * @returns {Provisions} the provisions generated
  */
-export const onDeployment: ProvisionHandler<AwsPostgreSQLAttributes> = (
-  config, stack, requirements,
+export const onDeployment: ProvisionHandler<AwsPostgreSQLAttributes, AWSPostgreSQLDeployableProvisions> = (
+  config, stack, requirements: ProvisionAssociationRequirements<DatabaseAssociations, 'deployable'>,
 ) => {
+  const { awsProvider: { provider }  } = requirements;
   /*
-  const { vault, provider } = prerequisites;
   const { instance, params } = this.resourceProfile;
   const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
 
@@ -77,18 +110,11 @@ export const onDeployment: ProvisionHandler<AwsPostgreSQLAttributes> = (
     },
   });
   */
+
+  return { instance: '', paramGroup: '' };
 };
 
-const associations: ServiceAssociation<AwsPostgreSQLAttributes>[] = [{
-  from: 'provider',
-  as: 'providerInstance',
-  scope: 'deployable',
-  where: (config, linkedConfig): boolean => {},
-  handler: (config, stack) => {},
-}];
-
 export const AWSPostgreSQL: Service<AwsPostgreSQLAttributes> = pipe(
-  // associate(...associations),
   withRegions(REGIONS, DEFAULT_REGION),
   sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
   versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
