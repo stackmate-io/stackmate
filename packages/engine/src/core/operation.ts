@@ -7,18 +7,9 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  BaseService, BaseServiceAttributes, Provisions,
+  BaseServiceAttributes, Provisionable, Provisions,
   ServiceConfiguration, ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
-
-/**
- * @type {Provisionable} represents a piece of configuration and service to be deployed
- */
-export type Provisionable = {
-  id: string;
-  config: BaseServiceAttributes;
-  service: BaseService;
-};
 
 /**
  * @type {Operation} an operation that synthesizes the terraform files
@@ -143,6 +134,7 @@ class StageOperation implements Operation {
     });
 
     // Register the current service into the stack and mark as provisioned
+    // assertRequirementsSatisfied();
     const provisions = registrationHandler(config, this.stack, requirements);
     this.provisions.set(provisionable.id, provisions);
   }

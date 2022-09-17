@@ -1,8 +1,9 @@
 import { uniq } from 'lodash';
 
-import { BaseService, BaseServiceAttributes } from '@stackmate/engine/core/service';
-import { ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service';
 import * as AwsServices from '@stackmate/engine/providers/aws';
+import {
+  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes,
+} from '@stackmate/engine/core/service';
 
 export type ServicesRegistry = {
   readonly items: BaseService[];
@@ -35,7 +36,7 @@ class Registry implements ServicesRegistry {
     this.items.push(...services);
 
     // Extract the regions from each service and group them by provider
-    services.forEach(({ provider, regions }) => {
+    services.forEach(({ provider, regions = [] }) => {
       const updated = Array.from(this.regions.get(provider) || []).concat(regions || []);
       this.regions.set(provider, new Set(updated));
     });

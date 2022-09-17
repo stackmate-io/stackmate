@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import { merge, uniq } from 'lodash';
 
 import { Obj } from '@stackmate/engine/types';
+import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
 import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service';
-import { JSON_SCHEMA_PATH } from '../constants';
 
 /**
  * @type {SchemaType} the allowed values for the `type` property in JSON schemas
