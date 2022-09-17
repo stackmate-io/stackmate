@@ -20,6 +20,7 @@ export const withRegions = <C extends BaseServiceAttributes>(
   withServiceAttributes({ regions }),
   withSchema<C, { region: string; }>({
     type: 'object',
+    required: ['region'],
     properties: {
       region: {
         type: 'string',

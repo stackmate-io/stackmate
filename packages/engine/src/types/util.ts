@@ -42,3 +42,4 @@ export type Last<T extends any[]> = T extends [infer _] ? never : T extends [...
 export type FirstParameterOf<T extends Fn[]> = Head<T> extends Fn ? Head<Parameters<Head<T>>> : never;
 export type LastParameterOf<T extends Fn[]> = Last<T> extends Fn ? Head<Parameters<Last<T>>> : never;
 export type MinMax = { min?: number, max?: number };
+export type ArrowFunc = (...args: any[]) => any;
