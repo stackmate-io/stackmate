@@ -92,7 +92,7 @@ class StageOperation implements Operation {
       return;
     }
 
-    const { config, service, service: { handlers, associations = [] } } = provisionable;
+    const { config, service, service: { handlers, associations = {} } } = provisionable;
 
     const registrationHandler = handlers.get(this.scope);
     // Item has no handler for the current scope, bail...
@@ -107,16 +107,17 @@ class StageOperation implements Operation {
     // Start extracting the service's requirements
     const requirements = {};
 
-    associations.filter(
-      // Only keep associations that are meant for the current scope
-      ({ scope: associationScope }) => associationScope === this.scope,
-    ).forEach(assoc => {
+    Object.keys(associations).filter((key) => {
+      const { [key]: { scope: associationScope } } = associations;
+      return associationScope === this.scope;
+    }).forEach(associationName => {
       const {
-        where: isAssociated,
-        handler: associationHandler,
-        from: associatedServiceType,
-        as: associationName,
-      } = assoc;
+        [associationName]: {
+          where: isAssociated,
+          handler: associationHandler,
+          from: associatedServiceType,
+        },
+      } = associations;
 
       // Get the provisionables associated with the current service configuration
       const associatedProvisionables = this.provisionables.filter((linked) => (
@@ -135,7 +136,7 @@ class StageOperation implements Operation {
 
     // Register the current service into the stack and mark as provisioned
     // assertRequirementsSatisfied();
-    const provisions = registrationHandler(config, this.stack, requirements);
+    const provisions = registrationHandler(provisionable, this.stack, requirements);
     this.provisions.set(provisionable.id, provisions);
   }
 

@@ -28,7 +28,7 @@ export type AwsProviderAttributes = CoreServiceAttributes
     type: typeof SERVICE_TYPE.PROVIDER;
   };
 
-export type ProviderProvisionable = {
+export type AwsProviderProvisionable = {
   id: string;
   config: {};
   service: {};
