@@ -1,4 +1,4 @@
-import { pipe } from 'lodash/fp';
+import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import { OneOf } from '@stackmate/engine/types';
@@ -9,9 +9,8 @@ import {
   RDS_INSTANCE_SIZES, RDS_MAJOR_VERSIONS_PER_ENGINE, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  associate,
-  BaseServiceAttributes, CloudServiceAttributes, EngineAttributes, getCloudService, multiNode,
-  MultiNodeAttributes, profilable, ProfilableAttributes, ProvisionAssociationRequirements,
+  associate, BaseServiceAttributes, CloudServiceAttributes, EngineAttributes, getCloudService,
+  multiNode, MultiNodeAttributes, profilable, ProfilableAttributes, ProvisionAssociationRequirements,
   ProvisionHandler, RegionalAttributes, Service, ServiceAssociation, ServiceTypeChoice, sizeable,
   SizeableAttributes, storable, StorableAttributes, versioned, VersioningAttributes, withDatabase,
   withEngine, withHandler, withRegions,
@@ -108,15 +107,16 @@ const associations: DatabaseAssociations = {
   masterCredentials: {},
 };
 
-export const getDatabaseService = <T extends DatabaseAttributes>(
+export const getDatabaseService = (
   type: ServiceTypeChoice, engine: RdsEngine,
-): Service<T> => {
+): AwsDatabaseService<DatabaseAttributes> => {
   const base = pipe(
     associate(associations),
-  )(getCloudService(PROVIDER.AWS, type));
-
-  const service = pipe(
     withRegions(REGIONS, DEFAULT_REGION),
+    withHandler('deployable', onDeployment),
+  )(getCloudService(PROVIDER.AWS, type))
+
+  return pipe(
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
     storable(),
@@ -124,8 +124,12 @@ export const getDatabaseService = <T extends DatabaseAttributes>(
     multiNode(),
     profilable(),
     withDatabase(),
-    withHandler('deployable', onDeployment),
   )(base);
-
-  return service;
 };
+
+let db = getDatabaseService('postgresql', 'postgres');
+let db2: AwsDatabaseService<DatabaseAttributes>;
+db2 = db;
+
+const withR = withRegions(REGIONS, DEFAULT_REGION)(db);
+// withR.associations.
