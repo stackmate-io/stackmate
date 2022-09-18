@@ -1,7 +1,7 @@
 import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import { OneOf } from '@stackmate/engine/lib';
+import { ChoiceOf } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsProviderDeployableProvisions, AwsProviderProvisionable } from '@stackmate/engine/providers/aws/services/provider';
 import {
@@ -11,14 +11,14 @@ import {
 import {
   associate, BaseServiceAttributes, CloudServiceAttributes, EngineAttributes, getCloudService,
   multiNode, MultiNodeAttributes, profilable, ProfilableAttributes, ProvisionAssociationRequirements,
-  ProvisionHandler, RegionalAttributes, Service, ServiceAssociation, ServiceTypeChoice, sizeable,
+  ProvisionHandler, Provisions, RegionalAttributes, Service, ServiceAssociation, ServiceTypeChoice, sizeable,
   SizeableAttributes, storable, StorableAttributes, versioned, VersioningAttributes, withDatabase,
   withEngine, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = CloudServiceAttributes
   & EngineAttributes<RdsEngine>
-  & RegionalAttributes<OneOf<typeof REGIONS>>
+  & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & SizeableAttributes
   & VersioningAttributes
   & MultiNodeAttributes
@@ -100,11 +100,17 @@ const associations: DatabaseAssociations = {
     where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
       config.provider === linked.provider && config.region === linked.region
     ),
-    handler: (provider: AwsProviderProvisionable, stack) => {
-    },
+    handler: (provider: AwsProviderProvisionable, stack): Provisions => {
+      const p = stack.resources(provider.id);
+      return {};
+    }
+    // handler: (provider: AwsProviderProvisionable, stack): Pick<AwsProviderDeployableProvisions, 'kmsKey'> => {
+    //   const resources = stack.resources(provider.id) as AwsProviderDeployableProvisions;
+    //   return pick(resources, 'kmsKey');
+    // },
   },
-  credentials: {},
-  masterCredentials: {},
+  // credentials: {},
+  // masterCredentials: {},
 };
 
 
