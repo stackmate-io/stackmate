@@ -1,4 +1,4 @@
-import { pipe } from 'lodash/fp';
+import pipe from '@bitty/pipe';
 import { isEmpty, uniqBy } from 'lodash';
 
 import Registry from '@stackmate/engine/core/registry';

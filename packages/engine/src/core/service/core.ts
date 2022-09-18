@@ -119,7 +119,7 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
 export type Service<Setup extends BaseServiceAttributes> = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  regions?: readonly string[];
+  regions?: string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
@@ -232,9 +232,9 @@ export const isCoreService = (
  * @param {Partial<Service>} attrs the service attributes to apply
  * @returns {Function<Service>} the updated service
  */
-export const withServiceAttributes = <C extends BaseServiceAttributes>(
-  attrs: Partial<Service<C>>,
-) => <T extends Service<C>>(srv: T): T => ({
+export const withAttributes = <C extends BaseServiceAttributes, Attributes extends Obj = {}>(
+  attrs: Attributes,
+) => <T extends Service<C>>(srv: T): T & Attributes => ({
   ...srv,
   ...attrs,
 });
@@ -274,12 +274,9 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @see {ServiceAssociation}
  * @returns {Function<Service>}
  */
-export const associate = <C extends BaseServiceAttributes>(
-  associations: Dictionary<Association>
-) => <T extends Service<C>>(service: T): T => ({
-  ...service,
-  associations: { ...service.associations, ...associations },
-});
+export const associate = <C extends BaseServiceAttributes, A extends Dictionary<Association>>(
+  associations: A
+) => withAttributes<C, { associations: A }>({ associations });
 
 /**
  * Registers a handler to use when provisioning the service under a specific scope
@@ -316,6 +313,4 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   environment: [...service.environment, { name, required, description }],
 });
 
-export const assertRequirementsSatisfied = () => {
-
-};
+export const assertRequirementsSatisfied = () => {};
