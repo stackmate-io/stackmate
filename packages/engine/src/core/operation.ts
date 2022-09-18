@@ -7,8 +7,8 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  BaseServiceAttributes, Provisionable, Provisions,
-  ServiceConfiguration, ServiceEnvironment, ServiceScopeChoice,
+  BaseServiceAttributes, Provisionable, ServiceConfiguration,
+  ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -40,13 +40,6 @@ class StageOperation implements Operation {
    * @var {Provisionable[]} provisionables the list of provisionable services
    */
   readonly provisionables: Provisionable[];
-
-  /**
-   * @var {Map<Provisionable['id'], Provisions>} provisions map of provisionable id to provisions
-   * @protected
-   * @readonly
-   */
-  protected readonly provisions: Map<Provisionable['id'], Provisions> = new Map();
 
   /**
    * @constructor
@@ -88,7 +81,7 @@ class StageOperation implements Operation {
    */
   register(provisionable: Provisionable): void {
     // Item has already been provisioned, bail...
-    if (this.provisions.has(provisionable.id)) {
+    if (this.stack.isProvisioned(provisionable.id)) {
       return;
     }
 
@@ -137,7 +130,7 @@ class StageOperation implements Operation {
     // Register the current service into the stack and mark as provisioned
     // assertRequirementsSatisfied();
     const provisions = registrationHandler(provisionable, this.stack, requirements);
-    this.provisions.set(provisionable.id, provisions);
+    this.stack.storeResources(provisionable.id, provisions);
   }
 
   /**

@@ -2,14 +2,14 @@ import { Dictionary } from 'lodash';
 import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, ChoiceOf, OneOf, OmitNever, ArrowFunc } from '@stackmate/engine/lib';
+import { Obj, ChoiceOf, OmitNever, ArrowFunc } from '@stackmate/engine/lib';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
-export type ServiceScopeChoice = OneOf<readonly ['deployable', 'preparable', 'destroyable']>;
+export type ServiceScopeChoice = ChoiceOf<readonly ['deployable', 'preparable', 'destroyable']>;
 export type Provisions = Record<string, TerraformResource | TerraformProvider | TerraformDataSource>;
 
 /**

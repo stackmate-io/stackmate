@@ -2,9 +2,9 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 
-import { OneOf } from '@stackmate/engine/lib';
+import { ChoiceOf } from '@stackmate/engine/lib';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { CoreServiceAttributes, RegionalAttributes } from '@stackmate/engine/core/service';
+import { CoreServiceAttributes, Provisionable, RegionalAttributes } from '@stackmate/engine/core/service';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 export type AwsProviderCommonProvisions = {
@@ -22,14 +22,14 @@ export type AwsProviderDestroyableProvisions = AwsProviderCommonProvisions;
 export type AwsProviderPreparableProvisions = AwsProviderCommonProvisions;
 
 export type AwsProviderAttributes = CoreServiceAttributes
-  & RegionalAttributes<OneOf<typeof REGIONS>>
+  & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & {
     provider: typeof PROVIDER.AWS,
     type: typeof SERVICE_TYPE.PROVIDER;
   };
 
-export type AwsProviderProvisionable = {
+export type AwsProviderProvisionable = Provisionable & {
   id: string;
-  config: {};
+  config: AwsProviderAttributes;
   service: {};
 };
