@@ -49,12 +49,12 @@ export type ProvisionAssociationRequirements<
 /**
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
  */
-export type ProvisionHandler<T extends BaseServiceAttributes, P extends Provisions = Provisions> = (
-  config: ServiceConfiguration<T>,
+export type ProvisionHandler = (
+  provisionable: Provisionable,
   stack: Stack,
   requirements: Dictionary<Provisions>,
   opts?: object,
-) => P;
+) => Provisions;
 
 /**
  * @type {ServiceAssociation} the configuration object for associating a service with another
@@ -116,18 +116,15 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
  * @param {BaseServiceAttributes}
  * @param {Associations}
  */
-export type Service<
-  Setup extends BaseServiceAttributes,
-  Associations extends Dictionary<Association> = {},
-> = {
+export type Service<Setup extends BaseServiceAttributes> = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
   regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
-  handlers: Map<ServiceScopeChoice, ProvisionHandler<Setup>>;
+  handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   environment: ServiceEnvironment[];
-  associations: Associations;
+  associations: Dictionary<Association>;
 };
 
 export type CoreService = Service<CoreServiceAttributes>;
@@ -278,10 +275,10 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @returns {Function<Service>}
  */
 export const associate = <C extends BaseServiceAttributes>(
-  ...associations: ServiceAssociation<C>[]
+  associations: Dictionary<Association>
 ) => <T extends Service<C>>(service: T): T => ({
   ...service,
-  associations: [...service.associations, ...associations],
+  associations: { ...service.associations, ...associations },
 });
 
 /**
