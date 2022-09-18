@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { merge, uniq } from 'lodash';
 
-import { Obj, RequireKeys } from '@stackmate/engine/types';
+import { Obj, RequireKeys } from '@stackmate/engine/lib';
 import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
 import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service/core';
 
