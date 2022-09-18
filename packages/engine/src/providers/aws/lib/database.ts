@@ -1,7 +1,7 @@
 import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
-import { OneOf } from '@stackmate/engine/types';
+import { OneOf } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsProviderDeployableProvisions, AwsProviderProvisionable } from '@stackmate/engine/providers/aws/services/provider';
 import {
@@ -107,6 +107,13 @@ const associations: DatabaseAssociations = {
   masterCredentials: {},
 };
 
+
+/**
+ *
+ * @param {ServiceTypeChoice} type the type of service to instantiate
+ * @param {RdsEngine} engine the RDS engine to use
+ * @returns {AwsDatabaseService<DatabaseAttributes>} the database service
+ */
 export const getDatabaseService = (
   type: ServiceTypeChoice, engine: RdsEngine,
 ): AwsDatabaseService<DatabaseAttributes> => {
@@ -126,10 +133,3 @@ export const getDatabaseService = (
     withDatabase(),
   )(base);
 };
-
-let db = getDatabaseService('postgresql', 'postgres');
-let db2: AwsDatabaseService<DatabaseAttributes>;
-db2 = db;
-
-const withR = withRegions(REGIONS, DEFAULT_REGION)(db);
-// withR.associations.

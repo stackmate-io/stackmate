@@ -1,4 +1,4 @@
-import { MinMax } from '@stackmate/engine/types';
+import { MinMax } from '@stackmate/engine/lib';
 import { DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import { BaseServiceAttributes, withSchema } from './core';
 
