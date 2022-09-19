@@ -8,9 +8,13 @@ import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schem
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
+
+type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
+export type ProvisionResources = Resource | Resource[];
+export type Provisions = Record<string, ProvisionResources>;
+
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
-export type ServiceScopeChoice = ChoiceOf<readonly ['deployable', 'preparable', 'destroyable']>;
-export type Provisions = Record<string, TerraformResource | TerraformProvider | TerraformDataSource>;
+export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
 
 /**
  * @type {Association}
@@ -19,8 +23,8 @@ export type Provisions = Record<string, TerraformResource | TerraformProvider | 
 type Association = {
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
-  handler: (config: Provisionable, stack: Stack) => Provisions,
-  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+  handler: (resources: Provisions, provisionable?: Provisionable) => ProvisionResources,
+  where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
 };
 
 /**
@@ -65,12 +69,12 @@ export type ProvisionHandler = (
 export type ServiceAssociation<
   S extends ServiceTypeChoice,
   C extends ServiceScopeChoice,
-  T extends Provisions
-  > = Association & {
+  T extends ProvisionResources
+> = Association & {
   from: S,
   scope: C,
-  handler: (config: Provisionable, stack: Stack) => T,
-  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+  handler: (provisions: Provisions, provisionable?: Provisionable) => T,
+  where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
 };
 
 /**

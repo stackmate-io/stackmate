@@ -4,11 +4,11 @@ import {
   SecretsmanagerSecretVersion,
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
-export type AwsSecretsDeployableProvisions = {};
-export type AwsSecretsDestroyableProvisions = {};
-export type AwsSecretsPreparableProvisions = {};
+export type AwsSecretsDeployableResources = {};
+export type AwsSecretsDestroyableResources = {};
+export type AwsSecretsPreparableResources = {};
 
-export type AwsSecretsLinkableProvisons = {
+export type AwsSecretsLinkableResources = {
   secret: SecretsmanagerSecret,
   version: SecretsmanagerSecretVersion,
   data: DataAwsSecretsmanagerSecretVersion,

@@ -3,18 +3,21 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import { ChoiceOf } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsProviderDeployableProvisions, AwsProviderProvisionable } from '@stackmate/engine/providers/aws/services/provider';
+import { AwsProviderDeployableResources } from '@stackmate/engine/providers/aws/services/provider';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, DEFAULT_REGION, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_INSTANCE_SIZES, RDS_MAJOR_VERSIONS_PER_ENGINE, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  associate, BaseServiceAttributes, CloudServiceAttributes, EngineAttributes, getCloudService,
-  multiNode, MultiNodeAttributes, profilable, ProfilableAttributes, ProvisionAssociationRequirements,
-  ProvisionHandler, Provisions, RegionalAttributes, Service, ServiceAssociation, ServiceTypeChoice, sizeable,
-  SizeableAttributes, storable, StorableAttributes, versioned, VersioningAttributes, withDatabase,
+  associate, CloudServiceAttributes, EngineAttributes, getCloudService,
+  multiNode, MultiNodeAttributes, profilable, ProfilableAttributes,
+  ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
+  ServiceAssociation, ServiceTypeChoice, sizeable, SizeableAttributes, storable,
+  StorableAttributes, versioned, VersioningAttributes, withDatabase,
   withEngine, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
+import { KmsKey } from '@cdktf/provider-aws/lib/kms';
+import { AwsProvider } from '@cdktf/provider-aws';
 
 type DatabaseAttributes = CloudServiceAttributes
   & EngineAttributes<RdsEngine>
@@ -38,9 +41,8 @@ export type AwsDatabaseDeployableProvisions = {
 };
 
 type DatabaseAssociations = {
-  awsProvider: ServiceAssociation<
-    typeof SERVICE_TYPE.PROVIDER, 'deployable', Pick<AwsProviderDeployableProvisions, 'provider'>
-  >,
+  kmsKey: ServiceAssociation<typeof SERVICE_TYPE.PROVIDER, 'deployable', KmsKey>,
+  providerInstance: ServiceAssociation<typeof SERVICE_TYPE.PROVIDER, 'deployable', AwsProvider>;
 };
 
 export type AwsDatabaseService<T extends DatabaseAttributes> = Service<T> & {
@@ -58,7 +60,7 @@ export type AwsDatabaseService<T extends DatabaseAttributes> = Service<T> & {
 export const onDeployment: ProvisionHandler = (
   config, stack, requirements: ProvisionAssociationRequirements<DatabaseAssociations, 'deployable'>,
 ): AwsDatabaseDeployableProvisions => {
-  const { awsProvider: { provider } } = requirements;
+  const { kmsKey, providerInstance } = requirements;
   /*
   const { instance, params } = this.resourceProfile;
   const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
@@ -94,23 +96,18 @@ export const onDeployment: ProvisionHandler = (
 };
 
 const associations: DatabaseAssociations = {
-  awsProvider: {
+  kmsKey: {
     from: SERVICE_TYPE.PROVIDER,
     scope: 'deployable',
-    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
-      config.provider === linked.provider && config.region === linked.region
-    ),
-    handler: (provider: AwsProviderProvisionable, stack): Provisions => {
-      const p = stack.resources(provider.id);
-      return {};
-    }
-    // handler: (provider: AwsProviderProvisionable, stack): Pick<AwsProviderDeployableProvisions, 'kmsKey'> => {
-    //   const resources = stack.resources(provider.id) as AwsProviderDeployableProvisions;
-    //   return pick(resources, 'kmsKey');
-    // },
+    handler: (r: AwsProviderDeployableResources): KmsKey => r.kmsKey,
+  },
+  providerInstance: {
+    from: SERVICE_TYPE.PROVIDER,
+    scope: 'deployable',
+    handler: (r: AwsProviderDeployableResources): AwsProvider => r.provider,
   },
   // credentials: {},
-  // masterCredentials: {},
+  // securityGroups
 };
 
 

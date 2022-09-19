@@ -7,7 +7,7 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  BaseServiceAttributes, Provisionable, ServiceConfiguration,
+  BaseServiceAttributes, Provisionable, Provisions, ServiceConfiguration,
   ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
@@ -79,10 +79,10 @@ class StageOperation implements Operation {
    *
    * @param {Provisionable} provisionable the provisionable to register
    */
-  register(provisionable: Provisionable): void {
+  register(provisionable: Provisionable): Provisions {
     // Item has already been provisioned, bail...
     if (this.stack.isProvisioned(provisionable.id)) {
-      return;
+      return {};
     }
 
     const { config, service, service: { handlers, associations = {} } } = provisionable;
@@ -91,7 +91,7 @@ class StageOperation implements Operation {
     // Item has no handler for the current scope, bail...
     // ie. it only has a handler for deployment, and we're running a 'setup' operation
     if (!registrationHandler) {
-      return;
+      return {};
     }
 
     // Validate the configuration
@@ -114,15 +114,17 @@ class StageOperation implements Operation {
 
       // Get the provisionables associated with the current service configuration
       const associatedProvisionables = this.provisionables.filter((linked) => (
-        linked.service.type === associatedServiceType && isAssociated(config, linked.config)
+        linked.service.type === associatedServiceType && (
+          typeof isAssociated === 'function' ? isAssociated(config, linked.config) : true
+        )
       ));
 
       // Register associated services into the stack and form the requirements
       associatedProvisionables.forEach((linked) => {
-        this.register(linked);
+        const linkedProvisions = this.register(linked);
 
         Object.assign(requirements, {
-          [associationName]: associationHandler(linked, this.stack),
+          [associationName]: associationHandler(linkedProvisions, linked),
         });
       });
     });
@@ -131,6 +133,7 @@ class StageOperation implements Operation {
     // assertRequirementsSatisfied();
     const provisions = registrationHandler(provisionable, this.stack, requirements);
     this.stack.storeResources(provisionable.id, provisions);
+    return provisions;
   }
 
   /**
