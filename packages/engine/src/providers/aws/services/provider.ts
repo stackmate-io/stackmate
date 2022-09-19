@@ -7,19 +7,19 @@ import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { CoreServiceAttributes, Provisionable, RegionalAttributes } from '@stackmate/engine/core/service';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-export type AwsProviderCommonProvisions = {
+export type AwsProviderCommonResources = {
   provider: TerraformAwsProvider,
 };
 
-export type AwsProviderDeployableProvisions = AwsProviderCommonProvisions & {
+export type AwsProviderDeployableResources = AwsProviderCommonResources & {
   gateway: InternetGateway;
   subnet: Subnet;
   vpc: Vpc;
   kmsKey: KmsKey;
 };
 
-export type AwsProviderDestroyableProvisions = AwsProviderCommonProvisions;
-export type AwsProviderPreparableProvisions = AwsProviderCommonProvisions;
+export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
+export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
 export type AwsProviderAttributes = CoreServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>

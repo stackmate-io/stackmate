@@ -13,7 +13,9 @@ const serviceType: ServiceTypeChoice = SERVICE_TYPE.POSTGRESQL;
 
 export type AwsPostgreSQLAttributes = AwsDatabaseAttributes<typeof serviceType, typeof engine>;
 export type AWSPostgreSQLDeployableProvisions = AwsDatabaseDeployableProvisions;
-export type AWSPostgreSQLService = AwsDatabaseService<AwsPostgreSQLAttributes>;
-export const AWSPostgreSQL = getDatabaseService(serviceType, engine);
+
+export const AWSPostgreSQL: AwsDatabaseService<AwsPostgreSQLAttributes> = getDatabaseService(
+  serviceType, engine
+);
 
 export default AWSPostgreSQL;
