@@ -10,9 +10,6 @@ export type Stack = {
   readonly context: TerraformStack,
   readonly projectName: string;
   readonly stageName: string;
-  isProvisioned(id: Provisionable['id']): boolean;
-  storeResources(id: Provisionable['id'], provisions: Provisions): void;
-  resources(id: string): Provisions;
 };
 
 class StageStack implements Stack {
@@ -65,35 +62,6 @@ class StageStack implements Stack {
     this.app = new TerraformApp(options);
     this.id = `${this.projectName}/${this.stageName}`;
     this.context = new TerraformStack(this.app, this.id);
-  }
-
-  /**
-   * Returns whether a Provisionable has been provisioned
-   *
-   * @param {String} id the id of the provisionable
-   * @returns {Boolean}
-   */
-  isProvisioned(id: Provisionable['id']): boolean {
-    return this.provisions.has(id);
-  }
-
-  /**
-   * Stores resources provisionables
-   *
-   * @param {String} id the id of the provisionable
-   * @param {Provisions} resources the provisions to store
-   */
-  storeResources(id: Provisionable['id'], resources: Provisions): void {
-    this.provisions.set(id, resources);
-  }
-
-  /**
-   * Returns resources associated to a provisionable
-   *
-   * @param {String} id the provisionable's id
-   */
-  resources(id: string): Provisions {
-    return this.provisions.get(id) || {};
   }
 }
 
