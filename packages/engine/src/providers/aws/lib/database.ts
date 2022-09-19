@@ -2,8 +2,8 @@ import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import { ChoiceOf } from '@stackmate/engine/lib';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsProviderDeployableResources } from '@stackmate/engine/providers/aws/services/provider';
+import { PROVIDER } from '@stackmate/engine/constants';
+import { getCredentialsAssociations, CredentialsAssociations } from '@stackmate/engine/providers/helpers';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, DEFAULT_REGION, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_INSTANCE_SIZES, RDS_MAJOR_VERSIONS_PER_ENGINE, REGIONS,
@@ -12,12 +12,11 @@ import {
   associate, CloudServiceAttributes, EngineAttributes, getCloudService,
   multiNode, MultiNodeAttributes, profilable, ProfilableAttributes,
   ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
-  ServiceAssociation, ServiceTypeChoice, sizeable, SizeableAttributes, storable,
+  ServiceTypeChoice, sizeable, SizeableAttributes, storable,
   StorableAttributes, versioned, VersioningAttributes, withDatabase,
   withEngine, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
-import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { AwsProvider } from '@cdktf/provider-aws';
+import { AwsProviderAssociations, getAwsProviderAssociations } from './provider';
 
 type DatabaseAttributes = CloudServiceAttributes
   & EngineAttributes<RdsEngine>
@@ -35,19 +34,21 @@ export type AwsDatabaseAttributes<
   T extends ServiceTypeChoice, E extends RdsEngine
 > = DatabaseAttributes & EngineAttributes<E> & { type: T; };
 
-export type AwsDatabaseDeployableProvisions = {
+type AwsDatabaseDeployableProvisions = {
   paramGroup: DbParameterGroup,
   dbInstance: DbInstance,
 };
 
-type DatabaseAssociations = {
-  kmsKey: ServiceAssociation<typeof SERVICE_TYPE.PROVIDER, 'deployable', KmsKey>,
-  providerInstance: ServiceAssociation<typeof SERVICE_TYPE.PROVIDER, 'deployable', AwsProvider>;
-};
+type DatabaseAssociations = [...CredentialsAssociations, ...AwsProviderAssociations];
 
 export type AwsDatabaseService<T extends DatabaseAttributes> = Service<T> & {
   associations: DatabaseAssociations;
 };
+
+const associations: DatabaseAssociations = [
+  ...getCredentialsAssociations(),
+  ...getAwsProviderAssociations(),
+];
 
 /**
  * Provisions the service
@@ -60,7 +61,7 @@ export type AwsDatabaseService<T extends DatabaseAttributes> = Service<T> & {
 export const onDeployment: ProvisionHandler = (
   config, stack, requirements: ProvisionAssociationRequirements<DatabaseAssociations, 'deployable'>,
 ): AwsDatabaseDeployableProvisions => {
-  const { kmsKey, providerInstance } = requirements;
+  const { kmsKey, providerInstance, credentials } = requirements;
   /*
   const { instance, params } = this.resourceProfile;
   const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
@@ -95,24 +96,7 @@ export const onDeployment: ProvisionHandler = (
   return { dbInstance: '', paramGroup: '' };
 };
 
-const associations: DatabaseAssociations = {
-  kmsKey: {
-    from: SERVICE_TYPE.PROVIDER,
-    scope: 'deployable',
-    handler: (r: AwsProviderDeployableResources): KmsKey => r.kmsKey,
-  },
-  providerInstance: {
-    from: SERVICE_TYPE.PROVIDER,
-    scope: 'deployable',
-    handler: (r: AwsProviderDeployableResources): AwsProvider => r.provider,
-  },
-  // credentials: {},
-  // securityGroups
-};
-
-
 /**
- *
  * @param {ServiceTypeChoice} type the type of service to instantiate
  * @param {RdsEngine} engine the RDS engine to use
  * @returns {AwsDatabaseService<DatabaseAttributes>} the database service

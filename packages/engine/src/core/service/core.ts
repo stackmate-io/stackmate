@@ -11,7 +11,7 @@ export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 
 type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
 export type ProvisionResources = Resource | Resource[];
-export type Provisions = Record<string, ProvisionResources>;
+export type Provisions = Record<string, Resource>;
 
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
@@ -20,11 +20,29 @@ export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroya
  * @type {Association}
  * @private
  */
-type Association = {
+type Association<Ret = any> = {
+  as: string;
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
-  handler: (resources: Provisions, provisionable?: Provisionable) => ProvisionResources,
+  handler: (provisionable: Provisionable, stack?: Stack) => Ret,
   where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+};
+
+/**
+ * @type {ServiceAssociation} the configuration object for associating a service with another
+ * @param {ServiceTypeChoice}
+ * @param {ServiceScopeChoice}
+ * @param {Provisions}
+ */
+export type ServiceAssociation<
+  name extends string,
+  S extends ServiceTypeChoice,
+  C extends ServiceScopeChoice,
+  H = any,
+> = Association<H> & {
+  as: name;
+  from: S;
+  scope: C;
 };
 
 /**
@@ -34,20 +52,20 @@ export type Provisionable = {
   id: string;
   config: BaseServiceAttributes;
   service: BaseService;
+  requirements: Record<string, any>;
+  provisions: Provisions,
 };
 
-/**
- * @type {ProvisionAssociationRequirements} extracts a service's requirements from its associations
- */
 export type ProvisionAssociationRequirements<
-  Associations extends Dictionary<Association>,
+  Associations extends Association[],
   S extends ServiceScopeChoice,
 > = OmitNever<{
-  [K in keyof Associations]: Associations[K] extends {
+  [K in Associations[number]['as']]: Associations[number] extends {
     scope: infer Scope extends ServiceScopeChoice,
-    handler: infer Func extends ArrowFunc, [p: string]: any }
-      ? Scope extends S ? ReturnType<Func> : never
-      : never
+    handler: infer Func extends ArrowFunc, [p: string]: any
+  }
+  ? Scope extends S ? ReturnType<Func> : never
+  : never
 }>;
 
 /**
@@ -56,26 +74,8 @@ export type ProvisionAssociationRequirements<
 export type ProvisionHandler = (
   provisionable: Provisionable,
   stack: Stack,
-  requirements: Dictionary<Provisions>,
   opts?: object,
 ) => Provisions;
-
-/**
- * @type {ServiceAssociation} the configuration object for associating a service with another
- * @param {ServiceTypeChoice}
- * @param {ServiceScopeChoice}
- * @param {Provisions}
- */
-export type ServiceAssociation<
-  S extends ServiceTypeChoice,
-  C extends ServiceScopeChoice,
-  T extends ProvisionResources
-> = Association & {
-  from: S,
-  scope: C,
-  handler: (provisions: Provisions, provisionable?: Provisionable) => T,
-  where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
-};
 
 /**
  * @type {ServiceEnvironment} the environment variable required by a service
@@ -128,7 +128,7 @@ export type Service<Setup extends BaseServiceAttributes> = {
   schema: ServiceSchema<Setup>;
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   environment: ServiceEnvironment[];
-  associations: Dictionary<Association>;
+  associations: Association[];
 };
 
 export type CoreService = Service<CoreServiceAttributes>;
@@ -178,7 +178,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
     schemaId,
     handlers: new Map(),
     environment: [],
-    associations: {},
+    associations: [],
   };
 };
 
@@ -278,7 +278,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @see {ServiceAssociation}
  * @returns {Function<Service>}
  */
-export const associate = <C extends BaseServiceAttributes, A extends Dictionary<Association>>(
+export const associate = <C extends BaseServiceAttributes, A extends Association[]>(
   associations: A
 ) => withAttributes<C, { associations: A }>({ associations });
 
