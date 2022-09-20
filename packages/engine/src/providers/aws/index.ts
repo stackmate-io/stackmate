@@ -1,1 +1,1 @@
-export { AWSPostgreSQL as PostgreSQL } from './services/postgresql';
+export { AWSPostgreSQL, AWSMySQL, AWSMariaDB } from './services/database';

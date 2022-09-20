@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { BaseServiceAttributes, withAttributes, withSchema, Service } from './core';
+import { BaseServiceAttributes, withServiceProperties, withSchema, Service } from './core';
 
 /**
  * @type {RegionalAttributes} region-specific attributes
@@ -18,7 +18,7 @@ export const withRegions = <C extends BaseServiceAttributes>(
   regions: readonly string[], defaultRegion: string
 ) => <T extends Service<C>>(srv: T): T & { regions: readonly string[] } => (
   pipe(
-    withAttributes<C, { regions: readonly string[] }>({ regions }),
+    withServiceProperties<C, { regions: readonly string[] }>({ regions }),
     withSchema<C, RegionalAttributes>({
       type: 'object',
       required: ['region'],
