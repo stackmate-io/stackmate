@@ -1,4 +1,3 @@
-import { Dictionary } from 'lodash';
 import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -18,9 +17,8 @@ export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroya
 
 /**
  * @type {Association}
- * @private
  */
-type Association<Ret = any> = {
+export type Association<Ret = any> = {
   as: string;
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
@@ -46,6 +44,21 @@ export type ServiceAssociation<
 };
 
 /**
+ * @type {ProvisionAssociationRequirements} calculates the types of the provisionable's requirements
+ *  by the return types of the handler functions in the service's associations
+ */
+export type ProvisionAssociationRequirements<
+  Associations extends Association[],
+  S extends ServiceScopeChoice,
+> = OmitNever<{
+  [K in Associations[number]['as']]: Associations[number] extends {
+    scope: infer Scope extends ServiceScopeChoice,
+    handler: infer Func extends ArrowFunc, [p: string]: any
+  } ? Scope extends S ? ReturnType<Func> : never
+    : never
+}>;
+
+/**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
  */
 export type Provisionable = {
@@ -55,18 +68,6 @@ export type Provisionable = {
   requirements: Record<string, any>;
   provisions: Provisions,
 };
-
-export type ProvisionAssociationRequirements<
-  Associations extends Association[],
-  S extends ServiceScopeChoice,
-> = OmitNever<{
-  [K in Associations[number]['as']]: Associations[number] extends {
-    scope: infer Scope extends ServiceScopeChoice,
-    handler: infer Func extends ArrowFunc, [p: string]: any
-  }
-  ? Scope extends S ? ReturnType<Func> : never
-  : never
-}>;
 
 /**
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service

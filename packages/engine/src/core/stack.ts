@@ -1,7 +1,5 @@
 import { TerraformStack, App as TerraformApp, AppOptions } from 'cdktf';
 
-import { Provisionable, Provisions } from '@stackmate/engine/core/service';
-
 /**
  * @type {Stack} the stage's stack
  */
@@ -42,13 +40,6 @@ class StageStack implements Stack {
    * @readonly
    */
   readonly stageName: string;
-
-  /**
-   * @var {Map<Provisionable['id'], Provisions>} provisions map of provisionable id to provisions
-   * @protected
-   * @readonly
-   */
-  protected readonly provisions: Map<Provisionable['id'], Provisions> = new Map();
 
   /**
    * @constructor

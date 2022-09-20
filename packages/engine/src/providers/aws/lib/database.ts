@@ -1,22 +1,22 @@
 import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
+import { Stack } from '@stackmate/engine/core/stack';
 import { ChoiceOf } from '@stackmate/engine/lib';
 import { PROVIDER } from '@stackmate/engine/constants';
-import { getCredentialsAssociations, CredentialsAssociations } from '@stackmate/engine/providers/helpers';
+import { AwsService, getAwsCloudService } from '@stackmate/engine/providers/aws/lib/service';
+import { withCredentials, withRootCredentials } from '@stackmate/engine/core/service/credentials';
 import {
-  DEFAULT_RDS_INSTANCE_SIZE, DEFAULT_REGION, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
+  DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_INSTANCE_SIZES, RDS_MAJOR_VERSIONS_PER_ENGINE, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  associate, CloudServiceAttributes, EngineAttributes, getCloudService,
-  multiNode, MultiNodeAttributes, profilable, ProfilableAttributes,
-  ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
-  ServiceTypeChoice, sizeable, SizeableAttributes, storable,
+  CloudServiceAttributes, EngineAttributes, multiNode, MultiNodeAttributes, profilable,
+  ProfilableAttributes, Provisionable, ProvisionAssociationRequirements, ProvisionHandler,
+  RegionalAttributes, ServiceTypeChoice, sizeable, SizeableAttributes, storable,
   StorableAttributes, versioned, VersioningAttributes, withDatabase,
-  withEngine, withHandler, withRegions,
+  withEngine, withHandler,
 } from '@stackmate/engine/core/service';
-import { AwsProviderAssociations, getAwsProviderAssociations } from './provider';
 
 type DatabaseAttributes = CloudServiceAttributes
   & EngineAttributes<RdsEngine>
@@ -34,21 +34,16 @@ export type AwsDatabaseAttributes<
   T extends ServiceTypeChoice, E extends RdsEngine
 > = DatabaseAttributes & EngineAttributes<E> & { type: T; };
 
-type AwsDatabaseDeployableProvisions = {
+export type AwsDatabaseService<T extends ServiceTypeChoice, E extends RdsEngine> = AwsService<AwsDatabaseAttributes<T, E>> & {
+  type: T;
+};
+
+export type AwsDatabaseDeployableResources = {
   paramGroup: DbParameterGroup,
   dbInstance: DbInstance,
 };
-
-type DatabaseAssociations = [...CredentialsAssociations, ...AwsProviderAssociations];
-
-export type AwsDatabaseService<T extends DatabaseAttributes> = Service<T> & {
-  associations: DatabaseAssociations;
-};
-
-const associations: DatabaseAssociations = [
-  ...getCredentialsAssociations(),
-  ...getAwsProviderAssociations(),
-];
+export type AwsDatabaseDestroyableResources = {};
+export type AwsDatabasePreparableResources = {};
 
 /**
  * Provisions the service
@@ -58,10 +53,10 @@ const associations: DatabaseAssociations = [
  * @param {ServiceRequirements} requirements the service's requirements
  * @returns {Provisions} the provisions generated
  */
-export const onDeployment: ProvisionHandler = (
-  config, stack, requirements: ProvisionAssociationRequirements<DatabaseAssociations, 'deployable'>,
-): AwsDatabaseDeployableProvisions => {
-  const { kmsKey, providerInstance, credentials } = requirements;
+export const onDeployment: ProvisionHandler = <P extends Provisionable>(
+  provisionable: P, stack: Stack, requirements: ProvisionAssociationRequirements<P['service']['associations'], 'deployable'>,
+): AwsDatabaseDeployableResources => {
+  // const { kmsKey, providerInstance, credentials } = requirements;
   /*
   const { instance, params } = this.resourceProfile;
   const { username, password } = vault.credentials(stack, provider, this.name, { root: true });
@@ -103,12 +98,12 @@ export const onDeployment: ProvisionHandler = (
  */
 export const getDatabaseService = (
   type: ServiceTypeChoice, engine: RdsEngine,
-): AwsDatabaseService<DatabaseAttributes> => {
+): AwsDatabaseService<typeof type, typeof engine> => {
   const base = pipe(
-    associate(associations),
-    withRegions(REGIONS, DEFAULT_REGION),
+    withCredentials(),
+    withRootCredentials(),
     withHandler('deployable', onDeployment),
-  )(getCloudService(PROVIDER.AWS, type))
+  )(getAwsCloudService(type));
 
   return pipe(
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),

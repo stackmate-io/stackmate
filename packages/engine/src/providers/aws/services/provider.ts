@@ -6,23 +6,24 @@ import { ChoiceOf } from '@stackmate/engine/lib';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CoreServiceAttributes, Provisionable, RegionalAttributes,
-  Service, ServiceScopeChoice,
+  CoreServiceAttributes, ProvisionAssociationRequirements,
+  RegionalAttributes, Service,
 } from '@stackmate/engine/core/service';
 
-export type AwsProviderCommonResources = {
-  provider: TerraformAwsProvider,
+type AwsProviderCommonResources = {
+  provider: TerraformAwsProvider;
 };
 
-export type AwsProviderDeployableResources = AwsProviderCommonResources & {
+type AwsProviderDeployableResources = AwsProviderCommonResources & {
+  provider: TerraformAwsProvider,
   gateway: InternetGateway;
   subnet: Subnet;
   vpc: Vpc;
   kmsKey: KmsKey;
 };
 
-export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
-export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
+type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
+type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
 export type AwsProviderAttributes = CoreServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
@@ -33,18 +34,23 @@ export type AwsProviderAttributes = CoreServiceAttributes
 
 export type AwsProviderService = Service<AwsProviderAttributes>;
 
-type ProvisionablesPerScope<S extends ServiceScopeChoice> = S extends 'deployable'
-  ? AwsProviderDeployableResources
-  : S extends 'destroyable'
-    ? AwsProviderDestroyableProvisions
-    : S extends 'preparable'
-      ? AwsProviderPreparableProvisions
-      : never;
-
-export type AwsProviderProvisionable<S extends ServiceScopeChoice> = Provisionable & {
+type AwsProviderBaseProvisionable = {
   id: string;
   config: AwsProviderAttributes;
   service: AwsProviderService;
-  requirements: {},
-  provisions: ProvisionablesPerScope<S>;
+};
+
+export type AwsProviderDeployableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderDeployableResources;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'deployable'>;
+};
+
+export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderDestroyableProvisions;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'destroyable'>;
+};
+
+export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderPreparableProvisions;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'preparable'>;
 };

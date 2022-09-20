@@ -3,6 +3,7 @@ export * from './core';
 
 // composable types
 export * from './connectable';
+export * from './credentials';
 export * from './linkable';
 export * from './multinode';
 export * from './profilable';
