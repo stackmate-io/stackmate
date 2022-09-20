@@ -9,7 +9,7 @@ import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService,
-  Service, ServiceAssociation, ServiceScopeChoice, ServiceTypeChoice, withRegions,
+  ServiceAssociation, ServiceScopeChoice, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -32,10 +32,6 @@ export type AwsServiceAssociations = [
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.AWS;
   region: ChoiceOf<typeof REGIONS>;
-};
-
-export type AwsService<Attrs extends BaseServiceAttributes> = Service<Attrs> & {
-  associations: AwsServiceAssociations;
 };
 
 type ProviderProvisionable = OneOfType<[

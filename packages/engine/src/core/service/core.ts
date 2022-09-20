@@ -58,6 +58,14 @@ export type ProvisionAssociationRequirements<
     : never
 }>;
 
+type Test = [
+  { as: 'fun', handler: () => boolean, scope: 'deployable', from: ServiceTypeChoice },
+  { as: 'fun2', handler: () => number, scope: 'deployable', from: ServiceTypeChoice },
+  { as: 'fun3', handler: () => string, scope: 'deployable', from: ServiceTypeChoice },
+];
+
+type Nok = ProvisionAssociationRequirements<Test, 'deployable'>;
+
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
  */
@@ -237,7 +245,7 @@ export const isCoreService = (
  * @param {Partial<Service>} attrs the service attributes to apply
  * @returns {Function<Service>} the updated service
  */
-export const withAttributes = <C extends BaseServiceAttributes, Attributes extends Obj = {}>(
+export const withServiceProperties = <C extends BaseServiceAttributes, Attributes extends Obj = {}>(
   attrs: Attributes,
 ) => <T extends Service<C>>(srv: T): T & Attributes => ({
   ...srv,
@@ -281,7 +289,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  */
 export const associate = <C extends BaseServiceAttributes, A extends Association[]>(
   associations: A
-) => withAttributes<C, { associations: A }>({ associations });
+) => withServiceProperties<C, { associations: A }>({ associations });
 
 /**
  * Registers a handler to use when provisioning the service under a specific scope

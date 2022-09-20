@@ -11,16 +11,8 @@ export type Credentials = {
   password: string;
 };
 
-type CredentialsAssociation = ServiceAssociation<'credentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
-type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
-
-export type WithCredentials<Srv extends BaseService> = Srv & {
-  associations: [CredentialsAssociation];
-};
-
-export type WithRootCredentials<Srv extends BaseService> = Srv & {
-  associations: [RootCredentialsAssociation];
-};
+export type CredentialsAssociation = ServiceAssociation<'credentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
+export type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
 
 export type CredentialsHandler = (
   config: BaseServiceAttributes, stack: Stack, opts?: { root?: boolean }
@@ -34,7 +26,7 @@ export type VaultProvisionable = Provisionable & {
   service: SecretsVaultService<Provisionable['service']>;
 };
 
-export const withCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T) => (
+export const withCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T): T & { associations: [CredentialsAssociation] } => (
   associate<C, [CredentialsAssociation]>([{
     as: 'credentials',
     from: SERVICE_TYPE.SECRETS,
@@ -45,7 +37,7 @@ export const withCredentials = <C extends BaseServiceAttributes>() => <T extends
   }])(srv)
 );
 
-export const withRootCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T) => (
+export const withRootCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T): T & { associations: [RootCredentialsAssociation] } => (
   associate<C, [RootCredentialsAssociation]>([{
     as: 'rootCredentials',
     from: SERVICE_TYPE.SECRETS,
@@ -58,9 +50,7 @@ export const withRootCredentials = <C extends BaseServiceAttributes>() => <T ext
 
 export const withCredentialsGenerator = <C extends BaseServiceAttributes>(
   credentials: CredentialsHandler
-) => <T extends Service<C>>(srv: T): T & {
-  credentials: CredentialsHandler,
-} => ({
+) => <T extends Service<C>>(srv: T): T & SecretsVaultService<T> => ({
   ...srv,
   credentials,
 });
