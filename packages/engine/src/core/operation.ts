@@ -111,7 +111,7 @@ class StageOperation implements Operation {
       return {};
     }
 
-    const { config, service, service: { handlers, associations = {} } } = provisionable;
+    const { config, service, service: { handlers, associations = [] } } = provisionable;
 
     const registrationHandler = handlers.get(this.scope);
     // Item has no handler for the current scope, bail...
@@ -126,17 +126,15 @@ class StageOperation implements Operation {
     // Start extracting the service's requirements
     const requirements = {};
 
-    Object.keys(associations).filter((key) => {
-      const { [key]: { scope: associationScope } } = associations;
-      return associationScope === this.scope;
-    }).forEach(associationName => {
+    associations.filter(({ scope: associationScope }) => (
+      associationScope === this.scope
+    )).forEach((association) => {
       const {
-        [associationName]: {
-          where: isAssociated,
-          handler: associationHandler,
-          from: associatedServiceType,
-        },
-      } = associations;
+        as: associationName,
+        where: isAssociated,
+        handler: associationHandler,
+        from: associatedServiceType,
+      } = association;
 
       // Get the provisionables associated with the current service configuration
       const associatedProvisionables = Array.from(this.provisionables.values()).filter((linked) => (
