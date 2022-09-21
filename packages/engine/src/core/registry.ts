@@ -1,6 +1,6 @@
 import { uniq } from 'lodash';
 
-import * as AwsServices from '@stackmate/engine/providers/aws';
+import * as Services from '@stackmate/engine/providers';
 import {
   ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes,
 } from '@stackmate/engine/core/service';
@@ -100,6 +100,4 @@ class Registry implements ServicesRegistry {
   }
 }
 
-export default new Registry(
-  ...Object.values(AwsServices),
-) as Registry;
+export default new Registry(...Object.values(Services)) as Registry;

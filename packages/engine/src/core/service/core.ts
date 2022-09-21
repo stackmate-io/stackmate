@@ -74,6 +74,7 @@ export type Provisionable = {
   service: BaseService;
   requirements: Record<string, any>;
   provisions: Provisions,
+  resourceId: string; /** @var {String} resourceId the id of the terraform resource */
 };
 
 /**
@@ -131,7 +132,7 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
 export type Service<Setup extends BaseServiceAttributes> = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
-  regions?: string[];
+  regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
@@ -197,7 +198,9 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  * @param type {ServiceTypeChoice} the service type for the cloud service
  * @returns {Service<Obj>} the cloud service
  */
-export const getCloudService = (provider: ProviderChoice, type: ServiceTypeChoice): CloudService => {
+export const getCloudService = (
+  provider: ProviderChoice, type: ServiceTypeChoice,
+): CloudService => {
   const core = getCoreService(provider, type);
   const schema: ServiceSchema<CloudServiceAttributes> = {
     ...core.schema,
@@ -269,7 +272,8 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * For example:
  *  const AwsRdsService = compose(
  *    ...
- *    associate(SERVICE_TYPE.PROVIDER, {
+ *    associate({
+ *      from: SERVICE_TYPE.PROVIDER,
  *      scope: 'deployable',
  *      as: 'kmsKey',
  *      where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
@@ -324,5 +328,17 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   ...service,
   environment: [...service.environment, { name, required, description }],
 });
+
+/**
+ * @param {BaseServiceAttributes} config the service's configuration
+ * @param {String} stageName the stage's name
+ * @returns {String} the id to use as a terraform resource identifier
+ */
+export const getProvisionableResourceId = (
+  config: BaseServiceAttributes, stageName: string,
+): string => {
+  const name = 'name' in config ? config.name : config.type;
+  return `${name}-${stageName}`;
+};
 
 export const assertRequirementsSatisfied = () => {};

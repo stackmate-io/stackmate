@@ -7,7 +7,7 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  BaseServiceAttributes, Provisionable, Provisions, ServiceConfiguration,
+  BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions, ServiceConfiguration,
   ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
@@ -75,6 +75,7 @@ class StageOperation implements Operation {
         service: Registry.fromConfig(config),
         requirements: {},
         provisions: {},
+        resourceId: getProvisionableResourceId(config, this.stack.stageName),
       };
 
       this.provisionables.set(provisionable.id, provisionable);

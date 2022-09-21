@@ -7,6 +7,7 @@ import { AwsProvider } from '@cdktf/provider-aws';
 
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService,
   ServiceAssociation, ServiceScopeChoice, ServiceTypeChoice, withRegions,
@@ -17,10 +18,13 @@ import {
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
-import { DEFAULT_REGION, REGIONS } from '../constants';
 
-type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, AwsProvider>;
-type KmsKeyAssociation<S extends ServiceScopeChoice> = ServiceAssociation<'kmsKey', typeof SERVICE_TYPE.PROVIDER, S, KmsKey>;
+type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
+  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, AwsProvider
+>;
+type KmsKeyAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
+  'kmsKey', typeof SERVICE_TYPE.PROVIDER, S, KmsKey
+>;
 
 export type AwsServiceAssociations = [
   ProviderAssociation<'deployable'>,
