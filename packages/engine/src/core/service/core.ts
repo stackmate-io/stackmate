@@ -169,7 +169,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
         type: 'string',
         enum: [type],
         default: type,
-        errorMessage: `You have to specify a valid service type, "${type}" is invalid`,
+        errorMessage: `You have to specify a valid service type, only ${type} is accepted`,
       },
       region: {
         type: 'string',
