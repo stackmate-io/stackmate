@@ -1,5 +1,5 @@
 import { defaultsDeep, get } from 'lodash';
-import { PROVIDER, ValueOf } from '@stackmate/engine';
+import { PROVIDER, util } from '@stackmate/engine';
 
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 import { PreferenceOptions } from '@stackmate/cli/types';
@@ -46,7 +46,7 @@ class Preferences {
    * @param {any} defaultValue the default value to set in case there isn't any stored
    * @returns {any} the value in the options
    */
-  get(key: keyof PreferenceOptions, defaultValue = null): ValueOf<PreferenceOptions> | null {
+  get(key: keyof PreferenceOptions, defaultValue = null): util.ChoiceOf<PreferenceOptions> | null {
     return get(this.options, key, defaultValue);
   }
 
@@ -56,7 +56,7 @@ class Preferences {
    * @param {String} key the preference key to set
    * @param {any} value the value to set
    */
-  set(key: keyof PreferenceOptions, value: ValueOf<PreferenceOptions>) {
+  set(key: keyof PreferenceOptions, value: util.ChoiceOf<PreferenceOptions>) {
     // this.options[key] = value;
   }
 
