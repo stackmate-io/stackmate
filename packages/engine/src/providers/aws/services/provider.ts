@@ -6,7 +6,7 @@ import { ChoiceOf } from '@stackmate/engine/lib';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CoreServiceAttributes, ProvisionAssociationRequirements,
+  CoreServiceAttributes, Provisionable, ProvisionAssociationRequirements,
   RegionalAttributes, Service,
 } from '@stackmate/engine/core/service';
 
@@ -30,11 +30,15 @@ export type AwsProviderAttributes = CoreServiceAttributes
   & {
     provider: typeof PROVIDER.AWS,
     type: typeof SERVICE_TYPE.PROVIDER;
+    region: ChoiceOf<typeof REGIONS>;
   };
 
-export type AwsProviderService = Service<AwsProviderAttributes>;
+export type AwsProviderService = Service<AwsProviderAttributes> & {
+  provider: typeof PROVIDER.AWS,
+  type: typeof SERVICE_TYPE.PROVIDER;
+};
 
-type AwsProviderBaseProvisionable = {
+type AwsProviderBaseProvisionable = Provisionable & {
   id: string;
   config: AwsProviderAttributes;
   service: AwsProviderService;

@@ -2,6 +2,7 @@ import pipe from '@bitty/pipe';
 import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 import { Stack } from '@stackmate/engine/core/stack';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/services/core';
@@ -10,16 +11,16 @@ import {
 } from '@stackmate/engine/core/service/credentials';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
-  RDS_INSTANCE_SIZES, RDS_LOG_EXPORTS_PER_ENGINE, RDS_MAJOR_VERSIONS_PER_ENGINE, RDS_PARAM_FAMILY_MAPPING, REGIONS,
+  RDS_INSTANCE_SIZES, RDS_LOG_EXPORTS_PER_ENGINE, RDS_MAJOR_VERSIONS_PER_ENGINE,
+  RDS_PARAM_FAMILY_MAPPING, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  CloudServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode, MultiNodeAttributes, profilable,
-  ProfilableAttributes, Provisionable, ProvisionAssociationRequirements, ProvisionHandler,
-  RegionalAttributes, Service, ServiceTypeChoice, sizeable, SizeableAttributes, storable,
-  StorableAttributes, versioned, VersioningAttributes, withDatabase,
-  withEngine, withHandler,
+  CloudServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode,
+  MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
+  ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
+  ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
+  versioned, VersioningAttributes, withDatabase, withEngine, withHandler,
 } from '@stackmate/engine/core/service';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
 
 type DatabaseAttributes = CloudServiceAttributes
   & EngineAttributes<RdsEngine>
@@ -55,8 +56,16 @@ export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>;
 export type AwsPostgreSQLService = AwsDbService<AwsPostgreSQLAttributes>;
 export type AwsMariaDBService = AwsDbService<AwsMariaDBAttributes>;
 
-type AwsDb = OneOfType<[AwsMySQLService, AwsPostgreSQLService, AwsMariaDBService]>;
-type AwsDbAttributes = OneOfType<[AwsMySQLAttributes, AwsPostgreSQLAttributes, AwsMariaDBAttributes]>;
+type AwsDb = OneOfType<[
+  AwsMySQLService,
+  AwsPostgreSQLService,
+  AwsMariaDBService,
+]>;
+type AwsDbAttributes = OneOfType<[
+  AwsMySQLAttributes,
+  AwsPostgreSQLAttributes,
+  AwsMariaDBAttributes,
+]>;
 type AwsBaseProvisionable = Provisionable & {
   config: AwsDbAttributes;
   service: AwsDb;
@@ -77,7 +86,11 @@ export type AwsDatabasPreparableProvisionable = AwsBaseProvisionable & {
   provisions: AwsDatabaseDeployableResources;
 };
 
-export const getParamGroupFamily = (config: DatabaseAttributes) => {
+/**
+ * @param {DatabaseAttributes} config the service's configuration
+ * @returns {String} the parameter group family to use when provisioning the database
+ */
+export const getParamGroupFamily = (config: DatabaseAttributes): string => {
   const triad = RDS_PARAM_FAMILY_MAPPING.find(
     ([engine, version]) => engine === config.engine && config.version.startsWith(version),
   );
@@ -92,7 +105,7 @@ export const getParamGroupFamily = (config: DatabaseAttributes) => {
 }
 
 /**
- * Provisions the service
+ * Provisions the database service
  *
  * @param {AwsDatabaseDeployableProvisionable} provisionable the service's configuration
  * @param {Stack} stack the stack to deploy
@@ -111,7 +124,7 @@ export const onDeployment: ProvisionHandler = (
     service.provider, service.type, config.profile || DEFAULT_PROFILE_NAME,
   );
 
-  const paramGroup = new DbParameterGroup(stack.context, `${config.identifier}-params`, {
+  const paramGroup = new DbParameterGroup(stack.context, `${provisionable.resourceId}-params`, {
     ...params,
     family: getParamGroupFamily(config),
   });
@@ -123,13 +136,13 @@ export const onDeployment: ProvisionHandler = (
     enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE[config.engine],
     engine: config.engine,
     engineVersion: config.version,
-    identifier: config.identifier,
+    identifier: provisionable.resourceId,
     instanceClass: config.size,
     name: config.database,
     parameterGroupName: paramGroup.name,
     port: config.port,
     provider: providerInstance,
-    dbSubnetGroupName: `db-subnet-${config.identifier}`,
+    dbSubnetGroupName: `db-subnet-${provisionable.resourceId}`,
     username: rootCredentials.username,
     password: rootCredentials.password,
     lifecycle: {
@@ -166,5 +179,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
 };
 
 export const AWSMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql');
-export const AWSPostgreSQL: AwsPostgreSQLService = getDatabaseService(SERVICE_TYPE.POSTGRESQL, 'postgres');
 export const AWSMariaDB: AwsMariaDBService = getDatabaseService(SERVICE_TYPE.MARIADB, 'mariadb');
+export const AWSPostgreSQL: AwsPostgreSQLService = getDatabaseService(
+  SERVICE_TYPE.POSTGRESQL, 'postgres',
+);

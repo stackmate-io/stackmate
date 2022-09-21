@@ -1,4 +1,4 @@
-import { AWSPostgreSQL } from '@stackmate/engine/providers/aws/services/postgresql';
+import { AWSPostgreSQL } from '@stackmate/engine/providers/aws/services/database';
 
 describe('AWSPostgreSQL', () => {
   const service = AWSPostgreSQL;
