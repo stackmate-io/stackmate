@@ -51,3 +51,5 @@ export const getSecretsVaultService = (): AwsSecretsVaultService => {
     withCredentialsGenerator(generateCredentials),
   )(getAwsCoreService(SERVICE_TYPE.SECRETS));
 };
+
+export const AwsSecretsVault = getSecretsVaultService();

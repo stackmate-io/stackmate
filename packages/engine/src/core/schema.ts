@@ -167,6 +167,8 @@ export type JsonSchema<T = undefined> = {
   serviceLinks?: boolean;
   serviceProfile?: boolean;
   serviceProfileOverrides?: boolean;
+  isIncludedInConfigGeneration?: boolean;
+  serviceConfigGenerationTemplate?: string;
 
   // AJV-error specific
   errorMessage?: string | {
