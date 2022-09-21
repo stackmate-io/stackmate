@@ -18,7 +18,7 @@ import {
 /**
  * @type {StageConfiguration} the configuration for the project stages
  */
-type StageConfiguration = {
+export type StageConfiguration = {
   name: string;
   services?: CloudServiceAttributes[],
   copy?: string;
