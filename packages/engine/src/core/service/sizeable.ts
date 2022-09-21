@@ -15,7 +15,7 @@ export type SizeableAttributes = { size: string; };
 
 export const sizeable = <C extends BaseServiceAttributes>(
   sizes: readonly string[], defaultSize: string
-) => withSchema<C, { size: string; }>({
+) => withSchema<C, SizeableAttributes>({
   type: 'object',
   properties: {
     size: {

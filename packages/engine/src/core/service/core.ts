@@ -1,60 +1,30 @@
-import { Dictionary } from 'lodash';
 import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, ChoiceOf, OneOf, OmitNever, ArrowFunc } from '@stackmate/engine/types';
+import { Obj, ChoiceOf } from '@stackmate/engine/lib';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
+
+type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
+export type ProvisionResources = Resource | Resource[];
+export type Provisions = Record<string, Resource>;
+
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
-export type ServiceScopeChoice = OneOf<['deployable', 'preparable', 'destroyable']>;
-export type Provisions = Record<string, TerraformResource | TerraformProvider | TerraformDataSource>;
+export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
 
 /**
  * @type {Association}
- * @private
  */
-type Association = {
+export type Association<Ret = any> = {
+  as: string;
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
-  handler: (config: Provisionable, stack: Stack) => Provisions,
-  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+  handler: (provisionable: Provisionable, stack?: Stack) => Ret,
+  where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
 };
-
-/**
- * @type {Provisionable} represents a piece of configuration and service to be deployed
- */
-export type Provisionable = {
-  id: string;
-  config: BaseServiceAttributes;
-  service: BaseService;
-};
-
-/**
- * @type {ProvisionAssociationRequirements} extracts a service's requirements from its associations
- */
-export type ProvisionAssociationRequirements<
-  Associations extends Dictionary<Association>,
-  S extends ServiceScopeChoice,
-> = OmitNever<{
-  [K in keyof Associations]: Associations[K] extends {
-    scope: infer Scope extends ServiceScopeChoice,
-    handler: infer Func extends ArrowFunc, [p: string]: any }
-      ? Scope extends S ? ReturnType<Func> : never
-      : never
-}>;
-
-/**
- * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
- */
-export type ProvisionHandler = (
-  provisionable: Provisionable,
-  stack: Stack,
-  requirements: Dictionary<Provisions>,
-  opts?: object,
-) => Provisions;
 
 /**
  * @type {ServiceAssociation} the configuration object for associating a service with another
@@ -63,15 +33,58 @@ export type ProvisionHandler = (
  * @param {Provisions}
  */
 export type ServiceAssociation<
+  name extends string,
   S extends ServiceTypeChoice,
   C extends ServiceScopeChoice,
-  T extends Provisions
-  > = Association & {
-  from: S,
-  scope: C,
-  handler: (config: Provisionable, stack: Stack) => T,
-  where: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+  H = any,
+> = Association<H> & {
+  as: name;
+  from: S;
+  scope: C;
 };
+
+/**
+ * Extracts an association object to an object whose key is the association's name (the "as" key)
+ * and value, the return type of the handler function (the "handler" key), whenever the "scope"
+ * key is equal to the given scope.
+ *
+ * @type {ExtractAssociation}
+ * @param {Association} T
+ * @param {ServiceScopeChoice} S
+ */
+type ExtractAssociation<T extends Association, S extends ServiceScopeChoice> = {
+  [K in Extract<T, { scope: S }>['as']]: ReturnType<Extract<T, { as: K }>['handler']>
+} extends infer O ? { [K in keyof O]: O[K] } : never;
+
+/**
+ * @type {ProvisionAssociationRequirements} calculates the types of the provisionable's requirements
+ *  by the return types of the handler functions in the service's associations
+ */
+export type ProvisionAssociationRequirements<
+  Associations extends Association[],
+  S extends ServiceScopeChoice,
+> = ExtractAssociation<Associations[number], S>;
+
+/**
+ * @type {Provisionable} represents a piece of configuration and service to be deployed
+ */
+export type Provisionable = {
+  id: string;
+  config: BaseServiceAttributes;
+  service: BaseService;
+  requirements: Record<string, any>;
+  provisions: Provisions,
+  resourceId: string; /** @var {String} resourceId the id of the terraform resource */
+};
+
+/**
+ * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
+ */
+export type ProvisionHandler = (
+  provisionable: Provisionable,
+  stack: Stack,
+  opts?: object,
+) => Provisions;
 
 /**
  * @type {ServiceEnvironment} the environment variable required by a service
@@ -124,7 +137,7 @@ export type Service<Setup extends BaseServiceAttributes> = {
   schema: ServiceSchema<Setup>;
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   environment: ServiceEnvironment[];
-  associations: Dictionary<Association>;
+  associations: Association[];
 };
 
 export type CoreService = Service<CoreServiceAttributes>;
@@ -174,7 +187,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
     schemaId,
     handlers: new Map(),
     environment: [],
-    associations: {},
+    associations: [],
   };
 };
 
@@ -185,7 +198,9 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  * @param type {ServiceTypeChoice} the service type for the cloud service
  * @returns {Service<Obj>} the cloud service
  */
-export const getCloudService = (provider: ProviderChoice, type: ServiceTypeChoice): CloudService => {
+export const getCloudService = (
+  provider: ProviderChoice, type: ServiceTypeChoice,
+): CloudService => {
   const core = getCoreService(provider, type);
   const schema: ServiceSchema<CloudServiceAttributes> = {
     ...core.schema,
@@ -232,9 +247,9 @@ export const isCoreService = (
  * @param {Partial<Service>} attrs the service attributes to apply
  * @returns {Function<Service>} the updated service
  */
-export const withServiceAttributes = <C extends BaseServiceAttributes>(
-  attrs: Partial<Service<C>>,
-) => <T extends Service<C>>(srv: T): T => ({
+export const withServiceProperties = <C extends BaseServiceAttributes, Attributes extends Obj = {}>(
+  attrs: Attributes,
+) => <T extends Service<C>>(srv: T): T & Attributes => ({
   ...srv,
   ...attrs,
 });
@@ -257,7 +272,8 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * For example:
  *  const AwsRdsService = compose(
  *    ...
- *    associate(SERVICE_TYPE.PROVIDER, {
+ *    associate({
+ *      from: SERVICE_TYPE.PROVIDER,
  *      scope: 'deployable',
  *      as: 'kmsKey',
  *      where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
@@ -274,12 +290,9 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @see {ServiceAssociation}
  * @returns {Function<Service>}
  */
-export const associate = <C extends BaseServiceAttributes>(
-  associations: Dictionary<Association>
-) => <T extends Service<C>>(service: T): T => ({
-  ...service,
-  associations: { ...service.associations, ...associations },
-});
+export const associate = <C extends BaseServiceAttributes, A extends Association[]>(
+  associations: A
+) => withServiceProperties<C, { associations: A }>({ associations });
 
 /**
  * Registers a handler to use when provisioning the service under a specific scope
@@ -316,6 +329,16 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   environment: [...service.environment, { name, required, description }],
 });
 
-export const assertRequirementsSatisfied = () => {
-
+/**
+ * @param {BaseServiceAttributes} config the service's configuration
+ * @param {String} stageName the stage's name
+ * @returns {String} the id to use as a terraform resource identifier
+ */
+export const getProvisionableResourceId = (
+  config: BaseServiceAttributes, stageName: string,
+): string => {
+  const name = 'name' in config ? config.name : config.type;
+  return `${name}-${stageName}`;
 };
+
+export const assertRequirementsSatisfied = () => {};

@@ -27,6 +27,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@bitty/pipe": "^0.3.0",
     "@cdktf/provider-aws": "5.0.52",
     "@cdktf/provider-local": "^0.5.58",
     "ajv": "^8.11.0",

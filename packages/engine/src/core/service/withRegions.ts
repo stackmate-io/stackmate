@@ -1,11 +1,11 @@
-import { pipe } from 'lodash/fp';
-import { BaseServiceAttributes, withServiceAttributes, withSchema } from './core';
+import pipe from '@bitty/pipe';
+import { BaseServiceAttributes, withServiceProperties, withSchema, Service } from './core';
 
 /**
  * @type {RegionalAttributes} region-specific attributes
  */
-
 export type RegionalAttributes<T extends string = string> = { region: T; };
+
 /**
  * Enhances a service to support regions
  *
@@ -16,18 +16,20 @@ export type RegionalAttributes<T extends string = string> = { region: T; };
 
 export const withRegions = <C extends BaseServiceAttributes>(
   regions: readonly string[], defaultRegion: string
-) => pipe(
-  withServiceAttributes({ regions }),
-  withSchema<C, { region: string; }>({
-    type: 'object',
-    required: ['region'],
-    properties: {
-      region: {
-        type: 'string',
-        enum: regions,
-        default: defaultRegion,
-        errorMessage: `The region is invalid. Available options are: ${regions.join(', ')}`
+) => <T extends Service<C>>(srv: T): T & { regions: readonly string[] } => (
+  pipe(
+    withServiceProperties<C, { regions: readonly string[] }>({ regions }),
+    withSchema<C, RegionalAttributes>({
+      type: 'object',
+      required: ['region'],
+      properties: {
+        region: {
+          type: 'string',
+          enum: regions,
+          default: defaultRegion,
+          errorMessage: `The region is invalid. Available options are: ${regions.join(', ')}`
+        },
       },
-    },
-  })
+    }),
+  )(srv)
 );

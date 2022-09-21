@@ -4,7 +4,7 @@ import Ajv, { AnySchemaObject, Options as AjvOptions } from 'ajv';
 import { defaults, difference, get, isEmpty } from 'lodash';
 import { DataValidationCxt } from 'ajv/dist/types';
 
-import { Obj } from '@stackmate/engine/types';
+import { Obj } from '@stackmate/engine/lib';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ServiceEnvironment } from '@stackmate/engine/core/service';
