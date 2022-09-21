@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import { merge, uniq } from 'lodash';
 
-import { Obj } from '@stackmate/engine/types';
+import { Obj, RequireKeys } from '@stackmate/engine/lib';
 import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service';
+import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service/core';
 
 /**
  * @type {SchemaType} the allowed values for the `type` property in JSON schemas
@@ -94,12 +94,13 @@ export type JsonSchema<T = undefined> = {
    * Holds simple JSON Schema definitions for referencing from elsewhere
    */
   $defs?: { [property: string]: JsonSchema };
+
   definitions?: T extends Obj ? { [K in keyof T]?: JsonSchema<T[K]> } : never;
   /**
    * The keys that can exist on the object with the json schema that should validate their value
    */
   properties?: T extends Obj
-    ? { [K in keyof T]: JsonSchema<T[K]> }
+    ? { [K in keyof T]?: JsonSchema<T[K]> }
     : { [property: string]: JsonSchema };
 
   /**
@@ -180,9 +181,7 @@ export type JsonSchema<T = undefined> = {
 /**
  * @type {ServiceSchema} special case for service schemas
  */
-export type ServiceSchema<T extends Obj = {}> = JsonSchema<T> & {
-  properties: { [K in keyof T]: JsonSchema<T[K]> };
-};
+export type ServiceSchema<T extends Obj = {}> = RequireKeys<JsonSchema<T>, 'properties'>;
 
 /**
  * Merges two JSON schemas into one

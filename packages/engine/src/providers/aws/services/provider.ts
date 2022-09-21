@@ -2,34 +2,59 @@ import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 
-import { OneOf } from '@stackmate/engine/types';
+import { ChoiceOf } from '@stackmate/engine/lib';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { CoreServiceAttributes, RegionalAttributes } from '@stackmate/engine/core/service';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import {
+  CoreServiceAttributes, Provisionable, ProvisionAssociationRequirements,
+  RegionalAttributes, Service,
+} from '@stackmate/engine/core/service';
 
-export type AwsProviderCommonProvisions = {
-  provider: TerraformAwsProvider,
+type AwsProviderCommonResources = {
+  provider: TerraformAwsProvider;
 };
 
-export type AwsProviderDeployableProvisions = AwsProviderCommonProvisions & {
+type AwsProviderDeployableResources = AwsProviderCommonResources & {
+  provider: TerraformAwsProvider,
   gateway: InternetGateway;
   subnet: Subnet;
   vpc: Vpc;
   kmsKey: KmsKey;
 };
 
-export type AwsProviderDestroyableProvisions = AwsProviderCommonProvisions;
-export type AwsProviderPreparableProvisions = AwsProviderCommonProvisions;
+type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
+type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
 export type AwsProviderAttributes = CoreServiceAttributes
-  & RegionalAttributes<OneOf<typeof REGIONS>>
+  & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & {
     provider: typeof PROVIDER.AWS,
     type: typeof SERVICE_TYPE.PROVIDER;
+    region: ChoiceOf<typeof REGIONS>;
   };
 
-export type AwsProviderProvisionable = {
+export type AwsProviderService = Service<AwsProviderAttributes> & {
+  provider: typeof PROVIDER.AWS,
+  type: typeof SERVICE_TYPE.PROVIDER;
+};
+
+type AwsProviderBaseProvisionable = Provisionable & {
   id: string;
-  config: {};
-  service: {};
+  config: AwsProviderAttributes;
+  service: AwsProviderService;
+};
+
+export type AwsProviderDeployableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderDeployableResources;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'deployable'>;
+};
+
+export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderDestroyableProvisions;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'destroyable'>;
+};
+
+export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderPreparableProvisions;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'preparable'>;
 };

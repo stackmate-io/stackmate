@@ -1,4 +1,4 @@
-import { pipe } from 'lodash/fp';
+import pipe from '@bitty/pipe';
 import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';

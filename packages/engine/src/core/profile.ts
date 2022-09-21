@@ -35,7 +35,7 @@ export const getProfilePath = (
  */
 export const getServiceProfile = (
   provider: ProviderChoice, service: ServiceTypeChoice, name: string
-): object => {
+): Record<string, any> => {
   try {
     const profilePath = getProfilePath(provider, service, name);
     // eslint-disable-next-line global-require,import/no-dynamic-require
