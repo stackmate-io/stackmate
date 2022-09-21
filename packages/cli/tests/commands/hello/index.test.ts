@@ -1,6 +1,6 @@
 import InitCommand from '@stackmate/cli/commands/init';
 
-describe('Init Command', () => {
+describe.skip('Init Command', () => {
   let results: string = '';
 
   beforeEach(() => {

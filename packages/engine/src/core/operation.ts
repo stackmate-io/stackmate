@@ -4,11 +4,12 @@ import { isEmpty, uniqBy } from 'lodash';
 import Registry from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
+import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
-import { getStageServices, Project, withLocalState } from '@stackmate/engine/core/project';
+import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions, ServiceConfiguration,
-  ServiceEnvironment, ServiceScopeChoice,
+  BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions,
+  ServiceConfiguration, ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
 type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
@@ -193,36 +194,40 @@ const getOperation = (
 /**
  * Returns a deployment operation
  *
- * @param {Project} config the project's configuration
+ * @param {Project} project the project's configuration
  * @param {String} stage the stage's name
  * @returns {Operation} the deployment operation
  */
-export const deployment = (config: Project, stage: string) => pipe(
-  getStageServices(stage),
-  getOperation(config.name, stage, 'deployable'),
-)(config);
+export const deployment = (project: Project, stage: string) => (
+  pipe(
+    getServiceConfigurations(stage),
+    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'deployable'),
+  )(project)
+);
 
 /**
  * Returns a destruction operation
  *
- * @param {Project} config the project's configuration
+ * @param {Project} project the project's configuration
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const destruction = (config: Project, stage: string) => pipe(
-  getStageServices(stage),
-  getOperation(config.name, stage, 'destroyable'),
-)(config);
+export const destruction = (project: Project, stage: string) => {
+  pipe(
+    getServiceConfigurations(stage),
+    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
+  )(project);
+};
 
 /**
  * Returns a setup operation (which uses a local state service)
  *
- * @param {Project} config the project's configuration
+ * @param {Project} project the project's configuration
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const setup = (config: Project, stage: string) => pipe(
-  getStageServices(stage),
+export const setup = (project: Project, stage: string) => pipe(
+  getServiceConfigurations(stage),
   withLocalState(),
-  getOperation(config.name, stage, 'preparable'),
-)(config);
+  getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
+)(project);
