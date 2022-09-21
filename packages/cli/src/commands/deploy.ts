@@ -1,6 +1,6 @@
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { deployment, Operation, validateProject } from '@stackmate/engine';
+import { deployment, validateProject } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import OperationCommand from '@stackmate/cli/core/commands/operation';

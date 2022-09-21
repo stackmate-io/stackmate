@@ -152,6 +152,16 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
     validate: validateServiceLinks,
   });
 
+  ajv.addKeyword({  // no-op for config generator
+    keyword: 'isIncludedInConfigGeneration',
+    type: 'boolean',
+  });
+
+  ajv.addKeyword({  // no-op for config generator
+    keyword: 'serviceConfigGenerationTemplate',
+    type: 'string',
+  });
+
   ajv.addKeyword({
     keyword: 'serviceProfile',
     type: 'string',
@@ -165,9 +175,6 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
     error: { message: 'Invalid profile overrides defined' },
     validate: validateServiceProfileOverrides,
   });
-
-  const schema = readSchemaFile();
-  ajv.addSchema(schema, schema.$id);
 
   return ajv;
 };
@@ -214,18 +221,18 @@ export const validate = <T extends Obj = {}>(
   loadJsonSchema(ajv);
 
   const validAttributes = { ...attributes };
-  const runValidations = ajv.getSchema(schemaId);
-  if (!runValidations) {
+  const validate = ajv.getSchema(schemaId);
+
+  if (!validate) {
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!runValidations(attributes)) {
-    const errors = ajv.errors;
+  if (!validate(attributes)) {
+    const errors = validate.errors;
 
     const { inspect } = require('util');
-    console.debug(inspect(errors, { depth: 30 }));
-
-    throw new Error('oops');
+    // console.log(inspect(errors, { depth: 30 }));
+    throw new Error(inspect(errors));
   }
 
   return validAttributes;
@@ -242,10 +249,10 @@ export const validateEnvironment = (vars: ServiceEnvironment[], env = process.en
 /**
  * Validates a project configuration
  *
- * @returns {Function<Project>} the validated project
+ * @param {ProjectConfiguration} config the project's configuration
+ * @param {AjvOptions} opts any options to pass to Ajv
+ * @returns {Project} the validated project
  */
-export const validateProject = () => (
-  config: ProjectConfiguration, opts: AjvOptions = {},
-): Project => (
-  validate(JSON_SCHEMA_ROOT, config, opts) as Project
+export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project => (
+  validate(JSON_SCHEMA_ROOT, config, opts) as unknown as Project
 );

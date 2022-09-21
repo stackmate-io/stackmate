@@ -130,8 +130,8 @@ export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAt
  * @param {Associations}
  */
 export type Service<Setup extends BaseServiceAttributes> = {
-  provider: ProviderChoice;
-  type: ServiceTypeChoice;
+  provider: Setup['provider'] extends ProviderChoice ? ProviderChoice : Extract<BaseServiceAttributes, Setup['provider']>;
+  type: Setup['type'] extends ServiceTypeChoice ? ServiceTypeChoice: Extract<BaseServiceAttributes, Setup['type']>;
   regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;

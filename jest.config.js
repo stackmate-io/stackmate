@@ -31,4 +31,5 @@ module.exports = {
     "ts",
     "js"
   ],
+  verbose: true,
 };

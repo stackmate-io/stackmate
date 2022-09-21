@@ -1,26 +1,23 @@
-import pipe from '@bitty/pipe';
 import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import Registry from '@stackmate/engine/core/registry';
-import { validateProject } from '@stackmate/engine/core/validation';
 import {
   getCloudServiceConditional, getCoreServiceConditional,
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 import {
   CloudServiceAttributes, CloudProviderChoice, CoreServiceAttributes,
-  BaseServiceAttributes, isCoreService, CloudService, CoreService,
-  ProviderChoice, ServiceConfiguration,
+  isCoreService, CloudService, CoreService, ProviderChoice, ServiceConfiguration,
 } from '@stackmate/engine/core/service';
 
 /**
  * @type {StageConfiguration} the configuration for the project stages
  */
-export type StageConfiguration = {
+export type StageConfiguration<IsPartial extends boolean = false> = {
   name: string;
-  services?: CloudServiceAttributes[],
+  services?: IsPartial extends true ? Partial<CloudServiceAttributes>[] : CloudServiceAttributes[],
   copy?: string;
   skip?: string[];
 };
@@ -40,7 +37,9 @@ export type Project = {
 /**
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
-export type ProjectConfiguration = Partial<Project>;
+export type ProjectConfiguration = Omit<Partial<Project>, 'stages'> & {
+  stages?: StageConfiguration<true>[];
+};
 
 /**
  * Returns the list of the cloud services that are managed by the given stage
@@ -51,7 +50,7 @@ export type ProjectConfiguration = Partial<Project>;
  * @returns {ServiceConfiguration[]} the cloud services deployed by this stage
  */
 export const getCloudServices = (
-  config: ProjectConfiguration, stage: string, skippedServices: string[] = [],
+  config: Project, stage: string, skippedServices: string[] = [],
 ): ServiceConfiguration[] => {
   const { provider: projectProvider, region: projectRegion = null, stages = [] } = config;
 
@@ -97,13 +96,13 @@ export const getCloudServices = (
  * Returns the configuration for the provider services, given a list of cloud services
  * We basically extract provider and region from the service list and return relevant configs
  *
- * @param {ProjectConfiguration} config the project configuration object
+ * @param {Project} config the project configuration object
  * @param {String} stage the stage to get provider configurations for
  * @param {ServiceConfiguration[]} services the services to get the provider configurations by
  * @returns {CoreServiceAttributes[]} the provider configurations
  */
 export const getProviderConfigurations = (
-  config: ProjectConfiguration, stage: string, services: ServiceConfiguration[] = [],
+  config: Project, stage: string, services: ServiceConfiguration[] = [],
 ): ServiceConfiguration[] => {
   const { provider: projectProvider, region: projectRegion } = config;
 
@@ -296,21 +295,6 @@ export const getProjectSchema = (
     },
   };
 };
-
-/**
- * Returns the stage's service attributes
- *
- * @param {ProjectConfiguration} stage the stage to return the services for
- * @returns {BaseServiceAttributes[]} the stage's services
- */
-export const getStageServices = (
-  stage: string,
-): (config: ProjectConfiguration) => BaseServiceAttributes[] => (
-  config: ProjectConfiguration,
-): BaseServiceAttributes[] => pipe(
-  validateProject(),
-  getServiceConfigurations(stage),
-)(config);
 
 /**
  * Replaces the state of the project with a local one
