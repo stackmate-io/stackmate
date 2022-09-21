@@ -2,16 +2,13 @@ import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { kebabCase } from 'lodash';
-import {
-  PROVIDER, Registry, DEFAULT_REGIONS,
-  ProjectConfiguration, ProviderChoice, ServiceTypeChoice,
-} from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, ProjectConfiguration } from '@stackmate/engine';
 
+import BaseCommand from '@stackmate/cli/core/commands/base';
+import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
+import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import { parseCommaSeparatedString } from '@stackmate/cli/lib/helpers';
-import { createProject, getRepository } from '@stackmate/cli/core/generator';
-import BaseCommand from '@stackmate/cli/core/commands/base';
-import ConfigurationFile from '../lib/configuration-file';
 
 class InitCommand extends BaseCommand {
   /**
@@ -61,18 +58,6 @@ class InitCommand extends BaseCommand {
    * @var {Object} flags the parsed flags
    */
   protected parsedFlags: OutputFlags<typeof InitCommand.flags>;
-
-  serviceAttributes(provider: ProviderChoice, service: ServiceTypeChoice) {
-    let serviceProvider: ProviderChoice = provider;
-    const serviceProviders = Registry.providers(service);
-
-    if (!serviceProviders.includes(provider)) {
-      ([serviceProvider] = serviceProviders);
-    }
-
-    const srv = Registry.get(serviceProvider, service);
-    return srv.config();
-  }
 
   @Memoize() get projectName(): string {
     const { name } = this.parsedFlags;

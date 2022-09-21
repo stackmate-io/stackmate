@@ -127,7 +127,7 @@ export type JsonSchema<T = undefined> = {
    * or an array of the acceptable types
    */
   type?: T extends undefined
-          ? "string"  // undefined, string by default
+          ? string  // undefined, string TYPE by default
           : T extends number
             ? "number"
               : T extends string | symbol
@@ -140,7 +140,7 @@ export type JsonSchema<T = undefined> = {
                         ? "null"
                         : T extends object
                           ? "object"
-                          : "string"; // explicitly defined
+                          : string; // explicitly defined, string type
 
   format?: string;
 

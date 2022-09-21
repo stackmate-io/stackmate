@@ -2,6 +2,7 @@ import path from 'node:path';
 import { omit } from 'lodash';
 
 export const { env: ENV } = process;
+export const DEFAULT_PROJECT_NAME = 'stackmate-project';
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate';
 export const DEBUG_MODE = Boolean(ENV.DEBUG) || false;
 
