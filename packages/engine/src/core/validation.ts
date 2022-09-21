@@ -176,9 +176,6 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
     validate: validateServiceProfileOverrides,
   });
 
-  const schema = readSchemaFile();
-  ajv.addSchema(schema, schema.$id);
-
   return ajv;
 };
 
@@ -224,18 +221,18 @@ export const validate = <T extends Obj = {}>(
   loadJsonSchema(ajv);
 
   const validAttributes = { ...attributes };
-  const runValidations = ajv.getSchema(schemaId);
-  if (!runValidations) {
+  const validate = ajv.getSchema(schemaId);
+
+  if (!validate) {
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!runValidations(attributes)) {
-    const errors = ajv.errors;
+  if (!validate(attributes)) {
+    const errors = validate.errors;
 
     const { inspect } = require('util');
-    console.debug(inspect(errors, { depth: 30 }));
-
-    throw new Error('oops');
+    // console.log(inspect(errors, { depth: 30 }));
+    throw new Error(inspect(errors));
   }
 
   return validAttributes;

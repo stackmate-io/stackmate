@@ -79,7 +79,7 @@ export const getServiceConfiguration = (
   const config: Partial<BaseServiceAttributes> = {};
   for (const [key, schema] of Object.entries(properties)) {
     const {
-      'default': defaultValue,
+      default: defaultValue,
       isIncludedInConfigGeneration,
       serviceConfigGenerationTemplate,
     } = schema;
@@ -96,11 +96,11 @@ export const getServiceConfiguration = (
       Object.assign(config, {
         [key]: defaultValue,
       });
+    } else {
+      throw new Error(
+        `There is no template or default value for property ${key} for service ${service.schemaId} ${JSON.stringify(schema)}`,
+      );
     }
-
-    throw new Error(
-      `There is no template or default value for property ${key} for service ${service.schemaId}`,
-    );
   }
 
   return config;
