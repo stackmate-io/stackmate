@@ -152,6 +152,16 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
     validate: validateServiceLinks,
   });
 
+  ajv.addKeyword({  // no-op for config generator
+    keyword: 'isIncludedInConfigGeneration',
+    type: 'boolean',
+  });
+
+  ajv.addKeyword({  // no-op for config generator
+    keyword: 'serviceConfigGenerationTemplate',
+    type: 'string',
+  });
+
   ajv.addKeyword({
     keyword: 'serviceProfile',
     type: 'string',
@@ -242,10 +252,10 @@ export const validateEnvironment = (vars: ServiceEnvironment[], env = process.en
 /**
  * Validates a project configuration
  *
- * @returns {Function<Project>} the validated project
+ * @param {ProjectConfiguration} config the project's configuration
+ * @param {AjvOptions} opts any options to pass to Ajv
+ * @returns {Project} the validated project
  */
-export const validateProject = () => (
-  config: ProjectConfiguration, opts: AjvOptions = {},
-): Project => (
-  validate(JSON_SCHEMA_ROOT, config, opts) as Project
+export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project => (
+  validate(JSON_SCHEMA_ROOT, config, opts) as unknown as Project
 );
