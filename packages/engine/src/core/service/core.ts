@@ -1,7 +1,7 @@
 import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, ChoiceOf, OmitNever, ArrowFunc } from '@stackmate/engine/lib';
+import { Obj, ChoiceOf, OmitNever, ArrowFunc, OneOfType } from '@stackmate/engine/lib';
 import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
@@ -44,27 +44,26 @@ export type ServiceAssociation<
 };
 
 /**
+ * Extracts an association object to an object whose key is the association's name (the "as" key)
+ * and value, the return type of the handler function (the "handler" key), whenever the "scope"
+ * key is equal to the given scope.
+ *
+ * @type {ExtractAssociation}
+ * @param {Association} T
+ * @param {ServiceScopeChoice} S
+ */
+type ExtractAssociation<T extends Association, S extends ServiceScopeChoice> = {
+  [K in Extract<T, { scope: S }>['as']]: ReturnType<Extract<T, { as: K }>['handler']>
+} extends infer O ? { [K in keyof O]: O[K] } : never;
+
+/**
  * @type {ProvisionAssociationRequirements} calculates the types of the provisionable's requirements
  *  by the return types of the handler functions in the service's associations
  */
 export type ProvisionAssociationRequirements<
   Associations extends Association[],
   S extends ServiceScopeChoice,
-> = OmitNever<{
-  [K in Associations[number]['as']]: Associations[number] extends {
-    scope: infer Scope extends ServiceScopeChoice,
-    handler: infer Func extends ArrowFunc, [p: string]: any
-  } ? Scope extends S ? ReturnType<Func> : never
-    : never
-}>;
-
-type Test = [
-  { as: 'fun', handler: () => boolean, scope: 'deployable', from: ServiceTypeChoice },
-  { as: 'fun2', handler: () => number, scope: 'deployable', from: ServiceTypeChoice },
-  { as: 'fun3', handler: () => string, scope: 'deployable', from: ServiceTypeChoice },
-];
-
-type Nok = ProvisionAssociationRequirements<Test, 'deployable'>;
+> = ExtractAssociation<Associations[number], S>;
 
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
