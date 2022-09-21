@@ -1,6 +1,6 @@
 import { uniq } from 'lodash';
 
-import * as Services from '@stackmate/engine/providers';
+import * as Services from '@stackmate/engine/providers/services';
 import {
   ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes,
 } from '@stackmate/engine/core/service';
@@ -8,8 +8,8 @@ import {
 export type ServicesRegistry = {
   readonly items: BaseService[];
   readonly regions: Map<ProviderChoice, Set<string>>;
-  providers(): ProviderChoice[];
   get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService;
+  providers(serviceType?: ServiceTypeChoice): ProviderChoice[];
   ofType(type: ServiceTypeChoice): BaseService[];
   ofProvider(provider: ProviderChoice): BaseService[];
   fromConfig(config: BaseServiceAttributes): BaseService;
@@ -43,10 +43,16 @@ class Registry implements ServicesRegistry {
   }
 
   /**
-   * @returns {ProviderChoice[]} the providers whose services are available in the registry
+   * Returns the providers for a specific services (if provided), or all available otherwise
+   *
+   * @returns {ProviderChoice[]} the providers available for the service (if any, otherwise all)
    */
-  providers(): ProviderChoice[] {
-    return uniq(this.items.map(s => s.provider));
+  providers(serviceType?: ServiceTypeChoice): ProviderChoice[] {
+    if (!serviceType) {
+      return uniq(this.items.map(s => s.provider));
+    }
+
+    return uniq(this.items.filter(s => s.type === serviceType).map(s => s.provider));
   }
 
   /**

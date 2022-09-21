@@ -244,6 +244,8 @@ export const validateEnvironment = (vars: ServiceEnvironment[], env = process.en
  *
  * @returns {Function<Project>} the validated project
  */
-export const validateProject = () => (config: ProjectConfiguration): Project => (
-  validate(JSON_SCHEMA_ROOT, config) as Project
+export const validateProject = () => (
+  config: ProjectConfiguration, opts: AjvOptions = {},
+): Project => (
+  validate(JSON_SCHEMA_ROOT, config, opts) as Project
 );
