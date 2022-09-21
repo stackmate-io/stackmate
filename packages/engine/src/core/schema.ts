@@ -6,11 +6,6 @@ import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
 import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service/core';
 
 /**
- * @type {SchemaType} the allowed values for the `type` property in JSON schemas
- */
-type SchemaType = "string" | "number" | "object" | "array" | "boolean" | "null";
-
-/**
  * @type {JsonSchema<T>} the JSON schema type
  */
 export type JsonSchema<T = undefined> = {
@@ -132,7 +127,7 @@ export type JsonSchema<T = undefined> = {
    * or an array of the acceptable types
    */
   type?: T extends undefined
-          ? SchemaType
+          ? "string"  // undefined, string by default
           : T extends number
             ? "number"
               : T extends string | symbol
@@ -145,7 +140,7 @@ export type JsonSchema<T = undefined> = {
                         ? "null"
                         : T extends object
                           ? "object"
-                          : SchemaType; // explicitly defined
+                          : "string"; // explicitly defined
 
   format?: string;
 
