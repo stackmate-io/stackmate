@@ -104,14 +104,14 @@ export const onDeployment: ProvisionHandler = (
   const {
     config,
     service,
-    requirements: { kmsKey, providerInstance, rootCredentials },
+    requirements: { providerInstance, rootCredentials },
   } = provisionable;
 
   const { instance, params } = getServiceProfile(
     service.provider, service.type, config.profile || DEFAULT_PROFILE_NAME,
   );
 
-  const paramGroup = new DbParameterGroup(stack.context, `${provisionable.id}-params`, {
+  const paramGroup = new DbParameterGroup(stack.context, `${config.identifier}-params`, {
     ...params,
     family: getParamGroupFamily(config),
   });
