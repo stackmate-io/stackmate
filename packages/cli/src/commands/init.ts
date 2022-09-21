@@ -3,7 +3,7 @@ import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { kebabCase } from 'lodash';
 import {
-  PROVIDER, AWS_REGIONS, ServiceConstructor, ServiceRegistry, AvailableServiceChoice,
+  PROVIDER, Registry, DEFAULT_REGIONS,
   ProjectConfiguration, ProviderChoice, ServiceTypeChoice,
 } from '@stackmate/engine';
 
@@ -40,7 +40,7 @@ class InitCommand extends BaseCommand {
     }),
     region: Flags.string({
       char: 'r',
-      default: AWS_REGIONS.EU_CENTRAL_1,
+      default: DEFAULT_REGIONS[PROVIDER.AWS],
     }),
     state: Flags.string({
       default: PROVIDER.AWS,
@@ -64,13 +64,13 @@ class InitCommand extends BaseCommand {
 
   serviceAttributes(provider: ProviderChoice, service: ServiceTypeChoice) {
     let serviceProvider: ProviderChoice = provider;
-    const serviceProviders = ServiceRegistry.providers(service);
+    const serviceProviders = Registry.providers(service);
 
     if (!serviceProviders.includes(provider)) {
       ([serviceProvider] = serviceProviders);
     }
 
-    const srv: ServiceConstructor = ServiceRegistry.get(serviceProvider, service);
+    const srv = Registry.get(serviceProvider, service);
     return srv.config();
   }
 
@@ -99,7 +99,7 @@ class InitCommand extends BaseCommand {
       secretsProvider: secrets,
       stateProvider: state,
       stageNames: parseCommaSeparatedString(stages),
-      serviceTypes: parseCommaSeparatedString(services) as AvailableServiceChoice[],
+      serviceTypes: parseCommaSeparatedString(services),
     });
   }
 
