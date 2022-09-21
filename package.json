@@ -15,7 +15,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-monorepo": "0.3.2",
     "globby": "^11",
-    "lerna": "^4.0.0",
+    "lerna": "5.5.2",
     "rimraf": "3.0.2",
     "ts-jest": "^27.1.5",
     "ts-transform-paths": "^2.0.3",

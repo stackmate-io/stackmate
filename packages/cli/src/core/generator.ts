@@ -4,14 +4,13 @@ import ini from 'ini';
 import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
-  AWS_REGIONS, DEFAULT_REGION, SERVICE_TYPE, PROVIDER,
-  ServiceRegistry, ProjectConfiguration, Project, CloudServiceAttributes,
-  StateServiceConfiguration, VaultServiceConfiguration, CloudServiceConfiguration,
-  StageConfiguration, BaseService, ConfigurationOptions, ServiceTypeChoice,
+  SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
+  BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, Registry, ProjectConfiguration, validateProject,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { ProjectConfigCreationOptions } from '@stackmate/cli/types';
+import { StageConfiguration } from '@stackmate/engine/core/project';
 
 export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')): string | undefined => {
   if (!fs.existsSync(fileName)) {
@@ -35,9 +34,9 @@ export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'c
 // Attributes that are implied in the service configuration and are
 const rootImpliedAttributes = ['provider', 'region'];
 
-const skipImpliedAttributes = <T extends ConfigurationOptions<BaseService.Attributes>>(
-  serviceConfig: T,
-  rootConfig: Partial<ProjectConfiguration>,
+const skipImpliedAttributes = <T extends BaseServiceAttributes>(
+  serviceConfig: Partial<T>,
+  rootConfig: Partial<Project>,
 ): T => (
   omitBy(serviceConfig, (value, key) => (
     rootImpliedAttributes.includes(key) && rootConfig[key as keyof typeof rootConfig] === value
@@ -49,7 +48,7 @@ export const createProject = ({
   defaultProvider = PROVIDER.AWS,
   stateProvider = PROVIDER.AWS,
   secretsProvider = PROVIDER.AWS,
-  defaultRegion = AWS_REGIONS.EU_CENTRAL_1,
+  defaultRegion = AWS_DEFAULT_REGION,
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
@@ -68,15 +67,10 @@ export const createProject = ({
 
   const [stageName, ...otherStages] = validStageNames;
   const provider = defaultProvider || PROVIDER.AWS;
-  const region = defaultRegion || DEFAULT_REGION[provider];
+  const region: string = defaultRegion || DEFAULT_REGIONS[provider];
 
-  const stateConfig = ServiceRegistry.get(stateProvider || provider, SERVICE_TYPE.STATE).config({
-    projectName, stageName,
-  }) as StateServiceConfiguration;
-
-  const vaultConfig = ServiceRegistry.get(secretsProvider || provider, SERVICE_TYPE.VAULT).config({
-    projectName, stageName,
-  }) as VaultServiceConfiguration;
+  const stateConfig = Registry.get(stateProvider || provider, SERVICE_TYPE.STATE).config();
+  const vaultConfig = Registry.get(secretsProvider || provider, SERVICE_TYPE.SECRETS).config();
 
   const rootConfig: Omit<ProjectConfiguration, 'stages'> = {
     name: projectName,
@@ -91,14 +85,12 @@ export const createProject = ({
     {
       name: stageName,
       services: validServiceTypes.map((type) => {
-        const baseConfig = ServiceRegistry.get(provider, type).config({
+        const baseConfig = Registry.get(provider, type).config({
           projectName,
           stageName,
-        }) as CloudServiceConfiguration<BaseService.Attributes>;
+        });
 
-        const config = skipImpliedAttributes<CloudServiceConfiguration<BaseService.Attributes>>(
-          baseConfig, rootConfig,
-        );
+        const config = skipImpliedAttributes(baseConfig, rootConfig);
 
         let name = config.name;
 
@@ -108,7 +100,7 @@ export const createProject = ({
           name = `${name}-${count}`;
         }
 
-        return { ...config, name, type } as CloudServiceConfiguration<CloudServiceAttributes>;
+        return { ...config, name, type };
       }),
     },
     ...otherStages.map(
@@ -127,7 +119,7 @@ export const createProject = ({
   };
 
   // Validate the configuration
-  Project.validate(config, { useDefaults: false });
+  validateProject(config, { useDefaults: false });
 
   return config;
 };

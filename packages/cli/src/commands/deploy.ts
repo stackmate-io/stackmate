@@ -1,10 +1,9 @@
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { Operation } from '@stackmate/engine';
+import { deployment, Operation, validateProject } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import OperationCommand from '@stackmate/cli/core/commands/operation';
-import { exportStackConfiguration } from '@stackmate/cli/lib/helpers';
 import { DEFAULT_OUTPUT_DIRECTORY } from '@stackmate/cli/constants';
 
 class DeployCommand extends OperationCommand {
@@ -65,11 +64,13 @@ class DeployCommand extends OperationCommand {
    * Synthesizes the operation and writes out the output
    */
   async run(): Promise<void> {
-    const op = Operation.deployment(this.projectConfig, this.stage);
-    const { workdir } = exportStackConfiguration(op, this.outputPath, this.filename);
+    const project = validateProject(this.projectConfig);
+    const operation = deployment(project, this.stage);
+
+    const tf = operation.process();
 
     console.log({
-      workdir,
+      tf,
     });
   }
 }

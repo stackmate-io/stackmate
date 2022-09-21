@@ -169,7 +169,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
         type: 'string',
         enum: [type],
         default: type,
-        errorMessage: `You have to specify a valid service type, "${type}" is invalid`,
+        errorMessage: `You have to specify a valid service type, only ${type} is accepted`,
       },
       region: {
         type: 'string',
@@ -207,11 +207,25 @@ export const getCloudService = (
     required: [...(core.schema.required || []), 'name', 'type'],
     properties: {
       ...core.schema.properties,
+      provider: {
+        ...(core.schema.properties.provider || {}),
+        isIncludedInConfigGeneration: true,
+      },
+      type: {
+        ...(core.schema.properties.type || {}),
+        isIncludedInConfigGeneration: true,
+      },
+      region: {
+        ...(core.schema.properties.provider || {}),
+        isIncludedInConfigGeneration: true,
+      },
       name: {
         type: 'string',
         pattern: '[a-zA-Z0-9_]+',
         description: 'The name for the service to deploy',
         errorMessage: 'The name for the service should only contain characters, numbers and underscores',
+        isIncludedInConfigGeneration: true,
+        serviceConfigGenerationTemplate: '${type}-service-${stageName}',
       },
     },
   };
