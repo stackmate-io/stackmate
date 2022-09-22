@@ -45,7 +45,6 @@
     "ini": "^3.0.1",
     "lodash": "4.17.21",
     "oclif": "3.2.2",
-    "typescript-memoize": "^1.1.1",
     "yaml": "^2.1.1"
   },
   "devDependencies": {

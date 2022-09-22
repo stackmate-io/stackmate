@@ -1,8 +1,7 @@
+import { kebabCase } from 'lodash';
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { Memoize } from 'typescript-memoize';
-import { kebabCase } from 'lodash';
-import { PROVIDER, DEFAULT_REGIONS, ProjectConfiguration, SERVICE_TYPE, ServiceTypeChoice } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, SERVICE_TYPE, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
@@ -59,26 +58,12 @@ class InitCommand extends BaseCommand {
    */
   protected parsedFlags: OutputFlags<typeof InitCommand.flags>;
 
-  @Memoize() get projectName(): string {
-    const { name } = this.parsedFlags;
+  async run(): Promise<any> {
+    const { name, provider, region, secrets, state, stages, services } = this.parsedFlags;
+    const projectName = kebabCase(name || getRepository() || CURRENT_DIRECTORY);
 
-    if (name) {
-      return name;
-    }
-
-    const repository = getRepository();
-    if (repository) {
-      return kebabCase(repository)
-    }
-
-    return kebabCase(CURRENT_DIRECTORY);
-  }
-
-  @Memoize() get project(): ProjectConfiguration {
-    const { provider, region, secrets, state, stages, services } = this.parsedFlags;
-
-    return createProject({
-      projectName: this.projectName,
+    const project = createProject({
+      projectName,
       defaultProvider: provider,
       defaultRegion: region,
       secretsProvider: secrets,
@@ -88,11 +73,9 @@ class InitCommand extends BaseCommand {
         s => s in Object.values(SERVICE_TYPE),
       ) as ServiceTypeChoice[],
     });
-  }
 
-  async run(): Promise<any> {
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
-    projectFile.write(this.project);
+    projectFile.write(project);
   }
 }
 
