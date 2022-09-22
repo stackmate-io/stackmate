@@ -6,8 +6,8 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  CoreServiceAttributes, Provisionable,
-  ProvisionAssociationRequirements, Service, withRegions,
+  CoreServiceAttributes, Provisionable, ProvisionAssociationRequirements,
+  Service, withRegions, withConfigHints,
 } from '@stackmate/engine/core/service';
 
 type AwsStatePreparableProvisions = { bucket: S3Bucket };
@@ -15,7 +15,8 @@ type AwsStateDeployableResources = { backend: S3Backend };
 type AwsStateDestroyableProvisions = { backend: S3Backend };
 
 export type AwsStateAttributes = AwsServiceAttributes<CoreServiceAttributes & {
-  type: typeof SERVICE_TYPE.STATE
+  type: typeof SERVICE_TYPE.STATE;
+  bucket: string;
 }>;
 
 export type AwsStateService = Service<AwsStateAttributes>;
@@ -47,6 +48,12 @@ export type AwsStatePreparableProvisionable = AwsStateBaseProvisionable & {
 export const getStateService = (): AwsStateService => (
   pipe(
     withRegions(REGIONS, DEFAULT_REGION),
+    withConfigHints({
+      bucket: {
+        isIncludedInConfigGeneration: true,
+        serviceConfigGenerationTemplate: 'stackmate-${type}-${projectName}',
+      },
+    }),
   )(getAwsCoreService(SERVICE_TYPE.STATE))
 );
 
