@@ -25,11 +25,9 @@ describe('Project generator', () => {
       }],
     });
 
-    expect(config.state).toEqual(
-      expect.objectContaining({
-        bucket: expect.stringContaining('stackmate-state-some-project-name-'),
-      }),
-    );
+    expect(config.state).toMatchObject({
+      bucket: 'stackmate-state-some-project-name',
+    });
   });
 
   it('applies a numerical suffix when multiple services of the same type are added', () => {
