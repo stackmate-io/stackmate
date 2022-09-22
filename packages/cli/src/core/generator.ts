@@ -5,15 +5,13 @@ import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
-  BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS,
-  Registry, ProjectConfiguration, validateProject,
-  BaseService, ProviderChoice, isCoreService, CloudService,
+  BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
+  Registry, ProjectConfiguration, validateProject, CloudServiceAttributes,
+  BaseService, ProviderChoice, isCoreService, CloudService, JsonSchema,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { ProjectConfigCreationOptions } from '@stackmate/cli/types';
-import { StageConfiguration } from '@stackmate/engine/core/project';
-import { CloudServiceAttributes } from '@stackmate/engine/core/service';
 
 type TemplatePlaceholders = {
   projectName: string;
@@ -82,7 +80,7 @@ export const getServiceConfiguration = (
       default: defaultValue,
       isIncludedInConfigGeneration,
       serviceConfigGenerationTemplate,
-    } = schema;
+    } = schema as JsonSchema;
 
     if (!isIncludedInConfigGeneration) {
       continue;
