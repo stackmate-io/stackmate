@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert';
 
 import { getProfilePath, getServiceProfile } from '@stackmate/engine/core/profile';
-import { DEFAULT_PROFILE_NAME, PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 describe('getProfilePath', () => {
   it('returns the path for a profile', () => {
@@ -43,18 +43,5 @@ describe('getServiceProfile', () => {
     ).toThrow(
       `The profile ${missingProfile} was not found in the system`
     );
-  });
-
-  it('tolerates a missing default profile for a service', () => {
-    // We don't have profiles for the local provider
-    const p = getProfilePath(
-      PROVIDER.LOCAL, SERVICE_TYPE.STATE, DEFAULT_PROFILE_NAME, { withExtension: true },
-    );
-
-    assert.equal(fs.existsSync(p), false);
-
-    expect(
-      getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.MYSQL, DEFAULT_PROFILE_NAME),
-    ).toMatchObject({});
   });
 });

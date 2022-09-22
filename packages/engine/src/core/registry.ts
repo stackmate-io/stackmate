@@ -106,4 +106,6 @@ class Registry implements ServicesRegistry {
   }
 }
 
-export default new Registry(...Object.values(Services)) as Registry;
+const registry = new Registry(...Object.values(Services)) as Registry;
+
+export { registry as Registry };

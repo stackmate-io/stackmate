@@ -1,7 +1,7 @@
 import pipe from '@bitty/pipe';
 import { isEmpty, uniqBy } from 'lodash';
 
-import Registry from '@stackmate/engine/core/registry';
+import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
