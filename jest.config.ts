@@ -1,8 +1,9 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
-const { compilerOptions: { paths } } = require('./tsconfig');
-const { pathsToModuleNameMapper } = require('ts-jest');
+import tsConfig from './tsconfig.json';
+import { pathsToModuleNameMapper } from 'ts-jest';
 
-module.exports = {
+const { compilerOptions: { paths } } = tsConfig;
+
+export default {
   clearMocks: true,
   cacheDirectory: '<rootDir>/.jestcache',
   preset: 'ts-jest',
@@ -19,11 +20,11 @@ module.exports = {
     "<rootDir>/packages/cli",
     "<rootDir>/packages/engine",
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
   moduleFileExtensions: [
     "ts",
     "js"
   ],
+  setupFilesAfterEnv: ['<rootDir>/packages/engine/tests/jest.setup.ts'],
   verbose: true,
 };
