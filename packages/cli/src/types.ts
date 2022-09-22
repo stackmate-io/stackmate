@@ -1,4 +1,4 @@
-import { AvailableServiceChoice, CloudProviderChoice } from '@stackmate/engine';
+import { CloudProviderChoice, ServiceTypeChoice } from '@stackmate/engine';
 
 export type PreferenceOptions = {
   version: string;
@@ -27,5 +27,5 @@ export type ProjectConfigCreationOptions = {
   stageNames?: string[],
   stateProvider?: CloudProviderChoice,
   secretsProvider?: CloudProviderChoice,
-  serviceTypes?: AvailableServiceChoice[],
+  serviceTypes?: ServiceTypeChoice[],
 };
