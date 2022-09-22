@@ -62,5 +62,6 @@
     "pretest": "lerna run --scope @stackmate/engine schema:generate",
     "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
     "test:watch": "yarn test --watchAll"
-  }
+  },
+  "packageManager": "yarn@3.2.3"
 }
