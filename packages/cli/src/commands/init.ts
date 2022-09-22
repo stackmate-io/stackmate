@@ -4,10 +4,9 @@ import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { PROVIDER, DEFAULT_REGIONS, SERVICE_TYPE, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { parseCommaSeparatedString } from '@stackmate/cli/lib/helpers';
+import { ConfigurationFile, parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
   /**
