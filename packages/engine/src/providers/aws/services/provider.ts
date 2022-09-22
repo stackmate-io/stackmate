@@ -6,7 +6,7 @@ import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { ChoiceOf } from '@stackmate/engine/lib';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/services/core';
+import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import {
   CoreServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
   RegionalAttributes, Service, withRegions,

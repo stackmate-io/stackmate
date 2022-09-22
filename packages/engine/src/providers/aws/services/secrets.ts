@@ -3,9 +3,9 @@ import pipe from '@bitty/pipe';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { ChoiceOf } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/services/core';
+import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  CoreServiceAttributes, CredentialsHandler, profilable, ProvisionAssociationRequirements,
+  CoreServiceAttributes, CredentialsHandler, profilable, Provisionable, ProvisionAssociationRequirements,
   SecretsVaultService, Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
 
@@ -23,8 +23,7 @@ export type AwsSecretsVaultService = SecretsVaultService<
   Service<AwsVaultAttributes> & { associations: AwsServiceAssociations }
 >;
 
-type BaseProvisionable = {
-  id: string;
+type BaseProvisionable = Provisionable & {
   config: AwsVaultAttributes;
   service: AwsSecretsVaultService;
 };
@@ -50,9 +49,13 @@ export type AwsSecretsVaultPreparableProvisionable = BaseProvisionable & {
   >;
 };
 
-const generateCredentials: CredentialsHandler = (config, stack, { root = false } = {}) => ({
-  username: '', password: '',
-});
+const generateCredentials: CredentialsHandler = (
+  provisionable: AwsSecretsVaultDeployableProvisionable, stack, { root = false } = {},
+) => {
+  return {
+    username: '', password: '',
+  };
+};
 
 /**
  * @returns {AwsSecretsVaultService} the secrets vault service
