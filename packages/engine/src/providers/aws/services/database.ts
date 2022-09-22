@@ -19,7 +19,7 @@ import {
   MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
   ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
   ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
-  versioned, VersioningAttributes, withDatabase, withEngine, withHandler,
+  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = CloudServiceAttributes
@@ -161,8 +161,16 @@ export const onDeployment: ProvisionHandler = (
 export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
   type: T, engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {
+  const hints = {
+    name: {
+      isIncludedInConfigGeneration: true,
+      serviceConfigGenerationTemplate: '${type}-${stageName}-database',
+    },
+  };
+
   const base = pipe(
     withCredentials(),
+    withConfigHints(hints),
     withRootCredentials(),
     withHandler('deployable', onDeployment),
   )(getAwsCloudService(type));

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { countBy, isEmpty, omitBy, uniq } from 'lodash';
+import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
@@ -57,7 +57,7 @@ export const applyServiceTemplate = (
   let result = template;
 
   for (const [key, value] of Object.entries(placeholders)) {
-    result.replace(new RegExp(`\\$\\{${key}\\}`, 'ig'), value);
+    result = result.replace(RegExp('\\${' + key + '}', 'ig'), value);
   }
 
   return result;
@@ -194,8 +194,11 @@ export const createProject = ({
     stages,
   };
 
-  // Validate the configuration
-  validateProject({ ...config });
+  // Validate the configuration:
+  // Ajv is known for mutating objects, so we need to deep clone the configuration,
+  // because `useDefaults` is on by default and we can't validate the user-friendly
+  // configuration without it, since it misses a lot of key properties.
+  validateProject(cloneDeep(config));
 
   return config;
 };
