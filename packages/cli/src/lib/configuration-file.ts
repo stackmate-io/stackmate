@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Memoize } from 'typescript-memoize';
 
 import { FileErrors } from '@stackmate/cli/lib/errors';
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -82,21 +81,21 @@ class ConfigurationFile implements FileStorage {
   /**
    * @returns {Boolean} whether the file exists or not
    */
-  @Memoize() get exists(): boolean {
+  get exists(): boolean {
     return fs.existsSync(this.filename);
   }
 
   /**
    * @returns {Boolean} whether the file is readable or not
    */
-  @Memoize() get readable(): boolean {
+  get readable(): boolean {
     return this.hasAccess(this.filename, fs.constants.R_OK);
   }
 
   /**
    * @returns {Boolean} whether the file is writeable
    */
-  @Memoize() get writeable(): boolean {
+  get writeable(): boolean {
     if (!this.exists) {
       return this.directoryWriteable;
     }
@@ -107,7 +106,7 @@ class ConfigurationFile implements FileStorage {
   /**
    * @returns {Boolean} whether the file is writeable or not
    */
-  @Memoize() get directoryWriteable(): boolean {
+  get directoryWriteable(): boolean {
     return this.hasAccess(this.directory, fs.constants.W_OK);
   }
 

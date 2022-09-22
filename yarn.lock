@@ -1363,7 +1363,6 @@ __metadata:
     tsconfig-paths: ^4.1.0
     tslib: ^2.4.0
     typescript: ^4.8.3
-    typescript-memoize: ^1.1.1
     yaml: ^2.1.1
   bin:
     stackmate: ./bin/run
@@ -8300,13 +8299,6 @@ __metadata:
   dependencies:
     is-typedarray: ^1.0.0
   checksum: 99c11aaa8f45189fcfba6b8a4825fd684a321caa9bd7a76a27cf0c7732c174d198b99f449c52c3818107430b5f41c0ccbbfb75cb2ee3ca4a9451710986d61a60
-  languageName: node
-  linkType: hard
-
-"typescript-memoize@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "typescript-memoize@npm:1.1.1"
-  checksum: c4035ccda6c156437e0a302f4a0b4cbdfa70c59729d20434f66ecefd45ab5df057792eafe9e05e3e167efc6221b70f474b2789f93a2b0da2a949bc419f3b60ce
   languageName: node
   linkType: hard
 
