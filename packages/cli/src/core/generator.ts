@@ -195,7 +195,7 @@ export const createProject = ({
   };
 
   // Validate the configuration
-  validateProject(config, { useDefaults: false });
+  validateProject({ ...config });
 
   return config;
 };

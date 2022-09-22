@@ -58,9 +58,10 @@
     "build": "yarn workspaces foreach -vipt run build",
     "cli:run": "packages/cli/bin/run",
     "cli:dev": "packages/cli/bin/dev",
+    "test": "yarn engine:schema && yarn test:run",
     "engine:schema": "yarn workspace @stackmate/engine run schema:generate",
-    "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
-    "test:watch": "yarn test --watchAll"
+    "test:run": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "test:watch": "yarn test:run --watchAll"
   },
   "packageManager": "yarn@3.2.3"
 }
