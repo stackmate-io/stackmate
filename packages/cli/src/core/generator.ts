@@ -7,11 +7,10 @@ import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
   Registry, ProjectConfiguration, validateProject, CloudServiceAttributes,
-  BaseService, ProviderChoice, isCoreService, CloudService, JsonSchema,
+  BaseService, ProviderChoice, isCoreService, CloudService, JsonSchema, CloudProviderChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
-import { ProjectConfigCreationOptions } from '@stackmate/cli/types';
 
 type TemplatePlaceholders = {
   projectName: string;
@@ -19,6 +18,16 @@ type TemplatePlaceholders = {
   provider: ProviderChoice;
   type: ServiceTypeChoice;
 }
+
+type ProjectConfigCreationOptions = {
+  projectName: string,
+  defaultProvider?: CloudProviderChoice,
+  defaultRegion?: string,
+  stageNames?: string[],
+  stateProvider?: CloudProviderChoice,
+  secretsProvider?: CloudProviderChoice,
+  serviceTypes?: ServiceTypeChoice[],
+};
 
 export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')): string | undefined => {
   if (!fs.existsSync(fileName)) {
