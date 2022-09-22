@@ -239,19 +239,13 @@ export const getCloudService = (
 /**
  * @var {ServiceTypeChoice[]} CORE_SERVICE_TYPES the core service types
  */
-export const CORE_SERVICE_TYPES = [
-  SERVICE_TYPE.PROVIDER,
-  SERVICE_TYPE.STATE,
-  SERVICE_TYPE.SECRETS,
-] as ServiceTypeChoice[];
+export const CORE_SERVICE_TYPES = [SERVICE_TYPE.STATE, SERVICE_TYPE.SECRETS] as ServiceTypeChoice[];
 
 /**
  * @param {ServiceTypeChoice} type the type of service to check whether is a core service
  * @returns {Boolean} whether the given service type is a core service
  */
-export const isCoreService = (
-  type: ServiceTypeChoice,
-): boolean => (
+export const isCoreService = (type: ServiceTypeChoice): boolean => (
   CORE_SERVICE_TYPES.includes(type)
 );
 
