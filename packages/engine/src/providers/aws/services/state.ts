@@ -4,7 +4,7 @@ import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/services/core';
+import { AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
   CoreServiceAttributes, Provisionable,
   ProvisionAssociationRequirements, Service, withRegions,
