@@ -52,14 +52,12 @@
       "project": "./tsconfig.json"
     }
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
+  "workspaces": [
+    "packages/cli",
+    "packages/engine"
+  ],
   "scripts": {
-    "build": "lerna run build --stream",
-    "lint": "lerna run lint --stream --parallel",
+    "build": "yarn workspaces foreach -vip run build",
     "cmd:run": "packages/cli/bin/run",
     "cmd:dev": "packages/cli/bin/dev",
     "pretest": "lerna run --scope @stackmate/engine schema:generate",
