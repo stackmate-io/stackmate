@@ -15,7 +15,7 @@ export type CredentialsAssociation = ServiceAssociation<'credentials', typeof SE
 export type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
 
 export type CredentialsHandler = (
-  config: BaseServiceAttributes, stack: Stack, opts?: { root?: boolean }
+  provisionable: Provisionable, stack: Stack, opts?: { root?: boolean }
 ) => Credentials;
 
 export type SecretsVaultService<Srv extends BaseService> = Srv & {
@@ -32,7 +32,7 @@ export const withCredentials = <C extends BaseServiceAttributes>() => <T extends
     from: SERVICE_TYPE.SECRETS,
     scope: 'deployable',
     handler: (vault: VaultProvisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault.config, stack)
+      vault.service.credentials(vault, stack)
     ),
   }])(srv)
 );
@@ -43,7 +43,7 @@ export const withRootCredentials = <C extends BaseServiceAttributes>() => <T ext
     from: SERVICE_TYPE.SECRETS,
     scope: 'deployable',
     handler: (vault: VaultProvisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault.config, stack, { root: true })
+      vault.service.credentials(vault, stack, { root: true })
     ),
   }])(srv)
 );
