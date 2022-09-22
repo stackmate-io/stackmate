@@ -2,8 +2,8 @@ import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
+import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;

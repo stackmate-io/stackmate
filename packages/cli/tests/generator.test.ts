@@ -18,7 +18,7 @@ describe('Project generator', () => {
       region: 'eu-central-1',
       stages: [{
         name: 'production',
-        services: [{ type: 'mysql', name: 'mysql-database' }],
+        services: [{ type: 'mysql', name: 'mysql-production-database' }],
       }, {
         name: 'staging',
         copy: 'production',
@@ -47,12 +47,12 @@ describe('Project generator', () => {
       stages: [{
         name: 'production',
         services: [
-          { type: 'mysql', name: 'mysql-database-1' },
-          { type: 'mysql', name: 'mysql-database-2' },
-          { type: 'postgresql', name: 'postgresql-database' },
-          { type: 'mariadb', name: 'mariadb-database-1' },
-          { type: 'mariadb', name: 'mariadb-database-2' },
-          { type: 'mariadb', name: 'mariadb-database-3' },
+          { type: 'mysql', name: 'mysql-production-database-1' },
+          { type: 'mysql', name: 'mysql-production-database-2' },
+          { type: 'postgresql', name: 'postgresql-production-database' },
+          { type: 'mariadb', name: 'mariadb-production-database-1' },
+          { type: 'mariadb', name: 'mariadb-production-database-2' },
+          { type: 'mariadb', name: 'mariadb-production-database-3' },
         ],
       }, {
         name: 'staging',

@@ -57,7 +57,7 @@ export const applyServiceTemplate = (
   let result = template;
 
   for (const [key, value] of Object.entries(placeholders)) {
-    result.replace(new RegExp(`\\$\\{${key}\\}`, 'ig'), value);
+    result = result.replace(RegExp('\\${' + key + '}', 'ig'), value);
   }
 
   return result;
