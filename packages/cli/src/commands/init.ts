@@ -2,7 +2,7 @@ import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { Memoize } from 'typescript-memoize';
 import { kebabCase } from 'lodash';
-import { PROVIDER, DEFAULT_REGIONS, ProjectConfiguration } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, ProjectConfiguration, SERVICE_TYPE, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
@@ -84,7 +84,9 @@ class InitCommand extends BaseCommand {
       secretsProvider: secrets,
       stateProvider: state,
       stageNames: parseCommaSeparatedString(stages),
-      serviceTypes: parseCommaSeparatedString(services),
+      serviceTypes: parseCommaSeparatedString(services).filter(
+        s => s in Object.values(SERVICE_TYPE),
+      ) as ServiceTypeChoice[],
     });
   }
 

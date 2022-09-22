@@ -5,7 +5,7 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/services/core';
+import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/service';
 import {
   RootCredentialsAssociation, withCredentials, withRootCredentials,
 } from '@stackmate/engine/core/service/credentials';

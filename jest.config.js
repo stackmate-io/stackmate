@@ -7,15 +7,9 @@ module.exports = {
   cacheDirectory: '<rootDir>/.jestcache',
   preset: 'ts-jest',
   testEnvironment: 'node',
-  globals: {
-    "ts-jest": {
-      "tsconfig": "tsconfig.json",
-      "diagnostics": true
-    }
-  },
   extensionsToTreatAsEsm: [".ts"],
   transform: {
-    "^.+\\.ts$": "ts-jest"
+    "^.+\\.ts$": ['ts-jest', { "tsconfig": "tsconfig.json", "diagnostics": true }],
   },
   roots: [
     "<rootDir>/packages/cli",
