@@ -2,7 +2,7 @@ import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-import Registry from '@stackmate/engine/core/registry';
+import { Registry } from '@stackmate/engine/core/registry';
 import {
   getCloudServiceConditional, getCoreServiceConditional,
   getRegionConditional, getRegionsSchema, JsonSchema,
