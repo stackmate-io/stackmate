@@ -2,8 +2,8 @@ import { Command, Flags } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
 import { FlagInput, OutputArgs } from '@oclif/core/lib/interfaces';
 
+import { ConfigurationFile } from '@stackmate/cli/lib';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
 
 abstract class BaseCommand extends Command {
   /**
@@ -23,16 +23,6 @@ abstract class BaseCommand extends Command {
       description: 'Whether to use colors in the output',
       default: true,
     }),
-  }
-
-  /**
-   * Parses a comma separated value
-   *
-   * @param {String} value the value to parse
-   * @returns {String[]} the parsed
-   */
-  static parseCommaSeparatedString(value: string) {
-    return value.split(',').map(v => v.trim()).join(',');
   }
 
   /**
