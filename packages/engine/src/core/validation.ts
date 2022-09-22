@@ -229,9 +229,7 @@ export const validate = <T extends Obj = {}>(
 
   if (!validate(attributes)) {
     const errors = validate.errors;
-
-    const { inspect } = require('util');
-    throw new Error(inspect(errors, { depth: 30 }));
+    throw new Error(require('util').inspect(errors, { depth: 30 }));
   }
 
   return validAttributes;
