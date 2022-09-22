@@ -1,20 +1,20 @@
 import { defaultsDeep, get } from 'lodash';
-import { PROVIDER, util } from '@stackmate/engine';
+import { CloudProviderChoice, PROVIDER, util } from '@stackmate/engine';
 
-import ConfigurationFile from '@stackmate/cli/lib/configuration-file';
-import { PreferenceOptions } from '@stackmate/cli/types';
+import { ConfigurationFile, fileExists } from '@stackmate/cli/lib';
 import { PREFERENCES_FILE, PREFERENCES_VERSION } from '@stackmate/cli/constants';
 
-class Preferences {
+export type PreferenceOptions = {
+  version: string;
+  defaultProvider: CloudProviderChoice;
+  defaultRegion: string;
+};
+
+class Preferences extends ConfigurationFile {
   /**
    * @var {String} version the configuration's version
    */
   readonly version: string = PREFERENCES_VERSION;
-
-  /**
-   * @var {ConfigurationFile} file the configuration file that
-   */
-  readonly file: ConfigurationFile;
 
   /**
    * @var {Object} options the options stored in the settings file
@@ -34,8 +34,8 @@ class Preferences {
    * @constructor
    */
   constructor() {
-    this.file = new ConfigurationFile(PREFERENCES_FILE);
-    this.options = this.file.read() as PreferenceOptions;
+    super(PREFERENCES_FILE);
+    this.options = this.read() as PreferenceOptions;
     this.migrate();
   }
 
@@ -65,19 +65,19 @@ class Preferences {
    */
   protected migrate() {
     // The file is present, there's no need to act upon it
-    if (this.file.exists && this.get('version') === this.defaults.version) {
+    if (fileExists(this.filename) && this.get('version') === this.defaults.version) {
       return;
     }
 
     // File does not exist, create it with default options
-    if (!this.file.exists) {
-      this.file.write(this.defaults);
+    if (!fileExists(this.filename)) {
+      this.write(this.defaults);
       return;
     }
 
     // File exists but it's outdated, upgrade to the latest version
     this.options = defaultsDeep(this.defaults, this.options, { version: PREFERENCES_VERSION });
-    this.file.write(this.options);
+    this.write(this.options);
   }
 }
 

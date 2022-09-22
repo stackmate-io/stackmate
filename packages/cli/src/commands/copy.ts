@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
-import { parseCommaSeparatedString } from '../lib/helpers';
+import { parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class StageCopyCommand extends BaseCommand {
   /**
