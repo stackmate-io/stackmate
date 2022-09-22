@@ -1601,7 +1601,7 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^1.0.8", "@oclif/core@^1.2.0", "@oclif/core@^1.2.1", "@oclif/core@^1.3.6", "@oclif/core@^1.6.4":
+"@oclif/core@^1.0.8", "@oclif/core@^1.2.0", "@oclif/core@^1.2.1", "@oclif/core@^1.3.6":
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.16.1.tgz#39663c903f859f8e37b375d7466b92b4394e1c8d"
   integrity sha512-MfzgqcWzWymndd934pd52JAwy0RIgWWYnC0Ed7bxUVYWF4HFb3KmsE7x9/QBP9392Q14vxXi2GNLHboM/5vaDA==
@@ -1635,7 +1635,7 @@
     widest-line "^3.1.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^1.16.1":
+"@oclif/core@^1.16.1", "@oclif/core@^1.16.3":
   version "1.16.3"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.16.3.tgz#03683f685b790a2d37868013f382f57a70ba4110"
   integrity sha512-SWrU/eGgN5kLyuZ+TqtKz2z2HTSrgaNEwkawNj4B31VXDrPv7aULS3ntVCboAKRldX/6J+Af+70BV07Rr5c5oA==
@@ -1674,7 +1674,7 @@
   resolved "https://registry.yarnpkg.com/@oclif/linewrap/-/linewrap-1.0.0.tgz#aedcb64b479d4db7be24196384897b5000901d91"
   integrity sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==
 
-"@oclif/plugin-help@^5.1.11", "@oclif/plugin-help@^5.1.12":
+"@oclif/plugin-help@^5.1.12":
   version "5.1.12"
   resolved "https://registry.yarnpkg.com/@oclif/plugin-help/-/plugin-help-5.1.12.tgz#24a18631eb9b22cb55e1a3b8e4f6039fd42727e6"
   integrity sha512-HvH/RubJxqCinP0vUWQLTOboT+SfjfL8h40s+PymkWaldIcXlpoRaJX50vz+SjZIs7uewZwEk8fzLqpF/BWXlg==
@@ -2578,10 +2578,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-aws-sdk@^2.1069.0:
-  version "2.1190.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1190.0.tgz#9ca291c27ff9dc3428a9211048754df9d01734c9"
-  integrity sha512-VJ3kpqjqww3u2OUOpvDA4EWU2HYetk0/5PQONqXR9N4dAvs8BP/Rv4BoYM/9m4rfhdBEMWizdye7epbBNxb4ZQ==
+aws-sdk@^2.1116.0:
+  version "2.1221.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1221.0.tgz#36dd12d7af4b46495a92d77a0fc3be2f8903f252"
+  integrity sha512-RKFnhC5RW70xRFixzdvZ50YnNT2DdNh1CoXWBEmPOVEXDEv5ztTmAsgju2vfPQZLkKuMzL8LCBdT3xrr8JdoDg==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -3289,9 +3289,9 @@ console-control-strings@^1.0.0, console-control-strings@^1.1.0:
   integrity sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==
 
 constructs@^10.1.108:
-  version "10.1.108"
-  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.108.tgz#6417608a01c29ec4b2197e7fb1c30a89aa036008"
-  integrity sha512-WfVXhurLliVGxqeDeVIT1dZmgwcpQpcCFzeN6BIClAjYGl7ax+lyslaqqJPqJT+XfPuYkCZT2i9Uc3gtySZJCA==
+  version "10.1.109"
+  resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.109.tgz#e5251dd1732aa07e5c0c030f60ac8f50899030ad"
+  integrity sha512-TBahkORv3V3T9xguVQ7QQFx61RKqLekEy32FZxFb5rWgbDjjL9Ljo28Xb9HqDNnrZNB0Q2JGDr0csJcp1WTFZA==
 
 content-type@^1.0.4:
   version "1.0.4"
@@ -6920,16 +6920,16 @@ object.values@^1.1.5:
     define-properties "^1.1.3"
     es-abstract "^1.19.1"
 
-oclif@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/oclif/-/oclif-2.7.0.tgz#590d866b02f20cff2a21ddfc56e22509c55865f5"
-  integrity sha512-nmgk/emtEth/0RYTMeovj22zpiT4P7KvIDc3OOT8VeAEDvdbnZfg3tV3YRnHK0zrSKETKqpHWFyNx2PLMl0eKQ==
+oclif@3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/oclif/-/oclif-3.2.2.tgz#cf2199b8243c8c6bfd350d799eb2e37536517526"
+  integrity sha512-0H239NO9WR/QdmOnYJSbBGJkrW/VoQ3q5/kvdZgOJ71rRSNbcBQxK/7CSldpMpa6gxHoMBckWDNaxCaEzEqXuQ==
   dependencies:
-    "@oclif/core" "^1.6.4"
-    "@oclif/plugin-help" "^5.1.11"
+    "@oclif/core" "^1.16.1"
+    "@oclif/plugin-help" "^5.1.12"
     "@oclif/plugin-not-found" "^2.3.1"
     "@oclif/plugin-warn-if-update-available" "^2.0.4"
-    aws-sdk "^2.1069.0"
+    aws-sdk "^2.1116.0"
     concurrently "^7.0.0"
     debug "^4.3.3"
     find-yarn-workspace-root "^2.0.0"
