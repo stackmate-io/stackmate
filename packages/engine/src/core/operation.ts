@@ -172,7 +172,7 @@ class StageOperation implements Operation {
   process(): object {
     validateEnvironment(this.environment());
     this.provisionables.forEach(provisionable => this.register(provisionable));
-    return this.stack.context.toTerraform();
+    return this.stack.toObject();
   }
 };
 
