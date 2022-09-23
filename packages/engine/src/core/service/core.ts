@@ -10,7 +10,7 @@ export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 
 type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
 export type ProvisionResources = Resource | Resource[];
-export type Provisions = Record<string, Resource>;
+export type Provisions = Record<string, ProvisionResources>;
 
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;

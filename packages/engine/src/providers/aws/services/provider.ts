@@ -1,15 +1,18 @@
 import pipe from '@bitty/pipe';
+import { kebabCase } from 'lodash';
 import { KmsKey } from '@cdktf/provider-aws/lib/kms';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 
-import { ChoiceOf } from '@stackmate/engine/lib';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Stack } from '@stackmate/engine/core/stack';
+import { getResourcesProfile } from '@stackmate/engine/core/profile';
+import { ChoiceOf, getCidrBlocks } from '@stackmate/engine/lib';
+import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import {
   CoreServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
-  RegionalAttributes, Service, withRegions,
+  RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
 type AwsProviderCommonResources = {
@@ -19,7 +22,7 @@ type AwsProviderCommonResources = {
 type AwsProviderDeployableResources = AwsProviderCommonResources & {
   provider: TerraformAwsProvider,
   gateway: InternetGateway;
-  subnet: Subnet;
+  subnets: Subnet[];
   vpc: Vpc;
   kmsKey: KmsKey;
 };
@@ -30,7 +33,7 @@ type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 export type AwsProviderAttributes = AwsServiceAttributes<CoreServiceAttributes
   & ProfilableAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
-  & { type: typeof SERVICE_TYPE.PROVIDER }
+  & { type: typeof SERVICE_TYPE.PROVIDER; ip?: string; }
 >;
 
 export type AwsProviderService = Service<AwsProviderAttributes>;
@@ -57,12 +60,91 @@ export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & 
 };
 
 /**
+ * Registers base provisions required by all handlers
+ *
+ * @param {AwsProviderDestroyableProvisionable} provisionable the provisionable item
+ * @param {Stack} stack the stack to deploy resources to
+ * @returns {AwsProviderCommonResources} the common resources provisioned by the AWS provider
+ */
+export const registerBaseProvisions = (
+  provisionable: AwsProviderBaseProvisionable, stack: Stack,
+): AwsProviderCommonResources => {
+  const { config: { region } } = provisionable;
+  const alias = `aws-${kebabCase(region)}`;
+  const provider = new TerraformAwsProvider(stack.context, PROVIDER.AWS, {
+    region,
+    alias,
+    defaultTags: {
+      tags: {
+        Environment: stack.stageName,
+        Description: DEFAULT_RESOURCE_COMMENT,
+      },
+    },
+  });
+
+  return { provider };
+};
+
+/**
+ * @param {AwsProviderDestroyableProvisionable} provisionable the provisionable item
+ * @param {Stack} stack the stack to deploy resources to
+ * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
+ */
+export const onDeploy = (
+  provisionable: AwsProviderDestroyableProvisionable, stack: Stack,
+): AwsProviderDeployableResources => {
+  const { config, resourceId } = provisionable;
+  const { provider } = registerBaseProvisions(provisionable, stack);
+  const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getResourcesProfile(config);
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.ip || DEFAULT_VPC_IP, 16, 2, 24);
+
+  const vpc = new Vpc(stack.context, resourceId, {
+    ...vpcConfig,
+    cidrBlock: vpcCidr,
+  });
+
+  const subnets = subnetCidrs.map((cidrBlock, idx) => (
+    new Subnet(stack.context, `${resourceId}-subnet${(idx + 1)}`, {
+      ...subnetConfig,
+      vpcId: vpc.id,
+      cidrBlock,
+    })
+  ));
+
+  const gateway = new InternetGateway(stack.context, `${resourceId}-gateway`, {
+    ...gatewayConfig,
+    vpcId: vpc.id,
+  });;
+
+  const kmsKey = new KmsKey(stack.context, `${resourceId}-key`, {
+    customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
+    deletionWindowInDays: 30,
+    description: 'Stackmate default encryption key',
+    enableKeyRotation: false,
+    isEnabled: true,
+    keyUsage: 'ENCRYPT_DECRYPT',
+    multiRegion: false,
+  });
+
+  return {
+    provider,
+    vpc,
+    subnets,
+    gateway,
+    kmsKey,
+  };
+};
+
+/**
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
 export const getProviderService = (): AwsProviderService => (
   pipe(
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
+    withHandler('deployable', onDeploy),
+    withHandler('destroyable', registerBaseProvisions),
+    withHandler('preparable', registerBaseProvisions),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 );
 
