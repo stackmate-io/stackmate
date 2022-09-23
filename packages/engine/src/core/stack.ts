@@ -8,15 +8,10 @@ export type Stack = {
   readonly context: TerraformStack,
   readonly projectName: string;
   readonly stageName: string;
+  toObject(): object;
 };
 
 class StageStack implements Stack {
-  /**
-   * @var {String} id the stack's id
-   * @readonly
-   */
-  readonly id: string;
-
   /**
    * @var {TerraformApp} app the terraform app for synthesizing the stack
    * @readonly
@@ -51,8 +46,14 @@ class StageStack implements Stack {
     this.projectName = projectName;
     this.stageName = stageName;
     this.app = new TerraformApp(options);
-    this.id = `${this.projectName}/${this.stageName}`;
-    this.context = new TerraformStack(this.app, this.id);
+    this.context = new TerraformStack(this.app, `${this.projectName}-${this.stageName}`);
+  }
+
+  /**
+   * @returns {Object} the stack exported as terraform json object
+   */
+  toObject(): object {
+    return this.context.toTerraform();
   }
 }
 
