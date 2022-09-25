@@ -31,6 +31,7 @@ export type AwsServiceAssociations = [
   ProviderAssociation<'destroyable'>,
   ProviderAssociation<'preparable'>,
   KmsKeyAssociation<'deployable'>,
+  KmsKeyAssociation<'preparable'>,
 ];
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
@@ -44,7 +45,9 @@ type ProviderProvisionable = OneOfType<[
   AwsProviderPreparableProvisionable,
 ]>;
 
-const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(scope: S): ProviderAssociation<S> => ({
+const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
+  scope: S,
+): ProviderAssociation<S> => ({
   as: 'providerInstance',
   from: SERVICE_TYPE.PROVIDER,
   scope,
@@ -56,21 +59,28 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(scope: S):
   },
 });
 
+const getKmsKeyAssociation = <S extends Exclude<ServiceScopeChoice, 'destroyable'>>(
+  scope: S,
+): KmsKeyAssociation<S> => ({
+  as: 'kmsKey',
+  from: SERVICE_TYPE.PROVIDER,
+  scope,
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
+    config.provider === linked.provider && config.region === linked.region
+  ),
+  handler: (
+    prov: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
+  ): KmsKey => (
+    prov.provisions.kmsKey
+  ),
+});
+
 const associations: AwsServiceAssociations = [
   getProviderInstanceAssociation('deployable'),
   getProviderInstanceAssociation('destroyable'),
   getProviderInstanceAssociation('preparable'),
-  {
-    as: 'kmsKey',
-    from: SERVICE_TYPE.PROVIDER,
-    scope: 'deployable',
-    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
-      config.provider === linked.provider && config.region === linked.region
-    ),
-    handler: (prov: AwsProviderDeployableProvisionable): KmsKey => (
-      prov.provisions.kmsKey
-    ),
-  },
+  getKmsKeyAssociation('deployable'),
+  getKmsKeyAssociation('preparable'),
 ];
 
 const getAwsService = (srv: BaseService) => (

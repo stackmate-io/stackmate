@@ -15,20 +15,23 @@ import {
   ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
-export type AwsProviderCommonResources = {
+export type ProviderInstanceResources = {
   provider: TerraformAwsProvider;
 };
 
-export type AwsProviderDeployableResources = AwsProviderCommonResources & {
+export type KmsKeyResources = {
+  kmsKey: KmsKey;
+}
+
+export type AwsProviderDeployableResources = ProviderInstanceResources & KmsKeyResources & {
   provider: TerraformAwsProvider,
   gateway: InternetGateway;
   subnets: Subnet[];
   vpc: Vpc;
-  kmsKey: KmsKey;
 };
 
-export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
-export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
+export type AwsProviderPreparableResources = ProviderInstanceResources & KmsKeyResources;
+export type AwsProviderDestroyableResources = ProviderInstanceResources;
 
 export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
   & ProfilableAttributes
@@ -49,26 +52,26 @@ export type AwsProviderDeployableProvisionable = AwsProviderBaseProvisionable & 
   requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'deployable'>;
 };
 
-export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable & {
-  provisions: AwsProviderDestroyableProvisions;
-  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'destroyable'>;
-};
-
 export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & {
-  provisions: AwsProviderPreparableProvisions;
+  provisions: AwsProviderPreparableResources;
   requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'preparable'>;
 };
 
+export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable & {
+  provisions: AwsProviderDestroyableResources;
+  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'destroyable'>;
+};
+
 /**
- * Registers base provisions required by all handlers
+ * Registers the provider instance required by all handlers
  *
- * @param {AwsProviderDestroyableProvisionable} provisionable the provisionable item
+ * @param {AwsProviderBaseProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
- * @returns {AwsProviderCommonResources} the common resources provisioned by the AWS provider
+ * @returns {ProviderInstanceResources} the provider instance resource
  */
-export const registerBaseProvisions = (
+export const registerProviderInstance = (
   provisionable: AwsProviderBaseProvisionable, stack: Stack,
-): AwsProviderCommonResources => {
+): ProviderInstanceResources => {
   const { config: { region } } = provisionable;
   const alias = `aws-${kebabCase(region)}`;
   const provider = new TerraformAwsProvider(stack.context, PROVIDER.AWS, {
@@ -86,15 +89,41 @@ export const registerBaseProvisions = (
 };
 
 /**
- * @param {AwsProviderDestroyableProvisionable} provisionable the provisionable item
+ * Registers the kms key required by the 'deployable' and 'preparable' scope
+ *
+ * @param {AwsProviderDeployableProvisionable|AwsProviderPreparableProvisionable} provisionable the
+ *  provisionable item
+ * @param {Stack} stack the stack to deploy resources to
+ * @returns {KmsKeyResources} the kms key resource
+ */
+export const registerKmsKey = (
+  provisionable: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
+  stack: Stack,
+): KmsKeyResources => {
+  const { resourceId } = provisionable;
+
+  const kmsKey = new KmsKey(stack.context, `${resourceId}-key`, {
+    customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
+    deletionWindowInDays: 30,
+    description: 'Stackmate default encryption key',
+    enableKeyRotation: false,
+    isEnabled: true,
+    keyUsage: 'ENCRYPT_DECRYPT',
+    multiRegion: false,
+  });
+
+  return { kmsKey };
+};
+
+/**
+ * @param {AwsProviderDeployableProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
 export const onDeployment = (
-  provisionable: AwsProviderDestroyableProvisionable, stack: Stack,
+  provisionable: AwsProviderDeployableProvisionable, stack: Stack,
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
-  const { provider } = registerBaseProvisions(provisionable, stack);
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.ip || DEFAULT_VPC_IP, 16, 2, 24);
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getServiceProfile(
     PROVIDER.AWS, SERVICE_TYPE.PROVIDER, config.profile || DEFAULT_PROFILE_NAME,
@@ -118,24 +147,29 @@ export const onDeployment = (
     vpcId: vpc.id,
   });;
 
-  const kmsKey = new KmsKey(stack.context, `${resourceId}-key`, {
-    customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
-    deletionWindowInDays: 30,
-    description: 'Stackmate default encryption key',
-    enableKeyRotation: false,
-    isEnabled: true,
-    keyUsage: 'ENCRYPT_DECRYPT',
-    multiRegion: false,
-  });
-
   return {
-    provider,
+    ...registerProviderInstance(provisionable, stack),
+    ...registerKmsKey(provisionable, stack),
     vpc,
     subnets,
     gateway,
-    kmsKey,
   };
 };
+
+/**
+ * Registers the provider instance and kms key
+ *
+ * @param {AwsProviderPreparableProvisionable} provisionable
+ * @param {Stack} stack
+ * @returns {AwsProviderPreparableResources}
+ */
+export const onPrepare = (
+  provisionable: AwsProviderPreparableProvisionable,
+  stack: Stack,
+): AwsProviderPreparableResources => ({
+  ...registerProviderInstance(provisionable, stack),
+  ...registerKmsKey(provisionable, stack),
+});
 
 /**
  * @returns {AwsSecretsVaultService} the secrets vault service
@@ -145,8 +179,8 @@ export const getProviderService = (): AwsProviderService => (
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler('deployable', onDeployment),
-    withHandler('destroyable', registerBaseProvisions),
-    withHandler('preparable', registerBaseProvisions),
+    withHandler('preparable', onPrepare),
+    withHandler('destroyable', registerProviderInstance),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 );
 

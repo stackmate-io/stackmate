@@ -6,15 +6,15 @@ import {
 import { AwsSecretsVault } from '@stackmate/engine/providers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
-import { AwsProviderPreparableProvisionable, onDeployment } from '@stackmate/engine/providers/aws/services/provider';
+import { AwsProviderDeployableProvisionable, onDeployment } from '@stackmate/engine/providers/aws/services/provider';
+import { AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault;
 
-  it('is a valid AWS state service', () => {
+  it('is a valid AWS secrets service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS);
     expect(service.type).toEqual(SERVICE_TYPE.SECRETS);
   });
@@ -82,7 +82,7 @@ describe('AWS Secrets service', () => {
 
       // Assign the AWS provider requirements
       const awsProviderResources = onDeployment(
-        awsProviderProvisionable as AwsProviderPreparableProvisionable, stack,
+        awsProviderProvisionable as AwsProviderDeployableProvisionable, stack,
       );
 
       Object.assign(provisionable, {
@@ -92,7 +92,6 @@ describe('AWS Secrets service', () => {
         },
       });
     });
-
 
     it('registers the provision credentials terraform resources', () => {
       const resources = provisionCredentialResources(provisionable, stack);
