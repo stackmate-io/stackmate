@@ -6,8 +6,8 @@ import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
-  Registry, ProjectConfiguration, validateProject, CloudServiceAttributes,
-  BaseService, ProviderChoice, isCoreService, CloudService, JsonSchema, CloudProviderChoice,
+  Registry, ProjectConfiguration, validateProject, BaseService, ProviderChoice,
+  isCoreService, JsonSchema, CloudProviderChoice,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -162,11 +162,11 @@ export const createProject = ({
     {
       name: stageName,
       services: validServiceTypes.map((type) => {
-        const srv = Registry.get(provider, type) as CloudService;
+        const srv = Registry.get(provider, type);
 
         const config = skipImpliedAttributes(
           getServiceConfiguration(srv, { projectName, stageName }), rootConfig,
-        ) as Partial<CloudServiceAttributes>;
+        ) as Partial<BaseServiceAttributes>;
 
         let name = config.name;
 

@@ -5,14 +5,14 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { getResourcesProfile } from '@stackmate/engine/core/profile';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, getCidrBlocks } from '@stackmate/engine/lib';
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import {
-  CoreServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
-  RegionalAttributes, Service, withHandler, withRegions,
+  BaseServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable,
+  ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
 export type AwsProviderCommonResources = {
@@ -30,7 +30,7 @@ export type AwsProviderDeployableResources = AwsProviderCommonResources & {
 export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
 export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
-export type AwsProviderAttributes = AwsServiceAttributes<CoreServiceAttributes
+export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
   & ProfilableAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & { type: typeof SERVICE_TYPE.PROVIDER; ip?: string; }
@@ -66,7 +66,7 @@ export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & 
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderCommonResources} the common resources provisioned by the AWS provider
  */
-const registerBaseProvisions = (
+export const registerBaseProvisions = (
   provisionable: AwsProviderBaseProvisionable, stack: Stack,
 ): AwsProviderCommonResources => {
   const { config: { region } } = provisionable;
@@ -90,13 +90,15 @@ const registerBaseProvisions = (
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
-const onDeploy = (
+export const onDeployment = (
   provisionable: AwsProviderDestroyableProvisionable, stack: Stack,
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
   const { provider } = registerBaseProvisions(provisionable, stack);
-  const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getResourcesProfile(config);
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.ip || DEFAULT_VPC_IP, 16, 2, 24);
+  const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getServiceProfile(
+    PROVIDER.AWS, SERVICE_TYPE.PROVIDER, config.profile || DEFAULT_PROFILE_NAME,
+  );
 
   const vpc = new Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -142,7 +144,7 @@ export const getProviderService = (): AwsProviderService => (
   pipe(
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
-    withHandler('deployable', onDeploy),
+    withHandler('deployable', onDeployment),
     withHandler('destroyable', registerBaseProvisions),
     withHandler('preparable', registerBaseProvisions),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))

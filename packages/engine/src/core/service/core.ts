@@ -96,30 +96,19 @@ export type ServiceEnvironment = {
 };
 
 /**
- * @type {CoreServiceAttributes} Attributes for core services, such as state, provider and secrets
+ * @type {BaseServiceAttributes} Base attributes for any service in the system
  */
-export type CoreServiceAttributes = {
+export type BaseServiceAttributes = {
+  name: string;
   provider: ProviderChoice;
   type: ServiceTypeChoice;
   region?: string;
 };
 
 /**
- * @type {CloudServiceAttributes} Attributes for cloud services, which can be part of stages
- */
-export type CloudServiceAttributes = CoreServiceAttributes & {
-  name: string;
-};
-
-/**
- * @type {BaseServiceAttributes} a union of the base service attribute sets
- */
-export type BaseServiceAttributes = CoreServiceAttributes | CloudServiceAttributes;
-
-/**
  * @type {ServiceConfiguration} the service configuration after it's been parsed
  */
-export type ServiceConfiguration<T extends CoreServiceAttributes = CoreServiceAttributes> = T & {
+export type ServiceConfiguration<T extends BaseServiceAttributes = BaseServiceAttributes> = T & {
   id: string;
   name: string;
 };
@@ -140,9 +129,7 @@ export type Service<Setup extends BaseServiceAttributes> = {
   associations: Association[];
 };
 
-export type CoreService = Service<CoreServiceAttributes>;
-export type CloudService = Service<CloudServiceAttributes>;
-export type BaseService = CoreService | CloudService;
+export type BaseService = Service<BaseServiceAttributes>;
 
 /**
  * Returns a base core service (one that cannot be part of a stage)
@@ -151,9 +138,9 @@ export type BaseService = CoreService | CloudService;
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): CoreService => {
+export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): BaseService => {
   const schemaId = `services/${provider}/${type}`;
-  const schema: ServiceSchema<CoreServiceAttributes> = {
+  const schema: ServiceSchema<BaseServiceAttributes> = {
     $id: schemaId,
     type: 'object',
     required: [],
@@ -164,6 +151,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
         enum: [provider],
         default: provider,
         errorMessage: `The provider can only be set to "${provider}"`,
+        isIncludedInConfigGeneration: true,
       },
       type: {
         type: 'string',
@@ -173,6 +161,13 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
       },
       region: {
         type: 'string',
+        isIncludedInConfigGeneration: true,
+      },
+      name: {
+        type: 'string',
+        pattern: '[a-zA-Z0-9_]+',
+        description: 'The name for the service to deploy',
+        errorMessage: 'The name for the service should only contain characters, numbers and underscores',
       },
     },
     errorMessage: {
@@ -200,30 +195,19 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  */
 export const getCloudService = (
   provider: ProviderChoice, type: ServiceTypeChoice,
-): CloudService => {
+): BaseService => {
   const core = getCoreService(provider, type);
-  const schema: ServiceSchema<CloudServiceAttributes> = {
+  const schema: ServiceSchema<BaseServiceAttributes> = {
     ...core.schema,
     required: [...(core.schema.required || []), 'name', 'type'],
     properties: {
       ...core.schema.properties,
-      provider: {
-        ...(core.schema.properties.provider || {}),
-        isIncludedInConfigGeneration: true,
-      },
       type: {
         ...(core.schema.properties.type || {}),
         isIncludedInConfigGeneration: true,
       },
-      region: {
-        ...(core.schema.properties.provider || {}),
-        isIncludedInConfigGeneration: true,
-      },
       name: {
-        type: 'string',
-        pattern: '[a-zA-Z0-9_]+',
-        description: 'The name for the service to deploy',
-        errorMessage: 'The name for the service should only contain characters, numbers and underscores',
+        ...(core.schema.properties.name || {}),
         isIncludedInConfigGeneration: true,
         serviceConfigGenerationTemplate: '${type}-service-${stageName}',
       },
