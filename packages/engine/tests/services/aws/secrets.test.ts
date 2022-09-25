@@ -4,12 +4,12 @@ import {
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
 import { AwsSecretsVault } from '@stackmate/engine/providers';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { Provisionable } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
-import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
-import { AwsProviderDeployableProvisionable, onDeployment } from '@stackmate/engine/providers/aws/services/provider';
-import { AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
+import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
+import { AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault;
@@ -59,42 +59,28 @@ describe('AWS Secrets service', () => {
 
   describe('credentials resources registrations', () => {
     let stack: Stack;
-    let provisionable: AwsSecretsVaultDeployableProvisionable;
+    let provisionable: Provisionable;
+    let config: AwsSecretsVaultAttributes;
 
     beforeEach(() => {
-      const project = 'my-project';
-      const stage = 'my-stage';
-      stack = getStack(project, stage);
+      stack = getStack('my-project', 'my-stage');
 
-      provisionable = getProvisionableFromConfig({
+      config = {
         provider: PROVIDER.AWS,
         name: 'aws-secrets-service',
         type: SERVICE_TYPE.SECRETS,
-        region: REGIONS[0],
-      }, stage) as AwsSecretsVaultDeployableProvisionable;
+        region: DEFAULT_REGION,
+        profile: DEFAULT_PROFILE_NAME,
+        overrides: {},
+      };
 
-      const awsProviderProvisionable = getProvisionableFromConfig({
-        provider: PROVIDER.AWS,
-        name: 'aws-provider-service',
-        type: SERVICE_TYPE.PROVIDER,
-        region: REGIONS[0],
-      }, stage);
-
-      // Assign the AWS provider requirements
-      const awsProviderResources = onDeployment(
-        awsProviderProvisionable as AwsProviderDeployableProvisionable, stack,
-      );
-
-      Object.assign(provisionable, {
-        requirements: {
-          kmsKey: awsProviderResources.kmsKey,
-          providerInstance: awsProviderResources.provider,
-        },
-      });
+      provisionable = getAwsDeploymentProvisionableMock(config, stack);
     });
 
     it('registers the provision credentials terraform resources', () => {
-      const resources = provisionCredentialResources(provisionable, stack);
+      const resources = provisionCredentialResources(
+        provisionable as AwsSecretsVaultDeployableProvisionable, stack,
+      );
       expect(resources).toBeInstanceOf(Object);
       expect(resources.data).toBeInstanceOf(DataAwsSecretsmanagerSecretVersion)
       expect(resources.version).toBeInstanceOf(SecretsmanagerSecretVersion);
