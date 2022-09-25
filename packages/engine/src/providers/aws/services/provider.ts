@@ -120,7 +120,7 @@ export const registerKmsKey = (
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
-export const onDeployment = (
+export const onDeploy = (
   provisionable: AwsProviderDeployableProvisionable, stack: Stack,
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
@@ -178,7 +178,7 @@ export const getProviderService = (): AwsProviderService => (
   pipe(
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
-    withHandler('deployable', onDeployment),
+    withHandler('deployable', onDeploy),
     withHandler('preparable', onPrepare),
     withHandler('destroyable', registerProviderInstance),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
