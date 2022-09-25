@@ -25,6 +25,6 @@ export default {
     "ts",
     "js"
   ],
-  setupFilesAfterEnv: ['<rootDir>/packages/engine/tests/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/packages/engine/jest.setup.ts'],
   verbose: true,
 };
