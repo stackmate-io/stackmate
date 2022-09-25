@@ -11,8 +11,8 @@ import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/provi
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import {
-  CoreServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
-  RegionalAttributes, Service, withHandler, withRegions,
+  BaseServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable,
+  ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
 export type AwsProviderCommonResources = {
@@ -30,7 +30,7 @@ export type AwsProviderDeployableResources = AwsProviderCommonResources & {
 export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
 export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
-export type AwsProviderAttributes = AwsServiceAttributes<CoreServiceAttributes
+export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
   & ProfilableAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & { type: typeof SERVICE_TYPE.PROVIDER; ip?: string; }

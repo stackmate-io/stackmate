@@ -8,8 +8,7 @@ import {
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 import {
-  CloudServiceAttributes, CloudProviderChoice, CoreServiceAttributes,
-  isCoreService, CloudService, CoreService, ProviderChoice, ServiceConfiguration,
+  BaseServiceAttributes, CloudProviderChoice, isCoreService, ProviderChoice, ServiceConfiguration,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -17,7 +16,7 @@ import {
  */
 export type StageConfiguration<IsPartial extends boolean = false> = {
   name: string;
-  services?: IsPartial extends true ? Partial<CloudServiceAttributes>[] : CloudServiceAttributes[],
+  services?: IsPartial extends true ? Partial<BaseServiceAttributes>[] : BaseServiceAttributes[],
   copy?: string;
   skip?: string[];
 };
@@ -30,8 +29,8 @@ export type Project = {
   provider: CloudProviderChoice;
   region: string;
   stages: StageConfiguration[];
-  secrets: Omit<CoreServiceAttributes, 'type'>;
-  state: Omit<CoreServiceAttributes, 'type'>;
+  secrets: Omit<BaseServiceAttributes, 'type'>;
+  state: Omit<BaseServiceAttributes, 'type'>;
 };
 
 /**
@@ -99,7 +98,7 @@ export const getCloudServices = (
  * @param {Project} config the project configuration object
  * @param {String} stage the stage to get provider configurations for
  * @param {ServiceConfiguration[]} services the services to get the provider configurations by
- * @returns {CoreServiceAttributes[]} the provider configurations
+ * @returns {BaseServiceAttributes[]} the provider configurations
  */
 export const getProviderConfigurations = (
   config: Project, stage: string, services: ServiceConfiguration[] = [],
@@ -268,8 +267,8 @@ export const getProjectSchema = (
     allOf: [
       ...Registry.items.map(service => (
         isCoreService(service.type)
-          ? getCoreServiceConditional(service as CoreService)
-          : getCloudServiceConditional(service as CloudService)
+          ? getCoreServiceConditional(service)
+          : getCloudServiceConditional(service)
       )),
       ...regions.map(
         ([provider, schema]) => getRegionConditional(provider, schema),
