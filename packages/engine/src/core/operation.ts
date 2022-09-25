@@ -21,10 +21,25 @@ export type Operation = {
   readonly stack: Stack;
   readonly scope: ServiceScopeChoice;
   readonly provisionables: ProvisionablesMap;
-  register(provisionable: Provisionable): void;
   environment(): ServiceEnvironment[];
   process(): object;
 };
+
+/**
+ * @param {BaseServiceAttributes} config the service's configuration
+ * @param {String} stageName the name of the stage to register resources to
+ * @returns {Provisionable} the provisionable to use in operations
+ */
+export const getProvisionableFromConfig = (
+  config: BaseServiceAttributes, stageName: string,
+): Provisionable => ({
+  id: hashObject(config),
+  config,
+  service: Registry.fromConfig(config),
+  requirements: {},
+  provisions: {},
+  resourceId: getProvisionableResourceId(config, stageName),
+});
 
 class StageOperation implements Operation {
   /**
@@ -70,15 +85,7 @@ class StageOperation implements Operation {
    */
   protected setUpProvisionables(services: BaseServiceAttributes[]) {
     services.forEach((config) => {
-      const provisionable: Provisionable = {
-        id: hashObject(config),
-        config,
-        service: Registry.fromConfig(config),
-        requirements: {},
-        provisions: {},
-        resourceId: getProvisionableResourceId(config, this.stack.stageName),
-      };
-
+      const provisionable = getProvisionableFromConfig(config, this.stack.stageName);
       this.provisionables.set(provisionable.id, provisionable);
     });
   }
@@ -107,7 +114,7 @@ class StageOperation implements Operation {
    *
    * @param {Provisionable} provisionable the provisionable to register
    */
-  register(provisionable: Provisionable): Provisions {
+  protected register(provisionable: Provisionable): Provisions {
     // Item has already been provisioned, bail...
     if (this.provisionables.has(provisionable.id)) {
       return {};

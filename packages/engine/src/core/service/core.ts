@@ -10,7 +10,7 @@ export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 
 type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
 export type ProvisionResources = Resource | Resource[];
-export type Provisions = Record<string, Resource>;
+export type Provisions = Record<string, ProvisionResources>;
 
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
@@ -68,9 +68,9 @@ export type ProvisionAssociationRequirements<
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
  */
-export type Provisionable = {
+export type Provisionable<T extends BaseServiceAttributes = BaseServiceAttributes> = {
   id: string;
-  config: BaseServiceAttributes;
+  config: T;
   service: BaseService;
   requirements: Record<string, any>;
   provisions: Provisions,
