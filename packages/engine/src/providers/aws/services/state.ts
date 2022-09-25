@@ -109,7 +109,7 @@ export const getStateService = (): AwsStateService => (
           maxLength: 63,
           pattern: '(?!(^xn--|.+-s3alias$))^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$',
           isIncludedInConfigGeneration: true,
-          serviceConfigGenerationTemplate: 'stackmate-state-${type}-${projectName}',
+          serviceConfigGenerationTemplate: 'stackmate-state-${projectName}',
         },
       },
     }),
