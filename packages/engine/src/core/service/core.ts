@@ -68,9 +68,9 @@ export type ProvisionAssociationRequirements<
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
  */
-export type Provisionable = {
+export type Provisionable<T extends BaseServiceAttributes = BaseServiceAttributes> = {
   id: string;
-  config: BaseServiceAttributes;
+  config: T;
   service: BaseService;
   requirements: Record<string, any>;
   provisions: Provisions,

@@ -15,11 +15,11 @@ import {
   RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
-type AwsProviderCommonResources = {
+export type AwsProviderCommonResources = {
   provider: TerraformAwsProvider;
 };
 
-type AwsProviderDeployableResources = AwsProviderCommonResources & {
+export type AwsProviderDeployableResources = AwsProviderCommonResources & {
   provider: TerraformAwsProvider,
   gateway: InternetGateway;
   subnets: Subnet[];
@@ -27,8 +27,8 @@ type AwsProviderDeployableResources = AwsProviderCommonResources & {
   kmsKey: KmsKey;
 };
 
-type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
-type AwsProviderPreparableProvisions = AwsProviderCommonResources;
+export type AwsProviderDestroyableProvisions = AwsProviderCommonResources;
+export type AwsProviderPreparableProvisions = AwsProviderCommonResources;
 
 export type AwsProviderAttributes = AwsServiceAttributes<CoreServiceAttributes
   & ProfilableAttributes
@@ -66,7 +66,7 @@ export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & 
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderCommonResources} the common resources provisioned by the AWS provider
  */
-export const registerBaseProvisions = (
+const registerBaseProvisions = (
   provisionable: AwsProviderBaseProvisionable, stack: Stack,
 ): AwsProviderCommonResources => {
   const { config: { region } } = provisionable;
@@ -90,7 +90,7 @@ export const registerBaseProvisions = (
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
-export const onDeploy = (
+const onDeploy = (
   provisionable: AwsProviderDestroyableProvisionable, stack: Stack,
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
