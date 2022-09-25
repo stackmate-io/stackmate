@@ -1,4 +1,4 @@
-import { TerraformDataSource, TerraformProvider, TerraformResource } from 'cdktf';
+import { TerraformDataSource, TerraformProvider, TerraformResource, TerraformBackend } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
@@ -8,7 +8,7 @@ import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/consta
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 
-type Resource = TerraformResource | TerraformProvider | TerraformDataSource;
+type Resource = TerraformResource | TerraformProvider | TerraformDataSource | TerraformBackend;
 export type ProvisionResources = Resource | Resource[];
 export type Provisions = Record<string, ProvisionResources>;
 
