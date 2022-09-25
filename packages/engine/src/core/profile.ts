@@ -53,7 +53,7 @@ export const getServiceProfile = (
  */
 export const getResourcesProfile = <T extends BaseServiceAttributes & ProfilableAttributes>(
   config: T,
-): object => {
+): Record<string, any> => {
   const profile = getServiceProfile(config.provider, config.type, config.profile);
   return merge(profile, config.overrides);
 };
