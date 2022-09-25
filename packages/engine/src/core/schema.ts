@@ -3,7 +3,7 @@ import { merge, uniq } from 'lodash';
 
 import { Obj, RequireKeys } from '@stackmate/engine/lib';
 import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { ProviderChoice, CloudService, CoreService } from '@stackmate/engine/core/service/core';
+import { ProviderChoice, BaseService } from '@stackmate/engine/core/service/core';
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
@@ -256,10 +256,10 @@ export const getServiceSchemaCondition = (
  * Returns a conditional schema for a Cloud service which allows the `provider` and `region`
  * attributes to be empty, then use the ones specified at project level
  *
- * @param {CloudService} service the service to get the conditional schema for
+ * @param {BaseService} service the service to get the conditional schema for
  * @returns {JsonSchema} the conditional schema
  */
-export const getCloudServiceConditional = (service: CloudService): JsonSchema => (
+export const getCloudServiceConditional = (service: BaseService): JsonSchema => (
   getServiceSchemaCondition(
     service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
       required: ['stages'],
@@ -283,11 +283,11 @@ export const getCloudServiceConditional = (service: CloudService): JsonSchema =>
  * Same with the cloud service schema conditionals, it generates the schema required
  * for the core services
  *
- * @param {CloudService} service the service to get the conditional schema for
+ * @param {BaseService} service the service to get the conditional schema for
  * @returns {JsonSchema} the conditional schema
  * @see {getCloudServiceConditional}
  */
-export const getCoreServiceConditional = (service: CoreService): JsonSchema => (
+export const getCoreServiceConditional = (service: BaseService): JsonSchema => (
   getServiceSchemaCondition(
     service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
       required: [service.type],

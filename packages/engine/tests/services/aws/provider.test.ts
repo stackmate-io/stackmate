@@ -3,7 +3,7 @@ import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 
 import { AwsProvider } from '@stackmate/engine/providers';
-import { REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
 import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
 import { Provisionable, ServiceScopeChoice } from '@stackmate/engine/core/service';
@@ -50,12 +50,12 @@ describe('AWS Provider', () => {
         type: {
           type: 'string',
           enum: [SERVICE_TYPE.PROVIDER],
-          default: 'provider',
+          default: SERVICE_TYPE.PROVIDER,
         },
         region: {
           type: 'string',
           enum: Array.from(REGIONS),
-          default: 'eu-central-1',
+          default: DEFAULT_REGION,
         },
         profile: { type: 'string', default: 'default', serviceProfile: true },
         overrides: { type: 'object', default: {}, serviceProfileOverrides: true }
@@ -73,6 +73,7 @@ describe('AWS Provider', () => {
       stack = getStack('my-project', stage);
       config = {
         provider: 'aws',
+        name: 'aws-provider',
         type: SERVICE_TYPE.PROVIDER,
         region: 'eu-central-1',
         profile: DEFAULT_PROFILE_NAME,
