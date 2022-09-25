@@ -35,12 +35,12 @@ type DatabaseAttributes = BaseServiceAttributes
     database: string;
   };
 
-type AwsDatabaseDeployableResources = {
+export type AwsDatabaseDeployableResources = {
   paramGroup: DbParameterGroup,
   dbInstance: DbInstance,
 };
 
-type AwsDatabaseAttributes<
+export type AwsDatabaseAttributes<
   T extends ServiceTypeChoice, E extends RdsEngine
 > = DatabaseAttributes & EngineAttributes<E> & { type: T; };
 
@@ -111,7 +111,7 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-export const onDeployment: ProvisionHandler = (
+export const onDeploy: ProvisionHandler = (
   provisionable: AwsDatabaseDeployableProvisionable, stack: Stack,
 ): AwsDatabaseDeployableResources => {
   const {
@@ -172,7 +172,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     withCredentials(),
     withConfigHints(hints),
     withRootCredentials(),
-    withHandler('deployable', onDeployment),
+    withHandler('deployable', onDeploy),
   )(getAwsCloudService(type));
 
   return pipe(

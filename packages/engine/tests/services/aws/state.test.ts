@@ -6,8 +6,7 @@ import { AwsState } from '@stackmate/engine/providers';
 import { Provisionable } from '@stackmate/engine/core/service';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
-import { AwsProviderDeployableProvisionable, onDeployment } from '@stackmate/engine/providers/aws/services/provider';
+import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
 import {
   AwsStateAttributes, AwsStateDeployableProvisionable, AwsStateDestroyableProvisionable,
   AwsStatePreparableProvisionable, onDeploy, onDestroy, onPrepare,
@@ -66,40 +65,21 @@ describe('AWS state', () => {
 
   describe('provision handlers', () => {
     let stack: Stack;
-    const stage = 'a-stage';
     let provisionable: Provisionable;
     let config: AwsStateAttributes;
 
     beforeEach(() => {
-      stack = getStack('my-project', stage);
+      stack = getStack('my-project', 'a-stage');
+
       config = {
-        provider: 'aws',
         name: 'aws-state-service',
+        provider: PROVIDER.AWS,
         type: SERVICE_TYPE.STATE,
-        region: 'eu-central-1',
+        region: DEFAULT_REGION,
         bucket: 'some-bucket-name',
       };
 
-      provisionable = getProvisionableFromConfig(config, stage);
-
-      const awsProviderProvisionable = getProvisionableFromConfig({
-        provider: PROVIDER.AWS,
-        name: 'aws-provider-service',
-        type: SERVICE_TYPE.PROVIDER,
-        region: REGIONS[0],
-      }, stage);
-
-      // Assign the AWS provider requirements
-      const awsProviderResources = onDeployment(
-        awsProviderProvisionable as AwsProviderDeployableProvisionable, stack,
-      );
-
-      Object.assign(provisionable, {
-        requirements: {
-          kmsKey: awsProviderResources.kmsKey,
-          providerInstance: awsProviderResources.provider,
-        },
-      });
+      provisionable = getAwsDeploymentProvisionableMock(config, stack);
     });
 
     it('registers the backend for the deployable scope', () => {
