@@ -8,6 +8,6 @@ export { Operation, deployment, destruction, setup } from '@stackmate/engine/cor
 export { SERVICE_TYPE, PROVIDER, CLOUD_PROVIDER } from '@stackmate/engine/constants';
 export { REGIONS as AWS_REGIONS, DEFAULT_REGION as AWS_DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
 export {
-  BaseService, BaseServiceAttributes, CloudServiceAttributes, CoreServiceAttributes,
-  ServiceTypeChoice, ProviderChoice, isCoreService, CloudService, CoreService, CloudProviderChoice,
+  BaseService, BaseServiceAttributes, CloudProviderChoice, isCoreService, ServiceTypeChoice,
+  ProviderChoice,
 } from '@stackmate/engine/core/service';

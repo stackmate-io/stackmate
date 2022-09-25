@@ -60,6 +60,7 @@ describe('Registry', () => {
     it('returns a service based on its configuration object', () => {
       const config = {
         provider: PROVIDER.AWS,
+        name: 'aws-mariadb-service',
         type: SERVICE_TYPE.MARIADB,
         region: REGIONS[0],
       };

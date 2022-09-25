@@ -1,15 +1,19 @@
 import pipe from '@bitty/pipe';
 
+import { Stack } from '@stackmate/engine/core/stack';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { ChoiceOf } from '@stackmate/engine/lib';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
+import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  CoreServiceAttributes, CredentialsHandler, profilable, Provisionable, ProvisionAssociationRequirements,
+  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
   SecretsVaultService, Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
+import { kebabCase, snakeCase } from 'lodash';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
+import { DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion, SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
-export type AwsVaultAttributes = CoreServiceAttributes & {
+export type AwsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
   provider: typeof PROVIDER.AWS,
   type: typeof SERVICE_TYPE.SECRETS;
   region: ChoiceOf<typeof REGIONS>;
@@ -49,11 +53,88 @@ export type AwsSecretsVaultPreparableProvisionable = BaseProvisionable & {
   >;
 };
 
-const generateCredentials: CredentialsHandler = (
-  provisionable: AwsSecretsVaultDeployableProvisionable, stack, { root = false } = {},
-) => {
+type ProvisionCredentialsResources = {
+  password: DataAwsSecretsmanagerRandomPassword;
+  secret: SecretsmanagerSecret;
+  version: SecretsmanagerSecretVersion;
+  data: DataAwsSecretsmanagerSecretVersion;
+};
+
+/**
+ * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
+ * @param {Stack} stack the stack to deploy resources on
+ * @param {CredentialsHandlerOptions} opts the credential handler's options
+ * @returns {Credentials} the credentials objects
+ * @returns {AwsSecretsDeployableResources} the resources created
+ */
+export const provisionCredentialResources = (
+  provisionable: AwsSecretsVaultDeployableProvisionable,
+  stack: Stack, { root = false, ...opts }: CredentialsHandlerOptions = {},
+): ProvisionCredentialsResources => {
+  const { service, config, requirements: { kmsKey, providerInstance } } = provisionable;
+  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`
+  const { secret, version, password } = getServiceProfile(
+    PROVIDER.AWS, SERVICE_TYPE.SECRETS, config.profile || DEFAULT_PROFILE_NAME,
+  );
+
+  const idPrefix = `${snakeCase(config.name)}_secrets`;
+  const username = `${snakeCase(config.name)}_${root ? 'root' : 'user'}`;
+
+  const passwordResource = new DataAwsSecretsmanagerRandomPassword(
+    stack.context, `${idPrefix}_password`, {
+      passwordLength: opts.length || DEFAULT_PASSWORD_LENGTH,
+      excludeCharacters: (opts.exclude || []).join(''),
+      ...password,
+  });
+
+  const secretResource = new SecretsmanagerSecret(stack.context, `${idPrefix}_secret`, {
+    name: secretName,
+    description: `Secrets for the ${service} service`,
+    kmsKeyId: kmsKey.id,
+    provider: providerInstance,
+    ...secret,
+  });
+
+  const secretVersionResource = new SecretsmanagerSecretVersion(
+    stack.context, `${idPrefix}_version`, {
+    ...version,
+    secretId: secretResource.id,
+    secretString: JSON.stringify({
+      username,
+      password: passwordResource.randomPassword,
+    }),
+    lifecycle: {
+      ignoreChanges: ['secret_string'],
+    },
+  });
+
+  const data = new DataAwsSecretsmanagerSecretVersion(stack.context, `${idPrefix}_data`, {
+    secretId: secret.id,
+    versionId: secretVersionResource.id,
+  });
+
   return {
-    username: '', password: '',
+    password: passwordResource,
+    secret: secretResource,
+    version: secretVersionResource,
+    data,
+  };
+}
+
+/**
+ * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
+ * @param {Stack} stack the stack to deploy resources on
+ * @param {CredentialsHandlerOptions} opts the credential handler's options
+ * @returns {Credentials} the credentials objects
+ */
+const generateCredentials: CredentialsHandler = (
+  provisionable: AwsSecretsVaultDeployableProvisionable, stack, opts = {},
+): Credentials => {
+  const { data } = provisionCredentialResources(provisionable, stack, opts);
+
+  return {
+    username: extractTokenFromJsonString(data.secretString, 'username'),
+    password: extractTokenFromJsonString(data.secretString, 'password'),
   };
 };
 

@@ -2,7 +2,7 @@ import { join as joinPaths } from 'node:path';
 
 import { merge } from 'lodash';
 
-import { PROFILES_PATH } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, PROFILES_PATH } from '@stackmate/engine/constants';
 import {
   BaseServiceAttributes, ProviderChoice, ServiceTypeChoice, ProfilableAttributes,
 } from '@stackmate/engine/core/service';
@@ -54,6 +54,9 @@ export const getServiceProfile = (
 export const getResourcesProfile = <T extends BaseServiceAttributes & ProfilableAttributes>(
   config: T,
 ): Record<string, any> => {
-  const profile = getServiceProfile(config.provider, config.type, config.profile);
+  const profile = getServiceProfile(
+    config.provider, config.type, config.profile || DEFAULT_PROFILE_NAME,
+  );
+
   return merge(profile, config.overrides);
 };

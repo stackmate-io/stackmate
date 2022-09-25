@@ -15,14 +15,14 @@ import {
   RDS_PARAM_FAMILY_MAPPING, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  CloudServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode,
+  BaseServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode,
   MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
   ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
   ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
   versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
 } from '@stackmate/engine/core/service';
 
-type DatabaseAttributes = CloudServiceAttributes
+type DatabaseAttributes = BaseServiceAttributes
   & EngineAttributes<RdsEngine>
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & SizeableAttributes
