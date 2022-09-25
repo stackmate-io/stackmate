@@ -13,9 +13,15 @@ export type Credentials = {
 
 export type CredentialsAssociation = ServiceAssociation<'credentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
 export type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
+export type CredentialsHandlerOptions = {
+  root?: boolean;
+  length?: number;
+  special?: boolean;
+  exclude?: string[];
+};
 
 export type CredentialsHandler = (
-  provisionable: Provisionable, stack: Stack, opts?: { root?: boolean }
+  provisionable: Provisionable, stack: Stack, opts?: CredentialsHandlerOptions,
 ) => Credentials;
 
 export type SecretsVaultService<Srv extends BaseService> = Srv & {

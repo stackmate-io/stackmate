@@ -41,3 +41,4 @@ export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
 export const DEFAULT_PROFILE_NAME = 'default' as const;
 export const DEFAULT_SERVICE_STORAGE = 30 as const;
 export const DEFAULT_CLOUD_PROVIDER = PROVIDER.AWS;
+export const DEFAULT_PASSWORD_LENGTH = 16 as const;
