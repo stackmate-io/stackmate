@@ -11,8 +11,8 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
 import {
   AwsProviderDeployableResources, AwsProviderAttributes, AwsProviderDeployableProvisionable,
-  AwsProviderDestroyableProvisions, AwsProviderPreparableProvisionable,
-  AwsProviderPreparableProvisions, AwsProviderDestroyableProvisionable,
+  AwsProviderDestroyableResources, AwsProviderPreparableProvisionable,
+  AwsProviderPreparableResources, AwsProviderDestroyableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
 describe('AWS Provider', () => {
@@ -58,7 +58,7 @@ describe('AWS Provider', () => {
           default: DEFAULT_REGION,
         },
         profile: { type: 'string', default: 'default', serviceProfile: true },
-        overrides: { type: 'object', default: {}, serviceProfileOverrides: true }
+        overrides: { type: 'object', default: {}, serviceProfileOverrides: true },
       },
     });
   });
@@ -109,7 +109,7 @@ describe('AWS Provider', () => {
 
       const resources = destroyHandler(
         provisionable as AwsProviderDestroyableProvisionable, stack,
-      ) as AwsProviderDestroyableProvisions;
+      ) as AwsProviderDestroyableResources;
 
       expect(resources).toBeInstanceOf(Object);
       expect(new Set(Object.keys(resources))).toEqual(new Set(['provider']));
@@ -122,11 +122,12 @@ describe('AWS Provider', () => {
 
       const resources = prepareHandler(
         provisionable as AwsProviderPreparableProvisionable, stack,
-      ) as AwsProviderPreparableProvisions;
+      ) as AwsProviderPreparableResources;
 
       expect(resources).toBeInstanceOf(Object);
-      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider']));
+      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'kmsKey']));
       expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
+      expect(resources.kmsKey).toBeInstanceOf(KmsKey);
     });
   });
 });
