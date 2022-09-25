@@ -13,7 +13,7 @@ import { kebabCase, snakeCase } from 'lodash';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion, SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
-export type AwsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
+export type AwsSecretsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
   provider: typeof PROVIDER.AWS,
   type: typeof SERVICE_TYPE.SECRETS;
   region: ChoiceOf<typeof REGIONS>;
@@ -24,11 +24,11 @@ export type AwsSecretsDestroyableResources = {};
 export type AwsSecretsPreparableResources = {};
 
 export type AwsSecretsVaultService = SecretsVaultService<
-  Service<AwsVaultAttributes> & { associations: AwsServiceAssociations }
+  Service<AwsSecretsVaultAttributes> & { associations: AwsServiceAssociations }
 >;
 
 type BaseProvisionable = Provisionable & {
-  config: AwsVaultAttributes;
+  config: AwsSecretsVaultAttributes;
   service: AwsSecretsVaultService;
 };
 
