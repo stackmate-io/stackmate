@@ -45,7 +45,7 @@ describe('AWS Provider', () => {
         provider: {
           type: 'string',
           enum: [PROVIDER.AWS],
-          default: 'aws',
+          default: PROVIDER.AWS,
         },
         type: {
           type: 'string',
@@ -65,12 +65,11 @@ describe('AWS Provider', () => {
 
   describe('provision handlers', () => {
     let stack: Stack;
-    const stage = 'a-stage';
     let provisionable: Provisionable;
     let config: AwsProviderAttributes;
 
     beforeEach(() => {
-      stack = getStack('my-project', stage);
+      stack = getStack('my-project', 'a-stage');
       config = {
         provider: 'aws',
         name: 'aws-provider',
@@ -80,7 +79,7 @@ describe('AWS Provider', () => {
         overrides: {},
       };
 
-      provisionable = getProvisionableFromConfig(config, stage);
+      provisionable = getProvisionableFromConfig(config, stack.stageName);
     });
 
     it('registers the service into the stack and creates the deployable provisions', () => {
