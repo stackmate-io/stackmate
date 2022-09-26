@@ -425,13 +425,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-local@npm:^2.0.67":
-  version: 2.0.67
-  resolution: "@cdktf/provider-local@npm:2.0.67"
+"@cdktf/provider-local@npm:^2.0.68":
+  version: 2.0.69
+  resolution: "@cdktf/provider-local@npm:2.0.69"
   peerDependencies:
     cdktf: ^0.12.2
     constructs: ^10.0.0
-  checksum: 60221d136530093ae12a456499676c0200e59cc7876702e0aed788ce13ffda924b22f96b42529972ec98cdc558a83e219869fca61fada059ffb10a5678364846
+  checksum: 62401b5a22152906b3f544af174f44223f68296965733b081a28e1a7c329add17c8eb37eddfe3e2889a7df6b48938fdcb9b7b322116ba8038c9e0bdbcf544fb6
   languageName: node
   linkType: hard
 
@@ -1411,7 +1411,7 @@ __metadata:
   dependencies:
     "@bitty/pipe": ^0.3.0
     "@cdktf/provider-aws": 9.0.42
-    "@cdktf/provider-local": ^2.0.67
+    "@cdktf/provider-local": ^2.0.68
     "@types/jest": ^29.0.3
     "@types/lodash": ^4.14.185
     "@types/node": ^18.7.21
