@@ -190,7 +190,7 @@ export const getProjectSchema = (
   const providers = Registry.providers();
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
-  ).map(([provider, regions]) => ([
+  ).filter(([_, regions]) => !isEmpty(regions)).map(([provider, regions]) => ([
     provider, getRegionsSchema(provider, Array.from(regions)),
   ]));
 
