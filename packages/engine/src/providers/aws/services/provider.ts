@@ -6,10 +6,10 @@ import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
+import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import { ChoiceOf, getCidrBlocks } from '@stackmate/engine/lib';
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { DEFAULT_PROFILE_NAME, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
 import {
   BaseServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable,
   ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
@@ -73,7 +73,7 @@ export const registerProviderInstance = (
   provisionable: AwsProviderBaseProvisionable, stack: Stack,
 ): ProviderInstanceResources => {
   const { config: { region } } = provisionable;
-  const alias = `aws-${kebabCase(region)}`;
+  const alias = `aws-${kebabCase(region)}-provider`;
   const provider = new TerraformAwsProvider(stack.context, PROVIDER.AWS, {
     region,
     alias,
@@ -172,7 +172,7 @@ export const onPrepare = (
 });
 
 /**
- * @returns {AwsSecretsVaultService} the secrets vault service
+ * @returns {AwsProviderService} the secrets vault service
  */
 export const getProviderService = (): AwsProviderService => (
   pipe(
