@@ -415,13 +415,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-aws@npm:9.0.42":
-  version: 9.0.42
-  resolution: "@cdktf/provider-aws@npm:9.0.42"
+"@cdktf/provider-aws@npm:9.0.43":
+  version: 9.0.43
+  resolution: "@cdktf/provider-aws@npm:9.0.43"
   peerDependencies:
     cdktf: ^0.12.2
     constructs: ^10.0.0
-  checksum: bdc0b97758353633f0f2cb455d8a98ee3bc106b925e1b20b3312a1357a6ae700511170ad7cb0275cc0236340c0403a7908d63f5929e27b9c49e0db32cc014617
+  checksum: 4ad9ce7492b75329b797af8bde43b784c3db26b86711b675a0f4e7c6ff0205dc58206a2b4af29ebbac010b0d52425266b870cc5ef98b54e2c04ea29b9b956852
   languageName: node
   linkType: hard
 
@@ -1410,7 +1410,7 @@ __metadata:
   resolution: "@stackmate/engine@workspace:packages/engine"
   dependencies:
     "@bitty/pipe": ^0.3.0
-    "@cdktf/provider-aws": 9.0.42
+    "@cdktf/provider-aws": 9.0.43
     "@cdktf/provider-local": ^2.0.68
     "@types/jest": ^29.0.3
     "@types/lodash": ^4.14.185
