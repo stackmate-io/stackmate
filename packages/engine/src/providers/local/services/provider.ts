@@ -13,9 +13,9 @@ export type ProviderInstanceResources = {
   provider: TerraformLocalProvider;
 };
 
-export type LocalProviderAttributes = LocalServiceAttributes<
-  Omit<BaseServiceAttributes, 'region'>  & { type: typeof SERVICE_TYPE.PROVIDER; }
->;
+export type LocalProviderAttributes = LocalServiceAttributes<BaseServiceAttributes & {
+  type: typeof SERVICE_TYPE.PROVIDER;
+}>;
 
 export type LocalProviderResources = ProviderInstanceResources;
 export type LocalProviderService = Service<LocalProviderAttributes>;
@@ -25,7 +25,7 @@ export type LocalProviderProvisionable = Provisionable & {
   service: LocalProviderService;
   provisions: LocalProviderResources;
   requirements: ProvisionAssociationRequirements<
-    LocalProviderService['associations'], 'deployable'
+    LocalProviderService['associations'], 'preparable'
   >;
 };
 
