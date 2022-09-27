@@ -1,9 +1,12 @@
+import os from 'node:os';
 import path from 'node:path';
 import { omit } from 'lodash';
 
 export const { env: ENV } = process;
+export const STACKMATE_DIRECTORY = '.stackmate';
 export const DEFAULT_PROJECT_NAME = 'stackmate-project';
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate';
+export const USER_HOME_DIRECTORY = path.join(os.homedir(), STACKMATE_DIRECTORY);
 export const DEBUG_MODE = Boolean(ENV.DEBUG) || false;
 
 export const PROVIDER = {
