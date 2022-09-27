@@ -1,4 +1,4 @@
-import addErrors from 'ajv-errors';
+import addErrors, { ErrorMessageOptions } from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import Ajv, { AnySchemaObject, Options as AjvOptions } from 'ajv';
 import { defaults, difference, get, isEmpty } from 'lodash';
@@ -8,7 +8,7 @@ import { Obj } from '@stackmate/engine/lib';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ServiceEnvironment } from '@stackmate/engine/core/service';
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
 const ajvInstance: Ajv | null = null;
@@ -125,12 +125,12 @@ export const validateServiceLinks = (
  * @param {AjvOptions} opts the options to use with Ajv
  * @returns {Ajv} the Ajv instance
  */
-const getAjv = (opts: AjvOptions = {}): Ajv => {
+export const getAjv = (opts: AjvOptions = {}): Ajv => {
   if (ajvInstance) {
     return ajvInstance;
   }
 
-  const options = defaults({ ...opts }, {
+  const defaultOptions: AjvOptions & ErrorMessageOptions = {
     useDefaults: true,
     allErrors: true,
     discriminator: true,
@@ -138,19 +138,14 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
     coerceTypes: true,
     allowMatchingProperties: true,
     strict: false,
-  })
+    keepErrors: false,
+    singleError: false,
+  };
 
-  const ajv = new Ajv(options);
+  const ajv = new Ajv(defaults({ ...opts }, defaultOptions));
 
   addFormats(ajv);
   addErrors(ajv, { keepErrors: false, singleError: false });
-
-  ajv.addKeyword({
-    keyword: 'serviceLinks',
-    type: 'array',
-    error: { message: 'Invalid service links defined' },
-    validate: validateServiceLinks,
-  });
 
   ajv.addKeyword({  // no-op for config generator
     keyword: 'isIncludedInConfigGeneration',
@@ -160,6 +155,13 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
   ajv.addKeyword({  // no-op for config generator
     keyword: 'serviceConfigGenerationTemplate',
     type: 'string',
+  });
+
+  ajv.addKeyword({
+    keyword: 'serviceLinks',
+    type: 'array',
+    error: { message: 'Invalid service links defined' },
+    validate: validateServiceLinks,
   });
 
   ajv.addKeyword({
@@ -188,7 +190,9 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
  * @param {Boolean} opts.refresh whether to refresh the schema on the ajv instance
  * @void
  */
-export const loadJsonSchema = (ajv: Ajv, schemaKey = 'json-schema', { refresh = false } = {}) => {
+export const loadJsonSchema = (
+  ajv: Ajv, schemaKey = JSON_SCHEMA_KEY, { refresh = false } = {},
+) => {
   if (ajv.schemas[schemaKey] && !refresh) {
     return;
   } else if (refresh) {
@@ -227,9 +231,8 @@ export const validate = <T extends Obj = {}>(
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!validate(attributes)) {
-    const errors = validate.errors;
-    throw new Error(require('util').inspect(errors, { depth: 30 }));
+  if (!validate(attributes) && validate.errors) {
+    throw new Error(require('util').inspect(validate.errors, { depth: 30 }));
   }
 
   return validAttributes;

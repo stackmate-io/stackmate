@@ -195,6 +195,7 @@ export const getProjectSchema = (
       name: {
         type: 'string',
         pattern: '[a-zA-Z0-9-_./]+',
+        minLength: 3,
         description: 'The name of the project in a URL-friendly format',
       },
       provider: {
@@ -275,7 +276,7 @@ export const getProjectSchema = (
       _: 'The configuration for the project is invalid',
       type: 'The configuration should be an object',
       properties: {
-        name: 'The name for the project only accepts characters, numbers, dashes, underscores, dots and forward slashes',
+        name: 'The name for the project should be 3 chars at minimum, consisting of letters, numbers, dashes, underscores, dots and forward slashes',
         provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
       },
       required: {
