@@ -81,9 +81,9 @@ describe('AWS PostgreSQL', () => {
     const engine: RdsEngine = 'postgres';
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine];
     const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine];
-    expect(Array.isArray(versions)).toBeTruthy();
+    expect(Array.isArray(versions)).toBe(true);
     expect(versions.length).toBeGreaterThan(0);
-    expect(typeof defaultVersion === 'string').toBeTruthy();
+    expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
       getDatabaseSchema(SERVICE_TYPE.POSTGRESQL, engine, versions, defaultVersion),
     );
@@ -97,7 +97,7 @@ describe('AWS PostgreSQL', () => {
     );
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
-    expect(typeof resources === 'object').toBeTruthy();
+    expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
   });
@@ -125,9 +125,9 @@ describe('AWS MySQL', () => {
     const engine: RdsEngine = 'mysql';
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine];
     const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine];
-    expect(Array.isArray(versions)).toBeTruthy();
+    expect(Array.isArray(versions)).toBe(true);
     expect(versions.length).toBeGreaterThan(0);
-    expect(typeof defaultVersion === 'string').toBeTruthy();
+    expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
       getDatabaseSchema(SERVICE_TYPE.MYSQL, engine, versions, defaultVersion),
     );
@@ -141,7 +141,7 @@ describe('AWS MySQL', () => {
     );
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
-    expect(typeof resources === 'object').toBeTruthy();
+    expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
   });
@@ -169,9 +169,9 @@ describe('AWS MariaDB', () => {
     const engine: RdsEngine = 'mariadb';
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine];
     const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine];
-    expect(Array.isArray(versions)).toBeTruthy();
+    expect(Array.isArray(versions)).toBe(true);
     expect(versions.length).toBeGreaterThan(0);
-    expect(typeof defaultVersion === 'string').toBeTruthy();
+    expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
       getDatabaseSchema(SERVICE_TYPE.MARIADB, engine, versions, defaultVersion),
     );
@@ -185,7 +185,7 @@ describe('AWS MariaDB', () => {
     );
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
-    expect(typeof resources === 'object').toBeTruthy();
+    expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
   });
