@@ -6,3 +6,4 @@ export { AWSPostgreSQL, AWSMySQL, AWSMariaDB } from './aws/services/database';
 
 // Local services
 export { LocalProvider } from './local/services/provider';
+export { LocalState } from './local/services/state';
