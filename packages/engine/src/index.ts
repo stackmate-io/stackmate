@@ -1,4 +1,5 @@
 export * as util from '@stackmate/engine/lib/util';
+export * from '@stackmate/engine/constants';
 export { JsonSchema } from '@stackmate/engine/core/schema';
 export { DEFAULT_REGIONS } from '@stackmate/engine/providers';
 export { validateProject } from '@stackmate/engine/core/validation';
