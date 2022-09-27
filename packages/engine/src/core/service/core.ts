@@ -106,14 +106,6 @@ export type BaseServiceAttributes = {
 };
 
 /**
- * @type {ServiceConfiguration} the service configuration after it's been parsed
- */
-export type ServiceConfiguration<T extends BaseServiceAttributes = BaseServiceAttributes> = T & {
-  id: string;
-  name: string;
-};
-
-/**
  * @type {Service} accepts a set of service attributes and returns a Service object
  * @param {BaseServiceAttributes}
  * @param {Associations}
@@ -328,9 +320,8 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
  */
 export const getProvisionableResourceId = (
   config: BaseServiceAttributes, stageName: string,
-): string => {
-  const name = 'name' in config ? config.name : config.type;
-  return `${name}-${stageName}`;
-};
+): string => (
+  `${config.name || config.type}-${stageName}`
+);
 
 export const assertRequirementsSatisfied = () => {};
