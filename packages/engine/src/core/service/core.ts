@@ -200,6 +200,7 @@ export const getCloudService = (
       },
       name: {
         ...(core.schema.properties.name || {}),
+        minLength: 3,
         isIncludedInConfigGeneration: true,
         serviceConfigGenerationTemplate: '${type}-service-${stageName}',
       },

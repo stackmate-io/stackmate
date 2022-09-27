@@ -107,5 +107,8 @@ class Registry implements ServicesRegistry {
 }
 
 const registry = new Registry(...Object.values(Services)) as Registry;
+const availbleServices = Object.values(Services);
+
+export type AvailableServiceTypes = typeof availbleServices[number];
 
 export { registry as Registry };

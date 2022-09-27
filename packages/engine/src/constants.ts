@@ -36,6 +36,7 @@ export const SERVICE_TYPE = {
 // Json Schema
 export const JSON_SCHEMA_PATH = path.resolve(__dirname, 'stackmate.schema.json');
 export const JSON_SCHEMA_ROOT = 'StackmateProject';
+export const JSON_SCHEMA_KEY = 'stackmate-json-schema';
 
 export const PROFILES_PATH = path.resolve(__dirname, 'profiles');
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL');
