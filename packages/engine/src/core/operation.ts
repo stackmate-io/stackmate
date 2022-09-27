@@ -9,7 +9,7 @@ import { validate, validateEnvironment } from '@stackmate/engine/core/validation
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
   BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions,
-  ServiceConfiguration, ServiceEnvironment, ServiceScopeChoice,
+  ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
 type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
@@ -193,7 +193,7 @@ class StageOperation implements Operation {
  */
 const getOperation = (
   projectName: string, stageName: string, scope: ServiceScopeChoice,
-) => (services: ServiceConfiguration[]): Operation => {
+) => (services: BaseServiceAttributes[]): Operation => {
   const stack = getStack(projectName, stageName);
   return new StageOperation(services, stack, scope);
 };

@@ -32,7 +32,7 @@ describe('AWS Provider', () => {
     expect(new Set(Array.from(service.handlers.keys()))).toEqual(new Set(scopes));
     expect(
       Array.from(service.handlers.values()).every(h => (typeof h === 'function')),
-    ).toBeTruthy();
+    ).toBe(true);
   });
 
   it('contains a valid schema', () => {
@@ -84,7 +84,7 @@ describe('AWS Provider', () => {
 
     it('registers the service into the stack and creates the deployable provisions', () => {
       const deployHandler = service.handlers.get('deployable')!;
-      expect(typeof deployHandler === 'function').toBeTruthy();
+      expect(typeof deployHandler === 'function').toBe(true);
 
       const resources = deployHandler(
         provisionable as AwsProviderDeployableProvisionable, stack,
@@ -98,13 +98,13 @@ describe('AWS Provider', () => {
       expect(resources.kmsKey).toBeInstanceOf(KmsKey);
       expect(resources.vpc).toBeInstanceOf(Vpc);
       expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
-      expect(Array.isArray(resources.subnets)).toBeTruthy();
-      expect(resources.subnets.every(s => s instanceof Subnet)).toBeTruthy();
+      expect(Array.isArray(resources.subnets)).toBe(true);
+      expect(resources.subnets.every(s => s instanceof Subnet)).toBe(true);
     });
 
     it('registers the service into the stack and creates the destroyable provisions', () => {
       const destroyHandler = service.handlers.get('destroyable')!;
-      expect(typeof destroyHandler === 'function').toBeTruthy();
+      expect(typeof destroyHandler === 'function').toBe(true);
 
       const resources = destroyHandler(
         provisionable as AwsProviderDestroyableProvisionable, stack,
@@ -117,7 +117,7 @@ describe('AWS Provider', () => {
 
     it('registers the base resources', () => {
       const prepareHandler = service.handlers.get('preparable')!;
-      expect(typeof prepareHandler === 'function').toBeTruthy();
+      expect(typeof prepareHandler === 'function').toBe(true);
 
       const resources = prepareHandler(
         provisionable as AwsProviderPreparableProvisionable, stack,
