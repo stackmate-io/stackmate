@@ -20,7 +20,7 @@ export const withDatabase = <C extends BaseServiceAttributes>(
     database: {
       type: 'string',
       pattern: '[a-z0-9_]+',
-      errorMessage: 'The database property is invalid',
+      errorMessage: 'The database must be an alphanumeric that could contain underscores',
     },
   }
 });

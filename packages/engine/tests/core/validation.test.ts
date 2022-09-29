@@ -67,7 +67,7 @@ describe('Validation', () => {
 
       validateProject({
         name: 'a', provider: 'aws', region: 'abc-123',
-        stages: [{ name: 'bc', services: [service] }],
+        stages: [{ name: 'bhkc', services: [service] }],
       });
     });
   });
