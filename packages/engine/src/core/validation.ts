@@ -133,7 +133,7 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   const defaultOptions: AjvOptions & ErrorMessageOptions = {
     useDefaults: true,
     allErrors: true,
-    discriminator: true,
+    discriminator: false,
     removeAdditional: true,
     coerceTypes: true,
     allowMatchingProperties: true,

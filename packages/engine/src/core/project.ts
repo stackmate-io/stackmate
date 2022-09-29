@@ -218,7 +218,7 @@ export const getProjectSchema = (
       stages: {
         type: 'array',
         description: 'The deployment stages for your projects',
-        errorMessage: 'The stages configuration is invalid',
+        errorMessage: 'You should provide either a set of services or a stage name to copy from',
         minItems: 1,
         items: {
           type: 'object',
@@ -274,10 +274,10 @@ export const getProjectSchema = (
     },
     errorMessage: {
       _: 'The configuration for the project is invalid',
-      type: 'The configuration should be an object',
+      type: 'must be an object',
       properties: {
-        name: 'The name for the project should be 3 chars at minimum, consisting of letters, numbers, dashes, underscores, dots and forward slashes',
-        provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
+        name: 'The project’s name must be at minimum 3 chars consisting of letters, numbers, dashes, underscores, dots and forward slashes',
+        provider: `The root provider must be one of ${providers.join(', ')}`,
       },
       required: {
         name: 'You need to set a name for the project',
