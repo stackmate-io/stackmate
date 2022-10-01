@@ -14,7 +14,7 @@ import {
   REGIONS, RDS_MAJOR_VERSIONS_PER_ENGINE, RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@stackmate/engine/providers/aws/constants';
 
-const getDatabaseSchema = (
+const getDatabaseSchemaExpectation = (
   type: ServiceTypeChoice, engine: RdsEngine, versions: readonly string[], defaultVersion: string,
 ) => ({
   $id: `services/aws/${type}`,
@@ -25,13 +25,13 @@ const getDatabaseSchema = (
     provider: { type: 'string', enum: [PROVIDER.AWS], default: PROVIDER.AWS },
     type: { type: 'string', enum: [type], default: type },
     region: { type: 'string', enum: Array.from(REGIONS), default: DEFAULT_REGION },
-    name: { type: 'string', pattern: '[a-zA-Z0-9_]+' },
+    name: { type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') },
     version: { type: 'string', enum: Array.from(versions), default: defaultVersion },
     engine: { type: 'string', enum: [engine], default: engine },
     nodes: { type: 'number', minimum: 1, maximum: 10000, default: 1 },
     profile: { type: 'string', default: DEFAULT_PROFILE_NAME, serviceProfile: true },
     overrides: { type: 'object', default: {}, serviceProfileOverrides: true },
-    database: { type: 'string', pattern: '[a-z0-9_]+' },
+    database: { type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') },
     storage: {
       type: 'number', minimum: 1, maximum: 100000, default: DEFAULT_SERVICE_STORAGE,
     },
@@ -85,7 +85,7 @@ describe('AWS PostgreSQL', () => {
     expect(versions.length).toBeGreaterThan(0);
     expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
-      getDatabaseSchema(SERVICE_TYPE.POSTGRESQL, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.POSTGRESQL, engine, versions, defaultVersion),
     );
   });
 
@@ -129,7 +129,7 @@ describe('AWS MySQL', () => {
     expect(versions.length).toBeGreaterThan(0);
     expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
-      getDatabaseSchema(SERVICE_TYPE.MYSQL, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.MYSQL, engine, versions, defaultVersion),
     );
   });
 
@@ -173,7 +173,7 @@ describe('AWS MariaDB', () => {
     expect(versions.length).toBeGreaterThan(0);
     expect(typeof defaultVersion === 'string').toBe(true);
     expect(service.schema).toMatchObject(
-      getDatabaseSchema(SERVICE_TYPE.MARIADB, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.MARIADB, engine, versions, defaultVersion),
     );
   });
 

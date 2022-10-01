@@ -223,17 +223,17 @@ export const loadJsonSchema = (
  *
  * @param {String} schemaId the schema id to use for validation
  * @param {Object} attributes the data to validate
- * @param {AjvOptions} ajvOptions any Ajv options to use
+ * @param {AjvOptions} options any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
 export const validate = <T extends Obj = {}>(
-  schemaId: string, attributes: T, ajvOptions: AjvOptions = {},
+  schemaId: string, attributes: T, options: AjvOptions = {},
 ): T => {
   if (!schemaId) {
     throw new Error('A schema ID should be provided');
   }
 
-  const ajv = getAjv(ajvOptions);
+  const ajv = getAjv(options);
   loadJsonSchema(ajv);
 
   const validAttributes = { ...attributes };
@@ -243,12 +243,12 @@ export const validate = <T extends Obj = {}>(
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!validate(attributes) && !isEmpty(validate.errors)) {
+  if (!validate(validAttributes) && !isEmpty(validate.errors)) {
     const errors = parseErrors(validate.errors || []);
     throw new ValidationError(errors);
   }
 
-  return validAttributes;
+  return options.useDefaults ? validAttributes : attributes;
 };
 
 /**
