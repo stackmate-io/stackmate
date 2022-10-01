@@ -1,17 +1,31 @@
 import addErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
-import Ajv, { AnySchemaObject, Options as AjvOptions } from 'ajv';
-import { defaults, difference, get, isEmpty } from 'lodash';
+import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
+import { defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 import { DataValidationCxt } from 'ajv/dist/types';
 
 import { Obj } from '@stackmate/engine/lib';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ServiceEnvironment } from '@stackmate/engine/core/service';
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
 const ajvInstance: Ajv | null = null;
+
+export type ErrorDescriptor = {
+  path: string;
+  message: string;
+};
+
+export class ValidationError extends Error {
+  readonly errors: ErrorDescriptor[] = [];
+
+  constructor(errors: ErrorDescriptor[], message = 'The project configuration is invalid') {
+    super(message);
+    this.errors = errors;
+  }
+}
 
 /**
  * Extracts the service names given a path in the schema
@@ -125,31 +139,28 @@ export const validateServiceLinks = (
  * @param {AjvOptions} opts the options to use with Ajv
  * @returns {Ajv} the Ajv instance
  */
-const getAjv = (opts: AjvOptions = {}): Ajv => {
+export const getAjv = (opts: AjvOptions = {}): Ajv => {
   if (ajvInstance) {
     return ajvInstance;
   }
 
-  const options = defaults({ ...opts }, {
+  const defaultOptions: AjvOptions = {
     useDefaults: true,
     allErrors: true,
-    discriminator: true,
+    discriminator: false,
     removeAdditional: true,
     coerceTypes: true,
     allowMatchingProperties: true,
     strict: false,
-  })
+  };
 
-  const ajv = new Ajv(options);
+  const ajv = new Ajv(defaults({ ...opts }, defaultOptions));
 
   addFormats(ajv);
-  addErrors(ajv, { keepErrors: false, singleError: false });
 
-  ajv.addKeyword({
-    keyword: 'serviceLinks',
-    type: 'array',
-    error: { message: 'Invalid service links defined' },
-    validate: validateServiceLinks,
+  addErrors(ajv, { // https://ajv.js.org/packages/ajv-errors.html
+    keepErrors: false,
+    singleError: false,
   });
 
   ajv.addKeyword({  // no-op for config generator
@@ -160,6 +171,13 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
   ajv.addKeyword({  // no-op for config generator
     keyword: 'serviceConfigGenerationTemplate',
     type: 'string',
+  });
+
+  ajv.addKeyword({
+    keyword: 'serviceLinks',
+    type: 'array',
+    error: { message: 'Invalid service links defined' },
+    validate: validateServiceLinks,
   });
 
   ajv.addKeyword({
@@ -188,7 +206,9 @@ const getAjv = (opts: AjvOptions = {}): Ajv => {
  * @param {Boolean} opts.refresh whether to refresh the schema on the ajv instance
  * @void
  */
-export const loadJsonSchema = (ajv: Ajv, schemaKey = 'json-schema', { refresh = false } = {}) => {
+export const loadJsonSchema = (
+  ajv: Ajv, schemaKey = JSON_SCHEMA_KEY, { refresh = false } = {},
+) => {
   if (ajv.schemas[schemaKey] && !refresh) {
     return;
   } else if (refresh) {
@@ -203,21 +223,17 @@ export const loadJsonSchema = (ajv: Ajv, schemaKey = 'json-schema', { refresh = 
  *
  * @param {String} schemaId the schema id to use for validation
  * @param {Object} attributes the data to validate
- * @param {AjvOptions} ajvOptions any Ajv options to use
+ * @param {AjvOptions} options any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
 export const validate = <T extends Obj = {}>(
-  schemaId: string, attributes: T, ajvOptions: AjvOptions = {},
+  schemaId: string, attributes: T, options: AjvOptions = {},
 ): T => {
   if (!schemaId) {
     throw new Error('A schema ID should be provided');
   }
 
-  if (isEmpty(attributes)) {
-    throw new Error('A set of validatable attributes needs to be provided');
-  }
-
-  const ajv = getAjv(ajvOptions);
+  const ajv = getAjv(options);
   loadJsonSchema(ajv);
 
   const validAttributes = { ...attributes };
@@ -227,12 +243,30 @@ export const validate = <T extends Obj = {}>(
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!validate(attributes)) {
-    const errors = validate.errors;
-    throw new Error(require('util').inspect(errors, { depth: 30 }));
+  if (!validate(validAttributes) && !isEmpty(validate.errors)) {
+    const errors = parseErrors(validate.errors || []);
+    throw new ValidationError(errors);
   }
 
-  return validAttributes;
+  return options.useDefaults ? validAttributes : attributes;
+};
+
+/**
+ * Parses Ajv errors to custom, error descriptors
+ *
+ * @param {AjvErrorObject[]} errors the raw, AJV errors available
+ * @returns {ErrorDescriptor[]} the parsed errors
+ */
+export const parseErrors = (errors: AjvErrorObject[]): ErrorDescriptor[] => {
+  const errs = errors.filter(
+    ({ keyword }) => !['if', 'then'].includes(keyword),
+  ).map(({ instancePath, message }) => {
+    const path = instancePath.replace(/\//g, '.').replace(/^\.(.*)/gi, '$1');
+    const defaultMessage = `Property ${path} is invalid`;
+    return { path, message: message || defaultMessage };
+  });
+
+  return uniqBy(errs, ({ path, message }) => `${path}-${message}`);
 };
 
 /**

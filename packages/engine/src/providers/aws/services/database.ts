@@ -4,7 +4,7 @@ import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 import { Stack } from '@stackmate/engine/core/stack';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
-import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PORT, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/service';
 import {
   RootCredentialsAssociation, withCredentials, withRootCredentials,
@@ -19,7 +19,7 @@ import {
   MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
   ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
   ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
-  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
+  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints, connectable,
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = BaseServiceAttributes
@@ -161,6 +161,11 @@ export const onDeploy: ProvisionHandler = (
 export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
   type: T, engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {
+  const defaultPort = DEFAULT_PORT.get(type);
+  if (!defaultPort) {
+    throw new Error(`There is no default port set for service ${type}`);
+  }
+
   const hints = {
     name: {
       isIncludedInConfigGeneration: true,
@@ -178,6 +183,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   return pipe(
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
+    connectable(defaultPort),
     storable(),
     withEngine(engine),
     multiNode(),

@@ -142,14 +142,18 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
         type: 'string',
         enum: [provider],
         default: provider,
-        errorMessage: `The provider can only be set to "${provider}"`,
         isIncludedInConfigGeneration: true,
+        errorMessage: {
+          enum: `The provider can only be set to "${provider}"`,
+        },
       },
       type: {
         type: 'string',
         enum: [type],
         default: type,
-        errorMessage: `You have to specify a valid service type, only ${type} is accepted`,
+        errorMessage: {
+          enum: `You have to specify a valid service type, only ${type} is accepted`,
+        },
       },
       region: {
         type: 'string',
@@ -157,13 +161,14 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
       },
       name: {
         type: 'string',
-        pattern: '[a-zA-Z0-9_]+',
+        pattern: '^([a-zA-Z0-9_-]+)$',
+        minLength: 2,
         description: 'The name for the service to deploy',
-        errorMessage: 'The name for the service should only contain characters, numbers and underscores',
+        errorMessage: {
+          minLength: 'The service’s name should be two characters or more',
+          pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
+        },
       },
-    },
-    errorMessage: {
-      _: 'The service configuration is invalid',
     },
   };
 
@@ -200,6 +205,7 @@ export const getCloudService = (
       },
       name: {
         ...(core.schema.properties.name || {}),
+        minLength: 3,
         isIncludedInConfigGeneration: true,
         serviceConfigGenerationTemplate: '${type}-service-${stageName}',
       },
@@ -223,6 +229,14 @@ export const CORE_SERVICE_TYPES = [SERVICE_TYPE.STATE, SERVICE_TYPE.SECRETS] as 
  */
 export const isCoreService = (type: ServiceTypeChoice): boolean => (
   CORE_SERVICE_TYPES.includes(type)
+);
+
+/**
+ * @param {ProviderChoice} provider the provider to check
+ * @returns {Boolean} whether the provider is a cloud provider
+ */
+export const isCloudProvider = (provider: ProviderChoice): boolean => (
+  provider !== PROVIDER.LOCAL
 );
 
 /**

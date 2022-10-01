@@ -8,7 +8,7 @@ import {
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 import {
-  BaseServiceAttributes, CloudProviderChoice, isCoreService, ProviderChoice,
+  BaseServiceAttributes, CloudProviderChoice, isCloudProvider, isCoreService, ProviderChoice,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -181,6 +181,12 @@ export const getProjectSchema = (
   projectSchemaId: string = JSON_SCHEMA_ROOT,
 ): JsonSchema<Project> => {
   const providers = Registry.providers();
+  const serviceTypes = Registry.serviceTypes();
+
+  const cloudProviders = providers.filter(p => isCloudProvider(p));
+  const stateProviders = Registry.providers('state');
+  const secretsProviders = Registry.providers('secrets');
+
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
   ).filter(([_, regions]) => !isEmpty(regions)).map(([provider, regions]) => ([
@@ -194,13 +200,21 @@ export const getProjectSchema = (
     properties: {
       name: {
         type: 'string',
-        pattern: '[a-zA-Z0-9-_./]+',
+        pattern: '^([a-zA-Z0-9-_./]+)$',
+        minLength: 3,
         description: 'The name of the project in a URL-friendly format',
+        errorMessage: {
+          minLength: 'The "name" property should be more than 3 characters',
+          pattern: 'The "name" property should consist of letters, numbers, dashes, dots, underscores and forward slashes',
+        },
       },
       provider: {
         type: 'string',
-        enum: providers,
+        enum: cloudProviders,
         description: 'The default provider for your cloud services',
+        errorMessage: {
+          enum: `The provider is invalid, available choices are: ${cloudProviders.join(', ')}`,
+        },
       },
       region: {
         type: 'string',
@@ -209,22 +223,61 @@ export const getProjectSchema = (
       secrets: {
         type: 'object',
         description: 'How would you like your services secrets to be stored',
+        properties: {
+          provider: {
+            type: 'string',
+            enum: secretsProviders,
+            description: 'The secrets provider',
+            errorMessage: {
+              enum: `Invalid secrets provider, available options are: ${secretsProviders.join(', ')}`,
+            },
+          },
+        },
       },
       state: {
         type: 'object',
         description: 'Where would you like your Terraform state to be stored',
+        properties: {
+          provider: {
+            type: 'string',
+            enum: stateProviders,
+            description: 'The state provider',
+            errorMessage: {
+              enum: `Invalid state provider, available options are: ${stateProviders.join(', ')}`,
+            },
+          },
+        },
       },
       stages: {
         type: 'array',
         description: 'The deployment stages for your projects',
-        errorMessage: 'The stages configuration is invalid',
         minItems: 1,
+        errorMessage: {
+          minItems: 'You should define at least one stage',
+        },
         items: {
           type: 'object',
+          required: ['name'],
           oneOf: [
-            { required: ['name', 'services'] },
-            { required: ['name', 'copy'] },
+            {
+              required: ['name', 'services'],
+              errorMessage: {
+                required: 'You should define at least one service or a source stage to copy from',
+              },
+            },
+            {
+              required: ['name', 'copy'],
+              errorMessage: {
+                required: 'You should define at least one service or a source stage to copy from',
+              },
+            },
           ],
+          errorMessage: {
+            oneOf: 'You should define at least one service or a source stage to copy from',
+            required: {
+              name: 'You should define a name for the stage',
+            },
+          },
           properties: {
             name: {
               type: 'string',
@@ -236,10 +289,38 @@ export const getProjectSchema = (
                 type: 'object',
                 additionalProperties: true,
                 required: ['name', 'type'],
+                minItems: 1,
                 properties: {
-                  name: { type: 'string' },
-                  type: { type: 'string' },
-                  provider: { type: 'string' },
+                  name: {
+                    type: 'string',
+                    pattern: '^([a-zA-Z0-9_-]+)$',
+                    minLength: 2,
+                    description: 'The name for the service',
+                    errorMessage: {
+                      minLength: 'The service’s name should be two characters or more',
+                      pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
+                    },
+                  },
+                  type: {
+                    type: 'string',
+                    enum: serviceTypes,
+                    errorMessage: {
+                      enum: `You have to specify a valid service type, available are: ${serviceTypes.join(', ')}`
+                    },
+                  },
+                  provider: {
+                    type: 'string',
+                    enum: providers,
+                    errorMessage: {
+                      enum: `You have to specify a valid provider, available are: ${providers.join(', ')}`,
+                    },
+                  },
+                },
+                errorMessage: {
+                  required: {
+                    name: 'Every service should feature a "name" property',
+                    type: 'Every service should feature a "type" property',
+                  },
                 },
               },
             },
@@ -272,12 +353,7 @@ export const getProjectSchema = (
       ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
     },
     errorMessage: {
-      _: 'The configuration for the project is invalid',
-      type: 'The configuration should be an object',
-      properties: {
-        name: 'The name for the project only accepts characters, numbers, dashes, underscores, dots and forward slashes',
-        provider: `The provider is not valid. Accepted options are ${providers.join(', ')}`,
-      },
+      type: 'The project configuration must be an object',
       required: {
         name: 'You need to set a name for the project',
         provider: 'You need to set a default provider for the project',

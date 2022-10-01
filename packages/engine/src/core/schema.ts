@@ -170,6 +170,22 @@ export type JsonSchema<T = undefined> = {
     '_'?: string;
     type?: string;
     additionalProperties?: string;
+
+    // Error messages for when some conditions are not met
+    oneOf?: string;
+    enum?: string;
+    pattern?: string;
+    format?: string;
+    multipleOf?: string;
+    maximum?: string;
+    exclusiveMaximum?: string;
+    minimum?: string;
+    exclusiveMinimum?: string;
+    maxItems?: string;
+    minItems?: string;
+    maxLength?: string;
+    minLength?: string;
+
     properties?: { [property: string]: string; } | {};
     required?: { [property: string]: string; } | {};
   };
@@ -309,7 +325,9 @@ export const getRegionsSchema = (
   $id: `regions/${provider}`,
   type: 'string',
   enum: regions,
-  errorMessage: `The region is invalid. Available options are: ${regions.join(', ')}`,
+  errorMessage: {
+    enum: `The region is invalid. Available options are: ${regions.join(', ')}`,
+  },
 });
 
 /**

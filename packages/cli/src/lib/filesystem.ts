@@ -4,6 +4,7 @@ import { DirectoryNotWriteableError, FileDoesNotExistError, FileNotWriteableErro
 
 export type FileStorage = {
   readonly filename: string;
+  get raw(): string;
   read(): object;
   write(contents: object): void;
 };

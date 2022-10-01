@@ -26,7 +26,10 @@ export const multiNode = <C extends BaseServiceAttributes>(
       minimum: min,
       maximum: max,
       default: defaultNodes,
-      errorMessage: `The nodes should be between ${min} and ${max}`,
+      errorMessage: {
+        minimum: `The nodes must be between ${min} and ${max}`,
+        maximum: `The nodes must be between ${min} and ${max}`,
+      },
     },
   }
 });

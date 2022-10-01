@@ -27,7 +27,10 @@ export const storable = <C extends BaseServiceAttributes>(
       minimum: min,
       maximum: max,
       default: defaultValue,
-      errorMessage: `The storage should be between ${min} and ${max}`,
+      errorMessage: {
+        minimum: `The storage must be be between ${min} and ${max}`,
+        maximum: `The storage must be be between ${min} and ${max}`,
+      },
     },
   }
 });

@@ -26,7 +26,10 @@ export const connectable = <C extends BaseServiceAttributes>(
       minimum: min,
       maximum: max,
       default: defaultPort,
-      errorMessage: `The port should be between ${min} and ${max}`,
+      errorMessage: {
+        minimum: `The service’s port must be be between ${min} and ${max}`,
+        maximum: `The service’s port must be be between ${min} and ${max}`,
+      },
     },
   }
 });

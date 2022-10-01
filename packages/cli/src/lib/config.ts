@@ -15,6 +15,11 @@ export class ConfigurationFile implements FileStorage {
   readonly filename: string;
 
   /**
+   * @var {String} raw the raw file contents
+   */
+  #raw: string;
+
+  /**
    * @var {Map} formatters the formatters to apply for reading / writing
    */
   protected formatter: FileFormatter;
@@ -26,6 +31,14 @@ export class ConfigurationFile implements FileStorage {
   constructor(filename: string) {
     this.filename = path.resolve(CURRENT_DIRECTORY, filename);
     this.formatter = getFormatterByFilename(this.filename);
+    this.#raw = readFile(this.filename);
+  }
+
+  /**
+   * @return {String} the raw file contents
+   */
+  get raw(): string {
+    return this.#raw;
   }
 
   /**
@@ -34,7 +47,7 @@ export class ConfigurationFile implements FileStorage {
    * @returns {Object} the file's contents
    */
   read(): object {
-    return this.formatter.deserialize(readFile(this.filename));
+    return this.formatter.deserialize(this.#raw);
   }
 
   /**
@@ -43,6 +56,7 @@ export class ConfigurationFile implements FileStorage {
    * @returns {Object} the file's contents
    */
   write(contents: object): void {
+    this.#raw = this.formatter.serialize(contents);
     writeFile(this.filename, this.formatter.serialize(contents));
   }
 }
