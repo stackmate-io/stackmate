@@ -161,7 +161,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
       },
       name: {
         type: 'string',
-        pattern: '^([a-zA-Z0-9_\-]+)$',
+        pattern: '^([a-zA-Z0-9_-]+)$',
         minLength: 2,
         description: 'The name for the service to deploy',
         errorMessage: {

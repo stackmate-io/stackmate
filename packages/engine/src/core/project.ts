@@ -293,7 +293,7 @@ export const getProjectSchema = (
                 properties: {
                   name: {
                     type: 'string',
-                    pattern: '^([a-zA-Z0-9_\-]+)$',
+                    pattern: '^([a-zA-Z0-9_-]+)$',
                     minLength: 2,
                     description: 'The name for the service',
                     errorMessage: {
