@@ -27,7 +27,9 @@ export const withRegions = <C extends BaseServiceAttributes>(
           type: 'string',
           enum: regions,
           default: defaultRegion,
-          errorMessage: `The region must be one of ${regions.join(', ')}`
+          errorMessage: {
+            enum: `The region must be one of ${regions.join(', ')}`,
+          },
         },
       },
     }),

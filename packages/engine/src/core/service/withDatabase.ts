@@ -19,8 +19,12 @@ export const withDatabase = <C extends BaseServiceAttributes>(
   properties: {
     database: {
       type: 'string',
-      pattern: '[a-z0-9_]+',
-      errorMessage: 'The database must be an alphanumeric that could contain underscores',
+      pattern: '^([a-z0-9_]+)$',
+      minLength: 3,
+      errorMessage: {
+        pattern: 'The database name must be an alphanumeric that could contain underscores',
+        minLength: 'The database name must be 3 characters or more',
+      },
     },
   }
 });
