@@ -22,7 +22,9 @@ export const sizeable = <C extends BaseServiceAttributes>(
       type: 'string',
       enum: sizes,
       default: defaultSize,
-      errorMessage: `The size must be one of ${sizes.join(', ')}`
+      errorMessage: {
+        enum: `The size must be one of ${sizes.join(', ')}`,
+      },
     },
   }
 });
