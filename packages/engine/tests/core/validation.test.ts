@@ -1,13 +1,16 @@
 import { fail } from 'node:assert';
 import { FuncKeywordDefinition } from 'ajv/dist/types';
 
-import { JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
+import { Registry } from '@stackmate/engine/core/registry';
+import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { BaseServiceAttributes } from '@stackmate/engine/core/service';
+import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
 import {
-  getAjv, loadJsonSchema, validateProject, validateServiceLinks,
+  getAjv, loadJsonSchema, validate, validateProject, validateServiceLinks,
   validateServiceProfile, validateServiceProfileOverrides, ValidationError,
 } from '@stackmate/engine/core/validation';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
 
 describe('Validation', () => {
   const ajv = getAjv();
@@ -198,6 +201,32 @@ describe('Validation', () => {
           }],
         }],
       })
+    });
+  });
+
+  describe('validate', () => {
+    it('validates a service and applies defaults', () => {
+      const service = Registry.get('aws', 'mysql');
+      const config: Partial<AwsMySQLAttributes> = {
+        name: 'my-database-service',
+        provider: 'aws',
+        type: 'mysql',
+        region: 'eu-central-1',
+      };
+
+      const validated = validate(service.schemaId, config, { useDefaults: true });
+      expect(validated).toBeInstanceOf(Object);
+      expect(validated).toMatchObject({
+        ...config,
+        size: DEFAULT_RDS_INSTANCE_SIZE,
+        engine: 'mysql',
+        nodes: 1,
+        port: 3306,
+        profile: DEFAULT_PROFILE_NAME,
+        overrides: {},
+        storage: DEFAULT_SERVICE_STORAGE,
+        version: '8.0',
+      });
     });
   });
 });
