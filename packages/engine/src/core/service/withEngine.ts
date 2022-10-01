@@ -22,7 +22,9 @@ export const withEngine = <C extends BaseServiceAttributes>(
       type: 'string',
       enum: [engine],
       default: engine,
-      errorMessage: `The engine can only be ${engine}`,
+      errorMessage: {
+        enum: `The engine can only be ${engine}`,
+      },
     },
   }
 });

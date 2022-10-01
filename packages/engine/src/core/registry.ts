@@ -2,13 +2,14 @@ import { uniq } from 'lodash';
 
 import * as Services from '@stackmate/engine/providers/services';
 import {
-  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes,
+  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, isCoreService,
 } from '@stackmate/engine/core/service';
 
 export type ServicesRegistry = {
   readonly items: BaseService[];
   readonly regions: Map<ProviderChoice, Set<string>>;
   get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService;
+  serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[];
   providers(serviceType?: ServiceTypeChoice): ProviderChoice[];
   ofType(type: ServiceTypeChoice): BaseService[];
   ofProvider(provider: ProviderChoice): BaseService[];
@@ -53,6 +54,19 @@ class Registry implements ServicesRegistry {
     }
 
     return uniq(this.items.filter(s => s.type === serviceType).map(s => s.provider));
+  }
+
+  /**
+   * Returns the types of services for a specific provider (if provided), or all available otherwise
+   *
+   * @returns {ServiceTypeChoice[]} the service types available for the provider (if any, otherwise all)
+   */
+  serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[] {
+    if (!provider) {
+      return uniq(this.items.map(s => s.type));
+    }
+
+    return uniq(this.items.filter(s => s.provider === provider).map(s => s.type));
   }
 
   /**
@@ -107,5 +121,10 @@ class Registry implements ServicesRegistry {
 }
 
 const registry = new Registry(...Object.values(Services)) as Registry;
+const availableServices = Object.values(Services);
+const cloudServices = availableServices.filter(s => !isCoreService(s.type));
+
+export type AvailableServices = typeof availableServices[number];
+export type CloudServices = typeof cloudServices[number];
 
 export { registry as Registry };

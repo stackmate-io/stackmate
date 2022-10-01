@@ -60,9 +60,9 @@ class StageOperation implements Operation {
   readonly provisionables: ProvisionablesMap = new Map();
 
   /**
-   * @var {ServiceEnvironment[]} _environment the environment variables required for the operation
+   * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
    */
-  private _environment: ServiceEnvironment[];
+  #environment: ServiceEnvironment[];
 
   /**
    * @constructor
@@ -96,17 +96,17 @@ class StageOperation implements Operation {
    * @returns {ServiceEnvironment[]} the environment variables
    */
   environment(): ServiceEnvironment[] {
-    if (!this._environment) {
+    if (!this.#environment) {
       const envVariables = Array.from(this.provisionables.values()).map(
         p => p.service.environment,
       ).filter(
         e => !isEmpty(e),
       ).flat();
 
-      this._environment = uniqBy(envVariables, e => e.name);
+      this.#environment = uniqBy(envVariables, e => e.name);
     }
 
-    return this._environment;
+    return this.#environment;
   }
 
   /**
