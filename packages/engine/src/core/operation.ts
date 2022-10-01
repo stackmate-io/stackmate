@@ -116,7 +116,7 @@ class StageOperation implements Operation {
    */
   protected register(provisionable: Provisionable): Provisions {
     // Item has already been provisioned, bail...
-    if (this.provisionables.has(provisionable.id)) {
+    if (!isEmpty(this.provisionables.get(provisionable.id)?.provisions)) {
       return {};
     }
 
@@ -130,7 +130,7 @@ class StageOperation implements Operation {
     }
 
     // Validate the configuration
-    validate(service.schemaId, config);
+    validate(service.schemaId, config, { useDefaults: true });
 
     // Start extracting the service's requirements
     const requirements = {};
@@ -165,10 +165,13 @@ class StageOperation implements Operation {
 
     // Register the current service into the stack and mark as provisioned
     // assertRequirementsSatisfied( requirements);
-    const updatedProvisionable = { ...provisionable, requirements };
-    this.provisionables.set(updatedProvisionable.id, updatedProvisionable);
+    Object.assign(provisionable, { requirements });
+    const provisions = registrationHandler(provisionable, this.stack);
 
-    return registrationHandler(updatedProvisionable, this.stack);
+    Object.assign(provisionable, { provisions });
+    this.provisionables.set(provisionable.id, provisionable);
+
+    return provisions;
   }
 
   /**
