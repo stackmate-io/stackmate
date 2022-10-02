@@ -21,7 +21,7 @@ export type ErrorDescriptor = {
 export class ValidationError extends Error {
   readonly errors: ErrorDescriptor[] = [];
 
-  constructor(errors: ErrorDescriptor[], message = 'The project configuration is invalid') {
+  constructor(message: string, errors: ErrorDescriptor[]) {
     super(message);
     this.errors = errors;
   }
@@ -244,8 +244,9 @@ export const validate = <T extends Obj = {}>(
   }
 
   if (!validate(validAttributes) && !isEmpty(validate.errors)) {
-    const errors = parseErrors(validate.errors || []);
-    throw new ValidationError(errors);
+    throw new ValidationError(
+      `Error while validating schema ${schemaId}`, parseErrors(validate.errors || []),
+    );
   }
 
   return options.useDefaults ? validAttributes : attributes;

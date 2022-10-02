@@ -29,8 +29,8 @@ export type Project = {
   provider: CloudProviderChoice;
   region: string;
   stages: StageConfiguration[];
-  secrets: Omit<BaseServiceAttributes, 'type'>;
-  state: Omit<BaseServiceAttributes, 'type'>;
+  secrets: Omit<BaseServiceAttributes, 'name' | 'type'>;
+  state: Omit<BaseServiceAttributes, 'name' | 'type'>;
 };
 
 /**
