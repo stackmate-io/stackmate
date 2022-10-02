@@ -73,8 +73,8 @@ export type Provisionable<T extends BaseServiceAttributes = BaseServiceAttribute
   config: T;
   service: BaseService;
   requirements: Record<string, any>;
-  provisions: Provisions,
   resourceId: string; /** @var {String} resourceId the id of the terraform resource */
+  provisions?: Provisions,
 };
 
 /**
@@ -338,4 +338,19 @@ export const getProvisionableResourceId = (
   `${config.name || config.type}-${stageName}`
 );
 
-export const assertRequirementsSatisfied = () => {};
+/**
+ * @param {Provisionable} provisionable the provisionable to check
+ * @param {ServiceScopeChoice} scope the scope for the services
+ * @throws {Error} if a requirement is not satisfied
+ */
+export const assertRequirementsSatisfied = (
+  provisionable: Provisionable, scope: ServiceScopeChoice,
+) => {
+  const { service: { associations, type }, requirements } = provisionable;
+  const associated = associations.filter(assoc => assoc.scope === scope);
+  associated.forEach(({ as: name }) => {
+    if (!requirements[name]) {
+      throw new Error(`Requirement ${name} for service ${type} is not satisfied`);
+    }
+  });
+};

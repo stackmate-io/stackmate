@@ -1,17 +1,21 @@
 import pipe from '@bitty/pipe';
+import { kebabCase, snakeCase } from 'lodash';
+import {
+  DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion,
+  SecretsmanagerSecret, SecretsmanagerSecretVersion,
+} from '@cdktf/provider-aws/lib/secretsmanager';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
+  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions,
+  profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
   SecretsVaultService, Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
-import { kebabCase, snakeCase } from 'lodash';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion, SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
   provider: typeof PROVIDER.AWS,
@@ -72,7 +76,7 @@ export const provisionCredentialResources = (
   stack: Stack, { root = false, ...opts }: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
   const { service, config, requirements: { kmsKey, providerInstance } } = provisionable;
-  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`
+  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
   const { secret, version, password } = getServiceProfile(
     PROVIDER.AWS, SERVICE_TYPE.SECRETS, config.profile || DEFAULT_PROFILE_NAME,
   );

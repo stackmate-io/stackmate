@@ -6,11 +6,16 @@ import { Project } from '@stackmate/engine/core/project';
 import { deployment, Operation } from '@stackmate/engine/core/operation';
 import { SERVICE_TYPE } from '@stackmate/engine';
 import { Provisionable } from '@stackmate/engine/core/service';
+import { AwsDatabaseDeployableResources } from '@stackmate/engine/providers/aws/services/database';
+import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
 
 describe('Operation', () => {
   const project: Project = validateProject({
     name: 'my-super-project',
     provider: 'aws',
+    state: {
+      provider: 'local',
+    },
     region: 'eu-central-1',
     stages: [{
       name: 'production',
@@ -66,6 +71,9 @@ describe('Operation', () => {
       expect(db).not.toBeUndefined();
       expect(db?.provisions).toBeInstanceOf(Object);
       expect(isEmpty(db?.provisions)).toBe(false);
+      const { dbInstance, paramGroup } = db?.provisions as AwsDatabaseDeployableResources;
+      expect(dbInstance).toBeInstanceOf(DbInstance);
+      expect(paramGroup).toBeInstanceOf(DbParameterGroup);
     });
   });
 });

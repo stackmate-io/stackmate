@@ -8,6 +8,7 @@ import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
 import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
+  assertRequirementsSatisfied,
   BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions,
   ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
@@ -37,7 +38,6 @@ export const getProvisionableFromConfig = (
   config,
   service: Registry.fromConfig(config),
   requirements: {},
-  provisions: {},
   resourceId: getProvisionableResourceId(config, stageName),
 });
 
@@ -116,18 +116,12 @@ class StageOperation implements Operation {
    */
   protected register(provisionable: Provisionable): Provisions {
     // Item has already been provisioned, bail...
-    if (!isEmpty(this.provisionables.get(provisionable.id)?.provisions)) {
-      return {};
+    const existingProvisions = this.provisionables.get(provisionable.id)?.provisions;
+    if (existingProvisions) {
+      return existingProvisions;
     }
 
     const { config, service, service: { handlers, associations = [] } } = provisionable;
-
-    const registrationHandler = handlers.get(this.scope);
-    // Item has no handler for the current scope, bail...
-    // ie. it only has a handler for deployment, and we're running a 'setup' operation
-    if (!registrationHandler) {
-      return {};
-    }
 
     // Validate the configuration
     validate(service.schemaId, config, { useDefaults: true });
@@ -146,11 +140,11 @@ class StageOperation implements Operation {
       } = association;
 
       // Get the provisionables associated with the current service configuration
-      const associatedProvisionables = Array.from(this.provisionables.values()).filter((linked) => (
-        linked.service.type === associatedServiceType && (
+      const associatedProvisionables = Array.from(this.provisionables.values()).filter((linked) => {
+        return linked.service.type === associatedServiceType && (
           typeof isAssociated === 'function' ? isAssociated(config, linked.config) : true
-        )
-      ));
+        );
+      });
 
       // Register associated services into the stack and form the requirements
       associatedProvisionables.forEach((linked) => {
@@ -164,13 +158,20 @@ class StageOperation implements Operation {
     });
 
     // Register the current service into the stack and mark as provisioned
-    // assertRequirementsSatisfied( requirements);
     Object.assign(provisionable, { requirements });
+    assertRequirementsSatisfied(provisionable, this.scope);
+
+    const registrationHandler = handlers.get(this.scope);
+    // Item has no handler for the current scope, bail...
+    // ie. it only has a handler for deployment, and we're running a 'setup' operation
+    if (!registrationHandler) {
+      return {};
+    }
+
     const provisions = registrationHandler(provisionable, this.stack);
-
     Object.assign(provisionable, { provisions });
-    this.provisionables.set(provisionable.id, provisionable);
 
+    this.provisionables.set(provisionable.id, provisionable);
     return provisions;
   }
 
