@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
@@ -36,8 +36,8 @@ type DatabaseAttributes = BaseServiceAttributes
   };
 
 export type AwsDatabaseDeployableResources = {
-  paramGroup: DbParameterGroup,
-  dbInstance: DbInstance,
+  dbInstance: rdsDbInstance.DbInstance,
+  paramGroup: dbParameterGroup.DbParameterGroup,
 };
 
 export type AwsDatabaseAttributes<
@@ -120,12 +120,13 @@ export const onDeploy: ProvisionHandler = (
     service.provider, service.type, config.profile || DEFAULT_PROFILE_NAME,
   );
 
-  const paramGroup = new DbParameterGroup(stack.context, `${provisionable.resourceId}-params`, {
-    ...params,
-    family: getParamGroupFamily(config),
-  });
+  const paramGroup = new dbParameterGroup.DbParameterGroup(
+    stack.context, `${provisionable.resourceId}-params`, {
+      ...params, family: getParamGroupFamily(config)
+    },
+  );
 
-  const dbInstance = new DbInstance(stack.context, config.name, {
+  const dbInstance = new rdsDbInstance.DbInstance(stack.context, config.name, {
     ...instance,
     allocatedStorage: config.storage,
     count: config.nodes,

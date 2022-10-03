@@ -1,8 +1,12 @@
 import pipe from '@bitty/pipe';
 import { kebabCase } from 'lodash';
-import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
-import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
+import {
+  internetGateway,
+  kmsKey as awsKmsKey,
+  subnet as awsSubnet,
+  vpc as awsVpc,
+  provider as awsProvider,
+} from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
@@ -16,14 +20,14 @@ import {
 } from '@stackmate/engine/core/service';
 
 export type ProviderPrerequisites = {
-  provider: TerraformAwsProvider;
-  kmsKey: KmsKey;
+  provider: awsProvider.AwsProvider;
+  kmsKey: awsKmsKey.KmsKey;
 }
 
 export type AwsProviderDeployableResources = ProviderPrerequisites & {
-  gateway: InternetGateway;
-  subnets: Subnet[];
-  vpc: Vpc;
+  gateway: internetGateway.InternetGateway;
+  subnets: awsSubnet.Subnet[];
+  vpc: awsVpc.Vpc;
 };
 
 export type AwsProviderPreparableResources = ProviderPrerequisites;
@@ -69,7 +73,7 @@ export const registerPrerequisites = (
 ): ProviderPrerequisites => {
   const { config: { region }, resourceId } = provisionable;
   const alias = `aws-${kebabCase(region)}-provider`;
-  const provider = new TerraformAwsProvider(stack.context, PROVIDER.AWS, {
+  const provider = new awsProvider.AwsProvider(stack.context, PROVIDER.AWS, {
     region,
     alias,
     defaultTags: {
@@ -80,7 +84,7 @@ export const registerPrerequisites = (
     },
   });
 
-  const kmsKey = new KmsKey(stack.context, `${resourceId}-key`, {
+  const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}-key`, {
     customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
     deletionWindowInDays: 30,
     description: 'Stackmate default encryption key',
@@ -109,20 +113,20 @@ export const onDeploy = (
     gateway: gatewayConfig,
   } = getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.PROVIDER, DEFAULT_PROFILE_NAME);
 
-  const vpc = new Vpc(stack.context, resourceId, {
+  const vpc = new awsVpc.Vpc(stack.context, resourceId, {
     ...vpcConfig,
     cidrBlock: vpcCidr,
   });
 
   const subnets = subnetCidrs.map((cidrBlock, idx) => (
-    new Subnet(stack.context, `${resourceId}-subnet${(idx + 1)}`, {
+    new awsSubnet.Subnet(stack.context, `${resourceId}-subnet${(idx + 1)}`, {
       ...subnetConfig,
       vpcId: vpc.id,
       cidrBlock,
     })
   ));
 
-  const gateway = new InternetGateway(stack.context, `${resourceId}-gateway`, {
+  const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}-gateway`, {
     ...gatewayConfig,
     vpcId: vpc.id,
   });;

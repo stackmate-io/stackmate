@@ -1,6 +1,6 @@
-import { DbInstanceConfig, DbParameterGroupParameter } from '@cdktf/provider-aws/lib/rds';
+import { dbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
-const instance: Partial<DbInstanceConfig> = {
+const instance: Partial<dbInstance.DbInstanceConfig> = {
   allowMajorVersionUpgrade: false,
   applyImmediately: true,
   autoMinorVersionUpgrade: true,
@@ -15,7 +15,7 @@ const instance: Partial<DbInstanceConfig> = {
   storageType: 'gp2',
 };
 
-const params: DbParameterGroupParameter[] = [{
+const params: dbParameterGroup.DbParameterGroupParameter[] = [{
   name: 'character_set_server',
   value: 'utf8mb4',
 }, {

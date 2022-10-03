@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
+import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -10,7 +10,7 @@ import {
 } from '@stackmate/engine/core/service';
 
 export type ProviderInstanceResources = {
-  provider: TerraformLocalProvider;
+  provider: terraformLocalProvider.LocalProvider;
 };
 
 export type LocalProviderAttributes = LocalServiceAttributes<BaseServiceAttributes & {
@@ -32,9 +32,9 @@ export type LocalProviderProvisionable = Provisionable & {
 export const onPrepare = (
   provisionable: LocalProviderProvisionable, stack: Stack,
 ): LocalProviderResources => {
-  const provider = new TerraformLocalProvider(stack.context, provisionable.resourceId, {
-    alias: `local-provider`,
-  });
+  const provider = new terraformLocalProvider.LocalProvider(
+    stack.context, provisionable.resourceId, { alias: `local-provider` },
+  );
 
   return { provider };
 };

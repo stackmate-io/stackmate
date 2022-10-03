@@ -1,11 +1,16 @@
 import { isEmpty } from 'lodash';
-import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
 import { LocalBackend, S3Backend, TerraformStack } from 'cdktf';
-import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
-import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
-import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import { kmsKey as awsKmsKey } from '@cdktf/provider-aws';
+import { provider as localProvider } from '@cdktf/provider-local';
+import {
+  provider as awsProvider,
+  s3Bucket,
+  internetGateway as awsInternetGateway,
+  subnet as awsSubnet,
+  vpc as awsVpc,
+  dbInstance as awsDbInstance,
+  dbParameterGroup,
+} from '@cdktf/provider-aws';
 
 import { validateProject } from '@stackmate/engine/core/validation';
 import { LocalStateResources } from '@stackmate/engine/providers/local/services/state';
@@ -88,12 +93,12 @@ describe('Operation', () => {
         provider, gateway, kmsKey, subnets, vpc,
       } = provisions as AwsProviderDeployableResources;
 
-      expect(provider).toBeInstanceOf(TerraformAwsProvider);
-      expect(gateway).toBeInstanceOf(InternetGateway);
-      expect(kmsKey).toBeInstanceOf(KmsKey);
+      expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
+      expect(gateway).toBeInstanceOf(awsInternetGateway.InternetGateway);
+      expect(kmsKey).toBeInstanceOf(awsKmsKey.KmsKey);
       expect(Array.isArray(subnets)).toBe(true);
-      expect(subnets.every(s => s instanceof Subnet)).toBe(true);
-      expect(vpc).toBeInstanceOf(Vpc);
+      expect(vpc).toBeInstanceOf(awsVpc.Vpc);
+      expect(subnets.every(s => s instanceof awsSubnet.Subnet)).toBe(true);
     });
 
     it('registers the AWS State resources', () => {
@@ -117,8 +122,8 @@ describe('Operation', () => {
       expect(new Set(Object.keys(provisions))).toEqual(new Set(['dbInstance', 'paramGroup']));
 
       const { dbInstance, paramGroup } = provisions as AwsDatabaseDeployableResources;
-      expect(dbInstance).toBeInstanceOf(DbInstance);
-      expect(paramGroup).toBeInstanceOf(DbParameterGroup);
+      expect(dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
+      expect(paramGroup).toBeInstanceOf(dbParameterGroup.DbParameterGroup);
     });
   });
 
@@ -135,7 +140,7 @@ describe('Operation', () => {
       expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'kmsKey']));
 
       const { provider } = provisions as AwsProviderDeployableResources;
-      expect(provider).toBeInstanceOf(TerraformAwsProvider);
+      expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
     });
 
     it('registers the AWS State resources', () => {
@@ -175,7 +180,7 @@ describe('Operation', () => {
       expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'kmsKey']));
 
       const { provider } = provisions as AwsProviderDeployableResources;
-      expect(provider).toBeInstanceOf(TerraformAwsProvider);
+      expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
     });
 
     it('registers the Local provider', () => {
@@ -188,7 +193,7 @@ describe('Operation', () => {
       expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider']));
 
       const { provider } = provisions as LocalProviderResources;
-      expect(provider).toBeInstanceOf(TerraformLocalProvider);
+      expect(provider).toBeInstanceOf(localProvider.LocalProvider);
     });
 
     it('registers the Local state resources', () => {
@@ -214,7 +219,7 @@ describe('Operation', () => {
       expect(new Set(Object.keys(provisions))).toEqual(new Set(['bucket']));
 
       const { bucket } = provisions as AwsStatePreparableResources;
-      expect(bucket).toBeInstanceOf(S3Bucket);
+      expect(bucket).toBeInstanceOf(s3Bucket.S3Bucket);
     });
 
     it('does not register any AWS secrets resources', () => {

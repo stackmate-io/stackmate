@@ -1,4 +1,4 @@
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
+import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
 import { getStack } from '@stackmate/engine/core/stack';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
@@ -59,7 +59,7 @@ describe('Local Provider', () => {
       const resources = onPrepare(provisionable as LocalProviderProvisionable, stack);
       expect(resources).toBeInstanceOf(Object);
       expect(Object.keys(resources)).toEqual(['provider']);
-      expect(resources.provider).toBeInstanceOf(TerraformLocalProvider);
+      expect(resources.provider).toBeInstanceOf(terraformLocalProvider.LocalProvider);
     });
   });
 });

@@ -1,8 +1,8 @@
 import { kebabCase, snakeCase } from 'lodash';
 import {
-  DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion,
-  SecretsmanagerSecret, SecretsmanagerSecretVersion,
-} from '@cdktf/provider-aws/lib/secretsmanager';
+  dataAwsSecretsmanagerRandomPassword, dataAwsSecretsmanagerSecretVersion,
+  secretsmanagerSecret, secretsmanagerSecretVersion,
+} from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
@@ -57,10 +57,10 @@ export type AwsSecretsVaultPreparableProvisionable = BaseProvisionable & {
 };
 
 type ProvisionCredentialsResources = {
-  password: DataAwsSecretsmanagerRandomPassword;
-  secret: SecretsmanagerSecret;
-  version: SecretsmanagerSecretVersion;
-  data: DataAwsSecretsmanagerSecretVersion;
+  password: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword;
+  secret: secretsmanagerSecret.SecretsmanagerSecret;
+  version: secretsmanagerSecretVersion.SecretsmanagerSecretVersion;
+  data: dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion;
 };
 
 /**
@@ -85,41 +85,45 @@ export const provisionCredentialResources = (
   const idPrefix = `${snakeCase(config.name)}_secrets`;
   const username = `${snakeCase(config.name)}_${root ? 'root' : 'user'}`;
 
-  const passwordResource = new DataAwsSecretsmanagerRandomPassword(
+  const passResource = new dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword(
     stack.context, `${idPrefix}_password`, {
       passwordLength: opts.length || DEFAULT_PASSWORD_LENGTH,
       excludeCharacters: (opts.exclude || []).join(''),
       ...password,
   });
 
-  const secretResource = new SecretsmanagerSecret(stack.context, `${idPrefix}_secret`, {
-    name: secretName,
-    description: `Secrets for the ${service} service`,
-    kmsKeyId: kmsKey.id,
-    provider: providerInstance,
-    ...secret,
-  });
+  const secretResource = new secretsmanagerSecret.SecretsmanagerSecret(
+    stack.context, `${idPrefix}_secret`, {
+      name: secretName,
+      description: `Secrets for the ${service} service`,
+      kmsKeyId: kmsKey.id,
+      provider: providerInstance,
+      ...secret,
+    },
+  );
 
-  const secretVersionResource = new SecretsmanagerSecretVersion(
+  const secretVersionResource = new secretsmanagerSecretVersion.SecretsmanagerSecretVersion(
     stack.context, `${idPrefix}_version`, {
     ...version,
     secretId: secretResource.id,
     secretString: JSON.stringify({
       username,
-      password: passwordResource.randomPassword,
+      password: passResource.randomPassword,
     }),
     lifecycle: {
       ignoreChanges: ['secret_string'],
     },
   });
 
-  const data = new DataAwsSecretsmanagerSecretVersion(stack.context, `${idPrefix}_data`, {
-    secretId: secret.id,
-    versionId: secretVersionResource.id,
-  });
+  const data = new dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion(
+    stack.context, `${idPrefix}_data`, {
+      secretId: secret.id,
+      versionId: secretVersionResource.id,
+    },
+  );
 
   return {
-    password: passwordResource,
+    password: passResource,
     secret: secretResource,
     version: secretVersionResource,
     data,
