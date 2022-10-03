@@ -1,7 +1,7 @@
 import { kebabCase } from 'lodash';
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, SERVICE_TYPE, ServiceTypeChoice } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, Registry, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
@@ -60,6 +60,10 @@ class InitCommand extends BaseCommand {
   async run(): Promise<any> {
     const { name, provider, region, secrets, state, stages, services } = this.parsedFlags;
     const projectName = kebabCase(name || getRepository() || CURRENT_DIRECTORY);
+    const availableServices = Registry.serviceTypes(provider);
+    const serviceTypes = parseCommaSeparatedString(services).filter(
+      s => s in availableServices,
+    ) as ServiceTypeChoice[];
 
     const project = createProject({
       projectName,
@@ -68,9 +72,7 @@ class InitCommand extends BaseCommand {
       secretsProvider: secrets,
       stateProvider: state,
       stageNames: parseCommaSeparatedString(stages),
-      serviceTypes: parseCommaSeparatedString(services).filter(
-        s => s in Object.values(SERVICE_TYPE),
-      ) as ServiceTypeChoice[],
+      serviceTypes,
     });
 
     const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
