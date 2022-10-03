@@ -1,6 +1,6 @@
 import pipe from '@bitty/pipe';
 import { S3Backend } from 'cdktf';
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
+import { s3Bucket } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -14,7 +14,7 @@ import {
 } from '@stackmate/engine/core/service';
 
 export type AwsStateDeployableResources = { backend: S3Backend };
-export type AwsStatePreparableResources = { bucket: S3Bucket };
+export type AwsStatePreparableResources = { bucket: s3Bucket.S3Bucket };
 export type AwsStateDestroyableResources = { backend: S3Backend };
 
 export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
@@ -73,7 +73,7 @@ export const onPrepare = (
 ): AwsStatePreparableResources => {
   const { config, requirements: { providerInstance }, resourceId } = provisionable;
 
-  const bucket = new S3Bucket(stack.context, resourceId, {
+  const bucket = new s3Bucket.S3Bucket(stack.context, resourceId, {
     acl: 'private',
     bucket: config.bucket,
     provider: providerInstance,

@@ -1,6 +1,10 @@
-import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
-import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
+import {
+  kmsKey,
+  provider as terraformAwsProvider,
+  internetGateway as awsInternetGateway,
+  subnet as awsSubnet,
+  vpc as awsVpc,
+} from '@cdktf/provider-aws';
 
 import { AwsProvider } from '@stackmate/engine/providers';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
@@ -91,12 +95,12 @@ describe('AWS Provider', () => {
       expect(new Set(Object.keys(resources))).toEqual(
         new Set(['gateway', 'kmsKey', 'vpc', 'provider', 'subnets']),
       );
-      expect(resources.gateway).toBeInstanceOf(InternetGateway);
-      expect(resources.kmsKey).toBeInstanceOf(KmsKey);
-      expect(resources.vpc).toBeInstanceOf(Vpc);
-      expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
+      expect(resources.gateway).toBeInstanceOf(awsInternetGateway.InternetGateway);
+      expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey);
+      expect(resources.vpc).toBeInstanceOf(awsVpc.Vpc);
+      expect(resources.provider).toBeInstanceOf(terraformAwsProvider.AwsProvider);
       expect(Array.isArray(resources.subnets)).toBe(true);
-      expect(resources.subnets.every(s => s instanceof Subnet)).toBe(true);
+      expect(resources.subnets.every(s => s instanceof awsSubnet.Subnet)).toBe(true);
     });
 
     it('registers the service into the stack and creates the destroyable provisions', () => {
@@ -109,7 +113,7 @@ describe('AWS Provider', () => {
 
       expect(resources).toBeInstanceOf(Object);
       expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'kmsKey']));
-      expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
+      expect(resources.provider).toBeInstanceOf(terraformAwsProvider.AwsProvider);
     });
 
     it('registers the base resources', () => {
@@ -122,8 +126,8 @@ describe('AWS Provider', () => {
 
       expect(resources).toBeInstanceOf(Object);
       expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'kmsKey']));
-      expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
-      expect(resources.kmsKey).toBeInstanceOf(KmsKey);
+      expect(resources.provider).toBeInstanceOf(terraformAwsProvider.AwsProvider);
+      expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey);
     });
   });
 });

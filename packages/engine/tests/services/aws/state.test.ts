@@ -1,4 +1,4 @@
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3';
+import { s3Bucket } from '@cdktf/provider-aws';
 
 import { TerraformBackend } from 'cdktf';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
@@ -103,7 +103,7 @@ describe('AWS state', () => {
       expect(Object.keys(resources)).toEqual(['bucket']);
 
       const { bucket } = resources;
-      expect(bucket).toBeInstanceOf(S3Bucket);
+      expect(bucket).toBeInstanceOf(s3Bucket.S3Bucket);
     });
   });
 });

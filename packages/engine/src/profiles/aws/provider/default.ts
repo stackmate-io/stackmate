@@ -1,15 +1,15 @@
-import { VpcConfig, SubnetConfig, InternetGatewayConfig } from '@cdktf/provider-aws/lib/vpc';
+import { vpc as awsVpc, subnet as awsSubnet, internetGateway } from '@cdktf/provider-aws';
 
-const vpc: Partial<VpcConfig> = {
+const vpc: Partial<awsVpc.VpcConfig> = {
   enableDnsHostnames: true,
   enableDnsSupport: true,
 };
 
-const subnet: Partial<SubnetConfig> = {
+const subnet: Partial<awsSubnet.SubnetConfig> = {
   mapPublicIpOnLaunch: true,
 };
 
-const gateway: Partial<InternetGatewayConfig> = {};
+const gateway: Partial<internetGateway.InternetGatewayConfig> = {};
 
 export {
   vpc,
