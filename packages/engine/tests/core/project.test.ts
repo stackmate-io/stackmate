@@ -4,37 +4,35 @@ import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { JsonSchema } from '@stackmate/engine/core/schema';
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { BaseServiceAttributes, CORE_SERVICE_TYPES, isCoreService } from '@stackmate/engine/core/service';
-import { getCloudServices, getProjectSchema, getProviderConfigurations, getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
+import { CloudServiceConfiguration, getCloudServices, getProjectSchema, getProviderConfigurations, getServiceConfigurations, Project, ProjectConfiguration, withLocalState } from '@stackmate/engine/core/project';
+import { validateProject } from '@stackmate/engine';
 
 describe('Project', () => {
   const [region] = REGIONS;
   const provider = PROVIDER.AWS;
 
-  const services: BaseServiceAttributes[] = [
+  const servicesConfig: CloudServiceConfiguration<true>[] = [
     { name: 'my-mysql-database', type: SERVICE_TYPE.MYSQL, provider, region },
     { name: 'my-postgresql-service', type: SERVICE_TYPE.POSTGRESQL, provider, region },
     { name: 'my-mariadb-service', type: SERVICE_TYPE.MARIADB, provider, region },
   ];
 
-  // Within the scope of this test, we assume that the project configuration
-  // has been validated and credentials have been applied
-  const project: Project = {
+  const projectConfig: ProjectConfiguration = {
     name: 'my-super-fun-project',
     provider,
     region,
     secrets: {
-      name: 'my-project-secrets-service',
-      provider,
+      provider: 'aws',
       region,
     },
     state: {
-      name: 'my-project-state',
-      provider,
+      provider: 'aws',
+      bucket: 'my-aws-bucket',
       region,
     },
     stages: [{
       name: 'production',
-      services,
+      services: servicesConfig,
     }, {
       name: 'production-clone',
       copy: 'production',
@@ -48,6 +46,10 @@ describe('Project', () => {
       skip: ['my-postgresql-service', 'my-mariadb-service'],
     }],
   };
+
+  const project: Project = validateProject(projectConfig);
+  const services = project.stages[0].services || [];
+  expect(services).toHaveLength(servicesConfig.length);
 
   describe('getCloudServices', () => {
     it('extracts all cloud services assigned in the production stage', () => {
@@ -183,15 +185,17 @@ describe('Project', () => {
   describe('withLocalState', () => {
     const configs: BaseServiceAttributes[] = getServiceConfigurations('production')(project);
 
-    it('replaces the state service with a local one', () => {
-      expect(
-        configs.find(s => s.type === SERVICE_TYPE.STATE && s.provider === PROVIDER.AWS),
-      ).not.toBeUndefined();
-
+    it('adds a local state & provider along with the AWS one', () => {
       const updated = withLocalState()(configs);
       expect(
+        updated.find(s => s.type === SERVICE_TYPE.PROVIDER && s.provider === PROVIDER.AWS)
+      ).not.toBeUndefined();
+      expect(
+        updated.find(s => s.type === SERVICE_TYPE.PROVIDER && s.provider === PROVIDER.LOCAL)
+      ).not.toBeUndefined();
+      expect(
         updated.find(s => s.type === SERVICE_TYPE.STATE && s.provider === PROVIDER.AWS)
-      ).toBeUndefined();
+      ).not.toBeUndefined();
       expect(
         updated.find(s => s.type === SERVICE_TYPE.STATE && s.provider === PROVIDER.LOCAL)
       ).not.toBeUndefined();

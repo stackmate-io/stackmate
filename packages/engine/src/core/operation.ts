@@ -162,13 +162,10 @@ class StageOperation implements Operation {
     assertRequirementsSatisfied(provisionable, this.scope);
 
     const registrationHandler = handlers.get(this.scope);
-    // Item has no handler for the current scope, bail...
-    // ie. it only has a handler for deployment, and we're running a 'setup' operation
-    if (!registrationHandler) {
-      return {};
-    }
+    // no handler exists for the current scope,
+    // eg. it only has a handler for deployment, we're running a 'setup'
+    const provisions = registrationHandler ? registrationHandler(provisionable, this.stack) : {};
 
-    const provisions = registrationHandler(provisionable, this.stack);
     Object.assign(provisionable, { provisions });
 
     this.provisionables.set(provisionable.id, provisionable);
@@ -223,12 +220,12 @@ export const deployment = (project: Project, stage: string) => (
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const destruction = (project: Project, stage: string) => {
+export const destruction = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
-  )(project);
-};
+  )(project)
+);
 
 /**
  * Returns a setup operation (which uses a local state service)
@@ -237,8 +234,10 @@ export const destruction = (project: Project, stage: string) => {
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const setup = (project: Project, stage: string) => pipe(
-  getServiceConfigurations(stage),
-  withLocalState(),
-  getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
-)(project);
+export const setup = (project: Project, stage: string) => (
+  pipe(
+    getServiceConfigurations(stage),
+    withLocalState(),
+    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
+  )(project)
+);

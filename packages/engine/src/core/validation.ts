@@ -244,6 +244,7 @@ export const validate = <T extends Obj = {}>(
   }
 
   if (!validate(validAttributes) && !isEmpty(validate.errors)) {
+    console.log(validate.errors);
     throw new ValidationError(
       `Error while validating schema ${schemaId}`, parseErrors(validate.errors || []),
     );

@@ -4,7 +4,7 @@ import {
 } from '@cdktf/provider-aws/lib/secretsmanager';
 
 import { AwsSecretsVault } from '@stackmate/engine/providers';
-import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { Provisionable } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
@@ -51,8 +51,6 @@ describe('AWS Secrets service', () => {
           enum: Array.from(REGIONS),
           default: DEFAULT_REGION,
         },
-        profile: { type: 'string', default: 'default', serviceProfile: true },
-        overrides: { type: 'object', default: {}, serviceProfileOverrides: true }
       },
     });
   });
@@ -70,8 +68,6 @@ describe('AWS Secrets service', () => {
         name: 'aws-secrets-service',
         type: SERVICE_TYPE.SECRETS,
         region: DEFAULT_REGION,
-        profile: DEFAULT_PROFILE_NAME,
-        overrides: {},
       };
 
       provisionable = getAwsDeploymentProvisionableMock(config, stack);

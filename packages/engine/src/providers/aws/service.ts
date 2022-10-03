@@ -31,6 +31,7 @@ export type AwsServiceAssociations = [
   ProviderAssociation<'destroyable'>,
   ProviderAssociation<'preparable'>,
   KmsKeyAssociation<'deployable'>,
+  KmsKeyAssociation<'destroyable'>,
   KmsKeyAssociation<'preparable'>,
 ];
 
@@ -59,7 +60,7 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
   },
 });
 
-const getKmsKeyAssociation = <S extends Exclude<ServiceScopeChoice, 'destroyable'>>(
+const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
   scope: S,
 ): KmsKeyAssociation<S> => ({
   as: 'kmsKey',
@@ -80,6 +81,7 @@ const associations: AwsServiceAssociations = [
   getProviderInstanceAssociation('destroyable'),
   getProviderInstanceAssociation('preparable'),
   getKmsKeyAssociation('deployable'),
+  getKmsKeyAssociation('destroyable'),
   getKmsKeyAssociation('preparable'),
 ];
 

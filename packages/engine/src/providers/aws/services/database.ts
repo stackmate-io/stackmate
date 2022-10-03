@@ -23,13 +23,13 @@ import {
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = BaseServiceAttributes
-  & EngineAttributes<RdsEngine>
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & SizeableAttributes
   & VersioningAttributes
   & MultiNodeAttributes
   & StorableAttributes
   & ConnectableAttributes
+  & EngineAttributes<RdsEngine>
   & ProfilableAttributes & {
     provider: typeof PROVIDER.AWS,
     database: string;
@@ -56,16 +56,12 @@ export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>;
 export type AwsPostgreSQLService = AwsDbService<AwsPostgreSQLAttributes>;
 export type AwsMariaDBService = AwsDbService<AwsMariaDBAttributes>;
 
-type AwsDb = OneOfType<[
-  AwsMySQLService,
-  AwsPostgreSQLService,
-  AwsMariaDBService,
-]>;
 type AwsDbAttributes = OneOfType<[
   AwsMySQLAttributes,
   AwsPostgreSQLAttributes,
   AwsMariaDBAttributes,
 ]>;
+type AwsDb = OneOfType<[AwsMySQLService, AwsPostgreSQLService, AwsMariaDBService]>;
 type AwsBaseProvisionable = Provisionable & {
   config: AwsDbAttributes;
   service: AwsDb;
