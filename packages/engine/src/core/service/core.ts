@@ -111,8 +111,8 @@ export type BaseServiceAttributes = {
  * @param {Associations}
  */
 export type Service<Setup extends BaseServiceAttributes> = {
-  provider: Setup['provider'] extends ProviderChoice ? ProviderChoice : Extract<BaseServiceAttributes, Setup['provider']>;
-  type: Setup['type'] extends ServiceTypeChoice ? ServiceTypeChoice: Extract<BaseServiceAttributes, Setup['type']>;
+  provider: ProviderChoice;
+  type: ServiceTypeChoice;
   regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
@@ -138,7 +138,9 @@ export type ExtractAttrs<T> = T extends Service<infer Attrs> ? Attrs : never;
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): BaseService => {
+export const getCoreService = (
+  provider: ProviderChoice, type: ServiceTypeChoice,
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const schemaId = `services/${provider}/${type}`;
   const schema: ServiceSchema<BaseServiceAttributes> = {
     $id: schemaId,
@@ -200,7 +202,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  */
 export const getCloudService = (
   provider: ProviderChoice, type: ServiceTypeChoice,
-): BaseService => {
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const core = getCoreService(provider, type);
   const schema: ServiceSchema<BaseServiceAttributes> = {
     ...core.schema,

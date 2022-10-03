@@ -125,23 +125,46 @@ class Registry implements ServicesRegistry {
 const registry = new Registry(...Object.values(Services)) as Registry;
 const availableServices = Object.values(Services);
 
-export type AvailableServices = typeof availableServices[number];
+type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER };
+type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE; };
+type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS };
 
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+export type AvailableServices = Distribute<typeof availableServices[number]>;
 export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableServices>>;
+
+export type ProviderServices = Distribute<
+  Extract<AvailableServices, ProviderDiscrimination>
+>;
 export type ProviderServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.PROVIDER; }>
+  Extract<AvailableServiceAttributes, ProviderDiscrimination>
+>;
+
+export type StateServices = Distribute<
+  Extract<AvailableServices, StateDiscrimination>
 >;
 export type StateServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.STATE; }>
+  Extract<AvailableServiceAttributes, StateDiscrimination>
+>;
+
+export type SecretVaultServices = Distribute<
+  Extract<AvailableServices, SecretsDiscrimination>
 >;
 export type SecretVaultServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.SECRETS }>
+  Extract<AvailableServiceAttributes, SecretsDiscrimination>
+>;
+
+export type CoreServices = Distribute<
+  ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination
 >;
 export type CoreServiceAttributes = Distribute<
   StateServiceAttributes | SecretVaultServiceAttributes | ProviderServiceAttributes
+>;
+
+export type CloudServices = Distribute<
+  Exclude<AvailableServices, ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination>
 >;
 export type CloudServiceAttributes = Distribute<
   Exclude<AvailableServiceAttributes, CoreServiceAttributes>

@@ -2,15 +2,14 @@ import { fail } from 'node:assert';
 import { FuncKeywordDefinition } from 'ajv/dist/types';
 
 import { Registry } from '@stackmate/engine/core/registry';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
-import { BaseServiceAttributes } from '@stackmate/engine/core/service';
 import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
 import {
   getAjv, loadJsonSchema, validate, validateProject, validateServiceLinks,
   validateServiceProfile, validateServiceProfileOverrides, ValidationError,
 } from '@stackmate/engine/core/validation';
-import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
 
 describe('Validation', () => {
   const ajv = getAjv();
@@ -167,23 +166,19 @@ describe('Validation', () => {
     });
 
     it('returns the validated data with defaults, for a valid project configuration', () => {
-      const service: BaseServiceAttributes = {
-        name: 'my-database',
-        provider: 'aws',
-        region: 'eu-central-1',
-        type: 'mysql',
-      };
-
-      const stage = {
-        name: 'my-awesome-stage',
-        services: [service],
-      };
-
       const config: ProjectConfiguration = {
         name: 'my-awesome-project',
         provider: 'aws',
         region: 'eu-central-1',
-        stages: [stage],
+        stages: [{
+          name: 'my-awesome-stage',
+          services: [{
+            name: 'my-database',
+            provider: 'aws',
+            region: 'eu-central-1',
+            type: 'mysql',
+          }],
+        }],
       };
 
       const validated = validateProject(config);
@@ -192,15 +187,15 @@ describe('Validation', () => {
       // make sure the default values have been applied
       expect(validated).toMatchObject({
         ...config,
-        stages: [{
+        stages: config.stages!.map(stage => ({
           ...stage,
-          services: [{
+          services: stage.services!.map(service => ({
             ...service,
             provider: 'aws',
             region: 'eu-central-1',
-          }],
-        }],
-      })
+          })),
+        })),
+      });
     });
   });
 
