@@ -2,8 +2,7 @@
  * This file contains associations and helpers for other services to associate with the AWS provider
  */
 import pipe from '@bitty/pipe';
-import { KmsKey } from '@cdktf/provider-aws/lib/kms';
-import { AwsProvider as TerraformAwsProvider } from '@cdktf/provider-aws';
+import { kmsKey, provider as terraformAwsProvider } from '@cdktf/provider-aws';
 
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -20,10 +19,10 @@ import {
 } from '@stackmate/engine/providers/aws/services/provider';
 
 type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, TerraformAwsProvider
+  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, terraformAwsProvider.AwsProvider
 >;
 type KmsKeyAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'kmsKey', typeof SERVICE_TYPE.PROVIDER, S, KmsKey
+  'kmsKey', typeof SERVICE_TYPE.PROVIDER, S, kmsKey.KmsKey
 >;
 
 export type AwsServiceAssociations = [
@@ -55,7 +54,7 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
-  handler: (p: ProviderProvisionable): TerraformAwsProvider => {
+  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => {
     return p.provisions.provider
   },
 });
@@ -71,7 +70,7 @@ const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
   ),
   handler: (
     prov: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
-  ): KmsKey => (
+  ): kmsKey.KmsKey => (
     prov.provisions.kmsKey
   ),
 });

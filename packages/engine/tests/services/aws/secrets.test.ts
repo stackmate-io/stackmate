@@ -1,7 +1,7 @@
 import {
-  DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion,
-  SecretsmanagerSecret, SecretsmanagerSecretVersion,
-} from '@cdktf/provider-aws/lib/secretsmanager';
+  dataAwsSecretsmanagerRandomPassword, dataAwsSecretsmanagerSecretVersion,
+  secretsmanagerSecret, secretsmanagerSecretVersion,
+} from '@cdktf/provider-aws';
 
 import { AwsSecretsVault } from '@stackmate/engine/providers';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -78,10 +78,18 @@ describe('AWS Secrets service', () => {
         provisionable as AwsSecretsVaultDeployableProvisionable, stack,
       );
       expect(resources).toBeInstanceOf(Object);
-      expect(resources.data).toBeInstanceOf(DataAwsSecretsmanagerSecretVersion)
-      expect(resources.version).toBeInstanceOf(SecretsmanagerSecretVersion);
-      expect(resources.secret).toBeInstanceOf(SecretsmanagerSecret);
-      expect(resources.password).toBeInstanceOf(DataAwsSecretsmanagerRandomPassword);
+      expect(resources.data).toBeInstanceOf(
+        dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion,
+      )
+      expect(resources.version).toBeInstanceOf(
+        secretsmanagerSecretVersion.SecretsmanagerSecretVersion,
+      );
+      expect(resources.secret).toBeInstanceOf(
+        secretsmanagerSecret.SecretsmanagerSecret,
+      );
+      expect(resources.password).toBeInstanceOf(
+        dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword,
+      );
     });
 
     it('returns the credentials as an object when calling the credentials method', () => {

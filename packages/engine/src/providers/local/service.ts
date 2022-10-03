@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { LocalProvider as TerraformLocalProvider } from '@cdktf/provider-local';
+import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { LocalProviderAttributes, LocalProviderProvisionable } from '@stackmate/engine/providers/local/services/provider';
@@ -9,7 +9,7 @@ import {
 } from '@stackmate/engine/core/service';
 
 type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, TerraformLocalProvider
+  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, terraformLocalProvider.LocalProvider
 >;
 
 export type LocalServiceAssociations = [
@@ -27,7 +27,7 @@ const associations: LocalServiceAssociations = [{
   where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider
   ),
-  handler: (p: LocalProviderProvisionable): TerraformLocalProvider => {
+  handler: (p: LocalProviderProvisionable): terraformLocalProvider.LocalProvider => {
     return p.provisions.provider
   },
 }];
