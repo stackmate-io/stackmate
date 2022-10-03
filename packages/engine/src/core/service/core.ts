@@ -73,8 +73,8 @@ export type Provisionable<T extends BaseServiceAttributes = BaseServiceAttribute
   config: T;
   service: BaseService;
   requirements: Record<string, any>;
-  provisions: Provisions,
   resourceId: string; /** @var {String} resourceId the id of the terraform resource */
+  provisions?: Provisions,
 };
 
 /**
@@ -111,8 +111,8 @@ export type BaseServiceAttributes = {
  * @param {Associations}
  */
 export type Service<Setup extends BaseServiceAttributes> = {
-  provider: Setup['provider'] extends ProviderChoice ? ProviderChoice : Extract<BaseServiceAttributes, Setup['provider']>;
-  type: Setup['type'] extends ServiceTypeChoice ? ServiceTypeChoice: Extract<BaseServiceAttributes, Setup['type']>;
+  provider: ProviderChoice;
+  type: ServiceTypeChoice;
   regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
@@ -121,7 +121,15 @@ export type Service<Setup extends BaseServiceAttributes> = {
   associations: Association[];
 };
 
+/**
+ * @type {BaseService} base service type
+ */
 export type BaseService = Service<BaseServiceAttributes>;
+
+/**
+ * @type {ExtractAttrs} extracts arguments from a service
+ */
+export type ExtractAttrs<T> = T extends Service<infer Attrs> ? Attrs : never;
 
 /**
  * Returns a base core service (one that cannot be part of a stage)
@@ -130,7 +138,9 @@ export type BaseService = Service<BaseServiceAttributes>;
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): BaseService => {
+export const getCoreService = (
+  provider: ProviderChoice, type: ServiceTypeChoice,
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const schemaId = `services/${provider}/${type}`;
   const schema: ServiceSchema<BaseServiceAttributes> = {
     $id: schemaId,
@@ -192,7 +202,7 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  */
 export const getCloudService = (
   provider: ProviderChoice, type: ServiceTypeChoice,
-): BaseService => {
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const core = getCoreService(provider, type);
   const schema: ServiceSchema<BaseServiceAttributes> = {
     ...core.schema,
@@ -338,4 +348,19 @@ export const getProvisionableResourceId = (
   `${config.name || config.type}-${stageName}`
 );
 
-export const assertRequirementsSatisfied = () => {};
+/**
+ * @param {Provisionable} provisionable the provisionable to check
+ * @param {ServiceScopeChoice} scope the scope for the services
+ * @throws {Error} if a requirement is not satisfied
+ */
+export const assertRequirementsSatisfied = (
+  provisionable: Provisionable, scope: ServiceScopeChoice,
+) => {
+  const { service: { associations, type }, requirements } = provisionable;
+  const associated = associations.filter(assoc => assoc.scope === scope);
+  associated.forEach(({ as: name }) => {
+    if (!requirements[name]) {
+      throw new Error(`Requirement ${name} for service ${type} is not satisfied`);
+    }
+  });
+};

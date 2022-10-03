@@ -1,25 +1,43 @@
 import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-
-import { Registry } from '@stackmate/engine/core/registry';
+import {
+  CloudServiceAttributes, Registry,
+  SecretVaultServiceAttributes, StateServiceAttributes,
+} from '@stackmate/engine/core/registry';
+import {
+  BaseServiceAttributes, CloudProviderChoice, isCloudProvider, isCoreService, ProviderChoice,
+} from '@stackmate/engine/core/service';
+import {
+  DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
+  DistributiveRequireKeys, OneOfType,
+} from '@stackmate/engine/lib';
 import {
   getCloudServiceConditional, getCoreServiceConditional,
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
-import {
-  BaseServiceAttributes, CloudProviderChoice, isCloudProvider, isCoreService, ProviderChoice,
-} from '@stackmate/engine/core/service';
+
+type CopiedStage = {
+  name: string;
+  copy?: string;
+  skip?: string[];
+};
+export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPartial extends true
+  ? DistributiveRequireKeys<DistributivePartial<CloudServiceAttributes>, 'name' | 'type'>
+  : CloudServiceAttributes;
+
+type StageWithServices<IsPartial extends boolean = false> = {
+  name: string;
+  services?: CloudServiceConfiguration<IsPartial>[];
+};
 
 /**
  * @type {StageConfiguration} the configuration for the project stages
  */
-export type StageConfiguration<IsPartial extends boolean = false> = {
-  name: string;
-  services?: IsPartial extends true ? Partial<BaseServiceAttributes>[] : BaseServiceAttributes[],
-  copy?: string;
-  skip?: string[];
-};
+export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<[
+  CopiedStage,
+  StageWithServices<IsPartial>,
+]>;
 
 /**
  * @type {Project} a project object
@@ -29,14 +47,16 @@ export type Project = {
   provider: CloudProviderChoice;
   region: string;
   stages: StageConfiguration[];
-  secrets: Omit<BaseServiceAttributes, 'type'>;
-  state: Omit<BaseServiceAttributes, 'type'>;
+  state: StateServiceAttributes;
+  secrets: SecretVaultServiceAttributes;
 };
 
 /**
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
-export type ProjectConfiguration = Omit<Partial<Project>, 'stages'> & {
+export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | 'secrets'> & {
+  state?: DistributiveOmit<DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'>;
+  secrets?: DistributiveOmit<DistributiveOptionalKeys<SecretVaultServiceAttributes, 'region'>, 'name' | 'type'>;
   stages?: StageConfiguration<true>[];
 };
 
@@ -129,14 +149,8 @@ export const getServiceConfigurations = (
     provider: projectProvider,
     region: projectRegion,
     name: projectName,
-    state: {
-      provider: stateProvider = projectProvider,
-      region: stateRegion = projectRegion,
-    } = {},
-    secrets: {
-      provider: secretsProvider = projectProvider,
-      region: secretsRegion = projectRegion,
-    } = {},
+    state = {},
+    secrets = {},
   } = config;
 
   if (!projectProvider) {
@@ -147,27 +161,25 @@ export const getServiceConfigurations = (
   const providers = getProviderConfigurations(cloudServices);
 
   // Predefined / core services => state & secrets
-  const state = {
-    id: `${projectName}-state-${stage}`,
-    type: SERVICE_TYPE.STATE,
-    provider: (stateProvider || projectProvider),
-    region: (stateRegion || projectRegion),
+  const stateConfig = defaults({ ...state }, {
     name: `${projectName}-project-state`,
-  };
+    type: SERVICE_TYPE.STATE,
+    provider: projectProvider,
+    region: projectRegion,
+  });
 
-  const secrets = {
-    id: `${projectName}-secrets-${stage}`,
-    type: SERVICE_TYPE.SECRETS,
-    provider: (secretsProvider || projectProvider),
-    region: (secretsRegion || projectRegion),
+  const secretsConfig = defaults({ ...secrets }, {
     name: `${projectName}-project-secrets-vault`,
-  };
+    type: SERVICE_TYPE.SECRETS,
+    provider: projectProvider,
+    region: projectRegion,
+  });
 
   return [
     ...providers,
     ...cloudServices,
-    state,
-    secrets,
+    stateConfig,
+    secretsConfig,
   ];
 };
 
@@ -371,8 +383,8 @@ export const getProjectSchema = (
  */
 export const withLocalState = (): (
   services: BaseServiceAttributes[],
-) => BaseServiceAttributes[] => (services) => (
-  services.map(
-    srv => (srv.type === SERVICE_TYPE.STATE ? { ...srv, provider: PROVIDER.LOCAL } : srv),
-  )
-);
+) => BaseServiceAttributes[] => (services) => ([
+  { name: 'local-state', type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL },
+  { name: 'local-provider', type: SERVICE_TYPE.PROVIDER, provider: PROVIDER.LOCAL },
+  ...services,
+]);
