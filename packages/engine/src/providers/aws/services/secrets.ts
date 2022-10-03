@@ -1,19 +1,22 @@
-import pipe from '@bitty/pipe';
+import { kebabCase, snakeCase } from 'lodash';
+import {
+  DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion,
+  SecretsmanagerSecret, SecretsmanagerSecretVersion,
+} from '@cdktf/provider-aws/lib/secretsmanager';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions, profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
-  SecretsVaultService, Service, withCredentialsGenerator,
+  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions,
+  Provisionable, ProvisionAssociationRequirements, SecretsVaultService,
+  Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
-import { kebabCase, snakeCase } from 'lodash';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion, SecretsmanagerSecret, SecretsmanagerSecretVersion } from '@cdktf/provider-aws/lib/secretsmanager';
 
-export type AwsSecretsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
+export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS,
   type: typeof SERVICE_TYPE.SECRETS;
   region: ChoiceOf<typeof REGIONS>;
@@ -72,9 +75,11 @@ export const provisionCredentialResources = (
   stack: Stack, { root = false, ...opts }: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
   const { service, config, requirements: { kmsKey, providerInstance } } = provisionable;
-  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`
+  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
+
+  // we only use the default profile, since this is a core service
   const { secret, version, password } = getServiceProfile(
-    PROVIDER.AWS, SERVICE_TYPE.SECRETS, config.profile || DEFAULT_PROFILE_NAME,
+    PROVIDER.AWS, SERVICE_TYPE.SECRETS, DEFAULT_PROFILE_NAME,
   );
 
   const idPrefix = `${snakeCase(config.name)}_secrets`;
@@ -142,10 +147,7 @@ const generateCredentials: CredentialsHandler = (
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
 export const getSecretsVaultService = (): AwsSecretsVaultService => (
-  pipe(
-    profilable(),
-    withCredentialsGenerator(generateCredentials),
-  )(getAwsCoreService(SERVICE_TYPE.SECRETS))
+  withCredentialsGenerator(generateCredentials)(getAwsCoreService(SERVICE_TYPE.SECRETS))
 );
 
 export const AwsSecretsVault = getSecretsVaultService();

@@ -4,10 +4,10 @@ import ini from 'ini';
 import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
-  SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
+  SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
-  Registry, ProjectConfiguration, validateProject, BaseService, ProviderChoice,
-  isCoreService, JsonSchema, CloudProviderChoice,
+  Registry, ProjectConfiguration, validateProject, ProviderChoice,
+  isCoreService, JsonSchema, CloudProviderChoice, BaseService, ExtractAttrs,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -24,12 +24,14 @@ type ProjectConfigCreationOptions = {
   defaultProvider?: CloudProviderChoice,
   defaultRegion?: string,
   stageNames?: string[],
-  stateProvider?: CloudProviderChoice,
-  secretsProvider?: CloudProviderChoice,
+  stateProvider?: ProviderChoice,
+  secretsProvider?: ProviderChoice,
   serviceTypes?: ServiceTypeChoice[],
 };
 
-export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')): string | undefined => {
+export const getRepository = (
+  fileName = path.join(CURRENT_DIRECTORY, '.git', 'config'),
+): string | undefined => {
   if (!fs.existsSync(fileName)) {
     return;
   }
@@ -63,9 +65,9 @@ export const applyServiceTemplate = (
   return result;
 };
 
-export const skipImpliedAttributes = <T extends BaseServiceAttributes>(
-  serviceConfig: Partial<T>,
-  rootConfig: Partial<Project>,
+export const skipImpliedAttributes = <T extends Partial<BaseServiceAttributes>>(
+  serviceConfig: T,
+  rootConfig: ProjectConfiguration,
 ): T => (
   omitBy(serviceConfig, (value, key) => (
     ROOT_IMPLIED_ATTRIBUTES.includes(key) && rootConfig[key as keyof typeof rootConfig] === value
@@ -75,15 +77,17 @@ export const skipImpliedAttributes = <T extends BaseServiceAttributes>(
 export const getServiceConfiguration = (
   service: BaseService,
   opts: Pick<TemplatePlaceholders, 'projectName' | 'stageName'>,
-): Partial<BaseServiceAttributes> => {
+): ExtractAttrs<typeof service> => {
   const { type, provider, schema: { properties = {} } } = service;
 
   if (isEmpty(properties)) {
-    return {};
+    throw new Error(
+      `No properties are defined on the service schema for service ${type} of provider ${provider}`,
+    );
   }
 
   const placeholders: TemplatePlaceholders = { ...opts, type, provider };
-  const config: Partial<BaseServiceAttributes> = {};
+  const config = { type, provider, name: `${provider}-${type}-service` };
   for (const [key, schema] of Object.entries(properties)) {
     const {
       default: defaultValue,
@@ -122,9 +126,10 @@ export const createProject = ({
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
-  const validServiceTypes = serviceTypes.filter(
+  const validServiceTypes = (serviceTypes || []).filter(
     st => Object.values(SERVICE_TYPE).includes(st) && !isCoreService(st),
   );
+
   const validStageNames = uniq(stageNames.filter(st => Boolean(st)));
   const serviceTypeCounts = countBy(validServiceTypes, String);
   const addedServiceTypes: Map<ServiceTypeChoice, number> = new Map();
@@ -139,7 +144,7 @@ export const createProject = ({
 
   const [stageName, ...otherStages] = validStageNames;
   const provider = defaultProvider || PROVIDER.AWS;
-  const region: string = defaultRegion || DEFAULT_REGIONS[provider];
+  const region = defaultRegion || DEFAULT_REGIONS[provider];
 
   const stateConfig = getServiceConfiguration(
     Registry.get(stateProvider || provider, SERVICE_TYPE.STATE), { projectName },
@@ -149,14 +154,22 @@ export const createProject = ({
     Registry.get(secretsProvider || provider, SERVICE_TYPE.SECRETS), { projectName },
   );
 
-  const rootConfig: Omit<ProjectConfiguration, 'stages'> = {
+  const config: ProjectConfiguration = {
     name: projectName,
     provider,
     region,
   };
 
-  const secrets = skipImpliedAttributes(vaultConfig, rootConfig);
-  const state = skipImpliedAttributes(stateConfig, rootConfig);
+  const state = skipImpliedAttributes(stateConfig, config);
+  const secrets = skipImpliedAttributes(vaultConfig, config);
+
+  if (!isEmpty(state)) {
+    Object.assign(config, { state });
+  }
+
+  if (!isEmpty(secrets)) {
+    Object.assign(config, { secrets });
+  }
 
   const stages: StageConfiguration<true>[] = [
     {
@@ -164,35 +177,27 @@ export const createProject = ({
       services: validServiceTypes.map((type) => {
         const srv = Registry.get(provider, type);
 
-        const config = skipImpliedAttributes(
-          getServiceConfiguration(srv, { projectName, stageName }), rootConfig,
-        ) as Partial<BaseServiceAttributes>;
+        const serviceConfig = skipImpliedAttributes(
+          getServiceConfiguration(srv, { projectName, stageName }), config,
+        );
 
-        let name = config.name;
-
+        let name = serviceConfig.name;
         if (serviceTypeCounts[type] > 1) {
           const count = (addedServiceTypes.get(type) || 0) + 1;
           addedServiceTypes.set(type, count);
           name = `${name}-${count}`;
         }
 
-        return { ...config, name, type };
+        return { ...serviceConfig, name, type } as CloudServiceAttributes;
       }),
     },
-    ...otherStages.map(
-      (stg: string) => ({
-        name: stg,
-        copy: stageName,
-      }),
-    ),
+    ...otherStages.map(name => ({
+      name,
+      copy: stageName,
+    })),
   ];
 
-  const config: ProjectConfiguration = {
-    ...rootConfig,
-    ...(!isEmpty(secrets) ? { secrets } : {}),
-    ...(!isEmpty(state) ? { state } : {}),
-    stages,
-  };
+  Object.assign(config, { stages });
 
   // Validate the configuration:
   // Ajv is known for mutating objects, so we need to deep clone the configuration,
