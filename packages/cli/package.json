@@ -44,7 +44,7 @@
     "chalk": "^5.0.1",
     "ini": "^3.0.1",
     "lodash": "4.17.21",
-    "oclif": "3.2.2",
+    "oclif": "3.2.13",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
@@ -52,7 +52,7 @@
     "@types/jest": "^29.0.3",
     "@types/lodash": "^4.14.185",
     "@types/node": "^18.7.21",
-    "oclif": "^3.2.2",
+    "oclif": "^3.2.13",
     "tsc-alias": "^1.7.0",
     "tsconfig-paths": "^4.1.0",
     "tslib": "^2.4.0",
