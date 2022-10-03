@@ -1,16 +1,16 @@
 import {
-  DataAwsSecretsmanagerRandomPassword,
-  SecretsmanagerSecretConfig,
-  SecretsmanagerSecretVersionConfig,
-} from '@cdktf/provider-aws/lib/secretsmanager';
+  dataAwsSecretsmanagerRandomPassword,
+  secretsmanagerSecret,
+  secretsmanagerSecretVersion,
+} from '@cdktf/provider-aws';
 
-const secret: Partial<SecretsmanagerSecretConfig> = {
+const secret: Partial<secretsmanagerSecret.SecretsmanagerSecretConfig> = {
   recoveryWindowInDays: 30,
 };
 
-const version: Partial<SecretsmanagerSecretVersionConfig> = {};
+const version: Partial<secretsmanagerSecretVersion.SecretsmanagerSecretVersionConfig> = {};
 
-const password: Partial<DataAwsSecretsmanagerRandomPassword> = {
+const password: Partial<dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword> = {
   includeSpace: false,
   excludeNumbers: false,
 };

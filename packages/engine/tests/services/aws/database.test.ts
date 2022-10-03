@@ -1,12 +1,16 @@
 import { faker } from '@faker-js/faker';
-import { DbInstance, DbParameterGroup } from '@cdktf/provider-aws/lib/rds';
+import {
+  dbInstance as awsDbInstance,
+  dbParameterGroup as awsDbParameterGroup,
+} from '@cdktf/provider-aws';
 
 import { getStack } from '@stackmate/engine/core/stack';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
 import { PROVIDER, ServiceTypeChoice, SERVICE_TYPE } from '@stackmate/engine';
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import {
-  AwsDatabaseAttributes, AwsDatabaseDeployableResources, AWSMariaDB, AwsMariaDBAttributes, AWSMySQL, AwsMySQLAttributes, AWSPostgreSQL,
+  AwsDatabaseAttributes, AwsDatabaseDeployableResources, AWSMariaDB,
+  AwsMariaDBAttributes, AWSMySQL, AwsMySQLAttributes, AWSPostgreSQL,
   AwsPostgreSQLAttributes, onDeploy,
 } from '@stackmate/engine/providers/aws/services/database';
 import {
@@ -98,8 +102,8 @@ describe('AWS PostgreSQL', () => {
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
     expect(typeof resources === 'object').toBe(true);
-    expect(resources.dbInstance).toBeInstanceOf(DbInstance);
-    expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
+    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
+    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
   });
 });
 
@@ -142,8 +146,8 @@ describe('AWS MySQL', () => {
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
     expect(typeof resources === 'object').toBe(true);
-    expect(resources.dbInstance).toBeInstanceOf(DbInstance);
-    expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
+    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
+    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
   });
 });
 
@@ -186,7 +190,7 @@ describe('AWS MariaDB', () => {
 
     const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
     expect(typeof resources === 'object').toBe(true);
-    expect(resources.dbInstance).toBeInstanceOf(DbInstance);
-    expect(resources.paramGroup).toBeInstanceOf(DbParameterGroup);
+    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
+    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
   });
 });

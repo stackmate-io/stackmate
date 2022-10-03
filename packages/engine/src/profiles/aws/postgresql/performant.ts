@@ -1,8 +1,8 @@
-import { DbInstanceConfig } from '@cdktf/provider-aws/lib/rds';
+import { dbInstance } from '@cdktf/provider-aws';
 
 import { instance as instanceDefaults, params } from './default';
 
-const instance: Partial<DbInstanceConfig> = {
+const instance: Partial<dbInstance.DbInstanceConfig> = {
   ...instanceDefaults,
   autoMinorVersionUpgrade: false,
   backupRetentionPeriod: 30,
