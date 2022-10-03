@@ -13,9 +13,9 @@ import {
   Service, withRegions, withHandler, withSchema,
 } from '@stackmate/engine/core/service';
 
-type AwsStatePreparableResources = { bucket: S3Bucket };
-type AwsStateDeployableResources = { backend: S3Backend };
-type AwsStateDestroyableResources = { backend: S3Backend };
+export type AwsStateDeployableResources = { backend: S3Backend };
+export type AwsStatePreparableResources = { bucket: S3Bucket };
+export type AwsStateDestroyableResources = { backend: S3Backend };
 
 export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
   type: typeof SERVICE_TYPE.STATE;

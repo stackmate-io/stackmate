@@ -5,7 +5,6 @@ import { InternetGateway, Subnet, Vpc } from '@cdktf/provider-aws/lib/vpc';
 import { AwsProvider } from '@stackmate/engine/providers';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
 import { Provisionable, ServiceScopeChoice } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
@@ -75,8 +74,6 @@ describe('AWS Provider', () => {
         name: 'aws-provider',
         type: SERVICE_TYPE.PROVIDER,
         region: 'eu-central-1',
-        profile: DEFAULT_PROFILE_NAME,
-        overrides: {},
       };
 
       provisionable = getProvisionableFromConfig(config, stack.stageName);
@@ -111,7 +108,7 @@ describe('AWS Provider', () => {
       ) as AwsProviderDestroyableResources;
 
       expect(resources).toBeInstanceOf(Object);
-      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider']));
+      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'kmsKey']));
       expect(resources.provider).toBeInstanceOf(TerraformAwsProvider);
     });
 

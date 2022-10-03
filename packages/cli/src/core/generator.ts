@@ -4,10 +4,11 @@ import ini from 'ini';
 import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
-  SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, Project,
+  SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
-  Registry, ProjectConfiguration, validateProject, BaseService, ProviderChoice,
-  isCoreService, JsonSchema, CloudProviderChoice,
+  Registry, ProjectConfiguration, validateProject, ProviderChoice,
+  isCoreService, JsonSchema, CloudProviderChoice, AvailableServices,
+  SecretVaultServiceAttributes, StateServiceAttributes, AvailableServiceAttributes,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -24,9 +25,9 @@ type ProjectConfigCreationOptions = {
   defaultProvider?: CloudProviderChoice,
   defaultRegion?: string,
   stageNames?: string[],
-  stateProvider?: CloudProviderChoice,
-  secretsProvider?: CloudProviderChoice,
-  serviceTypes?: ServiceTypeChoice[],
+  stateProvider?: ProviderChoice,
+  secretsProvider?: ProviderChoice,
+  serviceTypes?: CloudServiceAttributes['type'][],
 };
 
 export const getRepository = (fileName = path.join(CURRENT_DIRECTORY, '.git', 'config')): string | undefined => {
@@ -63,27 +64,29 @@ export const applyServiceTemplate = (
   return result;
 };
 
-export const skipImpliedAttributes = <T extends BaseServiceAttributes>(
-  serviceConfig: Partial<T>,
-  rootConfig: Partial<Project>,
+export const skipImpliedAttributes = <T extends Partial<BaseServiceAttributes>>(
+  serviceConfig: T,
+  rootConfig: ProjectConfiguration,
 ): T => (
   omitBy(serviceConfig, (value, key) => (
     ROOT_IMPLIED_ATTRIBUTES.includes(key) && rootConfig[key as keyof typeof rootConfig] === value
   )) as T
 );
 
-export const getServiceConfiguration = (
-  service: BaseService,
+export const getServiceConfiguration = <T extends AvailableServiceAttributes>(
+  service: AvailableServices,
   opts: Pick<TemplatePlaceholders, 'projectName' | 'stageName'>,
-): Partial<BaseServiceAttributes> => {
+): T => {
   const { type, provider, schema: { properties = {} } } = service;
 
   if (isEmpty(properties)) {
-    return {};
+    throw new Error(
+      `No properties are defined on the service schema for service ${type} of provider ${provider}`,
+    );
   }
 
   const placeholders: TemplatePlaceholders = { ...opts, type, provider };
-  const config: Partial<BaseServiceAttributes> = {};
+  const config = { type, provider, name: `${provider}-${type}-service` };
   for (const [key, schema] of Object.entries(properties)) {
     const {
       default: defaultValue,
@@ -122,7 +125,7 @@ export const createProject = ({
   stageNames = ['production'],
   serviceTypes = []}: ProjectConfigCreationOptions,
 ): ProjectConfiguration => {
-  const validServiceTypes = serviceTypes.filter(
+  const validServiceTypes = (serviceTypes || []).filter(
     st => Object.values(SERVICE_TYPE).includes(st) && !isCoreService(st),
   );
   const validStageNames = uniq(stageNames.filter(st => Boolean(st)));
@@ -141,11 +144,11 @@ export const createProject = ({
   const provider = defaultProvider || PROVIDER.AWS;
   const region: string = defaultRegion || DEFAULT_REGIONS[provider];
 
-  const stateConfig = getServiceConfiguration(
+  const stateConfig = getServiceConfiguration<StateServiceAttributes>(
     Registry.get(stateProvider || provider, SERVICE_TYPE.STATE), { projectName },
   );
 
-  const vaultConfig = getServiceConfiguration(
+  const vaultConfig = getServiceConfiguration<SecretVaultServiceAttributes>(
     Registry.get(secretsProvider || provider, SERVICE_TYPE.SECRETS), { projectName },
   );
 
@@ -164,12 +167,13 @@ export const createProject = ({
       services: validServiceTypes.map((type) => {
         const srv = Registry.get(provider, type);
 
-        const config = skipImpliedAttributes(
-          getServiceConfiguration(srv, { projectName, stageName }), rootConfig,
-        ) as Partial<BaseServiceAttributes>;
+        // const config = skipImpliedAttributes<CloudServiceAttributes>(
+        //   getServiceConfiguration<CloudServiceAttributes>(srv, { projectName, stageName }), rootConfig,
+        // );
+
+        const config = getServiceConfiguration<CloudServiceAttributes>(srv, { projectName, stageName });
 
         let name = config.name;
-
         if (serviceTypeCounts[type] > 1) {
           const count = (addedServiceTypes.get(type) || 0) + 1;
           addedServiceTypes.set(type, count);

@@ -121,7 +121,15 @@ export type Service<Setup extends BaseServiceAttributes> = {
   associations: Association[];
 };
 
+/**
+ * @type {BaseService} base service type
+ */
 export type BaseService = Service<BaseServiceAttributes>;
+
+/**
+ * @type {ExtractAttrs} extracts arguments from a service
+ */
+export type ExtractAttrs<T> = T extends Service<infer Attrs> ? Attrs : never;
 
 /**
  * Returns a base core service (one that cannot be part of a stage)

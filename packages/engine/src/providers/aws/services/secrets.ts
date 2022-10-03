@@ -1,4 +1,3 @@
-import pipe from '@bitty/pipe';
 import { kebabCase, snakeCase } from 'lodash';
 import {
   DataAwsSecretsmanagerRandomPassword, DataAwsSecretsmanagerSecretVersion,
@@ -13,11 +12,11 @@ import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE }
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
   BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions,
-  profilable, ProfilableAttributes, Provisionable, ProvisionAssociationRequirements,
-  SecretsVaultService, Service, withCredentialsGenerator,
+  Provisionable, ProvisionAssociationRequirements, SecretsVaultService,
+  Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
 
-export type AwsSecretsVaultAttributes = BaseServiceAttributes & ProfilableAttributes & {
+export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS,
   type: typeof SERVICE_TYPE.SECRETS;
   region: ChoiceOf<typeof REGIONS>;
@@ -77,8 +76,10 @@ export const provisionCredentialResources = (
 ): ProvisionCredentialsResources => {
   const { service, config, requirements: { kmsKey, providerInstance } } = provisionable;
   const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
+
+  // we only use the default profile, since this is a core service
   const { secret, version, password } = getServiceProfile(
-    PROVIDER.AWS, SERVICE_TYPE.SECRETS, config.profile || DEFAULT_PROFILE_NAME,
+    PROVIDER.AWS, SERVICE_TYPE.SECRETS, DEFAULT_PROFILE_NAME,
   );
 
   const idPrefix = `${snakeCase(config.name)}_secrets`;
@@ -146,10 +147,7 @@ const generateCredentials: CredentialsHandler = (
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
 export const getSecretsVaultService = (): AwsSecretsVaultService => (
-  pipe(
-    profilable(),
-    withCredentialsGenerator(generateCredentials),
-  )(getAwsCoreService(SERVICE_TYPE.SECRETS))
+  withCredentialsGenerator(generateCredentials)(getAwsCoreService(SERVICE_TYPE.SECRETS))
 );
 
 export const AwsSecretsVault = getSecretsVaultService();

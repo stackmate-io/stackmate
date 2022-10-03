@@ -1,8 +1,10 @@
 import { uniq } from 'lodash';
 
 import * as Services from '@stackmate/engine/providers/services';
+import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Distribute } from '@stackmate/engine/lib';
 import {
-  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, isCoreService,
+  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, ExtractAttrs,
 } from '@stackmate/engine/core/service';
 
 export type ServicesRegistry = {
@@ -122,9 +124,26 @@ class Registry implements ServicesRegistry {
 
 const registry = new Registry(...Object.values(Services)) as Registry;
 const availableServices = Object.values(Services);
-const cloudServices = availableServices.filter(s => !isCoreService(s.type));
 
 export type AvailableServices = typeof availableServices[number];
-export type CloudServices = typeof cloudServices[number];
 
+// In order for hints to work properly when we type project configurations (eg. in tests),
+// the union types extracted from AvailableServices should be distributive
+// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableServices>>;
+export type ProviderServiceAttributes = Distribute<
+  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.PROVIDER; }>
+>;
+export type StateServiceAttributes = Distribute<
+  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.STATE; }>
+>;
+export type SecretVaultServiceAttributes = Distribute<
+  Extract<AvailableServiceAttributes, { type: typeof SERVICE_TYPE.SECRETS }>
+>;
+export type CoreServiceAttributes = Distribute<
+  StateServiceAttributes | SecretVaultServiceAttributes | ProviderServiceAttributes
+>;
+export type CloudServiceAttributes = Distribute<
+  Exclude<AvailableServiceAttributes, CoreServiceAttributes>
+>;
 export { registry as Registry };

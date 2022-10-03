@@ -11,30 +11,25 @@ import { ChoiceOf, getCidrBlocks } from '@stackmate/engine/lib';
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { DEFAULT_PROFILE_NAME, DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  BaseServiceAttributes, getCoreService, profilable, ProfilableAttributes, Provisionable,
+  BaseServiceAttributes, getCoreService, profilable, Provisionable,
   ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
-export type ProviderInstanceResources = {
+export type ProviderPrerequisites = {
   provider: TerraformAwsProvider;
-};
-
-export type KmsKeyResources = {
   kmsKey: KmsKey;
 }
 
-export type AwsProviderDeployableResources = ProviderInstanceResources & KmsKeyResources & {
-  provider: TerraformAwsProvider,
+export type AwsProviderDeployableResources = ProviderPrerequisites & {
   gateway: InternetGateway;
   subnets: Subnet[];
   vpc: Vpc;
 };
 
-export type AwsProviderPreparableResources = ProviderInstanceResources & KmsKeyResources;
-export type AwsProviderDestroyableResources = ProviderInstanceResources;
+export type AwsProviderPreparableResources = ProviderPrerequisites;
+export type AwsProviderDestroyableResources = ProviderPrerequisites;
 
 export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
-  & ProfilableAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & { type: typeof SERVICE_TYPE.PROVIDER; ip?: string; }
 >;
@@ -63,16 +58,16 @@ export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable &
 };
 
 /**
- * Registers the provider instance required by all handlers
+ * Registers the prerequisites required by all operation types
  *
  * @param {AwsProviderBaseProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
- * @returns {ProviderInstanceResources} the provider instance resource
+ * @returns {ProviderPrerequisites} the provider prerequisite resources
  */
-export const registerProviderInstance = (
+export const registerPrerequisites = (
   provisionable: AwsProviderBaseProvisionable, stack: Stack,
-): ProviderInstanceResources => {
-  const { config: { region } } = provisionable;
+): ProviderPrerequisites => {
+  const { config: { region }, resourceId } = provisionable;
   const alias = `aws-${kebabCase(region)}-provider`;
   const provider = new TerraformAwsProvider(stack.context, PROVIDER.AWS, {
     region,
@@ -85,23 +80,6 @@ export const registerProviderInstance = (
     },
   });
 
-  return { provider };
-};
-
-/**
- * Registers the kms key required by the 'deployable' and 'preparable' scope
- *
- * @param {AwsProviderDeployableProvisionable|AwsProviderPreparableProvisionable} provisionable the
- *  provisionable item
- * @param {Stack} stack the stack to deploy resources to
- * @returns {KmsKeyResources} the kms key resource
- */
-export const registerKmsKey = (
-  provisionable: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
-  stack: Stack,
-): KmsKeyResources => {
-  const { resourceId } = provisionable;
-
   const kmsKey = new KmsKey(stack.context, `${resourceId}-key`, {
     customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
     deletionWindowInDays: 30,
@@ -112,7 +90,7 @@ export const registerKmsKey = (
     multiRegion: false,
   });
 
-  return { kmsKey };
+  return { provider, kmsKey };
 };
 
 /**
@@ -125,9 +103,11 @@ export const onDeploy = (
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.ip || DEFAULT_VPC_IP, 16, 2, 24);
-  const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getServiceProfile(
-    PROVIDER.AWS, SERVICE_TYPE.PROVIDER, config.profile || DEFAULT_PROFILE_NAME,
-  );
+  const {
+    vpc: vpcConfig,
+    subnet: subnetConfig,
+    gateway: gatewayConfig,
+  } = getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.PROVIDER, DEFAULT_PROFILE_NAME);
 
   const vpc = new Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -148,28 +128,12 @@ export const onDeploy = (
   });;
 
   return {
-    ...registerProviderInstance(provisionable, stack),
-    ...registerKmsKey(provisionable, stack),
+    ...registerPrerequisites(provisionable, stack),
     vpc,
     subnets,
     gateway,
   };
 };
-
-/**
- * Registers the provider instance and kms key
- *
- * @param {AwsProviderPreparableProvisionable} provisionable
- * @param {Stack} stack
- * @returns {AwsProviderPreparableResources}
- */
-export const onPrepare = (
-  provisionable: AwsProviderPreparableProvisionable,
-  stack: Stack,
-): AwsProviderPreparableResources => ({
-  ...registerProviderInstance(provisionable, stack),
-  ...registerKmsKey(provisionable, stack),
-});
 
 /**
  * @returns {AwsProviderService} the secrets vault service
@@ -179,8 +143,8 @@ export const getProviderService = (): AwsProviderService => (
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler('deployable', onDeploy),
-    withHandler('preparable', onPrepare),
-    withHandler('destroyable', registerProviderInstance),
+    withHandler('preparable', registerPrerequisites),
+    withHandler('destroyable', registerPrerequisites),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 );
 
