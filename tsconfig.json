@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "target": "es2019",
     "lib": [
       "es5",
       "es6",
@@ -18,6 +17,8 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "skipLibCheck": true,
+    "target": "es2019",
+    "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noEmit": false,

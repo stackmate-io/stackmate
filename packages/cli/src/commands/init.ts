@@ -1,12 +1,12 @@
 import { kebabCase } from 'lodash';
-import { Flags } from '@oclif/core';
+import { CliUx, Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
 import { PROVIDER, DEFAULT_REGIONS, Registry, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { ConfigurationFile, parseCommaSeparatedString } from '@stackmate/cli/lib';
+import { ConfigurationFile, fileExists, parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
   /**
@@ -58,7 +58,20 @@ class InitCommand extends BaseCommand {
   protected parsedFlags: OutputFlags<typeof InitCommand.flags>;
 
   async run(): Promise<any> {
+    const targetFilePath = DEFAULT_PROJECT_FILE;
     const { name, provider, region, secrets, state, stages, services } = this.parsedFlags;
+
+    if (fileExists(targetFilePath)) {
+      const proceed = await CliUx.ux.confirm(
+        `File ${targetFilePath} already exists and will be overwritten. Are you sure you want to continue`,
+      );
+
+      if (!proceed) {
+        CliUx.ux.info('Alright, keeping the existing file then');
+        this.exit();
+      }
+    }
+
     const projectName = kebabCase(name || getRepository() || CURRENT_DIRECTORY);
     const availableServices = Registry.serviceTypes(provider);
     const serviceTypes = parseCommaSeparatedString(services).filter(
@@ -75,8 +88,10 @@ class InitCommand extends BaseCommand {
       serviceTypes,
     });
 
-    const projectFile = new ConfigurationFile(DEFAULT_PROJECT_FILE);
+    const projectFile = new ConfigurationFile(targetFilePath);
     projectFile.write(project);
+
+    this.log(`Project file created under ${projectFile.filename}`);
   }
 }
 

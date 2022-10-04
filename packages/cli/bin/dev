@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-const fs = require('fs');
+process.env.NODE_ENV = 'development';
+
 const path = require('path');
 const oclif = require('@oclif/core');
 const tsNode = require('ts-node');
-const project = path.join(__dirname, '..', '..', '..', 'tsconfig.json')
-
+const project = path.join(__dirname, '..', '..', '..', 'tsconfig.json');
 const tsConfig = require(project);
 const tsConfigPaths = require('tsconfig-paths');
 
@@ -13,11 +13,9 @@ tsConfigPaths.register({
   paths: tsConfig.compilerOptions.paths,
 });
 
-// In dev mode -> use ts-node and dev plugins
-process.env.NODE_ENV = 'development'
-
-tsNode.register({ project })
+tsNode.register({ project });
 
 oclif.settings.debug = true;
+oclif.settings.tsnodeEnabled = true;
 
-oclif.run().then(oclif.flush).catch(oclif.Errors.handle)
+oclif.run().then(oclif.flush).catch(oclif.Errors.handle);
