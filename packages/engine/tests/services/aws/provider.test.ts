@@ -42,7 +42,7 @@ describe('AWS Provider', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/provider',
       type: 'object',
-      required: ['region'],
+      required: [],
       additionalProperties: false,
       properties: {
         provider: {

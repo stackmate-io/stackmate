@@ -34,7 +34,7 @@ describe('AWS state', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/state',
       type: 'object',
-      required: ['region', 'bucket'],
+      required: ['bucket'],
       additionalProperties: false,
       properties: {
         provider: {

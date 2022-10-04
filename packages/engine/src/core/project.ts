@@ -2,11 +2,11 @@ import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CloudServiceAttributes, Registry,
+  CloudServiceAttributes, Registry, CloudServiceProvider,
   SecretVaultServiceAttributes, StateServiceAttributes,
 } from '@stackmate/engine/core/registry';
 import {
-  BaseServiceAttributes, CloudProviderChoice, isCloudProvider, isCoreService, ProviderChoice,
+  BaseServiceAttributes, isCloudProvider, isCoreService, ProviderChoice,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
@@ -44,7 +44,7 @@ export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<[
  */
 export type Project = {
   name: string;
-  provider: CloudProviderChoice;
+  provider: CloudServiceProvider;
   region: string;
   stages: StageConfiguration[];
   state: StateServiceAttributes;

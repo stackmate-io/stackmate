@@ -7,7 +7,7 @@ import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
   Registry, ProjectConfiguration, validateProject, ProviderChoice,
-  isCoreService, JsonSchema, CloudProviderChoice, BaseService, ExtractAttrs, CloudServiceTypes,
+  isCoreService, JsonSchema, BaseService, ExtractAttrs, CloudServiceType, CloudServiceProvider,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -21,12 +21,12 @@ type TemplatePlaceholders = {
 
 type ProjectConfigCreationOptions = {
   projectName: string,
-  defaultProvider?: CloudProviderChoice,
+  defaultProvider?: CloudServiceProvider,
   defaultRegion?: string,
   stageNames?: string[],
   stateProvider?: ProviderChoice,
   secretsProvider?: ProviderChoice,
-  serviceTypes?: CloudServiceTypes[],
+  serviceTypes?: CloudServiceType[],
 };
 
 export const getRepository = (
