@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
+import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
   Registry, ProjectConfiguration, validateProject, ProviderChoice,
-  isCoreService, JsonSchema, CloudProviderChoice, BaseService, ExtractAttrs,
+  isCoreService, JsonSchema, CloudProviderChoice, BaseService, ExtractAttrs, CloudServiceTypes,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -26,7 +26,7 @@ type ProjectConfigCreationOptions = {
   stageNames?: string[],
   stateProvider?: ProviderChoice,
   secretsProvider?: ProviderChoice,
-  serviceTypes?: ServiceTypeChoice[],
+  serviceTypes?: CloudServiceTypes[],
 };
 
 export const getRepository = (
@@ -199,11 +199,7 @@ export const createProject = ({
 
   Object.assign(config, { stages });
 
-  // Validate the configuration:
-  // Ajv is known for mutating objects, so we need to deep clone the configuration,
-  // because `useDefaults` is on by default and we can't validate the user-friendly
-  // configuration without it, since it misses a lot of key properties.
-  validateProject(cloneDeep(config));
+  validateProject(config, { useDefaults: false });
 
   return config;
 };

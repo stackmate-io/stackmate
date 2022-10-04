@@ -21,7 +21,6 @@ export const withRegions = <C extends BaseServiceAttributes>(
     withServiceProperties<C, { regions: readonly string[] }>({ regions }),
     withSchema<C, RegionalAttributes>({
       type: 'object',
-      required: ['region'],
       properties: {
         region: {
           type: 'string',

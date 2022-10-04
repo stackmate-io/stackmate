@@ -243,9 +243,8 @@ export const validate = (
   }
 
   if (!validateData(validData) && !isEmpty(validateData.errors)) {
-    throw new ValidationError(
-      `Error while validating schema ${schemaId}`, parseErrors(validateData.errors || []),
-    );
+    const errors = parseErrors(validateData.errors || [])
+    throw new ValidationError(`Error while validating schema ${schemaId}`, errors);
   }
 
   return validData;
