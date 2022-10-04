@@ -63,7 +63,7 @@ jobs:
       - name: Commit yarn.lock
         run: |
           git config user.name "falexandrou"
-          git config user.email "fotis@dependabot"
+          git config user.email "hello@falexandrou.com"
           git add yarn.lock
           git commit -m '[dependabot skip] Fix yarn.lock'
           git push
