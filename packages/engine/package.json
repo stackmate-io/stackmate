@@ -39,9 +39,13 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.5.0",
     "@types/jest": "^29.1.1",
     "@types/lodash": "^4.14.186",
     "@types/node": "^18.8.0",
+    "jest": "^29.1.2",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.7.0",
     "tsconfig-paths": "^4.1.0",
@@ -55,11 +59,14 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "clean": "rimraf dist/* && rimraf tsconfig.build.tsbuildinfo",
+    "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "build": "yarn clean && yarn schema:generate && yarn build:project && yarn build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
     "build:project": "tsc -p ./tsconfig.build.json",
     "schema:generate": "ts-node -r tsconfig-paths/register src/bin/json-schema.ts",
-    "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json"
+    "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json",
+    "test": "yarn schema:generate && yarn test:run",
+    "test:run": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "test:watch": "yarn test:run --watchAll"
   }
 }
