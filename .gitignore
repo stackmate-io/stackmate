@@ -1,5 +1,6 @@
 *-debug.log
 *-error.log
+.turbo
 .nyc_output
 dist
 package-lock.json
