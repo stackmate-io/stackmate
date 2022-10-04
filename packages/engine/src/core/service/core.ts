@@ -3,10 +3,9 @@ import { TerraformDataSource, TerraformProvider, TerraformResource, TerraformBac
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
-export type CloudProviderChoice = ChoiceOf<typeof CLOUD_PROVIDER>;
 
 type Resource = TerraformResource | TerraformProvider | TerraformDataSource | TerraformBackend;
 export type ProvisionResources = Resource | Resource[];

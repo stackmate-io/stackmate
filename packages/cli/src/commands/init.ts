@@ -1,7 +1,7 @@
 import { kebabCase } from 'lodash';
 import { CliUx, Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, Registry, CloudServiceTypes } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, Registry, CloudServiceType } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
@@ -76,7 +76,7 @@ class InitCommand extends BaseCommand {
     const availableServices = Registry.serviceTypes(provider);
     const serviceTypes = parseCommaSeparatedString(services).filter(
       s => s in availableServices,
-    ) as CloudServiceTypes[];
+    ) as CloudServiceType[];
 
     const project = createProject({
       projectName,
