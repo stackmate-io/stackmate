@@ -21,10 +21,11 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
+            .yarn/cache
             **/node_modules
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-modules-
+            ${{ runner.os }}-yarn-modules-
       - name: Setup node
         uses: actions/setup-node@v2
       - name: Install dependencies
