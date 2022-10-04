@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.actor == 'dependabot[bot]' &&
-      contains(github.event.pull_request.head.ref, 'dependabot/npm_and_yarn/')
+      contains(github.event.pull_request.head.ref, 'dependabot-npm_and_yarn-')
 
     # IMPORTANT: setting YARN_ENABLE_SCRIPTS=false is critical to ensure that untrusted
     # PRs can't add an npm package and then use that to execute untrusted code in
@@ -29,6 +29,7 @@ jobs:
     # See also: https://github.com/yarnpkg/berry/issues/1679#issuecomment-669937860
     env:
       YARN_ENABLE_SCRIPTS: false
+      YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +37,7 @@ jobs:
           # Using a Personal Access Token here is required to trigger workflows on our new commit.
           # The default GitHub token doesn't trigger any workflows.
           # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
-          token: ${{ secrets.DEPENDABOT_COMMITTER_GITHUB_TOKEN }}
+          token: ${{ secrets.STACKMATE_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - run: git lfs pull --include .yarn/
@@ -62,7 +63,7 @@ jobs:
       - name: Commit yarn.lock
         run: |
           git config user.name "falexandrou"
-          git config user.email "hello@falexandrou.com"
+          git config user.email "fotis@dependabot"
           git add yarn.lock
           git commit -m '[dependabot skip] Fix yarn.lock'
           git push
