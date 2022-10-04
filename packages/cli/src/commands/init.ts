@@ -1,11 +1,11 @@
 import { kebabCase } from 'lodash';
 import { CliUx, Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, Registry, ServiceTypeChoice } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, Registry, CloudServiceTypes } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
-import { CURRENT_DIRECTORY, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
+import { CURRENT_DIR_BASENAME, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import { ConfigurationFile, fileExists, parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
@@ -72,11 +72,11 @@ class InitCommand extends BaseCommand {
       }
     }
 
-    const projectName = kebabCase(name || getRepository() || CURRENT_DIRECTORY);
+    const projectName = kebabCase(name || getRepository() || CURRENT_DIR_BASENAME);
     const availableServices = Registry.serviceTypes(provider);
     const serviceTypes = parseCommaSeparatedString(services).filter(
       s => s in availableServices,
-    ) as ServiceTypeChoice[];
+    ) as CloudServiceTypes[];
 
     const project = createProject({
       projectName,

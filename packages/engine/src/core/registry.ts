@@ -169,4 +169,6 @@ export type CloudServices = Distribute<
 export type CloudServiceAttributes = Distribute<
   Exclude<AvailableServiceAttributes, CoreServiceAttributes>
 >;
+export type CloudServiceTypes = CloudServiceAttributes['type'];
+
 export { registry as Registry };
