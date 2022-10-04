@@ -425,13 +425,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-local@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@cdktf/provider-local@npm:3.0.0"
+"@cdktf/provider-local@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@cdktf/provider-local@npm:3.0.1"
   peerDependencies:
     cdktf: ^0.13.0
     constructs: ^10.0.0
-  checksum: 83249bb7ebb69e0a26ee8e6d422f9867d398cfc07ee501f4810a8beb75c4c296c9daf51cc7b2c95541ac7176425899fb881bdfe0811600421ae422bff78e8d4c
+  checksum: 68bae99c04efe81b7665be44dbf0d4d3bd867a6ce24eb7ecd9b58af3db95515be57454a18d8c1bb849b1737f4f2f27d578f749da5991c122690a06a830b9acc3
   languageName: node
   linkType: hard
 
@@ -1345,7 +1345,7 @@ __metadata:
   dependencies:
     "@bitty/pipe": ^0.3.0
     "@cdktf/provider-aws": 10.0.0
-    "@cdktf/provider-local": ^3.0.0
+    "@cdktf/provider-local": ^3.0.1
     "@faker-js/faker": ^7.5.0
     "@types/jest": ^29.1.1
     "@types/lodash": ^4.14.186
