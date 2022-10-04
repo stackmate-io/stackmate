@@ -1,10 +1,9 @@
 import addErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
-import { defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 import { DataValidationCxt } from 'ajv/dist/types';
+import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 
-import { Obj } from '@stackmate/engine/lib';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ServiceEnvironment } from '@stackmate/engine/core/service';
@@ -222,13 +221,13 @@ export const loadJsonSchema = (
  * Validates an attribute-set against a schema id found in the schema
  *
  * @param {String} schemaId the schema id to use for validation
- * @param {Object} attributes the data to validate
+ * @param {Object} data the data to validate
  * @param {AjvOptions} options any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
-export const validate = <T extends Obj = {}>(
-  schemaId: string, attributes: T, options: AjvOptions = {},
-): T => {
+export const validate = (
+  schemaId: string, data: any, options: AjvOptions = {},
+): any => {
   if (!schemaId) {
     throw new Error('A schema ID should be provided');
   }
@@ -236,20 +235,20 @@ export const validate = <T extends Obj = {}>(
   const ajv = getAjv(options);
   loadJsonSchema(ajv);
 
-  const validAttributes = { ...attributes };
-  const validate = ajv.getSchema(schemaId);
+  const validData = options.useDefaults ? cloneDeep(data) : data;
+  const validateData = ajv.getSchema(schemaId);
 
-  if (!validate) {
+  if (!validateData) {
     throw new Error(`Invalid schema definition “${schemaId}”`);
   }
 
-  if (!validate(validAttributes) && !isEmpty(validate.errors)) {
+  if (!validateData(validData) && !isEmpty(validateData.errors)) {
     throw new ValidationError(
-      `Error while validating schema ${schemaId}`, parseErrors(validate.errors || []),
+      `Error while validating schema ${schemaId}`, parseErrors(validateData.errors || []),
     );
   }
 
-  return options.useDefaults ? validAttributes : attributes;
+  return validData;
 };
 
 /**

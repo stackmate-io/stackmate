@@ -21,6 +21,7 @@
     "ts-node": "^10.9.1",
     "ts-transform-paths": "^2.0.3",
     "tslib": "^2.4.0",
+    "turbo": "^1.5.5",
     "typescript": "^4.8.4"
   },
   "eslintConfig": {
@@ -55,13 +56,11 @@
     "packages/engine"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach -vipt run build",
+    "build": "turbo run build",
     "cli:run": "packages/cli/bin/run",
     "cli:dev": "packages/cli/bin/dev",
-    "test": "yarn engine:schema && yarn test:run",
-    "engine:schema": "yarn workspace @stackmate/engine run schema:generate",
-    "test:run": "jest --verbose --useStderr --detectOpenHandles --silent=false",
-    "test:watch": "yarn test:run --watchAll"
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch"
   },
   "packageManager": "yarn@3.2.3"
 }

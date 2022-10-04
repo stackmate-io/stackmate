@@ -93,7 +93,7 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
 
   if (!triad) {
     throw new Error(
-      'We couldn’t determine the parameter group family to use based on your database’s version and engine',
+      `We couldn’t determine the parameter group family for engine ${config.engine} version ${config.version}`,
     );
   }
 
