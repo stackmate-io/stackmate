@@ -6,7 +6,7 @@ import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
-  Registry, ProjectConfiguration, validateProject, ProviderChoice,
+  Registry, ProjectConfiguration, validateProject, ProviderChoice, OptionalKeys,
   isCoreService, JsonSchema, BaseService, ExtractAttrs, CloudServiceType, CloudServiceProvider,
 } from '@stackmate/engine';
 
@@ -77,7 +77,7 @@ export const skipImpliedAttributes = <T extends Partial<BaseServiceAttributes>>(
 export const getServiceConfiguration = (
   service: BaseService,
   opts: Pick<TemplatePlaceholders, 'projectName' | 'stageName'>,
-): ExtractAttrs<typeof service> => {
+): OptionalKeys<ExtractAttrs<typeof service>, 'name' | 'type'> => {
   const { type, provider, schema: { properties = {} } } = service;
 
   if (isEmpty(properties)) {
@@ -87,7 +87,12 @@ export const getServiceConfiguration = (
   }
 
   const placeholders: TemplatePlaceholders = { ...opts, type, provider };
-  const config = { type, provider, name: `${provider}-${type}-service` };
+  const config = { provider };
+
+  if (!isCoreService(type)) {
+    Object.assign(config, { type, name: `${provider}-${type}-service` });
+  }
+
   for (const [key, schema] of Object.entries(properties)) {
     const {
       default: defaultValue,

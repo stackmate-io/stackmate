@@ -1,4 +1,4 @@
-export * as util from '@stackmate/engine/lib/util';
+export * from '@stackmate/engine/lib';
 export * from '@stackmate/engine/constants';
 export * from '@stackmate/engine/core/registry';
 export * from '@stackmate/engine/core/service';
