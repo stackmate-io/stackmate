@@ -7,7 +7,7 @@ import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
 import {
-  getAjv, loadJsonSchema, validate, validateProject, validateServiceLinks,
+  getAjv, loadJsonSchema, validate, validateProject, validateProperty, validateServiceLinks,
   validateServiceProfile, validateServiceProfileOverrides, ValidationError,
 } from '@stackmate/engine/core/validation';
 
@@ -222,6 +222,22 @@ describe('Validation', () => {
         storage: DEFAULT_SERVICE_STORAGE,
         version: '8.0',
       });
+    });
+  });
+
+  describe('validateProperty', () => {
+    it('throws a validation error for an invalid property', () => {
+      expect(
+        () => validateProperty('name', 'this is invalid because of all the spaces'),
+      ).toThrow(ValidationError);
+    });
+
+    it('does not throw for a valid name', () => {
+      expect(() => validateProperty('name', 'my-project-name')).not.toThrow();
+    });
+
+    it('validates a nested property', () => {
+      expect(() => validateProperty('stages/items/properties/name', 'my-stage-name')).not.toThrow();
     });
   });
 });

@@ -18,4 +18,14 @@ describe.skip('Init Command', () => {
     await InitCommand.run(['--services', 'mysql']);
     console.log(results)
   });
+
+  /*
+  it('exits when no configuration has been provided');
+  it('should generate the configuration');
+  it('prompts the user for the project name');
+  it('prompts the user for the stages when none is defined');
+  it('prompts the user for the services when none is defined');
+  it('exits when the file exists and the user does not want to overwrite');
+  it('should proceed when the user wants to overwrite the configuration file');
+  */
 });

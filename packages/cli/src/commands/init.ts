@@ -1,13 +1,13 @@
 import inquirer from 'inquirer';
-import { isEmpty, kebabCase } from 'lodash';
+import { filter, isEmpty, isString, kebabCase } from 'lodash';
 import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, CloudServiceType, cloudServices } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, CloudServiceType, cloudServices, validateProperty, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIR_BASENAME, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { ConfigurationFile, fileExists, parseCommaSeparatedString } from '@stackmate/cli/lib';
+import { ConfigurationFile, fileExists, isValidOrError, parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
   /**
@@ -60,7 +60,9 @@ class InitCommand extends BaseCommand {
 
   async run(): Promise<any> {
     const targetFilePath = DEFAULT_PROJECT_FILE;
-    const { name, provider, region, secrets, state, stages, services } = this.parsedFlags;
+    const {
+      name, provider, region, secrets, state, stages = '', services = '',
+    } = this.parsedFlags;
 
     if (fileExists(targetFilePath)) {
       const { overwrite } = await inquirer.prompt([{
@@ -76,24 +78,46 @@ class InitCommand extends BaseCommand {
       }
     }
 
-    const { projectName } = await inquirer.prompt([{
+    const cloudServiceTypes = cloudServices.map(s => s.type);
+    const filterServiceTypes = (t: ServiceTypeChoice) => cloudServiceTypes.includes(t);
+    const filterStageNames = (t: string) => !isEmpty(t);
+
+    const { projectName, serviceTypes, stageNames } = await inquirer.prompt([{
       name: 'projectName',
       type: 'input',
+      message: 'What’s the name of the project?',
       default: kebabCase(name || getRepository() || CURRENT_DIR_BASENAME),
-      // validate: (input) =>
-    }]);
+      validate: (input) => isValidOrError(() => validateProperty('name', input)),
+    }, {
+      type: 'checkbox',
+      name: 'serviceTypes',
+      choices: cloudServiceTypes,
+      message: 'Provide the services to deploy',
+      filter: async (types: ServiceTypeChoice[]) => (
+        (types || []).filter(t => cloudServiceTypes.includes(t))
+      ),
+      askAnswered: isEmpty(services),
+      validate: (types: string[]) => (
+        !types.length ? 'You must choose at least one service' : true
+      ),
+    }, {
+      type: 'list',
+      name: 'stageNames',
+      askAnswered: isEmpty(stages),
+      filter: async (input) => !isEmpty(input),
+      validate: (stages: string[]) => isValidOrError(() => (
+        stages.every(
+          (s) => validateProperty('stages/items/properties/name', s),
+        )
+      )),
+    }], {
+      serviceTypes: parseCommaSeparatedString(services).filter(filterServiceTypes),
+      stageNames: parseCommaSeparatedString(stages).filter(filterStageNames),
+    });
 
-    const cloudServiceTypes = cloudServices.map(s => s.type);
-    let serviceTypes = parseCommaSeparatedString(services).filter(
-      s => s in cloudServiceTypes,
-    ) as CloudServiceType[];
-
-    if (isEmpty(serviceTypes)) {
-      ({ serviceTypes } = await inquirer.prompt([{
-        name: 'serviceTypes',
-        type: 'checkbox',
-        choices: cloudServiceTypes,
-      }]));
+    if (isEmpty(stageNames) || isEmpty(serviceTypes) || isEmpty(projectName)) {
+      this.log('No configuration provided, you need to re-run this command. Will now exit');
+      this.exit();
     }
 
     const project = createProject({
@@ -102,7 +126,7 @@ class InitCommand extends BaseCommand {
       defaultRegion: region,
       secretsProvider: secrets,
       stateProvider: state,
-      stageNames: parseCommaSeparatedString(stages),
+      stageNames,
       serviceTypes,
     });
 
