@@ -1,7 +1,8 @@
-import { kebabCase } from 'lodash';
-import { CliUx, Flags } from '@oclif/core';
+import inquirer from 'inquirer';
+import { isEmpty, kebabCase } from 'lodash';
+import { Flags } from '@oclif/core';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, Registry, CloudServiceType } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, CloudServiceType, cloudServices } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
@@ -62,21 +63,38 @@ class InitCommand extends BaseCommand {
     const { name, provider, region, secrets, state, stages, services } = this.parsedFlags;
 
     if (fileExists(targetFilePath)) {
-      const proceed = await CliUx.ux.confirm(
-        `File ${targetFilePath} already exists and will be overwritten. Are you sure you want to continue`,
-      );
+      const { overwrite } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'overwrite',
+        message: `File ${targetFilePath} already exists and will be overwritten. Are you sure you want to continue`,
+        default: false,
+      }]);
 
-      if (!proceed) {
-        CliUx.ux.info('Alright, keeping the existing file then');
+      if (!overwrite) {
+        this.log('Alright, keeping the existing file then');
         this.exit();
       }
     }
 
-    const projectName = kebabCase(name || getRepository() || CURRENT_DIR_BASENAME);
-    const availableServices = Registry.serviceTypes(provider);
-    const serviceTypes = parseCommaSeparatedString(services).filter(
-      s => s in availableServices,
+    const { projectName } = await inquirer.prompt([{
+      name: 'projectName',
+      type: 'input',
+      default: kebabCase(name || getRepository() || CURRENT_DIR_BASENAME),
+      // validate: (input) =>
+    }]);
+
+    const cloudServiceTypes = cloudServices.map(s => s.type);
+    let serviceTypes = parseCommaSeparatedString(services).filter(
+      s => s in cloudServiceTypes,
     ) as CloudServiceType[];
+
+    if (isEmpty(serviceTypes)) {
+      ({ serviceTypes } = await inquirer.prompt([{
+        name: 'serviceTypes',
+        type: 'checkbox',
+        choices: cloudServiceTypes,
+      }]));
+    }
 
     const project = createProject({
       projectName,

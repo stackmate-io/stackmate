@@ -194,11 +194,10 @@ export const getProjectSchema = (
 ): JsonSchema<Project> => {
   const providers = Registry.providers();
   const serviceTypes = Registry.serviceTypes();
-
   const cloudProviders = providers.filter(p => isCloudProvider(p));
   const stateProviders = Registry.providers('state');
   const secretsProviders = Registry.providers('secrets');
-
+  const allServices = Registry.items;
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
   ).filter(([_, regions]) => !isEmpty(regions)).map(([provider, regions]) => ([
@@ -351,7 +350,11 @@ export const getProjectSchema = (
     },
     required: ['name', 'provider', 'region', 'stages'],
     allOf: [
-      ...Registry.items.map(service => (
+      // We need to exclude 'provider' services from the conditionals, since it will try
+      // to register a 'provider' attribute which conflicts with the main `provider` one
+      ...allServices.filter(
+        service => service.type !== SERVICE_TYPE.PROVIDER,
+      ).map(service => (
         isCoreService(service.type)
           ? getCoreServiceConditional(service)
           : getCloudServiceConditional(service)

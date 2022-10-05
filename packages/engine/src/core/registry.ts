@@ -4,7 +4,7 @@ import * as Services from '@stackmate/engine/providers/services';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { Distribute } from '@stackmate/engine/lib';
 import {
-  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, ExtractAttrs,
+  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, ExtractAttrs, isCoreService,
 } from '@stackmate/engine/core/service';
 
 export type ServicesRegistry = {
@@ -122,8 +122,10 @@ class Registry implements ServicesRegistry {
   }
 }
 
-const registry = new Registry(...Object.values(Services)) as Registry;
-const availableServices = Object.values(Services);
+export const availableServices = Object.values(Services);
+export const cloudServices = availableServices.filter(s => !isCoreService(s.type));
+
+const registry = new Registry(...availableServices) as Registry;
 
 type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER };
 type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE; };
