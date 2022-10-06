@@ -1,22 +1,15 @@
 import InitCommand from '@stackmate/cli/commands/init';
+import { mockInquirerQuestions, runCommand } from 'tests/cli/mocks';
 
-describe.skip('Init Command', () => {
-  let results: string = '';
-
-  beforeEach(() => {
-    results = '';
-
-    jest.spyOn(process.stdout, 'write').mockImplementation(val => {
-      results += val.toString();
-      return true;
-    });
-  });
-
-  afterEach(() => jest.restoreAllMocks());
-
+describe('Init Command', () => {
   it('should temporarily do nothing', async () => {
-    await InitCommand.run(['--services', 'mysql']);
-    console.log(results)
+    mockInquirerQuestions(
+      { overwrite: true },
+      { projectName: 'something', serviceTypes: ['mysql'], stageNames: ['production'] },
+    );
+
+    const results = await runCommand(InitCommand, ['--services', 'mysql']);
+    console.log(results);
   });
 
   /*
