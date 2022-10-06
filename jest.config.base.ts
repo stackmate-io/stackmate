@@ -1,4 +1,3 @@
-import path from 'node:path';
 import tsConfig from './tsconfig.json';
 import { JestConfigWithTsJest, pathsToModuleNameMapper } from 'ts-jest';
 

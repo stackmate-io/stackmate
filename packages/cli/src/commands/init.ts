@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
-import { filter, isEmpty, isString, kebabCase } from 'lodash';
 import { Flags } from '@oclif/core';
+import { isEmpty, kebabCase } from 'lodash';
 import { OutputFlags } from '@oclif/core/lib/interfaces';
-import { PROVIDER, DEFAULT_REGIONS, CloudServiceType, cloudServices, validateProperty, ServiceTypeChoice } from '@stackmate/engine';
+import { PROVIDER, DEFAULT_REGIONS, cloudServices, validateProperty, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
@@ -65,7 +65,7 @@ class InitCommand extends BaseCommand {
     } = this.parsedFlags;
 
     if (fileExists(targetFilePath)) {
-      const { overwrite } = await inquirer.prompt([{
+      const { overwrite = false } = await inquirer.prompt([{
         type: 'confirm',
         name: 'overwrite',
         message: `File ${targetFilePath} already exists and will be overwritten. Are you sure you want to continue`,
@@ -87,6 +87,7 @@ class InitCommand extends BaseCommand {
       type: 'input',
       message: 'What’s the name of the project?',
       default: kebabCase(name || getRepository() || CURRENT_DIR_BASENAME),
+      askAnswered: isEmpty(name),
       validate: (input) => isValidOrError(() => validateProperty('name', input)),
     }, {
       type: 'checkbox',
@@ -111,13 +112,13 @@ class InitCommand extends BaseCommand {
         )
       )),
     }], {
+      projectName: name,
       serviceTypes: parseCommaSeparatedString(services).filter(filterServiceTypes),
       stageNames: parseCommaSeparatedString(stages).filter(filterStageNames),
     });
 
     if (isEmpty(stageNames) || isEmpty(serviceTypes) || isEmpty(projectName)) {
-      this.log('No configuration provided, you need to re-run this command. Will now exit');
-      this.exit();
+      this.log('No configuration provided, you need to re-run this command. Will now exit')
     }
 
     const project = createProject({
