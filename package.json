@@ -56,10 +56,11 @@
     "packages/engine"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "yarn workspace @stackmate/engine schema:generate:dist && turbo run build",
+    "schema": "yarn workspace @stackmate/engine schema:generate",
     "cli:run": "packages/cli/bin/run",
     "cli:dev": "packages/cli/bin/dev",
-    "test": "turbo run test",
+    "test": "yarn schema && turbo run test",
     "test:watch": "turbo run test:watch"
   },
   "packageManager": "yarn@3.2.3"
