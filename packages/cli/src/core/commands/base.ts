@@ -1,6 +1,6 @@
-import { Command, Flags } from '@oclif/core';
+import { Command } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
-import { FlagInput, OutputArgs } from '@oclif/core/lib/interfaces';
+import { ArgInput, FlagInput, OutputArgs } from '@oclif/core/lib/interfaces';
 
 import { ConfigurationFile } from '@stackmate/cli/lib';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
@@ -9,7 +9,7 @@ abstract class BaseCommand extends Command {
   /**
    * @var {Array} args the command's arguments
    */
-  static args = [
+  static args: ArgInput = [
     ...(Command.args || []),
   ];
 
@@ -17,13 +17,7 @@ abstract class BaseCommand extends Command {
    * @var {Object} flags the flags available for the command
    * @static
    */
-  static flags = {
-    colors: Flags.boolean({
-      char: 'c',
-      description: 'Whether to use colors in the output',
-      default: true,
-    }),
-  }
+  static flags: FlagInput = {};
 
   /**
    * @var {ArgInput} arguments the arguments used in the command
@@ -48,21 +42,6 @@ abstract class BaseCommand extends Command {
   async init() {
     ({ flags: this.parsedFlags, args: this.parsedArgs } = await this.parse(this.ctor));
   }
-
-  /**
-   * Error handler for all commands executed
-   *
-   * @param {Error} err the error thrown
-   * @returns {any}
-   */
-  // async catch(err: Error & { exitCode?: number | undefined; }): Promise<any> {
-  //   if (err instanceof ValidationError) {
-  //     formatValidationError(err, this, { colors: this.parsedFlags.colors });
-  //     this.exit(1);
-  //   }
-
-  //   return super.catch(err);
-  // }
 }
 
 export default BaseCommand;

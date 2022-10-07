@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { Flags } from '@oclif/core';
 import { isEmpty, kebabCase } from 'lodash';
-import { OutputFlags } from '@oclif/core/lib/interfaces';
+import { ArgInput, OutputFlags } from '@oclif/core/lib/interfaces';
 import { PROVIDER, DEFAULT_REGIONS, cloudServices, validateProperty, ServiceTypeChoice } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
@@ -13,9 +13,14 @@ class InitCommand extends BaseCommand {
   /**
    * @var {Array} args the command's arguments
    */
-  static args = [
+  static args: ArgInput = [
     ...BaseCommand.args,
   ];
+
+  /**
+   * @var {String} summary the command's short description
+   */
+  static summary = 'Generates the stackmate configuration file.';
 
   /**
    * @var {Object} flags the flags to use in the command

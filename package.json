@@ -58,8 +58,8 @@
   "scripts": {
     "build": "yarn workspace @stackmate/engine schema:generate:dist && turbo run build",
     "schema": "yarn workspace @stackmate/engine schema:generate",
-    "cli:run": "packages/cli/bin/run",
-    "cli:dev": "packages/cli/bin/dev",
+    "cmd": "packages/cli/bin/dev",
+    "cmd:dist": "packages/cli/bin/run",
     "test": "yarn schema && turbo run test",
     "test:watch": "turbo run test:watch"
   },
