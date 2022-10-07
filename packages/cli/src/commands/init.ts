@@ -44,9 +44,6 @@ class InitCommand extends BaseCommand {
     secrets: Flags.string({
       default: PROVIDER.AWS,
     }),
-    deploy: Flags.boolean({
-      default: true,
-    }),
     stages: Flags.string({
       char: 's',
       default: 'production',
@@ -73,7 +70,7 @@ class InitCommand extends BaseCommand {
       }]);
 
       if (!overwrite) {
-        this.log('Alright, keeping the existing file then');
+        this.log('Alright, keeping the existing file then, will now exit');
         this.exit();
       }
     }
