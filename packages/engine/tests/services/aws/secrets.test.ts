@@ -33,7 +33,7 @@ describe('AWS Secrets service', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/secrets',
       type: 'object',
-      required: ['region'],
+      required: [],
       additionalProperties: false,
       properties: {
         provider: {

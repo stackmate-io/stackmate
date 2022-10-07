@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
-import { FileFormatter, FileStorage, getFormatterByFilename, readFile, writeFile } from '@stackmate/cli/lib';
+import { fileExists, FileFormatter, FileStorage, getFormatterByFilename, readFile, writeFile } from '@stackmate/cli/lib';
 
 /**
  * Represents a configuration file
@@ -31,7 +31,7 @@ export class ConfigurationFile implements FileStorage {
   constructor(filename: string) {
     this.filename = path.resolve(CURRENT_DIRECTORY, filename);
     this.formatter = getFormatterByFilename(this.filename);
-    this.#raw = readFile(this.filename);
+    this.#raw = fileExists(this.filename) ? readFile(this.filename) : '';
   }
 
   /**

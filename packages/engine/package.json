@@ -65,8 +65,8 @@
     "build:project": "tsc -p ./tsconfig.build.json",
     "schema:generate": "ts-node -r tsconfig-paths/register src/bin/json-schema.ts",
     "schema:generate:dist": "yarn schema:generate ./dist/stackmate.schema.json",
-    "test": "yarn schema:generate && yarn test:run",
-    "test:run": "jest --verbose --useStderr --detectOpenHandles --silent=false",
-    "test:watch": "yarn test:run --watchAll"
+    "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "test:full": "yarn schema:generate && yarn test",
+    "test:watch": "yarn test --watchAll"
   }
 }

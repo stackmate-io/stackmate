@@ -1,12 +1,12 @@
 import { defaultsDeep, get } from 'lodash';
-import { CloudProviderChoice, PROVIDER, util } from '@stackmate/engine';
+import { CloudServiceProvider, PROVIDER, util } from '@stackmate/engine';
 
 import { ConfigurationFile, fileExists } from '@stackmate/cli/lib';
 import { PREFERENCES_FILE, PREFERENCES_VERSION } from '@stackmate/cli/constants';
 
 export type PreferenceOptions = {
   version: string;
-  defaultProvider: CloudProviderChoice;
+  defaultProvider: CloudServiceProvider;
   defaultRegion: string;
 };
 
