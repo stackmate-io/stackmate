@@ -221,7 +221,7 @@ export const loadJsonSchema = (
  * Validates an attribute-set against a schema id found in the schema
  *
  * @param {String} schemaId the schema id to use for validation
- * @param {Object} data the data to validate
+ * @param {Any} data the data to validate
  * @param {AjvOptions} options any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
@@ -243,13 +243,24 @@ export const validate = (
   }
 
   if (!validateData(validData) && !isEmpty(validateData.errors)) {
-    throw new ValidationError(
-      `Error while validating schema ${schemaId}`, parseErrors(validateData.errors || []),
-    );
+    const errors = parseErrors(validateData.errors || [])
+    throw new ValidationError(`Error while validating schema ${schemaId}`, errors);
   }
 
   return validData;
 };
+
+/**
+ * Validates a single property in the schema
+ *
+ * @param {String} property the name of the property to validate
+ * @param {Any} data the data to validate
+ * @param {String} root the root for the property
+ * @returns {Any}
+ */
+export const validateProperty = (property: string, data: any, root = JSON_SCHEMA_ROOT): any => (
+  validate(`${root}#/properties/${property}`, data)
+);
 
 /**
  * Parses Ajv errors to custom, error descriptors

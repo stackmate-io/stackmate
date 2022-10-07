@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ini from 'ini';
-import { cloneDeep, countBy, isEmpty, omitBy, uniq } from 'lodash';
+import { countBy, isEmpty, omitBy, uniq } from 'lodash';
 
 import {
   SERVICE_TYPE, PROVIDER, AWS_DEFAULT_REGION, CloudServiceAttributes,
   BaseServiceAttributes, ServiceTypeChoice, DEFAULT_REGIONS, StageConfiguration,
-  Registry, ProjectConfiguration, validateProject, ProviderChoice,
-  isCoreService, JsonSchema, CloudProviderChoice, BaseService, ExtractAttrs,
+  Registry, ProjectConfiguration, validateProject, ProviderChoice, OptionalKeys,
+  isCoreService, JsonSchema, BaseService, ExtractAttrs, CloudServiceType, CloudServiceProvider,
 } from '@stackmate/engine';
 
 import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
@@ -21,12 +21,12 @@ type TemplatePlaceholders = {
 
 type ProjectConfigCreationOptions = {
   projectName: string,
-  defaultProvider?: CloudProviderChoice,
+  defaultProvider?: CloudServiceProvider,
   defaultRegion?: string,
   stageNames?: string[],
   stateProvider?: ProviderChoice,
   secretsProvider?: ProviderChoice,
-  serviceTypes?: ServiceTypeChoice[],
+  serviceTypes?: CloudServiceType[],
 };
 
 export const getRepository = (
@@ -77,7 +77,7 @@ export const skipImpliedAttributes = <T extends Partial<BaseServiceAttributes>>(
 export const getServiceConfiguration = (
   service: BaseService,
   opts: Pick<TemplatePlaceholders, 'projectName' | 'stageName'>,
-): ExtractAttrs<typeof service> => {
+): OptionalKeys<ExtractAttrs<typeof service>, 'name' | 'type'> => {
   const { type, provider, schema: { properties = {} } } = service;
 
   if (isEmpty(properties)) {
@@ -87,7 +87,12 @@ export const getServiceConfiguration = (
   }
 
   const placeholders: TemplatePlaceholders = { ...opts, type, provider };
-  const config = { type, provider, name: `${provider}-${type}-service` };
+  const config = { provider };
+
+  if (!isCoreService(type)) {
+    Object.assign(config, { type, name: `${provider}-${type}-service` });
+  }
+
   for (const [key, schema] of Object.entries(properties)) {
     const {
       default: defaultValue,
@@ -199,11 +204,7 @@ export const createProject = ({
 
   Object.assign(config, { stages });
 
-  // Validate the configuration:
-  // Ajv is known for mutating objects, so we need to deep clone the configuration,
-  // because `useDefaults` is on by default and we can't validate the user-friendly
-  // configuration without it, since it misses a lot of key properties.
-  validateProject(cloneDeep(config));
+  validateProject(config, { useDefaults: false });
 
   return config;
 };
