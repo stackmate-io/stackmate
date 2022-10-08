@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 import { ValidationError } from '@stackmate/engine';
 
 /**
@@ -7,7 +8,7 @@ import { ValidationError } from '@stackmate/engine';
  * @returns {String[]} the parsed value
  */
 export const parseCommaSeparatedString = (value: string): string[] => (
-  value.split(',').map(v => v.trim())
+  value.split(',').filter(v => !isEmpty(v)).map(v => v.trim())
 );
 
 /**

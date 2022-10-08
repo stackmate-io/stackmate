@@ -48,3 +48,13 @@ export class DirectoryNotWriteableError extends FileError {
     this.path = path;
   }
 }
+
+export class StageNotFoundError extends Error {
+  /**
+   * @constructor
+   * @param {String} stage the stage's name
+   */
+  constructor(stage: string) {
+    super(`Stage ${stage} not found in the project`);
+  }
+};
