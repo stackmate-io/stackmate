@@ -7,7 +7,7 @@ import { PROVIDER, DEFAULT_REGIONS, cloudServices, validateProperty, ServiceType
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIR_BASENAME, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { ConfigurationFile, fileExists, isValidOrError, parseCommaSeparatedString } from '@stackmate/cli/lib';
+import { fileExists, isValidOrError, parseCommaSeparatedString, ConfigurationFile } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
   /**

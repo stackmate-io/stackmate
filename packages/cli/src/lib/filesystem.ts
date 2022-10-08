@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { CURRENT_DIRECTORY } from '@stackmate/cli/constants';
 import { DirectoryNotWriteableError, FileDoesNotExistError, FileNotWriteableError } from './errors';
 
 export type FileStorage = {
@@ -22,17 +23,20 @@ const hasFileSystemAccess = (path: string, mode: number): boolean => {
  * Creates a directory if it doesn't exist
  *
  * @param {String} path the path to create (if doesn't exist)
+ * @param {Number} mode the mode for the directory (default 755)
  * @void
  */
-export const createDirectory = (path: string): void => {
+export const createDirectory = (path: string, mode: number = 0o755): void => {
   const exists = fs.existsSync(path);
 
   if (exists && !fs.statSync(path).isDirectory()) {
     throw new Error(`Path ${path} already exists and it's not a directory`);
+  } else {
+    fs.chmodSync(path, mode);
   }
 
   try {
-    fs.mkdirSync(path, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(path, { recursive: true, mode });
   } catch (error) {
     throw new DirectoryNotWriteableError(path);
   }
@@ -40,6 +44,14 @@ export const createDirectory = (path: string): void => {
 
 export const fileExists = (filename: string): boolean => (
   fs.existsSync(filename)
+);
+
+export const directoryExists = (dirname: string): boolean => (
+  fs.existsSync(dirname) && fs.statSync(dirname).isDirectory()
+);
+
+export const resolveRelativePath = (...parts: string[]): string => (
+  path.resolve(CURRENT_DIRECTORY, ...parts)
 );
 
 export const isFileReadable = (filename: string): boolean => (
@@ -78,4 +90,4 @@ export const writeFile = (filename: string, content: string): void => {
 
 export const getFileExtension = (filename: string): string => (
   path.extname(filename).toLowerCase()
-)
+);
