@@ -15,6 +15,13 @@ import {
 
 type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
 
+export type OperationType = 'deployment' | 'destruction' | 'setup';
+export const OPERATION_TYPE: Record<string, OperationType> = {
+  DEPLOYMENT: 'deployment',
+  DESTRUCTION: 'destruction',
+  SETUP: 'setup',
+} as const;
+
 /**
  * @type {Operation} an operation that synthesizes the terraform files
  */
@@ -241,3 +248,29 @@ export const setup = (project: Project, stage: string) => (
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
   )(project)
 );
+
+/**
+ * Returns an operation by its name
+ *
+ * @param {OperationType} operation the operation to get
+ * @param {Project} project the validated project configuration
+ * @param {String} stage the stage name
+ * @returns {Operation} the operation to use
+ */
+export const getOperationByName = (
+  operation: OperationType, project: Project, stage: string,
+): Operation => {
+  switch (operation) {
+    case OPERATION_TYPE.DEPLOYMENT:
+      return deployment(project, stage);
+
+    case OPERATION_TYPE.DESTRUCTION:
+      return destruction(project, stage);
+
+    case OPERATION_TYPE.SETUP:
+      return setup(project, stage);
+
+    default:
+      throw new Error(`Operation ${operation} is invalid`);
+  }
+};

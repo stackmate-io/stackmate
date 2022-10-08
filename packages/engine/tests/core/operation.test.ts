@@ -17,11 +17,11 @@ import { LocalStateResources } from '@stackmate/engine/providers/local/services/
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { LocalProviderResources } from '@stackmate/engine/providers/local/services/provider';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { deployment, destruction, Operation, setup } from '@stackmate/engine/core/operation';
 import { Provisionable, Provisions, ServiceTypeChoice } from '@stackmate/engine/core/service';
 import { AwsDatabaseDeployableResources } from '@stackmate/engine/providers/aws/services/database';
 import { AwsProviderDeployableResources } from '@stackmate/engine/providers/aws/services/provider';
 import { AwsStateDeployableResources, AwsStatePreparableResources } from '@stackmate/engine/providers/aws/services/state';
+import { deployment, destruction, getOperationByName, Operation, OPERATION_TYPE, setup } from '@stackmate/engine/core/operation';
 
 describe('Operation', () => {
   let operation: Operation;
@@ -230,6 +230,26 @@ describe('Operation', () => {
     it('registers the database resources and returns the output', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.MYSQL);
       expect(isEmpty(provisions)).toBe(true);
+    });
+  });
+
+  describe('getOperationByName', () => {
+    it('returns a deployment operation', () => {
+      const operation = getOperationByName(OPERATION_TYPE.DEPLOYMENT , project, 'production');
+      expect(operation).not.toBeUndefined();
+      expect(operation.scope).toEqual('deployable');
+    });
+
+    it('returns a destruction operation', () => {
+      const operation = getOperationByName(OPERATION_TYPE.DESTRUCTION, project, 'production');
+      expect(operation).not.toBeUndefined();
+      expect(operation.scope).toEqual('destroyable');
+    });
+
+    it('returns a setup operation', () => {
+      const operation = getOperationByName(OPERATION_TYPE.SETUP, project, 'production');
+      expect(operation).not.toBeUndefined();
+      expect(operation.scope).toEqual('preparable');
     });
   });
 });
