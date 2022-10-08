@@ -292,7 +292,11 @@ export const getProjectSchema = (
           properties: {
             name: {
               type: 'string',
+              pattern: '^([a-zA-Z0-9_-]+)$',
               description: 'The name of the stage',
+              errorMessage: {
+                pattern: 'The stage name should only contain characters, numbers, dashes and underscores',
+              },
             },
             services: {
               type: 'array',

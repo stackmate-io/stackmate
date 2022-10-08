@@ -1,36 +1,113 @@
+import { cloneDeep, isEmpty } from 'lodash';
 import { Flags } from '@oclif/core';
+import { ArgInput, FlagInput } from '@oclif/core/lib/interfaces';
+import { StageConfiguration, validateProperty } from '@stackmate/engine';
 
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { parseCommaSeparatedString } from '@stackmate/cli/lib';
+
+type CopyFlags = {
+  full?: boolean;
+  skip?: string;
+};
 
 class StageCopyCommand extends BaseCommand {
   /**
    * @var {Array} args the command's arguments
    */
-  static args = [
+  static args: ArgInput = [
     ...BaseCommand.args,
+    {
+      name: 'source',
+      description: 'The source stage to copy',
+      required: true,
+      parse: async (input: string) => (input || '').trim(),
+    },
+    {
+      name: 'target',
+      description: 'The target stage to copy',
+      required: true,
+      parse: async (input: string) => (input || '').trim(),
+    },
   ];
+
+  /**
+   * @var {String} summary the command's short description
+   */
+  static summary = 'Copies a stage to anoyther.';
 
   /**
    * @var {Object} flags the flags to use in the command
    */
-  static flags = {
+  static flags: FlagInput<CopyFlags> = {
     ...BaseCommand.flags,
-    from: Flags.string({
-      char: 'f',
-      default: 'production',
-      required: true,
-      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
+    full: Flags.boolean({
+      default: false,
+      required: false,
+      description: 'Copy the entire stage with its services, not just ad a copy statement',
     }),
     skip: Flags.string({
-      char: 's',
       default: '',
-      parse: async (v: string) => parseCommaSeparatedString(v).join(','),
+      required: false,
+      description: 'The comma separated service names to skip (should exist in the source stage)',
     }),
   };
 
+  /**
+   * Copies the services from a stage to another, changes their name and skips any requested ones
+   *
+   * @param {String} source the source stage to copy from
+   * @param {String} target the target stage to copy to
+   * @param {String[]} skipped any services to skip
+   * @returns {StageConfiguration<true>['services']} the services to use
+   */
+  copyServices(
+    source: string, target: string, skipped: string[] = [],
+  ): StageConfiguration<true>['services'] {
+    const { services = [] } = this.stage(source);
+
+    if (isEmpty(services)) {
+      throw new Error('No servies to copy were provided');
+    }
+
+    return services.filter(
+      srv => !skipped.includes(srv.name),
+    ).map(srv => ({
+      ...srv,
+      name: srv.name.replace(source, target),
+    }));
+  }
+
   async run(): Promise<any> {
-    // console.log(this.parsedFlags);
+    const { source, target } = this.parsedArgs;
+    const { full = false, skip = '' } = this.parsedFlags;
+
+    const sourceStage = this.stage(source);
+    const sourceNames = (sourceStage.services || []).map(srv => srv.name);
+    const targetStage = validateProperty('stages/items/properties/name', target);
+    const projectConfig = cloneDeep(this.projectConfig);
+    const skipped = parseCommaSeparatedString(skip).filter(n => sourceNames.includes(n));
+    const copied: StageConfiguration<true> = { name: targetStage };
+
+    if (full) {
+      Object.assign(copied, { services: this.copyServices(sourceStage.name, target, skipped) });
+    } else {
+      Object.assign(copied, {
+        ...(!isEmpty(skipped) ? { skip: skipped } : {}),
+        copy: sourceStage.name, // validate that the stage exists
+      });
+    }
+
+    Object.assign(projectConfig, {
+      stages: [
+        ...(projectConfig.stages || []),
+        copied,
+      ],
+    });
+
+    this.configFile.write(projectConfig);
+
+    this.log(`Stage ${target} added to the project`);
   }
 }
 

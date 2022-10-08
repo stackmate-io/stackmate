@@ -1,15 +1,15 @@
-import { Command, Flags } from '@oclif/core';
-import { ProjectConfiguration } from '@stackmate/engine';
-import { FlagInput, OutputArgs } from '@oclif/core/lib/interfaces';
+import { Command } from '@oclif/core';
+import { ProjectConfiguration, StageConfiguration } from '@stackmate/engine';
+import { ArgInput, FlagInput } from '@oclif/core/lib/interfaces';
 
-import { ConfigurationFile } from '@stackmate/cli/lib';
+import { ConfigurationFile, StageNotFoundError } from '@stackmate/cli/lib';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 
 abstract class BaseCommand extends Command {
   /**
    * @var {Array} args the command's arguments
    */
-  static args = [
+  static args: ArgInput = [
     ...(Command.args || []),
   ];
 
@@ -17,29 +17,68 @@ abstract class BaseCommand extends Command {
    * @var {Object} flags the flags available for the command
    * @static
    */
-  static flags = {
-    colors: Flags.boolean({
-      char: 'c',
-      description: 'Whether to use colors in the output',
-      default: true,
-    }),
-  }
+  static flags: FlagInput = {};
 
   /**
    * @var {ArgInput} arguments the arguments used in the command
    */
-  protected parsedArgs: OutputArgs;
+  protected parsedArgs: { [name: string]: any };
 
   /**
    * @var {Object} flags the parsed flags
    */
-  protected parsedFlags: FlagInput;
+  protected parsedFlags: { [name: string]: any };
+
+  protected filename: string  = DEFAULT_PROJECT_FILE;
+
+  /**
+   * @var {ProjectConfiguration} config the configuration object
+   */
+  #config: ConfigurationFile;
+
+  /**
+   * @returns {ConfigurationFile} the configuration file associated with this command
+   */
+  get configFile(): ConfigurationFile {
+    if (!this.#config) {
+      this.#config = new ConfigurationFile(this.filename);
+    }
+
+    return this.#config;
+  }
 
   /**
    * @returns {ProjectConfiguration} the project configuration to load from the file
    */
   get projectConfig(): ProjectConfiguration {
-    return new ConfigurationFile(DEFAULT_PROJECT_FILE).read() as ProjectConfiguration;
+    this.assertConfigExists();
+    return this.configFile.read() as ProjectConfiguration;
+  }
+
+  /**
+   * Asserts that a configuration file exists
+   */
+  assertConfigExists() {
+    if (this.configFile.exists) {
+      return;
+    }
+
+    this.log('Stackmate configuration not found. Use the `init` command to create one');
+    this.exit(1);
+  }
+
+  /**
+   * @param {String} name the stage's name
+   * @returns {StageConfiguration} the stage requested
+   */
+  stage(name: string): StageConfiguration<true> {
+    const stage = this.projectConfig.stages?.find(stg => stg.name === name);
+
+    if (!stage) {
+      throw new StageNotFoundError(name);
+    }
+
+    return stage;
   }
 
   /**
@@ -48,21 +87,6 @@ abstract class BaseCommand extends Command {
   async init() {
     ({ flags: this.parsedFlags, args: this.parsedArgs } = await this.parse(this.ctor));
   }
-
-  /**
-   * Error handler for all commands executed
-   *
-   * @param {Error} err the error thrown
-   * @returns {any}
-   */
-  // async catch(err: Error & { exitCode?: number | undefined; }): Promise<any> {
-  //   if (err instanceof ValidationError) {
-  //     formatValidationError(err, this, { colors: this.parsedFlags.colors });
-  //     this.exit(1);
-  //   }
-
-  //   return super.catch(err);
-  // }
 }
 
 export default BaseCommand;
