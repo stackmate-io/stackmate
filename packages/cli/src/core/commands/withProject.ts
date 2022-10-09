@@ -1,13 +1,14 @@
 import { ArgInput } from '@oclif/core/lib/interfaces';
 
+import ProjectFile from '@stackmate/cli/core/project';
+import { StageNotFoundError } from '@stackmate/cli/lib';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
 import BaseCommand, { BaseCommandClass } from '@stackmate/cli/core/commands/base';
-import { ConfigurationFile, StageNotFoundError } from '@stackmate/cli/lib';
 import { ProjectConfiguration, StageConfiguration } from '@stackmate/engine';
 
 export type CommandWithProject = BaseCommand & {
   get selectedStage(): string;
-  get configFile(): ConfigurationFile;
+  get configFile(): ProjectFile;
   get projectConfig(): ProjectConfiguration;
   get selectedStageConfig(): StageConfiguration<true>;
   getStage(name: string): StageConfiguration<true>;
@@ -40,14 +41,14 @@ export const withProject = (Base: BaseCommandClass): CommandWithProjectClass => 
     /**
      * @var {ProjectConfiguration} config the configuration object
      */
-    #config: ConfigurationFile;
+    #config: ProjectFile;
 
     /**
-     * @returns {ConfigurationFile} the configuration file associated with this command
+     * @returns {ProjectFile} the configuration file associated with this command
      */
-    get configFile(): ConfigurationFile {
+    get configFile(): ProjectFile {
       if (!this.#config) {
-        this.#config = new ConfigurationFile(this.filename);
+        this.#config = new ProjectFile(this.filename);
       }
 
       return this.#config;
