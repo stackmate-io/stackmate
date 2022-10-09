@@ -15,11 +15,6 @@ export class ConfigurationFile implements FileStorage {
   readonly filename: string;
 
   /**
-   * @var {Boolean} exists whether the configuration file exists
-   */
-  readonly exists: boolean;
-
-  /**
    * @var {String} raw the raw file contents
    */
   #raw: string;
@@ -35,9 +30,15 @@ export class ConfigurationFile implements FileStorage {
    */
   constructor(filename: string) {
     this.filename = path.resolve(CURRENT_DIRECTORY, filename);
-    this.exists = fileExists(this.filename);
     this.formatter = getFormatterByFilename(this.filename);
     this.#raw = this.exists ? readFile(this.filename) : '';
+  }
+
+  /**
+   * @returns {Boolean} whether the configuration file exists or not
+   */
+  get exists(): boolean {
+    return fileExists(this.filename);
   }
 
   /**
