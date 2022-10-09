@@ -1,6 +1,6 @@
 import YAML from 'yaml';
 import inquirer, { Answers } from 'inquirer';
-import { has, isError, isString } from 'lodash';
+import { isError, isString } from 'lodash';
 import { Errors, Interfaces } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
 
@@ -42,24 +42,26 @@ export const runCommand = async (
   let exitCode;
   let errorMessage;
   let error;
-  let configSpy;
+  const mocks: jest.SpyInstance[] = [];
 
-  const stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation(val => {
-    output += val.toString();
-    return true;
-  });
-
-  const exitSpy = jest.spyOn(CommandClass.prototype, 'exit').mockImplementation(
-    (code: number | undefined) => {
-      exitCode = code;
-      return Errors.exit(code);
-    },
+  mocks.push(
+    jest.spyOn(process.stdout, 'write').mockImplementation(val => {
+      output += val.toString();
+      return true;
+    }),
   );
 
-  if (configuration && has(CommandClass.prototype, 'projectConfig')) {
-    configSpy = jest.spyOn(CommandClass.prototype, 'projectConfig', 'get').mockReturnValue(
-      mockConfiguration(configuration),
-    );
+  mocks.push(
+    jest.spyOn(CommandClass.prototype, 'exit').mockImplementation(
+      (code: number | undefined) => {
+        exitCode = code;
+        return Errors.exit(code);
+      },
+    ),
+  );
+
+  if (configuration) {
+    mocks.push(...mockProjectConfig(configuration));
   }
 
   try {
@@ -78,17 +80,7 @@ export const runCommand = async (
     }
   }
 
-  stdoutSpy.mockReset();
-  stdoutSpy.mockRestore();
-
-  exitSpy.mockReset();
-  exitSpy.mockRestore();
-
-  if (configSpy) {
-    configSpy.mockReset();
-    configSpy.mockRestore();
-  }
-
+  mocks.forEach((mock) => mock.mockRestore());
   return { output, exitCode, errorMessage, error };
 };
 
@@ -187,3 +179,13 @@ export const createDirectoryMock = (dirname: string, mode: number): jest.Mock =>
     }
   })
 );
+
+/**
+ * @param {ProjectConfiguration} config the configuration to return
+ */
+export const mockProjectConfig = (config: ProjectConfiguration): jest.SpyInstance[] => {
+  const existsMock = jest.spyOn(ProjectFile.prototype, 'exists', 'get').mockReturnValue(true);
+  const readMock = jest.spyOn(ProjectFile.prototype, 'read').mockReturnValue(config);
+
+  return [existsMock, readMock];
+};

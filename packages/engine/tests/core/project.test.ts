@@ -2,10 +2,13 @@ import { sortBy } from 'lodash';
 
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { JsonSchema } from '@stackmate/engine/core/schema';
+import { validateProject } from '@stackmate/engine';
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { BaseServiceAttributes, CORE_SERVICE_TYPES, isCoreService } from '@stackmate/engine/core/service';
-import { CloudServiceConfiguration, getCloudServices, getProjectSchema, getProviderConfigurations, getServiceConfigurations, Project, ProjectConfiguration, withLocalState } from '@stackmate/engine/core/project';
-import { validateProject } from '@stackmate/engine';
+import {
+  CloudServiceConfiguration, getCloudServices, getProjectSchema, getProviderConfigurations,
+  getServiceConfigurations, Project, ProjectConfiguration, withLocalState,
+} from '@stackmate/engine/core/project';
 
 describe('Project', () => {
   const [region] = REGIONS;

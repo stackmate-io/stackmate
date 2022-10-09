@@ -46,7 +46,9 @@ describe('Operation', () => {
 
   const project = validateProject(config);
 
-  const getProvisions = (provs: Provisionable[], lookup: ServiceTypeChoice | ((p: Provisionable) => boolean)): Provisions => {
+  const getProvisions = (
+    provs: Provisionable[], lookup: ServiceTypeChoice | ((p: Provisionable) => boolean),
+  ): Provisions => {
     const finder = typeof lookup === 'function'
       ? lookup
       : ((p: Provisionable) => p.service.type === lookup);
