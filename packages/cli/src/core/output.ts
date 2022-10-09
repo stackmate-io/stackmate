@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { OperationType } from '@stackmate/engine';
 
 import { ConfigurationFile, createDirectory, resolveRelativePath } from '@stackmate/cli/lib';
 
@@ -18,11 +19,11 @@ class OutputFile extends ConfigurationFile {
    * @param {String} stage the stage's name
    * @param {String} dirname the directory to store the output to
    */
-  constructor(stage: string, dirname: string) {
-    const stagePath = resolveRelativePath(dirname);
+  constructor(stage: string, dirname: string, operation: OperationType) {
+    const stagePath = resolveRelativePath(dirname, stage);
     createDirectory(stagePath);
 
-    const filename = path.join(stagePath, `${stage}.json`);
+    const filename = path.join(stagePath, `${operation}.json`);
     super(filename);
 
     this.stage = stage;

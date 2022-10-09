@@ -1,28 +1,27 @@
-import { cloneDeep, isEmpty } from 'lodash';
 import { Flags } from '@oclif/core';
+import { cloneDeep, isEmpty } from 'lodash';
 import { ArgInput, FlagInput } from '@oclif/core/lib/interfaces';
 import { StageConfiguration, validateProperty } from '@stackmate/engine';
 
-import BaseCommand from '@stackmate/cli/core/commands/base';
 import { parseCommaSeparatedString } from '@stackmate/cli/lib';
+import { BaseCommandWithProject } from '@stackmate/cli/core/commands/withProject';
 
 type CopyFlags = {
   full?: boolean;
   skip?: string;
 };
 
-class StageCopyCommand extends BaseCommand {
+class StageCopyCommand extends BaseCommandWithProject {
+  /**
+   * @var {String} summary the command's short description
+   */
+  static summary = 'Copies a stage to anoyther.';
+
   /**
    * @var {Array} args the command's arguments
    */
   static args: ArgInput = [
-    ...BaseCommand.args,
-    {
-      name: 'source',
-      description: 'The source stage to copy',
-      required: true,
-      parse: async (input: string) => (input || '').trim(),
-    },
+    ...BaseCommandWithProject.args,
     {
       name: 'target',
       description: 'The target stage to copy',
@@ -32,15 +31,10 @@ class StageCopyCommand extends BaseCommand {
   ];
 
   /**
-   * @var {String} summary the command's short description
-   */
-  static summary = 'Copies a stage to anoyther.';
-
-  /**
    * @var {Object} flags the flags to use in the command
    */
   static flags: FlagInput<CopyFlags> = {
-    ...BaseCommand.flags,
+    ...BaseCommandWithProject.flags,
     full: Flags.boolean({
       default: false,
       required: false,
@@ -64,7 +58,7 @@ class StageCopyCommand extends BaseCommand {
   copyServices(
     source: string, target: string, skipped: string[] = [],
   ): StageConfiguration<true>['services'] {
-    const { services = [] } = this.stage(source);
+    const { services = [] } = this.getStage(source);
 
     if (isEmpty(services)) {
       throw new Error('No servies to copy were provided');
@@ -79,10 +73,10 @@ class StageCopyCommand extends BaseCommand {
   }
 
   async run(): Promise<any> {
-    const { source, target } = this.parsedArgs;
+    const { target } = this.parsedArgs;
     const { full = false, skip = '' } = this.parsedFlags;
 
-    const sourceStage = this.stage(source);
+    const sourceStage = this.getStage(this.selectedStage);
     const sourceNames = (sourceStage.services || []).map(srv => srv.name);
     const targetStage = validateProperty('stages/items/properties/name', target);
     const projectConfig = cloneDeep(this.projectConfig);
