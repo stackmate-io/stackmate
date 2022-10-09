@@ -4,10 +4,11 @@ import { isEmpty, kebabCase } from 'lodash';
 import { ArgInput, OutputFlags } from '@oclif/core/lib/interfaces';
 import { PROVIDER, DEFAULT_REGIONS, cloudServices, validateProperty, ServiceTypeChoice } from '@stackmate/engine';
 
+import ProjectFile from '@stackmate/cli/core/project';
 import BaseCommand from '@stackmate/cli/core/commands/base';
 import { createProject, getRepository } from '@stackmate/cli/core/generator';
 import { CURRENT_DIR_BASENAME, DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { fileExists, isValidOrError, parseCommaSeparatedString, ConfigurationFile } from '@stackmate/cli/lib';
+import { fileExists, isValidOrError, parseCommaSeparatedString } from '@stackmate/cli/lib';
 
 class InitCommand extends BaseCommand {
   /**
@@ -133,7 +134,7 @@ class InitCommand extends BaseCommand {
       serviceTypes,
     });
 
-    const projectFile = new ConfigurationFile(targetFilePath);
+    const projectFile = new ProjectFile(targetFilePath);
     projectFile.write(project);
 
     this.log(`Project file created under ${projectFile.filename}`);

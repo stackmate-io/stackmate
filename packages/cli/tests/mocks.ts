@@ -4,8 +4,9 @@ import { has, isError, isString } from 'lodash';
 import { Errors, Interfaces } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
 
+import ProjectFile from '@stackmate/cli/core/project';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { writeFile, fileExists, readFile, createDirectory, ConfigurationFile } from '@stackmate/cli/lib';
+import { writeFile, fileExists, readFile, createDirectory } from '@stackmate/cli/lib';
 
 type ErrorLike = Error | string | Errors.CLIError | Errors.ExitError;
 
@@ -109,14 +110,14 @@ export const mockInquirerQuestions = (...args: Answers[]): jest.SpyInstance => {
 /**
  * @param {ProjectConfiguration} contents the configuration file contents
  * @param {String} filename the file name to use
- * @returns {ConfigurationFile}
+ * @returns {ProjectFile}
  */
 export const mockConfiguration = (
   contents: ProjectConfiguration, filename: string = DEFAULT_PROJECT_FILE,
-): ConfigurationFile => {
+): ProjectFile => {
   (fileExists as jest.Mock).mockImplementationOnce(() => true);
   (readFile as jest.Mock).mockImplementationOnce(() => YAML.stringify(contents));
-  return new ConfigurationFile(filename);
+  return new ProjectFile(filename);
 };
 
 /**
