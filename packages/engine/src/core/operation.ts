@@ -5,7 +5,7 @@ import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
-import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
+import { validate, validateEnvironment, validateServices } from '@stackmate/engine/core/validation';
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
   assertRequirementsSatisfied,
@@ -16,6 +16,7 @@ import {
 type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
 
 export type OperationType = 'deployment' | 'destruction' | 'setup';
+
 export const OPERATION_TYPE: Record<string, OperationType> = {
   DEPLOYMENT: 'deployment',
   DESTRUCTION: 'destruction',
@@ -159,7 +160,7 @@ class StageOperation implements Operation {
         const linkedProvisionable = { ...linked, provisions: linkedProvisions };
 
         Object.assign(requirements, {
-          [associationName]: associationHandler(linkedProvisionable, this.stack),
+          [associationName]: associationHandler(linkedProvisionable, provisionable, this.stack),
         });
       });
     });
@@ -216,6 +217,7 @@ const getOperation = (
 export const deployment = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'deployable'),
   )(project)
 );
@@ -230,6 +232,7 @@ export const deployment = (project: Project, stage: string) => (
 export const destruction = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
   )(project)
 );
@@ -244,6 +247,7 @@ export const destruction = (project: Project, stage: string) => (
 export const setup = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     withLocalState(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
   )(project)

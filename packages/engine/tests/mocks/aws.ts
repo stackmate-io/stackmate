@@ -19,6 +19,7 @@ export const getProviderResources = (stack: Stack): AwsProviderDeployableResourc
 
 export const getCredentialResources = (
   providerResources: AwsProviderDeployableResources,
+  target: Provisionable,
   stack: Stack,
   opts?: CredentialsHandlerOptions,
 ): AwsSecretsDeployableResources => {
@@ -31,7 +32,9 @@ export const getCredentialResources = (
 
   Object.assign(provisionable, { requirements: providerResources });
 
-  return provisionCredentialResources(provisionable as AwsSecretsVaultDeployableProvisionable, stack, opts);
+  return provisionCredentialResources(
+    provisionable as AwsSecretsVaultDeployableProvisionable, target, stack, opts,
+  );
 }
 
 export const getAwsDeploymentProvisionableMock = (
@@ -46,11 +49,11 @@ export const getAwsDeploymentProvisionableMock = (
     requirements: {
       ...providerResources,
       ...(withCredentials
-        ? { credentials: getCredentialResources(providerResources, stack) }
+        ? { credentials: getCredentialResources(providerResources, provisionable, stack) }
         : {}
       ),
       ...(withRootCredentials
-        ? { rootCredentials: getCredentialResources(providerResources, stack, { root: true }) }
+        ? { rootCredentials: getCredentialResources(providerResources, provisionable, stack, { root: true }) }
         : {}
       ),
     },

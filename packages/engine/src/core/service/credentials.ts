@@ -21,7 +21,7 @@ export type CredentialsHandlerOptions = {
 };
 
 export type CredentialsHandler = (
-  provisionable: Provisionable, stack: Stack, opts?: CredentialsHandlerOptions,
+  vault: Provisionable, target: Provisionable, stack: Stack, opts?: CredentialsHandlerOptions,
 ) => Credentials;
 
 export type SecretsVaultService<Srv extends BaseService> = Srv & {
@@ -37,8 +37,8 @@ export const withCredentials = <C extends BaseServiceAttributes>() => <T extends
     as: 'credentials',
     from: SERVICE_TYPE.SECRETS,
     scope: 'deployable',
-    handler: (vault: VaultProvisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault, stack)
+    handler: (vault: VaultProvisionable, target: Provisionable, stack: Stack): Credentials => (
+      vault.service.credentials(vault, target, stack)
     ),
   }])(srv)
 );
@@ -48,8 +48,8 @@ export const withRootCredentials = <C extends BaseServiceAttributes>() => <T ext
     as: 'rootCredentials',
     from: SERVICE_TYPE.SECRETS,
     scope: 'deployable',
-    handler: (vault: VaultProvisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault, stack, { root: true })
+    handler: (vault: VaultProvisionable, target: Provisionable, stack: Stack): Credentials => (
+      vault.service.credentials(vault, target, stack, { root: true })
     ),
   }])(srv)
 );
