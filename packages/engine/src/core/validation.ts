@@ -4,9 +4,10 @@ import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObj
 import { DataValidationCxt } from 'ajv/dist/types';
 import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 
+import { Registry } from '@stackmate/engine/core/registry';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { ServiceEnvironment } from '@stackmate/engine/core/service';
+import { BaseServiceAttributes, ServiceEnvironment } from '@stackmate/engine/core/service';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
@@ -297,4 +298,15 @@ export const validateEnvironment = (vars: ServiceEnvironment[], env = process.en
  */
 export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project => (
   validate(JSON_SCHEMA_ROOT, config, opts) as unknown as Project
+);
+
+export const validateServiceConfig = (cfg: BaseServiceAttributes): BaseServiceAttributes => {
+  const { schemaId } = Registry.fromConfig(cfg);
+  return validate(schemaId, cfg, { useDefaults: true });
+};
+
+export const validateServices = () => (
+  services: BaseServiceAttributes[],
+): BaseServiceAttributes[] => (
+  services.map(srv => validateServiceConfig(srv))
 );
