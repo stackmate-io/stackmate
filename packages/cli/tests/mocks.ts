@@ -24,7 +24,7 @@ jest.mock('@stackmate/cli/lib/filesystem', () => {
     writeFile: jest.fn(),
     fileExists: jest.fn(),
     readFile: jest.fn(),
-    createDirectoryMock: jest.fn(),
+    createDirectory: jest.fn(),
   };
 });
 

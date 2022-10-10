@@ -82,9 +82,10 @@ export const operatable = (Base: CommandWithProjectClass): OperatableClass => {
      * @returns {OutputFile} the output file to use
      */
     synth(operation: OperationType): OutputFile {
+      const { output: directory = STACKMATE_DIRECTORY } = this.parsedFlags;
       const output = this.operation.process();
 
-      const outputFile = new OutputFile(this.selectedStage, this.parsedFlags.output, operation);
+      const outputFile = new OutputFile(this.selectedStage, directory, operation);
       outputFile.write(output);
       return outputFile;
     }
