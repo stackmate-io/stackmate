@@ -1109,12 +1109,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-plugins@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "@oclif/plugin-plugins@npm:2.1.1"
+"@oclif/plugin-plugins@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@oclif/plugin-plugins@npm:2.1.2"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.16.4
+    "@oclif/core": ^1.16.5
     chalk: ^4.1.2
     debug: ^4.3.4
     fs-extra: ^9.0
@@ -1124,7 +1124,7 @@ __metadata:
     semver: ^7.3.2
     tslib: ^2.0.0
     yarn: ^1.22.18
-  checksum: 1eec985ab8f39c3ca6ded7e7b1ef2b5ec7bb4af8c3d4fc713b933d97aeda8417d96987b8d8601f7c6ce39f78769aa7af10eb27f58670bd310dc83cb5f43126e6
+  checksum: 3027e55b9f930daf144b70086d9f1107aa00beca405b1a73702a5a4ce1ff4ff97131847927e8c45e00530bb7208e15b964dd8140361be2e06a75a01df6cad918
   languageName: node
   linkType: hard
 
@@ -1313,7 +1313,7 @@ __metadata:
     "@oclif/color": ^1.0.1
     "@oclif/core": ^1.16.5
     "@oclif/plugin-help": ^5.1.14
-    "@oclif/plugin-plugins": ^2.1.1
+    "@oclif/plugin-plugins": ^2.1.2
     "@stackmate/engine": "workspace:packages/engine"
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.2
