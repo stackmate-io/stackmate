@@ -1088,16 +1088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:^5.1.14":
-  version: 5.1.14
-  resolution: "@oclif/plugin-help@npm:5.1.14"
-  dependencies:
-    "@oclif/core": ^1.16.4
-  checksum: 86034d86abccfcb34b8e26196abc66d445b88cf97b654bed092a7b9a7bf7c25184e1ee6bcd95b332a9f3ce48e02a626068c212ec4e0e7ed97aaab2944ed494e4
-  languageName: node
-  linkType: hard
-
-"@oclif/plugin-help@npm:^5.1.15":
+"@oclif/plugin-help@npm:^5.1.14, @oclif/plugin-help@npm:^5.1.15":
   version: 5.1.15
   resolution: "@oclif/plugin-help@npm:5.1.15"
   dependencies:
