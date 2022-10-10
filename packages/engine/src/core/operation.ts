@@ -5,7 +5,7 @@ import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
-import { validate, validateEnvironment } from '@stackmate/engine/core/validation';
+import { validate, validateEnvironment, validateServices } from '@stackmate/engine/core/validation';
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
   assertRequirementsSatisfied,
@@ -14,6 +14,14 @@ import {
 } from '@stackmate/engine/core/service';
 
 type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
+
+export type OperationType = 'deployment' | 'destruction' | 'setup';
+
+export const OPERATION_TYPE: Record<string, OperationType> = {
+  DEPLOYMENT: 'deployment',
+  DESTRUCTION: 'destruction',
+  SETUP: 'setup',
+} as const;
 
 /**
  * @type {Operation} an operation that synthesizes the terraform files
@@ -152,7 +160,7 @@ class StageOperation implements Operation {
         const linkedProvisionable = { ...linked, provisions: linkedProvisions };
 
         Object.assign(requirements, {
-          [associationName]: associationHandler(linkedProvisionable, this.stack),
+          [associationName]: associationHandler(linkedProvisionable, provisionable, this.stack),
         });
       });
     });
@@ -209,6 +217,7 @@ const getOperation = (
 export const deployment = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'deployable'),
   )(project)
 );
@@ -223,6 +232,7 @@ export const deployment = (project: Project, stage: string) => (
 export const destruction = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
   )(project)
 );
@@ -237,7 +247,34 @@ export const destruction = (project: Project, stage: string) => (
 export const setup = (project: Project, stage: string) => (
   pipe(
     getServiceConfigurations(stage),
+    validateServices(),
     withLocalState(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
   )(project)
 );
+
+/**
+ * Returns an operation by its name
+ *
+ * @param {OperationType} operation the operation to get
+ * @param {Project} project the validated project configuration
+ * @param {String} stage the stage name
+ * @returns {Operation} the operation to use
+ */
+export const getOperationByName = (
+  operation: OperationType, project: Project, stage: string,
+): Operation => {
+  switch (operation) {
+    case OPERATION_TYPE.DEPLOYMENT:
+      return deployment(project, stage);
+
+    case OPERATION_TYPE.DESTRUCTION:
+      return destruction(project, stage);
+
+    case OPERATION_TYPE.SETUP:
+      return setup(project, stage);
+
+    default:
+      throw new Error(`Operation ${operation} is invalid`);
+  }
+};

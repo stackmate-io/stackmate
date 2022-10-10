@@ -1,11 +1,12 @@
 import YAML from 'yaml';
 import inquirer, { Answers } from 'inquirer';
-import { has, isError, isString } from 'lodash';
+import { isError, isString } from 'lodash';
 import { Errors, Interfaces } from '@oclif/core';
 import { ProjectConfiguration } from '@stackmate/engine';
 
+import ProjectFile from '@stackmate/cli/core/project';
 import { DEFAULT_PROJECT_FILE } from '@stackmate/cli/constants';
-import { writeFile, fileExists, readFile, ConfigurationFile } from '@stackmate/cli/lib';
+import { writeFile, fileExists, readFile, createDirectory } from '@stackmate/cli/lib';
 
 type ErrorLike = Error | string | Errors.CLIError | Errors.ExitError;
 
@@ -23,6 +24,7 @@ jest.mock('@stackmate/cli/lib/filesystem', () => {
     writeFile: jest.fn(),
     fileExists: jest.fn(),
     readFile: jest.fn(),
+    createDirectory: jest.fn(),
   };
 });
 
@@ -40,24 +42,26 @@ export const runCommand = async (
   let exitCode;
   let errorMessage;
   let error;
-  let configSpy;
+  const mocks: jest.SpyInstance[] = [];
 
-  const stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation(val => {
-    output += val.toString();
-    return true;
-  });
-
-  const exitSpy = jest.spyOn(CommandClass.prototype, 'exit').mockImplementation(
-    (code: number | undefined) => {
-      exitCode = code;
-      return Errors.exit(code);
-    },
+  mocks.push(
+    jest.spyOn(process.stdout, 'write').mockImplementation(val => {
+      output += val.toString();
+      return true;
+    }),
   );
 
-  if (configuration && has(CommandClass.prototype, 'projectConfig')) {
-    configSpy = jest.spyOn(CommandClass.prototype, 'projectConfig', 'get').mockReturnValue(
-      mockConfiguration(configuration),
-    );
+  mocks.push(
+    jest.spyOn(CommandClass.prototype, 'exit').mockImplementation(
+      (code: number | undefined) => {
+        exitCode = code;
+        return Errors.exit(code);
+      },
+    ),
+  );
+
+  if (configuration) {
+    mocks.push(...mockProjectConfig(configuration));
   }
 
   try {
@@ -76,17 +80,7 @@ export const runCommand = async (
     }
   }
 
-  stdoutSpy.mockReset();
-  stdoutSpy.mockRestore();
-
-  exitSpy.mockReset();
-  exitSpy.mockRestore();
-
-  if (configSpy) {
-    configSpy.mockReset();
-    configSpy.mockRestore();
-  }
-
+  mocks.forEach((mock) => mock.mockRestore());
   return { output, exitCode, errorMessage, error };
 };
 
@@ -108,20 +102,20 @@ export const mockInquirerQuestions = (...args: Answers[]): jest.SpyInstance => {
 /**
  * @param {ProjectConfiguration} contents the configuration file contents
  * @param {String} filename the file name to use
- * @returns {ConfigurationFile}
+ * @returns {ProjectFile}
  */
 export const mockConfiguration = (
   contents: ProjectConfiguration, filename: string = DEFAULT_PROJECT_FILE,
-): ConfigurationFile => {
+): ProjectFile => {
   (fileExists as jest.Mock).mockImplementationOnce(() => true);
   (readFile as jest.Mock).mockImplementationOnce(() => YAML.stringify(contents));
-  return new ConfigurationFile(filename);
+  return new ProjectFile(filename);
 };
 
 /**
  * @param {String} filename the file name to check
  * @param {Boolean} exists the return value
- * @returns {jest.Mock} the spy instance
+ * @returns {jest.Mock} the mock instance
  */
 export const getFileExistsMock = (filename: string, exists: boolean): jest.Mock => (
   (fileExists as jest.Mock).mockImplementation((fileToCheck: string) => {
@@ -137,7 +131,7 @@ export const getFileExistsMock = (filename: string, exists: boolean): jest.Mock 
 /**
  * @param {String} filename the file name to write
  * @param {String} contents the file contents to return
- * @returns {jest.Mock} the spy instance
+ * @returns {jest.Mock} the mock instance
  */
 export const getReadFileMock = (filename: string, contents: string): jest.Mock => (
   (readFile as jest.Mock).mockImplementationOnce((fileToRead) => {
@@ -153,10 +147,10 @@ export const getReadFileMock = (filename: string, contents: string): jest.Mock =
 
 /**
  * @param {String} filename the file name to write
- * @returns {jest.Mock} the spy instance
+ * @returns {jest.Mock} the mock instance
  */
 export const getWriteFileMock = (filename: string): jest.Mock => (
-  (writeFile as jest.Mock).mockImplementation((fileToWrite) => {
+  (writeFile as jest.Mock).mockImplementationOnce((fileToWrite) => {
     if (fileToWrite !== filename) {
       throw new Error(
         `Mock created with ${filename} as a filename but writeFile was called with ${fileToWrite}`,
@@ -164,3 +158,34 @@ export const getWriteFileMock = (filename: string): jest.Mock => (
     }
   })
 );
+
+/**
+ * @param {String} dirname the directory name to mock creation for
+ * @param {NUmber} mode the filesystem mode to create the directory by
+ * @returns {est.Mock} the mock instance
+ */
+export const createDirectoryMock = (dirname: string, mode: number): jest.Mock => (
+  (createDirectory as jest.Mock).mockImplementationOnce((dir: string, mod: number) => {
+    if (dir !== dirname) {
+      throw new Error(
+        `Mock created with ${dirname} as a directory name but was called with ${dir}`,
+      );
+    }
+
+    if (mod !== mode) {
+      throw new Error(
+        `Mock created with ${mode} as the directory mode but was called with ${mod}`,
+      );
+    }
+  })
+);
+
+/**
+ * @param {ProjectConfiguration} config the configuration to return
+ */
+export const mockProjectConfig = (config: ProjectConfiguration): jest.SpyInstance[] => {
+  const existsMock = jest.spyOn(ProjectFile.prototype, 'exists', 'get').mockReturnValue(true);
+  const readMock = jest.spyOn(ProjectFile.prototype, 'read').mockReturnValue(config);
+
+  return [existsMock, readMock];
+};

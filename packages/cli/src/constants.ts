@@ -12,7 +12,5 @@ export const DEFAULT_OUTPUT_DIRECTORY = path.join(CURRENT_DIRECTORY, STACKMATE_D
 
 export const PREFERENCES_FILE = path.join(USER_HOME_DIRECTORY, 'settings.json');
 
-export const STACK_FILE_NAME = 'stackmate.tf.json';
-
 // Configuration files versions
 export const PREFERENCES_VERSION = '0.1.0';

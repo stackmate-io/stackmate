@@ -30,14 +30,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-modules-
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            **/.turbo
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/turbo.json') }}
-          restore-keys: |
-            ${{ runner.os }}-turborepo-
-
       - name: Setup node
         uses: actions/setup-node@v2
 

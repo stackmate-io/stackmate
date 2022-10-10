@@ -6,7 +6,7 @@ import { createProject } from '@stackmate/cli/core/generator';
 import { getFileExistsMock, getReadFileMock, getWriteFileMock, runCommand } from 'tests/cli/mocks';
 import StageCopyCommand from '@stackmate/cli/commands/copy';
 
-describe('Init Command', () => {
+describe('Copy Command', () => {
   let config: ProjectConfiguration;
   let writeMock: jest.SpyInstance;
   let existsMock: jest.SpyInstance;
