@@ -87,7 +87,7 @@ describe('Validation', () => {
         }, {
           path: '', message: expect.stringContaining('You need to set a default region'),
         }, {
-          path: 'stages', message: expect.stringContaining('You should define at least one stage'),
+          path: '', message: expect.stringContaining('You should define at least one stage'),
         }]),
       );
     });
