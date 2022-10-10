@@ -1097,15 +1097,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.3.3":
-  version: 2.3.3
-  resolution: "@oclif/plugin-not-found@npm:2.3.3"
+"@oclif/plugin-not-found@npm:^2.3.4":
+  version: 2.3.4
+  resolution: "@oclif/plugin-not-found@npm:2.3.4"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.16.4
+    "@oclif/core": ^1.16.5
     fast-levenshtein: ^3.0.0
     lodash: ^4.17.21
-  checksum: 1945219bb34de30e13dc50099c67abddfe1068a54f2ef2d5ce22ab3ae49fc3b5206bc04ea73990e5d1c22e2aca8b3412903b3ccc8529c15d8d82239b345eba3d
+  checksum: d513be48e7813c90686d765fe5ea4918d38fd762a643ad23f0ffb5cec7873b4e47444d4ec1ef1f4784af06f4eec46951ad1ab1f57485fadd82d924b74da7d968
   languageName: node
   linkType: hard
 
@@ -1325,7 +1325,7 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^29.1.2
     lodash: 4.17.21
-    oclif: ^3.2.13
+    oclif: ^3.2.16
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.0
@@ -2125,9 +2125,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:^2.1227.0":
-  version: 2.1228.0
-  resolution: "aws-sdk@npm:2.1228.0"
+"aws-sdk@npm:^2.1231.0":
+  version: 2.1231.0
+  resolution: "aws-sdk@npm:2.1231.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -2139,7 +2139,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.4.19
-  checksum: e08bc4234c3a116d0186f347efd6d07d458d86d075ea3be803e7c928a4584db4639f94a068b4c103191c88d27059fb60c6032c756dadeecfcd4967ea10ac1a6b
+  checksum: 34597bc47b8efa84f0c637f8aea92e01010f282eeb878097cd198f67b9d04110115d949c0e641a799cd9a06e4da57697f0b8a682dd7c2be78c717d21d5c4720a
   languageName: node
   linkType: hard
 
@@ -6453,15 +6453,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.13":
-  version: 3.2.13
-  resolution: "oclif@npm:3.2.13"
+"oclif@npm:^3.2.16":
+  version: 3.2.16
+  resolution: "oclif@npm:3.2.16"
   dependencies:
     "@oclif/core": ^1.16.4
     "@oclif/plugin-help": ^5.1.14
-    "@oclif/plugin-not-found": ^2.3.3
+    "@oclif/plugin-not-found": ^2.3.4
     "@oclif/plugin-warn-if-update-available": ^2.0.6
-    aws-sdk: ^2.1227.0
+    aws-sdk: ^2.1231.0
     concurrently: ^7.4.0
     debug: ^4.3.3
     find-yarn-workspace-root: ^2.0.0
@@ -6470,14 +6470,14 @@ __metadata:
     lodash: ^4.17.21
     normalize-package-data: ^3.0.3
     qqjs: ^0.3.11
-    semver: ^7.3.5
+    semver: ^7.3.8
     tslib: ^2.3.1
     yeoman-environment: ^3.11.1
     yeoman-generator: ^5.6.1
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: fa5c2a2a7d66b4afd34298a8922c2572a5d99dec2f9316868bc29db1f6dab14348ba7cb2bdee0b4815b6c0774c77fb3e9df14a773d311f644f98ee836eaf2227
+  checksum: cc4e62ca1985be5e51c06d59a594587741c475608115876a756926a09c7a5e1c1ba056d3e7f16dab251179dfe785c6d661accf0895f25548f6939bf2fe9f2158
   languageName: node
   linkType: hard
 
@@ -7408,14 +7408,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.x, semver@npm:^7.1.1, semver@npm:^7.1.3, semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7":
-  version: 7.3.7
-  resolution: "semver@npm:7.3.7"
+"semver@npm:7.x, semver@npm:^7.1.1, semver@npm:^7.1.3, semver@npm:^7.2.1, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8":
+  version: 7.3.8
+  resolution: "semver@npm:7.3.8"
   dependencies:
     lru-cache: ^6.0.0
   bin:
     semver: bin/semver.js
-  checksum: 2fa3e877568cd6ce769c75c211beaed1f9fce80b28338cadd9d0b6c40f2e2862bafd62c19a6cff42f3d54292b7c623277bcab8816a2b5521cf15210d43e75232
+  checksum: ba9c7cbbf2b7884696523450a61fee1a09930d888b7a8d7579025ad93d459b2d1949ee5bbfeb188b2be5f4ac163544c5e98491ad6152df34154feebc2cc337c1
   languageName: node
   linkType: hard
 
