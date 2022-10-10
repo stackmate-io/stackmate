@@ -1097,6 +1097,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/plugin-help@npm:^5.1.15":
+  version: 5.1.15
+  resolution: "@oclif/plugin-help@npm:5.1.15"
+  dependencies:
+    "@oclif/core": ^1.16.5
+  checksum: dde54947163cc5c97b9e198b2016f7d0a68ed3205e494dd21348545efcc4b0db4164466063b3573f922b6d8884534b100e582cfc4c4c4746bd50ef0cadf5a9a9
+  languageName: node
+  linkType: hard
+
 "@oclif/plugin-not-found@npm:^2.3.4":
   version: 2.3.4
   resolution: "@oclif/plugin-not-found@npm:2.3.4"
@@ -1312,7 +1321,7 @@ __metadata:
   dependencies:
     "@oclif/color": ^1.0.1
     "@oclif/core": ^1.16.5
-    "@oclif/plugin-help": ^5.1.14
+    "@oclif/plugin-help": ^5.1.15
     "@oclif/plugin-plugins": ^2.1.2
     "@stackmate/engine": "workspace:packages/engine"
     "@types/ini": ^1.3.31
