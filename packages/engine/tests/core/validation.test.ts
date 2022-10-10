@@ -81,13 +81,13 @@ describe('Validation', () => {
       expect(error).toBeInstanceOf(ValidationError);
       expect(error.errors).toEqual(
         expect.arrayContaining([{
-          path: '', message: 'You need to set a name for the project',
+          path: '', message: expect.stringContaining('You need to set a name for the project'),
         }, {
-          path: '', message: 'You need to set a default provider for the project',
+          path: '', message: expect.stringContaining('You need to set a default provider'),
         }, {
-          path: '', message: 'You need to set a default region for the project',
+          path: '', message: expect.stringContaining('You need to set a default region'),
         }, {
-          path: '', message: 'You should define at least one stage to deploy',
+          path: '', message: expect.stringContaining('You should define at least one stage'),
         }]),
       );
     });

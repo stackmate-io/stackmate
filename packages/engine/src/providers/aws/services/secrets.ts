@@ -64,17 +64,20 @@ type ProvisionCredentialsResources = {
 };
 
 /**
- * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
+ * @param {AwsSecretsVaultDeployableProvisionable} vault the vault's provisionable
+ * @param {Provisionable} target the service to add the credentials for
  * @param {Stack} stack the stack to deploy resources on
  * @param {CredentialsHandlerOptions} opts the credential handler's options
  * @returns {Credentials} the credentials objects
  * @returns {AwsSecretsDeployableResources} the resources created
  */
 export const provisionCredentialResources = (
-  provisionable: AwsSecretsVaultDeployableProvisionable,
+  vault: AwsSecretsVaultDeployableProvisionable,
+  target: Provisionable,
   stack: Stack, { root = false, ...opts }: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
-  const { service, config, requirements: { kmsKey, providerInstance } } = provisionable;
+  const { service, requirements: { kmsKey, providerInstance } } = vault;
+  const { config } = target;
   const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
 
   // we only use the default profile, since this is a core service
@@ -137,9 +140,9 @@ export const provisionCredentialResources = (
  * @returns {Credentials} the credentials objects
  */
 const generateCredentials: CredentialsHandler = (
-  provisionable: AwsSecretsVaultDeployableProvisionable, stack, opts = {},
+  provisionable: AwsSecretsVaultDeployableProvisionable, target: Provisionable, stack, opts = {},
 ): Credentials => {
-  const { data } = provisionCredentialResources(provisionable, stack, opts);
+  const { data } = provisionCredentialResources(provisionable, target, stack, opts);
 
   return {
     username: extractTokenFromJsonString(data.secretString, 'username'),

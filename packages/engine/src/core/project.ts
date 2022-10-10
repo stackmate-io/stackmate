@@ -158,9 +158,13 @@ export const getServiceConfigurations = (
   }
 
   const cloudServices = getCloudServices(config, stage);
-  const providers = getProviderConfigurations(cloudServices);
 
-  // Predefined / core services => state & secrets
+  if (isEmpty(cloudServices)) {
+    throw new Error(`There are no services defined for stage ${stage}`);
+  }
+
+  // Predefined / core services => providers, state & secrets
+  const providers = getProviderConfigurations(cloudServices);
   const stateConfig = defaults({ ...state }, {
     name: `${projectName}-project-state`,
     type: SERVICE_TYPE.STATE,

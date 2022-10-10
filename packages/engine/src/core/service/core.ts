@@ -21,7 +21,7 @@ export type Association<Ret = any> = {
   as: string;
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
-  handler: (provisionable: Provisionable, stack?: Stack) => Ret,
+  handler: (linked: Provisionable, target: Provisionable, stack?: Stack) => Ret,
   where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
 };
 

@@ -9,7 +9,10 @@ import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constan
 import { Provisionable } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
-import { AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
+import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
+import {
+  AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, provisionCredentialResources,
+} from '@stackmate/engine/providers/aws/services/secrets';
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault;
@@ -57,7 +60,8 @@ describe('AWS Secrets service', () => {
 
   describe('credentials resources registrations', () => {
     let stack: Stack;
-    let provisionable: Provisionable;
+    let vault: Provisionable;
+    let target: Provisionable;
     let config: AwsSecretsVaultAttributes;
 
     beforeEach(() => {
@@ -70,12 +74,20 @@ describe('AWS Secrets service', () => {
         region: DEFAULT_REGION,
       };
 
-      provisionable = getAwsDeploymentProvisionableMock(config, stack);
+      const targetConfig = {
+        provider: PROVIDER.AWS,
+        name: 'aws-secrets-service',
+        type: SERVICE_TYPE.SECRETS,
+        region: DEFAULT_REGION,
+      };
+
+      vault = getAwsDeploymentProvisionableMock(config, stack);
+      target = getProvisionableFromConfig(targetConfig, stack.stageName);
     });
 
     it('registers the provision credentials terraform resources', () => {
       const resources = provisionCredentialResources(
-        provisionable as AwsSecretsVaultDeployableProvisionable, stack,
+        vault as AwsSecretsVaultDeployableProvisionable, target, stack,
       );
       expect(resources).toBeInstanceOf(Object);
       expect(resources.data).toBeInstanceOf(
@@ -93,7 +105,7 @@ describe('AWS Secrets service', () => {
     });
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(provisionable, stack);
+      const credentials = service.credentials(vault, target, stack);
       expect(credentials).toBeInstanceOf(Object);
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi;
       expect(credentials.username).toEqual(expect.stringMatching(reg));
