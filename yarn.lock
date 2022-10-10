@@ -1347,7 +1347,7 @@ __metadata:
     "@cdktf/provider-aws": 10.0.8
     "@cdktf/provider-local": ^3.0.8
     "@faker-js/faker": ^7.5.0
-    "@types/jest": ^29.1.1
+    "@types/jest": ^29.1.2
     "@types/lodash": ^4.14.186
     "@types/node": ^18.8.3
     ajv: ^8.11.0
