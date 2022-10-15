@@ -20,8 +20,6 @@ stackmate.schema.json
 
 # Oclif specific
 oclif.manifest.json
-# Created by https://www.toptal.com/developers/gitignore/api/yarn
-# Edit at https://www.toptal.com/developers/gitignore?templates=yarn
 
 ### yarn ###
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
@@ -39,6 +37,3 @@ oclif.manifest.json
 
 # and uncomment the following lines
 .pnp.*
-
-# End of https://www.toptal.com/developers/gitignore/api/yarn
-

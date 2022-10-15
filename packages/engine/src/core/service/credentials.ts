@@ -11,8 +11,8 @@ export type Credentials = {
   password: string;
 };
 
-export type CredentialsAssociation = ServiceAssociation<'credentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
-export type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', typeof SERVICE_TYPE.SECRETS, 'deployable', Credentials>;
+export type CredentialsAssociation = ServiceAssociation<'credentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS>;
+export type RootCredentialsAssociation = ServiceAssociation<'rootCredentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS>;
 export type CredentialsHandlerOptions = {
   root?: boolean;
   length?: number;
