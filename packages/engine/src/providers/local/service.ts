@@ -8,8 +8,8 @@ import {
   ServiceScopeChoice, ServiceTypeChoice,
 } from '@stackmate/engine/core/service';
 
-type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, terraformLocalProvider.LocalProvider
+type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+  'providerInstance', Scope, terraformLocalProvider.LocalProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
 export type LocalServiceAssociations = [

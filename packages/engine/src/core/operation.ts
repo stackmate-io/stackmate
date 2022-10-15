@@ -137,28 +137,33 @@ class StageOperation implements Operation {
     // Start extracting the service's requirements
     const requirements = {};
 
-    associations.filter(({ scope: associationScope }) => (
-      associationScope === this.scope
-    )).forEach((association) => {
+    associations.forEach((association) => {
       const {
         as: associationName,
         where: isAssociated,
         handler: associationHandler,
         from: associatedServiceType,
+        scope: associationScope,
       } = association;
 
-      // Get the provisionables associated with the current service configuration
-      const associatedProvisionables = Array.from(this.provisionables.values()).filter((linked) => {
-        return linked.service.type === associatedServiceType && (
-          typeof isAssociated === 'function' ? isAssociated(config, linked.config) : true
-        );
-      });
+      // The association is meant to be used in a different scope, bail...
+      if (associationScope !== this.scope) {
+        return;
+      }
 
-      // Register associated services into the stack and form the requirements
-      associatedProvisionables.forEach((linked) => {
+      // Get the provisionables associated with the current service configuration
+      Array.from(this.provisionables.values()).forEach((linked) => {
+        if (associatedServiceType && linked.service.type !== associatedServiceType) {
+          return false;
+        }
+
+        if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
+          return false;
+        }
+
+        // Register associated services into the stack and assign it to the requirements
         const linkedProvisions = this.register(linked);
         const linkedProvisionable = { ...linked, provisions: linkedProvisions };
-
         Object.assign(requirements, {
           [associationName]: associationHandler(linkedProvisionable, provisionable, this.stack),
         });
