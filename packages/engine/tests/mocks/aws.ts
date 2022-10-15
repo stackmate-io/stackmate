@@ -4,7 +4,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
 import { BaseServiceAttributes, CredentialsHandlerOptions, Provisionable } from '@stackmate/engine/core/service';
 import { AwsProviderDeployableProvisionable, AwsProviderDeployableResources, onDeploy as providerDeployHandler } from '@stackmate/engine/providers/aws/services/provider';
-import { AwsSecretsDeployableResources, AwsSecretsVaultDeployableProvisionable, provisionCredentialResources } from '@stackmate/engine/providers/aws/services/secrets';
+import { AwsSecretsDeployableResources, AwsSecretsVaultDeployableProvisionable, generateCredentials } from '@stackmate/engine/providers/aws/services/secrets';
 
 export const getProviderResources = (stack: Stack): AwsProviderDeployableResources => {
   const provisionable = getProvisionableFromConfig({
@@ -32,7 +32,7 @@ export const getCredentialResources = (
 
   Object.assign(provisionable, { requirements: providerResources });
 
-  return provisionCredentialResources(
+  return generateCredentials(
     provisionable as AwsSecretsVaultDeployableProvisionable, target, stack, opts,
   );
 }

@@ -129,27 +129,29 @@ class StageOperation implements Operation {
       return existingProvisions;
     }
 
-    const { config, service, service: { handlers, associations = [] } } = provisionable;
+    const {
+      config,
+      service,
+      service: { handlers, associations = [] },
+      requirements = {},
+    } = provisionable;
 
     // Validate the configuration
     validate(service.schemaId, config, { useDefaults: true });
 
-    // Start extracting the service's requirements
-    const requirements = {};
-
     associations.forEach((association) => {
+      // The association is meant to be used in a different scope, bail...
+      if (association.scope !== this.scope) {
+        return;
+      }
+
       const {
         as: associationName,
         where: isAssociated,
         handler: associationHandler,
         from: associatedServiceType,
-        scope: associationScope,
+        requirement: isRequirement,
       } = association;
-
-      // The association is meant to be used in a different scope, bail...
-      if (associationScope !== this.scope) {
-        return;
-      }
 
       // Get the provisionables associated with the current service configuration
       Array.from(this.provisionables.values()).forEach((linked) => {
@@ -161,24 +163,25 @@ class StageOperation implements Operation {
           return false;
         }
 
-        // Register associated services into the stack and assign it to the requirements
         const linkedProvisions = this.register(linked);
-        const linkedProvisionable = { ...linked, provisions: linkedProvisions };
-        Object.assign(requirements, {
-          [associationName]: associationHandler(linkedProvisionable, provisionable, this.stack),
-        });
+        const handlerOutput = associationHandler(
+          { ...linked, provisions: linkedProvisions }, provisionable, this.stack,
+        );
+
+        if (isRequirement && associationName) {
+          Object.assign(requirements, { [associationName]: handlerOutput });
+        }
       });
     });
 
-    // Register the current service into the stack and mark as provisioned
-    Object.assign(provisionable, { requirements });
+    // // Register the current service into the stack and mark as provisioned
+    // Object.assign(provisionable, { requirements });
     assertRequirementsSatisfied(provisionable, this.scope);
 
     const registrationHandler = handlers.get(this.scope);
     // no handler exists for the current scope,
     // eg. it only has a handler for deployment, we're running a 'setup'
     const provisions = registrationHandler ? registrationHandler(provisionable, this.stack) : {};
-
     Object.assign(provisionable, { provisions });
 
     this.provisionables.set(provisionable.id, provisionable);

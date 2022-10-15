@@ -13,7 +13,6 @@ export type RegionalAttributes<T extends string = string> = { region: T; };
  * @param {String} defaultRegion the default region to provision the service in
  * @returns {Function<Service>}
  */
-
 export const withRegions = <C extends BaseServiceAttributes>(
   regions: readonly string[], defaultRegion: string
 ) => <T extends Service<C>>(srv: T): T & { regions: readonly string[] } => (
