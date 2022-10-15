@@ -18,11 +18,12 @@ import {
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
-type ProviderAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'providerInstance', typeof SERVICE_TYPE.PROVIDER, S, terraformAwsProvider.AwsProvider
+type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+  'providerInstance', Scope, terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
-type KmsKeyAssociation<S extends ServiceScopeChoice> = ServiceAssociation<
-  'kmsKey', typeof SERVICE_TYPE.PROVIDER, S, kmsKey.KmsKey
+
+type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+  'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
 export type AwsServiceAssociations = [
@@ -54,9 +55,9 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
-  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => {
-    return p.provisions.provider
-  },
+  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => (
+    p.provisions.provider
+  ),
 });
 
 const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
