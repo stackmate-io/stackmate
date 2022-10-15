@@ -9,7 +9,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService,
-  ServiceAssociation, ServiceScopeChoice, ServiceTypeChoice, withRegions,
+  ServiceRequirement, ServiceScopeChoice, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -18,11 +18,11 @@ import {
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
-type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'providerInstance', Scope, terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
@@ -46,12 +46,13 @@ type ProviderProvisionable = OneOfType<[
   AwsProviderPreparableProvisionable,
 ]>;
 
-const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
+const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
   scope: S,
 ): ProviderAssociation<S> => ({
   as: 'providerInstance',
   from: SERVICE_TYPE.PROVIDER,
   scope,
+  requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
@@ -60,12 +61,13 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
   ),
 });
 
-const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
+const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
   scope: S,
 ): KmsKeyAssociation<S> => ({
   as: 'kmsKey',
   from: SERVICE_TYPE.PROVIDER,
   scope,
+  requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
@@ -77,12 +79,12 @@ const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
 });
 
 const associations: AwsServiceAssociations = [
-  getProviderInstanceAssociation('deployable'),
-  getProviderInstanceAssociation('destroyable'),
-  getProviderInstanceAssociation('preparable'),
-  getKmsKeyAssociation('deployable'),
-  getKmsKeyAssociation('destroyable'),
-  getKmsKeyAssociation('preparable'),
+  getProviderInstanceRequirement('deployable'),
+  getProviderInstanceRequirement('destroyable'),
+  getProviderInstanceRequirement('preparable'),
+  getKmsKeyRequirement('deployable'),
+  getKmsKeyRequirement('destroyable'),
+  getKmsKeyRequirement('preparable'),
 ];
 
 const getAwsService = (srv: BaseService) => (

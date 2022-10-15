@@ -4,26 +4,27 @@ import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { LocalProviderAttributes, LocalProviderProvisionable } from '@stackmate/engine/providers/local/services/provider';
 import {
-  associate, BaseServiceAttributes, getCoreService, ServiceAssociation,
+  associate, BaseServiceAttributes, getCoreService, ServiceRequirement,
   ServiceScopeChoice, ServiceTypeChoice,
 } from '@stackmate/engine/core/service';
 
-type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+type ProviderRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'providerInstance', Scope, terraformLocalProvider.LocalProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-export type LocalServiceAssociations = [
-  ProviderAssociation<'preparable'>,
+export type LocalServiceRequirements = [
+  ProviderRequirement<'preparable'>,
 ];
 
 export type LocalServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.LOCAL;
 };
 
-const associations: LocalServiceAssociations = [{
+const associations: LocalServiceRequirements = [{
   as: 'providerInstance',
   from: SERVICE_TYPE.PROVIDER,
   scope: 'preparable',
+  requirement: true,
   where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider
   ),

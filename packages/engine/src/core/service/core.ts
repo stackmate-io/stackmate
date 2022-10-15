@@ -1,4 +1,4 @@
-import { TerraformDataSource, TerraformProvider, TerraformResource, TerraformBackend } from 'cdktf';
+import { TerraformDataSource, TerraformProvider, TerraformResource, TerraformBackend, TerraformLocal } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
@@ -7,32 +7,49 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 
-type Resource = TerraformResource | TerraformProvider | TerraformDataSource | TerraformBackend;
-export type ProvisionResources = Resource | Resource[];
-export type Exposables = { ip?: string; cidr?: string; ref?: string };
+export type Resource = TerraformResource | TerraformProvider | TerraformDataSource | TerraformBackend | TerraformLocal;
+export type ProvisionResources = Resource | Resource[] | Record<string, Resource> | Record<string, Resource[]>;
+export type Exposables = { ip?: string; cidr?: string; resourceRef?: string };
 export type Provisions = Exposables & Record<string, ProvisionResources>;
-export type AssociationHandlerReturnType = Provisions[string] | Record<string, string>;
+export type AssociationHandlerReturnType = Provisions[string];
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
+export type AssociationNameGenerator = (prefix: string, index: number) => string;
+export type AssociationLookup = (
+  config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes,
+) => boolean;
+export type AssociationHandler<Ret = any> = (
+  linked: Provisionable, target: Provisionable, stack?: Stack,
+) => Ret;
 
 /**
- * @type {Association}
+ * @type {Association} describes an association between two services
  */
-export type Association<Ret extends AssociationHandlerReturnType = AssociationHandlerReturnType> = {
-  as: string;
-  from: ServiceTypeChoice,
-  scope: ServiceScopeChoice,
-  handler: (linked: Provisionable, target: Provisionable, stack?: Stack) => Ret,
-  where?: (config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes) => boolean,
+export type Association<Ret = unknown> = {
+  scope: ServiceScopeChoice;
+  handler: AssociationHandler<Ret>;
+  as?: string;
+  from?: ServiceTypeChoice;
+  where?: AssociationLookup;
+  requirement?: boolean;
 };
 
 /**
- * @type {ServiceAssociation} the configuration object for associating a service with another
+ * @type {ServiceSideEffect} describes a generic association that is not a requirement
+ */
+export type ServiceSideEffect = Omit<Association, 'as' | 'from'> & {
+  scope: ServiceScopeChoice;
+  handler: AssociationHandler<Resource | void>;
+  where: AssociationLookup;
+};
+
+/**
+ * @type {ServiceRequirement} the configuration object for associating a service with another
  * @param {ServiceTypeChoice}
  * @param {ServiceScopeChoice}
  * @param {Provisions}
  */
-export type ServiceAssociation<
+export type ServiceRequirement<
   name extends string,
   C extends ServiceScopeChoice,
   HandlerReturnType extends AssociationHandlerReturnType,
@@ -41,6 +58,7 @@ export type ServiceAssociation<
   as: name;
   scope: C;
   from?: S;
+  requirement: true;
 };
 
 /**
@@ -52,8 +70,10 @@ export type ServiceAssociation<
  * @param {Association} T
  * @param {ServiceScopeChoice} S
  */
-type ExtractAssociation<T extends Association, S extends ServiceScopeChoice> = {
-  [K in Extract<T, { scope: S }>['as']]: ReturnType<Extract<T, { as: K }>['handler']>
+type ExtractAssociation<
+  T extends Association, S extends ServiceScopeChoice, P = Extract<T, { scope: S }>['as']
+> = {
+  [K in P extends string | symbol ? P : never]: ReturnType<Extract<T, { as: K }>['handler']>
 } extends infer O ? { [K in keyof O]: O[K] } : never;
 
 /**
@@ -74,7 +94,8 @@ export type Provisionable<T extends BaseServiceAttributes = BaseServiceAttribute
   service: BaseService;
   requirements: Record<string, any>;
   resourceId: string; /** @var {String} resourceId the id of the terraform resource */
-  provisions?: Provisions,
+  provisions?: Provisions;
+  sideEffects?: Resource[];
 };
 
 /**
@@ -296,8 +317,8 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * match, using the `handler` function. The `handler` function returns the data to be used
  * as `requirements` when provisioning the service.
  *
- * @param {ServiceAssociation[]} associations the association configurations
- * @see {ServiceAssociation}
+ * @param {ServiceRequirement[]} associations the association configurations
+ * @see {ServiceRequirement}
  * @returns {Function<Service>}
  */
 export const associate = <C extends BaseServiceAttributes, A extends Association[]>(
@@ -359,8 +380,13 @@ export const assertRequirementsSatisfied = (
   provisionable: Provisionable, scope: ServiceScopeChoice,
 ) => {
   const { service: { associations, type }, requirements } = provisionable;
-  const associated = associations.filter(assoc => assoc.scope === scope);
-  associated.forEach(({ as: name }) => {
+  associations.filter(
+    assoc => assoc.scope === scope && assoc.requirement,
+  ).forEach(({ as: name }) => {
+    if (!name) {
+      throw new Error(`Service ${type} is marked as a requirement but doesn't have a name`);
+    }
+
     if (!requirements[name]) {
       throw new Error(`Requirement ${name} for service ${type} is not satisfied`);
     }

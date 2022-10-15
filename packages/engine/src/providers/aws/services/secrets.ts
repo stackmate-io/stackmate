@@ -1,3 +1,4 @@
+import { TerraformLocal } from 'cdktf';
 import { kebabCase, snakeCase } from 'lodash';
 import {
   dataAwsSecretsmanagerRandomPassword, dataAwsSecretsmanagerSecretVersion,
@@ -11,7 +12,7 @@ import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseServiceAttributes, Credentials, CredentialsHandler, CredentialsHandlerOptions,
+  BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
   Provisionable, ProvisionAssociationRequirements, SecretsVaultService,
   Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
@@ -56,37 +57,34 @@ export type AwsSecretsVaultPreparableProvisionable = BaseProvisionable & {
   >;
 };
 
-type ProvisionCredentialsResources = {
-  password: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword;
+type ProvisionCredentialsResources = Credentials & {
+  randomPassword: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword;
   secret: secretsmanagerSecret.SecretsmanagerSecret;
   version: secretsmanagerSecretVersion.SecretsmanagerSecretVersion;
   data: dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion;
 };
 
 /**
- * @param {AwsSecretsVaultDeployableProvisionable} vault the vault's provisionable
- * @param {Provisionable} target the service to add the credentials for
+ * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
  * @param {Stack} stack the stack to deploy resources on
  * @param {CredentialsHandlerOptions} opts the credential handler's options
- * @returns {Credentials} the credentials objects
- * @returns {AwsSecretsDeployableResources} the resources created
+ * @returns {ProvisionCredentialsResources} the credentials objects
  */
-export const provisionCredentialResources = (
+export const generateCredentials = (
   vault: AwsSecretsVaultDeployableProvisionable,
   target: Provisionable,
-  stack: Stack, { root = false, ...opts }: CredentialsHandlerOptions = {},
+  stack: Stack,
+  { root = false, ...opts }: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
-  const { service, requirements: { kmsKey, providerInstance } } = vault;
   const { config } = target;
+  const { service, requirements: { kmsKey, providerInstance } } = vault;
+  const idPrefix = `${snakeCase(config.name)}_secrets`;
   const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
 
   // we only use the default profile, since this is a core service
   const { secret, version, password } = getServiceProfile(
     PROVIDER.AWS, SERVICE_TYPE.SECRETS, DEFAULT_PROFILE_NAME,
   );
-
-  const idPrefix = `${snakeCase(config.name)}_secrets`;
-  const username = `${snakeCase(config.name)}_${root ? 'root' : 'user'}`;
 
   const passResource = new dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword(
     stack.context, `${idPrefix}_password`, {
@@ -110,7 +108,7 @@ export const provisionCredentialResources = (
     ...version,
     secretId: secretResource.id,
     secretString: JSON.stringify({
-      username,
+      username: `${snakeCase(config.name)}_${root ? 'root' : 'user'}`,
       password: passResource.randomPassword,
     }),
     lifecycle: {
@@ -125,30 +123,27 @@ export const provisionCredentialResources = (
     },
   );
 
+  const usernameLocal = new TerraformLocal(
+    stack.context,
+    `${idPrefix}_var_username`,
+    extractTokenFromJsonString(data.secretString, 'username'),
+  );
+
+  const passwordLocal = new TerraformLocal(
+    stack.context,
+    `${idPrefix}_var_password`,
+    extractTokenFromJsonString(data.secretString, 'password'),
+  );
+
   return {
-    password: passResource,
+    username: usernameLocal,
+    password: passwordLocal,
+    randomPassword: passResource,
     secret: secretResource,
     version: secretVersionResource,
     data,
   };
 }
-
-/**
- * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
- * @param {Stack} stack the stack to deploy resources on
- * @param {CredentialsHandlerOptions} opts the credential handler's options
- * @returns {Credentials} the credentials objects
- */
-const generateCredentials: CredentialsHandler = (
-  provisionable: AwsSecretsVaultDeployableProvisionable, target: Provisionable, stack, opts = {},
-): Credentials => {
-  const { data } = provisionCredentialResources(provisionable, target, stack, opts);
-
-  return {
-    username: extractTokenFromJsonString(data.secretString, 'username'),
-    password: extractTokenFromJsonString(data.secretString, 'password'),
-  };
-};
 
 /**
  * @returns {AwsSecretsVaultService} the secrets vault service
