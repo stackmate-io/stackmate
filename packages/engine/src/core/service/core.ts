@@ -9,15 +9,16 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 
 type Resource = TerraformResource | TerraformProvider | TerraformDataSource | TerraformBackend;
 export type ProvisionResources = Resource | Resource[];
-export type Provisions = Record<string, ProvisionResources>;
-
+export type Exposables = { ip?: string; cidr?: string; ref?: string };
+export type Provisions = Exposables & Record<string, ProvisionResources>;
+export type AssociationHandlerReturnType = Provisions[string] | Record<string, string>;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
 
 /**
  * @type {Association}
  */
-export type Association<Ret = any> = {
+export type Association<Ret extends AssociationHandlerReturnType = AssociationHandlerReturnType> = {
   as: string;
   from: ServiceTypeChoice,
   scope: ServiceScopeChoice,
@@ -33,13 +34,13 @@ export type Association<Ret = any> = {
  */
 export type ServiceAssociation<
   name extends string,
-  S extends ServiceTypeChoice,
   C extends ServiceScopeChoice,
-  H = any,
-> = Association<H> & {
+  HandlerReturnType extends AssociationHandlerReturnType,
+  S extends ServiceTypeChoice = never,
+> = Association<HandlerReturnType> & {
   as: name;
-  from: S;
   scope: C;
+  from?: S;
 };
 
 /**
