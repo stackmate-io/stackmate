@@ -2,7 +2,7 @@ import pipe from '@bitty/pipe';
 
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, AssociationLookup, Resource,
+  withSchema, ServiceSideEffect, AssociationLookup, AssociationHandlerReturnType,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -16,8 +16,8 @@ export type LinkableAttributes = { links: string[]; };
  * @param {AssociationHandler<void>} onServiceLinked the function handling service links
  * @returns {Function<Service>}
  */
-export const linkable = <C extends BaseServiceAttributes>(
-  onServiceLinked: AssociationHandler<Resource | void>,
+export const linkable = <C extends BaseServiceAttributes, Ret extends AssociationHandlerReturnType>(
+  onServiceLinked: AssociationHandler<Ret>,
   lookup?: AssociationLookup,
 ) => <T extends Service<C>>(srv: T): T => (
   pipe(
