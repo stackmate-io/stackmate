@@ -2,7 +2,7 @@
  * This file contains associations and helpers for other services to associate with the AWS provider
  */
 import pipe from '@bitty/pipe';
-import { kmsKey, provider as terraformAwsProvider } from '@cdktf/provider-aws';
+import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
 
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
@@ -26,6 +26,10 @@ type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
+type VpcAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
+  'vpc', Scope, vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
+>;
+
 export type AwsServiceAssociations = [
   ProviderAssociation<'deployable'>,
   ProviderAssociation<'destroyable'>,
@@ -33,6 +37,7 @@ export type AwsServiceAssociations = [
   KmsKeyAssociation<'deployable'>,
   KmsKeyAssociation<'destroyable'>,
   KmsKeyAssociation<'preparable'>,
+  VpcAssociation<'deployable'>,
 ];
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
@@ -78,6 +83,21 @@ const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
   ),
 });
 
+const getVpcRequirement = <S extends ServiceScopeChoice>(
+  scope: S,
+): VpcAssociation<S> => ({
+  as: 'vpc',
+  from: SERVICE_TYPE.PROVIDER,
+  scope,
+  requirement: true,
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
+    config.provider === linked.provider && config.region === linked.region
+  ),
+  handler: (prov: AwsProviderDeployableProvisionable): vpc.Vpc => (
+    prov.provisions.vpc
+  ),
+});
+
 const associations: AwsServiceAssociations = [
   getProviderInstanceRequirement('deployable'),
   getProviderInstanceRequirement('destroyable'),
@@ -85,6 +105,7 @@ const associations: AwsServiceAssociations = [
   getKmsKeyRequirement('deployable'),
   getKmsKeyRequirement('destroyable'),
   getKmsKeyRequirement('preparable'),
+  getVpcRequirement('deployable'),
 ];
 
 const getAwsService = (srv: BaseService) => (

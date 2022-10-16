@@ -22,7 +22,7 @@ import {
 export type ProviderPrerequisites = {
   provider: awsProvider.AwsProvider;
   kmsKey: awsKmsKey.KmsKey;
-}
+};
 
 export type AwsProviderDeployableResources = ProviderPrerequisites & {
   gateway: internetGateway.InternetGateway;
