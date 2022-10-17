@@ -21,8 +21,11 @@ export type AssociationNameGenerator = (prefix: string, index: number) => string
 export type AssociationLookup = (
   config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes,
 ) => boolean;
-export type AssociationHandler<Ret extends AssociationHandlerReturnType> = (
-  linked: Provisionable, target: Provisionable, stack?: Stack,
+export type AssociationHandler<
+  Ret extends AssociationHandlerReturnType,
+  Attrs extends BaseServiceAttributes = BaseServiceAttributes
+> = (
+  linked: Provisionable<Attrs>, target: Provisionable<Attrs>, stack?: Stack,
 ) => Ret;
 
 /**
