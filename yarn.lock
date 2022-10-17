@@ -1045,9 +1045,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.16.4, @oclif/core@npm:^1.16.5":
-  version: 1.16.5
-  resolution: "@oclif/core@npm:1.16.5"
+"@oclif/core@npm:^1.16.4, @oclif/core@npm:^1.16.5, @oclif/core@npm:^1.18.0":
+  version: 1.18.0
+  resolution: "@oclif/core@npm:1.18.0"
   dependencies:
     "@oclif/linewrap": ^1.0.0
     "@oclif/screen": ^3.0.2
@@ -1077,7 +1077,7 @@ __metadata:
     tslib: ^2.3.1
     widest-line: ^3.1.0
     wrap-ansi: ^7.0.0
-  checksum: 8af72d6fea8b302729d283c31e656aaa653d51863b7fd2b0f2174af091b3833a3d85ac9c96e1378380e5e195f370b0e00acca3b5978a45b3a8e84e98c878735a
+  checksum: 19d08e0f206a976ce809879c379691ea2e2d8871451c733d04ccb3af37b18be6751d079f5e26f5dc513a9be4f3b37ec1d4ab3b336cde518e4251569e24b6bc32
   languageName: node
   linkType: hard
 
@@ -1088,7 +1088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:^5.1.14, @oclif/plugin-help@npm:^5.1.15":
+"@oclif/plugin-help@npm:^5.1.15":
   version: 5.1.15
   resolution: "@oclif/plugin-help@npm:5.1.15"
   dependencies:
@@ -1097,15 +1097,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.3.4":
-  version: 2.3.4
-  resolution: "@oclif/plugin-not-found@npm:2.3.4"
+"@oclif/plugin-not-found@npm:^2.3.5":
+  version: 2.3.5
+  resolution: "@oclif/plugin-not-found@npm:2.3.5"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.16.5
+    "@oclif/core": ^1.18.0
     fast-levenshtein: ^3.0.0
     lodash: ^4.17.21
-  checksum: d513be48e7813c90686d765fe5ea4918d38fd762a643ad23f0ffb5cec7873b4e47444d4ec1ef1f4784af06f4eec46951ad1ab1f57485fadd82d924b74da7d968
+  checksum: aeed5ca2d7e052f867ca6db43c78a5ec229dcb824eb9e632cd8f5764f8204f2513651452a1c3aa4349ae452af6d3c2093a476b7cc54b46559284080b6abbd762
   languageName: node
   linkType: hard
 
@@ -1325,7 +1325,7 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^29.1.2
     lodash: 4.17.21
-    oclif: ^3.2.16
+    oclif: ^3.2.19
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.0
@@ -6453,13 +6453,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.16":
-  version: 3.2.16
-  resolution: "oclif@npm:3.2.16"
+"oclif@npm:^3.2.19":
+  version: 3.2.19
+  resolution: "oclif@npm:3.2.19"
   dependencies:
-    "@oclif/core": ^1.16.4
-    "@oclif/plugin-help": ^5.1.14
-    "@oclif/plugin-not-found": ^2.3.4
+    "@oclif/core": ^1.18.0
+    "@oclif/plugin-help": ^5.1.15
+    "@oclif/plugin-not-found": ^2.3.5
     "@oclif/plugin-warn-if-update-available": ^2.0.6
     aws-sdk: ^2.1231.0
     concurrently: ^7.4.0
@@ -6477,7 +6477,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: cc4e62ca1985be5e51c06d59a594587741c475608115876a756926a09c7a5e1c1ba056d3e7f16dab251179dfe785c6d661accf0895f25548f6939bf2fe9f2158
+  checksum: 7ce368176a674ecd4beb171cbc766a0dd760fc156b35388cfe7805ccdc3159c57f7ba8e9473a6603de66c81e0fe4c0557fafa5f4c63406fc3620540ef4b16804
   languageName: node
   linkType: hard
 
