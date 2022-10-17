@@ -1,14 +1,38 @@
-import { TerraformElement, TerraformLocal } from 'cdktf';
+import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
 import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
+/**
+ * @type {ProviderChoice} a provider choice
+ */
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 
+/**
+ * @type {ServiceTypeChoice} a service type choice
+ */
+export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
+
+/**
+ * @type {ServiceScopeChoice} the provisioning scopes available
+ */
+export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
+
+/**
+ * @type {Resource} a resource provisioned by the system
+ */
 export type Resource = TerraformElement;
+
+/**
+ * @type {ProvisionResources} types of resources that are provisioned by the handlers
+ */
 export type ProvisionResources = Resource | Resource[] | Record<string, Resource>;
+
+/**
+ * @type {Provisions} the type returned by provision handlers
+ */
 export type Provisions = Record<string, ProvisionResources> & {
   /**
    * The service's IP address to allow linking with services with
@@ -16,19 +40,28 @@ export type Provisions = Record<string, ProvisionResources> & {
   ip?: TerraformLocal;
 
   /**
+   * The service's outputs
+   */
+  outputs?: TerraformOutput[];
+
+  /**
    * A resource reference such as a resource's ID to link with services within the same provider
    */
   resourceRef?: TerraformLocal;
 };
-export type AssociationHandlerReturnType = ProvisionResources;
-export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
-export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
-export type AssociationNameGenerator = (prefix: string, index: number) => string;
+
+/**
+ * @type {AssociationLookup} the function which determines whether an association takes effect
+ */
 export type AssociationLookup = (
   config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes,
 ) => boolean;
+
+/**
+ * @type {AssociationHandler} the handler to run when an association takes effect
+ */
 export type AssociationHandler<
-  Ret extends AssociationHandlerReturnType,
+  Ret extends ProvisionResources,
   Attrs extends BaseServiceAttributes = BaseServiceAttributes
 > = (
   linked: Provisionable<Attrs>, target: Provisionable<Attrs>, stack?: Stack,
@@ -37,7 +70,7 @@ export type AssociationHandler<
 /**
  * @type {Association} describes an association between two services
  */
-export type Association<Ret extends AssociationHandlerReturnType> = {
+export type Association<Ret extends ProvisionResources> = {
   scope: ServiceScopeChoice;
   handler: AssociationHandler<Ret>;
   as?: string;
@@ -51,7 +84,7 @@ export type Association<Ret extends AssociationHandlerReturnType> = {
  */
 export type ServiceSideEffect = Omit<Association<any>, 'as'> & {
   scope: ServiceScopeChoice;
-  handler: AssociationHandler<AssociationHandlerReturnType>;
+  handler: AssociationHandler<ProvisionResources>;
   where: AssociationLookup;
   requirement?: false;
 };
@@ -65,7 +98,7 @@ export type ServiceSideEffect = Omit<Association<any>, 'as'> & {
 export type ServiceRequirement<
   name extends string,
   C extends ServiceScopeChoice,
-  HandlerReturnType extends AssociationHandlerReturnType,
+  HandlerReturnType extends ProvisionResources,
   S extends ServiceTypeChoice = never,
 > = Association<HandlerReturnType> & {
   as: name;

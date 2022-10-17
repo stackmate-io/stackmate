@@ -2,7 +2,6 @@ import { dbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
 const instance: Partial<dbInstance.DbInstanceConfig> = {
   allowMajorVersionUpgrade: false,
-  applyImmediately: true,
   autoMinorVersionUpgrade: true,
   backupRetentionPeriod: 0,
   copyTagsToSnapshot: true,
