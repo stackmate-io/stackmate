@@ -9,9 +9,13 @@ import {
 } from '@stackmate/engine/core/service/core';
 
 /**
- * @type {LinkableAttributes} link attributes
+ * @type {LinkableAttributes} internal link service attributes
  */
 export type LinkableAttributes = { links: string[]; };
+
+/**
+ * @type {ExternallyLinkableAttributes} external link service attributes
+ */
 export type ExternallyLinkableAttributes = { externalLinks: string[] };
 
 /**
