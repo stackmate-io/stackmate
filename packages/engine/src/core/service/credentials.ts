@@ -6,13 +6,31 @@ import {
   associate, BaseService, BaseServiceAttributes, Provisionable, Service, ServiceRequirement,
 } from '@stackmate/engine/core/service';
 
+/**
+ * @type {Credentials} a credentials object returned by the credentials provision handler
+ */
 export type Credentials = {
   username: TerraformLocal;
   password: TerraformLocal;
 };
 
-export type CredentialsRequirement = ServiceRequirement<'credentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS>;
-export type RootCredentialsRequirement = ServiceRequirement<'rootCredentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS>;
+/**
+ * @type {CredentialsRequirement} adds a requirement for credentials
+ */
+export type CredentialsRequirement = ServiceRequirement<
+  'credentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+>;
+
+/**
+ * @type {RootCredentialsRequirement} adds a requirement for root credentials
+ */
+export type RootCredentialsRequirement = ServiceRequirement<
+  'rootCredentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+>;
+
+/**
+ * @type {CredentialsHandlerOptions} the options to pass into the credentials handler
+ */
 export type CredentialsHandlerOptions = {
   root?: boolean;
   length?: number;
@@ -20,19 +38,32 @@ export type CredentialsHandlerOptions = {
   exclude?: string[];
 };
 
+/**
+ * @type {CredentialsHandler} the credentials association handler
+ */
 export type CredentialsHandler = (
   vault: Provisionable, target: Provisionable, stack: Stack, opts?: CredentialsHandlerOptions,
 ) => Credentials;
 
+/**
+ * @type {SecretsVaultService} describes secrets vault services
+ */
 export type SecretsVaultService<Srv extends BaseService> = Srv & {
   credentials: CredentialsHandler,
 };
 
+/**
+ * @type {VaultProvisionable} a vault service provisionable
+ */
 export type VaultProvisionable = Provisionable & {
   service: SecretsVaultService<Provisionable['service']>;
 };
 
-export const withCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T): T & { associations: [CredentialsRequirement] } => (
+/**
+ * @returns {Function<Service>} the service enhanced with the crerentials association
+ */
+export const withCredentials = <C extends BaseServiceAttributes>(
+) => <T extends Service<C>>(srv: T): T & { associations: [CredentialsRequirement] } => (
   associate<C, [CredentialsRequirement]>([{
     as: 'credentials',
     from: SERVICE_TYPE.SECRETS,
@@ -44,7 +75,11 @@ export const withCredentials = <C extends BaseServiceAttributes>() => <T extends
   }])(srv)
 );
 
-export const withRootCredentials = <C extends BaseServiceAttributes>() => <T extends Service<C>>(srv: T): T & { associations: [RootCredentialsRequirement] } => (
+/**
+ * @returns {Function<Service>} the service enhanced with the root crerentials association
+ */
+export const withRootCredentials = <C extends BaseServiceAttributes>(
+) => <T extends Service<C>>(srv: T): T & { associations: [RootCredentialsRequirement] } => (
   associate<C, [RootCredentialsRequirement]>([{
     as: 'rootCredentials',
     from: SERVICE_TYPE.SECRETS,
@@ -56,9 +91,16 @@ export const withRootCredentials = <C extends BaseServiceAttributes>() => <T ext
   }])(srv)
 );
 
+/**
+ * This function is intended for secrets vault services.
+ * It adds a `credentials` function which provides the credentials requested by other services
+ *
+ * @param {Function<Credentials>} onCredentialsRequested function that generates credentials
+ * @returns {Service}
+ */
 export const withCredentialsGenerator = <C extends BaseServiceAttributes>(
-  credentials: CredentialsHandler
+  onCredentialsRequested: CredentialsHandler
 ) => <T extends Service<C>>(srv: T): T & SecretsVaultService<T> => ({
   ...srv,
-  credentials,
+  credentials: onCredentialsRequested,
 });
