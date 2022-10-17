@@ -159,6 +159,7 @@ export type JsonSchema<T = undefined> = {
   else?: JsonSchema;
 
   // Stackmate-specific
+  isIpOrCidr?: boolean;
   serviceLinks?: boolean;
   serviceProfile?: boolean;
   serviceProfileOverrides?: boolean;
