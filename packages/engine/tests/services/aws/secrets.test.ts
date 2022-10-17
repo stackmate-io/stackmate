@@ -1,3 +1,4 @@
+import { TerraformLocal } from 'cdktf';
 import {
   dataAwsSecretsmanagerRandomPassword, dataAwsSecretsmanagerSecretVersion,
   secretsmanagerSecret, secretsmanagerSecretVersion,
@@ -11,7 +12,7 @@ import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
 import {
-  AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, provisionCredentialResources,
+  AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, generateCredentials,
 } from '@stackmate/engine/providers/aws/services/secrets';
 
 describe('AWS Secrets service', () => {
@@ -86,10 +87,12 @@ describe('AWS Secrets service', () => {
     });
 
     it('registers the provision credentials terraform resources', () => {
-      const resources = provisionCredentialResources(
+      const resources = generateCredentials(
         vault as AwsSecretsVaultDeployableProvisionable, target, stack,
       );
       expect(resources).toBeInstanceOf(Object);
+      expect(resources.username).toBeInstanceOf(TerraformLocal);
+      expect(resources.password).toBeInstanceOf(TerraformLocal);
       expect(resources.data).toBeInstanceOf(
         dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion,
       )
@@ -99,7 +102,7 @@ describe('AWS Secrets service', () => {
       expect(resources.secret).toBeInstanceOf(
         secretsmanagerSecret.SecretsmanagerSecret,
       );
-      expect(resources.password).toBeInstanceOf(
+      expect(resources.randomPassword).toBeInstanceOf(
         dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword,
       );
     });
@@ -108,8 +111,8 @@ describe('AWS Secrets service', () => {
       const credentials = service.credentials(vault, target, stack);
       expect(credentials).toBeInstanceOf(Object);
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi;
-      expect(credentials.username).toEqual(expect.stringMatching(reg));
-      expect(credentials.password).toEqual(expect.stringMatching(reg));
+      expect(credentials.username.asString).toEqual(expect.stringMatching(reg));
+      expect(credentials.password.asString).toEqual(expect.stringMatching(reg));
     });
   });
 });

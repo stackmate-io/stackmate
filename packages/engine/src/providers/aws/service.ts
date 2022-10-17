@@ -2,14 +2,14 @@
  * This file contains associations and helpers for other services to associate with the AWS provider
  */
 import pipe from '@bitty/pipe';
-import { kmsKey, provider as terraformAwsProvider } from '@cdktf/provider-aws';
+import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
 
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService,
-  ServiceAssociation, ServiceScopeChoice, ServiceTypeChoice, withRegions,
+  ServiceRequirement, ServiceScopeChoice, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -18,12 +18,16 @@ import {
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
-type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'providerInstance', Scope, terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceAssociation<
+type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
+>;
+
+type VpcAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
+  'vpc', Scope, vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
 >;
 
 export type AwsServiceAssociations = [
@@ -33,6 +37,7 @@ export type AwsServiceAssociations = [
   KmsKeyAssociation<'deployable'>,
   KmsKeyAssociation<'destroyable'>,
   KmsKeyAssociation<'preparable'>,
+  VpcAssociation<'deployable'>,
 ];
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
@@ -46,12 +51,13 @@ type ProviderProvisionable = OneOfType<[
   AwsProviderPreparableProvisionable,
 ]>;
 
-const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
+const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
   scope: S,
 ): ProviderAssociation<S> => ({
   as: 'providerInstance',
   from: SERVICE_TYPE.PROVIDER,
   scope,
+  requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
@@ -60,12 +66,13 @@ const getProviderInstanceAssociation = <S extends ServiceScopeChoice>(
   ),
 });
 
-const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
+const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
   scope: S,
 ): KmsKeyAssociation<S> => ({
   as: 'kmsKey',
   from: SERVICE_TYPE.PROVIDER,
   scope,
+  requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
   ),
@@ -76,13 +83,29 @@ const getKmsKeyAssociation = <S extends ServiceScopeChoice>(
   ),
 });
 
+const getVpcRequirement = <S extends ServiceScopeChoice>(
+  scope: S,
+): VpcAssociation<S> => ({
+  as: 'vpc',
+  from: SERVICE_TYPE.PROVIDER,
+  scope,
+  requirement: true,
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
+    config.provider === linked.provider && config.region === linked.region
+  ),
+  handler: (prov: AwsProviderDeployableProvisionable): vpc.Vpc => (
+    prov.provisions.vpc
+  ),
+});
+
 const associations: AwsServiceAssociations = [
-  getProviderInstanceAssociation('deployable'),
-  getProviderInstanceAssociation('destroyable'),
-  getProviderInstanceAssociation('preparable'),
-  getKmsKeyAssociation('deployable'),
-  getKmsKeyAssociation('destroyable'),
-  getKmsKeyAssociation('preparable'),
+  getProviderInstanceRequirement('deployable'),
+  getProviderInstanceRequirement('destroyable'),
+  getProviderInstanceRequirement('preparable'),
+  getKmsKeyRequirement('deployable'),
+  getKmsKeyRequirement('destroyable'),
+  getKmsKeyRequirement('preparable'),
+  getVpcRequirement('deployable'),
 ];
 
 const getAwsService = (srv: BaseService) => (

@@ -4,7 +4,7 @@ import { LocalBackend } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@stackmate/engine/constants';
-import { getLocalService, LocalServiceAssociations, LocalServiceAttributes } from '@stackmate/engine/providers/local/service';
+import { getLocalService, LocalServiceRequirements, LocalServiceAttributes } from '@stackmate/engine/providers/local/service';
 import {
   BaseServiceAttributes, Provisionable, ProvisionAssociationRequirements,
   Service, withHandler, withSchema,
@@ -19,7 +19,7 @@ export type LocalStateAttributes = LocalServiceAttributes<BaseServiceAttributes 
 }>;
 
 export type LocalStateService = Service<LocalStateAttributes> & {
-  associations: LocalServiceAssociations;
+  associations: LocalServiceRequirements;
 };
 
 export type LocalStateProvisionable = Provisionable & {
