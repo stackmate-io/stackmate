@@ -1045,9 +1045,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.16.4, @oclif/core@npm:^1.16.5":
-  version: 1.16.5
-  resolution: "@oclif/core@npm:1.16.5"
+"@oclif/core@npm:^1.16.4, @oclif/core@npm:^1.16.5, @oclif/core@npm:^1.18.0":
+  version: 1.18.0
+  resolution: "@oclif/core@npm:1.18.0"
   dependencies:
     "@oclif/linewrap": ^1.0.0
     "@oclif/screen": ^3.0.2
@@ -1077,7 +1077,7 @@ __metadata:
     tslib: ^2.3.1
     widest-line: ^3.1.0
     wrap-ansi: ^7.0.0
-  checksum: 8af72d6fea8b302729d283c31e656aaa653d51863b7fd2b0f2174af091b3833a3d85ac9c96e1378380e5e195f370b0e00acca3b5978a45b3a8e84e98c878735a
+  checksum: 19d08e0f206a976ce809879c379691ea2e2d8871451c733d04ccb3af37b18be6751d079f5e26f5dc513a9be4f3b37ec1d4ab3b336cde518e4251569e24b6bc32
   languageName: node
   linkType: hard
 
@@ -1109,22 +1109,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-plugins@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@oclif/plugin-plugins@npm:2.1.2"
+"@oclif/plugin-plugins@npm:^2.1.4":
+  version: 2.1.4
+  resolution: "@oclif/plugin-plugins@npm:2.1.4"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.16.5
+    "@oclif/core": ^1.18.0
     chalk: ^4.1.2
     debug: ^4.3.4
     fs-extra: ^9.0
     http-call: ^5.2.2
     load-json-file: ^5.3.0
     npm-run-path: ^4.0.1
-    semver: ^7.3.2
+    semver: ^7.3.8
     tslib: ^2.0.0
     yarn: ^1.22.18
-  checksum: 3027e55b9f930daf144b70086d9f1107aa00beca405b1a73702a5a4ce1ff4ff97131847927e8c45e00530bb7208e15b964dd8140361be2e06a75a01df6cad918
+  checksum: 90e0e4ff08bbaf0f8fde49bc3f3d7537e110127f57ce817d8fa14bf120be715bd318ed6c757eafa623bc5a2170b6e55454fd25428f4551c39607c07a64af6c02
   languageName: node
   linkType: hard
 
@@ -1313,7 +1313,7 @@ __metadata:
     "@oclif/color": ^1.0.1
     "@oclif/core": ^1.16.5
     "@oclif/plugin-help": ^5.1.15
-    "@oclif/plugin-plugins": ^2.1.2
+    "@oclif/plugin-plugins": ^2.1.4
     "@stackmate/engine": "workspace:packages/engine"
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.2
