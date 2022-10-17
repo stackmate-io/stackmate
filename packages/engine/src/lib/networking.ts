@@ -1,4 +1,5 @@
-import { Address4 } from 'ip-address';
+import { uniq } from 'lodash';
+import { Address4, Address6 } from 'ip-address';
 
 /**
  * Returns a list of CIDR blocks based on a single IP
@@ -11,11 +12,13 @@ import { Address4 } from 'ip-address';
  */
 export const getCidrBlocks = (
   ip: string, bitmask: number = 16, subnets: number = 2, subnetBitmask: number = 24,
-): Array<string> => {
-  const cidrBlocks: Array<string> = [];
+): string[] => {
+  const cidrBlocks: string[] = [];
   const root = new Address4(`${ip}/${bitmask}`);
+  const { address, addressMinusSuffix } = root.startAddress();
+
   cidrBlocks.push(
-    `${root.startAddress().address}/${bitmask}`,
+    `${addressMinusSuffix || address}/${bitmask}`,
   );
 
   const [firstOctet, secondOctet] = root.toArray();
@@ -24,5 +27,38 @@ export const getCidrBlocks = (
     cidrBlocks.push(`${subnetIp}/${subnetBitmask}`);
   });
 
-  return cidrBlocks;
+  return uniq(cidrBlocks);
+};
+
+/**
+ * @param {String} ipOrCidr the address to parse
+ * @returns {Object} the IP / mask setup
+ */
+export const getIpAddressParts = (ipOrCidr: string): { ip: string, mask?: number } => {
+  const addr = ipOrCidr.match(':') ? new Address6(ipOrCidr) : new Address4(ipOrCidr);
+  const { addressMinusSuffix, address } = addr.startAddress();
+  return { ip: addressMinusSuffix || address, mask: addr.subnetMask };
+};
+
+/**
+ * Converts an IP Address to a CIDR block
+ *
+ * @param {String} ipOrCidr the IP or CIDR address to parse
+ * @returns {String} the address as a CIDR block
+ */
+export const convertIpToCidr = (ipOrCidr: string): string => {
+  const { ip, mask = 32 } = getIpAddressParts(ipOrCidr);
+  return `${ip}/${mask}`;
+};
+
+/**
+ * @param {String} ip the value to check
+ * @returns {Boolean} whether the given value is an IP address or not
+ */
+export const isAddressValid = (ip: string): boolean => {
+  try {
+    return (ip.match(':') ? new Address6(ip) : new Address4(ip)).isCorrect();
+  } catch (err) {
+    return false;
+  }
 };
