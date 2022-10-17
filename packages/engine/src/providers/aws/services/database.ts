@@ -122,6 +122,7 @@ export const onDeploy: ProvisionHandler = (
   const dbInstance = new rdsDbInstance.DbInstance(stack.context, config.name, {
     ...instance,
     allocatedStorage: config.storage,
+    applyImmediately: true,
     count: config.nodes,
     enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE[config.engine],
     engine: config.engine,
