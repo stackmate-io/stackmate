@@ -1,14 +1,24 @@
 import pipe from '@bitty/pipe';
 
+import { ConnectableAttributes } from './connectable';
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, AssociationLookup, AssociationHandlerReturnType,
+  withSchema, ServiceSideEffect, AssociationLookup, AssociationHandlerReturnType, ProvisionResources,
 } from '@stackmate/engine/core/service/core';
 
 /**
  * @type {LinkableAttributes} link attributes
  */
 export type LinkableAttributes = { links: string[]; };
+
+export type LinkableServiceAttributes = BaseServiceAttributes & ConnectableAttributes;
+
+/**
+ * @type {ServiceLinkHandler} the function who handles service linking
+ */
+export type ServiceLinkHandler = AssociationHandler<
+  ProvisionResources, BaseServiceAttributes & ConnectableAttributes
+>;
 
 /**
  * Adds link support to a service (allows it to be linked to other services)
@@ -17,7 +27,7 @@ export type LinkableAttributes = { links: string[]; };
  * @returns {Function<Service>}
  */
 export const linkable = <C extends BaseServiceAttributes, Ret extends AssociationHandlerReturnType>(
-  onServiceLinked: AssociationHandler<Ret>,
+  onServiceLinked: ServiceLinkHandler,
   lookup?: AssociationLookup,
 ) => <T extends Service<C>>(srv: T): T => (
   pipe(
