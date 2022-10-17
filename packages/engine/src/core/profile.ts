@@ -2,7 +2,7 @@ import { join as joinPaths } from 'node:path';
 
 import { merge } from 'lodash';
 
-import { DEFAULT_PROFILE_NAME, PROFILES_PATH } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, PROFILES_PATH, PROFILE_DIRECTORY_OVERRIDES } from '@stackmate/engine/constants';
 import {
   BaseServiceAttributes, ProviderChoice, ServiceTypeChoice, ProfilableAttributes,
 } from '@stackmate/engine/core/service';
@@ -20,8 +20,10 @@ import {
 export const getProfilePath = (
   provider: ProviderChoice, service: ServiceTypeChoice, name: string, { withExtension = false } = {},
 ): string => {
-  const fileName = `${name}${withExtension ? '.ts' : ''}`;
-  return joinPaths(PROFILES_PATH, provider, service, fileName);
+  const directory = PROFILE_DIRECTORY_OVERRIDES.get(service) || service;
+  return joinPaths(
+    PROFILES_PATH, provider, directory, `${name}${withExtension ? '.ts' : ''}`,
+  );
 };
 
 /**
@@ -51,12 +53,11 @@ export const getServiceProfile = (
  * @param {BaseServiceAttributes & ProfilableAttributes} config the service configuration
  * @returns {Object} the result of merging the profile with the service's overrides
  */
-export const getResourcesProfile = <T extends BaseServiceAttributes & ProfilableAttributes>(
-  config: T,
+export const getResourcesProfile = <T extends BaseServiceAttributes & Partial<ProfilableAttributes>>(
+  config: T
 ): Record<string, any> => {
-  const profile = getServiceProfile(
-    config.provider, config.type, config.profile || DEFAULT_PROFILE_NAME,
-  );
+  const { provider, type, profile = DEFAULT_PROFILE_NAME, overrides = {} } = config;
+  const profileConfig = getServiceProfile(provider, type, profile);
 
-  return merge(profile, config.overrides);
+  return merge(profileConfig, overrides);
 };

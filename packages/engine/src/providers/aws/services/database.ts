@@ -2,9 +2,9 @@ import pipe from '@bitty/pipe';
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
+import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
-import { DEFAULT_PORT, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/service';
 import {
   RootCredentialsRequirement, withCredentials, withRootCredentials,
@@ -110,15 +110,8 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
 export const onDeploy: ProvisionHandler = (
   provisionable: AwsDatabaseDeployableProvisionable, stack: Stack,
 ): AwsDatabaseDeployableResources => {
-  const {
-    config,
-    service,
-    requirements: { providerInstance, rootCredentials },
-  } = provisionable;
-
-  const { instance, params } = getServiceProfile(
-    service.provider, service.type, config.profile || DEFAULT_PROFILE_NAME,
-  );
+  const { config, requirements: { providerInstance, rootCredentials } } = provisionable;
+  const { instance, params } = getResourcesProfile(config);
 
   const paramGroup = new dbParameterGroup.DbParameterGroup(
     stack.context, `${provisionable.resourceId}-params`, {
