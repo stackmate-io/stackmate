@@ -2,7 +2,7 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "@faker-js/faker": "^7.5.0",
+    "@faker-js/faker": "^7.6.0",
     "@types/chai": "^4.3.3",
     "@types/jest": "^29.1.1",
     "@types/lodash": "^4.14.186",
