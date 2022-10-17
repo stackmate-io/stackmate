@@ -10,8 +10,14 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>;
 export type Resource = TerraformElement;
 export type ProvisionResources = Resource | Resource[] | Record<string, Resource>;
 export type Provisions = Record<string, ProvisionResources> & {
+  /**
+   * The service's IP address to allow linking with services with
+   */
   ip?: TerraformLocal;
-  cidr?: TerraformLocal;
+
+  /**
+   * A resource reference such as a resource's ID to link with services within the same provider
+   */
   resourceRef?: TerraformLocal;
 };
 export type AssociationHandlerReturnType = ProvisionResources;
