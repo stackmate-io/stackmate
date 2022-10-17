@@ -1310,7 +1310,7 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.16.5
+    "@oclif/core": ^1.18.0
     "@oclif/plugin-help": ^5.1.15
     "@oclif/plugin-plugins": ^2.1.2
     "@stackmate/engine": "workspace:packages/engine"
