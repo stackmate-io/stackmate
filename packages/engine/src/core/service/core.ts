@@ -14,7 +14,7 @@ export type Provisions = Record<string, ProvisionResources> & {
   cidr?: TerraformLocal;
   resourceRef?: TerraformLocal;
 };
-export type AssociationHandlerReturnType = Provisions[string];
+export type AssociationHandlerReturnType = ProvisionResources;
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>;
 export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>;
 export type AssociationNameGenerator = (prefix: string, index: number) => string;
@@ -37,16 +37,17 @@ export type Association<Ret extends AssociationHandlerReturnType> = {
   as?: string;
   from?: ServiceTypeChoice;
   where?: AssociationLookup;
-  requirement?: boolean;
+  requirement?: true;
 };
 
 /**
  * @type {ServiceSideEffect} describes a generic association that is not a requirement
  */
-export type ServiceSideEffect = Omit<Association<any>, 'as' | 'from'> & {
+export type ServiceSideEffect = Omit<Association<any>, 'as'> & {
   scope: ServiceScopeChoice;
   handler: AssociationHandler<AssociationHandlerReturnType>;
   where: AssociationLookup;
+  requirement?: false;
 };
 
 /**
