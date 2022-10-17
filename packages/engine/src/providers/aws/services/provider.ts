@@ -35,7 +35,7 @@ export type AwsProviderDestroyableResources = ProviderPrerequisites;
 
 export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
-  & { type: typeof SERVICE_TYPE.PROVIDER; ip?: string; }
+  & { type: typeof SERVICE_TYPE.PROVIDER; rootIp?: string; }
 >;
 
 export type AwsProviderService = Service<AwsProviderAttributes>;
@@ -106,7 +106,7 @@ export const onDeploy = (
   provisionable: AwsProviderDeployableProvisionable, stack: Stack,
 ): AwsProviderDeployableResources => {
   const { config, resourceId } = provisionable;
-  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.ip || DEFAULT_VPC_IP, 16, 2, 24);
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24);
   const {
     vpc: vpcConfig,
     subnet: subnetConfig,
