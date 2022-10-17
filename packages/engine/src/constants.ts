@@ -58,8 +58,8 @@ export const DEFAULT_PORT: Map<ServiceTypeChoice, number> = new Map([
 
 export const PROFILE_DIRECTORY_OVERRIDES: Map<ServiceTypeChoice, string> = new Map([
   [SERVICE_TYPE.MEMCACHED, 'cache'],
-  [SERVICE_TYPE.MARIADB, 'cache'],
+  [SERVICE_TYPE.REDIS, 'cache'],
+  [SERVICE_TYPE.MARIADB, 'database'],
   [SERVICE_TYPE.MYSQL, 'database'],
   [SERVICE_TYPE.POSTGRESQL, 'database'],
-  [SERVICE_TYPE.REDIS, 'database'],
 ]);
