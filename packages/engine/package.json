@@ -34,7 +34,7 @@
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "cdktf": "0.13.0",
-    "constructs": "^10.1.127",
+    "constructs": "^10.1.131",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21"
   },
