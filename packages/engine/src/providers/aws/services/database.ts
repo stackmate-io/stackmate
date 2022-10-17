@@ -7,7 +7,7 @@ import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PORT, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/service';
 import {
-  RootCredentialsAssociation, withCredentials, withRootCredentials,
+  RootCredentialsRequirement, withCredentials, withRootCredentials,
 } from '@stackmate/engine/core/service/credentials';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
@@ -49,7 +49,7 @@ export type AwsPostgreSQLAttributes = AwsDatabaseAttributes<'postgresql', 'postg
 export type AwsMariaDBAttributes = AwsDatabaseAttributes<'mariadb', 'mariadb'>;
 
 type AwsDbService<Attrs extends DatabaseAttributes> = Service<Attrs> & {
-  associations: [...AwsServiceAssociations, RootCredentialsAssociation],
+  associations: [...AwsServiceAssociations, RootCredentialsRequirement],
 };
 
 export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>;
@@ -140,8 +140,8 @@ export const onDeploy: ProvisionHandler = (
     port: config.port,
     provider: providerInstance,
     dbSubnetGroupName: `db-subnet-${provisionable.resourceId}`,
-    username: rootCredentials.username,
-    password: rootCredentials.password,
+    username: rootCredentials.username.expression,
+    password: rootCredentials.password.expression,
     lifecycle: {
       createBeforeDestroy: true,
     },
