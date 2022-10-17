@@ -6,6 +6,7 @@ import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
+import { isAddressValid } from '@stackmate/engine/lib';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { BaseServiceAttributes, ServiceEnvironment } from '@stackmate/engine/core/service';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
@@ -161,6 +162,13 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   addErrors(ajv, { // https://ajv.js.org/packages/ajv-errors.html
     keepErrors: false,
     singleError: false,
+  });
+
+  ajv.addKeyword({
+    keyword: 'isIpOrCidr',
+    type: 'boolean',
+    error: { message: 'Invalid IP specified' },
+    validate: isAddressValid,
   });
 
   ajv.addKeyword({  // no-op for config generator
