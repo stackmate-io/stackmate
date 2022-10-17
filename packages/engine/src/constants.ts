@@ -55,3 +55,11 @@ export const DEFAULT_PORT: Map<ServiceTypeChoice, number> = new Map([
   [SERVICE_TYPE.POSTGRESQL, 5432],
   [SERVICE_TYPE.REDIS, 6379],
 ]);
+
+export const PROFILE_DIRECTORY_OVERRIDES: Map<ServiceTypeChoice, string> = new Map([
+  [SERVICE_TYPE.MEMCACHED, 'cache'],
+  [SERVICE_TYPE.MARIADB, 'cache'],
+  [SERVICE_TYPE.MYSQL, 'database'],
+  [SERVICE_TYPE.POSTGRESQL, 'database'],
+  [SERVICE_TYPE.REDIS, 'database'],
+]);
