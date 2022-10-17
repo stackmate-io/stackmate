@@ -6,14 +6,32 @@ import { getProfilePath, getServiceProfile } from '@stackmate/engine/core/profil
 import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 describe('getProfilePath', () => {
-  it('returns the path for a profile', () => {
-    const p = getProfilePath(PROVIDER.AWS, SERVICE_TYPE.MYSQL, 'production');
-    expect(p).toEqual(path.join(PROFILES_PATH, PROVIDER.AWS, SERVICE_TYPE.MYSQL, 'production'))
+  it('returns the path for a profile for a service without overrides', () => {
+    const p = getProfilePath(
+      PROVIDER.AWS, SERVICE_TYPE.SECRETS, 'production', { withExtension: true },
+    );
+
+    expect(p).toEqual(
+      path.join(PROFILES_PATH, PROVIDER.AWS, SERVICE_TYPE.SECRETS, 'production.ts'),
+    );
+  });
+
+  it('returns the path for a profile for a service without overrides', () => {
+    const p = getProfilePath(
+      PROVIDER.AWS, SERVICE_TYPE.MYSQL, 'production', { withExtension: true },
+    );
+
+    expect(p).toEqual(path.join(PROFILES_PATH, PROVIDER.AWS, 'database', 'production.ts'));
   });
 
   it('returns the path for a profile with the file extension', () => {
-    const p = getProfilePath(PROVIDER.AWS, SERVICE_TYPE.MYSQL, 'production', { withExtension: true });
-    expect(p).toEqual(path.join(PROFILES_PATH, PROVIDER.AWS, SERVICE_TYPE.MYSQL, 'production.ts'))
+    const p = getProfilePath(
+      PROVIDER.AWS, SERVICE_TYPE.SECRETS, 'production', { withExtension: true },
+    );
+
+    expect(p).toEqual(
+      path.join(PROFILES_PATH, PROVIDER.AWS, SERVICE_TYPE.SECRETS, 'production.ts'),
+    );
   });
 });
 
