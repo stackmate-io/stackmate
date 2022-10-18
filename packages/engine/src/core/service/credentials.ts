@@ -3,7 +3,7 @@ import { TerraformLocal } from 'cdktf';
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  associate, BaseService, BaseServiceAttributes, Provisionable, Service, ServiceRequirement,
+  associate, BaseService, BaseServiceAttributes, Provisionable, Service, ServiceRequirement, WithAssociations,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -63,7 +63,7 @@ export type VaultProvisionable = Provisionable & {
  * @returns {Function<Service>} the service enhanced with the crerentials association
  */
 export const withCredentials = <C extends BaseServiceAttributes>(
-) => <T extends Service<C>>(srv: T): T & { associations: [CredentialsRequirement] } => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, [CredentialsRequirement]> => (
   associate<C, [CredentialsRequirement]>([{
     as: 'credentials',
     from: SERVICE_TYPE.SECRETS,
@@ -79,7 +79,7 @@ export const withCredentials = <C extends BaseServiceAttributes>(
  * @returns {Function<Service>} the service enhanced with the root crerentials association
  */
 export const withRootCredentials = <C extends BaseServiceAttributes>(
-) => <T extends Service<C>>(srv: T): T & { associations: [RootCredentialsRequirement] } => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, [RootCredentialsRequirement]> => (
   associate<C, [RootCredentialsRequirement]>([{
     as: 'rootCredentials',
     from: SERVICE_TYPE.SECRETS,

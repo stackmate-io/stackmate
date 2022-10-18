@@ -5,7 +5,7 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ConnectableAttributes } from './connectable';
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, AssociationLookup, ProvisionResources,
+  withSchema, ServiceSideEffect, AssociationLookup, ProvisionResources, WithAssociations,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -41,7 +41,7 @@ export type ExternalLinkHandler = AssociationHandler<
 export const linkable = <C extends BaseServiceAttributes>(
   onServiceLinked: ServiceLinkHandler,
   lookup?: AssociationLookup,
-) => <T extends Service<C>>(srv: T): T => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, [ServiceSideEffect]> => (
   pipe(
     withSchema<C, LinkableAttributes>({
       type: 'object',
@@ -57,7 +57,7 @@ export const linkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
+    associate<C, [ServiceSideEffect]>([{
       scope: 'deployable',
       handler: onServiceLinked,
       where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
@@ -83,7 +83,7 @@ export const linkable = <C extends BaseServiceAttributes>(
  */
 export const externallyLinkable = <C extends BaseServiceAttributes>(
   onExternalLink: ExternalLinkHandler,
-) => <T extends Service<C>>(srv: T): T => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, [ServiceSideEffect]> => (
   pipe(
     withSchema<C, ExternallyLinkableAttributes>({
       type: 'object',
@@ -99,7 +99,7 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
+    associate<C, [ServiceSideEffect]>([{
       scope: 'deployable',
       handler: onExternalLink,
       from: SERVICE_TYPE.PROVIDER,

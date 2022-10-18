@@ -5,10 +5,10 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAssociations, getAwsCloudService, onExternalLink, onServiceLinked } from '@stackmate/engine/providers/aws/service';
+import { RootCredentialsRequirement, withRootCredentials } from '@stackmate/engine/core/service/credentials';
 import {
-  RootCredentialsRequirement, withCredentials, withRootCredentials,
-} from '@stackmate/engine/core/service/credentials';
+  AwsServiceAssociations, getAwsCloudService, onExternalLink, onServiceLinked,
+} from '@stackmate/engine/providers/aws/service';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_INSTANCE_SIZES, RDS_LOG_EXPORTS_PER_ENGINE, RDS_MAJOR_VERSIONS_PER_ENGINE,
@@ -168,7 +168,6 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   };
 
   const base = pipe(
-    withCredentials(),
     withConfigHints(hints),
     withRootCredentials(),
     withHandler('deployable', onDeploy),

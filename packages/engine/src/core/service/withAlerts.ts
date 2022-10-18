@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, ProvisionResources,
+  withSchema, ServiceSideEffect, ProvisionResources, WithAssociations,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -26,7 +26,7 @@ export type ServiceLinkHandler = AssociationHandler<
  */
 export const withAlerts = <C extends BaseServiceAttributes>(
   onServiceLinked: ServiceLinkHandler,
-) => <T extends Service<C>>(srv: T): T => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, [ServiceSideEffect]> => (
   pipe(
     withSchema<C, AlertableAttributes>({
       type: 'object',
@@ -44,7 +44,7 @@ export const withAlerts = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
+    associate<C, [ServiceSideEffect]>([{
       scope: 'deployable',
       handler: onServiceLinked,
       where: (config: C & AlertableAttributes): boolean => (
