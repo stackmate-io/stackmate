@@ -22,7 +22,7 @@ const ajvInstance: Ajv | null = null;
  * @param {Object} data the data to extract the service names from
  * @returns {String} the service names
  */
-export const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
+const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
   if (!path || !path.startsWith('/stages')) {
     return [];
   }
@@ -155,7 +155,7 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
     keyword: 'isIpOrCidr',
     type: 'boolean',
     error: { message: 'Invalid IP specified' },
-    validate: isAddressValid,
+    validate: (schema: any, value: any): boolean => isAddressValid(value),
   });
 
   ajv.addKeyword({  // no-op for config generator
