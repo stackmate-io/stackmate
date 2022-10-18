@@ -1,14 +1,19 @@
 import { fail } from 'node:assert';
+import { faker } from '@faker-js/faker';
+import { fromPairs } from 'lodash';
 import { FuncKeywordDefinition } from 'ajv/dist/types';
 
 import { Registry } from '@stackmate/engine/core/registry';
+import { ServiceEnvironment } from '@stackmate/engine/core/service/core';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
+import { EnvironmentValidationError, ValidationError } from '@stackmate/engine/lib/errors';
 import {
-  getAjv, loadJsonSchema, validate, validateProject, validateProperty, validateServiceLinks,
-  validateServiceProfile, validateServiceProfileOverrides, ValidationError,
+  getAjv, loadJsonSchema, validate, validateEnvironment,
+  validateProject, validateProperty, validateServiceLinks,
+  validateServiceProfile, validateServiceProfileOverrides,
 } from '@stackmate/engine/core/validation';
 
 describe('Validation', () => {
@@ -238,6 +243,36 @@ describe('Validation', () => {
 
     it('validates a nested property', () => {
       expect(() => validateProperty('stages/items/properties/name', 'my-stage-name')).not.toThrow();
+    });
+  });
+
+  describe('validateEnvironment', () => {
+    const vars: ServiceEnvironment[] = [];
+
+    beforeEach(() => {
+      vars.push({
+        name: faker.lorem.word().toUpperCase(),
+        description: faker.lorem.sentence(),
+        required: true,
+      }, {
+        name: faker.lorem.word().toUpperCase(),
+        description: faker.lorem.sentence(),
+        required: false,
+      });
+    });
+
+    it('raises an error when there are required environment variables missing', () => {
+      expect(() => validateEnvironment(vars)).toThrow(EnvironmentValidationError);
+    });
+
+    it('does not raise an error when all required variables are present', () => {
+      const envWithRequiredParams = fromPairs(vars.filter(
+        (envVar) => envVar.required,
+      ).map(
+        (envVar) => [envVar.name, faker.lorem.word()]),
+      );
+
+      expect(() => validateEnvironment(vars, envWithRequiredParams)).not.toThrow();
     });
   });
 });
