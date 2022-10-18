@@ -47,7 +47,9 @@ export const withAlerts = <C extends BaseServiceAttributes>(
     associate<C, ServiceSideEffect[]>([{
       scope: 'deployable',
       handler: onServiceLinked,
-      where: (config: C & AlertableAttributes): boolean => !isEmpty(config.alerts),
+      where: (config: C & AlertableAttributes): boolean => (
+        !isEmpty(config.alerts)
+      ),
     }]),
   )(srv)
 );

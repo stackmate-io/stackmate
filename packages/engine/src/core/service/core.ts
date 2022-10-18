@@ -64,7 +64,7 @@ export type AssociationHandler<
   Ret extends ProvisionResources,
   Attrs extends BaseServiceAttributes = BaseServiceAttributes
 > = (
-  linked: Provisionable<Attrs>, target: Provisionable<Attrs>, stack?: Stack,
+  linked: Provisionable<Attrs>, target: Provisionable<Attrs>, stack: Stack,
 ) => Ret;
 
 /**
