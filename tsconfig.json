@@ -63,10 +63,10 @@
     "packages/engine/src/**/*",
     "packages/engine/tests/**/*",
     "packages/engine/src/profiles/**/*",
-    "packages/engine/jest.setup.ts"
+    "packages/engine/jest.setup.ts",
+    "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],
   "exclude": [
-    "**/node_modules",
     "**/dist"
   ],
   "ts-node": {
