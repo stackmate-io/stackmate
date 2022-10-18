@@ -117,7 +117,9 @@ export type ServiceRequirement<
  * @param {ServiceScopeChoice} S
  */
 type ExtractAssociation<
-  T extends Association<any>, S extends ServiceScopeChoice, P = Extract<T, { scope: S }>['as']
+  T extends Association<any>,
+  S extends ServiceScopeChoice,
+  P = Extract<T, { scope: S, required: true }>['as']
 > = {
   [K in P extends string | symbol ? P : never]: ReturnType<Extract<T, { as: K }>['handler']>
 } extends infer O ? { [K in keyof O]: O[K] } : never;
@@ -367,9 +369,20 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @see {ServiceRequirement}
  * @returns {Function<Service>}
  */
-export const associate = <C extends BaseServiceAttributes, A extends Association<any>[]>(
+export const associateOld = <C extends BaseServiceAttributes, A extends Association<any>[]>(
   associations: A
 ) => withServiceProperties<C, { associations: A }>({ associations });
+
+export type WithAssociations<T extends BaseService, Assoc extends Association<any>[]> = T & {
+  associations: T['associations'] | Assoc
+};
+
+export const associate = <C extends BaseServiceAttributes, A extends Association<any>[]>(
+  associations: A
+) => <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
+  ...service,
+  associations: [...service.associations, ...associations],
+});
 
 /**
  * Registers a handler to use when provisioning the service under a specific scope
