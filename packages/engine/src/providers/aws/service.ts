@@ -2,14 +2,16 @@
  * This file contains associations and helpers for other services to associate with the AWS provider
  */
 import pipe from '@bitty/pipe';
+import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
 import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
 
-import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
+import { ChoiceOf, getCidrBlocks, getIpAddressParts, hashString, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
-  associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService,
-  ServiceRequirement, ServiceScopeChoice, ServiceTypeChoice, withRegions,
+  associate, BaseService, BaseServiceAttributes, ExternalLinkHandler,
+  getCloudService, getCoreService, ServiceLinkHandler, ServiceRequirement,
+  ServiceScopeChoice, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -97,6 +99,50 @@ const getVpcRequirement = <S extends ServiceScopeChoice>(
     prov.provisions.vpc
   ),
 });
+
+export const onServiceLinked: ServiceLinkHandler = (provisionable, linked, stack) => {
+  const { config: { port, name: toName }, requirements: { vpc } } = provisionable;
+  const { provisions = {}, config: { name: fromName } } = linked;
+  const sgName = `allow-incoming-from-${fromName}-to-${toName}`;
+  const { ip } = provisions;
+
+  if (!ip) {
+    throw new Error(`The IP resource on service ${fromName} is not provisioned yet`);
+  }
+
+  return new SecurityGroup(stack.context, sgName, {
+    vpcId: vpc.id,
+    name: sgName,
+    ingress: [{
+      fromPort: port,
+      toPort: port,
+      description: `Allow connections from ${fromName} to ${toName}`,
+      cidrBlocks: [ip.expression()],
+    }],
+  });
+};
+
+export const onExternalLink: ExternalLinkHandler = (provisionable, linked, stack) => {
+  const { config: { externalLinks = [], port }, requirements: { vpc } } = provisionable;
+
+  const securityGroups = externalLinks.map((ipAddress, idx) => {
+    const { ip, mask } = getIpAddressParts(ipAddress);
+    const sgName: string = `allow-external-ip-${hashString(ipAddress)}`;
+
+    return new SecurityGroup(stack.context, sgName, {
+      vpcId: vpc.id,
+      name: sgName,
+      ingress: [{
+        fromPort: port,
+        toPort: port,
+        description: `Allow connections from ${ipAddress}`,
+        cidrBlocks: getCidrBlocks(ip, mask),
+      }],
+    });
+  });
+
+  return securityGroups;
+};
 
 const associations: AwsServiceAssociations = [
   getProviderInstanceRequirement('deployable'),

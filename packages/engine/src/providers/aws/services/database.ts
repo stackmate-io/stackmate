@@ -5,7 +5,7 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAssociations, getAwsCloudService } from '@stackmate/engine/providers/aws/service';
+import { AwsServiceAssociations, getAwsCloudService, onExternalLink, onServiceLinked } from '@stackmate/engine/providers/aws/service';
 import {
   RootCredentialsRequirement, withCredentials, withRootCredentials,
 } from '@stackmate/engine/core/service/credentials';
@@ -19,13 +19,16 @@ import {
   MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
   ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
   ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
-  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints, connectable,
+  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
+  connectable, linkable, externallyLinkable, LinkableAttributes, ExternallyLinkableAttributes,
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = BaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & SizeableAttributes
   & VersioningAttributes
+  & LinkableAttributes
+  & ExternallyLinkableAttributes
   & MultiNodeAttributes
   & StorableAttributes
   & ConnectableAttributes
@@ -169,6 +172,8 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     withConfigHints(hints),
     withRootCredentials(),
     withHandler('deployable', onDeploy),
+    linkable(onServiceLinked),
+    externallyLinkable(onExternalLink),
   )(getAwsCloudService(type));
 
   return pipe(

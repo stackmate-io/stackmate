@@ -19,10 +19,17 @@ export type LinkableAttributes = { links: string[]; };
 export type ExternallyLinkableAttributes = { externalLinks: string[] };
 
 /**
- * @type {ServiceLinkHandler} the function who handles service linking
+ * @type {ServiceLinkHandler} the function that handles service linking
  */
 export type ServiceLinkHandler = AssociationHandler<
   ProvisionResources, BaseServiceAttributes & ConnectableAttributes
+>;
+
+/**
+ * @type {ExternalLinkHandler} the function that handles external linking
+ */
+export type ExternalLinkHandler = AssociationHandler<
+  ProvisionResources, BaseServiceAttributes & ConnectableAttributes & ExternallyLinkableAttributes
 >;
 
 /**
@@ -71,11 +78,11 @@ export const linkable = <C extends BaseServiceAttributes>(
 /**
  * Adds external link support to services
  *
- * @param {ServiceLinkHandler} onExternalLink
+ * @param {ExternalLinkHandler} onExternalLink
  * @returns {Function<Service>}
  */
 export const externallyLinkable = <C extends BaseServiceAttributes>(
-  onExternalLink: ServiceLinkHandler,
+  onExternalLink: ExternalLinkHandler,
 ) => <T extends Service<C>>(srv: T): T => (
   pipe(
     withSchema<C, ExternallyLinkableAttributes>({
