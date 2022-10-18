@@ -9,10 +9,11 @@ import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/const
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
+import { EnvironmentValidationError, ValidationError } from '@stackmate/engine/lib/errors';
 import {
-  EnvironmentValidationError,
-  getAjv, loadJsonSchema, validate, validateEnvironment, validateProject, validateProperty, validateServiceLinks,
-  validateServiceProfile, validateServiceProfileOverrides, ValidationError,
+  getAjv, loadJsonSchema, validate, validateEnvironment,
+  validateProject, validateProperty, validateServiceLinks,
+  validateServiceProfile, validateServiceProfileOverrides,
 } from '@stackmate/engine/core/validation';
 
 describe('Validation', () => {

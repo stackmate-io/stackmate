@@ -8,43 +8,12 @@ import { Registry } from '@stackmate/engine/core/registry';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { isAddressValid } from '@stackmate/engine/lib';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
+import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 import { BaseServiceAttributes, ServiceEnvironment } from '@stackmate/engine/core/service';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
-import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
+import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@stackmate/engine/lib/errors';
 
 const ajvInstance: Ajv | null = null;
-
-/**
- * @type {ErrorDescriptor} describes a Validation Error entry
- */
-export type ErrorDescriptor = {
-  path: string;
-  message: string;
-};
-
-/**
- * @class ValidationError
- */
-export class ValidationError extends Error {
-  readonly errors: ErrorDescriptor[] = [];
-
-  constructor(message: string, errors: ErrorDescriptor[]) {
-    super(message);
-    this.errors = errors;
-  }
-}
-
-/**
- * @class EnvironmentValidationError
- */
-export class EnvironmentValidationError extends Error {
-  readonly vars: string[] = [];
-
-  constructor(message: string, vars: string[]) {
-    super(message);
-    this.vars = vars;
-  }
-}
 
 /**
  * Extracts the service names given a path in the schema
@@ -293,9 +262,9 @@ export const validateProperty = (property: string, data: any, root = JSON_SCHEMA
  * Parses Ajv errors to custom, error descriptors
  *
  * @param {AjvErrorObject[]} errors the raw, AJV errors available
- * @returns {ErrorDescriptor[]} the parsed errors
+ * @returns {ValidationErrorDescriptor[]} the parsed errors
  */
-export const parseErrors = (errors: AjvErrorObject[]): ErrorDescriptor[] => {
+export const parseErrors = (errors: AjvErrorObject[]): ValidationErrorDescriptor[] => {
   const errs = errors.filter(
     ({ keyword }) => !['if', 'then'].includes(keyword),
   ).map(({ instancePath, message }) => {
@@ -325,7 +294,6 @@ export const validateEnvironment = (required: ServiceEnvironment[], env = proces
       missing.push(envVar.name);
     }
   });
-
 
   if (!isEmpty(missing)) {
     throw new EnvironmentValidationError(
