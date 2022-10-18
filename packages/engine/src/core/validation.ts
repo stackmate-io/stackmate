@@ -14,17 +14,35 @@ import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 
 const ajvInstance: Ajv | null = null;
 
+/**
+ * @type {ErrorDescriptor} describes a Validation Error entry
+ */
 export type ErrorDescriptor = {
   path: string;
   message: string;
 };
 
+/**
+ * @class ValidationError
+ */
 export class ValidationError extends Error {
   readonly errors: ErrorDescriptor[] = [];
 
   constructor(message: string, errors: ErrorDescriptor[]) {
     super(message);
     this.errors = errors;
+  }
+}
+
+/**
+ * @class EnvironmentValidationError
+ */
+export class EnvironmentValidationError extends Error {
+  readonly vars: string[] = [];
+
+  constructor(message: string, vars: string[]) {
+    super(message);
+    this.vars = vars;
   }
 }
 
@@ -292,10 +310,29 @@ export const parseErrors = (errors: AjvErrorObject[]): ErrorDescriptor[] => {
 /**
  * Validates an operation's environment variables
  *
- * @param {ServiceEnvironment[]} vars the environment variables to validate
+ * @param {ServiceEnvironment[]} required the variables required in the environment
  * @throws {Error} if the environment is not properly set up
  */
-export const validateEnvironment = (vars: ServiceEnvironment[], env = process.env) => {};
+export const validateEnvironment = (required: ServiceEnvironment[], env = process.env): void => {
+  const missing: string[] = [];
+
+  required.forEach((envVar) => {
+    if (!envVar.required) {
+      return false;
+    }
+
+    if (!(envVar.name in env)) {
+      missing.push(envVar.name);
+    }
+  });
+
+
+  if (!isEmpty(missing)) {
+    throw new EnvironmentValidationError(
+      `Your environment is missing some variables: ${missing.join(', ')}`, missing,
+    );
+  }
+};
 
 /**
  * Validates a project configuration
