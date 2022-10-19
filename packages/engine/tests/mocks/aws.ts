@@ -37,11 +37,11 @@ export const getCredentialResources = (
   );
 }
 
-export const getAwsDeploymentProvisionableMock = (
+export const getAwsDeploymentProvisionableMock = <P extends BaseProvisionable>(
   config: BaseServiceAttributes,
   stack: Stack,
   { withCredentials = false, withRootCredentials = false } = {},
-): BaseProvisionable => {
+): P => {
   const provisionable = getProvisionableFromConfig(config, stack.stageName);
   const providerResources = getProviderResources(stack);
 
@@ -59,5 +59,5 @@ export const getAwsDeploymentProvisionableMock = (
     },
   });
 
-  return provisionable;
+  return provisionable as P;
 };

@@ -3,7 +3,8 @@ import { TerraformLocal } from 'cdktf';
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  associate, BaseService, BaseServiceAttributes, BaseProvisionable, Service, ServiceRequirement, WithAssociations,
+  associate, BaseService, BaseServiceAttributes, BaseProvisionable,
+  Service, ServiceRequirement, WithAssociations,
 } from '@stackmate/engine/core/service';
 
 /**
