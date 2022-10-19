@@ -33,6 +33,20 @@ export type ExternalLinkHandler = AssociationHandler<
 >;
 
 /**
+ * @type {LinkableAssociations} associations for services that are linkable
+ */
+export type LinkableAssociations = {
+  deployable: { linkable: ServiceSideEffect };
+};
+
+/**
+ * @type {LinkableAssociations} associations for services that are linkable
+ */
+export type ExternallyLinkableAssociations = {
+  deployable: { externallyLinkable: ServiceSideEffect };
+};
+
+/**
  * Adds link support to a service (allows it to be linked to other services)
  *
  * @param {ServiceLinkHandler} onServiceLinked the function handling service links
@@ -41,7 +55,7 @@ export type ExternalLinkHandler = AssociationHandler<
 export const linkable = <C extends BaseServiceAttributes>(
   onServiceLinked: ServiceLinkHandler,
   lookup?: AssociationLookup,
-) => <T extends Service<C>>(srv: T): WithAssociations<T, [ServiceSideEffect]> => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, LinkableAssociations> => (
   pipe(
     withSchema<C, LinkableAttributes>({
       type: 'object',
@@ -60,7 +74,6 @@ export const linkable = <C extends BaseServiceAttributes>(
     associate({
       deployable: {
         linkable: {
-          requirement: false,
           handler: onServiceLinked,
           where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
             if (!config.links.includes(linkedConfig.name)) {
@@ -87,7 +100,7 @@ export const linkable = <C extends BaseServiceAttributes>(
  */
 export const externallyLinkable = <C extends BaseServiceAttributes>(
   onExternalLink: ExternalLinkHandler,
-) => <T extends Service<C>>(srv: T): WithAssociations<T, [ServiceSideEffect]> => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, ExternallyLinkableAssociations> => (
   pipe(
     withSchema<C, ExternallyLinkableAttributes>({
       type: 'object',
@@ -103,14 +116,16 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, [ServiceSideEffect]>([{
-      scope: 'deployable',
-      as: 'externallyLinkable',
-      handler: onExternalLink,
-      from: SERVICE_TYPE.PROVIDER,
-      where: (config: C & ExternallyLinkableAttributes): boolean => (
-        !isEmpty(config.externalLinks)
-      ),
-    }]),
+    associate({
+      deployable: {
+        externallyLinkable: {
+          handler: onExternalLink,
+          from: SERVICE_TYPE.PROVIDER,
+          where: (config: C & ExternallyLinkableAttributes): boolean => (
+            !isEmpty(config.externalLinks)
+          ),
+        },
+      },
+    }),
   )(srv)
 );

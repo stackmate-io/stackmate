@@ -6,9 +6,9 @@ import { ChoiceOf, getCidrBlocks, getIpAddressParts, hashString, OneOfType } fro
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
-  associate, BaseService, BaseServiceAttributes, ExternalLinkHandler,
-  getCloudService, getCoreService, Service, ServiceAssociations, ServiceLinkHandler,
-  ServiceRequirement, ServiceTypeChoice, withRegions,
+  associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService, Provisions,
+  ServiceAssociations, BaseProvisionable, ServiceRequirement, ServiceTypeChoice, withRegions,
+  Provisionable, Service, LinkableAttributes, ConnectableAttributes, ExternallyLinkableAttributes,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -16,16 +16,17 @@ import {
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
+import { Stack } from '@stackmate/engine/core/stack';
 
-type ProviderRequirement= ServiceRequirement<
+type ProviderRequirement = ServiceRequirement<
   terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type KmsKeyRequirement= ServiceRequirement<
+type KmsKeyRequirement = ServiceRequirement<
   kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type VpcRequirement= ServiceRequirement<
+type VpcRequirement = ServiceRequirement<
   vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
 >;
 
@@ -60,6 +61,18 @@ type ProviderProvisionable = OneOfType<[
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
 ]>;
+
+type LinkableServiceProvisionable = Provisionable<
+  AwsService<BaseServiceAttributes & LinkableAttributes & ConnectableAttributes>,
+  Provisions,
+  'deployable'
+>;
+
+type ExternallyLinkableServiceProvisionable = Provisionable<
+  AwsService<BaseServiceAttributes & ExternallyLinkableAttributes & ConnectableAttributes>,
+  Provisions,
+  'deployable'
+>;
 
 const getProviderInstanceRequirement = (): ProviderRequirement => ({
   from: SERVICE_TYPE.PROVIDER,
@@ -96,7 +109,9 @@ const getVpcRequirement = (): VpcRequirement => ({
   ),
 });
 
-export const onServiceLinked: ServiceLinkHandler = (provisionable, linked, stack) => {
+export const onServiceLinked = (
+  provisionable: LinkableServiceProvisionable, linked: BaseProvisionable, stack: Stack,
+) => {
   const { config: { port, name: toName }, requirements: { vpc } } = provisionable;
   const { provisions = {}, config: { name: fromName } } = linked;
   const sgName = `allow-incoming-from-${fromName}-to-${toName}`;
@@ -118,7 +133,11 @@ export const onServiceLinked: ServiceLinkHandler = (provisionable, linked, stack
   });
 };
 
-export const onExternalLink: ExternalLinkHandler = (provisionable, linked, stack) => {
+export const onExternalLink = (
+  provisionable: ExternallyLinkableServiceProvisionable,
+  linked: BaseProvisionable,
+  stack: Stack,
+) => {
   const { config: { externalLinks = [], port }, requirements: { vpc } } = provisionable;
 
   const securityGroups = externalLinks.map((ipAddress, idx) => {

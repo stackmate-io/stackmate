@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { isEmpty, uniqBy } from 'lodash';
+import { get, isEmpty, uniqBy } from 'lodash';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
@@ -10,7 +10,7 @@ import { getServiceConfigurations, Project, withLocalState } from '@stackmate/en
 import {
   assertRequirementsSatisfied,
   BaseServiceAttributes, getProvisionableResourceId, BaseProvisionable, Provisions,
-  ServiceEnvironment, ServiceScopeChoice,
+  ServiceEnvironment, ServiceScopeChoice, ServiceAssociations,
 } from '@stackmate/engine/core/service';
 
 type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
@@ -133,21 +133,19 @@ class StageOperation implements Operation {
     const {
       config,
       service,
-      service: { handlers, associations = [] },
+      service: { handlers, associations = {} },
       requirements = {},
     } = provisionable;
 
     // Validate the configuration
     validate(service.schemaId, config, { useDefaults: true });
 
-    associations.forEach((association) => {
-      // The association is meant to be used in a different scope, bail...
-      if (association.scope !== this.scope) {
-        return;
-      }
+    const serviceAssociations: ServiceAssociations[ServiceScopeChoice] = get(
+      associations, this.scope,
+    );
 
+    Object.entries(serviceAssociations || {}).forEach(([associationName, association]) => {
       const {
-        as: associationName,
         where: isAssociated,
         handler: associationHandler,
         from: associatedServiceType,

@@ -61,8 +61,11 @@ export type AssociationLookup = (
 /**
  * @type {AssociationHandler} the handler to run when an association takes effect
  */
-export type AssociationHandler<Ret extends ProvisionResources> = (
-  linked: BaseProvisionable, target: BaseProvisionable, stack: Stack,
+export type AssociationHandler<
+  Ret extends ProvisionResources,
+  Attrs extends BaseServiceAttributes = BaseServiceAttributes
+> = (
+  linked: BaseProvisionable<Attrs>, target: BaseProvisionable<Attrs>, stack: Stack,
 ) => Ret;
 
 /**
@@ -76,25 +79,23 @@ export type Association<Ret extends ProvisionResources> = {
 };
 
 /**
- * @type {ServiceSideEffect} describes a generic association that is not a requirement
- */
-export type ServiceSideEffect = Association<ProvisionResources> & {
-  where: AssociationLookup;
-  requirement?: false;
-};
-
-/**
  * @type {ServiceRequirement} the configuration object for associating a service with another
- * @param {ServiceTypeChoice}
- * @param {ServiceScopeChoice}
- * @param {Provisions}
+ * @param {ProvisionResources} Ret the handler's return type
+ * @param {ServiceTypeChoice} S the service type choice the association refers to (optional)
  */
 export type ServiceRequirement<
-  HandlerReturnType extends ProvisionResources,
+  Ret extends ProvisionResources,
   S extends ServiceTypeChoice = never,
-> = Association<HandlerReturnType> & {
-  requirement: true;
-  from?: S;
+> = Association<Ret> & { requirement: true; from?: S };
+
+/**
+ * @type {ServiceSideEffect} describes a generic association that is not a requirement
+ */
+export type ServiceSideEffect<
+  Ret extends ProvisionResources = ProvisionResources
+> = Association<Ret> & {
+  where: AssociationLookup;
+  requirement?: false;
 };
 
 /**
@@ -119,10 +120,10 @@ type ExtractServiceRequirements<
 /**
  * @type {BaseProvisionable} base provisionable
  */
-export type BaseProvisionable = {
+export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
   id: string;
   service: BaseService;
-  config: BaseServiceAttributes;
+  config: Attrs;
   provisions: Provisions;
   resourceId: string;
   sideEffects?: Resource[];
@@ -136,9 +137,10 @@ export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
   Scope extends ServiceScopeChoice,
-> = BaseProvisionable & {
+  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>
+> = BaseProvisionable<Attrs> & {
   service: Srv;
-  config: ExtractAttrs<Srv>;
+  config: Attrs;
   provisions: Provs;
   requirements: ExtractServiceRequirements<Srv['associations'], Scope>;
 };
@@ -199,6 +201,13 @@ export type BaseService = Service<BaseServiceAttributes>;
  * @type {ExtractAttrs} extracts arguments from a service
  */
 export type ExtractAttrs<T> = T extends Service<infer Attrs> ? Attrs : never;
+
+/**
+ * @type {WithAssociations} returns a service with additional associations
+ */
+export type WithAssociations<T extends BaseService, A extends ServiceAssociations> = T & {
+  associations: A;
+};
 
 /**
  * Returns a base core service (one that cannot be part of a stage)
@@ -352,11 +361,14 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  *  const AwsRdsService = compose(
  *    ...
  *    associate({
- *      from: SERVICE_TYPE.PROVIDER,
- *      scope: 'deployable',
- *      as: 'kmsKey',
- *      where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
- *      handler: (cfg, stack) => stack.getProvisionsFromConfig(cfg).find(p => p instanceof KmsKey),
+ *      deployable: {
+ *        associationName: {
+ *          from: SERVICE_TYPE.PROVIDER,
+ *          where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
+ *          handler: (p, stack) => p.provisions.find(p => p instanceof KmsKey),
+ *        },
+ *        // ...
+ *      },
  *    }),
  *  )
  *
@@ -370,7 +382,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  */
 export const associate = <C extends BaseServiceAttributes, A extends ServiceAssociations>(
   associations: A
-) => <T extends Service<C>>(service: T): T & { associations: A } => ({
+) => <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
   ...service,
   associations: merge({}, service.associations, associations),
 });
