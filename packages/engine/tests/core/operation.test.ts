@@ -53,7 +53,7 @@ describe('Operation', () => {
       ? lookup
       : ((p: BaseProvisionable) => p.service.type === lookup);
 
-    const serviceProvisionables = provs.find(finder)
+    const serviceProvisionables = provs.find(finder);
     expect(serviceProvisionables).not.toBeUndefined();
     expect(serviceProvisionables?.provisions).toBeInstanceOf(Object);
     return serviceProvisionables?.provisions || {};

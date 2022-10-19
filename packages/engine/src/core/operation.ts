@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { get, isEmpty, uniqBy } from 'lodash';
+import { get, isEmpty, isObject, uniqBy } from 'lodash';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
@@ -47,6 +47,7 @@ export const getProvisionableFromConfig = (
   service: Registry.fromConfig(config),
   requirements: {},
   provisions: {},
+  sideEffects: [],
   resourceId: getProvisionableResourceId(config, stageName),
 });
 
@@ -67,6 +68,11 @@ class StageOperation implements Operation {
    * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
   readonly provisionables: ProvisionablesMap = new Map();
+
+  /**
+   * @var {Set} provisioned the provisioned resources
+   */
+  readonly #provisioned: Set<string> = new Set();
 
   /**
    * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
@@ -125,9 +131,8 @@ class StageOperation implements Operation {
    */
   protected register(provisionable: BaseProvisionable): Provisions {
     // Item has already been provisioned, bail...
-    const existingProvisions = this.provisionables.get(provisionable.id)?.provisions;
-    if (existingProvisions) {
-      return existingProvisions;
+    if (this.#provisioned.has(provisionable.id)) {
+      return this.provisionables.get(provisionable.id)?.provisions || {};
     }
 
     const {
@@ -135,6 +140,7 @@ class StageOperation implements Operation {
       service,
       service: { handlers, associations = {} },
       requirements = {},
+      sideEffects = [],
     } = provisionable;
 
     // Validate the configuration
@@ -167,23 +173,33 @@ class StageOperation implements Operation {
           { ...linked, provisions: linkedProvisions }, provisionable, this.stack,
         );
 
+        // Register the requirements or side-effects into the provisionable
         if (isRequirement && associationName) {
           Object.assign(requirements, { [associationName]: handlerOutput });
+        } else {
+          const linkedSideEffects = isObject(handlerOutput)
+            ? Object.values(handlerOutput)
+            : Array.isArray(handlerOutput) ? handlerOutput : [handlerOutput];
+
+          sideEffects.push(...linkedSideEffects);
         }
       });
     });
 
-    // // Register the current service into the stack and mark as provisioned
-    // Object.assign(provisionable, { requirements });
+    // Register and verify the requirements and side-effects
+    Object.assign(provisionable, { requirements, sideEffects });
     assertRequirementsSatisfied(provisionable, this.scope);
 
+    // there is a chance we don't have any handler for the current scope,
+    // for example it only has a handler for deployment, we're running a 'setup' operation
     const registrationHandler = handlers.get(this.scope);
-    // no handler exists for the current scope,
-    // eg. it only has a handler for deployment, we're running a 'setup'
     const provisions = registrationHandler ? registrationHandler(provisionable, this.stack) : {};
     Object.assign(provisionable, { provisions });
 
+    // Mark the item as provisioned and register the resources
+    this.#provisioned.add(provisionable.id);
     this.provisionables.set(provisionable.id, provisionable);
+
     return provisions;
   }
 
