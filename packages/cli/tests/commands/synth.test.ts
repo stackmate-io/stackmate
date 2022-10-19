@@ -43,7 +43,7 @@ describe('Synth command', () => {
     const parsed = JSON.parse(contents);
     expect(parsed).toBeInstanceOf(Object);
     expect(new Set(Object.keys(parsed))).toEqual(new Set([
-      '//', 'data', 'provider', 'resource', 'terraform',
+      '//', 'data', 'locals', 'provider', 'resource', 'terraform',
     ]));
 
     writeMock.mockRestore();
@@ -65,7 +65,7 @@ describe('Synth command', () => {
     const parsed = JSON.parse(contents);
     expect(parsed).toBeInstanceOf(Object);
     expect(new Set(Object.keys(parsed))).toEqual(new Set([
-      '//', 'data', 'provider', 'resource', 'terraform',
+      '//', 'data', 'locals', 'provider', 'resource', 'terraform',
     ]));
 
     writeMock.mockRestore();
