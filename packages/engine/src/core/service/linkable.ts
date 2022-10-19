@@ -5,7 +5,7 @@ import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ConnectableAttributes } from './connectable';
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, AssociationLookup, ProvisionResources,
+  withSchema, ServiceSideEffect, AssociationLookup, ProvisionResources, WithAssociations,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -19,11 +19,32 @@ export type LinkableAttributes = { links: string[]; };
 export type ExternallyLinkableAttributes = { externalLinks: string[] };
 
 /**
- * @type {ServiceLinkHandler} the function who handles service linking
+ * @type {ServiceLinkHandler} the function that handles service linking
  */
 export type ServiceLinkHandler = AssociationHandler<
   ProvisionResources, BaseServiceAttributes & ConnectableAttributes
 >;
+
+/**
+ * @type {ExternalLinkHandler} the function that handles external linking
+ */
+export type ExternalLinkHandler = AssociationHandler<
+  ProvisionResources, BaseServiceAttributes & ConnectableAttributes & ExternallyLinkableAttributes
+>;
+
+/**
+ * @type {LinkableAssociations} associations for services that are linkable
+ */
+export type LinkableAssociations = {
+  deployable: { linkable: ServiceSideEffect };
+};
+
+/**
+ * @type {LinkableAssociations} associations for services that are linkable
+ */
+export type ExternallyLinkableAssociations = {
+  deployable: { externallyLinkable: ServiceSideEffect };
+};
 
 /**
  * Adds link support to a service (allows it to be linked to other services)
@@ -34,7 +55,7 @@ export type ServiceLinkHandler = AssociationHandler<
 export const linkable = <C extends BaseServiceAttributes>(
   onServiceLinked: ServiceLinkHandler,
   lookup?: AssociationLookup,
-) => <T extends Service<C>>(srv: T): T => (
+) => <T extends Service<C>>(srv: T): WithAssociations<T, LinkableAssociations> => (
   pipe(
     withSchema<C, LinkableAttributes>({
       type: 'object',
@@ -50,33 +71,36 @@ export const linkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
-      scope: 'deployable',
-      handler: onServiceLinked,
-      where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
-        if (!config.links.includes(linkedConfig.name)) {
-          return false;
-        }
+    associate({
+      deployable: {
+        linkable: {
+          handler: onServiceLinked,
+          where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
+            if (!config.links.includes(linkedConfig.name)) {
+              return false;
+            }
 
-        if (typeof lookup !== 'function') {
-          return false;
-        }
+            if (typeof lookup !== 'function') {
+              return false;
+            }
 
-        return lookup(config, linkedConfig);
+            return lookup(config, linkedConfig);
+          },
+        },
       },
-    }]),
+    }),
   )(srv)
 );
 
 /**
  * Adds external link support to services
  *
- * @param {ServiceLinkHandler} onExternalLink
+ * @param {ExternalLinkHandler} onExternalLink
  * @returns {Function<Service>}
  */
 export const externallyLinkable = <C extends BaseServiceAttributes>(
-  onExternalLink: ServiceLinkHandler,
-) => <T extends Service<C>>(srv: T): T => (
+  onExternalLink: ExternalLinkHandler,
+) => <T extends Service<C>>(srv: T): WithAssociations<T, ExternallyLinkableAssociations> => (
   pipe(
     withSchema<C, ExternallyLinkableAttributes>({
       type: 'object',
@@ -92,13 +116,16 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
-      scope: 'deployable',
-      handler: onExternalLink,
-      from: SERVICE_TYPE.PROVIDER,
-      where: (config: C & ExternallyLinkableAttributes): boolean => (
-        !isEmpty(config.externalLinks)
-      ),
-    }]),
+    associate({
+      deployable: {
+        externallyLinkable: {
+          handler: onExternalLink,
+          from: SERVICE_TYPE.PROVIDER,
+          where: (config: C & ExternallyLinkableAttributes): boolean => (
+            !isEmpty(config.externalLinks)
+          ),
+        },
+      },
+    }),
   )(srv)
 );

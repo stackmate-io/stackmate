@@ -9,7 +9,7 @@ import {
 import { AwsProvider } from '@stackmate/engine/providers';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { Provisionable, ServiceScopeChoice } from '@stackmate/engine/core/service';
+import { BaseProvisionable, ServiceScopeChoice } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
 import {
@@ -68,7 +68,7 @@ describe('AWS Provider', () => {
 
   describe('provision handlers', () => {
     let stack: Stack;
-    let provisionable: Provisionable;
+    let provisionable: BaseProvisionable;
     let config: AwsProviderAttributes;
 
     beforeEach(() => {

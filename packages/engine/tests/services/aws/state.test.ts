@@ -3,7 +3,7 @@ import { s3Bucket } from '@cdktf/provider-aws';
 import { TerraformBackend } from 'cdktf';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { AwsState } from '@stackmate/engine/providers';
-import { Provisionable } from '@stackmate/engine/core/service';
+import { BaseProvisionable } from '@stackmate/engine/core/service';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
@@ -65,7 +65,7 @@ describe('AWS state', () => {
 
   describe('provision handlers', () => {
     let stack: Stack;
-    let provisionable: Provisionable;
+    let provisionable: BaseProvisionable;
     let config: AwsStateAttributes;
 
     beforeEach(() => {

@@ -5,9 +5,9 @@ import {
 } from '@cdktf/provider-aws';
 
 import { AwsSecretsVault } from '@stackmate/engine/providers';
+import { BaseProvisionable } from '@stackmate/engine/core/service';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { Provisionable } from '@stackmate/engine/core/service';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
 import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
@@ -61,8 +61,8 @@ describe('AWS Secrets service', () => {
 
   describe('credentials resources registrations', () => {
     let stack: Stack;
-    let vault: Provisionable;
-    let target: Provisionable;
+    let vault: BaseProvisionable;
+    let target: BaseProvisionable;
     let config: AwsSecretsVaultAttributes;
 
     beforeEach(() => {

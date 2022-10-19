@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { isEmpty, uniqBy } from 'lodash';
+import { get, isEmpty, isObject, uniqBy } from 'lodash';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
@@ -9,11 +9,11 @@ import { validate, validateEnvironment, validateServices } from '@stackmate/engi
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
   assertRequirementsSatisfied,
-  BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions,
-  ServiceEnvironment, ServiceScopeChoice,
+  BaseServiceAttributes, getProvisionableResourceId, BaseProvisionable, Provisions,
+  ServiceEnvironment, ServiceScopeChoice, ServiceAssociations,
 } from '@stackmate/engine/core/service';
 
-type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
+type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
 
 export type OperationType = 'deployment' | 'destruction' | 'setup';
 
@@ -37,15 +37,17 @@ export type Operation = {
 /**
  * @param {BaseServiceAttributes} config the service's configuration
  * @param {String} stageName the name of the stage to register resources to
- * @returns {Provisionable} the provisionable to use in operations
+ * @returns {BaseProvisionable} the provisionable to use in operations
  */
 export const getProvisionableFromConfig = (
   config: BaseServiceAttributes, stageName: string,
-): Provisionable => ({
+): BaseProvisionable => ({
   id: hashObject(config),
   config,
   service: Registry.fromConfig(config),
   requirements: {},
+  provisions: {},
+  sideEffects: [],
   resourceId: getProvisionableResourceId(config, stageName),
 });
 
@@ -66,6 +68,11 @@ class StageOperation implements Operation {
    * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
   readonly provisionables: ProvisionablesMap = new Map();
+
+  /**
+   * @var {Set} provisioned the provisioned resources
+   */
+  readonly #provisioned: Set<string> = new Set();
 
   /**
    * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
@@ -120,33 +127,31 @@ class StageOperation implements Operation {
   /**
    * Registers a provisionable and its associations to the stack
    *
-   * @param {Provisionable} provisionable the provisionable to register
+   * @param {BaseProvisionable} provisionable the provisionable to register
    */
-  protected register(provisionable: Provisionable): Provisions {
+  protected register(provisionable: BaseProvisionable): Provisions {
     // Item has already been provisioned, bail...
-    const existingProvisions = this.provisionables.get(provisionable.id)?.provisions;
-    if (existingProvisions) {
-      return existingProvisions;
+    if (this.#provisioned.has(provisionable.id)) {
+      return this.provisionables.get(provisionable.id)?.provisions || {};
     }
 
     const {
       config,
       service,
-      service: { handlers, associations = [] },
+      service: { handlers, associations = {} },
       requirements = {},
+      sideEffects = [],
     } = provisionable;
 
     // Validate the configuration
     validate(service.schemaId, config, { useDefaults: true });
 
-    associations.forEach((association) => {
-      // The association is meant to be used in a different scope, bail...
-      if (association.scope !== this.scope) {
-        return;
-      }
+    const serviceAssociations: ServiceAssociations[ServiceScopeChoice] = get(
+      associations, this.scope,
+    );
 
+    Object.entries(serviceAssociations || {}).forEach(([associationName, association]) => {
       const {
-        as: associationName,
         where: isAssociated,
         handler: associationHandler,
         from: associatedServiceType,
@@ -168,23 +173,33 @@ class StageOperation implements Operation {
           { ...linked, provisions: linkedProvisions }, provisionable, this.stack,
         );
 
+        // Register the requirements or side-effects into the provisionable
         if (isRequirement && associationName) {
           Object.assign(requirements, { [associationName]: handlerOutput });
+        } else {
+          const linkedSideEffects = isObject(handlerOutput)
+            ? Object.values(handlerOutput)
+            : Array.isArray(handlerOutput) ? handlerOutput : [handlerOutput];
+
+          sideEffects.push(...linkedSideEffects);
         }
       });
     });
 
-    // // Register the current service into the stack and mark as provisioned
-    // Object.assign(provisionable, { requirements });
+    // Register and verify the requirements and side-effects
+    Object.assign(provisionable, { requirements, sideEffects });
     assertRequirementsSatisfied(provisionable, this.scope);
 
+    // there is a chance we don't have any handler for the current scope,
+    // for example it only has a handler for deployment, we're running a 'setup' operation
     const registrationHandler = handlers.get(this.scope);
-    // no handler exists for the current scope,
-    // eg. it only has a handler for deployment, we're running a 'setup'
     const provisions = registrationHandler ? registrationHandler(provisionable, this.stack) : {};
     Object.assign(provisionable, { provisions });
 
+    // Mark the item as provisioned and register the resources
+    this.#provisioned.add(provisionable.id);
     this.provisionables.set(provisionable.id, provisionable);
+
     return provisions;
   }
 

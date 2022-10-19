@@ -6,11 +6,10 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
-  AwsServiceAssociations, AwsServiceAttributes, getAwsCoreService,
+  AwsService, AwsServiceAttributes, getAwsCoreService,
 } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseServiceAttributes, Provisionable, ProvisionAssociationRequirements,
-  Service, withRegions, withHandler, withSchema,
+  BaseServiceAttributes, Provisionable, withRegions, withHandler, withSchema,
 } from '@stackmate/engine/core/service';
 
 export type AwsStateDeployableResources = { backend: S3Backend };
@@ -22,30 +21,19 @@ export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
   bucket: string;
 }>;
 
-export type AwsStateService = Service<AwsStateAttributes> & {
-  associations: AwsServiceAssociations,
-};
+export type AwsStateService = AwsService<AwsStateAttributes>;
 
-type AwsStateBaseProvisionable = Provisionable & {
-  id: string;
-  config: AwsStateAttributes;
-  service: AwsStateService;
-};
+export type AwsStateDeployableProvisionable = Provisionable<
+  AwsStateService, AwsStateDeployableResources, 'deployable'
+>;
 
-export type AwsStateDeployableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStateDeployableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'deployable'>;
-};
+export type AwsStateDestroyableProvisionable = Provisionable<
+  AwsStateService, AwsStateDestroyableResources, 'destroyable'
+>;
 
-export type AwsStateDestroyableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStateDestroyableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'destroyable'>;
-};
-
-export type AwsStatePreparableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStatePreparableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'preparable'>;
-};
+export type AwsStatePreparableProvisionable = Provisionable<
+  AwsStateService, AwsStatePreparableResources, 'preparable'
+>;
 
 const registerBackend = (
   provisionable: AwsStateDeployableProvisionable | AwsStateDestroyableProvisionable,
