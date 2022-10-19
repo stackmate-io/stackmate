@@ -6,11 +6,11 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
-  AwsServiceAssociations, AwsServiceAttributes, getAwsCoreService,
+  AwsService, AwsServiceAttributes, getAwsCoreService,
 } from '@stackmate/engine/providers/aws/service';
 import {
   BaseServiceAttributes, Provisionable, ProvisionAssociationRequirements,
-  Service, withRegions, withHandler, withSchema,
+  withRegions, withHandler, withSchema,
 } from '@stackmate/engine/core/service';
 
 export type AwsStateDeployableResources = { backend: S3Backend };
@@ -22,9 +22,7 @@ export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
   bucket: string;
 }>;
 
-export type AwsStateService = Service<AwsStateAttributes> & {
-  associations: AwsServiceAssociations,
-};
+export type AwsStateService = AwsService<AwsStateAttributes>;
 
 type AwsStateBaseProvisionable = Provisionable & {
   id: string;

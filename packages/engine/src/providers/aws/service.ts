@@ -1,6 +1,3 @@
-/**
- * This file contains associations and helpers for other services to associate with the AWS provider
- */
 import pipe from '@bitty/pipe';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
 import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
@@ -10,7 +7,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   associate, BaseService, BaseServiceAttributes, ExternalLinkHandler,
-  getCloudService, getCoreService, ServiceLinkHandler, ServiceRequirement,
+  getCloudService, getCoreService, Service, ServiceAssociations, ServiceLinkHandler, ServiceRequirement,
   ServiceScopeChoice, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
@@ -20,31 +17,44 @@ import {
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
-type ProviderAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
+type ProviderRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'providerInstance', Scope, terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type KmsKeyAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
+type KmsKeyRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type VpcAssociation<Scope extends ServiceScopeChoice> = ServiceRequirement<
+type VpcRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'vpc', Scope, vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
 >;
 
-export type AwsServiceAssociations = [
-  ProviderAssociation<'deployable'>,
-  ProviderAssociation<'destroyable'>,
-  ProviderAssociation<'preparable'>,
-  KmsKeyAssociation<'deployable'>,
-  KmsKeyAssociation<'destroyable'>,
-  KmsKeyAssociation<'preparable'>,
-  VpcAssociation<'deployable'>,
-];
+export type AwsServiceAssociations = {
+  deployable: {
+    providerInstance: ProviderRequirement<'deployable'>;
+    kmsKey: KmsKeyRequirement<'deployable'>;
+    vpc: VpcRequirement<'deployable'>;
+  },
+  preparable: {
+    providerInstance: ProviderRequirement<'preparable'>;
+    kmsKey: KmsKeyRequirement<'preparable'>;
+  },
+  destroyable: {
+    providerInstance: ProviderRequirement<'destroyable'>;
+    kmsKey: KmsKeyRequirement<'destroyable'>;
+  },
+};
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.AWS;
   region: ChoiceOf<typeof REGIONS>;
+};
+
+export type AwsService<
+  Attrs extends BaseServiceAttributes,
+  Assocs extends ServiceAssociations = {},
+> = Service<AwsServiceAttributes<Attrs>> & {
+  associations: AwsServiceAssociations & Assocs,
 };
 
 type ProviderProvisionable = OneOfType<[
@@ -55,7 +65,7 @@ type ProviderProvisionable = OneOfType<[
 
 const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
   scope: S,
-): ProviderAssociation<S> => ({
+): ProviderRequirement<S> => ({
   as: 'providerInstance',
   from: SERVICE_TYPE.PROVIDER,
   scope,
@@ -70,7 +80,7 @@ const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
 
 const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
   scope: S,
-): KmsKeyAssociation<S> => ({
+): KmsKeyRequirement<S> => ({
   as: 'kmsKey',
   from: SERVICE_TYPE.PROVIDER,
   scope,
@@ -87,7 +97,7 @@ const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
 
 const getVpcRequirement = <S extends ServiceScopeChoice>(
   scope: S,
-): VpcAssociation<S> => ({
+): VpcRequirement<S> => ({
   as: 'vpc',
   from: SERVICE_TYPE.PROVIDER,
   scope,
@@ -144,15 +154,24 @@ export const onExternalLink: ExternalLinkHandler = (provisionable, linked, stack
   return securityGroups;
 };
 
-const associations: AwsServiceAssociations = [
-  getProviderInstanceRequirement('deployable'),
-  getProviderInstanceRequirement('destroyable'),
-  getProviderInstanceRequirement('preparable'),
-  getKmsKeyRequirement('deployable'),
-  getKmsKeyRequirement('destroyable'),
-  getKmsKeyRequirement('preparable'),
-  getVpcRequirement('deployable'),
-];
+/**
+ * @var {AwsServiceAssociations} associations every AWS service's associations
+ */
+const associations: AwsServiceAssociations = {
+  deployable: {
+    providerInstance: getProviderInstanceRequirement('deployable'),
+    kmsKey: getKmsKeyRequirement('deployable'),
+    vpc: getVpcRequirement('deployable'),
+  },
+  destroyable: {
+    providerInstance: getProviderInstanceRequirement('destroyable'),
+    kmsKey: getKmsKeyRequirement('destroyable'),
+  },
+  preparable: {
+    providerInstance: getProviderInstanceRequirement('preparable'),
+    kmsKey: getKmsKeyRequirement('preparable'),
+  },
+};
 
 const getAwsService = (srv: BaseService) => (
   pipe(

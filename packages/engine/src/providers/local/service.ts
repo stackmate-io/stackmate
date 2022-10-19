@@ -12,26 +12,35 @@ type ProviderRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
   'providerInstance', Scope, terraformLocalProvider.LocalProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-export type LocalServiceRequirements = [
-  ProviderRequirement<'preparable'>,
-];
+export type LocalServiceAssociations = {
+  preparable: {
+    providerInstance: ProviderRequirement<'preparable'>;
+  };
+};
 
 export type LocalServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.LOCAL;
 };
 
-const associations: LocalServiceRequirements = [{
-  as: 'providerInstance',
-  from: SERVICE_TYPE.PROVIDER,
-  scope: 'preparable',
-  requirement: true,
-  where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) => (
-    config.provider === linked.provider
-  ),
-  handler: (p: LocalProviderProvisionable): terraformLocalProvider.LocalProvider => {
-    return p.provisions.provider
+/**
+ * @var {LocalServiceAssociations} associations Service Associations applied to all local services
+ */
+const associations: LocalServiceAssociations = {
+  preparable: {
+    providerInstance: {
+      as: 'providerInstance',
+      from: SERVICE_TYPE.PROVIDER,
+      scope: 'preparable',
+      requirement: true,
+      where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) => (
+        config.provider === linked.provider
+      ),
+      handler: (p: LocalProviderProvisionable): terraformLocalProvider.LocalProvider => {
+        return p.provisions.provider
+      },
+    },
   },
-}];
+};
 
 export const getLocalService = (type: ServiceTypeChoice) => (
   pipe(

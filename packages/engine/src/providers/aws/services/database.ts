@@ -5,8 +5,9 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { RootCredentialsRequirement, withRootCredentials } from '@stackmate/engine/core/service/credentials';
+import { RootCredentialsAssociations, RootCredentialsRequirement, withRootCredentials } from '@stackmate/engine/core/service/credentials';
 import {
+  AwsService,
   AwsServiceAssociations, getAwsCloudService, onExternalLink, onServiceLinked,
 } from '@stackmate/engine/providers/aws/service';
 import {
@@ -51,9 +52,9 @@ export type AwsMySQLAttributes = AwsDatabaseAttributes<'mysql', 'mysql'>;
 export type AwsPostgreSQLAttributes = AwsDatabaseAttributes<'postgresql', 'postgres'>;
 export type AwsMariaDBAttributes = AwsDatabaseAttributes<'mariadb', 'mariadb'>;
 
-type AwsDbService<Attrs extends DatabaseAttributes> = Service<Attrs> & {
-  associations: [...AwsServiceAssociations, RootCredentialsRequirement],
-};
+type AwsDbService<Attrs extends DatabaseAttributes> = AwsService<
+  Attrs, RootCredentialsAssociations
+>;
 
 export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>;
 export type AwsPostgreSQLService = AwsDbService<AwsPostgreSQLAttributes>;

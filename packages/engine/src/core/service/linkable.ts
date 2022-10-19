@@ -59,6 +59,7 @@ export const linkable = <C extends BaseServiceAttributes>(
     }),
     associate<C, [ServiceSideEffect]>([{
       scope: 'deployable',
+      as: 'linkable',
       handler: onServiceLinked,
       where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
         if (!config.links.includes(linkedConfig.name)) {
@@ -101,6 +102,7 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
     }),
     associate<C, [ServiceSideEffect]>([{
       scope: 'deployable',
+      as: 'externallyLinkable',
       handler: onExternalLink,
       from: SERVICE_TYPE.PROVIDER,
       where: (config: C & ExternallyLinkableAttributes): boolean => (
