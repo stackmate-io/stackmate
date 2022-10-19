@@ -17,7 +17,7 @@ import { LocalStateResources } from '@stackmate/engine/providers/local/services/
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { LocalProviderResources } from '@stackmate/engine/providers/local/services/provider';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { Provisionable, Provisions, ServiceTypeChoice } from '@stackmate/engine/core/service';
+import { BaseProvisionable, Provisions, ServiceTypeChoice } from '@stackmate/engine/core/service';
 import { AwsDatabaseDeployableResources } from '@stackmate/engine/providers/aws/services/database';
 import { AwsProviderDeployableResources } from '@stackmate/engine/providers/aws/services/provider';
 import { AwsStateDeployableResources, AwsStatePreparableResources } from '@stackmate/engine/providers/aws/services/state';
@@ -25,7 +25,7 @@ import { deployment, destruction, getOperationByName, Operation, OPERATION_TYPE,
 
 describe('Operation', () => {
   let operation: Operation;
-  let provisionables: Provisionable[];
+  let provisionables: BaseProvisionable[];
 
   const config: ProjectConfiguration = {
     name: 'my-super-project',
@@ -47,11 +47,11 @@ describe('Operation', () => {
   const project = validateProject(config);
 
   const getProvisions = (
-    provs: Provisionable[], lookup: ServiceTypeChoice | ((p: Provisionable) => boolean),
+    provs: BaseProvisionable[], lookup: ServiceTypeChoice | ((p: BaseProvisionable) => boolean),
   ): Provisions => {
     const finder = typeof lookup === 'function'
       ? lookup
-      : ((p: Provisionable) => p.service.type === lookup);
+      : ((p: BaseProvisionable) => p.service.type === lookup);
 
     const serviceProvisionables = provs.find(finder)
     expect(serviceProvisionables).not.toBeUndefined();
@@ -173,7 +173,7 @@ describe('Operation', () => {
     });
 
     it('registers the AWS provider', () => {
-      const lookup = (p: Provisionable) => (
+      const lookup = (p: BaseProvisionable) => (
         p.service.type === SERVICE_TYPE.PROVIDER && p.service.provider === PROVIDER.AWS
       );
 
@@ -186,7 +186,7 @@ describe('Operation', () => {
     });
 
     it('registers the Local provider', () => {
-      const lookup = (p: Provisionable) => (
+      const lookup = (p: BaseProvisionable) => (
         p.service.type === SERVICE_TYPE.PROVIDER && p.service.provider === PROVIDER.LOCAL
       );
 
@@ -199,7 +199,7 @@ describe('Operation', () => {
     });
 
     it('registers the Local state resources', () => {
-      const lookup = (p: Provisionable) => (
+      const lookup = (p: BaseProvisionable) => (
         p.service.type === SERVICE_TYPE.STATE && p.service.provider === PROVIDER.LOCAL
       );
 
@@ -212,7 +212,7 @@ describe('Operation', () => {
     });
 
     it('registers the AWS State provider resources (that are to be created)', () => {
-      const lookup = (p: Provisionable) => (
+      const lookup = (p: BaseProvisionable) => (
         p.service.type === SERVICE_TYPE.STATE && p.service.provider === PROVIDER.AWS
       );
 
