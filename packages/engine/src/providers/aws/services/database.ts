@@ -5,10 +5,9 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
 import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { RootCredentialsAssociations, RootCredentialsRequirement, withRootCredentials } from '@stackmate/engine/core/service/credentials';
+import { RootCredentialsAssociations, withRootCredentials } from '@stackmate/engine/core/service/credentials';
 import {
-  AwsService,
-  AwsServiceAssociations, getAwsCloudService, onExternalLink, onServiceLinked,
+  AwsService, getAwsCloudService, onExternalLink, onServiceLinked,
 } from '@stackmate/engine/providers/aws/service';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
@@ -17,8 +16,7 @@ import {
 } from '@stackmate/engine/providers/aws/constants';
 import {
   BaseServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode,
-  MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable,
-  ProvisionAssociationRequirements, ProvisionHandler, RegionalAttributes, Service,
+  MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable, RegionalAttributes,
   ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
   versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
   connectable, linkable, externallyLinkable, LinkableAttributes, ExternallyLinkableAttributes,
@@ -60,31 +58,14 @@ export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>;
 export type AwsPostgreSQLService = AwsDbService<AwsPostgreSQLAttributes>;
 export type AwsMariaDBService = AwsDbService<AwsMariaDBAttributes>;
 
-type AwsDbAttributes = OneOfType<[
-  AwsMySQLAttributes,
-  AwsPostgreSQLAttributes,
-  AwsMariaDBAttributes,
-]>;
+
 type AwsDb = OneOfType<[AwsMySQLService, AwsPostgreSQLService, AwsMariaDBService]>;
-type AwsBaseProvisionable = Provisionable & {
-  config: AwsDbAttributes;
-  service: AwsDb;
-};
 
-export type AwsDatabaseDeployableProvisionable = AwsBaseProvisionable & {
-  requirements: ProvisionAssociationRequirements<AwsDb['associations'], 'deployable'>;
-  provisions: AwsDatabaseDeployableResources;
-};
-
-export type AwsDatabaseDestroyableProvisionable = AwsBaseProvisionable & {
-  requirements: ProvisionAssociationRequirements<AwsDb['associations'], 'destroyable'>;
-  provisions: AwsDatabaseDeployableResources;
-};
-
-export type AwsDatabasPreparableProvisionable = AwsBaseProvisionable & {
-  requirements: ProvisionAssociationRequirements<AwsDb['associations'], 'preparable'>;
-  provisions: AwsDatabaseDeployableResources;
-};
+export type AwsDatabaseDestroyableProvisionable = Provisionable<AwsDb, {}, 'destroyable'>;
+export type AwsDatabasPreparableProvisionable = Provisionable<AwsDb, {}, 'preparable'>;
+export type AwsDatabaseDeployableProvisionable = Provisionable<
+  AwsDb, AwsDatabaseDeployableResources, 'deployable'
+>;
 
 /**
  * @param {DatabaseAttributes} config the service's configuration
@@ -111,7 +92,7 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-export const onDeploy: ProvisionHandler = (
+export const onDeploy = (
   provisionable: AwsDatabaseDeployableProvisionable, stack: Stack,
 ): AwsDatabaseDeployableResources => {
   const { config, requirements: { providerInstance, rootCredentials } } = provisionable;

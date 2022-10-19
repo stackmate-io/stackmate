@@ -7,8 +7,8 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   associate, BaseService, BaseServiceAttributes, ExternalLinkHandler,
-  getCloudService, getCoreService, Service, ServiceAssociations, ServiceLinkHandler, ServiceRequirement,
-  ServiceScopeChoice, ServiceTypeChoice, withRegions,
+  getCloudService, getCoreService, Service, ServiceAssociations, ServiceLinkHandler,
+  ServiceRequirement, ServiceTypeChoice, withRegions,
 } from '@stackmate/engine/core/service';
 import {
   AwsProviderAttributes,
@@ -17,31 +17,31 @@ import {
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
 
-type ProviderRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
-  'providerInstance', Scope, terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
+type ProviderRequirement= ServiceRequirement<
+  terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type KmsKeyRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
-  'kmsKey', Scope, kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
+type KmsKeyRequirement= ServiceRequirement<
+  kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
 >;
 
-type VpcRequirement<Scope extends ServiceScopeChoice> = ServiceRequirement<
-  'vpc', Scope, vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
+type VpcRequirement= ServiceRequirement<
+  vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
 >;
 
 export type AwsServiceAssociations = {
   deployable: {
-    providerInstance: ProviderRequirement<'deployable'>;
-    kmsKey: KmsKeyRequirement<'deployable'>;
-    vpc: VpcRequirement<'deployable'>;
+    providerInstance: ProviderRequirement;
+    kmsKey: KmsKeyRequirement;
+    vpc: VpcRequirement;
   },
   preparable: {
-    providerInstance: ProviderRequirement<'preparable'>;
-    kmsKey: KmsKeyRequirement<'preparable'>;
+    providerInstance: ProviderRequirement;
+    kmsKey: KmsKeyRequirement;
   },
   destroyable: {
-    providerInstance: ProviderRequirement<'destroyable'>;
-    kmsKey: KmsKeyRequirement<'destroyable'>;
+    providerInstance: ProviderRequirement;
+    kmsKey: KmsKeyRequirement;
   },
 };
 
@@ -53,9 +53,7 @@ export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & 
 export type AwsService<
   Attrs extends BaseServiceAttributes,
   Assocs extends ServiceAssociations = {},
-> = Service<AwsServiceAttributes<Attrs>> & {
-  associations: AwsServiceAssociations & Assocs,
-};
+> = Service<AwsServiceAttributes<Attrs>, AwsServiceAssociations & Assocs>;
 
 type ProviderProvisionable = OneOfType<[
   AwsProviderDeployableProvisionable,
@@ -63,12 +61,8 @@ type ProviderProvisionable = OneOfType<[
   AwsProviderPreparableProvisionable,
 ]>;
 
-const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
-  scope: S,
-): ProviderRequirement<S> => ({
-  as: 'providerInstance',
+const getProviderInstanceRequirement = (): ProviderRequirement => ({
   from: SERVICE_TYPE.PROVIDER,
-  scope,
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -78,12 +72,8 @@ const getProviderInstanceRequirement = <S extends ServiceScopeChoice>(
   ),
 });
 
-const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
-  scope: S,
-): KmsKeyRequirement<S> => ({
-  as: 'kmsKey',
+const getKmsKeyRequirement = (): KmsKeyRequirement => ({
   from: SERVICE_TYPE.PROVIDER,
-  scope,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -95,12 +85,8 @@ const getKmsKeyRequirement = <S extends ServiceScopeChoice>(
   ),
 });
 
-const getVpcRequirement = <S extends ServiceScopeChoice>(
-  scope: S,
-): VpcRequirement<S> => ({
-  as: 'vpc',
+const getVpcRequirement = (): VpcRequirement => ({
   from: SERVICE_TYPE.PROVIDER,
-  scope,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -159,17 +145,17 @@ export const onExternalLink: ExternalLinkHandler = (provisionable, linked, stack
  */
 const associations: AwsServiceAssociations = {
   deployable: {
-    providerInstance: getProviderInstanceRequirement('deployable'),
-    kmsKey: getKmsKeyRequirement('deployable'),
-    vpc: getVpcRequirement('deployable'),
+    providerInstance: getProviderInstanceRequirement(),
+    kmsKey: getKmsKeyRequirement(),
+    vpc: getVpcRequirement(),
   },
   destroyable: {
-    providerInstance: getProviderInstanceRequirement('destroyable'),
-    kmsKey: getKmsKeyRequirement('destroyable'),
+    providerInstance: getProviderInstanceRequirement(),
+    kmsKey: getKmsKeyRequirement(),
   },
   preparable: {
-    providerInstance: getProviderInstanceRequirement('preparable'),
-    kmsKey: getKmsKeyRequirement('preparable'),
+    providerInstance: getProviderInstanceRequirement(),
+    kmsKey: getKmsKeyRequirement(),
   },
 };
 
