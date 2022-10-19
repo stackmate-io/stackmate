@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, ProvisionResources,
+  withSchema, ServiceSideEffect, ProvisionResources, WithAssociations,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -12,21 +12,28 @@ import {
 export type AlertableAttributes = { alerts: { email: string; } };
 
 /**
- * @type {ServiceLinkHandler} the function who handles service linking
+ * @type {AlertingHandler} the function who handles service linking
  */
-export type ServiceLinkHandler = AssociationHandler<
+export type AlertingHandler = AssociationHandler<
   ProvisionResources, BaseServiceAttributes & AlertableAttributes
 >;
 
 /**
+ * @type {AlertableAssociations} associations for alertable services
+ */
+export type AlertableAssociations = {
+  deployable: { alertable: ServiceSideEffect; };
+};
+
+/**
  * Adds link support to a service (allows it to be linked to other services)
  *
- * @param {ServiceLinkHandler} onServiceLinked the function handling service links
+ * @param {AlertingHandler} onServiceLinked the function handling service links
  * @returns {Function<Service>}
  */
 export const withAlerts = <C extends BaseServiceAttributes>(
-  onServiceLinked: ServiceLinkHandler,
-) => <T extends Service<C>>(srv: T): T => (
+  onServiceLinked: AlertingHandler,
+) => <T extends Service<C>>(srv: T): WithAssociations<T, AlertableAssociations> => (
   pipe(
     withSchema<C, AlertableAttributes>({
       type: 'object',
@@ -44,10 +51,15 @@ export const withAlerts = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, ServiceSideEffect[]>([{
-      scope: 'deployable',
-      handler: onServiceLinked,
-      where: (config: C & AlertableAttributes): boolean => !isEmpty(config.alerts),
-    }]),
+    associate({
+      deployable: {
+        alertable: {
+          handler: onServiceLinked,
+          where: (config: C & AlertableAttributes): boolean => (
+            !isEmpty(config.alerts)
+          ),
+        },
+      },
+    }),
   )(srv)
 );

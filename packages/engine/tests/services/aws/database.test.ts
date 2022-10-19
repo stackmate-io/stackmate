@@ -9,9 +9,8 @@ import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
 import { PROVIDER, ServiceTypeChoice, SERVICE_TYPE } from '@stackmate/engine';
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
 import {
-  AwsDatabaseAttributes, AwsDatabaseDeployableResources, AWSMariaDB,
-  AwsMariaDBAttributes, AWSMySQL, AwsMySQLAttributes, AWSPostgreSQL,
-  AwsPostgreSQLAttributes, onDeploy,
+  AwsDatabaseAttributes, AWSMariaDB, AwsMariaDBAttributes, AWSMySQL, AwsMySQLAttributes,
+  AWSPostgreSQL, AwsPostgreSQLAttributes, onDeploy, AwsDatabaseDeployableProvisionable,
 } from '@stackmate/engine/providers/aws/services/database';
 import {
   RdsEngine, DEFAULT_RDS_INSTANCE_SIZE, DEFAULT_REGION, RDS_INSTANCE_SIZES,
@@ -56,6 +55,8 @@ const getDatabaseConfig = <T extends ServiceTypeChoice, E extends RdsEngine>(
   nodes: 1,
   profile: DEFAULT_PROFILE_NAME,
   overrides: {},
+  links: [],
+  externalLinks: [],
   port: faker.mersenne.rand(65000, 2000),
   region: faker.helpers.arrayElement(REGIONS),
   size: faker.helpers.arrayElement(RDS_INSTANCE_SIZES),
@@ -96,11 +97,11 @@ describe('AWS PostgreSQL', () => {
   it('registers the resources on deployment', () => {
     const stack = getStack('some-project', 'some-stage');
     const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres');
-    const provisionable = getAwsDeploymentProvisionableMock(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config, stack, { withRootCredentials: true },
     );
 
-    const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
+    const resources = onDeploy(provisionable, stack);
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
@@ -140,11 +141,11 @@ describe('AWS MySQL', () => {
   it('registers the resources on deployment', () => {
     const stack = getStack('some-project', 'some-stage');
     const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql');
-    const provisionable = getAwsDeploymentProvisionableMock(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config, stack, { withRootCredentials: true },
     );
 
-    const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
+    const resources = onDeploy(provisionable, stack);
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
@@ -184,11 +185,11 @@ describe('AWS MariaDB', () => {
   it('registers the resources on deployment', () => {
     const stack = getStack('some-project', 'some-stage');
     const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb');
-    const provisionable = getAwsDeploymentProvisionableMock(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config, stack, { withRootCredentials: true },
     );
 
-    const resources = onDeploy(provisionable, stack) as AwsDatabaseDeployableResources;
+    const resources = onDeploy(provisionable, stack);
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);

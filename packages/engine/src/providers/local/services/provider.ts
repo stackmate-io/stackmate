@@ -5,8 +5,7 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { LocalServiceAttributes } from '@stackmate/engine/providers/local/service';
 import {
-  BaseServiceAttributes, getCoreService, Provisionable,
-  ProvisionAssociationRequirements, Service, withHandler,
+  BaseServiceAttributes, getCoreService, Provisionable, Service, withHandler,
 } from '@stackmate/engine/core/service';
 
 export type ProviderInstanceResources = {
@@ -19,15 +18,9 @@ export type LocalProviderAttributes = LocalServiceAttributes<BaseServiceAttribut
 
 export type LocalProviderResources = ProviderInstanceResources;
 export type LocalProviderService = Service<LocalProviderAttributes>;
-
-export type LocalProviderProvisionable = Provisionable & {
-  config: LocalProviderAttributes;
-  service: LocalProviderService;
-  provisions: LocalProviderResources;
-  requirements: ProvisionAssociationRequirements<
-    LocalProviderService['associations'], 'preparable'
-  >;
-};
+export type LocalProviderProvisionable = Provisionable<
+  LocalProviderService, LocalProviderResources, 'preparable'
+>;
 
 export const onPrepare = (
   provisionable: LocalProviderProvisionable, stack: Stack,

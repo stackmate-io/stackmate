@@ -3,7 +3,8 @@ import { TerraformLocal } from 'cdktf';
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  associate, BaseService, BaseServiceAttributes, Provisionable, Service, ServiceRequirement,
+  associate, BaseService, BaseServiceAttributes, BaseProvisionable,
+  Service, ServiceRequirement, WithAssociations,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -18,15 +19,27 @@ export type Credentials = {
  * @type {CredentialsRequirement} adds a requirement for credentials
  */
 export type CredentialsRequirement = ServiceRequirement<
-  'credentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+  Credentials, typeof SERVICE_TYPE.SECRETS
 >;
 
 /**
  * @type {RootCredentialsRequirement} adds a requirement for root credentials
  */
 export type RootCredentialsRequirement = ServiceRequirement<
-  'rootCredentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+  Credentials, typeof SERVICE_TYPE.SECRETS
 >;
+
+export type CredentialsAssociations = {
+  deployable: {
+    credentials: CredentialsRequirement;
+  };
+};
+
+export type RootCredentialsAssociations = {
+  deployable: {
+    rootCredentials: RootCredentialsRequirement;
+  };
+};
 
 /**
  * @type {CredentialsHandlerOptions} the options to pass into the credentials handler
@@ -42,7 +55,10 @@ export type CredentialsHandlerOptions = {
  * @type {CredentialsHandler} the credentials association handler
  */
 export type CredentialsHandler = (
-  vault: Provisionable, target: Provisionable, stack: Stack, opts?: CredentialsHandlerOptions,
+  vault: BaseProvisionable,
+  target: BaseProvisionable,
+  stack: Stack,
+  opts?: CredentialsHandlerOptions,
 ) => Credentials;
 
 /**
@@ -55,40 +71,48 @@ export type SecretsVaultService<Srv extends BaseService> = Srv & {
 /**
  * @type {VaultProvisionable} a vault service provisionable
  */
-export type VaultProvisionable = Provisionable & {
-  service: SecretsVaultService<Provisionable['service']>;
+export type VaultProvisionable = BaseProvisionable & {
+  service: SecretsVaultService<BaseProvisionable['service']>;
 };
 
 /**
  * @returns {Function<Service>} the service enhanced with the crerentials association
  */
 export const withCredentials = <C extends BaseServiceAttributes>(
-) => <T extends Service<C>>(srv: T): T & { associations: [CredentialsRequirement] } => (
-  associate<C, [CredentialsRequirement]>([{
-    as: 'credentials',
-    from: SERVICE_TYPE.SECRETS,
-    scope: 'deployable',
-    requirement: true,
-    handler: (vault: VaultProvisionable, target: Provisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault, target, stack)
-    ),
-  }])(srv)
+) => <T extends Service<C>>(srv: T): WithAssociations<T, CredentialsAssociations> => (
+  associate({
+    deployable: {
+      credentials: {
+        from: SERVICE_TYPE.SECRETS,
+        requirement: true,
+        handler: (
+          vault: VaultProvisionable, target: BaseProvisionable, stack: Stack,
+        ): Credentials => (
+          vault.service.credentials(vault, target, stack)
+        ),
+      },
+    },
+  })(srv)
 );
 
 /**
  * @returns {Function<Service>} the service enhanced with the root crerentials association
  */
 export const withRootCredentials = <C extends BaseServiceAttributes>(
-) => <T extends Service<C>>(srv: T): T & { associations: [RootCredentialsRequirement] } => (
-  associate<C, [RootCredentialsRequirement]>([{
-    as: 'rootCredentials',
-    from: SERVICE_TYPE.SECRETS,
-    scope: 'deployable',
-    requirement: true,
-    handler: (vault: VaultProvisionable, target: Provisionable, stack: Stack): Credentials => (
-      vault.service.credentials(vault, target, stack, { root: true })
-    ),
-  }])(srv)
+) => <T extends Service<C>>(srv: T): WithAssociations<T, RootCredentialsAssociations> => (
+  associate({
+    deployable: {
+      rootCredentials: {
+        from: SERVICE_TYPE.SECRETS,
+        requirement: true,
+        handler: (
+          vault: VaultProvisionable, target: BaseProvisionable, stack: Stack,
+        ): Credentials => (
+          vault.service.credentials(vault, target, stack, { root: true })
+        ),
+      },
+    },
+  })(srv)
 );
 
 /**
