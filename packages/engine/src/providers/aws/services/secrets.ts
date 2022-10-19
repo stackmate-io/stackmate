@@ -143,7 +143,7 @@ export const generateCredentials = (
     version: secretVersionResource,
     data,
   };
-}
+};
 
 /**
  * @returns {AwsSecretsVaultService} the secrets vault service

@@ -1,3 +1,4 @@
+import { merge } from 'lodash';
 import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -71,20 +72,20 @@ export type AssociationHandler<
  * @type {Association} describes an association between two services
  */
 export type Association<Ret extends ProvisionResources> = {
-  scope: ServiceScopeChoice;
-  handler: AssociationHandler<Ret>;
+  // TODO
   as?: string;
+  scope?: ServiceScopeChoice;
+
+  handler: AssociationHandler<Ret>;
   from?: ServiceTypeChoice;
   where?: AssociationLookup;
-  requirement?: true;
+  requirement?: boolean;
 };
 
 /**
  * @type {ServiceSideEffect} describes a generic association that is not a requirement
  */
-export type ServiceSideEffect = Omit<Association<any>, 'as'> & {
-  scope: ServiceScopeChoice;
-  handler: AssociationHandler<ProvisionResources>;
+export type ServiceSideEffect = Association<ProvisionResources> & {
   where: AssociationLookup;
   requirement?: false;
 };
@@ -101,10 +102,19 @@ export type ServiceRequirement<
   HandlerReturnType extends ProvisionResources,
   S extends ServiceTypeChoice = never,
 > = Association<HandlerReturnType> & {
-  as: name;
-  scope: C;
+  // TODO: Remove
+  as?: name;
+  scope?: C;
+
   from?: S;
   requirement: true;
+};
+
+/**
+ * @type {ServiceAssociations} the service's associations
+ */
+export type ServiceAssociations = {
+  [K in ServiceScopeChoice]?: Record<string, Association<any>>;
 };
 
 /**
@@ -129,9 +139,9 @@ type ExtractAssociation<
  *  by the return types of the handler functions in the service's associations
  */
 export type ProvisionAssociationRequirements<
-  Associations extends Association<any>[],
+  Associations extends Record<ServiceScopeChoice, Record<string, Association<any>>>,
   S extends ServiceScopeChoice,
-> = ExtractAssociation<Associations[number], S>;
+> = ExtractAssociation<Associations, { [key in S]: Record<string, Association<any>> }>;
 
 /**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
@@ -185,9 +195,9 @@ export type Service<Setup extends BaseServiceAttributes> = {
   regions?: readonly string[];
   schemaId: string;
   schema: ServiceSchema<Setup>;
-  handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   environment: ServiceEnvironment[];
-  associations: Association<any>[];
+  handlers: Map<ServiceScopeChoice, ProvisionHandler>;
+  associations: ServiceAssociations;
 };
 
 /**
@@ -256,9 +266,9 @@ export const getCoreService = (
     type,
     schema,
     schemaId,
-    handlers: new Map(),
     environment: [],
-    associations: [],
+    handlers: new Map(),
+    associations: { 'deployable': {}, 'preparable': {}, 'destroyable': {} },
   };
 };
 
@@ -373,15 +383,15 @@ export const associateOld = <C extends BaseServiceAttributes, A extends Associat
   associations: A
 ) => withServiceProperties<C, { associations: A }>({ associations });
 
-export type WithAssociations<T extends BaseService, Assoc extends Association<any>[]> = T & {
-  associations: T['associations'] | Assoc
+export type WithAssociations<T extends BaseService, Assoc extends ServiceAssociations> = T & {
+  associations: Assoc;
 };
 
-export const associate = <C extends BaseServiceAttributes, A extends Association<any>[]>(
+export const associate = <C extends BaseServiceAttributes, A extends ServiceAssociations>(
   associations: A
 ) => <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
   ...service,
-  associations: [...service.associations, ...associations],
+  associations: merge({}, service.associations, associations),
 });
 
 /**
