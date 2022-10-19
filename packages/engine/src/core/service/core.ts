@@ -126,7 +126,7 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   config: Attrs;
   provisions: Provisions;
   resourceId: string;
-  sideEffects?: Resource[];
+  sideEffects: Resource[];
   requirements: Record<string, ProvisionResources>;
 };
 
