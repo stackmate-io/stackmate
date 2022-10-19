@@ -12,6 +12,7 @@ import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
+  BaseProvisionable,
   BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
   Provisionable, SecretsVaultService, Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
@@ -57,7 +58,7 @@ type ProvisionCredentialsResources = Credentials & {
  */
 export const generateCredentials = (
   vault: AwsSecretsVaultDeployableProvisionable,
-  target: Provisionable,
+  target: BaseProvisionable,
   stack: Stack,
   options: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {

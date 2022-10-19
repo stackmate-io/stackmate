@@ -1,10 +1,10 @@
-import { merge } from 'lodash';
+import { get, merge } from 'lodash';
 import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
-import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -61,11 +61,8 @@ export type AssociationLookup = (
 /**
  * @type {AssociationHandler} the handler to run when an association takes effect
  */
-export type AssociationHandler<
-  Ret extends ProvisionResources,
-  Attrs extends BaseServiceAttributes = BaseServiceAttributes
-> = (
-  linked: Provisionable<Attrs>, target: Provisionable<Attrs>, stack: Stack,
+export type AssociationHandler<Ret extends ProvisionResources> = (
+  linked: BaseProvisionable, target: BaseProvisionable, stack: Stack,
 ) => Ret;
 
 /**
@@ -120,28 +117,37 @@ type ExtractServiceRequirements<
 };
 
 /**
+ * @type {BaseProvisionable} base provisionable
+ */
+export type BaseProvisionable = {
+  id: string;
+  service: BaseService;
+  config: BaseServiceAttributes;
+  provisions: Provisions;
+  resourceId: string;
+  sideEffects?: Resource[];
+  requirements: Record<string, ProvisionResources>;
+};
+
+/**
  * @type {Provisionable} represents a piece of configuration and service to be deployed
  */
 export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
   Scope extends ServiceScopeChoice,
-> = {
-  id: string;
+> = BaseProvisionable & {
   service: Srv;
   config: ExtractAttrs<Srv>;
   provisions: Provs;
   requirements: ExtractServiceRequirements<Srv['associations'], Scope>;
-  sideEffects?: Resource[];
-  /** the id of the terraform resource */
-  resourceId: string;
 };
 
 /**
  * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
  */
 export type ProvisionHandler = (
-  provisionable: Provisionable,
+  provisionable: BaseProvisionable,
   stack: Stack,
   opts?: object,
 ) => Provisions;
@@ -416,19 +422,23 @@ export const getProvisionableResourceId = (
 );
 
 /**
- * @param {Provisionable} provisionable the provisionable to check
+ * @param {BaseProvisionable} provisionable the provisionable to check
  * @param {ServiceScopeChoice} scope the scope for the services
  * @throws {Error} if a requirement is not satisfied
  */
 export const assertRequirementsSatisfied = (
-  provisionable: Provisionable, scope: ServiceScopeChoice,
+  provisionable: BaseProvisionable, scope: ServiceScopeChoice,
 ) => {
-  const { service: { associations, type }, requirements } = provisionable;
-  associations.filter(
-    assoc => assoc.scope === scope && assoc.requirement,
-  ).forEach(({ as: name }) => {
-    if (!name) {
-      throw new Error(`Service ${type} is marked as a requirement but doesn't have a name`);
+  const { service: { associations: allAssociations, type }, requirements } = provisionable;
+  const associations: ServiceAssociations[ServiceScopeChoice] = get(allAssociations, scope);
+
+  if (!associations) {
+    return;
+  }
+
+  Object.entries(associations).forEach(([name, assoc]) => {
+    if (!assoc.requirement) {
+      return;
     }
 
     if (!requirements[name]) {

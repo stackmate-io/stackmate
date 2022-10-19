@@ -9,11 +9,11 @@ import { validate, validateEnvironment, validateServices } from '@stackmate/engi
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
   assertRequirementsSatisfied,
-  BaseServiceAttributes, getProvisionableResourceId, Provisionable, Provisions,
+  BaseServiceAttributes, getProvisionableResourceId, BaseProvisionable, Provisions,
   ServiceEnvironment, ServiceScopeChoice,
 } from '@stackmate/engine/core/service';
 
-type ProvisionablesMap = Map<Provisionable['id'], Provisionable>;
+type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
 
 export type OperationType = 'deployment' | 'destruction' | 'setup';
 
@@ -37,15 +37,16 @@ export type Operation = {
 /**
  * @param {BaseServiceAttributes} config the service's configuration
  * @param {String} stageName the name of the stage to register resources to
- * @returns {Provisionable} the provisionable to use in operations
+ * @returns {BaseProvisionable} the provisionable to use in operations
  */
 export const getProvisionableFromConfig = (
   config: BaseServiceAttributes, stageName: string,
-): Provisionable => ({
+): BaseProvisionable => ({
   id: hashObject(config),
   config,
   service: Registry.fromConfig(config),
   requirements: {},
+  provisions: {},
   resourceId: getProvisionableResourceId(config, stageName),
 });
 
@@ -120,9 +121,9 @@ class StageOperation implements Operation {
   /**
    * Registers a provisionable and its associations to the stack
    *
-   * @param {Provisionable} provisionable the provisionable to register
+   * @param {BaseProvisionable} provisionable the provisionable to register
    */
-  protected register(provisionable: Provisionable): Provisions {
+  protected register(provisionable: BaseProvisionable): Provisions {
     // Item has already been provisioned, bail...
     const existingProvisions = this.provisionables.get(provisionable.id)?.provisions;
     if (existingProvisions) {
