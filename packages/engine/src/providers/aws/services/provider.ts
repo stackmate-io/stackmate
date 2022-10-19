@@ -16,7 +16,7 @@ import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/provi
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   BaseServiceAttributes, getCoreService, profilable, Provisionable,
-  ProvisionAssociationRequirements, RegionalAttributes, Service, withHandler, withRegions,
+  RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
 
 export type ProviderPrerequisites = {
@@ -35,31 +35,25 @@ export type AwsProviderDestroyableResources = ProviderPrerequisites;
 
 export type AwsProviderAttributes = AwsServiceAttributes<BaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
-  & { type: typeof SERVICE_TYPE.PROVIDER; rootIp?: string; }
+  & {
+    type: typeof SERVICE_TYPE.PROVIDER;
+    rootIp?: string;
+  }
 >;
 
 export type AwsProviderService = Service<AwsProviderAttributes>;
 
-type AwsProviderBaseProvisionable = Provisionable & {
-  id: string;
-  config: AwsProviderAttributes;
-  service: AwsProviderService;
-};
+export type AwsProviderDeployableProvisionable = Provisionable<
+  AwsProviderService, AwsProviderDeployableResources, 'deployable'
+>;
 
-export type AwsProviderDeployableProvisionable = AwsProviderBaseProvisionable & {
-  provisions: AwsProviderDeployableResources;
-  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'deployable'>;
-};
+export type AwsProviderPreparableProvisionable = Provisionable<
+  AwsProviderService, AwsProviderPreparableResources, 'preparable'
+>;
 
-export type AwsProviderPreparableProvisionable = AwsProviderBaseProvisionable & {
-  provisions: AwsProviderPreparableResources;
-  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'preparable'>;
-};
-
-export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable & {
-  provisions: AwsProviderDestroyableResources;
-  requirements: ProvisionAssociationRequirements<AwsProviderService['associations'], 'destroyable'>;
-};
+export type AwsProviderDestroyableProvisionable = Provisionable<
+  AwsProviderService, AwsProviderDestroyableResources, 'destroyable'
+>;
 
 /**
  * Registers the prerequisites required by all operation types
@@ -69,7 +63,8 @@ export type AwsProviderDestroyableProvisionable = AwsProviderBaseProvisionable &
  * @returns {ProviderPrerequisites} the provider prerequisite resources
  */
 export const registerPrerequisites = (
-  provisionable: AwsProviderBaseProvisionable, stack: Stack,
+  provisionable: AwsProviderPreparableProvisionable | AwsProviderDestroyableProvisionable,
+  stack: Stack,
 ): ProviderPrerequisites => {
   const { config: { region }, resourceId } = provisionable;
   const alias = `aws-${kebabCase(region)}-provider`;

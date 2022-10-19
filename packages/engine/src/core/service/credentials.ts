@@ -18,14 +18,14 @@ export type Credentials = {
  * @type {CredentialsRequirement} adds a requirement for credentials
  */
 export type CredentialsRequirement = ServiceRequirement<
-  'credentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+  Credentials, typeof SERVICE_TYPE.SECRETS
 >;
 
 /**
  * @type {RootCredentialsRequirement} adds a requirement for root credentials
  */
 export type RootCredentialsRequirement = ServiceRequirement<
-  'rootCredentials', 'deployable', Credentials, typeof SERVICE_TYPE.SECRETS
+  Credentials, typeof SERVICE_TYPE.SECRETS
 >;
 
 export type CredentialsAssociations = {

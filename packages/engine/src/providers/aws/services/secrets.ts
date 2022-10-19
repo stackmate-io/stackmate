@@ -13,8 +13,7 @@ import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE }
 import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
   BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
-  Provisionable, ProvisionAssociationRequirements, SecretsVaultService,
-  Service, withCredentialsGenerator,
+  Provisionable, SecretsVaultService, Service, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
@@ -31,31 +30,17 @@ export type AwsSecretsVaultService = SecretsVaultService<
   Service<AwsSecretsVaultAttributes> & { associations: AwsServiceAssociations }
 >;
 
-type BaseProvisionable = Provisionable & {
-  config: AwsSecretsVaultAttributes;
-  service: AwsSecretsVaultService;
-};
+export type AwsSecretsVaultDeployableProvisionable = Provisionable<
+  AwsSecretsVaultService, AwsSecretsDeployableResources, 'deployable'
+>;
 
-export type AwsSecretsVaultDeployableProvisionable = BaseProvisionable & {
-  provisions: AwsSecretsDeployableResources;
-  requirements: ProvisionAssociationRequirements<
-    AwsSecretsVaultService['associations'], 'deployable'
-  >;
-};
+export type AwsSecretsVaultDestroyableProvisionable = Provisionable<
+  AwsSecretsVaultService, AwsSecretsDestroyableResources, 'destroyable'
+>;
 
-export type AwsSecretsVaultDestroyableProvisionable = BaseProvisionable & {
-  provisions: AwsSecretsDestroyableResources;
-  requirements: ProvisionAssociationRequirements<
-    AwsSecretsVaultService['associations'], 'destroyable'
-  >;
-};
-
-export type AwsSecretsVaultPreparableProvisionable = BaseProvisionable & {
-  provisions: AwsSecretsPreparableResources;
-  requirements: ProvisionAssociationRequirements<
-    AwsSecretsVaultService['associations'], 'preparable'
-  >;
-};
+export type AwsSecretsVaultPreparableProvisionable = Provisionable<
+  AwsSecretsVaultService, AwsSecretsDestroyableResources, 'preparable'
+>;
 
 type ProvisionCredentialsResources = Credentials & {
   randomPassword: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword;
@@ -74,9 +59,10 @@ export const generateCredentials = (
   vault: AwsSecretsVaultDeployableProvisionable,
   target: Provisionable,
   stack: Stack,
-  { root = false, ...opts }: CredentialsHandlerOptions = {},
+  options: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
   const { config } = target;
+  const { root = false, length: passwordLength, exclude: excludeCharacters = [] } = options;
   const { service, requirements: { kmsKey, providerInstance } } = vault;
   const idPrefix = `${snakeCase(config.name)}_secrets`;
   const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
@@ -88,8 +74,8 @@ export const generateCredentials = (
 
   const passResource = new dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword(
     stack.context, `${idPrefix}_password`, {
-      passwordLength: opts.length || DEFAULT_PASSWORD_LENGTH,
-      excludeCharacters: (opts.exclude || []).join(''),
+      passwordLength: passwordLength || DEFAULT_PASSWORD_LENGTH,
+      excludeCharacters: excludeCharacters.join(''),
       ...password,
   });
 

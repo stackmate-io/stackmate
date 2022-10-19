@@ -57,22 +57,25 @@ export const linkable = <C extends BaseServiceAttributes>(
         },
       },
     }),
-    associate<C, [ServiceSideEffect]>([{
-      scope: 'deployable',
-      as: 'linkable',
-      handler: onServiceLinked,
-      where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
-        if (!config.links.includes(linkedConfig.name)) {
-          return false;
-        }
+    associate({
+      deployable: {
+        linkable: {
+          requirement: false,
+          handler: onServiceLinked,
+          where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
+            if (!config.links.includes(linkedConfig.name)) {
+              return false;
+            }
 
-        if (typeof lookup !== 'function') {
-          return false;
-        }
+            if (typeof lookup !== 'function') {
+              return false;
+            }
 
-        return lookup(config, linkedConfig);
+            return lookup(config, linkedConfig);
+          },
+        },
       },
-    }]),
+    }),
   )(srv)
 );
 

@@ -4,10 +4,11 @@ import { LocalBackend } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@stackmate/engine/constants';
-import { getLocalService, LocalServiceAssociations, LocalServiceAttributes } from '@stackmate/engine/providers/local/service';
 import {
-  BaseServiceAttributes, Provisionable, ProvisionAssociationRequirements,
-  Service, withHandler, withSchema,
+  getLocalService, LocalServiceAssociations, LocalServiceAttributes,
+} from '@stackmate/engine/providers/local/service';
+import {
+  BaseServiceAttributes, Provisionable, Service, withHandler, withSchema,
 } from '@stackmate/engine/core/service';
 
 export type LocalStateResources = { backend: LocalBackend };
@@ -22,14 +23,9 @@ export type LocalStateService = Service<LocalStateAttributes> & {
   associations: LocalServiceAssociations;
 };
 
-export type LocalStateProvisionable = Provisionable & {
-  config: LocalStateAttributes;
-  service: LocalStateService;
-  provisions: LocalStateResources;
-  requirements: ProvisionAssociationRequirements<
-    LocalStateService['associations'], 'deployable'
-  >;
-};
+export type LocalStateProvisionable = Provisionable<
+  LocalStateService, LocalStateResources, 'preparable'
+>;
 
 export const onPrepare = (
   provisionable: LocalStateProvisionable, stack: Stack,

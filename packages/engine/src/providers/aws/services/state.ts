@@ -9,8 +9,7 @@ import {
   AwsService, AwsServiceAttributes, getAwsCoreService,
 } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseServiceAttributes, Provisionable, ProvisionAssociationRequirements,
-  withRegions, withHandler, withSchema,
+  BaseServiceAttributes, Provisionable, withRegions, withHandler, withSchema,
 } from '@stackmate/engine/core/service';
 
 export type AwsStateDeployableResources = { backend: S3Backend };
@@ -24,26 +23,17 @@ export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
 
 export type AwsStateService = AwsService<AwsStateAttributes>;
 
-type AwsStateBaseProvisionable = Provisionable & {
-  id: string;
-  config: AwsStateAttributes;
-  service: AwsStateService;
-};
+export type AwsStateDeployableProvisionable = Provisionable<
+  AwsStateService, AwsStateDeployableResources, 'deployable'
+>;
 
-export type AwsStateDeployableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStateDeployableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'deployable'>;
-};
+export type AwsStateDestroyableProvisionable = Provisionable<
+  AwsStateService, AwsStateDestroyableResources, 'destroyable'
+>;
 
-export type AwsStateDestroyableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStateDestroyableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'destroyable'>;
-};
-
-export type AwsStatePreparableProvisionable = AwsStateBaseProvisionable & {
-  provisions: AwsStatePreparableResources;
-  requirements: ProvisionAssociationRequirements<AwsStateService['associations'], 'preparable'>;
-};
+export type AwsStatePreparableProvisionable = Provisionable<
+  AwsStateService, AwsStatePreparableResources, 'preparable'
+>;
 
 const registerBackend = (
   provisionable: AwsStateDeployableProvisionable | AwsStateDestroyableProvisionable,
