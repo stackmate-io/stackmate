@@ -56,8 +56,8 @@ export type CredentialsHandlerOptions = {
  */
 export type CredentialsHandler = (
   vault: BaseProvisionable,
-  target: BaseProvisionable,
   stack: Stack,
+  target: BaseProvisionable,
   opts?: CredentialsHandlerOptions,
 ) => Credentials;
 
@@ -86,9 +86,9 @@ export const withCredentials = <C extends BaseServiceAttributes>(
         from: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
-          vault: VaultProvisionable, target: BaseProvisionable, stack: Stack,
+          vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,
         ): Credentials => (
-          vault.service.credentials(vault, target, stack)
+          vault.service.credentials(vault, stack, target)
         ),
       },
     },
@@ -106,9 +106,9 @@ export const withRootCredentials = <C extends BaseServiceAttributes>(
         from: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
-          vault: VaultProvisionable, target: BaseProvisionable, stack: Stack,
+          vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,
         ): Credentials => (
-          vault.service.credentials(vault, target, stack, { root: true })
+          vault.service.credentials(vault, stack, target, { root: true })
         ),
       },
     },

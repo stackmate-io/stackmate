@@ -170,7 +170,7 @@ class StageOperation implements Operation {
 
         const linkedProvisions = this.register(linked);
         const handlerOutput = associationHandler(
-          { ...linked, provisions: linkedProvisions }, provisionable, this.stack,
+          { ...linked, provisions: linkedProvisions }, this.stack, provisionable,
         );
 
         // Register the requirements or side-effects into the provisionable
