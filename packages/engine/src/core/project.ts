@@ -17,19 +17,29 @@ import {
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 
+/**
+ * @type {CopiedStage} a stage which is a copy of another one
+ */
 type CopiedStage = {
   name: string;
   copy?: string;
   skip?: string[];
 };
-export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPartial extends true
-  ? DistributiveRequireKeys<DistributivePartial<CloudServiceAttributes>, 'name' | 'type'>
-  : CloudServiceAttributes;
 
+/**
+ * @type {StageWithServices} a stage that is not coppied, rather has services configured
+ */
 type StageWithServices<IsPartial extends boolean = false> = {
   name: string;
   services?: CloudServiceConfiguration<IsPartial>[];
 };
+
+/**
+ * @type {CloudServiceConfiguration} describes the cloud service configuration
+ */
+export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPartial extends true
+  ? DistributiveRequireKeys<DistributivePartial<CloudServiceAttributes>, 'name' | 'type'>
+  : CloudServiceAttributes;
 
 /**
  * @type {StageConfiguration} the configuration for the project stages

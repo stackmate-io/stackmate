@@ -6,6 +6,7 @@ import {
   subnet as awsSubnet,
   vpc as awsVpc,
   provider as awsProvider,
+  dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -22,6 +23,7 @@ import {
 export type ProviderPrerequisites = {
   provider: awsProvider.AwsProvider;
   kmsKey: awsKmsKey.KmsKey;
+  account: callerIdentity.DataAwsCallerIdentity;
 };
 
 export type AwsProviderDeployableResources = ProviderPrerequisites & {
@@ -89,7 +91,13 @@ export const registerPrerequisites = (
     multiRegion: false,
   });
 
-  return { provider, kmsKey };
+  const account = new callerIdentity.DataAwsCallerIdentity(
+    stack.context, `${resourceId}-account-id`, {
+      provider,
+    },
+  );
+
+  return { provider, kmsKey, account };
 };
 
 /**
