@@ -4,7 +4,7 @@ import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
+import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@stackmate/engine/core/schema';
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -212,6 +212,53 @@ export type WithAssociations<T extends BaseService, A extends ServiceAssociation
 };
 
 /**
+ * @returns {JsonSchema} the service's name schema
+ */
+export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']> => ({
+  type: 'string',
+  pattern: '^([a-zA-Z0-9_-]+)$',
+  minLength: 2,
+  description: 'The name for the service to deploy',
+  errorMessage: {
+    minLength: 'The service’s name should be two characters or more',
+    pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
+  },
+});
+
+/**
+ * @param {ProviderChoice[]} providers the providers to allow in the schema
+ * @param {ProviderChoice} defaultProvider the default provider for the service
+ * @returns {JsonSchema} the provider's schema
+ */
+export const getServiceProviderSchema = (
+  providers: ProviderChoice[], defaultProvider?: ProviderChoice,
+): JsonSchema<ProviderChoice> => ({
+  type: 'string',
+  enum: providers,
+  default: defaultProvider,
+  isIncludedInConfigGeneration: true,
+  errorMessage: {
+    enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
+  },
+});
+
+/**
+ * @param {ServiceTypeChoice[]} types the service types available
+ * @param {ServiceTypeChoice} defaultType the default type for the service
+ * @returns {JsonSchema} the service's type schema
+ */
+export const getServiceTypeSchema = (
+  types: ServiceTypeChoice[], defaultType?: ServiceTypeChoice,
+): JsonSchema<ServiceTypeChoice> => ({
+  type: 'string',
+  enum: types,
+  default: defaultType,
+  errorMessage: {
+    enum: `You have to specify a valid service type, available are: ${types.join(', ')}`,
+  },
+});
+
+/**
  * Returns a base core service (one that cannot be part of a stage)
  *
  * @param provider {ProviderChoice} the provider for the core service
@@ -228,36 +275,12 @@ export const getCoreService = (
     required: [],
     additionalProperties: false,
     properties: {
-      provider: {
-        type: 'string',
-        enum: [provider],
-        default: provider,
-        isIncludedInConfigGeneration: true,
-        errorMessage: {
-          enum: `The provider can only be set to "${provider}"`,
-        },
-      },
-      type: {
-        type: 'string',
-        enum: [type],
-        default: type,
-        errorMessage: {
-          enum: `You have to specify a valid service type, only ${type} is accepted`,
-        },
-      },
+      name: getServiceNameSchema(),
+      provider: getServiceProviderSchema([provider], provider),
+      type: getServiceTypeSchema([type], type),
       region: {
         type: 'string',
         isIncludedInConfigGeneration: true,
-      },
-      name: {
-        type: 'string',
-        pattern: '^([a-zA-Z0-9_-]+)$',
-        minLength: 2,
-        description: 'The name for the service to deploy',
-        errorMessage: {
-          minLength: 'The service’s name should be two characters or more',
-          pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
-        },
       },
     },
   };

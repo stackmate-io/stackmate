@@ -6,7 +6,7 @@ import {
   SecretVaultServiceAttributes, StateServiceAttributes,
 } from '@stackmate/engine/core/registry';
 import {
-  BaseServiceAttributes, isCloudProvider, isCoreService, ProviderChoice,
+  BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema, isCloudProvider, isCoreService, ProviderChoice,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
@@ -223,6 +223,7 @@ export const getProjectSchema = (
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
     properties: {
+      provider: getServiceProviderSchema(cloudProviders),
       name: {
         type: 'string',
         pattern: '^([a-zA-Z0-9-_./]+)$',
@@ -233,14 +234,6 @@ export const getProjectSchema = (
           pattern: 'The "name" property should consist of letters, numbers, dashes, dots, underscores and forward slashes',
         },
       },
-      provider: {
-        type: 'string',
-        enum: cloudProviders,
-        description: 'The default provider for your cloud services',
-        errorMessage: {
-          enum: `The provider is invalid, available choices are: ${cloudProviders.join(', ')}`,
-        },
-      },
       region: {
         type: 'string',
         description: 'The default region for the provider you have selected',
@@ -249,28 +242,14 @@ export const getProjectSchema = (
         type: 'object',
         description: 'How would you like your services secrets to be stored',
         properties: {
-          provider: {
-            type: 'string',
-            enum: secretsProviders,
-            description: 'The secrets provider',
-            errorMessage: {
-              enum: `Invalid secrets provider, available options are: ${secretsProviders.join(', ')}`,
-            },
-          },
+          provider: getServiceProviderSchema(secretsProviders),
         },
       },
       state: {
         type: 'object',
         description: 'Where would you like your Terraform state to be stored',
         properties: {
-          provider: {
-            type: 'string',
-            enum: stateProviders,
-            description: 'The state provider',
-            errorMessage: {
-              enum: `Invalid state provider, available options are: ${stateProviders.join(', ')}`,
-            },
-          },
+          provider: getServiceProviderSchema(stateProviders),
         },
       },
       stages: {
@@ -320,30 +299,9 @@ export const getProjectSchema = (
                 required: ['name', 'type'],
                 minItems: 1,
                 properties: {
-                  name: {
-                    type: 'string',
-                    pattern: '^([a-zA-Z0-9_-]+)$',
-                    minLength: 2,
-                    description: 'The name for the service',
-                    errorMessage: {
-                      minLength: 'The service’s name should be two characters or more',
-                      pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
-                    },
-                  },
-                  type: {
-                    type: 'string',
-                    enum: serviceTypes,
-                    errorMessage: {
-                      enum: `You have to specify a valid service type, available are: ${serviceTypes.join(', ')}`
-                    },
-                  },
-                  provider: {
-                    type: 'string',
-                    enum: providers,
-                    errorMessage: {
-                      enum: `You have to specify a valid provider, available are: ${providers.join(', ')}`,
-                    },
-                  },
+                  name: getServiceNameSchema(),
+                  provider: getServiceProviderSchema(providers),
+                  type: getServiceTypeSchema(serviceTypes),
                 },
                 errorMessage: {
                   required: {
