@@ -58,8 +58,8 @@ type ProvisionCredentialsResources = Credentials & {
  */
 export const generateCredentials = (
   vault: AwsSecretsVaultDeployableProvisionable,
-  target: BaseProvisionable,
   stack: Stack,
+  target: BaseProvisionable,
   options: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
   const { config } = target;

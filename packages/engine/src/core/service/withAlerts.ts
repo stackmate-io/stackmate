@@ -28,11 +28,11 @@ export type AlertableAssociations = {
 /**
  * Adds link support to a service (allows it to be linked to other services)
  *
- * @param {AlertingHandler} onServiceLinked the function handling service links
+ * @param {AlertingHandler} onAlertingAssociationLinked the function handling service links
  * @returns {Function<Service>}
  */
 export const withAlerts = <C extends BaseServiceAttributes>(
-  onServiceLinked: AlertingHandler,
+  onAlertingAssociationLinked: AlertingHandler,
 ) => <T extends Service<C>>(srv: T): WithAssociations<T, AlertableAssociations> => (
   pipe(
     withSchema<C, AlertableAttributes>({
@@ -54,7 +54,7 @@ export const withAlerts = <C extends BaseServiceAttributes>(
     associate({
       deployable: {
         alertable: {
-          handler: onServiceLinked,
+          handler: onAlertingAssociationLinked,
           where: (config: C & AlertableAttributes): boolean => (
             !isEmpty(config.alerts)
           ),
