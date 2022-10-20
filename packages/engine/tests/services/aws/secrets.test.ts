@@ -88,7 +88,7 @@ describe('AWS Secrets service', () => {
 
     it('registers the provision credentials terraform resources', () => {
       const resources = generateCredentials(
-        vault as AwsSecretsVaultDeployableProvisionable, target, stack,
+        vault as AwsSecretsVaultDeployableProvisionable, stack, target,
       );
       expect(resources).toBeInstanceOf(Object);
       expect(resources.username).toBeInstanceOf(TerraformLocal);
@@ -108,7 +108,7 @@ describe('AWS Secrets service', () => {
     });
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(vault, target, stack);
+      const credentials = service.credentials(vault, stack, target);
       expect(credentials).toBeInstanceOf(Object);
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi;
       expect(credentials.username.asString).toEqual(expect.stringMatching(reg));

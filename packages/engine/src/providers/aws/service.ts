@@ -2,6 +2,7 @@ import pipe from '@bitty/pipe';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
 import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
 
+import { Stack } from '@stackmate/engine/core/stack';
 import { ChoiceOf, getCidrBlocks, getIpAddressParts, hashString, OneOfType } from '@stackmate/engine/lib';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
@@ -16,7 +17,6 @@ import {
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
 } from '@stackmate/engine/providers/aws/services/provider';
-import { Stack } from '@stackmate/engine/core/stack';
 
 type ProviderRequirement = ServiceRequirement<
   terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
@@ -110,7 +110,7 @@ const getVpcRequirement = (): VpcRequirement => ({
 });
 
 export const onServiceLinked = (
-  provisionable: LinkableServiceProvisionable, linked: BaseProvisionable, stack: Stack,
+  provisionable: LinkableServiceProvisionable, stack: Stack, linked: BaseProvisionable,
 ) => {
   const { config: { port, name: toName }, requirements: { vpc } } = provisionable;
   const { provisions = {}, config: { name: fromName } } = linked;
@@ -135,7 +135,6 @@ export const onServiceLinked = (
 
 export const onExternalLink = (
   provisionable: ExternallyLinkableServiceProvisionable,
-  linked: BaseProvisionable,
   stack: Stack,
 ) => {
   const { config: { externalLinks = [], port }, requirements: { vpc } } = provisionable;
