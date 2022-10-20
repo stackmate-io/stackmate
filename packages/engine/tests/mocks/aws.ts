@@ -33,7 +33,7 @@ export const getCredentialResources = (
   Object.assign(provisionable, { requirements: providerResources });
 
   return generateCredentials(
-    provisionable as AwsSecretsVaultDeployableProvisionable, target, stack, opts,
+    provisionable as AwsSecretsVaultDeployableProvisionable, stack, target, opts,
   );
 }
 
