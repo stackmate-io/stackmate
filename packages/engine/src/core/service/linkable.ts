@@ -120,7 +120,7 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
       deployable: {
         externallyLinkable: {
           handler: onExternalLink,
-          from: SERVICE_TYPE.PROVIDER,
+          with: SERVICE_TYPE.PROVIDER,
           where: (config: C & ExternallyLinkableAttributes): boolean => (
             !isEmpty(config.externalLinks)
           ),

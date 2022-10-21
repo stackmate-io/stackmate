@@ -83,7 +83,7 @@ export const withCredentials = <C extends BaseServiceAttributes>(
   associate({
     deployable: {
       credentials: {
-        from: SERVICE_TYPE.SECRETS,
+        with: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
           vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,
@@ -103,7 +103,7 @@ export const withRootCredentials = <C extends BaseServiceAttributes>(
   associate({
     deployable: {
       rootCredentials: {
-        from: SERVICE_TYPE.SECRETS,
+        with: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
           vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,

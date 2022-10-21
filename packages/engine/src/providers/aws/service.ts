@@ -82,7 +82,7 @@ type ExternallyLinkableServiceProvisionable = Provisionable<
 >;
 
 const getProviderInstanceRequirement = (): ProviderRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -93,7 +93,7 @@ const getProviderInstanceRequirement = (): ProviderRequirement => ({
 });
 
 const getAccountRequirement = (): AccountRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -106,7 +106,7 @@ const getAccountRequirement = (): AccountRequirement => ({
 });
 
 const getKmsKeyRequirement = (): KmsKeyRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -119,7 +119,7 @@ const getKmsKeyRequirement = (): KmsKeyRequirement => ({
 });
 
 const getVpcRequirement = (): VpcRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region

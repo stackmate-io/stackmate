@@ -3,12 +3,13 @@ import { sortBy } from 'lodash';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { JsonSchema } from '@stackmate/engine/core/schema';
 import { validateProject } from '@stackmate/engine';
-import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { BaseServiceAttributes, CORE_SERVICE_TYPES, isCoreService } from '@stackmate/engine/core/service';
+import { BaseServiceAttributes, isCoreService } from '@stackmate/engine/core/service';
+import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   CloudServiceConfiguration, getCloudServices, getProjectSchema, getProviderConfigurations,
   getServiceConfigurations, Project, ProjectConfiguration, withLocalState,
 } from '@stackmate/engine/core/project';
+import { faker } from '@faker-js/faker';
 
 describe('Project', () => {
   const [region] = REGIONS;
@@ -36,6 +37,9 @@ describe('Project', () => {
     stages: [{
       name: 'production',
       services: servicesConfig,
+      alerts: {
+        email: faker.internet.email(),
+      },
     }, {
       name: 'production-clone',
       copy: 'production',

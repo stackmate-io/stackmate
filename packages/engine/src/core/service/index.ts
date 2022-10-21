@@ -10,7 +10,6 @@ export * from './profilable';
 export * from './sizeable';
 export * from './storable';
 export * from './versioned';
-export * from './withAlerts';
 export * from './withConfigHints';
 export * from './withDatabase';
 export * from './withEngine';

@@ -3,14 +3,15 @@ import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   CloudServiceAttributes, Registry, CloudServiceProvider,
-  SecretVaultServiceAttributes, StateServiceAttributes,
+  SecretVaultServiceAttributes, StateServiceAttributes, MonitoringServiceAttributes,
 } from '@stackmate/engine/core/registry';
 import {
-  BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema, isCloudProvider, isCoreService, ProviderChoice,
+  BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema,
+  isCloudProvider, isCoreService, ProviderChoice,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
-  DistributiveRequireKeys, OneOfType,
+  DistributiveRequireKeys, OneOfType, OptionalKeys,
 } from '@stackmate/engine/lib';
 import {
   getCloudServiceConditional, getCoreServiceConditional,
@@ -21,7 +22,6 @@ import {
  * @type {CopiedStage} a stage which is a copy of another one
  */
 type CopiedStage = {
-  name: string;
   copy?: string;
   skip?: string[];
 };
@@ -30,7 +30,6 @@ type CopiedStage = {
  * @type {StageWithServices} a stage that is not coppied, rather has services configured
  */
 type StageWithServices<IsPartial extends boolean = false> = {
-  name: string;
   services?: CloudServiceConfiguration<IsPartial>[];
 };
 
@@ -47,7 +46,17 @@ export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPar
 export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<[
   CopiedStage,
   StageWithServices<IsPartial>,
-]>;
+]> & {
+  name: string;
+  alerts?: DistributiveOmit<DistributivePartial<MonitoringServiceAttributes>, 'name' | 'type'>;
+};
+
+/**
+ * @type {TransformableConfiguration} the service's configuration
+ */
+export type TransformableConfiguration = OptionalKeys<
+  BaseServiceAttributes, 'name' | 'provider' | 'region'
+>;
 
 /**
  * @type {Project} a project object
@@ -65,39 +74,71 @@ export type Project = {
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
 export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | 'secrets'> & {
-  state?: DistributiveOmit<DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'>;
-  secrets?: DistributiveOmit<DistributiveOptionalKeys<SecretVaultServiceAttributes, 'region'>, 'name' | 'type'>;
   stages?: StageConfiguration<true>[];
+  state?: DistributiveOmit<
+    DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'
+  >;
+  secrets?: DistributiveOmit<
+    DistributiveOptionalKeys<SecretVaultServiceAttributes, 'region'>, 'name' | 'type'
+  >;
 };
 
 /**
- * Returns the list of the cloud services that are managed by the given stage
- *
- * @param {Project} config the configuration object
- * @param {String} stage the stage to get
- * @param {String[]} skippedServices any names of services to skip (when copying the stage)
- * @returns {BaseServiceAttributes[]} the cloud services deployed by this stage
+ * @param {Project} project the project's configuration
+ * @param {String} stageName the name of the stage to get
+ * @returns {StageConfiguration} the stage's configuration
+ * @throws {Error} when the stage is not available in the project
  */
-export const getCloudServices = (
-  config: Project, stage: string, skippedServices: string[] = [],
-): BaseServiceAttributes[] => {
-  const { provider: projectProvider, region: projectRegion = null, stages = [] } = config;
+export const getStage = (project: Project, stageName: string): StageConfiguration => {
+  const { stages = [] } = project;
 
   if (isEmpty(stages)) {
     throw new Error('There aren’t any stages defined for the project');
   }
 
-  const stageConfiguration = stages.find(s => s.name === stage);
+  const stage = stages.find(s => s.name === stageName);
 
-  if (!stageConfiguration) {
-    throw new Error(`Stage ${stage} is not available in the project`);
+  if (!stage) {
+    throw new Error(`Stage ${stageName} is not available in the project`);
   }
 
-  const {
-    copy: copyFrom = null,
-    skip = [],
-    services: stageServices = [],
-  } = stageConfiguration;
+  return stage;
+};
+
+/**
+ * @param {TransformableConfiguration} config the service's configuration
+ * @param {Project} project the project to use
+ * @returns {BaseServiceAttributes} the configuration with credentials applied
+ */
+const applyProjectDefaults = (
+  config: TransformableConfiguration, project: Project,
+): BaseServiceAttributes => {
+  const cfg = defaults({}, config, {
+    name: `${config.type}-service`,
+    provider: project.provider,
+  });
+
+  if (cfg.provider === project.provider) {
+    Object.assign(cfg, { region: project.region });
+  }
+
+  return cfg;
+};
+
+/**
+ * Returns the list of the cloud services that are managed by the given stage
+ *
+ * @param {Project} project the configuration object
+ * @param {String} stage the stage to get
+ * @param {String[]} skippedServices any names of services to skip (when copying the stage)
+ * @returns {BaseServiceAttributes[]} the cloud services deployed by this stage
+ */
+export const getCloudServices = (
+  project: Project, stage: string, skippedServices: string[] = [],
+): BaseServiceAttributes[] => {
+  const { copy: copyFrom = null, skip = [], services: stageServices = [] } = getStage(
+    project, stage,
+  );
 
   if (isEmpty(stageServices) && !copyFrom) {
     throw new Error(
@@ -108,16 +149,12 @@ export const getCloudServices = (
   const services = [];
 
   if (copyFrom) {
-    services.push(...getCloudServices(config, copyFrom, skip));
+    services.push(...getCloudServices(project, copyFrom, skip));
   }
 
   services.push(...stageServices.filter(srv => !skippedServices.includes(srv.name)));
 
-  // Form the cloud services configurations
-  return services.map(srv => defaults({ ...srv }, {
-    provider: projectProvider,
-    region: projectRegion,
-  }));
+  return services;
 };
 
 /**
@@ -149,52 +186,35 @@ export const getProviderConfigurations = (
 /**
  * Returns the service configurations for the project and stage
  *
- * @param {String} stage the name of the stage to get configurations for
+ * @param {String} stageName the name of the stage to get configurations for
  * @returns {Function<BaseServiceAttributes[]>} the configurations for the services to deploy
  */
 export const getServiceConfigurations = (
-  stage: string,
-): (config: Project) => BaseServiceAttributes[] => (config) => {
-  const {
-    provider: projectProvider,
-    region: projectRegion,
-    name: projectName,
-    state = {},
-    secrets = {},
-  } = config;
-
-  if (!projectProvider) {
-    throw new Error('There is no provider set for the project');
-  }
-
-  const cloudServices = getCloudServices(config, stage);
+  stageName: string,
+): (project: Project) => BaseServiceAttributes[] => (project) => {
+  const cloudServices = getCloudServices(project, stageName);
+  const { alerts } = getStage(project, stageName);
+  const { state, secrets } = project;
 
   if (isEmpty(cloudServices)) {
-    throw new Error(`There are no services defined for stage ${stage}`);
+    throw new Error(`There are no services defined for stage ${stageName}`);
   }
 
-  // Predefined / core services => providers, state & secrets
-  const providers = getProviderConfigurations(cloudServices);
-  const stateConfig = defaults({ ...state }, {
-    name: `${projectName}-project-state`,
-    type: SERVICE_TYPE.STATE,
-    provider: projectProvider,
-    region: projectRegion,
-  });
-
-  const secretsConfig = defaults({ ...secrets }, {
-    name: `${projectName}-project-secrets-vault`,
-    type: SERVICE_TYPE.SECRETS,
-    provider: projectProvider,
-    region: projectRegion,
-  });
-
-  return [
-    ...providers,
-    ...cloudServices,
-    stateConfig,
-    secretsConfig,
+  // Predefined / core services => providers, state, monitoring & secrets
+  const providerConfigurations = getProviderConfigurations(cloudServices);
+  const coreServices: TransformableConfiguration[] = [
+    { ...state, type: SERVICE_TYPE.STATE },
+    { ...secrets, type: SERVICE_TYPE.SECRETS },
+    ...providerConfigurations,
   ];
+
+  providerConfigurations.forEach(({ provider, region }) => {
+    coreServices.push({ ...alerts, provider, region, type: SERVICE_TYPE.MONITORING });
+  });
+
+  return [...cloudServices, ...coreServices].map(
+    (cfg) => applyProjectDefaults(cfg, project),
+  );
 };
 
 /**
@@ -209,8 +229,9 @@ export const getProjectSchema = (
   const providers = Registry.providers();
   const serviceTypes = Registry.serviceTypes();
   const cloudProviders = providers.filter(p => isCloudProvider(p));
-  const stateProviders = Registry.providers('state');
-  const secretsProviders = Registry.providers('secrets');
+  const stateProviders = Registry.providers(SERVICE_TYPE.STATE);
+  const secretsProviders = Registry.providers(SERVICE_TYPE.SECRETS);
+  const monitoringProviders = Registry.providers(SERVICE_TYPE.MONITORING);
   const allServices = Registry.items;
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
@@ -289,6 +310,28 @@ export const getProjectSchema = (
               description: 'The name of the stage',
               errorMessage: {
                 pattern: 'The stage name should only contain characters, numbers, dashes and underscores',
+              },
+            },
+            alerts: {
+              type: 'object',
+              default: {},
+              properties: {
+                provider: getServiceProviderSchema(monitoringProviders),
+                emails: {
+                  type: 'array',
+                  minItems: 1,
+                  description: 'The list of email addresses to send the alerts to',
+                  items: {
+                    type: 'string',
+                    format: 'email',
+                    errorMessage: {
+                      format: '{/email} is not a valid email address',
+                    },
+                  },
+                  errorMessage: {
+                    minItems: 'You have to provide at least one email address to alert',
+                  },
+                },
               },
             },
             services: {
