@@ -3,7 +3,7 @@ import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CORE_SERVICE_TYPES, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@stackmate/engine/core/schema';
 
 /**
@@ -52,6 +52,11 @@ export type Provisions = Record<string, ProvisionResources> & {
 };
 
 /**
+ * @type {AssociationReturnType} the return types for association handlers
+ */
+export type AssociationReturnType = ProvisionResources | void;
+
+/**
  * @type {AssociationLookup} the function which determines whether an association takes effect
  */
 export type AssociationLookup = (
@@ -62,7 +67,7 @@ export type AssociationLookup = (
  * @type {AssociationHandler} the handler to run when an association takes effect
  */
 export type AssociationHandler<
-  Ret extends ProvisionResources,
+  Ret extends AssociationReturnType,
   Attrs extends BaseServiceAttributes = BaseServiceAttributes
 > = (
   current: BaseProvisionable<Attrs>,
@@ -73,10 +78,10 @@ export type AssociationHandler<
 /**
  * @type {Association} describes an association between two services
  */
-export type Association<Ret extends ProvisionResources> = {
+export type Association<Ret extends AssociationReturnType> = {
   handler: AssociationHandler<Ret>;
-  from?: ServiceTypeChoice;
   where?: AssociationLookup;
+  with?: ServiceTypeChoice;
   requirement?: boolean;
 };
 
@@ -86,15 +91,15 @@ export type Association<Ret extends ProvisionResources> = {
  * @param {ServiceTypeChoice} S the service type choice the association refers to (optional)
  */
 export type ServiceRequirement<
-  Ret extends ProvisionResources,
+  Ret extends AssociationReturnType,
   S extends ServiceTypeChoice = never,
-> = Association<Ret> & { requirement: true; from?: S };
+> = Association<Ret> & { requirement: true; with?: S };
 
 /**
  * @type {ServiceSideEffect} describes a generic association that is not a requirement
  */
 export type ServiceSideEffect<
-  Ret extends ProvisionResources = ProvisionResources
+  Ret extends AssociationReturnType = ProvisionResources
 > = Association<Ret> & {
   where: AssociationLookup;
   requirement?: false;
@@ -120,6 +125,11 @@ type ExtractServiceRequirements<
 };
 
 /**
+ * @type {ContextHandler} the context handler function
+ */
+export type ContextHandler<Ctx extends Obj = {}> = (configs: BaseServiceAttributes[]) => Ctx;
+
+/**
  * @type {BaseProvisionable} base provisionable
  */
 export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
@@ -129,6 +139,7 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   provisions: Provisions;
   resourceId: string;
   sideEffects: Resource[];
+  context: Obj;
   requirements: Record<string, ProvisionResources>;
 };
 
@@ -139,11 +150,13 @@ export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
   Scope extends ServiceScopeChoice,
+  Context extends Obj = {},
   Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>
 > = BaseProvisionable<Attrs> & {
   service: Srv;
   config: Attrs;
   provisions: Provs;
+  context: Context;
   requirements: ExtractServiceRequirements<Srv['associations'], Scope>;
 };
 
@@ -192,6 +205,7 @@ export type Service<
   environment: ServiceEnvironment[];
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   associations: Associations;
+  contextHandler?: ContextHandler;
 };
 
 /**
@@ -332,13 +346,6 @@ export const getCloudService = (
 };
 
 /**
- * @var {ServiceTypeChoice[]} CORE_SERVICE_TYPES the core service types
- */
-export const CORE_SERVICE_TYPES = [
-  SERVICE_TYPE.STATE, SERVICE_TYPE.SECRETS, SERVICE_TYPE.PROVIDER,
-] as ServiceTypeChoice[];
-
-/**
  * @param {ServiceTypeChoice} type the type of service to check whether is a core service
  * @returns {Boolean} whether the given service type is a core service
  */
@@ -388,7 +395,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  *    associate({
  *      deployable: {
  *        associationName: {
- *          from: SERVICE_TYPE.PROVIDER,
+ *          with: SERVICE_TYPE.PROVIDER,
  *          where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
  *          handler: (p, stack) => p.provisions.find(p => p instanceof KmsKey),
  *        },
@@ -448,14 +455,15 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
 });
 
 /**
- * @param {BaseServiceAttributes} config the service's configuration
- * @param {String} stageName the stage's name
- * @returns {String} the id to use as a terraform resource identifier
+ * Adds a function which manages the service's context
+ *
+ * @param {ContextHandler} contextHandler the context handler to add to the service
+ * @returns {Function<Service>}
  */
-export const getProvisionableResourceId = (
-  config: BaseServiceAttributes, stageName: string,
-): string => (
-  `${config.name || config.type}-${stageName}`
+export const withContext = <C extends BaseServiceAttributes, H extends ContextHandler>(
+  contextHandler: H,
+) => <T extends Service<C>>(srv: T): T => (
+  withServiceProperties<C>({ contextHandler })(srv)
 );
 
 /**

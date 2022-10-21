@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
 import { LocalBackend, S3Backend, TerraformStack } from 'cdktf';
-import { kmsKey as awsKmsKey } from '@cdktf/provider-aws';
+import { dataAwsCallerIdentity, kmsKey as awsKmsKey } from '@cdktf/provider-aws';
 import { provider as localProvider } from '@cdktf/provider-local';
 import {
   provider as awsProvider,
@@ -74,13 +74,14 @@ describe('Operation', () => {
     });
 
     it('populates the provisionables', () => {
-      // Provisionables should be provider + state + secerets + database = 4
-      expect(provisionables).toHaveLength(4);
+      // Provisionables should be provider + state + secerets + database + monitoring = 5
+      expect(provisionables).toHaveLength(5);
       expect(new Set(provisionables.map(p => p.service.type))).toEqual(new Set([
         SERVICE_TYPE.PROVIDER,
         SERVICE_TYPE.STATE,
         SERVICE_TYPE.SECRETS,
         SERVICE_TYPE.MYSQL,
+        SERVICE_TYPE.MONITORING,
       ]));
     });
 
@@ -88,15 +89,16 @@ describe('Operation', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.PROVIDER);
       expect(isEmpty(provisions)).toBe(false);
       expect(new Set(Object.keys(provisions))).toEqual(new Set([
-        'provider', 'gateway', 'kmsKey', 'subnets', 'vpc',
+        'provider', 'account', 'gateway', 'kmsKey', 'subnets', 'vpc',
       ]));
 
       const {
-        provider, gateway, kmsKey, subnets, vpc,
+        provider, gateway, kmsKey, subnets, vpc, account,
       } = provisions as AwsProviderDeployableResources;
 
       expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
       expect(gateway).toBeInstanceOf(awsInternetGateway.InternetGateway);
+      expect(account).toBeInstanceOf(dataAwsCallerIdentity.DataAwsCallerIdentity);
       expect(kmsKey).toBeInstanceOf(awsKmsKey.KmsKey);
       expect(Array.isArray(subnets)).toBe(true);
       expect(vpc).toBeInstanceOf(awsVpc.Vpc);
@@ -139,7 +141,7 @@ describe('Operation', () => {
     it('registers the AWS provider', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.PROVIDER);
       expect(isEmpty(provisions)).toBe(false);
-      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'kmsKey']));
+      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'account', 'kmsKey']));
 
       const { provider } = provisions as AwsProviderDeployableResources;
       expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
@@ -179,7 +181,7 @@ describe('Operation', () => {
 
       const provisions = getProvisions(provisionables, lookup);
       expect(isEmpty(provisions)).toBe(false);
-      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'kmsKey']));
+      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'account', 'kmsKey']));
 
       const { provider } = provisions as AwsProviderDeployableResources;
       expect(provider).toBeInstanceOf(awsProvider.AwsProvider);

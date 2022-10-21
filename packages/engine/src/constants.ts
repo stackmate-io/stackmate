@@ -24,6 +24,7 @@ export const SERVICE_TYPE = {
   MEMCACHED: 'memcached',
   MAILER: 'mailer',
   MARIADB: 'mariadb',
+  MONITORING: 'monitoring',
   MYSQL: 'mysql',
   POSTGRESQL: 'postgresql',
   PROVIDER: 'provider',
@@ -33,6 +34,13 @@ export const SERVICE_TYPE = {
   SECRETS: 'secrets',
   VOLUME: 'volume',
 } as const;
+
+export const CORE_SERVICE_TYPES = [
+  SERVICE_TYPE.STATE,
+  SERVICE_TYPE.SECRETS,
+  SERVICE_TYPE.PROVIDER,
+  SERVICE_TYPE.MONITORING,
+] as ServiceTypeChoice[];
 
 // Json Schema
 export const JSON_SCHEMA_PATH = path.resolve(__dirname, 'stackmate.schema.json');

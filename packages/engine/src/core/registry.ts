@@ -130,6 +130,7 @@ const registry = new Registry(...availableServices) as Registry;
 type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER };
 type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE; };
 type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS };
+type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING };
 
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
@@ -156,6 +157,13 @@ export type SecretVaultService = Distribute<
 >;
 export type SecretVaultServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, SecretsDiscrimination>
+>;
+
+export type MonitoringService = Distribute<
+  Extract<AvailableService, MonitoringDiscrimination>
+>;
+export type MonitoringServiceAttributes = Distribute<
+  Extract<AvailableServiceAttributes, MonitoringDiscrimination>
 >;
 
 export type CoreService = Distribute<

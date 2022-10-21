@@ -8,8 +8,7 @@ import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
 import { validate, validateEnvironment, validateServices } from '@stackmate/engine/core/validation';
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  assertRequirementsSatisfied,
-  BaseServiceAttributes, getProvisionableResourceId, BaseProvisionable, Provisions,
+  assertRequirementsSatisfied, BaseServiceAttributes, BaseProvisionable, Provisions,
   ServiceEnvironment, ServiceScopeChoice, ServiceAssociations,
 } from '@stackmate/engine/core/service';
 
@@ -36,20 +35,34 @@ export type Operation = {
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration
- * @param {String} stageName the name of the stage to register resources to
+ * @param {String} stageName the stage's name
+ * @returns {String} the id to use as a terraform resource identifier
+ */
+const getProvisionableResourceId = (config: BaseServiceAttributes): string => (
+  `${config.name || config.type}-${config.provider}-${config.region || 'default'}`
+);
+
+/**
+ * @param {BaseServiceAttributes} config the service's configuration
+ * @param {BaseServiceAttributes[]} context the name of the stage to register resources to
  * @returns {BaseProvisionable} the provisionable to use in operations
  */
-export const getProvisionableFromConfig = (
-  config: BaseServiceAttributes, stageName: string,
-): BaseProvisionable => ({
-  id: hashObject(config),
-  config,
-  service: Registry.fromConfig(config),
-  requirements: {},
-  provisions: {},
-  sideEffects: [],
-  resourceId: getProvisionableResourceId(config, stageName),
-});
+export const getProvisionable = (
+  config: BaseServiceAttributes, context: BaseServiceAttributes[] = [],
+): BaseProvisionable => {
+  const service = Registry.fromConfig(config);
+
+  return {
+    id: hashObject(config),
+    config,
+    service,
+    requirements: {},
+    provisions: {},
+    sideEffects: [],
+    resourceId: getProvisionableResourceId(config),
+    context: service.contextHandler ? service.contextHandler(context) : {},
+  };
+};
 
 class StageOperation implements Operation {
   /**
@@ -90,17 +103,9 @@ class StageOperation implements Operation {
   ) {
     this.stack = stack;
     this.scope = scope;
-    this.setUpProvisionables(services);
-  }
 
-  /**
-   * Creates the provisionables map from the list of services
-   *
-   * @param {BaseServiceAttributes[]} services the services to create the provisionables from
-   */
-  protected setUpProvisionables(services: BaseServiceAttributes[]) {
     services.forEach((config) => {
-      const provisionable = getProvisionableFromConfig(config, this.stack.stageName);
+      const provisionable = getProvisionable(config, services);
       this.provisionables.set(provisionable.id, provisionable);
     });
   }
@@ -154,7 +159,7 @@ class StageOperation implements Operation {
       const {
         where: isAssociated,
         handler: associationHandler,
-        from: associatedServiceType,
+        with: associatedServiceType,
         requirement: isRequirement,
       } = association;
 
@@ -176,7 +181,7 @@ class StageOperation implements Operation {
         // Register the requirements or side-effects into the provisionable
         if (isRequirement && associationName) {
           Object.assign(requirements, { [associationName]: handlerOutput });
-        } else {
+        } else if (handlerOutput) {
           const linkedSideEffects = isObject(handlerOutput)
             ? Object.values(handlerOutput)
             : Array.isArray(handlerOutput) ? handlerOutput : [handlerOutput];
