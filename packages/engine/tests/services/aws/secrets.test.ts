@@ -108,7 +108,9 @@ describe('AWS Secrets service', () => {
     });
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(vault, stack, target);
+      const credentials = service.credentials(
+        vault as AwsSecretsVaultDeployableProvisionable, stack, target,
+      );
       expect(credentials).toBeInstanceOf(Object);
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi;
       expect(credentials.username.asString).toEqual(expect.stringMatching(reg));

@@ -4,7 +4,7 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   associate, BaseService, BaseServiceAttributes, BaseProvisionable,
-  Service, ServiceRequirement, WithAssociations,
+  Service, ServiceRequirement, WithAssociations, AssociationHandler,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -52,16 +52,6 @@ export type CredentialsHandlerOptions = {
 };
 
 /**
- * @type {CredentialsHandler} the credentials association handler
- */
-export type CredentialsHandler = (
-  vault: BaseProvisionable,
-  stack: Stack,
-  target: BaseProvisionable,
-  opts?: CredentialsHandlerOptions,
-) => Credentials;
-
-/**
  * @type {SecretsVaultService} describes secrets vault services
  */
 export type SecretsVaultService<Srv extends BaseService> = Srv & {
@@ -74,6 +64,13 @@ export type SecretsVaultService<Srv extends BaseService> = Srv & {
 export type VaultProvisionable = BaseProvisionable & {
   service: SecretsVaultService<BaseProvisionable['service']>;
 };
+
+/**
+ * @type {CredentialsHandler} the credentials association handler
+ */
+export type CredentialsHandler = AssociationHandler<
+  Credentials, VaultProvisionable, CredentialsHandlerOptions
+>;
 
 /**
  * @returns {Function<Service>} the service enhanced with the crerentials association

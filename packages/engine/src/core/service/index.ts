@@ -5,6 +5,7 @@ export * from './core';
 export * from './connectable';
 export * from './credentials';
 export * from './linkable';
+export * from './monitored';
 export * from './multinode';
 export * from './profilable';
 export * from './sizeable';
