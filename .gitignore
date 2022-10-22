@@ -3,6 +3,8 @@
 .turbo
 .nyc_output
 dist
+artifacts/*
+!artifacts/.keep
 package-lock.json
 tmp
 node_modules
