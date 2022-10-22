@@ -66,7 +66,7 @@ describe('Operation', () => {
       operation.process();
     });
 
-    it('is populates the stack properly', () => {
+    it('populates the stack properly', () => {
       expect(operation.stack).not.toBeUndefined();
       expect(operation.stack.projectName).toEqual(project.name);
       expect(operation.stack.stageName).toEqual('production');

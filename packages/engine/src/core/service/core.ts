@@ -68,11 +68,13 @@ export type AssociationLookup = (
  */
 export type AssociationHandler<
   Ret extends AssociationReturnType,
-  Attrs extends BaseServiceAttributes = BaseServiceAttributes
+  Prov extends BaseProvisionable = BaseProvisionable,
+  Opts extends Obj = Obj
 > = (
-  current: BaseProvisionable<Attrs>,
+  current: Prov,
   stack: Stack,
-  linked: BaseProvisionable<Attrs>,
+  linked: BaseProvisionable,
+  opts?: Opts,
 ) => Ret;
 
 /**
@@ -83,7 +85,13 @@ export type Association<Ret extends AssociationReturnType> = {
   where?: AssociationLookup;
   with?: ServiceTypeChoice;
   requirement?: boolean;
+  sideEffect?: boolean;
 };
+
+/**
+ * @type {AnyAssociationHandler} describes any association hhandler
+ */
+export type AnyAssociationHandler = AssociationHandler<AssociationReturnType>;
 
 /**
  * @type {ServiceRequirement} the configuration object for associating a service with another
@@ -101,8 +109,8 @@ export type ServiceRequirement<
 export type ServiceSideEffect<
   Ret extends AssociationReturnType = ProvisionResources
 > = Association<Ret> & {
-  where: AssociationLookup;
-  requirement?: false;
+  where?: AssociationLookup;
+  sideEffect: true;
 };
 
 /**
@@ -125,11 +133,6 @@ type ExtractServiceRequirements<
 };
 
 /**
- * @type {ContextHandler} the context handler function
- */
-export type ContextHandler<Ctx extends Obj = {}> = (configs: BaseServiceAttributes[]) => Ctx;
-
-/**
  * @type {BaseProvisionable} base provisionable
  */
 export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
@@ -138,8 +141,8 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   config: Attrs;
   provisions: Provisions;
   resourceId: string;
-  sideEffects: Resource[];
-  context: Obj;
+  registered: boolean;
+  sideEffects: Provisions;
   requirements: Record<string, ProvisionResources>;
 };
 
@@ -205,7 +208,6 @@ export type Service<
   environment: ServiceEnvironment[];
   handlers: Map<ServiceScopeChoice, ProvisionHandler>;
   associations: Associations;
-  contextHandler?: ContextHandler;
 };
 
 /**
@@ -453,18 +455,6 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   ...service,
   environment: [...service.environment, { name, required, description }],
 });
-
-/**
- * Adds a function which manages the service's context
- *
- * @param {ContextHandler} contextHandler the context handler to add to the service
- * @returns {Function<Service>}
- */
-export const withContext = <C extends BaseServiceAttributes, H extends ContextHandler>(
-  contextHandler: H,
-) => <T extends Service<C>>(srv: T): T => (
-  withServiceProperties<C>({ contextHandler })(srv)
-);
 
 /**
  * @param {BaseProvisionable} provisionable the provisionable to check

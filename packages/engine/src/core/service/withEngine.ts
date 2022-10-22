@@ -13,7 +13,7 @@ export type EngineAttributes<T extends string = string> = { engine: T; };
  */
 
 export const withEngine = <C extends BaseServiceAttributes>(
-  engine: string, isRequired = false
+  engine: string, isRequired = false,
 ) => withSchema<C, EngineAttributes>({
   type: 'object',
   required: isRequired ? ['engine'] : [],
