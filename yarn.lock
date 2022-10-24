@@ -1080,6 +1080,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^1.19.1":
+  version: 1.19.1
+  resolution: "@oclif/core@npm:1.19.1"
+  dependencies:
+    "@oclif/linewrap": ^1.0.0
+    "@oclif/screen": ^3.0.2
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.3.1
+    widest-line: ^3.1.0
+    wrap-ansi: ^7.0.0
+  checksum: ef2f2af61a30230b20d35ef9f6340652775fffb880d028b884432646d85c7ca40e3051ed6acf1f0bcf50c46d12716f16ac451e4223082ede267c0307e59bc579
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1093,6 +1129,15 @@ __metadata:
   dependencies:
     "@oclif/core": ^1.16.5
   checksum: dde54947163cc5c97b9e198b2016f7d0a68ed3205e494dd21348545efcc4b0db4164466063b3573f922b6d8884534b100e582cfc4c4c4746bd50ef0cadf5a9a9
+  languageName: node
+  linkType: hard
+
+"@oclif/plugin-help@npm:^5.1.16":
+  version: 5.1.16
+  resolution: "@oclif/plugin-help@npm:5.1.16"
+  dependencies:
+    "@oclif/core": ^1.19.1
+  checksum: cfa6461ffc038a169161641cc6988a7ca7bcfb77ca1ce2e91169c74a055e3c33483210552ada0552f56acd3dc6c498fcb8a995ec3a888ddb0e995b95bdb00560
   languageName: node
   linkType: hard
 
@@ -1324,7 +1369,7 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^29.2.0
     lodash: 4.17.21
-    oclif: ^3.2.19
+    oclif: ^3.2.21
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.0
@@ -6498,12 +6543,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.19":
-  version: 3.2.19
-  resolution: "oclif@npm:3.2.19"
+"oclif@npm:^3.2.21":
+  version: 3.2.21
+  resolution: "oclif@npm:3.2.21"
   dependencies:
     "@oclif/core": ^1.18.0
-    "@oclif/plugin-help": ^5.1.15
+    "@oclif/plugin-help": ^5.1.16
     "@oclif/plugin-not-found": ^2.3.5
     "@oclif/plugin-warn-if-update-available": ^2.0.6
     aws-sdk: ^2.1231.0
@@ -6522,7 +6567,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 7ce368176a674ecd4beb171cbc766a0dd760fc156b35388cfe7805ccdc3159c57f7ba8e9473a6603de66c81e0fe4c0557fafa5f4c63406fc3620540ef4b16804
+  checksum: 93e33316abbc36de6d0d197ca3f5e3d41cce5387a3a9a0f7381d3e1fc9e34652cded04c27fa8c385bc272f4bf0d8915a49a1c62ede8949d021bb6e66faa218b4
   languageName: node
   linkType: hard
 
