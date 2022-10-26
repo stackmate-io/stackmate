@@ -1,4 +1,5 @@
 import pipe from '@bitty/pipe';
+import { kebabCase } from 'lodash';
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -103,9 +104,9 @@ export const onDeploy = (
     enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE[config.engine],
     engine: config.engine,
     engineVersion: config.version,
-    identifier: provisionable.resourceId,
+    identifier: kebabCase(`${config.name}-${stack.stageName}`),
     instanceClass: config.size,
-    name: config.database,
+    dbName: config.database,
     parameterGroupName: paramGroup.name,
     port: config.port,
     provider: providerInstance,

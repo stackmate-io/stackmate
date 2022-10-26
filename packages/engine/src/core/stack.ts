@@ -9,9 +9,10 @@ export type Stack = {
   readonly projectName: string;
   readonly stageName: string;
   toObject(): object;
+  toJson(): string;
 };
 
-class StageStack implements Stack {
+export class StageStack implements Stack {
   /**
    * @var {TerraformApp} app the terraform app for synthesizing the stack
    * @readonly
@@ -54,6 +55,13 @@ class StageStack implements Stack {
    */
   toObject(): object {
     return this.context.toTerraform();
+  }
+
+  /**
+   * @returns {String} the JSON representation of the stack
+   */
+  toJson(): string {
+    return JSON.stringify(this.toObject(), null, 2);
   }
 }
 
