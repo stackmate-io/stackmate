@@ -10,11 +10,10 @@ import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsServiceAssociations, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
+import { AwsService, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import {
-  BaseProvisionable,
-  BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
-  Provisionable, SecretsVaultService, Service, withCredentialsGenerator,
+  BaseProvisionable, BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
+  Provisionable, SecretsVaultService, withCredentialsGenerator,
 } from '@stackmate/engine/core/service';
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
@@ -27,9 +26,7 @@ export type AwsSecretsDeployableResources = {};
 export type AwsSecretsDestroyableResources = {};
 export type AwsSecretsPreparableResources = {};
 
-export type AwsSecretsVaultService = SecretsVaultService<
-  Service<AwsSecretsVaultAttributes> & { associations: AwsServiceAssociations }
->;
+export type AwsSecretsVaultService = SecretsVaultService<AwsService<AwsSecretsVaultAttributes>>;
 
 export type AwsSecretsVaultDeployableProvisionable = Provisionable<
   AwsSecretsVaultService, AwsSecretsDeployableResources, 'deployable'
@@ -62,11 +59,11 @@ export const generateCredentials = (
   target: BaseProvisionable,
   options: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
-  const { config } = target;
+  const { config: { name: targetName } } = target;
   const { root = false, length: passwordLength, exclude: excludeCharacters = [] } = options;
   const { service, requirements: { kmsKey, providerInstance } } = vault;
-  const idPrefix = `${snakeCase(config.name)}_secrets`;
-  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(config.name.toLowerCase())}`;
+  const idPrefix = `${snakeCase(targetName)}_secrets`;
+  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(targetName.toLowerCase())}`;
 
   // we only use the default profile, since this is a core service
   const { secret, version, password } = getServiceProfile(
@@ -95,7 +92,7 @@ export const generateCredentials = (
     ...version,
     secretId: secretResource.id,
     secretString: JSON.stringify({
-      username: `${snakeCase(config.name)}_${root ? 'root' : 'user'}`,
+      username: `${snakeCase(targetName)}_${root ? 'root' : 'user'}`,
       password: passResource.randomPassword,
     }),
     lifecycle: {

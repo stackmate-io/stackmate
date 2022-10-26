@@ -2,7 +2,7 @@ import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
 import { getStack } from '@stackmate/engine/core/stack';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
+import { getProvisionable } from '@stackmate/engine/core/operation';
 import {
   LocalProvider, LocalProviderAttributes, LocalProviderProvisionable, onPrepare,
 } from '@stackmate/engine/providers/local/services/provider';
@@ -53,7 +53,7 @@ describe('Local Provider', () => {
       type: 'provider',
     };
 
-    const provisionable = getProvisionableFromConfig(config, stack.stageName);
+    const provisionable = getProvisionable(config);
 
     it('registers the local provider', () => {
       const resources = onPrepare(provisionable as LocalProviderProvisionable, stack);

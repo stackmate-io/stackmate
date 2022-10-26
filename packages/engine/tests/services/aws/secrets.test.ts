@@ -10,7 +10,7 @@ import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { getStack, Stack } from '@stackmate/engine/core/stack';
 import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
-import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
+import { getProvisionable } from '@stackmate/engine/core/operation';
 import {
   AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, generateCredentials,
 } from '@stackmate/engine/providers/aws/services/secrets';
@@ -83,7 +83,7 @@ describe('AWS Secrets service', () => {
       };
 
       vault = getAwsDeploymentProvisionableMock(config, stack);
-      target = getProvisionableFromConfig(targetConfig, stack.stageName);
+      target = getProvisionable(targetConfig);
     });
 
     it('registers the provision credentials terraform resources', () => {
@@ -108,7 +108,9 @@ describe('AWS Secrets service', () => {
     });
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(vault, stack, target);
+      const credentials = service.credentials(
+        vault as AwsSecretsVaultDeployableProvisionable, stack, target,
+      );
       expect(credentials).toBeInstanceOf(Object);
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi;
       expect(credentials.username.asString).toEqual(expect.stringMatching(reg));

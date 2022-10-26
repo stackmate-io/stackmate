@@ -3,12 +3,13 @@ import { sortBy } from 'lodash';
 import { REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { JsonSchema } from '@stackmate/engine/core/schema';
 import { validateProject } from '@stackmate/engine';
-import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { BaseServiceAttributes, CORE_SERVICE_TYPES, isCoreService } from '@stackmate/engine/core/service';
+import { BaseServiceAttributes, isCoreService } from '@stackmate/engine/core/service';
+import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
-  CloudServiceConfiguration, getCloudServices, getProjectSchema, getProviderConfigurations,
+  CloudServiceConfiguration, getCloudServices, getProjectSchema,
   getServiceConfigurations, Project, ProjectConfiguration, withLocalState,
 } from '@stackmate/engine/core/project';
+import { faker } from '@faker-js/faker';
 
 describe('Project', () => {
   const [region] = REGIONS;
@@ -36,6 +37,9 @@ describe('Project', () => {
     stages: [{
       name: 'production',
       services: servicesConfig,
+      alerts: {
+        email: faker.internet.email(),
+      },
     }, {
       name: 'production-clone',
       copy: 'production',
@@ -90,34 +94,6 @@ describe('Project', () => {
       expect(sortBy(withoutDbs, 'name')).toEqual(
         sortBy(production.filter(s => !excluded.includes(s.name)), 'name'),
       );
-    });
-  });
-
-  describe('getProviderConfigurations', () => {
-    it('returns the provider configurations for the project', () => {
-      const providers = getProviderConfigurations(services);
-      expect(Array.isArray(providers)).toBe(true);
-      // there should only be the aws provider
-      expect(providers.length).toEqual(1);
-      expect(providers.map(p => p.provider)).toEqual([PROVIDER.AWS]);
-      expect(providers.every(p => p.type === SERVICE_TYPE.PROVIDER)).toBe(true);
-      expect(providers.map(p => p.region)).toEqual(expect.arrayContaining([region]));
-    });
-
-    it('returns the provider configurations for when there is another provider in place', () => {
-      const providers = getProviderConfigurations([...services, {
-        name: 'my-local-service',
-        provider: PROVIDER.LOCAL,
-        type: SERVICE_TYPE.STATE,
-      }]);
-
-      expect(Array.isArray(providers)).toBe(true);
-      // we should have both the AWS and local providers
-      expect(providers.length).toEqual(2);
-      expect(providers.map(p => p.provider)).toEqual([PROVIDER.AWS, PROVIDER.LOCAL]);
-      expect(providers.every(p => p.type === SERVICE_TYPE.PROVIDER)).toBe(true);
-      // only the AWS has regions
-      expect(providers.map(p => p.region)).toEqual(expect.arrayContaining([region]));
     });
   });
 

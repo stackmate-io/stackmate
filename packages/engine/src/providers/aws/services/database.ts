@@ -4,6 +4,7 @@ import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-a
 import { Stack } from '@stackmate/engine/core/stack';
 import { getResourcesProfile } from '@stackmate/engine/core/profile';
 import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
+import { DatabaseServiceAttributes } from '@stackmate/engine/providers/types';
 import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { RootCredentialsAssociations, withRootCredentials } from '@stackmate/engine/core/service/credentials';
 import {
@@ -15,26 +16,16 @@ import {
   RDS_PARAM_FAMILY_MAPPING, REGIONS,
 } from '@stackmate/engine/providers/aws/constants';
 import {
-  BaseServiceAttributes, ConnectableAttributes, EngineAttributes, multiNode,
-  MultiNodeAttributes, profilable, ProfilableAttributes, Provisionable, RegionalAttributes,
-  ServiceTypeChoice, sizeable, SizeableAttributes, storable, StorableAttributes,
-  versioned, VersioningAttributes, withDatabase, withEngine, withHandler, withConfigHints,
-  connectable, linkable, externallyLinkable, LinkableAttributes, ExternallyLinkableAttributes,
+  EngineAttributes, multiNode, profilable, Provisionable, RegionalAttributes,
+  ServiceTypeChoice, sizeable, storable, versioned, withDatabase,
+  withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored,
 } from '@stackmate/engine/core/service';
 
-type DatabaseAttributes = BaseServiceAttributes
+type DatabaseAttributes = DatabaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
-  & SizeableAttributes
-  & VersioningAttributes
-  & LinkableAttributes
-  & ExternallyLinkableAttributes
-  & MultiNodeAttributes
-  & StorableAttributes
-  & ConnectableAttributes
   & EngineAttributes<RdsEngine>
-  & ProfilableAttributes & {
+  & {
     provider: typeof PROVIDER.AWS,
-    database: string;
   };
 
 export type AwsDatabaseDeployableResources = {
@@ -158,6 +149,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   )(getAwsCloudService(type));
 
   return pipe(
+    monitored(),
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
     connectable(defaultPort),

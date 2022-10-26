@@ -3,8 +3,8 @@ import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { Obj, ChoiceOf } from '@stackmate/engine/lib';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceSchema, mergeServiceSchemas } from '@stackmate/engine/core/schema';
+import { CORE_SERVICE_TYPES, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@stackmate/engine/core/schema';
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -52,6 +52,11 @@ export type Provisions = Record<string, ProvisionResources> & {
 };
 
 /**
+ * @type {AssociationReturnType} the return types for association handlers
+ */
+export type AssociationReturnType = ProvisionResources | void;
+
+/**
  * @type {AssociationLookup} the function which determines whether an association takes effect
  */
 export type AssociationLookup = (
@@ -62,23 +67,31 @@ export type AssociationLookup = (
  * @type {AssociationHandler} the handler to run when an association takes effect
  */
 export type AssociationHandler<
-  Ret extends ProvisionResources,
-  Attrs extends BaseServiceAttributes = BaseServiceAttributes
+  Ret extends AssociationReturnType,
+  Prov extends BaseProvisionable = BaseProvisionable,
+  Opts extends Obj = Obj
 > = (
-  current: BaseProvisionable<Attrs>,
+  current: Prov,
   stack: Stack,
-  linked: BaseProvisionable<Attrs>,
+  linked: BaseProvisionable,
+  opts?: Opts,
 ) => Ret;
 
 /**
  * @type {Association} describes an association between two services
  */
-export type Association<Ret extends ProvisionResources> = {
+export type Association<Ret extends AssociationReturnType> = {
   handler: AssociationHandler<Ret>;
-  from?: ServiceTypeChoice;
   where?: AssociationLookup;
+  with?: ServiceTypeChoice;
   requirement?: boolean;
+  sideEffect?: boolean;
 };
+
+/**
+ * @type {AnyAssociationHandler} describes any association hhandler
+ */
+export type AnyAssociationHandler = AssociationHandler<AssociationReturnType>;
 
 /**
  * @type {ServiceRequirement} the configuration object for associating a service with another
@@ -86,18 +99,18 @@ export type Association<Ret extends ProvisionResources> = {
  * @param {ServiceTypeChoice} S the service type choice the association refers to (optional)
  */
 export type ServiceRequirement<
-  Ret extends ProvisionResources,
+  Ret extends AssociationReturnType,
   S extends ServiceTypeChoice = never,
-> = Association<Ret> & { requirement: true; from?: S };
+> = Association<Ret> & { requirement: true; with?: S };
 
 /**
  * @type {ServiceSideEffect} describes a generic association that is not a requirement
  */
 export type ServiceSideEffect<
-  Ret extends ProvisionResources = ProvisionResources
+  Ret extends AssociationReturnType = ProvisionResources
 > = Association<Ret> & {
-  where: AssociationLookup;
-  requirement?: false;
+  where?: AssociationLookup;
+  sideEffect: true;
 };
 
 /**
@@ -128,7 +141,8 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   config: Attrs;
   provisions: Provisions;
   resourceId: string;
-  sideEffects: Resource[];
+  registered: boolean;
+  sideEffects: Provisions;
   requirements: Record<string, ProvisionResources>;
 };
 
@@ -139,11 +153,13 @@ export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
   Scope extends ServiceScopeChoice,
+  Context extends Obj = {},
   Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>
 > = BaseProvisionable<Attrs> & {
   service: Srv;
   config: Attrs;
   provisions: Provs;
+  context: Context;
   requirements: ExtractServiceRequirements<Srv['associations'], Scope>;
 };
 
@@ -212,6 +228,53 @@ export type WithAssociations<T extends BaseService, A extends ServiceAssociation
 };
 
 /**
+ * @returns {JsonSchema} the service's name schema
+ */
+export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']> => ({
+  type: 'string',
+  pattern: '^([a-zA-Z0-9_-]+)$',
+  minLength: 2,
+  description: 'The name for the service to deploy',
+  errorMessage: {
+    minLength: 'The service’s name should be two characters or more',
+    pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
+  },
+});
+
+/**
+ * @param {ProviderChoice[]} providers the providers to allow in the schema
+ * @param {ProviderChoice} defaultProvider the default provider for the service
+ * @returns {JsonSchema} the provider's schema
+ */
+export const getServiceProviderSchema = (
+  providers: ProviderChoice[], defaultProvider?: ProviderChoice,
+): JsonSchema<ProviderChoice> => ({
+  type: 'string',
+  enum: providers,
+  default: defaultProvider,
+  isIncludedInConfigGeneration: true,
+  errorMessage: {
+    enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
+  },
+});
+
+/**
+ * @param {ServiceTypeChoice[]} types the service types available
+ * @param {ServiceTypeChoice} defaultType the default type for the service
+ * @returns {JsonSchema} the service's type schema
+ */
+export const getServiceTypeSchema = (
+  types: ServiceTypeChoice[], defaultType?: ServiceTypeChoice,
+): JsonSchema<ServiceTypeChoice> => ({
+  type: 'string',
+  enum: types,
+  default: defaultType,
+  errorMessage: {
+    enum: `You have to specify a valid service type, available are: ${types.join(', ')}`,
+  },
+});
+
+/**
  * Returns a base core service (one that cannot be part of a stage)
  *
  * @param provider {ProviderChoice} the provider for the core service
@@ -228,36 +291,12 @@ export const getCoreService = (
     required: [],
     additionalProperties: false,
     properties: {
-      provider: {
-        type: 'string',
-        enum: [provider],
-        default: provider,
-        isIncludedInConfigGeneration: true,
-        errorMessage: {
-          enum: `The provider can only be set to "${provider}"`,
-        },
-      },
-      type: {
-        type: 'string',
-        enum: [type],
-        default: type,
-        errorMessage: {
-          enum: `You have to specify a valid service type, only ${type} is accepted`,
-        },
-      },
+      name: getServiceNameSchema(),
+      provider: getServiceProviderSchema([provider], provider),
+      type: getServiceTypeSchema([type], type),
       region: {
         type: 'string',
         isIncludedInConfigGeneration: true,
-      },
-      name: {
-        type: 'string',
-        pattern: '^([a-zA-Z0-9_-]+)$',
-        minLength: 2,
-        description: 'The name for the service to deploy',
-        errorMessage: {
-          minLength: 'The service’s name should be two characters or more',
-          pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
-        },
       },
     },
   };
@@ -309,13 +348,6 @@ export const getCloudService = (
 };
 
 /**
- * @var {ServiceTypeChoice[]} CORE_SERVICE_TYPES the core service types
- */
-export const CORE_SERVICE_TYPES = [
-  SERVICE_TYPE.STATE, SERVICE_TYPE.SECRETS, SERVICE_TYPE.PROVIDER,
-] as ServiceTypeChoice[];
-
-/**
  * @param {ServiceTypeChoice} type the type of service to check whether is a core service
  * @returns {Boolean} whether the given service type is a core service
  */
@@ -365,7 +397,7 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  *    associate({
  *      deployable: {
  *        associationName: {
- *          from: SERVICE_TYPE.PROVIDER,
+ *          with: SERVICE_TYPE.PROVIDER,
  *          where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
  *          handler: (p, stack) => p.provisions.find(p => p instanceof KmsKey),
  *        },
@@ -423,17 +455,6 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
   ...service,
   environment: [...service.environment, { name, required, description }],
 });
-
-/**
- * @param {BaseServiceAttributes} config the service's configuration
- * @param {String} stageName the stage's name
- * @returns {String} the id to use as a terraform resource identifier
- */
-export const getProvisionableResourceId = (
-  config: BaseServiceAttributes, stageName: string,
-): string => (
-  `${config.name || config.type}-${stageName}`
-);
 
 /**
  * @param {BaseProvisionable} provisionable the provisionable to check

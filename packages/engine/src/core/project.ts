@@ -1,35 +1,46 @@
-import { defaults, fromPairs, isEmpty, uniqBy } from 'lodash';
-
+import { defaults, fromPairs, groupBy, isEmpty } from 'lodash';
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+
+import { MonitoringServiceAttributes } from '@stackmate/engine/core/registry';
 import {
   CloudServiceAttributes, Registry, CloudServiceProvider,
   SecretVaultServiceAttributes, StateServiceAttributes,
 } from '@stackmate/engine/core/registry';
 import {
-  BaseServiceAttributes, isCloudProvider, isCoreService, ProviderChoice,
+  BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema,
+  getServiceTypeSchema, isCloudProvider, isCoreService, ProviderChoice,
+  ServiceTypeChoice, BaseService, getAlertingEmailsSchema,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
-  DistributiveRequireKeys, OneOfType,
+  DistributiveRequireKeys, OneOfType, OptionalKeys,
 } from '@stackmate/engine/lib';
 import {
   getCloudServiceConditional, getCoreServiceConditional,
   getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 
+/**
+ * @type {CopiedStage} a stage which is a copy of another one
+ */
 type CopiedStage = {
-  name: string;
   copy?: string;
   skip?: string[];
 };
+
+/**
+ * @type {StageWithServices} a stage that is not coppied, rather has services configured
+ */
+type StageWithServices<IsPartial extends boolean = false> = {
+  services?: CloudServiceConfiguration<IsPartial>[];
+};
+
+/**
+ * @type {CloudServiceConfiguration} describes the cloud service configuration
+ */
 export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPartial extends true
   ? DistributiveRequireKeys<DistributivePartial<CloudServiceAttributes>, 'name' | 'type'>
   : CloudServiceAttributes;
-
-type StageWithServices<IsPartial extends boolean = false> = {
-  name: string;
-  services?: CloudServiceConfiguration<IsPartial>[];
-};
 
 /**
  * @type {StageConfiguration} the configuration for the project stages
@@ -37,7 +48,17 @@ type StageWithServices<IsPartial extends boolean = false> = {
 export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<[
   CopiedStage,
   StageWithServices<IsPartial>,
-]>;
+]> & {
+  name: string;
+  alerts?: DistributiveOmit<DistributivePartial<MonitoringServiceAttributes>, 'name' | 'type'>;
+};
+
+/**
+ * @type {TransformableConfiguration} the service's configuration
+ */
+export type TransformableConfiguration = OptionalKeys<
+  BaseServiceAttributes, 'name' | 'provider' | 'region'
+>;
 
 /**
  * @type {Project} a project object
@@ -54,40 +75,74 @@ export type Project = {
 /**
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
-export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | 'secrets'> & {
-  state?: DistributiveOmit<DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'>;
-  secrets?: DistributiveOmit<DistributiveOptionalKeys<SecretVaultServiceAttributes, 'region'>, 'name' | 'type'>;
+export type ProjectConfiguration = Omit<
+  Partial<Project>, 'stages' | 'state' | 'secrets' | 'alerts'
+> & {
   stages?: StageConfiguration<true>[];
+  state?: DistributiveOmit<
+    DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'
+  >;
+  secrets?: DistributiveOmit<
+    DistributiveOptionalKeys<SecretVaultServiceAttributes, 'region'>, 'name' | 'type'
+  >;
 };
 
 /**
- * Returns the list of the cloud services that are managed by the given stage
- *
- * @param {Project} config the configuration object
- * @param {String} stage the stage to get
- * @param {String[]} skippedServices any names of services to skip (when copying the stage)
- * @returns {BaseServiceAttributes[]} the cloud services deployed by this stage
+ * @param {Project} project the project's configuration
+ * @param {String} stageName the name of the stage to get
+ * @returns {StageConfiguration} the stage's configuration
+ * @throws {Error} when the stage is not available in the project
  */
-export const getCloudServices = (
-  config: Project, stage: string, skippedServices: string[] = [],
-): BaseServiceAttributes[] => {
-  const { provider: projectProvider, region: projectRegion = null, stages = [] } = config;
+export const getStage = (project: Project, stageName: string): StageConfiguration => {
+  const { stages = [] } = project;
 
   if (isEmpty(stages)) {
     throw new Error('There aren’t any stages defined for the project');
   }
 
-  const stageConfiguration = stages.find(s => s.name === stage);
+  const stage = stages.find(s => s.name === stageName);
 
-  if (!stageConfiguration) {
-    throw new Error(`Stage ${stage} is not available in the project`);
+  if (!stage) {
+    throw new Error(`Stage ${stageName} is not available in the project`);
   }
 
-  const {
-    copy: copyFrom = null,
-    skip = [],
-    services: stageServices = [],
-  } = stageConfiguration;
+  return stage;
+};
+
+/**
+ * @param {TransformableConfiguration} config the service's configuration
+ * @param {Project} project the project to use
+ * @returns {BaseServiceAttributes} the configuration with credentials applied
+ */
+const applyProjectDefaults = (
+  config: TransformableConfiguration, project: Project,
+): BaseServiceAttributes => {
+  const cfg = defaults({}, config, {
+    name: `${config.type}-service`,
+    provider: project.provider,
+  });
+
+  if (cfg.provider === project.provider) {
+    Object.assign(cfg, { region: project.region });
+  }
+
+  return cfg;
+};
+
+/**
+ * Returns the list of the cloud services that are managed by the given stage
+ *
+ * @param {Project} project the configuration object
+ * @param {String} stage the stage to get
+ * @param {String[]} skippedServices any names of services to skip (when copying the stage)
+ * @returns {BaseServiceAttributes[]} the cloud services deployed by this stage
+ */
+export const getCloudServices = (
+  project: Project, stage: string, skippedServices: string[] = [],
+): BaseServiceAttributes[] => {
+  const { copy: copyFrom = null, skip = [], services: stageServices = [] } = getStage(
+    project, stage,
+  );
 
   if (isEmpty(stageServices) && !copyFrom) {
     throw new Error(
@@ -98,42 +153,122 @@ export const getCloudServices = (
   const services = [];
 
   if (copyFrom) {
-    services.push(...getCloudServices(config, copyFrom, skip));
+    services.push(...getCloudServices(project, copyFrom, skip));
   }
 
   services.push(...stageServices.filter(srv => !skippedServices.includes(srv.name)));
 
-  // Form the cloud services configurations
-  return services.map(srv => defaults({ ...srv }, {
-    provider: projectProvider,
-    region: projectRegion,
-  }));
+  return services.map((service) => applyProjectDefaults(service, project));
 };
 
 /**
- * Returns the configuration for the provider services, given a list of cloud services
- * We basically extract provider and region from the service list and return relevant configs
+ * Returns the list of regions available within a list of services for a given provider
  *
- * @param {BaseServiceAttributes[]} services the services to get the provider configurations by
- * @returns {BaseServiceAttributes[]} the provider configurations
+ * @param {ProviderChoice} provider the service's provider
+ * @param {BaseServiceAttributes[]} services all available cloud services in the project
+ * @returns {String[]} the list of regions
  */
-export const getProviderConfigurations = (
+export const getRegionsPerProvider = (
   services: BaseServiceAttributes[],
-): BaseServiceAttributes[] => {
-  const providers = services.map(({ provider, region }) => {
-    const identifier = [provider, 'provider', (region || 'default')].join('-');
-    return {
-      provider,
-      region,
-      id: identifier,
-      name: identifier,
-      type: SERVICE_TYPE.PROVIDER,
-    };
+): Map<ProviderChoice, Set<string>> => {
+  const regionsPerProvider = new Map();
+
+  Object.entries(groupBy(services, 'provider')).forEach(([provider, configs]) => {
+    const regions: string[] = configs.map(cfg => cfg.region).filter((r) => Boolean(r)) as string[];
+    regionsPerProvider.set(provider, new Set(regions));
   });
 
-  return uniqBy(
-    providers, ({ provider, region }) => (`provider-${provider}-region-${region || 'default'}`),
+  return regionsPerProvider;
+};
+
+/**
+ * Expands a core service to all regions available in the project
+ *
+ * @param {BaseServiceAttributes} config the service's configuration
+ * @param {Set<String>} regions the regions available for the service
+ * @returns {BaseServiceAttributes} the expanded core service configurations
+ */
+export const expandCoreService = (
+  config: BaseServiceAttributes, regions?: Set<string>,
+): BaseServiceAttributes[] => {
+  const { type, provider, name } = config;
+
+  if (!isCoreService(type)) {
+    throw new Error('Only core services can be expanded');
+  }
+
+  if (!regions || !regions.size) {
+    return [];
+  }
+
+  const service = Registry.get(provider, type);
+  const isExpandable = Array.isArray(service.regions) && !isEmpty(service.regions);
+
+  if (!isExpandable) {
+    return [config];
+  }
+
+  return Array.from(regions).map(
+    (region) => ({ ...config, region, name: `${name}-${region}` }),
   );
+};
+
+export const getCoreServiceConfigurations = (
+  initialConfiguration: BaseServiceAttributes | null,
+  type: ServiceTypeChoice,
+  services: BaseServiceAttributes[],
+): BaseServiceAttributes[] => {
+  // The provider => regions mapping for the given service
+  const providersPerRegion = getRegionsPerProvider(services);
+  // The providers available in the configuration
+  const providers = Array.from(providersPerRegion.keys());
+  // The providers covered by the current or generated configuration
+  const providersCovered: Set<ProviderChoice> = new Set();
+  const configs: BaseServiceAttributes[] = [];
+
+  // Check the initial configuration. If it covers all providers, there's nothing else to do
+  if (initialConfiguration) {
+    providersCovered.add(initialConfiguration.provider);
+    configs.push(initialConfiguration);
+
+    if (providers.every((provider) => providersCovered.has(provider))) {
+      return configs;
+    }
+  }
+
+  // Alright, the initial configuration doesn't cover all providers, where's what we need to do:
+  // For every provider that is NOT covered, check the following:
+  const remainingProviders = providers.filter(prov => !providersCovered.has(prov));
+  remainingProviders.forEach((provider) => {
+    // If the provider is supported by the configuration provided so far, there's nothing to do
+    if (providersCovered.has(provider)) {
+      return;
+    }
+
+    let service: BaseService | undefined;
+    try {
+      // does the provider have a dedicated service? If so, use that
+      service = Registry.get(provider, type);
+    } catch (err) {
+      // if not, use one that does from the list of available services for the type specified
+      service = Registry.ofType(type).find((service) => service.provider === provider);
+    }
+
+    if (!service) {
+      return;
+    }
+
+    const configuration = {
+      ...(initialConfiguration || {}), type, provider, name: `${provider}-${type}-service`,
+    };
+
+    configs.push(
+      ...expandCoreService(configuration, providersPerRegion.get(provider) || new Set()),
+    );
+  });
+
+  // Finally, assert that all providers are covered by the set of core services & return
+  return configs;
 };
 
 /**
@@ -144,47 +279,35 @@ export const getProviderConfigurations = (
  */
 export const getServiceConfigurations = (
   stage: string,
-): (config: Project) => BaseServiceAttributes[] => (config) => {
-  const {
-    provider: projectProvider,
-    region: projectRegion,
-    name: projectName,
-    state = {},
-    secrets = {},
-  } = config;
-
-  if (!projectProvider) {
-    throw new Error('There is no provider set for the project');
-  }
-
-  const cloudServices = getCloudServices(config, stage);
+): (project: Project) => BaseServiceAttributes[] => (project) => {
+  const cloudServices = getCloudServices(project, stage);
+  const coreServices: BaseServiceAttributes[] = [];
+  const { provider, state, secrets } = project;
+  const { alerts = {} } = getStage(project, stage);
 
   if (isEmpty(cloudServices)) {
     throw new Error(`There are no services defined for stage ${stage}`);
   }
 
-  // Predefined / core services => providers, state & secrets
-  const providers = getProviderConfigurations(cloudServices);
-  const stateConfig = defaults({ ...state }, {
-    name: `${projectName}-project-state`,
-    type: SERVICE_TYPE.STATE,
-    provider: projectProvider,
-    region: projectRegion,
-  });
-
-  const secretsConfig = defaults({ ...secrets }, {
-    name: `${projectName}-project-secrets-vault`,
-    type: SERVICE_TYPE.SECRETS,
-    provider: projectProvider,
-    region: projectRegion,
-  });
-
-  return [
-    ...providers,
-    ...cloudServices,
-    stateConfig,
-    secretsConfig,
+  const initialCoreConfigs: [ServiceTypeChoice, BaseServiceAttributes | null][] = [
+    [SERVICE_TYPE.PROVIDER, applyProjectDefaults({
+      type: SERVICE_TYPE.PROVIDER, name: `${provider}-provider-service`}, project)],
+    [SERVICE_TYPE.STATE, !isEmpty(state)
+      ? applyProjectDefaults({ ...state, type: SERVICE_TYPE.STATE }, project)
+      : null],
+    [SERVICE_TYPE.SECRETS, !isEmpty(secrets)
+      ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
+      : null],
+    [SERVICE_TYPE.MONITORING, !isEmpty(state)
+      ? applyProjectDefaults({ ...alerts, type: SERVICE_TYPE.MONITORING }, project)
+      : null],
   ];
+
+  initialCoreConfigs.forEach(([type, initialConfig]) => {
+    coreServices.push(...getCoreServiceConfigurations(initialConfig, type, cloudServices));
+  });
+
+  return [...cloudServices, ...coreServices];
 };
 
 /**
@@ -197,11 +320,6 @@ export const getProjectSchema = (
   projectSchemaId: string = JSON_SCHEMA_ROOT,
 ): JsonSchema<Project> => {
   const providers = Registry.providers();
-  const serviceTypes = Registry.serviceTypes();
-  const cloudProviders = providers.filter(p => isCloudProvider(p));
-  const stateProviders = Registry.providers('state');
-  const secretsProviders = Registry.providers('secrets');
-  const allServices = Registry.items;
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
   ).filter(([_, regions]) => !isEmpty(regions)).map(([provider, regions]) => ([
@@ -213,6 +331,7 @@ export const getProjectSchema = (
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
     properties: {
+      provider: getServiceProviderSchema(providers.filter(p => isCloudProvider(p))),
       name: {
         type: 'string',
         pattern: '^([a-zA-Z0-9-_./]+)$',
@@ -223,14 +342,6 @@ export const getProjectSchema = (
           pattern: 'The "name" property should consist of letters, numbers, dashes, dots, underscores and forward slashes',
         },
       },
-      provider: {
-        type: 'string',
-        enum: cloudProviders,
-        description: 'The default provider for your cloud services',
-        errorMessage: {
-          enum: `The provider is invalid, available choices are: ${cloudProviders.join(', ')}`,
-        },
-      },
       region: {
         type: 'string',
         description: 'The default region for the provider you have selected',
@@ -239,28 +350,14 @@ export const getProjectSchema = (
         type: 'object',
         description: 'How would you like your services secrets to be stored',
         properties: {
-          provider: {
-            type: 'string',
-            enum: secretsProviders,
-            description: 'The secrets provider',
-            errorMessage: {
-              enum: `Invalid secrets provider, available options are: ${secretsProviders.join(', ')}`,
-            },
-          },
+          provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.SECRETS)),
         },
       },
       state: {
         type: 'object',
         description: 'Where would you like your Terraform state to be stored',
         properties: {
-          provider: {
-            type: 'string',
-            enum: stateProviders,
-            description: 'The state provider',
-            errorMessage: {
-              enum: `Invalid state provider, available options are: ${stateProviders.join(', ')}`,
-            },
-          },
+          provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.STATE)),
         },
       },
       stages: {
@@ -302,6 +399,14 @@ export const getProjectSchema = (
                 pattern: 'The stage name should only contain characters, numbers, dashes and underscores',
               },
             },
+            alerts: {
+              type: 'object',
+              default: {},
+              properties: {
+                provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.MONITORING)),
+                emails: getAlertingEmailsSchema(),
+              },
+            },
             services: {
               type: 'array',
               items: {
@@ -310,30 +415,9 @@ export const getProjectSchema = (
                 required: ['name', 'type'],
                 minItems: 1,
                 properties: {
-                  name: {
-                    type: 'string',
-                    pattern: '^([a-zA-Z0-9_-]+)$',
-                    minLength: 2,
-                    description: 'The name for the service',
-                    errorMessage: {
-                      minLength: 'The service’s name should be two characters or more',
-                      pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
-                    },
-                  },
-                  type: {
-                    type: 'string',
-                    enum: serviceTypes,
-                    errorMessage: {
-                      enum: `You have to specify a valid service type, available are: ${serviceTypes.join(', ')}`
-                    },
-                  },
-                  provider: {
-                    type: 'string',
-                    enum: providers,
-                    errorMessage: {
-                      enum: `You have to specify a valid provider, available are: ${providers.join(', ')}`,
-                    },
-                  },
+                  name: getServiceNameSchema(),
+                  provider: getServiceProviderSchema(providers),
+                  type: getServiceTypeSchema(Registry.serviceTypes()),
                 },
                 errorMessage: {
                   required: {
@@ -360,7 +444,7 @@ export const getProjectSchema = (
     allOf: [
       // We need to exclude 'provider' services from the conditionals, since it will try
       // to register a 'provider' attribute which conflicts with the main `provider` one
-      ...allServices.filter(
+      ...Registry.items.filter(
         service => service.type !== SERVICE_TYPE.PROVIDER,
       ).map(service => (
         isCoreService(service.type)

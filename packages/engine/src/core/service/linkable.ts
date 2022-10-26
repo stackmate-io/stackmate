@@ -4,8 +4,8 @@ import { isEmpty } from 'lodash';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { ConnectableAttributes } from './connectable';
 import {
-  associate, AssociationHandler, BaseServiceAttributes, Service,
-  withSchema, ServiceSideEffect, AssociationLookup, ProvisionResources, WithAssociations,
+  associate, AssociationHandler, BaseServiceAttributes, Service, withSchema, ServiceSideEffect,
+  AssociationLookup, ProvisionResources, WithAssociations, BaseProvisionable,
 } from '@stackmate/engine/core/service/core';
 
 /**
@@ -19,17 +19,31 @@ export type LinkableAttributes = { links: string[]; };
 export type ExternallyLinkableAttributes = { externalLinks: string[] };
 
 /**
+ * @type {LinkableProvisionable} the linkable provisionable
+ */
+export type LinkableProvisionable = BaseProvisionable<
+  BaseServiceAttributes & ConnectableAttributes & LinkableAttributes
+>;
+
+/**
+ * @type {ExternallyLinkableProvisionable} the externally linkable provisionable
+ */
+export type ExternallyLinkableProvisionable = BaseProvisionable<
+  BaseServiceAttributes & ConnectableAttributes & ExternallyLinkableAttributes
+>;
+
+/**
  * @type {ServiceLinkHandler} the function that handles service linking
  */
 export type ServiceLinkHandler = AssociationHandler<
-  ProvisionResources, BaseServiceAttributes & ConnectableAttributes
+  ProvisionResources, LinkableProvisionable
 >;
 
 /**
  * @type {ExternalLinkHandler} the function that handles external linking
  */
 export type ExternalLinkHandler = AssociationHandler<
-  ProvisionResources, BaseServiceAttributes & ConnectableAttributes & ExternallyLinkableAttributes
+  ProvisionResources, ExternallyLinkableProvisionable
 >;
 
 /**
@@ -74,6 +88,7 @@ export const linkable = <C extends BaseServiceAttributes>(
     associate({
       deployable: {
         linkable: {
+          sideEffect: true,
           handler: onServiceLinked,
           where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
             if (!config.links.includes(linkedConfig.name)) {
@@ -119,8 +134,9 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
     associate({
       deployable: {
         externallyLinkable: {
+          sideEffect: true,
           handler: onExternalLink,
-          from: SERVICE_TYPE.PROVIDER,
+          with: SERVICE_TYPE.PROVIDER,
           where: (config: C & ExternallyLinkableAttributes): boolean => (
             !isEmpty(config.externalLinks)
           ),

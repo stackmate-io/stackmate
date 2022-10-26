@@ -4,7 +4,7 @@ import { getStack } from '@stackmate/engine/core/stack';
 import { LocalState } from '@stackmate/engine/providers';
 import { LocalStateAttributes, LocalStateProvisionable, onPrepare } from '@stackmate/engine/providers/local/services/state';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getProvisionableFromConfig } from '@stackmate/engine/core/operation';
+import { getProvisionable } from '@stackmate/engine/core/operation';
 
 describe('Local state', () => {
   const service = LocalState;
@@ -52,7 +52,7 @@ describe('Local state', () => {
       type: 'state',
     };
 
-    const provisionable = getProvisionableFromConfig(config, stack.stageName);
+    const provisionable = getProvisionable(config);
 
     it('registers the local state backend', () => {
       const resources = onPrepare(provisionable as LocalStateProvisionable, stack);
