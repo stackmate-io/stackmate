@@ -4,7 +4,7 @@ import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import {
   associate, BaseService, BaseServiceAttributes, BaseProvisionable,
-  Service, ServiceRequirement, WithAssociations,
+  Service, ServiceRequirement, WithAssociations, AssociationHandler,
 } from '@stackmate/engine/core/service';
 
 /**
@@ -52,16 +52,6 @@ export type CredentialsHandlerOptions = {
 };
 
 /**
- * @type {CredentialsHandler} the credentials association handler
- */
-export type CredentialsHandler = (
-  vault: BaseProvisionable,
-  stack: Stack,
-  target: BaseProvisionable,
-  opts?: CredentialsHandlerOptions,
-) => Credentials;
-
-/**
  * @type {SecretsVaultService} describes secrets vault services
  */
 export type SecretsVaultService<Srv extends BaseService> = Srv & {
@@ -76,6 +66,13 @@ export type VaultProvisionable = BaseProvisionable & {
 };
 
 /**
+ * @type {CredentialsHandler} the credentials association handler
+ */
+export type CredentialsHandler = AssociationHandler<
+  Credentials, VaultProvisionable, CredentialsHandlerOptions
+>;
+
+/**
  * @returns {Function<Service>} the service enhanced with the crerentials association
  */
 export const withCredentials = <C extends BaseServiceAttributes>(
@@ -83,7 +80,7 @@ export const withCredentials = <C extends BaseServiceAttributes>(
   associate({
     deployable: {
       credentials: {
-        from: SERVICE_TYPE.SECRETS,
+        with: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
           vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,
@@ -103,7 +100,7 @@ export const withRootCredentials = <C extends BaseServiceAttributes>(
   associate({
     deployable: {
       rootCredentials: {
-        from: SERVICE_TYPE.SECRETS,
+        with: SERVICE_TYPE.SECRETS,
         requirement: true,
         handler: (
           vault: VaultProvisionable, stack: Stack, target: BaseProvisionable,

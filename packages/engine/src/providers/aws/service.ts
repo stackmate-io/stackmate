@@ -1,6 +1,6 @@
 import pipe from '@bitty/pipe';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
-import { kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
+import { dataAwsCallerIdentity, kmsKey, provider as terraformAwsProvider, vpc } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { ChoiceOf, getCidrBlocks, getIpAddressParts, hashString, OneOfType } from '@stackmate/engine/lib';
@@ -30,17 +30,24 @@ type VpcRequirement = ServiceRequirement<
   vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
 >;
 
+type AccountRequirement = ServiceRequirement<
+  dataAwsCallerIdentity.DataAwsCallerIdentity, typeof SERVICE_TYPE.PROVIDER
+>;
+
 export type AwsServiceAssociations = {
   deployable: {
     providerInstance: ProviderRequirement;
+    account: AccountRequirement;
     kmsKey: KmsKeyRequirement;
     vpc: VpcRequirement;
   },
   preparable: {
+    account: AccountRequirement,
     providerInstance: ProviderRequirement;
     kmsKey: KmsKeyRequirement;
   },
   destroyable: {
+    account: AccountRequirement;
     providerInstance: ProviderRequirement;
     kmsKey: KmsKeyRequirement;
   },
@@ -75,7 +82,7 @@ type ExternallyLinkableServiceProvisionable = Provisionable<
 >;
 
 const getProviderInstanceRequirement = (): ProviderRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -85,8 +92,21 @@ const getProviderInstanceRequirement = (): ProviderRequirement => ({
   ),
 });
 
+const getAccountRequirement = (): AccountRequirement => ({
+  with: SERVICE_TYPE.PROVIDER,
+  requirement: true,
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
+    config.provider === linked.provider && config.region === linked.region
+  ),
+  handler: (
+    prov: ProviderProvisionable,
+  ): dataAwsCallerIdentity.DataAwsCallerIdentity => (
+    prov.provisions.account
+  ),
+});
+
 const getKmsKeyRequirement = (): KmsKeyRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -99,7 +119,7 @@ const getKmsKeyRequirement = (): KmsKeyRequirement => ({
 });
 
 const getVpcRequirement = (): VpcRequirement => ({
-  from: SERVICE_TYPE.PROVIDER,
+  with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
     config.provider === linked.provider && config.region === linked.region
@@ -164,15 +184,18 @@ export const onExternalLink = (
 const associations: AwsServiceAssociations = {
   deployable: {
     providerInstance: getProviderInstanceRequirement(),
+    account: getAccountRequirement(),
     kmsKey: getKmsKeyRequirement(),
     vpc: getVpcRequirement(),
   },
   destroyable: {
     providerInstance: getProviderInstanceRequirement(),
+    account: getAccountRequirement(),
     kmsKey: getKmsKeyRequirement(),
   },
   preparable: {
     providerInstance: getProviderInstanceRequirement(),
+    account: getAccountRequirement(),
     kmsKey: getKmsKeyRequirement(),
   },
 };

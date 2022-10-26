@@ -33,7 +33,7 @@ export type LocalService<
 const associations: LocalServiceAssociations = {
   preparable: {
     providerInstance: {
-      from: SERVICE_TYPE.PROVIDER,
+      with: SERVICE_TYPE.PROVIDER,
       requirement: true,
       where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) => (
         config.provider === linked.provider

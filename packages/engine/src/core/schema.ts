@@ -73,7 +73,8 @@ export type JsonSchema<T = undefined> = {
   // Array Validation
   ///////////////////////////////////////////////////////////////////////////
   additionalItems?: boolean | JsonSchema;
-  items?: JsonSchema | JsonSchema[];
+  items?: T extends ArrayLike<any> ? JsonSchema<T[keyof T]> : JsonSchema;
+
   maxItems?: number;
   minItems?: number;
   uniqueItems?: boolean;
@@ -134,7 +135,7 @@ export type JsonSchema<T = undefined> = {
                 ? "string" | string // string type or some explicit string passed (eg. eu-central-1)
                 : T extends boolean
                     ? "boolean"
-                    : T extends string[] | number[] | boolean[] | object[]
+                    : T extends ArrayLike<any>
                       ? "array"
                       : T extends null
                         ? "null"

@@ -1,5 +1,5 @@
 import pipe from '@bitty/pipe';
-import { get, isEmpty, isObject, uniqBy } from 'lodash';
+import { get, isEmpty, uniqBy } from 'lodash';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { hashObject } from '@stackmate/engine/lib';
@@ -8,12 +8,19 @@ import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
 import { validate, validateEnvironment, validateServices } from '@stackmate/engine/core/validation';
 import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
 import {
-  assertRequirementsSatisfied,
-  BaseServiceAttributes, getProvisionableResourceId, BaseProvisionable, Provisions,
-  ServiceEnvironment, ServiceScopeChoice, ServiceAssociations,
+  assertRequirementsSatisfied, BaseServiceAttributes, BaseProvisionable, Provisions,
+  ServiceEnvironment, ServiceScopeChoice, ServiceAssociations, AnyAssociationHandler,
 } from '@stackmate/engine/core/service';
 
 type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
+
+type AssociatedProvisionable = {
+  name: string;
+  target: BaseProvisionable;
+  handler: AnyAssociationHandler;
+};
+
+type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>;
 
 export type OperationType = 'deployment' | 'destruction' | 'setup';
 
@@ -36,20 +43,31 @@ export type Operation = {
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration
- * @param {String} stageName the name of the stage to register resources to
+ * @param {String} stageName the stage's name
+ * @returns {String} the id to use as a terraform resource identifier
+ */
+const getProvisionableResourceId = (config: BaseServiceAttributes): string => (
+  `${config.name || config.type}-${config.provider}-${config.region || 'default'}`
+);
+
+/**
+ * @param {BaseServiceAttributes} config the service's configuration
  * @returns {BaseProvisionable} the provisionable to use in operations
  */
-export const getProvisionableFromConfig = (
-  config: BaseServiceAttributes, stageName: string,
-): BaseProvisionable => ({
-  id: hashObject(config),
-  config,
-  service: Registry.fromConfig(config),
-  requirements: {},
-  provisions: {},
-  sideEffects: [],
-  resourceId: getProvisionableResourceId(config, stageName),
-});
+export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionable => {
+  const service = Registry.fromConfig(config);
+
+  return {
+    id: hashObject(config),
+    config,
+    service,
+    requirements: {},
+    provisions: {},
+    sideEffects: {},
+    registered: false,
+    resourceId: getProvisionableResourceId(config),
+  };
+};
 
 class StageOperation implements Operation {
   /**
@@ -70,14 +88,20 @@ class StageOperation implements Operation {
   readonly provisionables: ProvisionablesMap = new Map();
 
   /**
-   * @var {Set} provisioned the provisioned resources
-   */
-  readonly #provisioned: Set<string> = new Set();
-
-  /**
    * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
+   * @private
    */
   #environment: ServiceEnvironment[];
+
+  /**
+   * @var {AssociationHandlersMapping} requirements the provisionable id per requirement mapping
+   */
+  #requirements: AssociatedProvisionablesMapping = new Map();
+
+  /**
+   * @var {AssociationHandlersMapping} sideEffects the provisionable id per side-effects mapping
+   */
+  #sideEffects: AssociatedProvisionablesMapping = new Map();
 
   /**
    * @constructor
@@ -90,19 +114,18 @@ class StageOperation implements Operation {
   ) {
     this.stack = stack;
     this.scope = scope;
-    this.setUpProvisionables(services);
+    this.setupProvisionables(services);
   }
 
   /**
-   * Creates the provisionables map from the list of services
+   * Processes an operation and returns the Terraform configuration as an object
    *
-   * @param {BaseServiceAttributes[]} services the services to create the provisionables from
+   * @returns {Object} the terraform configuration object
    */
-  protected setUpProvisionables(services: BaseServiceAttributes[]) {
-    services.forEach((config) => {
-      const provisionable = getProvisionableFromConfig(config, this.stack.stageName);
-      this.provisionables.set(provisionable.id, provisionable);
-    });
+  process(): object {
+    validateEnvironment(this.environment());
+    this.provisionables.forEach(provisionable => this.register(provisionable));
+    return this.stack.toObject();
   }
 
   /**
@@ -125,93 +148,113 @@ class StageOperation implements Operation {
   }
 
   /**
+   * @param {BaseServiceAttributes[]} services the services to set up as provisionables
+   */
+  protected setupProvisionables(services: BaseServiceAttributes[]) {
+    services.forEach((config) => {
+      const provisionable = getProvisionable(config);
+      this.provisionables.set(provisionable.id, provisionable);
+    });
+
+    for (const provisionable of this.provisionables.values()) {
+      const { config, service: { associations: assocs } } = provisionable;
+      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(assocs, this.scope);
+
+      for (const [associationName, association] of Object.entries(scopeAssociations || {})) {
+        const {
+          where: isAssociated,
+          handler: associationHandler,
+          with: associatedServiceType,
+          requirement: isRequirement,
+        } = association;
+
+        for (const linked of this.provisionables.values()) {
+          if (associatedServiceType && linked.service.type !== associatedServiceType) {
+            continue;
+          }
+
+          if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
+            continue;
+          }
+
+          const targetMap = isRequirement ? this.#requirements : this.#sideEffects;
+          const links = targetMap.get(provisionable.id) || [];
+
+          targetMap.set(provisionable.id, [
+            ...links,
+            { target: linked, name: associationName, handler: associationHandler },
+          ]);
+        }
+      }
+    }
+  }
+
+  /**
    * Registers a provisionable and its associations to the stack
    *
    * @param {BaseProvisionable} provisionable the provisionable to register
    */
   protected register(provisionable: BaseProvisionable): Provisions {
     // Item has already been provisioned, bail...
-    if (this.#provisioned.has(provisionable.id)) {
-      return this.provisionables.get(provisionable.id)?.provisions || {};
+    if (provisionable.registered) {
+      return provisionable.provisions;
     }
 
-    const {
-      config,
-      service,
-      service: { handlers, associations = {} },
-      requirements = {},
-      sideEffects = [],
-    } = provisionable;
+    const { config, service, service: { handlers } } = provisionable;
 
     // Validate the configuration
     validate(service.schemaId, config, { useDefaults: true });
 
-    const serviceAssociations: ServiceAssociations[ServiceScopeChoice] = get(
-      associations, this.scope,
-    );
-
-    Object.entries(serviceAssociations || {}).forEach(([associationName, association]) => {
-      const {
-        where: isAssociated,
-        handler: associationHandler,
-        from: associatedServiceType,
-        requirement: isRequirement,
-      } = association;
-
-      // Get the provisionables associated with the current service configuration
-      Array.from(this.provisionables.values()).forEach((linked) => {
-        if (associatedServiceType && linked.service.type !== associatedServiceType) {
-          return false;
-        }
-
-        if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
-          return false;
-        }
-
-        const linkedProvisions = this.register(linked);
-        const handlerOutput = associationHandler(
-          { ...linked, provisions: linkedProvisions }, this.stack, provisionable,
-        );
-
-        // Register the requirements or side-effects into the provisionable
-        if (isRequirement && associationName) {
-          Object.assign(requirements, { [associationName]: handlerOutput });
-        } else {
-          const linkedSideEffects = isObject(handlerOutput)
-            ? Object.values(handlerOutput)
-            : Array.isArray(handlerOutput) ? handlerOutput : [handlerOutput];
-
-          sideEffects.push(...linkedSideEffects);
-        }
-      });
+    // Provision & verify the requirements first
+    Object.assign(provisionable, {
+      requirements: this.registerAssociated(provisionable, this.#requirements.get(provisionable.id)),
     });
 
-    // Register and verify the requirements and side-effects
-    Object.assign(provisionable, { requirements, sideEffects });
     assertRequirementsSatisfied(provisionable, this.scope);
 
     // there is a chance we don't have any handler for the current scope,
     // for example it only has a handler for deployment, we're running a 'setup' operation
     const registrationHandler = handlers.get(this.scope);
-    const provisions = registrationHandler ? registrationHandler(provisionable, this.stack) : {};
-    Object.assign(provisionable, { provisions });
 
-    // Mark the item as provisioned and register the resources
-    this.#provisioned.add(provisionable.id);
+    Object.assign(provisionable, {
+      provisions: registrationHandler ? registrationHandler(provisionable, this.stack) : {},
+      registered: true,
+    });
+
+    // Now that the provisionable is registered into the stack, take care of the side-effetcs
+    Object.assign(provisionable, {
+      sideEffects: this.registerAssociated(provisionable, this.#sideEffects.get(provisionable.id)),
+    });
+
     this.provisionables.set(provisionable.id, provisionable);
-
-    return provisions;
+    return provisionable.provisions;
   }
 
   /**
-   * Processes an operation and returns the Terraform configuration as an object
-   *
-   * @returns {Object} the terraform configuration object
-   */
-  process(): object {
-    validateEnvironment(this.environment());
-    this.provisionables.forEach(provisionable => this.register(provisionable));
-    return this.stack.toObject();
+   * @param {BaseProvisionable} provisionable the source provisionable
+   * @param {AssociatedProvisionable[]} links the linked provisionables
+   * @returns {Object} the output
+  */
+  protected registerAssociated(
+    provisionable: BaseProvisionable, links?: AssociatedProvisionable[],
+  ): Object {
+    if (!links) {
+      return {};
+    }
+
+    const output = {};
+
+    links.forEach((link) => {
+      const { target, name, handler } = link;
+      const linkedProvisions = this.register(target);
+      const out = handler({ ...target, provisions: linkedProvisions }, this.stack, provisionable);
+
+      if (output) {
+        Object.assign(output, { [name]: out });
+      }
+    });
+
+    return output;
   }
 };
 

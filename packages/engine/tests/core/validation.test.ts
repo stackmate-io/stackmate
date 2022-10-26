@@ -158,7 +158,7 @@ describe('Validation', () => {
       const { errors } = getValidationError({ state: { provider: 'INVALID' } });
       expect(errors).toEqual(expect.arrayContaining([{
         path: 'state.provider',
-        message: expect.stringContaining('Invalid state provider, available options are'),
+        message: expect.stringContaining('The provider is invalid, available choices are'),
       }]))
     });
 
@@ -166,7 +166,7 @@ describe('Validation', () => {
       const { errors } = getValidationError({ secrets: { provider: 'INVALID' } });
       expect(errors).toEqual(expect.arrayContaining([{
         path: 'secrets.provider',
-        message: expect.stringContaining('Invalid secrets provider, available options are'),
+        message: expect.stringContaining('The provider is invalid, available choices are'),
       }]))
     });
 

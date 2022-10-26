@@ -4,6 +4,7 @@ import { s3Bucket } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { ServiceSchema } from '@stackmate/engine/core/schema';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import {
   AwsService, AwsServiceAttributes, getAwsCoreService,
@@ -16,9 +17,10 @@ export type AwsStateDeployableResources = { backend: S3Backend };
 export type AwsStatePreparableResources = { bucket: s3Bucket.S3Bucket };
 export type AwsStateDestroyableResources = { backend: S3Backend };
 
-export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & {
+type AdditionalAttrs = { bucket: string; };
+
+export type AwsStateAttributes = AwsServiceAttributes<BaseServiceAttributes & AdditionalAttrs & {
   type: typeof SERVICE_TYPE.STATE;
-  bucket: string;
 }>;
 
 export type AwsStateService = AwsService<AwsStateAttributes>;
@@ -74,6 +76,25 @@ export const onPrepare = (
   return { bucket };
 };
 
+const getAdditionalPropertiesSchema = (): ServiceSchema<AdditionalAttrs> => ({
+  type: 'object',
+  required: ['bucket'],
+  properties: {
+    bucket: {
+      type: 'string',
+      /**
+       * S3 Bucket naming rules
+       * @link {https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html}
+       * */
+      minLength: 3,
+      maxLength: 63,
+      pattern: '(?!(^xn--|.+-s3alias$))^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$',
+      isIncludedInConfigGeneration: true,
+      serviceConfigGenerationTemplate: 'stackmate-state-${projectName}',
+    },
+  },
+});
+
 /**
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
@@ -83,24 +104,7 @@ export const getStateService = (): AwsStateService => (
     withHandler('deployable', onDeploy),
     withHandler('destroyable', onDestroy),
     withHandler('preparable', onPrepare),
-    withSchema<AwsStateAttributes, { bucket: string }>({
-      type: 'object',
-      required: ['bucket'],
-      properties: {
-        bucket: {
-          type: 'string',
-          /**
-           * S3 Bucket naming rules
-           * @link {https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html}
-           * */
-          minLength: 3,
-          maxLength: 63,
-          pattern: '(?!(^xn--|.+-s3alias$))^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$',
-          isIncludedInConfigGeneration: true,
-          serviceConfigGenerationTemplate: 'stackmate-state-${projectName}',
-        },
-      },
-    }),
+    withSchema<AwsStateAttributes, AdditionalAttrs>(getAdditionalPropertiesSchema()),
   )(getAwsCoreService(SERVICE_TYPE.STATE))
 );
 
