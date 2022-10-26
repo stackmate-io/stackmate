@@ -1080,6 +1080,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^1.19.1":
+  version: 1.19.2
+  resolution: "@oclif/core@npm:1.19.2"
+  dependencies:
+    "@oclif/linewrap": ^1.0.0
+    "@oclif/screen": ^3.0.2
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.3.1
+    widest-line: ^3.1.0
+    wrap-ansi: ^7.0.0
+  checksum: b31f0e3a0398643a76d6a565560a12160e069e4aa1522cdc8983ede74e1494d2898e605e4bfadb32e15f31ddabb8727095d10b1074c737efd0328107e0b15aa9
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1310,7 +1346,7 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.18.0
+    "@oclif/core": ^1.19.1
     "@oclif/plugin-help": ^5.1.15
     "@oclif/plugin-plugins": ^2.1.4
     "@stackmate/engine": "workspace:packages/engine"
@@ -1353,7 +1389,7 @@ __metadata:
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
     cdktf: 0.13.1
-    constructs: ^10.1.131
+    constructs: ^10.1.140
     ip-address: ^8.1.0
     jest: ^29.2.0
     lodash: ^4.17.21
@@ -2938,10 +2974,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"constructs@npm:^10.1.131":
-  version: 10.1.131
-  resolution: "constructs@npm:10.1.131"
-  checksum: 6294bec69b5504e53e950def58d9e9d31e5f3238cf372cc0c04e869eeb7abbc1e46fcda9989c3e751b7b004f35057f7f5e5037118b1de0a49a8bcc04dc4299d9
+"constructs@npm:^10.1.140":
+  version: 10.1.140
+  resolution: "constructs@npm:10.1.140"
+  checksum: ea3b891980b591991acef80b4564ddfffcd5abeeb283aaa0d00cca5d13e863438918f926278276f602a73135157b9e92791c867eade677dd723e4f0f902a64b4
   languageName: node
   linkType: hard
 
