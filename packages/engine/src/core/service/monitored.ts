@@ -2,9 +2,9 @@ import { JsonSchema } from '@stackmate/engine/core/schema';
 import { BaseProvisionable, BaseServiceAttributes, withSchema } from './core';
 
 /**
- * @type {MonitoringAttributes} the attributes to use for monitoring
+ * @type {MonitoredAttributes} the attributes to use for monitoring
  */
-export type MonitoringAttributes = {
+export type MonitoredAttributes = {
   monitoring: boolean;
 };
 
@@ -19,7 +19,7 @@ export type AlertingAttributes = {
  * @type {MonitoredProvisionable} the linkable provisionable
  */
 export type MonitoredProvisionable = BaseProvisionable<
-  BaseServiceAttributes & MonitoringAttributes
+  BaseServiceAttributes & MonitoredAttributes
 >;
 
 /**
@@ -46,7 +46,7 @@ export const getAlertingEmailsSchema = (): JsonSchema<AlertingAttributes['emails
  * @returns {Function<Service>}
  */
 export const monitored = <C extends BaseServiceAttributes>(
-) => withSchema<C, MonitoringAttributes>({
+) => withSchema<C, MonitoredAttributes>({
   type: 'object',
   properties: {
     monitoring: {

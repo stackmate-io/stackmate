@@ -9,7 +9,7 @@ import { databaseAlerts, DatabasebAlertResources } from '../alerts/rds';
 import { AwsService, AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import { BaseProvisionable, Provisionable, withRegions, withSchema } from '@stackmate/engine/core/service';
 import { associate, AssociationHandler, BaseServiceAttributes, ProvisionResources, ServiceSideEffect, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
-import { AlertingAttributes, getAlertingEmailsSchema, MonitoredProvisionable, MonitoringAttributes } from '@stackmate/engine/core/service/monitored';
+import { AlertingAttributes, getAlertingEmailsSchema, MonitoredProvisionable, MonitoredAttributes } from '@stackmate/engine/core/service/monitored';
 
 /**
  * @type {AwsMonitoringAttributes} the AWS monitoring service (CloudWatch) attributes
@@ -141,7 +141,7 @@ const getMonitoringPrerequisites = (
  * @returns {Boolean} whether the two services are associated
  */
 const isAssociatedWith = (
-  cfg: AwsMonitoringAttributes, linked: BaseServiceAttributes & MonitoringAttributes,
+  cfg: AwsMonitoringAttributes, linked: BaseServiceAttributes & MonitoredAttributes,
 ): boolean => (
   linked.monitoring && cfg.provider === linked.provider && cfg.region === linked.region
 );
