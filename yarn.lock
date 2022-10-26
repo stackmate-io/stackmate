@@ -1080,6 +1080,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^1.19.1":
+  version: 1.19.2
+  resolution: "@oclif/core@npm:1.19.2"
+  dependencies:
+    "@oclif/linewrap": ^1.0.0
+    "@oclif/screen": ^3.0.2
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.3.1
+    widest-line: ^3.1.0
+    wrap-ansi: ^7.0.0
+  checksum: b31f0e3a0398643a76d6a565560a12160e069e4aa1522cdc8983ede74e1494d2898e605e4bfadb32e15f31ddabb8727095d10b1074c737efd0328107e0b15aa9
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1096,15 +1132,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-not-found@npm:^2.3.5":
-  version: 2.3.5
-  resolution: "@oclif/plugin-not-found@npm:2.3.5"
+"@oclif/plugin-help@npm:^5.1.16":
+  version: 5.1.16
+  resolution: "@oclif/plugin-help@npm:5.1.16"
+  dependencies:
+    "@oclif/core": ^1.19.1
+  checksum: cfa6461ffc038a169161641cc6988a7ca7bcfb77ca1ce2e91169c74a055e3c33483210552ada0552f56acd3dc6c498fcb8a995ec3a888ddb0e995b95bdb00560
+  languageName: node
+  linkType: hard
+
+"@oclif/plugin-not-found@npm:^2.3.6":
+  version: 2.3.6
+  resolution: "@oclif/plugin-not-found@npm:2.3.6"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.18.0
+    "@oclif/core": ^1.19.1
     fast-levenshtein: ^3.0.0
     lodash: ^4.17.21
-  checksum: aeed5ca2d7e052f867ca6db43c78a5ec229dcb824eb9e632cd8f5764f8204f2513651452a1c3aa4349ae452af6d3c2093a476b7cc54b46559284080b6abbd762
+  checksum: c084e51cfb14f29883f3750db5cb60daa75b5fc18c654cefdaed78dc67ea8fa611ba25e6fa549a862bb74cf73baa5362cd5b6a2f8d187fa012acc27fcd6c8c2c
   languageName: node
   linkType: hard
 
@@ -1310,7 +1355,7 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.18.0
+    "@oclif/core": ^1.19.1
     "@oclif/plugin-help": ^5.1.15
     "@oclif/plugin-plugins": ^2.1.4
     "@stackmate/engine": "workspace:packages/engine"
@@ -1324,7 +1369,7 @@ __metadata:
     inquirer: ^8.2.5
     jest: ^29.2.0
     lodash: 4.17.21
-    oclif: ^3.2.19
+    oclif: ^3.2.22
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.0
@@ -6521,13 +6566,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.19":
-  version: 3.2.19
-  resolution: "oclif@npm:3.2.19"
+"oclif@npm:^3.2.22":
+  version: 3.2.22
+  resolution: "oclif@npm:3.2.22"
   dependencies:
     "@oclif/core": ^1.18.0
-    "@oclif/plugin-help": ^5.1.15
-    "@oclif/plugin-not-found": ^2.3.5
+    "@oclif/plugin-help": ^5.1.16
+    "@oclif/plugin-not-found": ^2.3.6
     "@oclif/plugin-warn-if-update-available": ^2.0.6
     aws-sdk: ^2.1231.0
     concurrently: ^7.4.0
@@ -6545,7 +6590,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 7ce368176a674ecd4beb171cbc766a0dd760fc156b35388cfe7805ccdc3159c57f7ba8e9473a6603de66c81e0fe4c0557fafa5f4c63406fc3620540ef4b16804
+  checksum: 3c5c8771404dcfa384901315d28b878031080aa45cd5125de69b57ef908b18a4f4478612e200595da60e367db58eff72022c7c4f09132a9bd04d815e9ad2fb52
   languageName: node
   linkType: hard
 
