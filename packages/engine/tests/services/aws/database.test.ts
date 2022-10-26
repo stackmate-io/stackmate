@@ -58,10 +58,10 @@ const getDatabaseConfig = <T extends ServiceTypeChoice, E extends RdsEngine>(
   links: [],
   externalLinks: [],
   monitoring: true,
-  port: faker.mersenne.rand(65000, 2000),
+  port: faker.datatype.number({ min: 2000, max: 65000 }),
   region: faker.helpers.arrayElement(REGIONS),
   size: faker.helpers.arrayElement(RDS_INSTANCE_SIZES),
-  storage: faker.mersenne.rand(900, 30),
+  storage: faker.datatype.number({ min: 30, max: 900 }),
   version: faker.helpers.arrayElement(RDS_MAJOR_VERSIONS_PER_ENGINE[engine]),
 });
 
