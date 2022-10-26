@@ -18,7 +18,7 @@ import {
 import {
   EngineAttributes, multiNode, profilable, Provisionable, RegionalAttributes,
   ServiceTypeChoice, sizeable, storable, versioned, withDatabase,
-  withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable,
+  withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored,
 } from '@stackmate/engine/core/service';
 
 type DatabaseAttributes = DatabaseServiceAttributes
@@ -149,6 +149,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   )(getAwsCloudService(type));
 
   return pipe(
+    monitored(),
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
     connectable(defaultPort),

@@ -57,6 +57,7 @@ const getDatabaseConfig = <T extends ServiceTypeChoice, E extends RdsEngine>(
   overrides: {},
   links: [],
   externalLinks: [],
+  monitoring: true,
   port: faker.mersenne.rand(65000, 2000),
   region: faker.helpers.arrayElement(REGIONS),
   size: faker.helpers.arrayElement(RDS_INSTANCE_SIZES),
