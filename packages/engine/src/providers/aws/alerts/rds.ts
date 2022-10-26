@@ -3,16 +3,18 @@ Credits:
 https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/blob/master/alarms.tf
 */
 import { kebabCase, snakeCase } from 'lodash';
-import { cloudwatchMetricAlarm } from '@cdktf/provider-aws';
+import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
 import { RdsAlarmOptions, RdsMonitoringThresholds } from '@stackmate/engine/profiles/aws/monitoring/database';
 import { AwsDatabaseDeployableProvisionable } from '@stackmate/engine/providers/aws/services/database';
-import { AwsMonitoringDeployableProvisionable, AwsMonitoringPrerequisites } from '@stackmate/engine/providers/aws/services/monitoring';
+import { AwsAlarms, AwsMonitoringDeployableProvisionable, AwsMonitoringPrerequisites } from '@stackmate/engine/providers/aws/services/monitoring';
 
-export type DatabasebAlertResources = {};
+export type DatabasebAlertResources = AwsAlarms | {
+  eventSubscription: dbEventSubscription.DbEventSubscription;
+};
 
 export const databaseAlerts = (
   alerts: AwsMonitoringDeployableProvisionable,
@@ -20,12 +22,31 @@ export const databaseAlerts = (
   db: AwsDatabaseDeployableProvisionable,
   prerequisites: AwsMonitoringPrerequisites,
 ): DatabasebAlertResources => {
-  const { topic } = prerequisites;
+  const { topic, policy } = prerequisites;
   const { config: { name: serviceName }, provisions: { dbInstance } } = db;
   const { thresholds, options } = getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.MONITORING, 'database') as {
     thresholds: RdsMonitoringThresholds;
     options: RdsAlarmOptions,
   };
+
+  const eventSubscriptionId = `${db.resourceId}-event-sub`;
+  const eventSubscription = new dbEventSubscription.DbEventSubscription(
+    stack.context, eventSubscriptionId, {
+      name: kebabCase(`${db.config.name}-${stack.stageName}-event-subscription`),
+      snsTopic: topic.arn,
+      sourceType: 'db-instance',
+      sourceIds: [dbInstance.id],
+      dependsOn: [policy, dbInstance],
+      eventCategories: [
+        'failover',
+        'failure',
+        'low storage',
+        'maintenance',
+        'notification',
+        'recovery',
+      ],
+    },
+  );
 
   const opts: Omit<
     cloudwatchMetricAlarm.CloudwatchMetricAlarmConfig,
@@ -127,6 +148,7 @@ export const databaseAlerts = (
     freeableMemory,
     freeStorage,
     swapSpace,
+    eventSubscription,
   };
 };
 

@@ -1,15 +1,17 @@
 import pipe from '@bitty/pipe';
-import { dataAwsIamPolicyDocument, snsTopic, snsTopicPolicy } from '@cdktf/provider-aws';
+import { cloudwatchMetricAlarm, dataAwsIamPolicyDocument, snsTopic, snsTopicPolicy } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { MonitoringServiceAttributes } from '@stackmate/engine/providers/types';
-import { databaseAlerts, DatabasebAlertResources } from '../alerts/rds';
 import { AwsService, AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import { BaseProvisionable, Provisionable, withRegions, withSchema } from '@stackmate/engine/core/service';
-import { associate, AssociationHandler, BaseServiceAttributes, ProvisionResources, ServiceSideEffect, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
+import { associate, AssociationHandler, BaseServiceAttributes, ServiceSideEffect, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
 import { AlertingAttributes, getAlertingEmailsSchema, MonitoredProvisionable, MonitoredAttributes } from '@stackmate/engine/core/service/monitored';
+import { databaseAlerts, DatabasebAlertResources } from '../alerts/rds';
+
+export type AwsAlarms = Record<string, cloudwatchMetricAlarm.CloudwatchMetricAlarm>;
 
 /**
  * @type {AwsMonitoringAttributes} the AWS monitoring service (CloudWatch) attributes
@@ -17,22 +19,6 @@ import { AlertingAttributes, getAlertingEmailsSchema, MonitoredProvisionable, Mo
 export type AwsMonitoringAttributes = AwsServiceAttributes<MonitoringServiceAttributes & {
   type: typeof SERVICE_TYPE.MONITORING;
 }>;
-
-/**
- * @type {AwsMonitoringAssociations} the AWS monitoring service associations
- */
-export type AwsMonitoringAssociations = {
-  deployable: {
-    [SERVICE_TYPE.MARIADB]: ServiceSideEffect<DatabasebAlertResources>,
-    [SERVICE_TYPE.MYSQL]: ServiceSideEffect<DatabasebAlertResources>,
-    [SERVICE_TYPE.POSTGRESQL]: ServiceSideEffect<DatabasebAlertResources>,
-  },
-};
-
-/**
- * @type {AwsMonitoringService} the AWS monitoring service
- */
-export type AwsMonitoringService = AwsService<AwsMonitoringAttributes, AwsMonitoringAssociations>;
 
 /**
  * @type {AwsMonitoringPrerequisites} the prerequisites for alert generators
@@ -44,11 +30,32 @@ export type AwsMonitoringPrerequisites = {
 };
 
 /**
+ * @type {AwsMonitoringResources} resources that are returned through the monitoring service
+ */
+type AwsMonitoringResources = AwsMonitoringPrerequisites | DatabasebAlertResources;
+
+/**
  * @type {AwsMonitoringDeployableProvisionable} the AWS monitoring service provisionable
  */
 export type AwsMonitoringDeployableProvisionable = Provisionable<
   AwsMonitoringService, {}, 'deployable'
 >;
+
+/**
+ * @type {AwsMonitoringAssociations} the AWS monitoring service associations
+ */
+export type AwsMonitoringAssociations = {
+  deployable: {
+    [SERVICE_TYPE.MARIADB]: ServiceSideEffect<AwsMonitoringResources>,
+    [SERVICE_TYPE.MYSQL]: ServiceSideEffect<AwsMonitoringResources>,
+    [SERVICE_TYPE.POSTGRESQL]: ServiceSideEffect<AwsMonitoringResources>,
+  },
+};
+
+/**
+ * @type {AwsMonitoringService} the AWS monitoring service
+ */
+export type AwsMonitoringService = AwsService<AwsMonitoringAttributes, AwsMonitoringAssociations>;
 
 /**
  * @var {Map} awsServiceIdentifiers the name & URL mapping to use when generating the policy
@@ -151,10 +158,10 @@ const isAssociatedWith = (
  * @returns {Function<ProvisionResources>} the handler to use in associations
  */
 const getAssociationHandler = (
-  alertGenerator: AssociationHandler<ProvisionResources>
-): AssociationHandler<ProvisionResources> => (
+  alertGenerator: AssociationHandler<DatabasebAlertResources>
+): AssociationHandler<AwsMonitoringResources> => (
   source: MonitoredProvisionable, stack: Stack, monitoring: AwsMonitoringDeployableProvisionable,
-): AwsMonitoringPrerequisites | ProvisionResources => {
+): AwsMonitoringResources => {
   const prerequisites = getMonitoringPrerequisites(monitoring, stack, source);
   const alerts = alertGenerator(monitoring, stack, source, prerequisites);
 
@@ -170,8 +177,8 @@ const getAssociationHandler = (
  * @returns {Association} the association to use with the service
  */
 const getAssociation = (
-  type: ServiceTypeChoice, alertsGenerator: AssociationHandler<ProvisionResources>,
-): ServiceSideEffect => ({
+  type: ServiceTypeChoice, alertsGenerator: AssociationHandler<DatabasebAlertResources>,
+): ServiceSideEffect<AwsMonitoringResources> => ({
   with: type,
   where: isAssociatedWith,
   sideEffect: true,
