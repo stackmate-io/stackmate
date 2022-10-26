@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { kebabCase } from 'lodash';
+import { Testing } from 'cdktf';
 import {
   dbInstance as awsDbInstance,
   dbParameterGroup as awsDbParameterGroup,
@@ -106,6 +108,16 @@ describe('AWS PostgreSQL', () => {
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
+
+    const synthesized = Testing.synth(stack.context);
+    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
+      engine: config.engine,
+      instance_class: config.size,
+      port: config.port,
+      allocated_storage: config.storage,
+      db_name: config.database,
+      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+    });
   });
 });
 
@@ -150,6 +162,16 @@ describe('AWS MySQL', () => {
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
+
+    const synthesized = Testing.synth(stack.context);
+    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
+      engine: config.engine,
+      instance_class: config.size,
+      port: config.port,
+      allocated_storage: config.storage,
+      db_name: config.database,
+      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+    });
   });
 });
 
@@ -194,5 +216,15 @@ describe('AWS MariaDB', () => {
     expect(typeof resources === 'object').toBe(true);
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
+
+    const synthesized = Testing.synth(stack.context);
+    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
+      engine: config.engine,
+      instance_class: config.size,
+      port: config.port,
+      allocated_storage: config.storage,
+      db_name: config.database,
+      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+    });
   });
 });

@@ -102,7 +102,7 @@ export const generateCredentials = (
 
   const data = new dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion(
     stack.context, `${idPrefix}_data`, {
-      secretId: secret.id,
+      secretId: secretResource.id,
       versionId: secretVersionResource.id,
     },
   );
