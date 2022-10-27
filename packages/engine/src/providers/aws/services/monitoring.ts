@@ -1,4 +1,5 @@
 import pipe from '@bitty/pipe';
+import { snakeCase } from 'lodash';
 import { cloudwatchMetricAlarm, dataAwsIamPolicyDocument, snsTopic, snsTopicPolicy } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -80,7 +81,7 @@ const getMonitoringPrerequisites = (
   const topicId = `monitoring-${target.config.name}-${region || 'global'}-${stack.stageName}`;
 
   const topic = new snsTopic.SnsTopic(stack.context, topicId, {
-    name: topicId,
+    name: snakeCase(topicId),
     provider: providerInstance,
   });
 
@@ -103,34 +104,34 @@ const getMonitoringPrerequisites = (
 
   const document = new dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
     stack.context, `sns-${topicId}-policy-document`, {
-    dependsOn: [topic],
-    statement: [{
-      // Allow the account owner to manage SNS
-      sid: 'AllowManageSNS',
-      actions: [
-        'SNS:Subscribe',
-        'SNS:SetTopicAttributes',
-        'SNS:RemovePermission',
-        'SNS:Receive',
-        'SNS:Publish',
-        'SNS:ListSubscriptionsByTopic',
-        'SNS:GetTopicAttributes',
-        'SNS:DeleteTopic',
-        'SNS:AddPermission',
-      ],
-      effect: 'Allow',
-      resources: [topic.arn],
-      principals: [{
-        type: 'AWS',
-        identifiers: ['*'],
+      dependsOn: [topic],
+      statement: [{
+        // Allow the account owner to manage SNS
+        sid: 'AllowManageSNS',
+        actions: [
+          'SNS:Subscribe',
+          'SNS:SetTopicAttributes',
+          'SNS:RemovePermission',
+          'SNS:Receive',
+          'SNS:Publish',
+          'SNS:ListSubscriptionsByTopic',
+          'SNS:GetTopicAttributes',
+          'SNS:DeleteTopic',
+          'SNS:AddPermission',
+        ],
+        effect: 'Allow',
+        resources: [topic.arn],
+        principals: [{
+          type: 'AWS',
+          identifiers: ['*'],
+        }],
+        condition: [{
+          test: 'StringEquals',
+          variable: 'AWS:SourceOwner',
+          values: [account.accountId],
+        }],
       }],
-      condition: [{
-        test: 'StringEquals',
-        variable: 'AWS:SourceOwner',
-        values: [account.accountId],
-      }],
-    }],
-  },
+    },
   );
 
   const policy = new snsTopicPolicy.SnsTopicPolicy(stack.context, `${topicId}-policy`, {
