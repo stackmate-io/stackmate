@@ -1,4 +1,4 @@
-import { defaults, fromPairs, groupBy, isEmpty } from 'lodash';
+import { defaults, fromPairs, groupBy, isEmpty, uniq } from 'lodash';
 import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import { MonitoringServiceAttributes } from '@stackmate/engine/core/registry';
@@ -208,7 +208,7 @@ export const expandCoreService = (
     return [config];
   }
 
-  return Array.from(regions).map(
+  return uniq(Array.from(regions)).map(
     (region) => ({ ...config, region, name: `${name}-${region}` }),
   );
 };
