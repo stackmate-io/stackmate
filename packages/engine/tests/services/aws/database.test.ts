@@ -118,6 +118,10 @@ describe('AWS PostgreSQL', () => {
       db_name: config.database,
       identifier: kebabCase(`${config.name}-${stack.stageName}`),
     });
+
+    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
+      family: expect.stringContaining('postgres'),
+    });
   });
 });
 
@@ -172,6 +176,10 @@ describe('AWS MySQL', () => {
       db_name: config.database,
       identifier: kebabCase(`${config.name}-${stack.stageName}`),
     });
+
+    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
+      family: expect.stringContaining('mysql'),
+    });
   });
 });
 
@@ -225,6 +233,10 @@ describe('AWS MariaDB', () => {
       allocated_storage: config.storage,
       db_name: config.database,
       identifier: kebabCase(`${config.name}-${stack.stageName}`),
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
+      family: expect.stringContaining('mariadb'),
     });
   });
 });

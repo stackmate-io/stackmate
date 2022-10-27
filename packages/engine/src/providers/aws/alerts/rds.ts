@@ -32,7 +32,7 @@ export const databaseAlerts = (
   const eventSubscriptionId = `${db.resourceId}-event-sub`;
   const eventSubscription = new dbEventSubscription.DbEventSubscription(
     stack.context, eventSubscriptionId, {
-      name: kebabCase(`${db.config.name}-${stack.stageName}-event-subscription`),
+      name: snakeCase(`${db.config.name}-${stack.stageName}-event-subscription`),
       snsTopic: topic.arn,
       sourceType: 'db-instance',
       sourceIds: [dbInstance.id],
