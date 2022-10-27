@@ -75,9 +75,9 @@ const awsServiceIdentifiers: Map<ServiceTypeChoice, { name: string; url: string 
 const getMonitoringPrerequisites = (
   monitoring: AwsMonitoringDeployableProvisionable, stack: Stack, target: BaseProvisionable,
 ): AwsMonitoringPrerequisites => {
-  const { config: { type, region }, requirements: { providerInstance, account } } = monitoring;
+  const { config: { region }, requirements: { providerInstance, account } } = monitoring;
   const { service: { type: targetType } } = target;
-  const topicId = `monitoring-${type}-${region || 'global'}-${stack.stageName}`;
+  const topicId = `monitoring-${target.config.name}-${region || 'global'}-${stack.stageName}`;
 
   const topic = new snsTopic.SnsTopic(stack.context, topicId, {
     name: topicId,
