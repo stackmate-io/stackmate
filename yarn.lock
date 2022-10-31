@@ -1132,9 +1132,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.19.2":
-  version: 1.19.2
-  resolution: "@oclif/core@npm:1.19.2"
+"@oclif/core@npm:^1.20.0":
+  version: 1.20.0
+  resolution: "@oclif/core@npm:1.20.0"
   dependencies:
     "@oclif/linewrap": ^1.0.0
     "@oclif/screen": ^3.0.2
@@ -1164,7 +1164,7 @@ __metadata:
     tslib: ^2.3.1
     widest-line: ^3.1.0
     wrap-ansi: ^7.0.0
-  checksum: b31f0e3a0398643a76d6a565560a12160e069e4aa1522cdc8983ede74e1494d2898e605e4bfadb32e15f31ddabb8727095d10b1074c737efd0328107e0b15aa9
+  checksum: 90e20a2b9723026cc91098f5143b82426770372f307c98269ab6963407fad66869aae0f0c1e1df9a11bc81e4788b9ebfd1f51e278aa1518c221a0b3c52aa2057
   languageName: node
   linkType: hard
 
@@ -1398,7 +1398,7 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.19.2
+    "@oclif/core": ^1.20.0
     "@oclif/plugin-help": ^5.1.16
     "@oclif/plugin-plugins": ^2.1.5
     "@stackmate/engine": "workspace:packages/engine"
