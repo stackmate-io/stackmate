@@ -1060,7 +1060,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.16.4, @oclif/core@npm:^1.18.0":
+"@oclif/core@npm:^1.16.4":
   version: 1.18.0
   resolution: "@oclif/core@npm:1.18.0"
   dependencies:
@@ -1132,9 +1132,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.19.2":
-  version: 1.19.2
-  resolution: "@oclif/core@npm:1.19.2"
+"@oclif/core@npm:^1.20.0":
+  version: 1.20.0
+  resolution: "@oclif/core@npm:1.20.0"
   dependencies:
     "@oclif/linewrap": ^1.0.0
     "@oclif/screen": ^3.0.2
@@ -1164,7 +1164,7 @@ __metadata:
     tslib: ^2.3.1
     widest-line: ^3.1.0
     wrap-ansi: ^7.0.0
-  checksum: b31f0e3a0398643a76d6a565560a12160e069e4aa1522cdc8983ede74e1494d2898e605e4bfadb32e15f31ddabb8727095d10b1074c737efd0328107e0b15aa9
+  checksum: 90e20a2b9723026cc91098f5143b82426770372f307c98269ab6963407fad66869aae0f0c1e1df9a11bc81e4788b9ebfd1f51e278aa1518c221a0b3c52aa2057
   languageName: node
   linkType: hard
 
@@ -1184,6 +1184,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/plugin-help@npm:^5.1.17":
+  version: 5.1.17
+  resolution: "@oclif/plugin-help@npm:5.1.17"
+  dependencies:
+    "@oclif/core": ^1.20.0
+  checksum: cb4e35acb427315c3601303908a190ef761f8e4644ae838762154c51b2dff7143e4a4165134ad9fca476eb9f3c33908374774642f6d570ad1923cb8e01b77868
+  languageName: node
+  linkType: hard
+
 "@oclif/plugin-not-found@npm:^2.3.6":
   version: 2.3.6
   resolution: "@oclif/plugin-not-found@npm:2.3.6"
@@ -1196,12 +1205,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-plugins@npm:^2.1.5":
-  version: 2.1.5
-  resolution: "@oclif/plugin-plugins@npm:2.1.5"
+"@oclif/plugin-plugins@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "@oclif/plugin-plugins@npm:2.1.6"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.19.1
+    "@oclif/core": ^1.20.0
     chalk: ^4.1.2
     debug: ^4.3.4
     fs-extra: ^9.0
@@ -1211,7 +1220,7 @@ __metadata:
     semver: ^7.3.8
     tslib: ^2.0.0
     yarn: ^1.22.18
-  checksum: 993ef9b7d19ccdd653a300fdf8f4bc40ce8a0c700b42dc859c1f197285ef7e38ec795d7b5d1531d57bd46f9b73a1d88b6c55f97f46f04994f53e131880c46db3
+  checksum: 0d2b2cd9cd2dae5c1ba24b76c8200e55e2523034bd32fc21749c4974fc94451522d1dc6eba80fe9dd96f51f8e94aad8e641ad1d6aeb944e89a8d1767ef097274
   languageName: node
   linkType: hard
 
@@ -1398,27 +1407,27 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.19.2
-    "@oclif/plugin-help": ^5.1.16
-    "@oclif/plugin-plugins": ^2.1.5
+    "@oclif/core": ^1.20.0
+    "@oclif/plugin-help": ^5.1.17
+    "@oclif/plugin-plugins": ^2.1.6
     "@stackmate/engine": "workspace:packages/engine"
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.2
     "@types/jest": ^29.2.0
     "@types/lodash": ^4.14.186
-    "@types/node": ^18.11.7
+    "@types/node": ^18.11.8
     chalk: ^5.1.2
     ini: ^3.0.1
     inquirer: ^8.2.5
     jest: ^29.2.2
     lodash: 4.17.21
-    oclif: ^3.2.22
+    oclif: ^3.2.24
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.0
     tsconfig-paths: ^4.1.0
     tslib: ^2.4.0
-    turbo: ^1.6.1
+    turbo: ^1.6.2
     typescript: ^4.8.4
     yaml: ^2.1.3
   bin:
@@ -1436,12 +1445,12 @@ __metadata:
     "@faker-js/faker": ^7.6.0
     "@types/jest": ^29.2.0
     "@types/lodash": ^4.14.186
-    "@types/node": ^18.11.7
+    "@types/node": ^18.11.8
     ajv: ^8.11.0
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
     cdktf: 0.13.2
-    constructs: ^10.1.141
+    constructs: ^10.1.145
     ip-address: ^8.1.0
     jest: ^29.2.2
     lodash: ^4.17.21
@@ -1664,10 +1673,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.7":
-  version: 18.11.7
-  resolution: "@types/node@npm:18.11.7"
-  checksum: 69d630825cf6fbf580d08d76a4d4836ef8c34ed4fe0842221ade87d275f517099cbfabe8e22397208e564bd24926db97699ab9db5c091383269a432b336665e2
+"@types/node@npm:^18.11.8":
+  version: 18.11.8
+  resolution: "@types/node@npm:18.11.8"
+  checksum: 60b358f97c1a029722dc785811b217615ef20249c3fbde60a65869cfd7a5cd5b1872ee95c79c187ef70e5a078f4ac7670d2129803985268b1f021ad6e8040af8
   languageName: node
   linkType: hard
 
@@ -2962,9 +2971,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^7.4.0":
-  version: 7.4.0
-  resolution: "concurrently@npm:7.4.0"
+"concurrently@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "concurrently@npm:7.5.0"
   dependencies:
     chalk: ^4.1.0
     date-fns: ^2.29.1
@@ -2978,7 +2987,7 @@ __metadata:
   bin:
     conc: dist/bin/concurrently.js
     concurrently: dist/bin/concurrently.js
-  checksum: cc547866ad8d009d184ca3a7115d6636052a5f56f5429d123092d651286043d7233f6429257e30e50f509894cd12798ea831896ac18092d8135f67ffcc8ac3ea
+  checksum: 7886e1c8559d2699ae1b62be8aca5d56c226966e252a2b9dd6077b3c1fd5397e98ef537c040fffa1de50418bd2616746eb9dd589a31ffb9056d4758b850a865b
   languageName: node
   linkType: hard
 
@@ -2996,10 +3005,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"constructs@npm:^10.1.141":
-  version: 10.1.141
-  resolution: "constructs@npm:10.1.141"
-  checksum: 533593ab1abd490c907186d31cc1672adbe6028619dad244f21d4eee218ef7db2b3ba9824f19ef009dcf81f27ab731faf71cd6fa02fb20acd2ade1b0abf502ed
+"constructs@npm:^10.1.145":
+  version: 10.1.145
+  resolution: "constructs@npm:10.1.145"
+  checksum: 96765a4cc5288c0282c5a14769461fc44289d152c7d5fb61f70d8c60ced47ef684ab8449a097420dd479d0068c900e029b93ff7688de1424fd439285cc721b84
   languageName: node
   linkType: hard
 
@@ -6654,16 +6663,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.22":
-  version: 3.2.22
-  resolution: "oclif@npm:3.2.22"
+"oclif@npm:^3.2.24":
+  version: 3.2.24
+  resolution: "oclif@npm:3.2.24"
   dependencies:
-    "@oclif/core": ^1.18.0
+    "@oclif/core": ^1.20.0
     "@oclif/plugin-help": ^5.1.16
     "@oclif/plugin-not-found": ^2.3.6
     "@oclif/plugin-warn-if-update-available": ^2.0.6
     aws-sdk: ^2.1231.0
-    concurrently: ^7.4.0
+    concurrently: ^7.5.0
     debug: ^4.3.3
     find-yarn-workspace-root: ^2.0.0
     fs-extra: ^8.1
@@ -6678,7 +6687,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 3c5c8771404dcfa384901315d28b878031080aa45cd5125de69b57ef908b18a4f4478612e200595da60e367db58eff72022c7c4f09132a9bd04d815e9ad2fb52
+  checksum: 86581117b47f95805a6d18d4e98e29f1890138e4c5873ccfc023575f25daa47e998168b61a5633bfb66a37954078b83a50fd9d7d2c052671201d3ce026f6b369
   languageName: node
   linkType: hard
 
@@ -7524,7 +7533,7 @@ __metadata:
     "@types/chai": ^4.3.3
     "@types/jest": ^29.2.0
     "@types/lodash": ^4.14.186
-    "@types/node": ^18.11.7
+    "@types/node": ^18.11.8
     "@typescript-eslint/eslint-plugin": ^5.41.0
     "@typescript-eslint/parser": ^5.41.0
     chai: ^4.3.6
@@ -7539,7 +7548,7 @@ __metadata:
     ts-node: ^10.9.1
     ts-transform-paths: ^2.0.3
     tslib: ^2.4.0
-    turbo: ^1.6.1
+    turbo: ^1.6.2
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -8404,58 +8413,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo-darwin-64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-darwin-64@npm:1.6.1"
+"turbo-darwin-64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-darwin-64@npm:1.6.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-darwin-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-darwin-arm64@npm:1.6.1"
+"turbo-darwin-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-darwin-arm64@npm:1.6.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-linux-64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-linux-64@npm:1.6.1"
+"turbo-linux-64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-linux-64@npm:1.6.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-linux-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-linux-arm64@npm:1.6.1"
+"turbo-linux-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-linux-arm64@npm:1.6.2"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-windows-64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-windows-64@npm:1.6.1"
+"turbo-windows-64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-windows-64@npm:1.6.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-windows-arm64@npm:1.6.1":
-  version: 1.6.1
-  resolution: "turbo-windows-arm64@npm:1.6.1"
+"turbo-windows-arm64@npm:1.6.2":
+  version: 1.6.2
+  resolution: "turbo-windows-arm64@npm:1.6.2"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "turbo@npm:1.6.1"
+"turbo@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "turbo@npm:1.6.2"
   dependencies:
-    turbo-darwin-64: 1.6.1
-    turbo-darwin-arm64: 1.6.1
-    turbo-linux-64: 1.6.1
-    turbo-linux-arm64: 1.6.1
-    turbo-windows-64: 1.6.1
-    turbo-windows-arm64: 1.6.1
+    turbo-darwin-64: 1.6.2
+    turbo-darwin-arm64: 1.6.2
+    turbo-linux-64: 1.6.2
+    turbo-linux-arm64: 1.6.2
+    turbo-windows-64: 1.6.2
+    turbo-windows-arm64: 1.6.2
   dependenciesMeta:
     turbo-darwin-64:
       optional: true
@@ -8471,7 +8480,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 45e89ff34d877c28181e4b61e0f7bca792c88b0446eb2fbdfe433119cf70a4d4897c8c62744f687aea597161387de80a3fed606eb8b8857cb6c6ab3ad563681e
+  checksum: d32365bdd617d4ef4edbc332784ac303d77627aeb9107a6616f5d1ab7082f84da04905609c0daa39dd3a6841b2b52e46326135e98e29dab4b7f5464758d11513
   languageName: node
   linkType: hard
 
