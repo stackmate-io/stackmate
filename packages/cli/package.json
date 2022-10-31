@@ -38,7 +38,7 @@
   "dependencies": {
     "@oclif/color": "^1.0.1",
     "@oclif/core": "^1.19.2",
-    "@oclif/plugin-help": "^5.1.16",
+    "@oclif/plugin-help": "^5.1.17",
     "@oclif/plugin-plugins": "^2.1.5",
     "@stackmate/engine": "workspace:packages/engine",
     "chalk": "^5.1.2",
