@@ -1168,6 +1168,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^1.20.0":
+  version: 1.20.0
+  resolution: "@oclif/core@npm:1.20.0"
+  dependencies:
+    "@oclif/linewrap": ^1.0.0
+    "@oclif/screen": ^3.0.2
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.3.1
+    widest-line: ^3.1.0
+    wrap-ansi: ^7.0.0
+  checksum: 90e20a2b9723026cc91098f5143b82426770372f307c98269ab6963407fad66869aae0f0c1e1df9a11bc81e4788b9ebfd1f51e278aa1518c221a0b3c52aa2057
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1196,12 +1232,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-plugins@npm:^2.1.5":
-  version: 2.1.5
-  resolution: "@oclif/plugin-plugins@npm:2.1.5"
+"@oclif/plugin-plugins@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "@oclif/plugin-plugins@npm:2.1.6"
   dependencies:
     "@oclif/color": ^1.0.1
-    "@oclif/core": ^1.19.1
+    "@oclif/core": ^1.20.0
     chalk: ^4.1.2
     debug: ^4.3.4
     fs-extra: ^9.0
@@ -1211,7 +1247,7 @@ __metadata:
     semver: ^7.3.8
     tslib: ^2.0.0
     yarn: ^1.22.18
-  checksum: 993ef9b7d19ccdd653a300fdf8f4bc40ce8a0c700b42dc859c1f197285ef7e38ec795d7b5d1531d57bd46f9b73a1d88b6c55f97f46f04994f53e131880c46db3
+  checksum: 0d2b2cd9cd2dae5c1ba24b76c8200e55e2523034bd32fc21749c4974fc94451522d1dc6eba80fe9dd96f51f8e94aad8e641ad1d6aeb944e89a8d1767ef097274
   languageName: node
   linkType: hard
 
@@ -1400,7 +1436,7 @@ __metadata:
     "@oclif/color": ^1.0.1
     "@oclif/core": ^1.19.2
     "@oclif/plugin-help": ^5.1.16
-    "@oclif/plugin-plugins": ^2.1.5
+    "@oclif/plugin-plugins": ^2.1.6
     "@stackmate/engine": "workspace:packages/engine"
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.2
