@@ -61,6 +61,8 @@
     "cmd:dist": "packages/cli/bin/run",
     "schema": "yarn workspace @stackmate/engine bin:schema",
     "test": "yarn schema && turbo run test",
+    "test:cli": "yarn workspace @stackmate/cli run test",
+    "test:engine": "yarn workspace @stackmate/engine run test",
     "test:watch": "turbo run test:watch"
   },
   "packageManager": "yarn@3.2.3"

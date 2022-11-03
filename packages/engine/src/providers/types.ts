@@ -19,5 +19,5 @@ export type DatabaseServiceAttributes = BaseServiceAttributes
   };
 
 export type MonitoringServiceAttributes = BaseServiceAttributes & {
-  email: string;
+  emails: string[];
 };

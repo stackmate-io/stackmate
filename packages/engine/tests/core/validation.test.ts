@@ -1,12 +1,12 @@
 import { fail } from 'node:assert';
 import { faker } from '@faker-js/faker';
-import { fromPairs } from 'lodash';
+import { fromPairs, merge } from 'lodash';
 import { FuncKeywordDefinition } from 'ajv/dist/types';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { ServiceEnvironment } from '@stackmate/engine/core/service/core';
 import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
-import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { ProjectConfiguration } from '@stackmate/engine/core/project';
 import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
 import { EnvironmentValidationError, ValidationError } from '@stackmate/engine/lib/errors';
@@ -273,6 +273,45 @@ describe('Validation', () => {
       );
 
       expect(() => validateEnvironment(vars, envWithRequiredParams)).not.toThrow();
+    });
+  });
+
+  describe('custom validators', () => {
+    let projectConfig: ProjectConfiguration;
+
+    beforeEach(() => {
+      projectConfig = {
+        name: 'my-super-fun-project',
+        provider: 'aws',
+        region: 'eu-central-1',
+        monitoring: {
+          emails: [faker.internet.email()],
+        },
+        stages: [{
+          name: 'production',
+          services: [{
+            name: 'mysql-database',
+            type: 'mysql',
+            links: ['postgresql-database'],
+            size: 'db.t3.micro'
+          }, {
+            name: 'postgresql-database',
+            type: 'postgresql',
+          }],
+        }],
+      };
+    });
+
+    it('returns true for valid service entries', () => {
+      expect(validate(JSON_SCHEMA_ROOT, projectConfig)).toMatchObject(projectConfig);
+    });
+
+    it('raises an error when the service links contain invalid entries', () => {
+      const invalid = merge({}, projectConfig, {
+        stages: [{ services: [{ links: ['invalid-link'] }] }],
+      });
+
+      expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError);
     });
   });
 });
