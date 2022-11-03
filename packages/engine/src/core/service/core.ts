@@ -356,14 +356,6 @@ export const isCoreService = (type: ServiceTypeChoice): boolean => (
 );
 
 /**
- * @param {ProviderChoice} provider the provider to check
- * @returns {Boolean} whether the provider is a cloud provider
- */
-export const isCloudProvider = (provider: ProviderChoice): boolean => (
-  provider !== PROVIDER.LOCAL
-);
-
-/**
  * Updates a service given certain attributes
  *
  * @param {Partial<Service>} attrs the service attributes to apply
