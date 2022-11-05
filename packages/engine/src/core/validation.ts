@@ -1,19 +1,28 @@
 import addErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
-import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
 import { DataValidationCxt } from 'ajv/dist/types';
 import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
+import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
 import { isAddressValid } from '@stackmate/engine/lib';
 import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { Project, ProjectConfiguration } from '@stackmate/engine/core/project';
+import { CloudServiceConfiguration, Project, ProjectConfiguration } from '@stackmate/engine/core/project';
 import { BaseServiceAttributes, ServiceEnvironment } from '@stackmate/engine/core/service';
 import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
 import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@stackmate/engine/lib/errors';
 
-const ajvInstance: Ajv | null = null;
+export const AJV_OPTIONS: AjvOptions = {
+  useDefaults: true,
+  allErrors: true,
+  discriminator: false,
+  removeAdditional: true,
+  coerceTypes: true,
+  allowMatchingProperties: true,
+  strict: false,
+  $data: true,
+} as const;
 
 /**
  * Extracts the service names given a path in the schema
@@ -22,17 +31,14 @@ const ajvInstance: Ajv | null = null;
  * @param {Object} data the data to extract the service names from
  * @returns {String} the service names
  */
-const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
+export const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
   if (!path || !path.startsWith('/stages')) {
     return [];
   }
 
-  const stageName = path.replace(/\/stages\/([^\/]+)\/.*/, '$1');
-  if (!stageName) {
-    throw new Error('Stage not found in the schema');
-  }
-
-  return Object.keys(get(data, ['stages', stageName]));
+  const stagePath = path.replace(/^\/(stages\/[0-9]+\/services).*$/i, '$1').split('/').join('.');
+  const services = get(data, stagePath, []) as CloudServiceConfiguration<true>[];
+  return services.map((cfg) => cfg.name);
 };
 
 /**
@@ -103,18 +109,20 @@ export const validateServiceProfileOverrides = (
 export const validateServiceLinks = (
   schema: any, links: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt,
 ): boolean => {
+  if (isEmpty(links)) {
+    return true;
+  }
+
   // We should allow service links only for cloud services
   const block = dataCxt?.parentData || {};
   const path = dataCxt?.instancePath || null;
+
   if (!path || !block) {
     return true;
   }
 
   // Get the stage's service names
   const serviceNames = getServiceNamesFromPath(path, dataCxt?.rootData);
-  if (isEmpty(links)) {
-    return true;
-  }
 
   // Detect any service names that are not available within the schema
   const irrelevantServices = difference(links, serviceNames);
@@ -128,34 +136,13 @@ export const validateServiceLinks = (
  * @returns {Ajv} the Ajv instance
  */
 export const getAjv = (opts: AjvOptions = {}): Ajv => {
-  if (ajvInstance) {
-    return ajvInstance;
-  }
-
-  const defaultOptions: AjvOptions = {
-    useDefaults: true,
-    allErrors: true,
-    discriminator: false,
-    removeAdditional: true,
-    coerceTypes: true,
-    allowMatchingProperties: true,
-    strict: false,
-  };
-
-  const ajv = new Ajv(defaults({ ...opts }, defaultOptions));
+  const ajv = new Ajv(defaults({ ...opts }, AJV_OPTIONS));
 
   addFormats(ajv);
 
   addErrors(ajv, { // https://ajv.js.org/packages/ajv-errors.html
     keepErrors: false,
     singleError: false,
-  });
-
-  ajv.addKeyword({
-    keyword: 'isIpOrCidr',
-    type: 'boolean',
-    error: { message: 'Invalid IP specified' },
-    validate: (schema: any, value: any): boolean => isAddressValid(value),
   });
 
   ajv.addKeyword({  // no-op for config generator
@@ -169,9 +156,17 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   });
 
   ajv.addKeyword({
+    keyword: 'isIpOrCidr',
+    type: 'boolean',
+    error: { message: 'Invalid IP specified' },
+    validate: (schema: any, value: any): boolean => isAddressValid(value),
+  });
+
+  ajv.addKeyword({
     keyword: 'serviceLinks',
-    type: 'array',
-    error: { message: 'Invalid service links defined' },
+    async: false,
+    errors: true,
+    error: { message: 'Invalid links provided for the service' },
     validate: validateServiceLinks,
   });
 

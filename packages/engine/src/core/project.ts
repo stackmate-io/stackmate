@@ -1,5 +1,5 @@
 import { defaults, fromPairs, groupBy, isEmpty, uniq } from 'lodash';
-import { JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
 import { MonitoringServiceAttributes } from '@stackmate/engine/core/registry';
 import {
@@ -8,16 +8,15 @@ import {
 } from '@stackmate/engine/core/registry';
 import {
   BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema,
-  getServiceTypeSchema, isCloudProvider, isCoreService, ProviderChoice,
-  ServiceTypeChoice, BaseService, getAlertingEmailsSchema,
+  getServiceTypeSchema, isCoreService, ProviderChoice,
+  ServiceTypeChoice, BaseService,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
   DistributiveRequireKeys, OneOfType, OptionalKeys,
 } from '@stackmate/engine/lib';
 import {
-  getCloudServiceConditional, getCoreServiceConditional,
-  getRegionConditional, getRegionsSchema, JsonSchema,
+  getProviderServiceSchemas, getRegionConditional, getRegionsSchema, JsonSchema,
 } from '@stackmate/engine/core/schema';
 
 /**
@@ -50,7 +49,6 @@ export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<[
   StageWithServices<IsPartial>,
 ]> & {
   name: string;
-  alerts?: DistributiveOmit<DistributivePartial<MonitoringServiceAttributes>, 'name' | 'type'>;
 };
 
 /**
@@ -70,14 +68,13 @@ export type Project = {
   stages: StageConfiguration[];
   state: StateServiceAttributes;
   secrets: SecretVaultServiceAttributes;
+  monitoring?: DistributiveOmit<DistributivePartial<MonitoringServiceAttributes>, 'name' | 'type'>;
 };
 
 /**
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
-export type ProjectConfiguration = Omit<
-  Partial<Project>, 'stages' | 'state' | 'secrets' | 'alerts'
-> & {
+export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | 'secrets'> & {
   stages?: StageConfiguration<true>[];
   state?: DistributiveOmit<
     DistributiveOptionalKeys<StateServiceAttributes, 'region'>, 'name' | 'type'
@@ -282,8 +279,7 @@ export const getServiceConfigurations = (
 ): (project: Project) => BaseServiceAttributes[] => (project) => {
   const cloudServices = getCloudServices(project, stage);
   const coreServices: BaseServiceAttributes[] = [];
-  const { provider, state, secrets } = project;
-  const { alerts = {} } = getStage(project, stage);
+  const { provider, state, secrets, monitoring } = project;
 
   if (isEmpty(cloudServices)) {
     throw new Error(`There are no services defined for stage ${stage}`);
@@ -298,8 +294,8 @@ export const getServiceConfigurations = (
     [SERVICE_TYPE.SECRETS, !isEmpty(secrets)
       ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
       : null],
-    [SERVICE_TYPE.MONITORING, !isEmpty(state)
-      ? applyProjectDefaults({ ...alerts, type: SERVICE_TYPE.MONITORING }, project)
+    [SERVICE_TYPE.MONITORING, monitoring?.enabled
+      ? applyProjectDefaults({ ...monitoring, type: SERVICE_TYPE.MONITORING }, project)
       : null],
   ];
 
@@ -320,18 +316,38 @@ export const getProjectSchema = (
   projectSchemaId: string = JSON_SCHEMA_ROOT,
 ): JsonSchema<Project> => {
   const providers = Registry.providers();
+  const cloudProviders = Object.values(CLOUD_PROVIDER);
   const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(
     Registry.regions.entries()
   ).filter(([_, regions]) => !isEmpty(regions)).map(([provider, regions]) => ([
     provider, getRegionsSchema(provider, Array.from(regions)),
   ]));
 
+  const allOf: JsonSchema[] = [
+    ...regions.map(([provider, schema]) => getRegionConditional(provider, schema)),
+  ];
+
+  const $defs = {
+    ...fromPairs(Registry.items.map(service => [service.schemaId, service.schema])),
+    ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
+  };
+
+  // Add type discriminations for the cloud providers available
+  providers.forEach((provider) => {
+    getProviderServiceSchemas(provider, Registry.ofProvider(provider)).forEach((schema) => {
+      const { $id: schemaId } = schema;
+
+      Object.assign($defs, { [schemaId]: schema });
+      allOf.push({ $ref: schemaId });
+    });
+  });
+
   return {
     $id: projectSchemaId,
     $schema: 'http://json-schema.org/draft-07/schema',
     type: 'object',
     properties: {
-      provider: getServiceProviderSchema(providers.filter(p => isCloudProvider(p))),
+      provider: getServiceProviderSchema(cloudProviders),
       name: {
         type: 'string',
         pattern: '^([a-zA-Z0-9-_./]+)$',
@@ -358,6 +374,21 @@ export const getProjectSchema = (
         description: 'Where would you like your Terraform state to be stored',
         properties: {
           provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.STATE)),
+        },
+      },
+      monitoring: {
+        type: 'object',
+        description: 'How would you like to monitor your services',
+        default: {
+          enabled: true,
+        },
+        properties: {
+          provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.MONITORING)),
+          enabled: {
+            type: 'boolean',
+            default: true,
+            description: 'Whether monitoring is enabled or not',
+          },
         },
       },
       stages: {
@@ -399,14 +430,6 @@ export const getProjectSchema = (
                 pattern: 'The stage name should only contain characters, numbers, dashes and underscores',
               },
             },
-            alerts: {
-              type: 'object',
-              default: {},
-              properties: {
-                provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.MONITORING)),
-                emails: getAlertingEmailsSchema(),
-              },
-            },
             services: {
               type: 'array',
               items: {
@@ -440,25 +463,9 @@ export const getProjectSchema = (
         },
       },
     },
+    allOf,
+    $defs,
     required: ['name', 'provider', 'region', 'stages'],
-    allOf: [
-      // We need to exclude 'provider' services from the conditionals, since it will try
-      // to register a 'provider' attribute which conflicts with the main `provider` one
-      ...Registry.items.filter(
-        service => service.type !== SERVICE_TYPE.PROVIDER,
-      ).map(service => (
-        isCoreService(service.type)
-          ? getCoreServiceConditional(service)
-          : getCloudServiceConditional(service)
-      )),
-      ...regions.map(
-        ([provider, schema]) => getRegionConditional(provider, schema),
-      ),
-    ],
-    $defs: {
-      ...fromPairs(Registry.items.map(service => [service.schemaId, service.schema])),
-      ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
-    },
     errorMessage: {
       type: 'The project configuration must be an object',
       required: {

@@ -52,10 +52,10 @@ class Registry implements ServicesRegistry {
    */
   providers(serviceType?: ServiceTypeChoice): ProviderChoice[] {
     if (!serviceType) {
-      return uniq(this.items.map(s => s.provider));
+      return uniq(this.items.map((s) => s.provider));
     }
 
-    return uniq(this.items.filter(s => s.type === serviceType).map(s => s.provider));
+    return uniq(this.items.filter((s) => s.type === serviceType).map((s) => s.provider));
   }
 
   /**
@@ -65,10 +65,10 @@ class Registry implements ServicesRegistry {
    */
   serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[] {
     if (!provider) {
-      return uniq(this.items.map(s => s.type));
+      return uniq(this.items.map((s) => s.type));
     }
 
-    return uniq(this.items.filter(s => s.provider === provider).map(s => s.type));
+    return uniq(this.items.filter((s) => s.provider === provider).map((s) => s.type));
   }
 
   /**
@@ -78,7 +78,7 @@ class Registry implements ServicesRegistry {
    * @returns {BaseService[]} ths services returned
    */
   ofType(type: ServiceTypeChoice): BaseService[] {
-    return this.items.filter(s => s.type === type);
+    return this.items.filter((s) => s.type === type);
   }
 
   /**
@@ -88,7 +88,7 @@ class Registry implements ServicesRegistry {
    * @returns {BaseService[]} ths services returned
    */
   ofProvider(provider: ProviderChoice): BaseService[] {
-    return this.items.filter(s => s.provider === provider);
+    return this.items.filter((s) => s.provider === provider);
   }
 
   /**
@@ -100,7 +100,7 @@ class Registry implements ServicesRegistry {
    * @throws {Error} if the service is not found
    */
   get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService {
-    const service = this.items.find(s => s.provider === provider && s.type === type);
+    const service = this.items.find((s) => s.provider === provider && s.type === type);
 
     if (!service) {
       throw new Error(`Service ${type} for provider ${provider} was not found`);
@@ -123,7 +123,7 @@ class Registry implements ServicesRegistry {
 }
 
 export const availableServices = Object.values(Services);
-export const cloudServices = availableServices.filter(s => !isCoreService(s.type));
+export const cloudServices = availableServices.filter((s) => !isCoreService(s.type));
 
 const registry = new Registry(...availableServices) as Registry;
 

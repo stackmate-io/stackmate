@@ -123,7 +123,6 @@ export const externallyLinkable = <C extends BaseServiceAttributes>(
         externalLinks: {
           type: 'array',
           default: [],
-          serviceLinks: true,
           items: {
             type: 'string',
             isIpOrCidr: true,

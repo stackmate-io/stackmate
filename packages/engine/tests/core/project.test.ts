@@ -29,6 +29,9 @@ describe('Project', () => {
       provider: 'aws',
       region,
     },
+    monitoring: {
+      emails: [faker.internet.email()],
+    },
     state: {
       provider: 'aws',
       bucket: 'my-aws-bucket',
@@ -37,9 +40,6 @@ describe('Project', () => {
     stages: [{
       name: 'production',
       services: servicesConfig,
-      alerts: {
-        email: faker.internet.email(),
-      },
     }, {
       name: 'production-clone',
       copy: 'production',
