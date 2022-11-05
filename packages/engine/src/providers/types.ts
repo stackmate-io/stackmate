@@ -20,4 +20,5 @@ export type DatabaseServiceAttributes = BaseServiceAttributes
 
 export type MonitoringServiceAttributes = BaseServiceAttributes & {
   emails: string[];
+  enabled: boolean;
 };
