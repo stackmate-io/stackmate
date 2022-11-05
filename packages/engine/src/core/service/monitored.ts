@@ -1,4 +1,4 @@
-import { JsonSchema } from '@stackmate/engine/core/schema';
+import { ServiceSchema } from '@stackmate/engine/core/schema';
 import { BaseProvisionable, BaseServiceAttributes, withSchema } from './core';
 
 /**
@@ -9,10 +9,11 @@ export type MonitoredAttributes = {
 };
 
 /**
- * @type {AlertingAttributes} the configuration to use for setting up the alerts
+ * @type {MonitoringAttributes} the configuration to use for setting up the alerts
  */
-export type AlertingAttributes = {
+export type MonitoringAttributes = {
   emails: string[];
+  enabled: boolean;
 };
 
 /**
@@ -25,20 +26,26 @@ export type MonitoredProvisionable = BaseProvisionable<
 /**
  * @returns {ServiceSchema} the schema to use when validating alerting services
  */
-export const getAlertingEmailsSchema = (): JsonSchema<AlertingAttributes['emails']> => ({
-  type: 'array',
-  minItems: 1,
-  description: 'The list of email addresses to send the alerts to',
-  items: {
-    type: 'string',
-    format: 'email',
-    errorMessage: {
-      format: '{/email} is not a valid email address',
+export const getMonitoringAttributesSchema = (): ServiceSchema<MonitoringAttributes> => ({
+  type: 'object',
+  properties: {
+    enabled: {
+      type: 'boolean',
+      default: true,
+      description: 'Whether monitoring is enabled or not',
     },
-  },
-  errorMessage: {
-    minItems: 'You have to provide at least one email address to alert',
-  },
+    emails: {
+      type: 'array',
+      description: 'The list of email addresses to send the alerts to',
+      items: {
+        type: 'string',
+        format: 'email',
+        errorMessage: {
+          format: '{/email} is not a valid email address',
+        },
+      },
+    },
+  }
 });
 
 /**

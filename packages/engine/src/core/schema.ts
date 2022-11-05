@@ -1,9 +1,9 @@
 import fs from 'node:fs';
-import { merge, uniq } from 'lodash';
+import { isEmpty, merge, uniq } from 'lodash';
 
 import { Obj, RequireKeys } from '@stackmate/engine/lib';
-import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { ProviderChoice, BaseService } from '@stackmate/engine/core/service/core';
+import { JSON_SCHEMA_PATH, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { BaseService, isCoreService, ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
@@ -74,6 +74,7 @@ export type JsonSchema<T = undefined> = {
   ///////////////////////////////////////////////////////////////////////////
   additionalItems?: boolean | JsonSchema;
   items?: T extends ArrayLike<any> ? JsonSchema<T[keyof T]> : JsonSchema;
+  contains?: T extends ArrayLike<any> ? JsonSchema<T[keyof T]> : JsonSchema;
 
   maxItems?: number;
   minItems?: number;
@@ -199,6 +200,21 @@ export type JsonSchema<T = undefined> = {
 export type ServiceSchema<T extends Obj = {}> = RequireKeys<JsonSchema<T>, 'properties'>;
 
 /**
+ * Returns the stored JSON schema file. The schema is generated at build time and is
+ * bundled within the app's distribution files.
+ *
+ * @returns {JsonSchema} the schema
+ */
+export const readSchemaFile = (): JsonSchema<Obj> => {
+  if (!fs.existsSync(JSON_SCHEMA_PATH)) {
+    throw new Error('JSON Schema file not found');
+  }
+
+  const content = fs.readFileSync(JSON_SCHEMA_PATH).toString();
+  return JSON.parse(content);
+};
+
+/**
  * Merges two JSON schemas into one
  *
  * @param {ServiceSchema} a the source schema
@@ -216,103 +232,6 @@ export const mergeServiceSchemas = <A extends Obj = {}, B extends Obj = {}>(
     required: uniq([...requiredA, ...requiredB]),
   };
 };
-
-/**
- * Every service in the schema, needs a condition which allows for the `provider` and `region`
- * attributes in the service configuration to be empty and use the project's equivalents.
- * This function returns the condition required to allow this check
- *
- * @param {ProviderChoice} provider service's provider
- * @param {String} serviceSchemaId service's schema id
- * @param {JsonSchema} typeDiscrimination type discrimination schema
- * @param {Function<JsonSchema>} subSchemaGenerator function that generates the service's subschema
- * @returns {JsonSchema}
- */
-export const getServiceSchemaCondition = (
-  provider: ProviderChoice,
-  serviceSchemaId: string,
-  typeDiscrimination: { [p: string]: JsonSchema } = {},
-  subSchemaGenerator: (props: JsonSchema) => JsonSchema,
-): JsonSchema => ({
-  if: {
-    // The provider is either defined at root level,
-    // or is explicitly defined in the service definition
-    anyOf: [
-      {
-        // root provider is defined, nested provider is not
-        allOf: [
-          {
-            required: ['provider'],
-            properties: {
-              ...typeDiscrimination,
-              provider: { const: provider },
-            },
-          },
-          // provider at service level is absent
-          subSchemaGenerator({
-            not: { required: ['provider'] },
-            properties: typeDiscrimination,
-          }),
-        ],
-      },
-      // Provider is explicitly defined on the service type
-      subSchemaGenerator({
-        required: ['provider'],
-        properties: {
-          ...typeDiscrimination,
-          provider: { const: provider },
-        },
-      }),
-    ],
-  },
-  // In case this condition is true, we should apply another set of conditions
-  // discriminated by service type, referencing the corresponding service's schema
-  then: subSchemaGenerator({ $ref: serviceSchemaId }),
-});
-
-/**
- * Returns a conditional schema for a Cloud service which allows the `provider` and `region`
- * attributes to be empty, then use the ones specified at project level
- *
- * @param {BaseService} service the service to get the conditional schema for
- * @returns {JsonSchema} the conditional schema
- */
-export const getCloudServiceConditional = (service: BaseService): JsonSchema => (
-  getServiceSchemaCondition(
-    service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
-      required: ['stages'],
-      properties: {
-        stages: {
-          items: {
-            required: ['services'],
-            properties: {
-              services: {
-                items: props,
-              },
-            },
-          },
-        },
-      },
-    }),
-  )
-);
-
-/**
- * Same with the cloud service schema conditionals, it generates the schema required
- * for the core services
- *
- * @param {BaseService} service the service to get the conditional schema for
- * @returns {JsonSchema} the conditional schema
- * @see {getCloudServiceConditional}
- */
-export const getCoreServiceConditional = (service: BaseService): JsonSchema => (
-  getServiceSchemaCondition(
-    service.provider, service.schemaId, { type: { const: service.type } }, (props) => ({
-      required: [service.type],
-      properties: { [service.type]: props },
-    }),
-  )
-);
 
 /**
  * Returns the schema for a set of a provider's regions
@@ -353,16 +272,114 @@ export const getRegionConditional = (provider: ProviderChoice, schema: JsonSchem
 };
 
 /**
- * Returns the stored JSON schema file. The schema is generated at build time and is
- * bundled within the app's distribution files.
+ * Returns the schemas to be used when validating either core or cloud services
  *
- * @returns {JsonSchema} the schema
+ * How the validtion works:
+ *  - it uses the `provider` property assigned in the service configuration (if any)
+ *  - otherwise it uses the default cloud provider (the one set at root level)
+ *  - adds a discrimination based on the service's type and points to the specific reference
+ *
+ * @param {ProviderChoice} provider the provider to get the validations schema for
+ * @returns {JsonSchema[]} the stage services validation schema
  */
-export const readSchemaFile = (): JsonSchema<Obj> => {
-  if (!fs.existsSync(JSON_SCHEMA_PATH)) {
-    throw new Error('JSON Schema file not found');
+export const getProviderServiceSchemas = (provider: ProviderChoice, services: BaseService[]) => {
+  const schemas: RequireKeys<JsonSchema, '$id'>[] = [];
+  const cloudServices = services.filter((srv) => !isCoreService(srv.type));
+  const rootCoreServiceTypes = [
+    SERVICE_TYPE.STATE,
+    SERVICE_TYPE.SECRETS,
+    SERVICE_TYPE.MONITORING,
+  ] as ServiceTypeChoice[];
+
+  // Start with the root-level core services (eg. state, secrets, monitoring)
+  services.filter((srv) => rootCoreServiceTypes.includes(srv.type)).forEach((service) => {
+    schemas.push({
+      $id: `${provider}-${service.type}-core-service`,
+      if: {
+        anyOf: [
+          {
+            // Provider is defined at root-level, not defined on the core service configuration
+            properties: {
+              provider: { const: provider },
+              [service.type]: { not: { required: ['provider'] } },
+            },
+          },
+          {
+            // Provider is explicitly defined at core service configuration level
+            properties: {
+              [service.type]: {
+                required: ['provider'],
+                properties: { provider: { const: provider } },
+              },
+            },
+          }
+        ],
+      },
+      then: {
+        properties: { [service.type]: { $ref: service.schemaId } },
+      },
+    });
+  });
+
+  // Finally, add the provider's cloud services
+  if (!isEmpty(cloudServices)) {
+    schemas.push({
+      $id: `${provider}-cloud-services`,
+      if: {
+        // Provider defined at root-level
+        properties: { provider: { const: provider } },
+      },
+      then: {
+        properties: {
+          stages: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                services: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      // Set the accepted service types
+                      type: {
+                        enum: cloudServices.map((srv) => srv.type),
+                      },
+                    },
+                    // Add type discriminations for every cloud service available
+                    allOf: cloudServices.map((service): JsonSchema => ({
+                      if: {
+                        anyOf: [
+                          {
+                            // Provider is not defined at service level
+                            not: { required: ['provider'] },
+                            properties: {
+                              type: { const: service.type },
+                            },
+                          },
+                          {
+                            // Provider is defined set to the current one
+                            required: ['provider'],
+                            properties: {
+                              provider: { const: provider },
+                              type: { const: service.type },
+                            },
+                          },
+                        ],
+                      },
+                      then: {
+                        $ref: service.schemaId,
+                      },
+                    })),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
-  const content = fs.readFileSync(JSON_SCHEMA_PATH).toString();
-  return JSON.parse(content);
+  return schemas;
 };
