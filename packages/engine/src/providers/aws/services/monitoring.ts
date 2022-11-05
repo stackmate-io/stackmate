@@ -9,7 +9,7 @@ import { MonitoringServiceAttributes } from '@stackmate/engine/providers/types';
 import { AwsService, AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
 import { BaseProvisionable, Provisionable, withRegions, withSchema } from '@stackmate/engine/core/service';
 import { associate, AssociationHandler, BaseServiceAttributes, ServiceSideEffect, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
-import { AlertingAttributes, getAlertingEmailsSchema, MonitoredProvisionable, MonitoredAttributes } from '@stackmate/engine/core/service/monitored';
+import { MonitoringAttributes, MonitoredProvisionable, MonitoredAttributes, getMonitoringAttributesSchema } from '@stackmate/engine/core/service/monitored';
 import { databaseAlerts, DatabasebAlertResources } from '../alerts/rds';
 
 export type AwsAlarms = Record<string, cloudwatchMetricAlarm.CloudwatchMetricAlarm>;
@@ -204,12 +204,7 @@ export const getMonitoringService = (): AwsMonitoringService => (
   pipe(
     associate(associations),
     withRegions(REGIONS, DEFAULT_REGION),
-    withSchema<AwsMonitoringAttributes, AlertingAttributes>({
-      type: 'object',
-      properties: {
-        emails: getAlertingEmailsSchema(),
-      },
-    }),
+    withSchema<AwsMonitoringAttributes, MonitoringAttributes>(getMonitoringAttributesSchema()),
   )(getAwsCoreService(SERVICE_TYPE.MONITORING))
 );
 

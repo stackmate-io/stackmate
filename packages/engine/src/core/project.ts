@@ -9,7 +9,7 @@ import {
 import {
   BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema,
   getServiceTypeSchema, isCoreService, ProviderChoice,
-  ServiceTypeChoice, BaseService, getAlertingEmailsSchema,
+  ServiceTypeChoice, BaseService,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
@@ -279,7 +279,7 @@ export const getServiceConfigurations = (
 ): (project: Project) => BaseServiceAttributes[] => (project) => {
   const cloudServices = getCloudServices(project, stage);
   const coreServices: BaseServiceAttributes[] = [];
-  const { provider, state, secrets, monitoring = {} } = project;
+  const { provider, state, secrets, monitoring } = project;
 
   if (isEmpty(cloudServices)) {
     throw new Error(`There are no services defined for stage ${stage}`);
@@ -294,7 +294,7 @@ export const getServiceConfigurations = (
     [SERVICE_TYPE.SECRETS, !isEmpty(secrets)
       ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
       : null],
-    [SERVICE_TYPE.MONITORING, !isEmpty(monitoring)
+    [SERVICE_TYPE.MONITORING, monitoring?.enabled
       ? applyProjectDefaults({ ...monitoring, type: SERVICE_TYPE.MONITORING }, project)
       : null],
   ];
@@ -379,10 +379,16 @@ export const getProjectSchema = (
       monitoring: {
         type: 'object',
         description: 'How would you like to monitor your services',
-        default: {},
+        default: {
+          enabled: true,
+        },
         properties: {
           provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.MONITORING)),
-          emails: getAlertingEmailsSchema(),
+          enabled: {
+            type: 'boolean',
+            default: true,
+            description: 'Whether monitoring is enabled or not',
+          },
         },
       },
       stages: {
