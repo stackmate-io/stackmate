@@ -93,7 +93,7 @@ describe('AWS Provider', () => {
 
       expect(resources).toBeInstanceOf(Object);
       expect(new Set(Object.keys(resources))).toEqual(
-        new Set(['gateway', 'account', 'kmsKey', 'vpc', 'provider', 'subnets']),
+        new Set(['gateway', 'account', 'kmsKey', 'vpc', 'provider', 'subnets', 'outputs']),
       );
       expect(resources.gateway).toBeInstanceOf(awsInternetGateway.InternetGateway);
       expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey);
@@ -112,7 +112,9 @@ describe('AWS Provider', () => {
       ) as AwsProviderDestroyableResources;
 
       expect(resources).toBeInstanceOf(Object);
-      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'account', 'kmsKey']));
+      expect(new Set(Object.keys(resources))).toEqual(
+        new Set(['provider', 'account', 'kmsKey', 'outputs']),
+      );
       expect(resources.provider).toBeInstanceOf(terraformAwsProvider.AwsProvider);
     });
 
@@ -125,7 +127,9 @@ describe('AWS Provider', () => {
       ) as AwsProviderPreparableResources;
 
       expect(resources).toBeInstanceOf(Object);
-      expect(new Set(Object.keys(resources))).toEqual(new Set(['provider', 'account', 'kmsKey']));
+      expect(new Set(Object.keys(resources))).toEqual(
+        new Set(['provider', 'account', 'kmsKey', 'outputs']),
+      );
       expect(resources.provider).toBeInstanceOf(terraformAwsProvider.AwsProvider);
       expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey);
     });
