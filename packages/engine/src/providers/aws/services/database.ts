@@ -1,5 +1,6 @@
 import pipe from '@bitty/pipe';
 import { kebabCase } from 'lodash';
+import { TerraformOutput } from 'cdktf';
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
@@ -32,6 +33,7 @@ type DatabaseAttributes = DatabaseServiceAttributes
 export type AwsDatabaseDeployableResources = {
   dbInstance: rdsDbInstance.DbInstance,
   paramGroup: dbParameterGroup.DbParameterGroup,
+  outputs: TerraformOutput[],
 };
 
 export type AwsDatabaseAttributes<
@@ -118,7 +120,14 @@ export const onDeploy = (
     },
   });
 
-  return { dbInstance, paramGroup };
+  const outputs: TerraformOutput[] = [
+    new TerraformOutput(stack.context, `${config.name}-endpoint-output`, {
+      description: `Connection endpoint for "${config.name}" RDS service`,
+      value: dbInstance.endpoint,
+    }),
+  ];
+
+  return { dbInstance, paramGroup, outputs };
 };
 
 /**

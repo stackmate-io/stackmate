@@ -3,7 +3,7 @@ import { snakeCase } from 'lodash';
 import { cloudwatchMetricAlarm, dataAwsIamPolicyDocument, snsTopic, snsTopicPolicy } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
 import { MonitoringServiceAttributes } from '@stackmate/engine/providers/types';
 import { AwsService, AwsServiceAttributes, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
@@ -76,8 +76,8 @@ const awsServiceIdentifiers: Map<ServiceTypeChoice, { name: string; url: string 
 const getMonitoringPrerequisites = (
   monitoring: AwsMonitoringDeployableProvisionable, stack: Stack, target: BaseProvisionable,
 ): AwsMonitoringPrerequisites => {
-  const { config: { region }, requirements: { providerInstance, account } } = monitoring;
   const { service: { type: targetType } } = target;
+  const { config: { region }, requirements: { providerInstance, account } } = monitoring;
   const topicId = `monitoring-${target.config.name}-${region || 'global'}-${stack.stageName}`;
 
   const topic = new snsTopic.SnsTopic(stack.context, topicId, {
@@ -151,7 +151,7 @@ const getMonitoringPrerequisites = (
 const isAssociatedWith = (
   cfg: AwsMonitoringAttributes, linked: BaseServiceAttributes & MonitoredAttributes,
 ): boolean => (
-  linked.monitoring && cfg.provider === linked.provider && cfg.region === linked.region
+  linked.monitoring && linked.provider === PROVIDER.AWS && cfg.region === linked.region
 );
 
 /**

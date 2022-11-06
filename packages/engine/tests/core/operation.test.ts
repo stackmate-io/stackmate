@@ -89,7 +89,7 @@ describe('Operation', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.PROVIDER);
       expect(isEmpty(provisions)).toBe(false);
       expect(new Set(Object.keys(provisions))).toEqual(new Set([
-        'provider', 'account', 'gateway', 'kmsKey', 'subnets', 'vpc',
+        'provider', 'account', 'gateway', 'kmsKey', 'subnets', 'vpc', 'outputs',
       ]));
 
       const {
@@ -123,7 +123,9 @@ describe('Operation', () => {
     it('registers the database resources and returns the output', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.MYSQL);
       expect(isEmpty(provisions)).toBe(false);
-      expect(new Set(Object.keys(provisions))).toEqual(new Set(['dbInstance', 'paramGroup']));
+      expect(new Set(Object.keys(provisions))).toEqual(
+        new Set(['dbInstance', 'paramGroup', 'outputs']),
+      );
 
       const { dbInstance, paramGroup } = provisions as AwsDatabaseDeployableResources;
       expect(dbInstance).toBeInstanceOf(awsDbInstance.DbInstance);
@@ -141,7 +143,9 @@ describe('Operation', () => {
     it('registers the AWS provider', () => {
       const provisions = getProvisions(provisionables, SERVICE_TYPE.PROVIDER);
       expect(isEmpty(provisions)).toBe(false);
-      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'account', 'kmsKey']));
+      expect(new Set(Object.keys(provisions))).toEqual(
+        new Set(['provider', 'account', 'kmsKey', 'outputs']),
+      );
 
       const { provider } = provisions as AwsProviderDeployableResources;
       expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
@@ -181,7 +185,9 @@ describe('Operation', () => {
 
       const provisions = getProvisions(provisionables, lookup);
       expect(isEmpty(provisions)).toBe(false);
-      expect(new Set(Object.keys(provisions))).toEqual(new Set(['provider', 'account', 'kmsKey']));
+      expect(new Set(Object.keys(provisions))).toEqual(
+        new Set(['provider', 'account', 'kmsKey', 'outputs']),
+      );
 
       const { provider } = provisions as AwsProviderDeployableResources;
       expect(provider).toBeInstanceOf(awsProvider.AwsProvider);
