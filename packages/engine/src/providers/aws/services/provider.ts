@@ -19,11 +19,13 @@ import {
   BaseServiceAttributes, getCoreService, profilable, Provisionable,
   RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
+import { TerraformOutput } from 'cdktf';
 
 export type ProviderPrerequisites = {
   provider: awsProvider.AwsProvider;
   kmsKey: awsKmsKey.KmsKey;
   account: callerIdentity.DataAwsCallerIdentity;
+  outputs: TerraformOutput[],
 };
 
 export type AwsProviderDeployableResources = ProviderPrerequisites & {
@@ -97,7 +99,7 @@ export const registerPrerequisites = (
     },
   );
 
-  return { provider, kmsKey, account };
+  return { provider, kmsKey, account, outputs: [] };
 };
 
 /**
@@ -132,13 +134,25 @@ export const onDeploy = (
   const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}-gateway`, {
     ...gatewayConfig,
     vpcId: vpc.id,
-  });;
+  });
+
+  const outputs: TerraformOutput[] = [
+    new TerraformOutput(stack.context, `${resourceId}-vpc-id`, {
+      description: 'VPC ID',
+      value: vpc.id,
+    }),
+    new TerraformOutput(stack.context, `${resourceId}-vpc-cidr-block`, {
+      description: 'VPC CIDR block',
+      value: vpc.cidrBlock,
+    }),
+  ];
 
   return {
     ...registerPrerequisites(provisionable, stack),
     vpc,
     subnets,
     gateway,
+    outputs,
   };
 };
 
