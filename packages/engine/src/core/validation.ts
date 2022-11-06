@@ -2,7 +2,7 @@ import addErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { DataValidationCxt } from 'ajv/dist/types';
 import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
-import Ajv, { AnySchemaObject, Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
+import Ajv, { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
 
 import { Registry } from '@stackmate/engine/core/registry';
 import { readSchemaFile } from '@stackmate/engine/core/schema';
@@ -44,15 +44,11 @@ export const getServiceNamesFromPath = (path: string, data: object = {}): string
 /**
  * Validates a service `profile` value
  *
- * @param {Any|JsonSchema} schema the schema to use for validation
  * @param {Any|String} profile the value for the profile attribute
- * @param {AnySchemaObject} parentSchema the parent schema
  * @param {DataValidationCxt} dataCxt the data validation context
  * @returns {Boolean} whether the service profile validates
  */
-export const validateServiceProfile = (
-  schema: any, profile: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt,
-): boolean => {
+export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt): boolean => {
   const type = get(dataCxt?.parentData, 'type');
   const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
 
@@ -71,14 +67,12 @@ export const validateServiceProfile = (
 /**
  * Validates a profile `overrides` value
  *
- * @param {Any|JsonSchema} schema the schema to use for validation
  * @param {Any|Object} overrides the value for overrides to validate
- * @param {AnySchemaObject} parentSchema the parent schema
  * @param {DataValidationCxt} dataCxt the data validation context
  * @returns {Boolean} whether the overrides value validates
  */
 export const validateServiceProfileOverrides = (
-  schema: any, overrides: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt,
+  overrides: any, dataCxt?: DataValidationCxt,
 ): boolean => {
   const type = get(dataCxt?.parentData, 'type');
   const profile = get(dataCxt?.parentData, 'profile', DEFAULT_PROFILE_NAME);
@@ -100,15 +94,11 @@ export const validateServiceProfileOverrides = (
 /**
  * Validates a `links` value
  *
- * @param {Any|JsonSchema} schema the schema to use for validation
  * @param {Any|String[]} links the value for overrides to validate
- * @param {AnySchemaObject} parentSchema the parent schema
  * @param {DataValidationCxt} dataCxt the data validation context
  * @returns {Boolean} whether the links value validates
  */
-export const validateServiceLinks = (
-  schema: any, links: any, parentSchema?: AnySchemaObject, dataCxt?: DataValidationCxt,
-): boolean => {
+export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): boolean => {
   if (isEmpty(links)) {
     return true;
   }
@@ -156,32 +146,32 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   });
 
   ajv.addKeyword({
-    keyword: 'isIpOrCidr',
-    type: 'boolean',
-    error: { message: 'Invalid IP specified' },
-    validate: (schema: any, value: any): boolean => isAddressValid(value),
-  });
-
-  ajv.addKeyword({
     keyword: 'serviceLinks',
     async: false,
     errors: true,
     error: { message: 'Invalid links provided for the service' },
-    validate: validateServiceLinks,
+    compile: () => validateServiceLinks,
   });
 
   ajv.addKeyword({
     keyword: 'serviceProfile',
     type: 'string',
     error: { message: 'Invalid service profile defined' },
-    validate: validateServiceProfile,
+    compile: () => validateServiceProfile,
   });
 
   ajv.addKeyword({
     keyword: 'serviceProfileOverrides',
     type: 'object',
     error: { message: 'Invalid profile overrides defined' },
-    validate: validateServiceProfileOverrides,
+    compile: () => validateServiceProfileOverrides,
+  });
+
+  ajv.addKeyword({
+    keyword: 'isIpOrCidr',
+    type: 'string',
+    error: { message: 'Invalid IP specified' },
+    compile: () => isAddressValid,
   });
 
   return ajv;
