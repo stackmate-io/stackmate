@@ -74,14 +74,13 @@ describe('Operation', () => {
     });
 
     it('populates the provisionables', () => {
-      // Provisionables should be provider + state + secerets + database + monitoring = 5
-      expect(provisionables).toHaveLength(5);
+      // Provisionables should be provider + state + secerets + database = 4
+      expect(provisionables).toHaveLength(4);
       expect(new Set(provisionables.map(p => p.service.type))).toEqual(new Set([
         SERVICE_TYPE.PROVIDER,
         SERVICE_TYPE.STATE,
         SERVICE_TYPE.SECRETS,
         SERVICE_TYPE.MYSQL,
-        SERVICE_TYPE.MONITORING,
       ]));
     });
 

@@ -22,6 +22,8 @@ import {
   ServiceTypeChoice, sizeable, storable, versioned, withDatabase,
   withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored,
 } from '@stackmate/engine/core/service';
+import { withAwsAlarms } from '@stackmate/engine/providers/aws/service';
+import { awsDatabaseAlarms } from '../alarms/database';
 
 type DatabaseAttributes = DatabaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
@@ -86,9 +88,9 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-export const onDeploy = (
+const deployDatabases = (
   provisionable: AwsDatabaseDeployableProvisionable, stack: Stack,
-): AwsDatabaseDeployableResources => {
+): (() => AwsDatabaseDeployableResources) => (): AwsDatabaseDeployableResources => {
   const { config, requirements: { providerInstance, rootCredentials } } = provisionable;
   const { instance, params } = getResourcesProfile(config);
 
@@ -129,6 +131,22 @@ export const onDeploy = (
 
   return { dbInstance, paramGroup, outputs };
 };
+
+/**
+ * Provisions the database resources along with monitoring resources
+ *
+ * @param {AwsDatabaseDeployableProvisionable} provisionable the service's configuration
+ * @param {Stack} stack the stack to deploy
+ * @returns {Provisions} the provisions generated
+*/
+export const onDeploy = (
+  provisionable: AwsDatabaseDeployableProvisionable, stack: Stack,
+): AwsDatabaseDeployableResources => (
+  pipe(
+    deployDatabases(provisionable, stack),
+    withAwsAlarms<AwsDatabaseDeployableProvisionable>(provisionable, stack, awsDatabaseAlarms),
+  )()
+);
 
 /**
  * @param {ServiceTypeChoice} type the type of service to instantiate

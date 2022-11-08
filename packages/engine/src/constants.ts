@@ -39,7 +39,6 @@ export const CORE_SERVICE_TYPES = [
   SERVICE_TYPE.STATE,
   SERVICE_TYPE.SECRETS,
   SERVICE_TYPE.PROVIDER,
-  SERVICE_TYPE.MONITORING,
 ] as ServiceTypeChoice[];
 
 // Json Schema & artifacts
