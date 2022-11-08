@@ -158,7 +158,9 @@ class StageOperation implements Operation {
 
     for (const provisionable of this.provisionables.values()) {
       const { config, service: { associations: assocs } } = provisionable;
-      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(assocs, this.scope);
+      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(
+        assocs, this.scope, {},
+      );
 
       for (const [associationName, association] of Object.entries(scopeAssociations || {})) {
         const {
