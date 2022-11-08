@@ -6,37 +6,74 @@ import { kebabCase, snakeCase } from 'lodash';
 import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws';
 
 import { Stack } from '@stackmate/engine/core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { RdsAlarmOptions, RdsMonitoringThresholds } from '@stackmate/engine/profiles/aws/monitoring/database';
 import { AwsDatabaseDeployableProvisionable } from '@stackmate/engine/providers/aws/services/database';
-import { AwsAlarms, AwsMonitoringDeployableProvisionable, AwsMonitoringPrerequisites } from '@stackmate/engine/providers/aws/services/monitoring';
+import { AwsServiceAlarmResources, AwsAlarmPrerequisites, AwsServiceAlertsGenerator } from '@stackmate/engine/providers/aws/service';
 
-export type DatabasebAlertResources = AwsAlarms | {
+/**
+ * @type {RdsMonitoringThresholds} the monitoring thresholds applicable
+ */
+export type RdsMonitoringThresholds = {
+  /** The minimum percent of gp2 SSD I/O credits available */
+  burstBalance: number;
+  /** Maximum percentage of CPU utilization */
+  cpuUtilization: number;
+  /** Minimum number of credits (t2 class instances only) */
+  cpuCreditBalance: number;
+  /** Maximum number of outstanding read/write requests that are waiting to access the disk */
+  diskQueueDepth: number;
+  /** The minimum amount of available memory (in bytes) */
+  freeableMemory: number;
+  /** The minimum amount of available free storage space (in bytes) */
+  freeStorageSpace: number;
+  /** Maximum amount of swap space used (in bytes) */
+  swapUsage: number;
+};
+
+/**
+ * @type {RdsAlarmOptions} the alarm options
+ */
+export type RdsAlarmOptions = {
+  evaluationPeriods: number,
+  period: number,
+};
+
+export const thresholds: RdsMonitoringThresholds = {
+  burstBalance: 20,
+  cpuUtilization: 80,
+  cpuCreditBalance: 20,
+  diskQueueDepth: 64,
+  freeableMemory: 64 * 1024 * 1024, // 64 MB
+  freeStorageSpace: 3 * 1024 * 1024 * 1024, // 3 GB
+  swapUsage: 256 * 1024 * 1024, // 256MB
+};
+
+export const options: RdsAlarmOptions = {
+  evaluationPeriods: 1,
+  period: 300,
+};
+
+export type DatabasebAlertResources = AwsServiceAlarmResources | {
   eventSubscription: dbEventSubscription.DbEventSubscription;
 };
 
-export const databaseAlerts = (
-  alerts: AwsMonitoringDeployableProvisionable,
+export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
+  provisionable: AwsDatabaseDeployableProvisionable,
   stack: Stack,
-  db: AwsDatabaseDeployableProvisionable,
-  prerequisites: AwsMonitoringPrerequisites,
+  resources: AwsDatabaseDeployableProvisionable['provisions'],
+  prerequisites: AwsAlarmPrerequisites,
 ): DatabasebAlertResources => {
-  const { topic, policy } = prerequisites;
-  const { config: { name: serviceName }, provisions: { dbInstance } } = db;
-  const { thresholds, options } = getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.MONITORING, 'database') as {
-    thresholds: RdsMonitoringThresholds;
-    options: RdsAlarmOptions,
-  };
+  const { topic } = prerequisites;
+  const { dbInstance } = resources;
+  const { config: { name: serviceName } } = provisionable;
 
-  const eventSubscriptionId = `${db.resourceId}-event-sub`;
+  const eventSubscriptionId = `${provisionable.resourceId}-event-sub`;
   const eventSubscription = new dbEventSubscription.DbEventSubscription(
     stack.context, eventSubscriptionId, {
-      name: snakeCase(`${db.config.name}-${stack.stageName}-event-subscription`),
+      name: snakeCase(`${serviceName}-${stack.stageName}-event-subscription`),
       snsTopic: topic.arn,
       sourceType: 'db-instance',
       sourceIds: [dbInstance.id],
-      dependsOn: [policy, dbInstance],
+      dependsOn: [dbInstance],
       eventCategories: [
         'failover',
         'failure',
@@ -151,4 +188,3 @@ export const databaseAlerts = (
     eventSubscription,
   };
 };
-

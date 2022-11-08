@@ -1,5 +1,6 @@
 import pipe from '@bitty/pipe';
 import { kebabCase } from 'lodash';
+import { TerraformOutput } from 'cdktf';
 import {
   internetGateway,
   kmsKey as awsKmsKey,
@@ -19,7 +20,6 @@ import {
   BaseServiceAttributes, getCoreService, profilable, Provisionable,
   RegionalAttributes, Service, withHandler, withRegions,
 } from '@stackmate/engine/core/service';
-import { TerraformOutput } from 'cdktf';
 
 export type ProviderPrerequisites = {
   provider: awsProvider.AwsProvider;

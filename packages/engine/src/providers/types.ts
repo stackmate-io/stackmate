@@ -1,6 +1,6 @@
 import {
   BaseServiceAttributes, ConnectableAttributes, ExternallyLinkableAttributes,
-  LinkableAttributes, MonitoredAttributes, MultiNodeAttributes, ProfilableAttributes,
+  LinkableAttributes, MultiNodeAttributes, ProfilableAttributes,
   SizeableAttributes, StorableAttributes, VersioningAttributes,
 } from '@stackmate/engine/core/service';
 
@@ -10,15 +10,9 @@ export type DatabaseServiceAttributes = BaseServiceAttributes
   & LinkableAttributes
   & ExternallyLinkableAttributes
   & MultiNodeAttributes
-  & MonitoredAttributes
   & StorableAttributes
   & ConnectableAttributes
   & ProfilableAttributes
   & {
     database: string;
   };
-
-export type MonitoringServiceAttributes = BaseServiceAttributes & {
-  emails: string[];
-  enabled: boolean;
-};

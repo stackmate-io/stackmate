@@ -1,9 +1,14 @@
 import { faker } from '@faker-js/faker';
-import { kebabCase } from 'lodash';
+import { kebabCase, snakeCase } from 'lodash';
 import { Testing } from 'cdktf';
 import {
+  cloudwatchMetricAlarm,
+  dataAwsIamPolicyDocument,
+  dbEventSubscription,
   dbInstance as awsDbInstance,
   dbParameterGroup as awsDbParameterGroup,
+  snsTopic,
+  snsTopicPolicy,
 } from '@cdktf/provider-aws';
 
 import { getStack } from '@stackmate/engine/core/stack';
@@ -59,7 +64,7 @@ const getDatabaseConfig = <T extends ServiceTypeChoice, E extends RdsEngine>(
   overrides: {},
   links: [],
   externalLinks: [],
-  monitoring: true,
+  monitoring: { emails: [], urls: [] },
   port: faker.datatype.number({ min: 2000, max: 65000 }),
   region: faker.helpers.arrayElement(REGIONS),
   size: faker.helpers.arrayElement(RDS_INSTANCE_SIZES),
@@ -110,6 +115,7 @@ describe('AWS PostgreSQL', () => {
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup);
 
     const synthesized = Testing.synth(stack.context);
+
     expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
       engine: config.engine,
       instance_class: config.size,
@@ -237,6 +243,80 @@ describe('AWS MariaDB', () => {
 
     expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
       family: expect.stringContaining('mariadb'),
+    });
+  });
+});
+
+describe('Database service monitoring', () => {
+  it('provides monitoring for the database service', () => {
+    const stack = getStack('some-project', 'some-stage');
+    const config: AwsMariaDBAttributes = {
+      ...getDatabaseConfig('mariadb', 'mariadb'),
+      monitoring: {
+        emails: [faker.internet.email()],
+        urls: [faker.internet.url()],
+      },
+    };
+
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
+      config, stack, { withRootCredentials: true },
+    );
+
+    onDeploy(provisionable, stack);
+    const synthesized = Testing.synth(stack.context);
+
+    const alarmPrefix = snakeCase(`${config.name}_${stack.stageName}`);
+    expect(synthesized).toHaveResourceWithProperties(snsTopic.SnsTopic, {
+      name: expect.stringContaining(snakeCase(config.name)),
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(snsTopicPolicy.SnsTopicPolicy, {});
+
+    expect(synthesized).toHaveDataSourceWithProperties(
+      dataAwsIamPolicyDocument.DataAwsIamPolicyDocument, {},
+    );
+
+    expect(synthesized).toHaveResourceWithProperties(dbEventSubscription.DbEventSubscription, {
+      name: expect.stringContaining(`${alarmPrefix}_event_subscription`),
+      source_type: 'db-instance',
+      event_categories: [
+        'failover', 'failure', 'low storage', 'maintenance', 'notification', 'recovery',
+      ],
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_burst_balance`),
+      metric_name: 'BurstBalance',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_cpu_utilization`),
+      metric_name: 'CPUUtilization',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_cpu_credit_balance`),
+      metric_name: 'CPUCreditBalance',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_disk_depth`),
+      metric_name: 'DiskQueueDepth',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_freeable_memory`),
+      metric_name: 'FreeableMemory',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_free_storage`),
+      metric_name: 'FreeStorageSpace',
+    });
+
+    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+      alarm_name: expect.stringContaining(`${alarmPrefix}_swap_usage`),
+      metric_name: 'SwapUsage',
     });
   });
 });
