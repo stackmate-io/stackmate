@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { inspect } from 'node:util';
 import { argv } from 'node:process';
 
 import Ajv from 'ajv';
@@ -9,7 +10,7 @@ const schema = getProjectSchema();
 const ajv = new Ajv();
 
 if (!ajv.validateSchema(schema)) {
-  console.error('Schema is invalid', ajv.errors);
+  console.error('Schema is invalid', inspect(ajv.errors, { depth: 20 }));
   process.exit(1);
 }
 
