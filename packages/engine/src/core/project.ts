@@ -328,6 +328,8 @@ export const getProjectSchema = (
     ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
   };
 
+  const { properties: { monitoring } } = getMonitoringSchema();
+
   // Add type discriminations for the cloud providers available
   providers.forEach((provider) => {
     getProviderServiceSchemas(provider, Registry.ofProvider(provider)).forEach((schema) => {
@@ -358,7 +360,7 @@ export const getProjectSchema = (
         type: 'string',
         description: 'The default region for the provider you have selected',
       },
-      ...getMonitoringSchema(),
+      monitoring,
       secrets: {
         type: 'object',
         description: 'How would you like your services secrets to be stored',
