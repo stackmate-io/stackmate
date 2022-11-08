@@ -20,7 +20,7 @@ import {
 import {
   EngineAttributes, multiNode, profilable, Provisionable, RegionalAttributes,
   ServiceTypeChoice, sizeable, storable, versioned, withDatabase,
-  withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored,
+  withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored, MonitoringAttributes,
 } from '@stackmate/engine/core/service';
 import { withAwsAlarms } from '@stackmate/engine/providers/aws/service';
 import { awsDatabaseAlarms } from '../alarms/database';
@@ -28,6 +28,7 @@ import { awsDatabaseAlarms } from '../alarms/database';
 type DatabaseAttributes = DatabaseServiceAttributes
   & RegionalAttributes<ChoiceOf<typeof REGIONS>>
   & EngineAttributes<RdsEngine>
+  & MonitoringAttributes
   & {
     provider: typeof PROVIDER.AWS,
   };
