@@ -1,7 +1,6 @@
 import { defaults, fromPairs, groupBy, isEmpty, uniq } from 'lodash';
 import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
-import { MonitoringServiceAttributes } from '@stackmate/engine/core/registry';
 import {
   CloudServiceAttributes, Registry, CloudServiceProvider,
   SecretVaultServiceAttributes, StateServiceAttributes,
@@ -9,7 +8,7 @@ import {
 import {
   BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema,
   getServiceTypeSchema, isCoreService, ProviderChoice,
-  ServiceTypeChoice, BaseService,
+  ServiceTypeChoice, BaseService, getMonitoringSchema, MonitoringAttributes,
 } from '@stackmate/engine/core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
@@ -68,7 +67,7 @@ export type Project = {
   stages: StageConfiguration[];
   state: StateServiceAttributes;
   secrets: SecretVaultServiceAttributes;
-  monitoring?: DistributiveOmit<DistributivePartial<MonitoringServiceAttributes>, 'name' | 'type'>;
+  monitoring: Partial<MonitoringAttributes['monitoring']>;
 };
 
 /**
@@ -279,7 +278,7 @@ export const getServiceConfigurations = (
 ): (project: Project) => BaseServiceAttributes[] => (project) => {
   const cloudServices = getCloudServices(project, stage);
   const coreServices: BaseServiceAttributes[] = [];
-  const { provider, state, secrets, monitoring } = project;
+  const { provider, state, secrets } = project;
 
   if (isEmpty(cloudServices)) {
     throw new Error(`There are no services defined for stage ${stage}`);
@@ -293,9 +292,6 @@ export const getServiceConfigurations = (
       : null],
     [SERVICE_TYPE.SECRETS, !isEmpty(secrets)
       ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
-      : null],
-    [SERVICE_TYPE.MONITORING, monitoring?.enabled
-      ? applyProjectDefaults({ ...monitoring, type: SERVICE_TYPE.MONITORING }, project)
       : null],
   ];
 
@@ -332,6 +328,8 @@ export const getProjectSchema = (
     ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
   };
 
+  const { properties: { monitoring } } = getMonitoringSchema();
+
   // Add type discriminations for the cloud providers available
   providers.forEach((provider) => {
     getProviderServiceSchemas(provider, Registry.ofProvider(provider)).forEach((schema) => {
@@ -362,6 +360,7 @@ export const getProjectSchema = (
         type: 'string',
         description: 'The default region for the provider you have selected',
       },
+      monitoring,
       secrets: {
         type: 'object',
         description: 'How would you like your services secrets to be stored',
@@ -374,21 +373,6 @@ export const getProjectSchema = (
         description: 'Where would you like your Terraform state to be stored',
         properties: {
           provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.STATE)),
-        },
-      },
-      monitoring: {
-        type: 'object',
-        description: 'How would you like to monitor your services',
-        default: {
-          enabled: true,
-        },
-        properties: {
-          provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.MONITORING)),
-          enabled: {
-            type: 'boolean',
-            default: true,
-            description: 'Whether monitoring is enabled or not',
-          },
         },
       },
       stages: {

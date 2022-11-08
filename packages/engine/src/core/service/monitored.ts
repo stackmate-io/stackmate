@@ -1,67 +1,60 @@
 import { ServiceSchema } from '@stackmate/engine/core/schema';
-import { BaseProvisionable, BaseServiceAttributes, withSchema } from './core';
-
-/**
- * @type {MonitoredAttributes} the attributes to use for monitoring
- */
-export type MonitoredAttributes = {
-  monitoring: boolean;
-};
+import { BaseServiceAttributes, withSchema } from './core';
 
 /**
  * @type {MonitoringAttributes} the configuration to use for setting up the alerts
  */
 export type MonitoringAttributes = {
-  emails: string[];
-  enabled: boolean;
+  monitoring: {
+    emails: string[];
+    urls: string[];
+  };
 };
-
-/**
- * @type {MonitoredProvisionable} the linkable provisionable
- */
-export type MonitoredProvisionable = BaseProvisionable<
-  BaseServiceAttributes & MonitoredAttributes
->;
 
 /**
  * @returns {ServiceSchema} the schema to use when validating alerting services
  */
-export const getMonitoringAttributesSchema = (): ServiceSchema<MonitoringAttributes> => ({
+export const getMonitoringSchema = (): ServiceSchema<MonitoringAttributes> => ({
   type: 'object',
-  properties: {
-    enabled: {
-      type: 'boolean',
-      default: true,
-      description: 'Whether monitoring is enabled or not',
-    },
-    emails: {
-      type: 'array',
-      description: 'The list of email addresses to send the alerts to',
-      items: {
-        type: 'string',
-        format: 'email',
-        errorMessage: {
-          format: '{/email} is not a valid email address',
-        },
-      },
-    },
-  }
-});
-
-/**
- * @param {AlertsGenerator} alertsGenerator the function that generates the service's alerts
- * @returns {Function<Service>}
- */
-export const monitored = <C extends BaseServiceAttributes>(
-) => withSchema<C, MonitoredAttributes>({
-  type: 'object',
+  description: 'How would you like to monitor your services',
+  default: {},
   properties: {
     monitoring: {
-      type: 'boolean',
-      default: true,
-      errorMessage: {
-        type: 'Monitoring is a boolean value',
+      type: 'object',
+      properties: {
+        urls: {
+          type: 'array',
+          description: 'The list of URLs to call when an alert occurs',
+          default: [],
+          items: {
+            type: 'string',
+            format: 'url',
+            errorMessage: {
+              format: '{/url} is not a valid URL',
+            },
+          },
+        },
+        emails: {
+          type: 'array',
+          description: 'The list of email addresses to send the alerts to',
+          default: [],
+          items: {
+            type: 'string',
+            format: 'email',
+            errorMessage: {
+              format: '{/email} is not a valid email address',
+            },
+          },
+        },
       },
     },
   },
 });
+
+/**
+ * @returns {Function<Service>}
+ */
+export const monitored = <C extends BaseServiceAttributes>(
+) => withSchema<C, MonitoringAttributes>(
+  getMonitoringSchema(),
+);
