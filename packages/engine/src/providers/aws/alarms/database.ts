@@ -7,7 +7,8 @@ import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws'
 
 import { Stack } from '@stackmate/engine/core/stack';
 import { AwsDatabaseDeployableProvisionable } from '@stackmate/engine/providers/aws/services/database';
-import { AwsServiceAlarmResources, AwsAlarmPrerequisites, AwsServiceAlertsGenerator } from '@stackmate/engine/providers/aws/service';
+import { AwsServiceAlertsGenerator } from '@stackmate/engine/providers/aws/service';
+import { AwsServiceAlarmResources, AwsAlarmPrerequisites, } from '@stackmate/engine/providers/aws/alarms';
 
 /**
  * @type {RdsMonitoringThresholds} the monitoring thresholds applicable
