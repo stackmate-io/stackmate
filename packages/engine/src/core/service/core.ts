@@ -457,7 +457,7 @@ export const assertRequirementsSatisfied = (
   provisionable: BaseProvisionable, scope: ServiceScopeChoice,
 ) => {
   const { service: { associations: allAssociations, type }, requirements } = provisionable;
-  const associations: ServiceAssociations[ServiceScopeChoice] = get(allAssociations, scope);
+  const associations: ServiceAssociations[ServiceScopeChoice] = get(allAssociations, scope, {});
 
   if (!associations) {
     return;
