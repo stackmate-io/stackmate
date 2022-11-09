@@ -56,7 +56,7 @@
     "packages/engine"
   ],
   "scripts": {
-    "build": "yarn schema && turbo run build",
+    "build": "turbo run build",
     "cmd": "packages/cli/bin/dev",
     "cmd:dist": "packages/cli/bin/run",
     "schema": "yarn workspace @stackmate/engine bin:schema",
