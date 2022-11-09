@@ -6,6 +6,7 @@
     "baseUrl": "./",
     "module": "commonjs",
     "composite": false,
+    "target": "es6",
     "paths": {
       "@stackmate/cli/*": [
         "src/*"
