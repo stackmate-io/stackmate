@@ -18,7 +18,7 @@
     "dist",
     "node_modules",
     "tests",
-    "src/schema.ts"
+    "bin/json-schema.ts"
   ],
   "tsc-alias": {
     "verbose": true,
