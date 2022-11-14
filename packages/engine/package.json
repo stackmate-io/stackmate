@@ -30,7 +30,7 @@
     "@bitty/pipe": "^0.3.0",
     "@cdktf/provider-aws": "10.0.11",
     "@cdktf/provider-local": "^3.0.11",
-    "ajv": "^8.11.0",
+    "ajv": "^8.11.2",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "cdktf": "0.13.3",
