@@ -1,6 +1,0 @@
-/*
-!/bin
-!/dist
-/dist/*.tsbuildinfo
-/npm-shrinkwrap.json
-/oclif.manifest.json
