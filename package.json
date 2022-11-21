@@ -63,7 +63,7 @@
     "cmd": "packages/cli/bin/dev",
     "cmd:dist": "packages/cli/bin/run",
     "schema": "yarn workspace @stackmate/engine bin:schema",
-    "prerelease": "yarn test & yarn build",
+    "prerelease": "yarn build",
     "release": "changeset publish",
     "test": "yarn schema && turbo run test",
     "test:cli": "yarn workspace @stackmate/cli run test",

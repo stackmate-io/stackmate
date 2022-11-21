@@ -1,4 +1,4 @@
-name: Tests
+name: Test & Release
 
 on:
   pull_request:
@@ -12,13 +12,12 @@ env:
   CI: false
 
 jobs:
-  deploy:
+  test:
     name: test
     timeout-minutes: 20
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
-
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -37,8 +36,18 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Test
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
         run: yarn test
+
+      - name: Create Release Pull Request or Publish to npm
+        uses: changesets/action@master
+        with:
+          publish: yarn release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
