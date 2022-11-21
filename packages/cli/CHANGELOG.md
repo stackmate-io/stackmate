@@ -1,5 +1,14 @@
 # @stackmate/cli
 
+## 0.1.2
+
+### Patch Changes
+
+- [`275f06d`](https://github.com/stackmate-io/stackmate/commit/275f06d9215d7878dc5f9012f38cf01d97b0fb6a) Thanks [@falexandrou](https://github.com/falexandrou)! - Improve the released packages
+
+- Updated dependencies [[`275f06d`](https://github.com/stackmate-io/stackmate/commit/275f06d9215d7878dc5f9012f38cf01d97b0fb6a)]:
+  - @stackmate/engine@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
