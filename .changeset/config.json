@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "https://github.com/stackmate-io/stackmate"
+      "repo": "stackmate-io/stackmate"
     }
   ],
   "commit": false,
