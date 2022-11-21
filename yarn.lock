@@ -434,6 +434,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cdktf/provider-aws@npm:5.0.40":
+  version: 5.0.40
+  resolution: "@cdktf/provider-aws@npm:5.0.40"
+  peerDependencies:
+    cdktf: ^0.9
+    constructs: ^10.0.0
+  checksum: c819814f2e5884469ae692dd1f67e1fdd13120249b7cf9de611baa1acb81fc5c37836c5792d1dd973c8bd4be076263daba1bfd38f6208fe960b48e1fbbeda341
+  languageName: node
+  linkType: hard
+
 "@cdktf/provider-local@npm:^3.0.11":
   version: 3.0.11
   resolution: "@cdktf/provider-local@npm:3.0.11"
@@ -1721,7 +1731,7 @@ __metadata:
     "@oclif/core": ^1.20.4
     "@oclif/plugin-help": ^5.1.19
     "@oclif/plugin-plugins": ^2.1.7
-    "@stackmate/engine": "workspace:packages/engine"
+    "@stackmate/engine": latest
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.3
     "@types/jest": ^29.2.3
@@ -1745,6 +1755,24 @@ __metadata:
     stackmate: ./bin/run
   languageName: unknown
   linkType: soft
+
+"@stackmate/engine@npm:latest":
+  version: 0.1.0
+  resolution: "@stackmate/engine@npm:0.1.0"
+  dependencies:
+    "@cdktf/provider-aws": 5.0.40
+    cdktf: 0.9.4
+    constructs: ^10.0.25
+    ip-address: ^8.1.0
+    lodash: ^4.17.21
+    reflect-metadata: ^0.1.13
+    tslib: ^2.3.1
+    typescript-memoize: ^1.1.0
+    validate.js: ^0.13.1
+    yaml: ^1.10.2
+  checksum: 33e034401df827b0f6dd20b67cd649ac3e5e0078ca9c953958497ab7fc6e9f702ff555144e0df880eb8aaf6279adda25e999abbdcf670fc1075108751859b65b
+  languageName: node
+  linkType: hard
 
 "@stackmate/engine@workspace:packages/engine":
   version: 0.0.0-use.local
@@ -2443,6 +2471,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"archiver@npm:5.3.0":
+  version: 5.3.0
+  resolution: "archiver@npm:5.3.0"
+  dependencies:
+    archiver-utils: ^2.1.0
+    async: ^3.2.0
+    buffer-crc32: ^0.2.1
+    readable-stream: ^3.6.0
+    readdir-glob: ^1.0.0
+    tar-stream: ^2.2.0
+    zip-stream: ^4.1.0
+  checksum: 878b275390dbab4a32dc2010fb68447d2750297226002002b27d790058d0e04c7d1566f20cf6f9c5abcca33e946cd36ed11b659c59408dabd852db005c84dfed
+  languageName: node
+  linkType: hard
+
 "archiver@npm:5.3.1":
   version: 5.3.1
   resolution: "archiver@npm:5.3.1"
@@ -2596,7 +2639,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async@npm:^3.2.3":
+"async@npm:^3.2.0, async@npm:^3.2.3":
   version: 3.2.4
   resolution: "async@npm:3.2.4"
   checksum: 43d07459a4e1d09b84a20772414aa684ff4de085cbcaec6eea3c7a8f8150e8c62aa6cd4e699fe8ee93c3a5b324e777d34642531875a0817a35697522c1b02e89
@@ -3014,6 +3057,18 @@ __metadata:
   peerDependencies:
     constructs: ^10.0.25
   checksum: 0fead40048b6781b7f0f974d77d7ef206b6526929ef57a459c9c89f3f6824b5f7755c0c14e26930692fe394cbbc7dfae124e4f10b46028995a19e83d25a555aa
+  languageName: node
+  linkType: hard
+
+"cdktf@npm:0.9.4":
+  version: 0.9.4
+  resolution: "cdktf@npm:0.9.4"
+  dependencies:
+    archiver: 5.3.0
+    json-stable-stringify: ^1.0.1
+  peerDependencies:
+    constructs: ^10.0.25
+  checksum: 1bdb8067cdcf60f37d0be5cbc503ee1d73c1823d61bc5fd647c0d28be8276b499ff72c0e7089842c03053a8c02fbd228f9b07bf52aa0bc771924f9f0589e131d
   languageName: node
   linkType: hard
 
@@ -3440,6 +3495,13 @@ __metadata:
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
   checksum: 8755d76787f94e6cf79ce4666f0c5519906d7f5b02d4b884cf41e11dcd759ed69c57da0670afd9236d229a46e0f9cf519db0cd829c6dca820bb5a5c3def584ed
+  languageName: node
+  linkType: hard
+
+"constructs@npm:^10.0.25":
+  version: 10.1.166
+  resolution: "constructs@npm:10.1.166"
+  checksum: 581036558b508d5189cb15fab3918ab5b1f5f95d02ca1a0646fbd9541f9391f0910aa03308ff9fa35885cfd57b58ff9eb0def50d4b236633ac983ae377b6b637
   languageName: node
   linkType: hard
 
@@ -8205,6 +8267,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"reflect-metadata@npm:^0.1.13":
+  version: 0.1.13
+  resolution: "reflect-metadata@npm:0.1.13"
+  checksum: 798d379a7b6f6455501145419505c97dd11cbc23857a386add2b9ef15963ccf15a48d9d15507afe01d4cd74116df8a213247200bac00320bd7c11ddeaa5e8fb4
+  languageName: node
+  linkType: hard
+
 "regenerator-runtime@npm:^0.13.10":
   version: 0.13.11
   resolution: "regenerator-runtime@npm:0.13.11"
@@ -9488,6 +9557,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript-memoize@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "typescript-memoize@npm:1.1.1"
+  checksum: c4035ccda6c156437e0a302f4a0b4cbdfa70c59729d20434f66ecefd45ab5df057792eafe9e05e3e167efc6221b70f474b2789f93a2b0da2a949bc419f3b60ce
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^4.8.4":
   version: 4.8.4
   resolution: "typescript@npm:4.8.4"
@@ -9663,6 +9739,13 @@ __metadata:
   dependencies:
     builtins: ^1.0.3
   checksum: ce4c68207abfb22c05eedb09ff97adbcedc80304a235a0844f5344f1fd5086aa80e4dbec5684d6094e26e35065277b765c1caef68bcea66b9056761eddb22967
+  languageName: node
+  linkType: hard
+
+"validate.js@npm:^0.13.1":
+  version: 0.13.1
+  resolution: "validate.js@npm:0.13.1"
+  checksum: a3ddc8744bf1e97afeef6129083e5a4f6c3378a82927c94effa4ec9954ff0cc3a9155c3894101b781f20b6256dde1010b69a96145e0bfb2229da3a8b7bd331a6
   languageName: node
   linkType: hard
 
@@ -9943,6 +10026,13 @@ __metadata:
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^1.10.2":
+  version: 1.10.2
+  resolution: "yaml@npm:1.10.2"
+  checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
   languageName: node
   linkType: hard
 
