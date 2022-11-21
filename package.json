@@ -2,6 +2,8 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.7",
+    "@changesets/cli": "^2.25.2",
     "@faker-js/faker": "^7.6.0",
     "@types/chai": "^4.3.4",
     "@types/jest": "^29.2.3",
@@ -57,9 +59,12 @@
   ],
   "scripts": {
     "build": "turbo run build",
+    "changeset": "changeset",
     "cmd": "packages/cli/bin/dev",
     "cmd:dist": "packages/cli/bin/run",
     "schema": "yarn workspace @stackmate/engine bin:schema",
+    "prerelease": "yarn test & yarn build",
+    "release": "changeset publish",
     "test": "yarn schema && turbo run test",
     "test:cli": "yarn workspace @stackmate/cli run test",
     "test:engine": "yarn workspace @stackmate/engine run test",
