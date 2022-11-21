@@ -424,23 +424,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-aws@npm:10.0.11":
-  version: 10.0.11
-  resolution: "@cdktf/provider-aws@npm:10.0.11"
+"@cdktf/provider-aws@npm:10.0.12":
+  version: 10.0.12
+  resolution: "@cdktf/provider-aws@npm:10.0.12"
   peerDependencies:
     cdktf: ^0.13.0
     constructs: ^10.0.0
-  checksum: 29934a09c878d6dd6c976c006e8438ae65003dc594069071dd1ad60eb051f236bdc80ef8259d8cd164e3118d0f1aeaa17b220d2b350eb5e94e60d9ea5f103880
-  languageName: node
-  linkType: hard
-
-"@cdktf/provider-aws@npm:5.0.40":
-  version: 5.0.40
-  resolution: "@cdktf/provider-aws@npm:5.0.40"
-  peerDependencies:
-    cdktf: ^0.9
-    constructs: ^10.0.0
-  checksum: c819814f2e5884469ae692dd1f67e1fdd13120249b7cf9de611baa1acb81fc5c37836c5792d1dd973c8bd4be076263daba1bfd38f6208fe960b48e1fbbeda341
+  checksum: 3aedaae07ab852ba93f289f3f852847ec13d9ee5cfe4c3e6974098c77924ac0d0b9425047e99c25dd3416fb44bf05ec616c60bf0ced7405c0cde12657afb5dde
   languageName: node
   linkType: hard
 
@@ -1538,7 +1528,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-warn-if-update-available@npm:^2.0.13":
+"@oclif/plugin-warn-if-update-available@npm:^2.0.14":
   version: 2.0.14
   resolution: "@oclif/plugin-warn-if-update-available@npm:2.0.14"
   dependencies:
@@ -1731,7 +1721,7 @@ __metadata:
     "@oclif/core": ^1.20.4
     "@oclif/plugin-help": ^5.1.19
     "@oclif/plugin-plugins": ^2.1.7
-    "@stackmate/engine": latest
+    "@stackmate/engine": ^0.1.0
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.3
     "@types/jest": ^29.2.3
@@ -1742,44 +1732,26 @@ __metadata:
     inquirer: ^8.2.5
     jest: ^29.3.1
     lodash: 4.17.21
-    oclif: ^3.2.27
+    oclif: ^3.2.28
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.1
     tsconfig-paths: ^4.1.0
     tslib: ^2.4.1
     turbo: ^1.6.3
-    typescript: ^4.8.4
+    typescript: ^4.9.3
     yaml: ^2.1.3
   bin:
     stackmate: ./bin/run
   languageName: unknown
   linkType: soft
 
-"@stackmate/engine@npm:latest":
-  version: 0.1.0
-  resolution: "@stackmate/engine@npm:0.1.0"
-  dependencies:
-    "@cdktf/provider-aws": 5.0.40
-    cdktf: 0.9.4
-    constructs: ^10.0.25
-    ip-address: ^8.1.0
-    lodash: ^4.17.21
-    reflect-metadata: ^0.1.13
-    tslib: ^2.3.1
-    typescript-memoize: ^1.1.0
-    validate.js: ^0.13.1
-    yaml: ^1.10.2
-  checksum: 33e034401df827b0f6dd20b67cd649ac3e5e0078ca9c953958497ab7fc6e9f702ff555144e0df880eb8aaf6279adda25e999abbdcf670fc1075108751859b65b
-  languageName: node
-  linkType: hard
-
-"@stackmate/engine@workspace:packages/engine":
+"@stackmate/engine@^0.1.0, @stackmate/engine@workspace:packages/engine":
   version: 0.0.0-use.local
   resolution: "@stackmate/engine@workspace:packages/engine"
   dependencies:
     "@bitty/pipe": ^0.3.0
-    "@cdktf/provider-aws": 10.0.11
+    "@cdktf/provider-aws": 10.0.12
     "@cdktf/provider-local": ^3.0.11
     "@faker-js/faker": ^7.6.0
     "@types/jest": ^29.2.3
@@ -1789,7 +1761,7 @@ __metadata:
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
     cdktf: 0.13.3
-    constructs: ^10.1.160
+    constructs: ^10.1.166
     ip-address: ^8.1.0
     jest: ^29.3.1
     lodash: ^4.17.21
@@ -1798,7 +1770,7 @@ __metadata:
     ts-node: ^10.9.1
     tsc-alias: ^1.7.1
     tsconfig-paths: ^4.1.0
-    typescript: ^4.8.4
+    typescript: ^4.9.3
   languageName: unknown
   linkType: soft
 
@@ -2471,21 +2443,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"archiver@npm:5.3.0":
-  version: 5.3.0
-  resolution: "archiver@npm:5.3.0"
-  dependencies:
-    archiver-utils: ^2.1.0
-    async: ^3.2.0
-    buffer-crc32: ^0.2.1
-    readable-stream: ^3.6.0
-    readdir-glob: ^1.0.0
-    tar-stream: ^2.2.0
-    zip-stream: ^4.1.0
-  checksum: 878b275390dbab4a32dc2010fb68447d2750297226002002b27d790058d0e04c7d1566f20cf6f9c5abcca33e946cd36ed11b659c59408dabd852db005c84dfed
-  languageName: node
-  linkType: hard
-
 "archiver@npm:5.3.1":
   version: 5.3.1
   resolution: "archiver@npm:5.3.1"
@@ -2639,7 +2596,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"async@npm:^3.2.0, async@npm:^3.2.3":
+"async@npm:^3.2.3":
   version: 3.2.4
   resolution: "async@npm:3.2.4"
   checksum: 43d07459a4e1d09b84a20772414aa684ff4de085cbcaec6eea3c7a8f8150e8c62aa6cd4e699fe8ee93c3a5b324e777d34642531875a0817a35697522c1b02e89
@@ -3057,18 +3014,6 @@ __metadata:
   peerDependencies:
     constructs: ^10.0.25
   checksum: 0fead40048b6781b7f0f974d77d7ef206b6526929ef57a459c9c89f3f6824b5f7755c0c14e26930692fe394cbbc7dfae124e4f10b46028995a19e83d25a555aa
-  languageName: node
-  linkType: hard
-
-"cdktf@npm:0.9.4":
-  version: 0.9.4
-  resolution: "cdktf@npm:0.9.4"
-  dependencies:
-    archiver: 5.3.0
-    json-stable-stringify: ^1.0.1
-  peerDependencies:
-    constructs: ^10.0.25
-  checksum: 1bdb8067cdcf60f37d0be5cbc503ee1d73c1823d61bc5fd647c0d28be8276b499ff72c0e7089842c03053a8c02fbd228f9b07bf52aa0bc771924f9f0589e131d
   languageName: node
   linkType: hard
 
@@ -3498,17 +3443,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"constructs@npm:^10.0.25":
+"constructs@npm:^10.1.166":
   version: 10.1.166
   resolution: "constructs@npm:10.1.166"
   checksum: 581036558b508d5189cb15fab3918ab5b1f5f95d02ca1a0646fbd9541f9391f0910aa03308ff9fa35885cfd57b58ff9eb0def50d4b236633ac983ae377b6b637
-  languageName: node
-  linkType: hard
-
-"constructs@npm:^10.1.160":
-  version: 10.1.160
-  resolution: "constructs@npm:10.1.160"
-  checksum: 441fd94017263c11a102e99b276b9b60461d9462fb601059f58deaca60f87fc85583606e00d25c37c0b01eed1d8e7693d020a587cf88fc4dc4ecd4a71109226c
   languageName: node
   linkType: hard
 
@@ -4222,9 +4160,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.27.0":
-  version: 8.27.0
-  resolution: "eslint@npm:8.27.0"
+"eslint@npm:^8.28.0":
+  version: 8.28.0
+  resolution: "eslint@npm:8.28.0"
   dependencies:
     "@eslint/eslintrc": ^1.3.3
     "@humanwhocodes/config-array": ^0.11.6
@@ -4267,7 +4205,7 @@ __metadata:
     text-table: ^0.2.0
   bin:
     eslint: bin/eslint.js
-  checksum: 153b022d309e1b647a73b1bb0fa98912add699b06e279084155f23c6f2b5fc5abd05411fc1ba81608a24bbfaf044ca079544c16fffa6fc987b8f676c9960a2c4
+  checksum: 1b793486b2ec80f0602d75fff7116f7c39a3286f523608a999eead9bec4154a06841785d2b4fb87f8292a94cf85778c1dbfaec727772a09c4d604fdb9ff0809a
   languageName: node
   linkType: hard
 
@@ -7485,14 +7423,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.27":
-  version: 3.2.27
-  resolution: "oclif@npm:3.2.27"
+"oclif@npm:^3.2.28":
+  version: 3.2.28
+  resolution: "oclif@npm:3.2.28"
   dependencies:
     "@oclif/core": ^1.20.4
     "@oclif/plugin-help": ^5.1.16
     "@oclif/plugin-not-found": ^2.3.7
-    "@oclif/plugin-warn-if-update-available": ^2.0.13
+    "@oclif/plugin-warn-if-update-available": ^2.0.14
     aws-sdk: ^2.1231.0
     concurrently: ^7.5.0
     debug: ^4.3.3
@@ -7509,7 +7447,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 0491adeddcb79a6fa5bb843b5a731ea5c3182b39f2a455246b657aa5b597b28a8fab7e70057b453d601376965d10a68cce73e80f8fec71651d7632c7bc764500
+  checksum: 8ae8b33354084593830ccf63e423f5351036cdc7452dfce6e0f2e039a97acb599e1776b100a6435d85ae399e2d46cc71d54160a4a2d3dfa00443599ec81ca6fd
   languageName: node
   linkType: hard
 
@@ -8267,13 +8205,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.1.13":
-  version: 0.1.13
-  resolution: "reflect-metadata@npm:0.1.13"
-  checksum: 798d379a7b6f6455501145419505c97dd11cbc23857a386add2b9ef15963ccf15a48d9d15507afe01d4cd74116df8a213247200bac00320bd7c11ddeaa5e8fb4
-  languageName: node
-  linkType: hard
-
 "regenerator-runtime@npm:^0.13.10":
   version: 0.13.11
   resolution: "regenerator-runtime@npm:0.13.11"
@@ -8450,7 +8381,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.43.0
     "@typescript-eslint/parser": ^5.43.0
     chai: ^4.3.7
-    eslint: ^8.27.0
+    eslint: ^8.28.0
     eslint-config-airbnb-base: 15.0.0
     eslint-config-airbnb-typescript: ^17.0.0
     eslint-plugin-import: ^2.26.0
@@ -8462,7 +8393,7 @@ __metadata:
     ts-transform-paths: ^2.0.3
     tslib: ^2.4.1
     turbo: ^1.6.3
-    typescript: ^4.8.4
+    typescript: ^4.9.3
   languageName: unknown
   linkType: soft
 
@@ -9557,30 +9488,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-memoize@npm:^1.1.0":
-  version: 1.1.1
-  resolution: "typescript-memoize@npm:1.1.1"
-  checksum: c4035ccda6c156437e0a302f4a0b4cbdfa70c59729d20434f66ecefd45ab5df057792eafe9e05e3e167efc6221b70f474b2789f93a2b0da2a949bc419f3b60ce
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^4.8.4":
-  version: 4.8.4
-  resolution: "typescript@npm:4.8.4"
+"typescript@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "typescript@npm:4.9.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 3e4f061658e0c8f36c820802fa809e0fd812b85687a9a2f5430bc3d0368e37d1c9605c3ce9b39df9a05af2ece67b1d844f9f6ea8ff42819f13bcb80f85629af0
+  checksum: 17b8f816050b412403e38d48eef0e893deb6be522d6dc7caf105e54a72e34daf6835c447735fd2b28b66784e72bfbf87f627abb4818a8e43d1fa8106396128dc
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.8.4#~builtin<compat/typescript>":
-  version: 4.8.4
-  resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=a1c5e5"
+"typescript@patch:typescript@^4.9.3#~builtin<compat/typescript>":
+  version: 4.9.3
+  resolution: "typescript@patch:typescript@npm%3A4.9.3#~builtin<compat/typescript>::version=4.9.3&hash=a1c5e5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 563a0ef47abae6df27a9a3ab38f75fc681f633ccf1a3502b1108e252e187787893de689220f4544aaf95a371a4eb3141e4a337deb9895de5ac3c1ca76430e5f0
+  checksum: ef65c22622d864497d0a0c5db693523329b3284c15fe632e93ad9aa059e8dc38ef3bd767d6f26b1e5ecf9446f49bd0f6c4e5714a2eeaf352805dc002479843d1
   languageName: node
   linkType: hard
 
@@ -9739,13 +9663,6 @@ __metadata:
   dependencies:
     builtins: ^1.0.3
   checksum: ce4c68207abfb22c05eedb09ff97adbcedc80304a235a0844f5344f1fd5086aa80e4dbec5684d6094e26e35065277b765c1caef68bcea66b9056761eddb22967
-  languageName: node
-  linkType: hard
-
-"validate.js@npm:^0.13.1":
-  version: 0.13.1
-  resolution: "validate.js@npm:0.13.1"
-  checksum: a3ddc8744bf1e97afeef6129083e5a4f6c3378a82927c94effa4ec9954ff0cc3a9155c3894101b781f20b6256dde1010b69a96145e0bfb2229da3a8b7bd331a6
   languageName: node
   linkType: hard
 
@@ -10026,13 +9943,6 @@ __metadata:
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5
-  languageName: node
-  linkType: hard
-
-"yaml@npm:^1.10.2":
-  version: 1.10.2
-  resolution: "yaml@npm:1.10.2"
-  checksum: ce4ada136e8a78a0b08dc10b4b900936912d15de59905b2bf415b4d33c63df1d555d23acb2a41b23cf9fb5da41c256441afca3d6509de7247daa062fd2c5ea5f
   languageName: node
   linkType: hard
 
