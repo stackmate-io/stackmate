@@ -1,5 +1,14 @@
 # @stackmate/cli
 
+## 0.1.3
+
+### Patch Changes
+
+- [`7056daf`](https://github.com/stackmate-io/stackmate/commit/7056daf0df2f93bdc3f7e3937ed45d8025884f74) Thanks [@falexandrou](https://github.com/falexandrou)! - Update build process
+
+- Updated dependencies [[`7056daf`](https://github.com/stackmate-io/stackmate/commit/7056daf0df2f93bdc3f7e3937ed45d8025884f74)]:
+  - @stackmate/engine@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
