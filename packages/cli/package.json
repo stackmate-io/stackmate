@@ -1,6 +1,6 @@
 {
   "name": "@stackmate/cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Stackmate - launch and deploy cloud infrastructure using 1-line commands",
   "author": {
     "name": "Fotis Alexandrou (@falexandrou)",
