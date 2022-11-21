@@ -16,6 +16,7 @@ stackmate.schema.json
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
+*.map
 
 # Jest
 .jestcache
