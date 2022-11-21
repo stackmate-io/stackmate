@@ -48,6 +48,8 @@ jobs:
         uses: changesets/action@master
         with:
           publish: yarn release
+          title: 'chore: release packages'
+          commit: 'chore: release packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
