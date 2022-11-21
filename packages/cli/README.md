@@ -16,11 +16,11 @@ oclif example Hello World CLI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g stackmate
+$ npm install -g @stackmate/cli
 $ stackmate COMMAND
 running command...
 $ stackmate (--version)
-stackmate/0.0.0 darwin-x64 node-v17.4.0
+@stackmate/cli/0.0.0 linux-x64 node-v18.12.1
 $ stackmate --help [COMMAND]
 USAGE
   $ stackmate COMMAND
@@ -31,10 +31,13 @@ USAGE
 <!-- commands -->
 * [`stackmate help [COMMAND]`](#stackmate-help-command)
 * [`stackmate plugins`](#stackmate-plugins)
-* [`stackmate plugins:inspect PLUGIN...`](#stackmate-pluginsinspect-plugin)
 * [`stackmate plugins:install PLUGIN...`](#stackmate-pluginsinstall-plugin)
+* [`stackmate plugins:inspect PLUGIN...`](#stackmate-pluginsinspect-plugin)
+* [`stackmate plugins:install PLUGIN...`](#stackmate-pluginsinstall-plugin-1)
 * [`stackmate plugins:link PLUGIN`](#stackmate-pluginslink-plugin)
 * [`stackmate plugins:uninstall PLUGIN...`](#stackmate-pluginsuninstall-plugin)
+* [`stackmate plugins:uninstall PLUGIN...`](#stackmate-pluginsuninstall-plugin-1)
+* [`stackmate plugins:uninstall PLUGIN...`](#stackmate-pluginsuninstall-plugin-2)
 * [`stackmate plugins update`](#stackmate-plugins-update)
 
 ## `stackmate help [COMMAND]`
@@ -55,7 +58,7 @@ DESCRIPTION
   Display help for stackmate.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.10/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.19/src/commands/help.ts)_
 
 ## `stackmate plugins`
 
@@ -75,7 +78,45 @@ EXAMPLES
   $ stackmate plugins
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.1.7/src/commands/plugins/index.ts)_
+
+## `stackmate plugins:install PLUGIN...`
+
+Installs a plugin into the CLI.
+
+```
+USAGE
+  $ stackmate plugins:install PLUGIN...
+
+ARGUMENTS
+  PLUGIN  Plugin to install.
+
+FLAGS
+  -f, --force    Run yarn install with force flag.
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Installs a plugin into the CLI.
+  Can be installed from npm or a git url.
+
+  Installation of a user-installed plugin will override a core plugin.
+
+  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
+  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
+  the CLI without the need to patch and update the whole CLI.
+
+
+ALIASES
+  $ stackmate plugins add
+
+EXAMPLES
+  $ stackmate plugins:install myplugin 
+
+  $ stackmate plugins:install https://github.com/someuser/someplugin
+
+  $ stackmate plugins:install someuser/someplugin
+```
 
 ## `stackmate plugins:inspect PLUGIN...`
 
@@ -117,7 +158,6 @@ FLAGS
 
 DESCRIPTION
   Installs a plugin into the CLI.
-
   Can be installed from npm or a git url.
 
   Installation of a user-installed plugin will override a core plugin.
@@ -125,6 +165,7 @@ DESCRIPTION
   e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
   will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
   the CLI without the need to patch and update the whole CLI.
+
 
 ALIASES
   $ stackmate plugins add
@@ -154,14 +195,60 @@ FLAGS
 
 DESCRIPTION
   Links a plugin into the CLI for development.
-
   Installation of a linked plugin will override a user-installed or core plugin.
 
   e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
   command will override the user-installed or core plugin implementation. This is useful for development work.
 
+
 EXAMPLES
   $ stackmate plugins:link myplugin
+```
+
+## `stackmate plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ stackmate plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ stackmate plugins unlink
+  $ stackmate plugins remove
+```
+
+## `stackmate plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ stackmate plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ stackmate plugins unlink
+  $ stackmate plugins remove
 ```
 
 ## `stackmate plugins:uninstall PLUGIN...`
