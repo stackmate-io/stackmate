@@ -28,13 +28,13 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@bitty/pipe": "^0.3.0",
-    "@cdktf/provider-aws": "10.0.12",
-    "@cdktf/provider-local": "^3.0.11",
+    "@cdktf/provider-aws": "11.0.0",
+    "@cdktf/provider-local": "^4.0.0",
     "ajv": "^8.11.2",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
-    "cdktf": "0.13.3",
-    "constructs": "^10.1.166",
+    "cdktf": "0.14.1",
+    "constructs": "^10.1.167",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21"
   },
