@@ -1,5 +1,14 @@
 # @stackmate/cli
 
+## 0.1.4
+
+### Patch Changes
+
+- [`c18fa83`](https://github.com/stackmate-io/stackmate/commit/c18fa83c34cec82fe1eb3370a945c0e2d1feceb8) Thanks [@falexandrou](https://github.com/falexandrou)! - Update core dependencies
+
+- Updated dependencies [[`c18fa83`](https://github.com/stackmate-io/stackmate/commit/c18fa83c34cec82fe1eb3370a945c0e2d1feceb8)]:
+  - @stackmate/engine@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
