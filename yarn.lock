@@ -1364,42 +1364,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.19.1":
-  version: 1.19.1
-  resolution: "@oclif/core@npm:1.19.1"
-  dependencies:
-    "@oclif/linewrap": ^1.0.0
-    "@oclif/screen": ^3.0.2
-    ansi-escapes: ^4.3.2
-    ansi-styles: ^4.3.0
-    cardinal: ^2.1.1
-    chalk: ^4.1.2
-    clean-stack: ^3.0.1
-    cli-progress: ^3.10.0
-    debug: ^4.3.4
-    ejs: ^3.1.6
-    fs-extra: ^9.1.0
-    get-package-type: ^0.1.0
-    globby: ^11.1.0
-    hyperlinker: ^1.0.0
-    indent-string: ^4.0.0
-    is-wsl: ^2.2.0
-    js-yaml: ^3.14.1
-    natural-orderby: ^2.0.3
-    object-treeify: ^1.1.33
-    password-prompt: ^1.1.2
-    semver: ^7.3.7
-    string-width: ^4.2.3
-    strip-ansi: ^6.0.1
-    supports-color: ^8.1.1
-    supports-hyperlinks: ^2.2.0
-    tslib: ^2.3.1
-    widest-line: ^3.1.0
-    wrap-ansi: ^7.0.0
-  checksum: ef2f2af61a30230b20d35ef9f6340652775fffb880d028b884432646d85c7ca40e3051ed6acf1f0bcf50c46d12716f16ac451e4223082ede267c0307e59bc579
-  languageName: node
-  linkType: hard
-
 "@oclif/core@npm:^1.20.0":
   version: 1.20.0
   resolution: "@oclif/core@npm:1.20.0"
@@ -1476,15 +1440,6 @@ __metadata:
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
   checksum: a072016a58b5e1331bbc21303ad5100fcda846ac4b181e344aec88bb24c5da09c416651e51313ffcc846a83514b74b8b987dd965982900f3edbb42b4e87cc246
-  languageName: node
-  linkType: hard
-
-"@oclif/plugin-help@npm:^5.1.16":
-  version: 5.1.16
-  resolution: "@oclif/plugin-help@npm:5.1.16"
-  dependencies:
-    "@oclif/core": ^1.19.1
-  checksum: cfa6461ffc038a169161641cc6988a7ca7bcfb77ca1ce2e91169c74a055e3c33483210552ada0552f56acd3dc6c498fcb8a995ec3a888ddb0e995b95bdb00560
   languageName: node
   linkType: hard
 
@@ -1732,7 +1687,7 @@ __metadata:
     inquirer: ^8.2.5
     jest: ^29.3.1
     lodash: 4.17.21
-    oclif: ^3.2.28
+    oclif: ^3.3.1
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     tsc-alias: ^1.7.1
@@ -3409,9 +3364,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^7.5.0":
-  version: 7.5.0
-  resolution: "concurrently@npm:7.5.0"
+"concurrently@npm:^7.6.0":
+  version: 7.6.0
+  resolution: "concurrently@npm:7.6.0"
   dependencies:
     chalk: ^4.1.0
     date-fns: ^2.29.1
@@ -3425,7 +3380,7 @@ __metadata:
   bin:
     conc: dist/bin/concurrently.js
     concurrently: dist/bin/concurrently.js
-  checksum: 7886e1c8559d2699ae1b62be8aca5d56c226966e252a2b9dd6077b3c1fd5397e98ef537c040fffa1de50418bd2616746eb9dd589a31ffb9056d4758b850a865b
+  checksum: f705c9a7960f1b16559ca64958043faeeef6385c0bf30a03d1375e15ab2d96dba4f8166f1bbbb1c85e8da35ca0ce3c353875d71dff2aa132b2357bb533b3332e
   languageName: node
   linkType: hard
 
@@ -4799,10 +4754,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"github-slugger@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "github-slugger@npm:1.4.0"
-  checksum: 4f52e7a21f5c6a4c5328f01fe4fe13ae8881fea78bfe31f9e72c4038f97e3e70d52fb85aa7633a52c501dc2486874474d9abd22aa61cbe9b113099a495551c6b
+"github-slugger@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "github-slugger@npm:1.5.0"
+  checksum: c70988224578b3bdaa25df65973ffc8c24594a77a28550c3636e495e49d17aef5cdb04c04fa3f1744babef98c61eecc6a43299a13ea7f3cc33d680bf9053ffbe
   languageName: node
   linkType: hard
 
@@ -7423,20 +7378,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.2.28":
-  version: 3.2.28
-  resolution: "oclif@npm:3.2.28"
+"oclif@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "oclif@npm:3.3.1"
   dependencies:
     "@oclif/core": ^1.20.4
-    "@oclif/plugin-help": ^5.1.16
+    "@oclif/plugin-help": ^5.1.19
     "@oclif/plugin-not-found": ^2.3.7
     "@oclif/plugin-warn-if-update-available": ^2.0.14
     aws-sdk: ^2.1231.0
-    concurrently: ^7.5.0
+    concurrently: ^7.6.0
     debug: ^4.3.3
     find-yarn-workspace-root: ^2.0.0
     fs-extra: ^8.1
-    github-slugger: ^1.4.0
+    github-slugger: ^1.5.0
     lodash: ^4.17.21
     normalize-package-data: ^3.0.3
     qqjs: ^0.3.11
@@ -7447,7 +7402,7 @@ __metadata:
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 8ae8b33354084593830ccf63e423f5351036cdc7452dfce6e0f2e039a97acb599e1776b100a6435d85ae399e2d46cc71d54160a4a2d3dfa00443599ec81ca6fd
+  checksum: 7ee97c16d4d30cabf9bdb4cd6af6892fb12199a5ba4f00e166bb18fbc66a98c80cbe0ef2e02655803f13f675411626460f6e91dcc84636d7bf84a530f2714ea9
   languageName: node
   linkType: hard
 
