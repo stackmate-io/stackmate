@@ -58,7 +58,7 @@
     "oclif": "^3.2.28",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.0.3",
-    "tsc-alias": "^1.7.1",
+    "tsc-alias": "^1.8.1",
     "tsconfig-paths": "^4.1.0",
     "tslib": "^2.4.1",
     "turbo": "^1.6.3",
