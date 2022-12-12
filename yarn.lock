@@ -1735,7 +1735,7 @@ __metadata:
     oclif: ^3.2.28
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
-    tsc-alias: ^1.7.1
+    tsc-alias: ^1.8.2
     tsconfig-paths: ^4.1.0
     tslib: ^2.4.1
     turbo: ^1.6.3
@@ -1768,7 +1768,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-jest: ^29.0.3
     ts-node: ^10.9.1
-    tsc-alias: ^1.7.1
+    tsc-alias: ^1.8.2
     tsconfig-paths: ^4.1.0
     typescript: ^4.9.3
   languageName: unknown
@@ -9253,9 +9253,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsc-alias@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "tsc-alias@npm:1.7.1"
+"tsc-alias@npm:^1.8.2":
+  version: 1.8.2
+  resolution: "tsc-alias@npm:1.8.2"
   dependencies:
     chokidar: ^3.5.3
     commander: ^9.0.0
@@ -9265,7 +9265,7 @@ __metadata:
     plimit-lit: ^1.2.6
   bin:
     tsc-alias: dist/bin/index.js
-  checksum: 3e153cad544997303c1ff030358f898b4b381e692a05170e772fb35182d23c3c52c5e604ff00752f33a6133b27552f6b3794b05d8b9e0d8997cd3fe76a03bafd
+  checksum: d3a45982d521bb4550a71c291028cf819ee5a6e2e3c0eb3dfe36886f0f4e265a4dbf589dbcebb2e03215695a9081974715a543100176caed389e9d32c3ba0c50
   languageName: node
   linkType: hard
 
