@@ -1472,6 +1472,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^1.22.0":
+  version: 1.22.0
+  resolution: "@oclif/core@npm:1.22.0"
+  dependencies:
+    "@oclif/linewrap": ^1.0.0
+    "@oclif/screen": ^3.0.3
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.4.1
+    widest-line: ^3.1.0
+    wrap-ansi: ^7.0.0
+  checksum: 61b3cd030acfdeff942ac59e2e46207607119a5429c4bc2d0975bcfd9d46e347cfb64e8be8ec841c8d6fbc087ece0a4835f758cc38453505395eaff76e98f99a
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1718,7 +1754,7 @@ __metadata:
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
     "@oclif/color": ^1.0.2
-    "@oclif/core": ^1.20.4
+    "@oclif/core": ^1.22.0
     "@oclif/plugin-help": ^5.1.19
     "@oclif/plugin-plugins": ^2.1.7
     "@stackmate/engine": ^0.1.4
