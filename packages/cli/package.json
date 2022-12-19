@@ -39,7 +39,7 @@
     "@oclif/color": "^1.0.2",
     "@oclif/core": "^1.20.4",
     "@oclif/plugin-help": "^5.1.19",
-    "@oclif/plugin-plugins": "^2.1.7",
+    "@oclif/plugin-plugins": "^2.1.9",
     "@stackmate/engine": "^0.1.4",
     "chalk": "^5.1.2",
     "ini": "^3.0.1",
