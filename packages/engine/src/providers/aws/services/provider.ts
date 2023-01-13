@@ -75,12 +75,12 @@ export const registerPrerequisites = (
   const provider = new awsProvider.AwsProvider(stack.context, PROVIDER.AWS, {
     region,
     alias,
-    defaultTags: {
+    defaultTags: [{
       tags: {
         Environment: stack.stageName,
         Description: DEFAULT_RESOURCE_COMMENT,
       },
-    },
+    }],
   });
 
   const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}-key`, {
