@@ -8466,7 +8466,7 @@ __metadata:
     rimraf: 4.0.4
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
-    ts-transform-paths: ^2.0.3
+    ts-transform-paths: ^3.0.0
     tslib: ^2.4.1
     turbo: ^1.7.0
     typescript: ^4.9.4
@@ -9294,10 +9294,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-transform-paths@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "ts-transform-paths@npm:2.0.3"
-  checksum: 7318509fbc5e85012d81876bc0c369cd3a590f83d05aa6b692b36ea393ad3810d74db1ee987a3e48d0cba4a1e726967b858c096a6ad39fa89b5e7d9683d61e73
+"ts-transform-paths@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "ts-transform-paths@npm:3.0.0"
+  checksum: 218cd6b87ecf785c993af949fdd666ae88a4a887f8168cc3b4109858bdc9cfcd3adff4d42aad99b799ad728d6d326b5073b68736edbc65cbf42adb9138d62d59
   languageName: node
   linkType: hard
 
