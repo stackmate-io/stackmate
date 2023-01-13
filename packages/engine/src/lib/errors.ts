@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * @type {ValidationErrorDescriptor} describes a Validation Error entry
  */
