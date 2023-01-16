@@ -1423,7 +1423,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^1.23.0, @oclif/core@npm:^1.23.1, @oclif/core@npm:^1.24.0":
+"@oclif/core@npm:^1.23.0, @oclif/core@npm:^1.24.0":
   version: 1.24.0
   resolution: "@oclif/core@npm:1.24.0"
   dependencies:
@@ -1475,12 +1475,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:^5.1.22":
-  version: 5.1.22
-  resolution: "@oclif/plugin-help@npm:5.1.22"
+"@oclif/plugin-help@npm:^5.1.23":
+  version: 5.1.23
+  resolution: "@oclif/plugin-help@npm:5.1.23"
   dependencies:
-    "@oclif/core": ^1.23.1
-  checksum: dbb714b91e970ad9d1b0bad82a0b853f7ead0b35ffc3ac42ca55eb25178e2d4375e055be6bdf960c8921ae13f2370c5cad28ec6ec15a8d645be3ff53ec4a5e9a
+    "@oclif/core": ^1.24.0
+  checksum: 560f3f7c2b62e36cd2b300e90d55648d801774f993774be552a15f057a50ce2e94c5bc1ff98da6ff3688756f93eb0ef709d12fb570a9a30b664d512ed35ea302
   languageName: node
   linkType: hard
 
@@ -1713,7 +1713,7 @@ __metadata:
   dependencies:
     "@oclif/color": ^1.0.3
     "@oclif/core": ^1.24.0
-    "@oclif/plugin-help": ^5.1.22
+    "@oclif/plugin-help": ^5.1.23
     "@oclif/plugin-plugins": ^2.1.12
     "@stackmate/engine": ^0.1.4
     "@types/ini": ^1.3.31
