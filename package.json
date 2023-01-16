@@ -18,7 +18,7 @@
     "eslint-plugin-import": "^2.27.4",
     "eslint-plugin-monorepo": "0.3.2",
     "jest": "^29.3.1",
-    "rimraf": "4.0.4",
+    "rimraf": "4.0.7",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "ts-transform-paths": "^3.0.0",
