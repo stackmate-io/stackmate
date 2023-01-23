@@ -33,7 +33,7 @@
     "ajv": "^8.12.0",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
-    "cdktf": "0.14.3",
+    "cdktf": "0.15.0",
     "constructs": "^10.1.218",
     "ip-address": "^8.1.0",
     "lodash": "^4.17.21"

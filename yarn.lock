@@ -1754,7 +1754,7 @@ __metadata:
     ajv: ^8.12.0
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
-    cdktf: 0.14.3
+    cdktf: 0.15.0
     constructs: ^10.1.218
     ip-address: ^8.1.0
     jest: ^29.3.1
@@ -3056,16 +3056,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cdktf@npm:0.14.3":
-  version: 0.14.3
-  resolution: "cdktf@npm:0.14.3"
+"cdktf@npm:0.15.0":
+  version: 0.15.0
+  resolution: "cdktf@npm:0.15.0"
   dependencies:
     archiver: 5.3.1
     json-stable-stringify: ^1.0.2
     semver: ^7.3.8
   peerDependencies:
     constructs: ^10.0.25
-  checksum: 161ed0edce07195280ff843b624a6520042e93f97c80300a408242e076fa3f5a70d13773d0e9e81ca4f6fbea391809274fb5a6b95093b968362581c873d2201e
+  checksum: f5e1cfb3a32b9db6e2aaa94acfb655e6e3b549030ee4ef32e12649beebd904d7f8581a4b444c9cc0c98f41425f1e13759da99717770e17b0b8459c7227ae2fec
   languageName: node
   linkType: hard
 
