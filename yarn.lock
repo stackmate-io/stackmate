@@ -1459,6 +1459,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^2.0.2-beta.10":
+  version: 2.0.2-beta.10
+  resolution: "@oclif/core@npm:2.0.2-beta.10"
+  dependencies:
+    "@types/cli-progress": ^3.11.0
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.10.0
+    debug: ^4.3.4
+    ejs: ^3.1.6
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    tslib: ^2.4.1
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: b83aa8cf37403cefd4819aab5e51b8a4461c070e95fc38806857d0f388f1b155d7b51dace64b3756818cd5a48c2a773f6a375f9a53990d89906252137fc6dc2e
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1726,7 +1762,7 @@ __metadata:
     inquirer: ^8.2.5
     jest: ^29.3.1
     lodash: 4.17.21
-    oclif: ^3.4.3
+    oclif: ^3.6.0
     rimraf: ^4.0.4
     ts-jest: ^29.0.5
     tsc-alias: ^1.8.2
@@ -1876,6 +1912,15 @@ __metadata:
   version: 4.3.4
   resolution: "@types/chai@npm:4.3.4"
   checksum: 571184967beb03bf64c4392a13a7d44e72da9af5a1e83077ff81c39cf59c0fda2a5c78d2005084601cf8f3d11726608574d8b5b4a0e3e9736792807afd926cd0
+  languageName: node
+  linkType: hard
+
+"@types/cli-progress@npm:^3.11.0":
+  version: 3.11.0
+  resolution: "@types/cli-progress@npm:3.11.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: d4401622333e888925b47c5d5bb0b89dddae17cc020f909a64ad7275b326bf3c6e9cd467f625a197fd958a1e49220d32f4a2b0bf2948fee330c719a9b985674e
   languageName: node
   linkType: hard
 
@@ -7483,11 +7528,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oclif@npm:^3.4.3":
-  version: 3.4.3
-  resolution: "oclif@npm:3.4.3"
+"oclif@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "oclif@npm:3.6.0"
   dependencies:
-    "@oclif/core": ^1.20.4
+    "@oclif/core": ^2.0.2-beta.10
     "@oclif/plugin-help": ^5.1.19
     "@oclif/plugin-not-found": ^2.3.7
     "@oclif/plugin-warn-if-update-available": ^2.0.14
@@ -7501,13 +7546,14 @@ __metadata:
     lodash: ^4.17.21
     normalize-package-data: ^3.0.3
     semver: ^7.3.8
+    shelljs: ^0.8.5
     tslib: ^2.3.1
     yeoman-environment: ^3.11.1
     yeoman-generator: ^5.6.1
     yosay: ^2.0.2
   bin:
     oclif: bin/run
-  checksum: 56752202ce3892618891d4ab3d0ce7a1efb9d75d0f9173c8dc2df88bdfacfb5ca7e2278cc914bd38b73a6e56089810d5d9acb2644b9f971f2e71d15bf4258e59
+  checksum: e8bb91fac0e8ae36736da84e4ccb1bfc3e5809f0421ce4941e5a9ee3a5938c600a80f783170df88d30202eb30cffe0ef2488fef6849fb9b5f6ef58c922dd601f
   languageName: node
   linkType: hard
 
@@ -9853,6 +9899,13 @@ __metadata:
   version: 1.2.3
   resolution: "word-wrap@npm:1.2.3"
   checksum: 30b48f91fcf12106ed3186ae4fa86a6a1842416df425be7b60485de14bec665a54a68e4b5156647dec3a70f25e84d270ca8bc8cd23182ed095f5c7206a938c1f
+  languageName: node
+  linkType: hard
+
+"wordwrap@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "wordwrap@npm:1.0.0"
+  checksum: 2a44b2788165d0a3de71fd517d4880a8e20ea3a82c080ce46e294f0b68b69a2e49cff5f99c600e275c698a90d12c5ea32aff06c311f0db2eb3f1201f3e7b2a04
   languageName: node
   linkType: hard
 
