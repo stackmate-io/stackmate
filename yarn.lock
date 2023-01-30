@@ -1755,7 +1755,7 @@ __metadata:
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
     cdktf: 0.14.3
-    constructs: ^10.1.218
+    constructs: ^10.1.235
     ip-address: ^8.1.0
     jest: ^29.3.1
     lodash: ^4.17.21
@@ -3497,10 +3497,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"constructs@npm:^10.1.218":
-  version: 10.1.218
-  resolution: "constructs@npm:10.1.218"
-  checksum: 571d47384c0ea80c8cba674073bb6b2d4026f257a75d6af1d61cea8fda02900a72a8607d4ca58dfe6f5b26a9e04811c534b20f3687c310c69b208d6dc9d776fd
+"constructs@npm:^10.1.235":
+  version: 10.1.235
+  resolution: "constructs@npm:10.1.235"
+  checksum: 541d00e2c133d7d33b8727c7a62d7d9aa064b7062e687a58a544d268b050081a0eaed48fa1f38d3fd95aed4cfa3637f96f1a22967973226bc34f40529a6bc215
   languageName: node
   linkType: hard
 
