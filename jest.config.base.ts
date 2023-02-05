@@ -9,7 +9,7 @@ const opts: JestConfigWithTsJest = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
-  transform: { '^.+\\.ts$': ['ts-jest', { 'tsconfig': 'tsconfig.json', 'diagnostics': true }] },
+  transform: { '^.+\\.ts$': ['ts-jest', { 'tsconfig': '<rootDir>/tsconfig.json', 'diagnostics': true }] },
   modulePaths: ['<rootDir>/packages/cli', '<rootDir>/packages/engine'],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
   moduleFileExtensions: ['ts', 'js'],
