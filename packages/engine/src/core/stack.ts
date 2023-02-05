@@ -1,4 +1,4 @@
-import { TerraformStack, App as TerraformApp, AppOptions } from 'cdktf';
+import { TerraformStack, App as TerraformApp, AppConfig } from 'cdktf';
 
 /**
  * @type {Stack} the stage's stack
@@ -41,9 +41,9 @@ export class StageStack implements Stack {
    * @constructor
    * @param {String} projectName the project's name
    * @param {String} stageName the stage's name
-   * @param {AppOptions} options the terraform app options
+   * @param {AppConfig} options the terraform app options
    */
-  constructor(projectName: string, stageName: string, options?: AppOptions) {
+  constructor(projectName: string, stageName: string, options?: AppConfig) {
     this.projectName = projectName;
     this.stageName = stageName;
     this.app = new TerraformApp(options);
@@ -70,9 +70,9 @@ export class StageStack implements Stack {
  *
  * @param {String} projectName the project's name
  * @param {String} stageName the stage's name
- * @param {AppOptions} options the terraform app options
+ * @param {AppConfig} options the terraform app options
  * @returns {Stack} the stack object
  */
-export const getStack = (projectName: string, stageName: string, options?: AppOptions): Stack => (
+export const getStack = (projectName: string, stageName: string, options?: AppConfig): Stack => (
   new StageStack(projectName, stageName, options)
 );
