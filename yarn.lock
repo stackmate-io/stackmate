@@ -1784,7 +1784,7 @@ __metadata:
     tsc-alias: ^1.8.2
     tsconfig-paths: ^4.1.2
     tslib: ^2.5.0
-    turbo: ^1.7.3
+    turbo: ^1.8.1
     typescript: ^4.9.5
     yaml: ^2.2.1
   bin:
@@ -8523,7 +8523,7 @@ __metadata:
     ts-node: ^10.9.1
     ts-transform-paths: ^3.0.0
     tslib: ^2.5.0
-    turbo: ^1.7.3
+    turbo: ^1.8.1
     typescript: ^4.9.5
   languageName: unknown
   linkType: soft
@@ -9460,58 +9460,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo-darwin-64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-darwin-64@npm:1.7.3"
+"turbo-darwin-64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-darwin-64@npm:1.8.1"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-darwin-arm64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-darwin-arm64@npm:1.7.3"
+"turbo-darwin-arm64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-darwin-arm64@npm:1.8.1"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-linux-64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-linux-64@npm:1.7.3"
+"turbo-linux-64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-linux-64@npm:1.8.1"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-linux-arm64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-linux-arm64@npm:1.7.3"
+"turbo-linux-arm64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-linux-arm64@npm:1.8.1"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo-windows-64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-windows-64@npm:1.7.3"
+"turbo-windows-64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-windows-64@npm:1.8.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"turbo-windows-arm64@npm:1.7.3":
-  version: 1.7.3
-  resolution: "turbo-windows-arm64@npm:1.7.3"
+"turbo-windows-arm64@npm:1.8.1":
+  version: 1.8.1
+  resolution: "turbo-windows-arm64@npm:1.8.1"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"turbo@npm:^1.7.3":
-  version: 1.7.3
-  resolution: "turbo@npm:1.7.3"
+"turbo@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "turbo@npm:1.8.1"
   dependencies:
-    turbo-darwin-64: 1.7.3
-    turbo-darwin-arm64: 1.7.3
-    turbo-linux-64: 1.7.3
-    turbo-linux-arm64: 1.7.3
-    turbo-windows-64: 1.7.3
-    turbo-windows-arm64: 1.7.3
+    turbo-darwin-64: 1.8.1
+    turbo-darwin-arm64: 1.8.1
+    turbo-linux-64: 1.8.1
+    turbo-linux-arm64: 1.8.1
+    turbo-windows-64: 1.8.1
+    turbo-windows-arm64: 1.8.1
   dependenciesMeta:
     turbo-darwin-64:
       optional: true
@@ -9527,7 +9527,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 62fce7e1895593c51e51225789b1290d575affc74e8933692d9d133528b21a8e0942d2947529faeec4cf81486700854923aac48479f6dcc6e285091bab5075a0
+  checksum: d222bcf1995f39675d0d2c47f21ed9e72fb249bfb95c469f0729e97c80eedf921e22addfa994da961230a0e8b1d1c69b5037815c396cb4d7ac95708553dcaabb
   languageName: node
   linkType: hard
 
