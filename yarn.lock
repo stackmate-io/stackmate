@@ -1772,7 +1772,7 @@ __metadata:
     "@types/inquirer": ^9.0.3
     "@types/jest": ^29.4.0
     "@types/lodash": ^4.14.191
-    "@types/node": ^18.11.19
+    "@types/node": ^18.14.6
     chalk: ^5.2.0
     ini: ^3.0.1
     inquirer: ^8.2.5
@@ -1802,7 +1802,7 @@ __metadata:
     "@faker-js/faker": ^7.6.0
     "@types/jest": ^29.4.0
     "@types/lodash": ^4.14.191
-    "@types/node": ^18.11.19
+    "@types/node": ^18.14.6
     ajv: ^8.12.0
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
@@ -2089,10 +2089,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.19":
-  version: 18.11.19
-  resolution: "@types/node@npm:18.11.19"
-  checksum: d7cd19fcfc59cbdd3f9ba0b4072cb7adc21bd575bd8eb7d7e698975e63564aaa83f03434f32b12331f84f73d0b369d9cbe2371e359d9d7f5c3361f4987f4f7da
+"@types/node@npm:^18.14.6":
+  version: 18.14.6
+  resolution: "@types/node@npm:18.14.6"
+  checksum: 2f88f482cabadc6dbddd627a1674239e68c3c9beab56eb4ae2309fb96fd17fc3a509d99b0309bafe13b58529574f49ecf3a583f2ebe2896dd32fe4be436dc96e
   languageName: node
   linkType: hard
 
@@ -8508,7 +8508,7 @@ __metadata:
     "@types/chai": ^4.3.4
     "@types/jest": ^29.4.0
     "@types/lodash": ^4.14.191
-    "@types/node": ^18.11.19
+    "@types/node": ^18.14.6
     "@typescript-eslint/eslint-plugin": ^5.50.0
     "@typescript-eslint/parser": ^5.50.0
     chai: ^4.3.7
