@@ -1468,7 +1468,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/core@npm:^2.0.3, @oclif/core@npm:^2.0.8":
+"@oclif/core@npm:^2.0.3":
   version: 2.0.8
   resolution: "@oclif/core@npm:2.0.8"
   dependencies:
@@ -1504,6 +1504,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "@oclif/core@npm:2.8.0"
+  dependencies:
+    "@types/cli-progress": ^3.11.0
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.12.0
+    debug: ^4.3.4
+    ejs: ^3.1.8
+    fs-extra: ^9.1.0
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    semver: ^7.3.7
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    ts-node: ^10.9.1
+    tslib: ^2.5.0
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: 6d47b0052898a04dfb5157fc2f7b14065d9851d1d88a65083260c72d6bea25318d7c18325b1ce692e06651258b6e90c851a5a1bce5c3d292afefbe1937bfd331
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1520,12 +1557,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-help@npm:^5.2.4":
-  version: 5.2.4
-  resolution: "@oclif/plugin-help@npm:5.2.4"
+"@oclif/plugin-help@npm:^5.2.9":
+  version: 5.2.9
+  resolution: "@oclif/plugin-help@npm:5.2.9"
   dependencies:
-    "@oclif/core": ^2.0.8
-  checksum: a2335e9b9ab806566082e4a52d259f206dbae6334afa9d816e09acdf6e51b4f37cff0ce72294ad532141895c4d1eb9c38e2fe4794e71abb59cd56e966be70b2e
+    "@oclif/core": ^2.8.0
+  checksum: bf75daa86db8aac91230824a9a4bb301b243738280128baa53f8dca6cc14b5340c2fca37733c84e89d242e7947094ba4fc46693a0a44bbd24144a50c1c364732
   languageName: node
   linkType: hard
 
@@ -1765,7 +1802,7 @@ __metadata:
   dependencies:
     "@oclif/color": ^1.0.4
     "@oclif/core": ^1.26.1
-    "@oclif/plugin-help": ^5.2.4
+    "@oclif/plugin-help": ^5.2.9
     "@oclif/plugin-plugins": ^2.3.0
     "@stackmate/engine": ^0.1.4
     "@types/ini": ^1.3.31
@@ -3293,6 +3330,15 @@ __metadata:
   dependencies:
     string-width: ^4.2.3
   checksum: 147d26b80ceaa24d72f0354d1b58b7f3567b928bf5943be879de31cf16b0a4f1d059984e2e35a664d7d27ae3e7fafd69fd94b35f462c8879caf96d7f31eac442
+  languageName: node
+  linkType: hard
+
+"cli-progress@npm:^3.12.0":
+  version: 3.12.0
+  resolution: "cli-progress@npm:3.12.0"
+  dependencies:
+    string-width: ^4.2.3
+  checksum: e8390dc3cdf3c72ecfda0a1e8997bfed63a0d837f97366bbce0ca2ff1b452da386caed007b389f0fe972625037b6c8e7ab087c69d6184cc4dfc8595c4c1d3e6e
   languageName: node
   linkType: hard
 
