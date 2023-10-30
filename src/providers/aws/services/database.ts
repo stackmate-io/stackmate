@@ -169,15 +169,13 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     },
   };
 
-  const base = pipe(
+
+  return pipe(
     withConfigHints(hints),
     withRootCredentials(),
     withHandler('deployable', onDeploy),
     linkable(onServiceLinked),
     externallyLinkable(onExternalLink),
-  )(getAwsCloudService(type));
-
-  return pipe(
     monitored(),
     sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
@@ -187,7 +185,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     multiNode(),
     profilable(),
     withDatabase(),
-  )(base);
+  )(getAwsCloudService(type));
 };
 
 export const AWSMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql');

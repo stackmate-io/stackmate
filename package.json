@@ -72,6 +72,7 @@
     "build:project": "tsc -p ./tsconfig.build.json",
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
     "test:full": "yarn bin:schema && yarn test",
     "test:watch": "yarn test --watchAll"
