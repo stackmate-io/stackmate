@@ -1370,6 +1370,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/color@npm:^1.0.13":
+  version: 1.0.13
+  resolution: "@oclif/color@npm:1.0.13"
+  dependencies:
+    ansi-styles: ^4.2.1
+    chalk: ^4.1.0
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    tslib: ^2
+  checksum: 885a6ba4a7d296fef559ba1a7f04a6e67dba92d7aeb46dd23b18d99551d3716710c077d2f3180ff0a4a6d18998b920f723b92865bcd21970ae03dbaff57ba480
+  languageName: node
+  linkType: hard
+
 "@oclif/color@npm:^1.0.3":
   version: 1.0.3
   resolution: "@oclif/color@npm:1.0.3"
@@ -1380,19 +1393,6 @@ __metadata:
     supports-color: ^8.1.1
     tslib: ^2
   checksum: 98d136a1eaa6bffd9fefdb2ed275a912004234f2435f0eaa5646b22beabedd4f3743c81e7e63bec13b3dd7bff149491d33e5b4f1fbad01b44511263defdaabe7
-  languageName: node
-  linkType: hard
-
-"@oclif/color@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@oclif/color@npm:1.0.4"
-  dependencies:
-    ansi-styles: ^4.2.1
-    chalk: ^4.1.0
-    strip-ansi: ^6.0.1
-    supports-color: ^8.1.1
-    tslib: ^2
-  checksum: 5dc377db5684dc482d299d79037a9dcdfc104482d01a60d99f4f8e92cbc8b89e533086f34f3f6e702ba025d4882e24816199c33529a545a8d43ff8bf542d1cfd
   languageName: node
   linkType: hard
 
@@ -1763,7 +1763,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stackmate/cli@workspace:packages/cli"
   dependencies:
-    "@oclif/color": ^1.0.4
+    "@oclif/color": ^1.0.13
     "@oclif/core": ^1.26.1
     "@oclif/plugin-help": ^5.2.4
     "@oclif/plugin-plugins": ^2.3.0
