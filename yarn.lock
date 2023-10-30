@@ -1370,19 +1370,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/color@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@oclif/color@npm:1.0.3"
-  dependencies:
-    ansi-styles: ^4.2.1
-    chalk: ^4.1.0
-    strip-ansi: ^6.0.1
-    supports-color: ^8.1.1
-    tslib: ^2
-  checksum: 98d136a1eaa6bffd9fefdb2ed275a912004234f2435f0eaa5646b22beabedd4f3743c81e7e63bec13b3dd7bff149491d33e5b4f1fbad01b44511263defdaabe7
-  languageName: node
-  linkType: hard
-
 "@oclif/color@npm:^1.0.4":
   version: 1.0.4
   resolution: "@oclif/color@npm:1.0.4"
@@ -1504,6 +1491,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oclif/core@npm:^2.8.2":
+  version: 2.15.0
+  resolution: "@oclif/core@npm:2.15.0"
+  dependencies:
+    "@types/cli-progress": ^3.11.0
+    ansi-escapes: ^4.3.2
+    ansi-styles: ^4.3.0
+    cardinal: ^2.1.1
+    chalk: ^4.1.2
+    clean-stack: ^3.0.1
+    cli-progress: ^3.12.0
+    debug: ^4.3.4
+    ejs: ^3.1.8
+    get-package-type: ^0.1.0
+    globby: ^11.1.0
+    hyperlinker: ^1.0.0
+    indent-string: ^4.0.0
+    is-wsl: ^2.2.0
+    js-yaml: ^3.14.1
+    natural-orderby: ^2.0.3
+    object-treeify: ^1.1.33
+    password-prompt: ^1.1.2
+    slice-ansi: ^4.0.0
+    string-width: ^4.2.3
+    strip-ansi: ^6.0.1
+    supports-color: ^8.1.1
+    supports-hyperlinks: ^2.2.0
+    ts-node: ^10.9.1
+    tslib: ^2.5.0
+    widest-line: ^3.1.0
+    wordwrap: ^1.0.0
+    wrap-ansi: ^7.0.0
+  checksum: a4ef8ad00d9bc7cb48e5847bad7def6947f913875f4b0ecec65ab423a3c2a82c87df173c709c3c25396d545f60d20d17d562c474f66230d76de43061ce22ba90
+  languageName: node
+  linkType: hard
+
 "@oclif/linewrap@npm:^1.0.0":
   version: 1.0.0
   resolution: "@oclif/linewrap@npm:1.0.0"
@@ -1541,22 +1564,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oclif/plugin-plugins@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "@oclif/plugin-plugins@npm:2.3.0"
+"@oclif/plugin-plugins@npm:^2.4.7":
+  version: 2.4.7
+  resolution: "@oclif/plugin-plugins@npm:2.4.7"
   dependencies:
-    "@oclif/color": ^1.0.3
-    "@oclif/core": ^2.0.3
+    "@oclif/color": ^1.0.4
+    "@oclif/core": ^2.8.2
     chalk: ^4.1.2
     debug: ^4.3.4
     fs-extra: ^9.0
     http-call: ^5.2.2
     load-json-file: ^5.3.0
     npm-run-path: ^4.0.1
-    semver: ^7.3.8
+    semver: ^7.5.0
     tslib: ^2.4.1
     yarn: ^1.22.18
-  checksum: 478cebe7ce401d8623d78129a043956b2fbcc3a2d36ef91f7e28bbfa2f0455045769a6730dccb565fa731d0661fcf442aaf7ce4b2ff08a77688e96140a23657a
+  checksum: 0f25ca7d072a01d6e9d3902882d40ee2e20740b93456b4965eb3e70f3afecdea8a10b0097ae65bdfc8e227d9370d67cbee54c40337a7817d4773ee98329bbea3
   languageName: node
   linkType: hard
 
@@ -1766,7 +1789,7 @@ __metadata:
     "@oclif/color": ^1.0.4
     "@oclif/core": ^1.26.1
     "@oclif/plugin-help": ^5.2.4
-    "@oclif/plugin-plugins": ^2.3.0
+    "@oclif/plugin-plugins": ^2.4.7
     "@stackmate/engine": ^0.1.4
     "@types/ini": ^1.3.31
     "@types/inquirer": ^9.0.3
@@ -2688,6 +2711,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"astral-regex@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "astral-regex@npm:2.0.0"
+  checksum: 876231688c66400473ba505731df37ea436e574dd524520294cc3bbc54ea40334865e01fa0d074d74d036ee874ee7e62f486ea38bc421ee8e6a871c06f011766
+  languageName: node
+  linkType: hard
+
 "async@npm:^3.2.3":
   version: 3.2.4
   resolution: "async@npm:3.2.4"
@@ -3293,6 +3323,15 @@ __metadata:
   dependencies:
     string-width: ^4.2.3
   checksum: 147d26b80ceaa24d72f0354d1b58b7f3567b928bf5943be879de31cf16b0a4f1d059984e2e35a664d7d27ae3e7fafd69fd94b35f462c8879caf96d7f31eac442
+  languageName: node
+  linkType: hard
+
+"cli-progress@npm:^3.12.0":
+  version: 3.12.0
+  resolution: "cli-progress@npm:3.12.0"
+  dependencies:
+    string-width: ^4.2.3
+  checksum: e8390dc3cdf3c72ecfda0a1e8997bfed63a0d837f97366bbce0ca2ff1b452da386caed007b389f0fe972625037b6c8e7ab087c69d6184cc4dfc8595c4c1d3e6e
   languageName: node
   linkType: hard
 
@@ -8635,6 +8674,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:^7.5.0":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
+  languageName: node
+  linkType: hard
+
 "set-blocking@npm:^2.0.0":
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0"
@@ -8730,6 +8780,17 @@ __metadata:
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
   checksum: 94a93fff615f25a999ad4b83c9d5e257a7280c90a32a7cb8b4a87996e4babf322e469c42b7f649fd5796edd8687652f3fb452a86dc97a816f01113183393f11c
+  languageName: node
+  linkType: hard
+
+"slice-ansi@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "slice-ansi@npm:4.0.0"
+  dependencies:
+    ansi-styles: ^4.0.0
+    astral-regex: ^2.0.0
+    is-fullwidth-code-point: ^3.0.0
+  checksum: 4a82d7f085b0e1b070e004941ada3c40d3818563ac44766cca4ceadd2080427d337554f9f99a13aaeb3b4a94d9964d9466c807b3d7b7541d1ec37ee32d308756
   languageName: node
   linkType: hard
 
