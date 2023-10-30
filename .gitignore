@@ -2,7 +2,8 @@
 *-error.log
 .turbo
 .nyc_output
-dist
+dist/*
+!dist/.keep
 artifacts/*
 !artifacts/.keep
 package-lock.json
