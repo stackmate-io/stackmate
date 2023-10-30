@@ -9,7 +9,6 @@
     "composite": true,
     "declaration": true,
     "baseUrl": ".",
-    "rootDir": ".",
     "outDir": "dist",
     "strictFunctionTypes": false,
     "importHelpers": true,
@@ -28,42 +27,29 @@
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
-      "@stackmate/cli": [
-        "packages/cli/src"
+      "@constants": [
+        "src/constants"
       ],
-      "@stackmate/cli/*": [
-        "packages/cli/src/*"
+      "@core/*": [
+        "src/core/*"
       ],
-      "@stackmate/engine": [
-        "packages/engine/src"
+      "@providers/*": [
+        "src/providers/*"
       ],
-      "@stackmate/engine/*": [
-        "packages/engine/src/*"
+      "@lib/*": [
+        "src/lib/*"
       ],
-      "tests/cli/*": [
-        "packages/cli/tests/*"
-      ],
-      "tests/engine/*": [
-        "packages/engine/tests/*"
+      "@mocks/*": [
+        "tests/mocks/*"
       ]
     }
   },
-  "references": [
-    {
-      "path": "packages/cli"
-    },
-    {
-      "path": "packages/engine"
-    }
-  ],
   "include": [
-    "packages/cli/src/**/*",
-    "packages/cli/tests/**/*",
-    "packages/engine/src/**/*",
-    "packages/engine/tests/**/*",
-    "packages/engine/src/profiles/**/*",
-    "packages/engine/jest.setup.ts",
+    "src/**/*",
+    "tests/**/*",
+    "jest.setup.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],
   "exclude": [
@@ -72,8 +58,6 @@
   "ts-node": {
     "require": [
       "tsconfig-paths/register"
-    ],
-    "transpileOnly": true,
-    "files": true
+    ]
   }
 }
