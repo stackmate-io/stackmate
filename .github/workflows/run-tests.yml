@@ -1,4 +1,4 @@
-name: Test & Release
+name: Run tests
 
 on:
   pull_request:
@@ -38,7 +38,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Test
+      - name: Run the tests
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
-        run: yarn test
+        run: yarn test:full
