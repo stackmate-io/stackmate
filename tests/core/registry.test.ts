@@ -1,6 +1,6 @@
-import { Registry } from '@stackmate/engine/core/registry';
-import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
+import { Registry } from '@core/registry';
+import { REGIONS } from '@providers/aws/constants';
+import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@constants';
 
 describe('Registry', () => {
   it('already has items loaded', () => {

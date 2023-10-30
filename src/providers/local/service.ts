@@ -1,12 +1,12 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { LocalProviderAttributes, LocalProviderProvisionable } from '@stackmate/engine/providers/local/services/provider';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { LocalProviderAttributes, LocalProviderProvisionable } from '@providers/local/services/provider';
 import {
   associate, BaseServiceAttributes, getCoreService, Service, ServiceAssociations,
   ServiceRequirement, ServiceTypeChoice,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 type ProviderRequirement = ServiceRequirement<
   terraformLocalProvider.LocalProvider, typeof SERVICE_TYPE.PROVIDER

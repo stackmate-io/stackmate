@@ -2,7 +2,7 @@ import {
   BaseServiceAttributes, ConnectableAttributes, ExternallyLinkableAttributes,
   LinkableAttributes, MultiNodeAttributes, ProfilableAttributes,
   SizeableAttributes, StorableAttributes, VersioningAttributes,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type DatabaseServiceAttributes = BaseServiceAttributes
   & SizeableAttributes

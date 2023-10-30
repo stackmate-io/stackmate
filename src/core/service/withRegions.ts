@@ -1,4 +1,4 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 
 import { BaseServiceAttributes, withServiceProperties, withSchema, Service } from './core';
 

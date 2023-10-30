@@ -1,11 +1,11 @@
 import { TerraformLocal } from 'cdktf';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Stack } from '@core/stack';
+import { SERVICE_TYPE } from '@constants';
 import {
   associate, BaseService, BaseServiceAttributes, BaseProvisionable,
   Service, ServiceRequirement, WithAssociations, AssociationHandler,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 /**
  * @type {Credentials} a credentials object returned by the credentials provision handler

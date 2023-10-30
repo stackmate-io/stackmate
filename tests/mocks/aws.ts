@@ -1,10 +1,10 @@
-import { Stack } from '@stackmate/engine/core/stack';
-import { DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { getProvisionable } from '@stackmate/engine/core/operation';
-import { BaseProvisionable, BaseServiceAttributes, CredentialsHandlerOptions } from '@stackmate/engine/core/service';
-import { AwsProviderDeployableProvisionable, AwsProviderDeployableResources, onDeploy as providerDeployHandler } from '@stackmate/engine/providers/aws/services/provider';
-import { AwsSecretsDeployableResources, AwsSecretsVaultDeployableProvisionable, generateCredentials } from '@stackmate/engine/providers/aws/services/secrets';
+import { Stack } from '@core/stack';
+import { DEFAULT_REGION } from '@providers/aws/constants';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { getProvisionable } from '@core/operation';
+import { BaseProvisionable, BaseServiceAttributes, CredentialsHandlerOptions } from '@core/service';
+import { AwsProviderDeployableProvisionable, AwsProviderDeployableResources, onDeploy as providerDeployHandler } from '@providers/aws/services/provider';
+import { AwsSecretsDeployableResources, AwsSecretsVaultDeployableProvisionable, generateCredentials } from '@providers/aws/services/secrets';
 
 export const getProviderResources = (stack: Stack): AwsProviderDeployableResources => {
   const provisionable = getProvisionable({

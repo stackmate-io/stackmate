@@ -1,4 +1,4 @@
-import { getCidrBlocks, getIpAddressParts, convertIpToCidr, isAddressValid } from '@stackmate/engine';
+import { getCidrBlocks, getIpAddressParts, convertIpToCidr, isAddressValid } from '@lib/networking';
 
 describe('Networking functions', () => {
   describe('isAddressValid', () => {

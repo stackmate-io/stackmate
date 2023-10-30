@@ -3,16 +3,16 @@ import { faker } from '@faker-js/faker';
 import { fromPairs, merge } from 'lodash';
 import { FuncKeywordDefinition } from 'ajv/dist/types';
 
-import { Registry } from '@stackmate/engine/core/registry';
-import { ServiceEnvironment } from '@stackmate/engine/core/service/core';
-import { DEFAULT_RDS_INSTANCE_SIZE } from '@stackmate/engine/providers/aws/constants';
-import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
-import { ProjectConfiguration } from '@stackmate/engine/core/project';
-import { AwsMySQLAttributes } from '@stackmate/engine/providers/aws/services/database';
-import { EnvironmentValidationError, ValidationError } from '@stackmate/engine/lib/errors';
+import { Registry } from '@core/registry';
+import { ServiceEnvironment } from '@core/service/core';
+import { DEFAULT_RDS_INSTANCE_SIZE } from '@providers/aws/constants';
+import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@constants';
+import { ProjectConfiguration } from '@core/project';
+import { AwsMySQLAttributes } from '@providers/aws/services/database';
+import { EnvironmentValidationError, ValidationError } from '@lib/errors';
 import {
   getAjv, loadJsonSchema, validate, validateEnvironment, validateProject, validateProperty,
-} from '@stackmate/engine/core/validation';
+} from '@core/validation';
 
 describe('Validation', () => {
   const ajv = getAjv();

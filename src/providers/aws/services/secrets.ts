@@ -5,16 +5,17 @@ import {
   secretsmanagerSecret, secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { ChoiceOf, extractTokenFromJsonString } from '@stackmate/engine/lib';
-import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { AwsService, getAwsCoreService } from '@stackmate/engine/providers/aws/service';
+import { Stack } from '@core/stack';
+import { REGIONS } from '@providers/aws/constants';
+import { getServiceProfile } from '@core/profile';
+import { ChoiceOf } from '@lib/util';
+import { extractTokenFromJsonString } from '@lib/terraform'
+import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@constants';
+import { AwsService, getAwsCoreService } from '@providers/aws/service';
 import {
   BaseProvisionable, BaseServiceAttributes, Credentials, CredentialsHandlerOptions,
   Provisionable, SecretsVaultService, withCredentialsGenerator,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS,

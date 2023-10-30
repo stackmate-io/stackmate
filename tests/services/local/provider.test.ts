@@ -1,11 +1,11 @@
 import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
-import { getStack } from '@stackmate/engine/core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { getProvisionable } from '@stackmate/engine/core/operation';
+import { getStack } from '@core/stack';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { getProvisionable } from '@core/operation';
 import {
   LocalProvider, LocalProviderAttributes, LocalProviderProvisionable, onPrepare,
-} from '@stackmate/engine/providers/local/services/provider';
+} from '@providers/local/services/provider';
 
 describe('Local Provider', () => {
   const service = LocalProvider;

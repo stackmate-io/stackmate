@@ -1,28 +1,28 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { kebabCase } from 'lodash';
 import { TerraformOutput } from 'cdktf';
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { getResourcesProfile } from '@stackmate/engine/core/profile';
-import { ChoiceOf, OneOfType } from '@stackmate/engine/lib';
-import { DatabaseServiceAttributes } from '@stackmate/engine/providers/types';
-import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { RootCredentialsAssociations, withRootCredentials } from '@stackmate/engine/core/service/credentials';
+import { Stack } from '@core/stack';
+import { getResourcesProfile } from '@core/profile';
+import { ChoiceOf, OneOfType } from '@lib/util';
+import { DatabaseServiceAttributes } from '@providers/types';
+import { DEFAULT_PORT, PROVIDER, SERVICE_TYPE } from '@constants';
+import { RootCredentialsAssociations, withRootCredentials } from '@core/service/credentials';
 import {
   AwsService, getAwsCloudService, onExternalLink, onServiceLinked,
-} from '@stackmate/engine/providers/aws/service';
+} from '@providers/aws/service';
 import {
   DEFAULT_RDS_INSTANCE_SIZE, RdsEngine, RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_INSTANCE_SIZES, RDS_LOG_EXPORTS_PER_ENGINE, RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_PARAM_FAMILY_MAPPING, REGIONS,
-} from '@stackmate/engine/providers/aws/constants';
+} from '@providers/aws/constants';
 import {
   EngineAttributes, multiNode, profilable, Provisionable, RegionalAttributes,
   ServiceTypeChoice, sizeable, storable, versioned, withDatabase,
   withEngine, withHandler, withConfigHints, connectable, linkable, externallyLinkable, monitored, MonitoringAttributes,
-} from '@stackmate/engine/core/service';
-import { withAwsAlarms } from '@stackmate/engine/providers/aws/service';
+} from '@core/service';
+import { withAwsAlarms } from '@providers/aws/service';
 import { awsDatabaseAlarms } from '../alarms/database';
 
 type DatabaseAttributes = DatabaseServiceAttributes

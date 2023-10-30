@@ -11,18 +11,19 @@ import {
   snsTopicPolicy,
 } from '@cdktf/provider-aws';
 
-import { getStack } from '@stackmate/engine/core/stack';
-import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
-import { PROVIDER, ServiceTypeChoice, SERVICE_TYPE } from '@stackmate/engine';
-import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@stackmate/engine/constants';
+import { getStack } from '@core/stack';
+import { getAwsDeploymentProvisionableMock } from '@tests/mocks/aws';
+import { ServiceTypeChoice } from '@core/service'
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants';
 import {
   AwsDatabaseAttributes, AWSMariaDB, AwsMariaDBAttributes, AWSMySQL, AwsMySQLAttributes,
   AWSPostgreSQL, AwsPostgreSQLAttributes, onDeploy, AwsDatabaseDeployableProvisionable,
-} from '@stackmate/engine/providers/aws/services/database';
+} from '@providers/aws/services/database';
 import {
   RdsEngine, DEFAULT_RDS_INSTANCE_SIZE, DEFAULT_REGION, RDS_INSTANCE_SIZES,
   REGIONS, RDS_MAJOR_VERSIONS_PER_ENGINE, RDS_DEFAULT_VERSIONS_PER_ENGINE,
-} from '@stackmate/engine/providers/aws/constants';
+} from '@providers/aws/constants';
 
 const getDatabaseSchemaExpectation = (
   type: ServiceTypeChoice, engine: RdsEngine, versions: readonly string[], defaultVersion: string,

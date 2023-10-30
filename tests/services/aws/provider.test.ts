@@ -6,17 +6,17 @@ import {
   vpc as awsVpc,
 } from '@cdktf/provider-aws';
 
-import { AwsProvider } from '@stackmate/engine/providers';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { BaseProvisionable, ServiceScopeChoice } from '@stackmate/engine/core/service';
-import { getStack, Stack } from '@stackmate/engine/core/stack';
-import { getProvisionable } from '@stackmate/engine/core/operation';
+import { AwsProvider } from '@providers/aws/services/provider';
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { BaseProvisionable, ServiceScopeChoice } from '@core/service';
+import { getStack, Stack } from '@core/stack';
+import { getProvisionable } from '@core/operation';
 import {
   AwsProviderDeployableResources, AwsProviderAttributes, AwsProviderDeployableProvisionable,
   AwsProviderDestroyableResources, AwsProviderPreparableProvisionable,
   AwsProviderPreparableResources, AwsProviderDestroyableProvisionable,
-} from '@stackmate/engine/providers/aws/services/provider';
+} from '@providers/aws/services/provider';
 
 describe('AWS Provider', () => {
   const service = AwsProvider;

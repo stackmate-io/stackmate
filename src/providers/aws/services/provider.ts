@@ -1,4 +1,4 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { kebabCase } from 'lodash';
 import { TerraformOutput } from 'cdktf';
 import {
@@ -10,16 +10,17 @@ import {
   dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { getResourcesProfile } from '@stackmate/engine/core/profile';
-import { AwsServiceAttributes } from '@stackmate/engine/providers/aws/service';
-import { ChoiceOf, getCidrBlocks } from '@stackmate/engine/lib';
-import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { Stack } from '@core/stack';
+import { getResourcesProfile } from '@core/profile';
+import { AwsServiceAttributes } from '@providers/aws/service';
+import { ChoiceOf } from '@lib/util';
+import { getCidrBlocks } from '@lib/networking';
+import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constants';
+import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants';
 import {
   BaseServiceAttributes, getCoreService, profilable, Provisionable,
   RegionalAttributes, Service, withHandler, withRegions,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type ProviderPrerequisites = {
   provider: awsProvider.AwsProvider;

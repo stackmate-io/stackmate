@@ -1,16 +1,16 @@
 import { s3Bucket } from '@cdktf/provider-aws';
-
 import { TerraformBackend } from 'cdktf';
-import { getStack, Stack } from '@stackmate/engine/core/stack';
-import { AwsState } from '@stackmate/engine/providers';
-import { BaseProvisionable } from '@stackmate/engine/core/service';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine';
-import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
+
+import { getStack, Stack } from '@core/stack';
+import { AwsState } from '@providers/aws/services/state';
+import { BaseProvisionable } from '@core/service';
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { getAwsDeploymentProvisionableMock } from '@tests/mocks/aws';
 import {
   AwsStateAttributes, AwsStateDeployableProvisionable, AwsStateDestroyableProvisionable,
   AwsStatePreparableProvisionable, onDeploy, onDestroy, onPrepare,
-} from '@stackmate/engine/providers/aws/services/state';
+} from '@providers/aws/services/state';
 
 describe('AWS state', () => {
   const service = AwsState;

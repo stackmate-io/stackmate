@@ -1,16 +1,16 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { get, isEmpty, uniqBy } from 'lodash';
 
-import { Registry } from '@stackmate/engine/core/registry';
-import { hashObject } from '@stackmate/engine/lib';
-import { getStack, Stack } from '@stackmate/engine/core/stack';
-import { DEFAULT_PROJECT_NAME } from '@stackmate/engine/constants';
-import { validate, validateEnvironment, validateServices } from '@stackmate/engine/core/validation';
-import { getServiceConfigurations, Project, withLocalState } from '@stackmate/engine/core/project';
+import { Registry } from '@core/registry';
+import { hashObject } from '@lib/hash';
+import { getStack, Stack } from '@core/stack';
+import { DEFAULT_PROJECT_NAME } from '@constants';
+import { validate, validateEnvironment, validateServices } from '@core/validation';
+import { getServiceConfigurations, Project, withLocalState } from '@core/project';
 import {
   assertRequirementsSatisfied, BaseServiceAttributes, BaseProvisionable, Provisions,
   ServiceEnvironment, ServiceScopeChoice, ServiceAssociations, AnyAssociationHandler,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
 

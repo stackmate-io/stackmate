@@ -1,11 +1,11 @@
 import { uniq } from 'lodash';
 
-import * as Services from '@stackmate/engine/providers/services';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { Distribute } from '@stackmate/engine/lib';
+import * as Services from '@providers/services';
+import { SERVICE_TYPE } from '@constants';
+import { Distribute } from '@lib/util';
 import {
   ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, ExtractAttrs, isCoreService,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type ServicesRegistry = {
   readonly items: BaseService[];

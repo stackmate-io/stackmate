@@ -1,4 +1,4 @@
-import { JsonSchema } from '@stackmate/engine/core/schema';
+import { JsonSchema } from '@core/schema';
 import { BaseServiceAttributes, withSchema } from './core';
 
 type ConfigHintKeys = 'isIncludedInConfigGeneration' | 'serviceConfigGenerationTemplate';
