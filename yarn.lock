@@ -415,13 +415,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bitty/pipe@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@bitty/pipe@npm:0.3.0"
-  checksum: 841e816ad0dba6099d9dc75d4261738e3b49a5a9f4d3fa68538335d8a9c69169de266f047ea12ff2a1999f39778ecf187e51736782ac4949dde4afd71c081aca
-  languageName: node
-  linkType: hard
-
 "@cdktf/provider-aws@npm:11.0.10":
   version: 11.0.10
   resolution: "@cdktf/provider-aws@npm:11.0.10"
@@ -926,7 +919,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stackmate/engine@workspace:."
   dependencies:
-    "@bitty/pipe": ^0.3.0
     "@cdktf/provider-aws": 11.0.10
     "@cdktf/provider-local": ^4.0.1
     "@faker-js/faker": ^7.6.0

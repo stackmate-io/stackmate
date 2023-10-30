@@ -12,7 +12,7 @@ import {
 } from '@cdktf/provider-aws';
 
 import { getStack } from '@core/stack';
-import { getAwsDeploymentProvisionableMock } from '@tests/mocks/aws';
+import { getAwsDeploymentProvisionableMock } from '@mocks/aws';
 import { ServiceTypeChoice } from '@core/service'
 import { PROVIDER, SERVICE_TYPE } from '@constants';
 import { DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants';

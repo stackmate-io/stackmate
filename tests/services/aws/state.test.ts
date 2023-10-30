@@ -6,7 +6,7 @@ import { AwsState } from '@providers/aws/services/state';
 import { BaseProvisionable } from '@core/service';
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
 import { PROVIDER, SERVICE_TYPE } from '@constants';
-import { getAwsDeploymentProvisionableMock } from '@tests/mocks/aws';
+import { getAwsDeploymentProvisionableMock } from '@mocks/aws';
 import {
   AwsStateAttributes, AwsStateDeployableProvisionable, AwsStateDestroyableProvisionable,
   AwsStatePreparableProvisionable, onDeploy, onDestroy, onPrepare,
