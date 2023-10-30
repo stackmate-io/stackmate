@@ -415,13 +415,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-aws@npm:11.0.10":
-  version: 11.0.10
-  resolution: "@cdktf/provider-aws@npm:11.0.10"
+"@cdktf/provider-aws@npm:18.0.3":
+  version: 18.0.3
+  resolution: "@cdktf/provider-aws@npm:18.0.3"
   peerDependencies:
-    cdktf: ^0.14.0
+    cdktf: ^0.19.0
     constructs: ^10.0.0
-  checksum: 8143763e2346983b60bd5f47f9c8ef414d4eafda75cad36a8a62ca68a030d75b2391690f3728b3635feed9172ab22858c8c32a91eec5edf3ee20b4660ffee87e
+  checksum: bf9b2ddfa055f78a78ab4e4474e05737c2fdf14213aa91c242bffbb17ee7f9a977eb4d8d14724a9c5d1926a6dc6f15bf1a2f5ee3b8bb3f1d6a25c65b039c3d7b
   languageName: node
   linkType: hard
 
@@ -919,7 +919,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stackmate/engine@workspace:."
   dependencies:
-    "@cdktf/provider-aws": 11.0.10
+    "@cdktf/provider-aws": 18.0.3
     "@cdktf/provider-local": ^9.0.0
     "@faker-js/faker": ^8.2.0
     "@types/jest": ^29.5.6
