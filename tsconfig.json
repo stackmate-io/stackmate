@@ -29,41 +29,24 @@
     "noUnusedLocals": true,
     "moduleResolution": "node",
     "paths": {
-      "@stackmate/cli": [
-        "packages/cli/src"
+      "@core": [
+        "src/core/*"
       ],
-      "@stackmate/cli/*": [
-        "packages/cli/src/*"
+      "@providers/*": [
+        "src/providers/*"
       ],
-      "@stackmate/engine": [
-        "packages/engine/src"
+      "@lib/*": [
+        "src/lib/*"
       ],
-      "@stackmate/engine/*": [
-        "packages/engine/src/*"
-      ],
-      "tests/cli/*": [
-        "packages/cli/tests/*"
-      ],
-      "tests/engine/*": [
-        "packages/engine/tests/*"
+      "@tests/*": [
+        "tests/*"
       ]
     }
   },
-  "references": [
-    {
-      "path": "packages/cli"
-    },
-    {
-      "path": "packages/engine"
-    }
-  ],
   "include": [
-    "packages/cli/src/**/*",
-    "packages/cli/tests/**/*",
-    "packages/engine/src/**/*",
-    "packages/engine/tests/**/*",
-    "packages/engine/src/profiles/**/*",
-    "packages/engine/jest.setup.ts",
+    "src/**/*",
+    "tests/**/*",
+    "jest.setup.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],
   "exclude": [

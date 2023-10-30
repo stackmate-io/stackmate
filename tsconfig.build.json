@@ -1,9 +1,16 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false
+  },
   "exclude": [
+    "src/bin/json-schema.ts",
     "dist",
     "node_modules",
-    "packages/cli/tests",
-    "packages/engine/tests"
-  ]
+    "tests"
+  ],
+  "tsc-alias": {
+    "verbose": true,
+    "resolveFullPaths": true
+  }
 }
