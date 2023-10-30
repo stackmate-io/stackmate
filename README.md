@@ -7,7 +7,7 @@
     🏡 Website
   </a>
   &nbsp;
-  <a href="https://github.com/orgs/stackmate-io/projects/2">
+  <a href="https://github.com/orgs/stackmate-io/projects/3">
     🧭 Roadmap
   </a>
   &nbsp;
@@ -22,16 +22,15 @@
 
 
 ## What is Stackmate.io
-[Stackmate.io](https://stackmate.io) is an open source project that aims to make infrastructure as code easy and accessible to everyone. By using a very simple YAML file, you can generate your [Terraform](https://www.terraform.io/) configuration and deploy it automatically.
+[Stackmate.io](https://stackmate.io) aims to make infrastructure as code easy and accessible to everyone.
 
 ## Why Stackmate.io
 Stackmate is the perfect solution for the busy professional; by using what you already know, you can deploy your AWS services using sane defaults. It's built on top of [CDK for Terraform](https://www.terraform.io/cdktf) and provides solutions for commonly used cloud services.
 
 ## Get support
-- 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/2)
-- 🐞 For bug reports, issues, questions feature requests, [create a GitHub issue in this repository](https://github.com/stackmate-io/stackmate/issues/new)
+- 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/3)
+- 🐞 For bug reports, issues, questions feature requests, [create a GitHub issue in this repository](/issues/new)
 - 📖 Our documentation can be found at [docs.stackmate.io](https://docs.stackmate.io)
-- 📧 Contact us at https://stackmate.io/contact/
 - ❤️ Follow us on Twitter at [@stackmate](https://twitter.com/stackmate) and [@falexandrou](https://twitter.com/falexandrou)
 
 ### Disclaimer
