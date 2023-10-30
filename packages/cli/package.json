@@ -43,7 +43,7 @@
     "@stackmate/engine": "^0.1.4",
     "chalk": "^5.2.0",
     "ini": "^3.0.1",
-    "inquirer": "^8.2.5",
+    "inquirer": "^8.2.6",
     "lodash": "4.17.21",
     "oclif": "3.6.2",
     "yaml": "^2.2.1"
