@@ -27,6 +27,7 @@
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
       "@constants": [
         "src/constants"
@@ -40,8 +41,8 @@
       "@lib/*": [
         "src/lib/*"
       ],
-      "@tests/*": [
-        "tests/*"
+      "@mocks/*": [
+        "tests/mocks/*"
       ]
     }
   },
