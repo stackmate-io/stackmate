@@ -1806,7 +1806,7 @@ __metadata:
     ajv: ^8.12.0
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
-    cdktf: 0.15.2
+    cdktf: 0.19.0
     constructs: ^10.1.241
     ip-address: ^8.1.0
     jest: ^29.4.1
@@ -3118,16 +3118,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cdktf@npm:0.15.2":
-  version: 0.15.2
-  resolution: "cdktf@npm:0.15.2"
+"cdktf@npm:0.19.0":
+  version: 0.19.0
+  resolution: "cdktf@npm:0.19.0"
   dependencies:
     archiver: 5.3.1
     json-stable-stringify: ^1.0.2
-    semver: ^7.3.8
+    semver: ^7.5.3
   peerDependencies:
     constructs: ^10.0.25
-  checksum: 9eac90e7850d404a35d59ceadbdbb5541fd88ea0a8cf593763cd62e6ad4e427f2d873b3b6b73d1be3fa5e8850ed810c2e9a8d8e46fb65493981084be3b47bf3a
+  checksum: 0d4f95f1ee16618d234fc7374044b89314a6484ce9eb8eed0f6ff3e8e3cf8dda58b6b9688ed29ee404b3108dc2a2ea5cfc0f5cc92c134a0854dc61b74c1f4f67
   languageName: node
   linkType: hard
 
@@ -8632,6 +8632,17 @@ __metadata:
   bin:
     semver: ./bin/semver.js
   checksum: 1b26ecf6db9e8292dd90df4e781d91875c0dcc1b1909e70f5d12959a23c7eebb8f01ea581c00783bbee72ceeaad9505797c381756326073850dc36ed284b21b9
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.5.3":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
   languageName: node
   linkType: hard
 
