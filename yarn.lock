@@ -425,13 +425,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-local@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "@cdktf/provider-local@npm:4.0.1"
+"@cdktf/provider-local@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "@cdktf/provider-local@npm:9.0.0"
   peerDependencies:
-    cdktf: ^0.14.0
+    cdktf: ^0.19.0
     constructs: ^10.0.0
-  checksum: 1f3d4674fe0e32898e6a592a7997a31fe28ff495c48a1163c589022b9b170c500791da707e8a17f640ef8ab4d6daf919539a9f0c7def45f6bdbcc280107368c6
+  checksum: 743f3a108d7323561f662cbd171c4c199379205a15f99d700c7f126c39dcdecad54e9412fe9239659a98037abab176e912c80fe2203b2a0ad25cc25d82086c37
   languageName: node
   linkType: hard
 
@@ -486,10 +486,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^7.6.0":
-  version: 7.6.0
-  resolution: "@faker-js/faker@npm:7.6.0"
-  checksum: 942af6221774e8c98a0eb6bc75265e05fb81a941170377666c3439aab9495dd321d6beedc5406f07e6ad44262b3e43c20961f666d116ad150b78e7437dd1bb2b
+"@faker-js/faker@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "@faker-js/faker@npm:8.2.0"
+  checksum: febc17018acfb841a348591bfe415e815ea981bf7fa0a12670ac2b449479ad7e9e7b130c42878ec30210da964c13a620a3303dc00d63cb13ded00c6fc701e2be
   languageName: node
   linkType: hard
 
@@ -920,8 +920,8 @@ __metadata:
   resolution: "@stackmate/engine@workspace:."
   dependencies:
     "@cdktf/provider-aws": 11.0.10
-    "@cdktf/provider-local": ^4.0.1
-    "@faker-js/faker": ^7.6.0
+    "@cdktf/provider-local": ^9.0.0
+    "@faker-js/faker": ^8.2.0
     "@types/jest": ^29.5.6
     "@types/lodash": ^4.14.200
     "@types/node": ^20.8.9
@@ -930,7 +930,7 @@ __metadata:
     ajv: ^8.12.0
     ajv-errors: ^3.0.0
     ajv-formats: ^2.1.1
-    cdktf: 0.15.2
+    cdktf: 0.19.0
     constructs: ^10.3.0
     eslint: ^8.52.0
     eslint-config-airbnb-base: 15.0.0
@@ -1836,16 +1836,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cdktf@npm:0.15.2":
-  version: 0.15.2
-  resolution: "cdktf@npm:0.15.2"
+"cdktf@npm:0.19.0":
+  version: 0.19.0
+  resolution: "cdktf@npm:0.19.0"
   dependencies:
     archiver: 5.3.1
     json-stable-stringify: ^1.0.2
-    semver: ^7.3.8
+    semver: ^7.5.3
   peerDependencies:
     constructs: ^10.0.25
-  checksum: 9eac90e7850d404a35d59ceadbdbb5541fd88ea0a8cf593763cd62e6ad4e427f2d873b3b6b73d1be3fa5e8850ed810c2e9a8d8e46fb65493981084be3b47bf3a
+  checksum: 0d4f95f1ee16618d234fc7374044b89314a6484ce9eb8eed0f6ff3e8e3cf8dda58b6b9688ed29ee404b3108dc2a2ea5cfc0f5cc92c134a0854dc61b74c1f4f67
   languageName: node
   linkType: hard
 
@@ -5077,7 +5077,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.5, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4":
+"semver@npm:^7.3.5, semver@npm:^7.5.3, semver@npm:^7.5.4":
   version: 7.5.4
   resolution: "semver@npm:7.5.4"
   dependencies:
