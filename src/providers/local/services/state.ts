@@ -1,15 +1,15 @@
-import pipe from '@bitty/pipe';
 import { join as joinPaths } from 'node:path';
+import pipe from 'lodash/fp/pipe';
 import { LocalBackend } from 'cdktf';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@stackmate/engine/constants';
+import { Stack } from '@core/stack';
+import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@constants';
 import {
   getLocalService, LocalServiceAssociations, LocalServiceAttributes,
-} from '@stackmate/engine/providers/local/service';
+} from '@providers/local/service';
 import {
   BaseServiceAttributes, Provisionable, Service, withHandler, withSchema,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type LocalStateResources = { backend: LocalBackend };
 

@@ -1,4 +1,4 @@
-import { ServiceSchema } from '@stackmate/engine/core/schema';
+import { ServiceSchema } from '@core/schema';
 import { BaseServiceAttributes, withSchema } from './core';
 
 /**

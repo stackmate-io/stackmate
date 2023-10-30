@@ -4,16 +4,16 @@ import {
   secretsmanagerSecret, secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws';
 
-import { AwsSecretsVault } from '@stackmate/engine/providers';
-import { BaseProvisionable } from '@stackmate/engine/core/service';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { getStack, Stack } from '@stackmate/engine/core/stack';
-import { getAwsDeploymentProvisionableMock } from 'tests/engine/mocks/aws';
-import { getProvisionable } from '@stackmate/engine/core/operation';
+import { AwsSecretsVault } from '@providers/aws/services/secrets';
+import { BaseProvisionable } from '@core/service';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
+import { getStack, Stack } from '@core/stack';
+import { getAwsDeploymentProvisionableMock } from '@tests/mocks/aws';
+import { getProvisionable } from '@core/operation';
 import {
   AwsSecretsVaultAttributes, AwsSecretsVaultDeployableProvisionable, generateCredentials,
-} from '@stackmate/engine/providers/aws/services/secrets';
+} from '@providers/aws/services/secrets';
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault;

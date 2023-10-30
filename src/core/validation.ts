@@ -4,14 +4,14 @@ import { DataValidationCxt } from 'ajv/dist/types';
 import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
 import Ajv, { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
 
-import { Registry } from '@stackmate/engine/core/registry';
-import { readSchemaFile } from '@stackmate/engine/core/schema';
-import { isAddressValid } from '@stackmate/engine/lib';
-import { getServiceProfile } from '@stackmate/engine/core/profile';
-import { CloudServiceConfiguration, Project, ProjectConfiguration } from '@stackmate/engine/core/project';
-import { BaseServiceAttributes, ServiceEnvironment } from '@stackmate/engine/core/service';
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@stackmate/engine/constants';
-import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@stackmate/engine/lib/errors';
+import { Registry } from '@core/registry';
+import { readSchemaFile } from '@core/schema';
+import { isAddressValid } from '@lib/networking';
+import { getServiceProfile } from '@core/profile';
+import { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project';
+import { BaseServiceAttributes, ServiceEnvironment } from '@core/service';
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@constants';
+import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@lib/errors';
 
 export const AJV_OPTIONS: AjvOptions = {
   useDefaults: true,

@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert';
 
-import { getProfilePath, getServiceProfile } from '@stackmate/engine/core/profile';
-import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { getProfilePath, getServiceProfile } from '@core/profile';
+import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@constants';
 
 describe('getProfilePath', () => {
   it('returns the path for a profile for a service without overrides', () => {

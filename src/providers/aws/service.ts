@@ -1,4 +1,4 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { isEmpty } from 'lodash';
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
 import {
@@ -8,27 +8,29 @@ import {
   dataAwsCallerIdentity,
 } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { ChoiceOf, getCidrBlocks, getIpAddressParts, hashString, OneOfType } from '@stackmate/engine/lib';
+import { Stack } from '@core/stack';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
+import { getCidrBlocks, getIpAddressParts } from '@lib/networking';
+import { hashString } from '@lib/hash';
+import { ChoiceOf, OneOfType } from '@lib/util';
 import {
   associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService, Provisions,
   ServiceAssociations, BaseProvisionable, ServiceRequirement, ServiceTypeChoice, withRegions,
   Provisionable, Service, LinkableAttributes, ConnectableAttributes, ExternallyLinkableAttributes,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 import {
   AwsProviderAttributes,
   AwsProviderDeployableProvisionable,
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
-} from '@stackmate/engine/providers/aws/services/provider';
+} from '@providers/aws/services/provider';
 import {
   AwsAlarmPrerequisites,
   AwsServiceAlarmResources,
   getMonitoringPrerequisites,
   MonitoredServiceProvisionable,
-} from '@stackmate/engine/providers/aws/alarms';
+} from '@providers/aws/alarms';
 
 type ProviderRequirement = ServiceRequirement<
   terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER

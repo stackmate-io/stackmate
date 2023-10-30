@@ -1,5 +1,5 @@
-import { DEFAULT_REGION } from '@stackmate/engine/providers/aws/constants';
-import { PROVIDER } from '@stackmate/engine/constants';
+import { PROVIDER } from '@constants';
+import { DEFAULT_REGION } from '@providers/aws/constants';
 
 export * from './services';
 

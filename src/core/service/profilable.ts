@@ -1,4 +1,4 @@
-import { DEFAULT_PROFILE_NAME } from '@stackmate/engine/constants';
+import { DEFAULT_PROFILE_NAME } from '@constants';
 import { BaseServiceAttributes, withSchema } from './core';
 
 /**

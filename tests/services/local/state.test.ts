@@ -1,10 +1,10 @@
 import { LocalBackend } from 'cdktf';
 
-import { getStack } from '@stackmate/engine/core/stack';
-import { LocalState } from '@stackmate/engine/providers';
-import { LocalStateAttributes, LocalStateProvisionable, onPrepare } from '@stackmate/engine/providers/local/services/state';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { getProvisionable } from '@stackmate/engine/core/operation';
+import { getStack } from '@core/stack';
+import { LocalState } from '@providers/local/services/state';
+import { LocalStateAttributes, LocalStateProvisionable, onPrepare } from '@providers/local/services/state';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { getProvisionable } from '@core/operation';
 
 describe('Local state', () => {
   const service = LocalState;

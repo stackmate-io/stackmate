@@ -12,16 +12,16 @@ import {
   dbParameterGroup,
 } from '@cdktf/provider-aws';
 
-import { validateProject } from '@stackmate/engine/core/validation';
-import { LocalStateResources } from '@stackmate/engine/providers/local/services/state';
-import { ProjectConfiguration } from '@stackmate/engine/core/project';
-import { LocalProviderResources } from '@stackmate/engine/providers/local/services/provider';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { BaseProvisionable, Provisions, ServiceTypeChoice } from '@stackmate/engine/core/service';
-import { AwsDatabaseDeployableResources } from '@stackmate/engine/providers/aws/services/database';
-import { AwsProviderDeployableResources } from '@stackmate/engine/providers/aws/services/provider';
-import { AwsStateDeployableResources, AwsStatePreparableResources } from '@stackmate/engine/providers/aws/services/state';
-import { deployment, destruction, getOperationByName, Operation, OPERATION_TYPE, setup } from '@stackmate/engine/core/operation';
+import { validateProject } from '@core/validation';
+import { LocalStateResources } from '@providers/local/services/state';
+import { ProjectConfiguration } from '@core/project';
+import { LocalProviderResources } from '@providers/local/services/provider';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { BaseProvisionable, Provisions, ServiceTypeChoice } from '@core/service';
+import { AwsDatabaseDeployableResources } from '@providers/aws/services/database';
+import { AwsProviderDeployableResources } from '@providers/aws/services/provider';
+import { AwsStateDeployableResources, AwsStatePreparableResources } from '@providers/aws/services/state';
+import { deployment, destruction, getOperationByName, Operation, OPERATION_TYPE, setup } from '@core/operation';
 
 describe('Operation', () => {
   let operation: Operation;

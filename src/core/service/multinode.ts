@@ -1,4 +1,4 @@
-import { MinMax } from '@stackmate/engine/lib';
+import { MinMax } from '@lib/util';
 import { BaseServiceAttributes, withSchema } from './core';
 
 /**

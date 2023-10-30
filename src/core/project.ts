@@ -1,22 +1,22 @@
 import { defaults, fromPairs, groupBy, isEmpty, uniq } from 'lodash';
-import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
 
+import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@constants';
 import {
   CloudServiceAttributes, Registry, CloudServiceProvider,
   SecretVaultServiceAttributes, StateServiceAttributes,
-} from '@stackmate/engine/core/registry';
+} from '@core/registry';
 import {
   BaseServiceAttributes, getServiceProviderSchema, getServiceNameSchema,
   getServiceTypeSchema, isCoreService, ProviderChoice,
   ServiceTypeChoice, BaseService, getMonitoringSchema, MonitoringAttributes,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 import {
   DistributiveOmit, DistributiveOptionalKeys, DistributivePartial,
   DistributiveRequireKeys, OneOfType, OptionalKeys,
-} from '@stackmate/engine/lib';
+} from '@lib/util';
 import {
   getProviderServiceSchemas, getRegionConditional, getRegionsSchema, JsonSchema,
-} from '@stackmate/engine/core/schema';
+} from '@core/schema';
 
 /**
  * @type {CopiedStage} a stage which is a copy of another one

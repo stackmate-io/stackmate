@@ -1,12 +1,12 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { provider as terraformLocalProvider } from '@cdktf/provider-local';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { LocalServiceAttributes } from '@stackmate/engine/providers/local/service';
+import { Stack } from '@core/stack';
+import { PROVIDER, SERVICE_TYPE } from '@constants';
+import { LocalServiceAttributes } from '@providers/local/service';
 import {
   BaseServiceAttributes, getCoreService, Provisionable, Service, withHandler,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type ProviderInstanceResources = {
   provider: terraformLocalProvider.LocalProvider;

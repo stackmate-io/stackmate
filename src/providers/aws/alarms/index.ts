@@ -8,13 +8,13 @@ import {
   dataAwsIamPolicyDocument,
 } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { hashString } from '@stackmate/engine/lib';
-import { AwsService } from '@stackmate/engine/providers/aws/service';
+import { Stack } from '@core/stack';
+import { SERVICE_TYPE } from '@constants';
+import { hashString } from '@lib/hash';
+import { AwsService } from '@providers/aws/service';
 import {
   BaseServiceAttributes, MonitoringAttributes, Provisionable, Provisions, ServiceTypeChoice,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 /**
  * @type {AwsServiceAlarmResources} the alarms resources

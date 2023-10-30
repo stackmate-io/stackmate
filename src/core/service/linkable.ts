@@ -1,12 +1,12 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { isEmpty } from 'lodash';
 
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
+import { SERVICE_TYPE } from '@constants';
 import { ConnectableAttributes } from './connectable';
 import {
   associate, AssociationHandler, BaseServiceAttributes, Service, withSchema, ServiceSideEffect,
   AssociationLookup, ProvisionResources, WithAssociations, BaseProvisionable,
-} from '@stackmate/engine/core/service/core';
+} from '@core/service/core';
 
 /**
  * @type {LinkableAttributes} internal link service attributes

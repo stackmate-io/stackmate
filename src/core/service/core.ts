@@ -1,10 +1,10 @@
 import { get, merge } from 'lodash';
 import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { Obj, ChoiceOf } from '@stackmate/engine/lib';
-import { CORE_SERVICE_TYPES, PROVIDER, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@stackmate/engine/core/schema';
+import { Stack } from '@core/stack';
+import { Obj, ChoiceOf } from '@lib/util';
+import { CORE_SERVICE_TYPES, PROVIDER, SERVICE_TYPE } from '@constants';
+import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@core/schema';
 
 /**
  * @type {ProviderChoice} a provider choice

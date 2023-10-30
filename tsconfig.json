@@ -9,7 +9,6 @@
     "composite": true,
     "declaration": true,
     "baseUrl": ".",
-    "rootDir": ".",
     "outDir": "dist",
     "strictFunctionTypes": false,
     "importHelpers": true,
@@ -29,7 +28,10 @@
     "noUnusedLocals": true,
     "moduleResolution": "node",
     "paths": {
-      "@core": [
+      "@constants": [
+        "src/constants"
+      ],
+      "@core/*": [
         "src/core/*"
       ],
       "@providers/*": [
@@ -55,8 +57,6 @@
   "ts-node": {
     "require": [
       "tsconfig-paths/register"
-    ],
-    "transpileOnly": true,
-    "files": true
+    ]
   }
 }

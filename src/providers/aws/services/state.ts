@@ -1,17 +1,17 @@
-import pipe from '@bitty/pipe';
+import pipe from 'lodash/fp/pipe';
 import { S3Backend } from 'cdktf';
 import { s3Bucket } from '@cdktf/provider-aws';
 
-import { Stack } from '@stackmate/engine/core/stack';
-import { SERVICE_TYPE } from '@stackmate/engine/constants';
-import { ServiceSchema } from '@stackmate/engine/core/schema';
-import { DEFAULT_REGION, REGIONS } from '@stackmate/engine/providers/aws/constants';
+import { Stack } from '@core/stack';
+import { SERVICE_TYPE } from '@constants';
+import { ServiceSchema } from '@core/schema';
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
 import {
   AwsService, AwsServiceAttributes, getAwsCoreService,
-} from '@stackmate/engine/providers/aws/service';
+} from '@providers/aws/service';
 import {
   BaseServiceAttributes, Provisionable, withRegions, withHandler, withSchema,
-} from '@stackmate/engine/core/service';
+} from '@core/service';
 
 export type AwsStateDeployableResources = { backend: S3Backend };
 export type AwsStatePreparableResources = { bucket: s3Bucket.S3Bucket };

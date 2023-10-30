@@ -3,8 +3,8 @@ import { inspect } from 'node:util';
 import { argv } from 'node:process';
 
 import Ajv from 'ajv';
-import { JSON_SCHEMA_PATH } from '@stackmate/engine/constants';
-import { getProjectSchema } from '@stackmate/engine/core/project';
+import { JSON_SCHEMA_PATH } from '@constants';
+import { getProjectSchema } from '@core/project';
 
 const schema = getProjectSchema();
 const ajv = new Ajv();

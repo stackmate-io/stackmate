@@ -1,15 +1,15 @@
+import { faker } from '@faker-js/faker';
 import { sortBy } from 'lodash';
 
-import { REGIONS } from '@stackmate/engine/providers/aws/constants';
-import { JsonSchema } from '@stackmate/engine/core/schema';
-import { validateProject } from '@stackmate/engine';
-import { BaseServiceAttributes, isCoreService } from '@stackmate/engine/core/service';
-import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@stackmate/engine/constants';
+import { REGIONS } from '@providers/aws/constants';
+import { JsonSchema } from '@core/schema';
+import { validateProject } from '@core/validation';
+import { BaseServiceAttributes, isCoreService } from '@core/service';
+import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@constants';
 import {
   CloudServiceConfiguration, getCloudServices, getProjectSchema,
   getServiceConfigurations, Project, ProjectConfiguration, withLocalState,
-} from '@stackmate/engine/core/project';
-import { faker } from '@faker-js/faker';
+} from '@core/project';
 
 describe('Project', () => {
   const [region] = REGIONS;

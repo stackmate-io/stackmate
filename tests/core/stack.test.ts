@@ -1,6 +1,6 @@
 import { TerraformStack, App as TerraformApp } from 'cdktf';
 
-import { getStack } from '@stackmate/engine/core/stack';
+import { getStack } from '@core/stack';
 
 describe('Stack', () => {
   const projectName = 'my-project-name';

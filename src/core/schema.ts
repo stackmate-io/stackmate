@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import { isEmpty, merge, uniq } from 'lodash';
 
-import { Obj, RequireKeys } from '@stackmate/engine/lib';
-import { JSON_SCHEMA_PATH, SERVICE_TYPE } from '@stackmate/engine/constants';
-import { BaseService, isCoreService, ProviderChoice, ServiceTypeChoice } from '@stackmate/engine/core/service/core';
+import { Obj, RequireKeys } from '@lib/util';
+import { JSON_SCHEMA_PATH, SERVICE_TYPE } from '@constants';
+import { BaseService, isCoreService, ProviderChoice, ServiceTypeChoice } from '@core/service/core';
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
