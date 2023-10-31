@@ -1,10 +1,11 @@
-import { MinMax } from '@lib/util'
-import { BaseServiceAttributes, withSchema } from './core'
+import type { MinMax } from '@lib/util'
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {ConnectableAttributes} port-specific attributes
  */
-export type ConnectableAttributes = { port: number; }
+export type ConnectableAttributes = { port: number }
 
 /**
  * Adds TCP port connection support to a service (eg. the port 3306 for a MySQL database)
@@ -16,8 +17,10 @@ export type ConnectableAttributes = { port: number; }
  * @returns {Function<Service>}
  */
 export const connectable = <C extends BaseServiceAttributes>(
-  defaultPort: number, { min = 1, max = 65535 }: MinMax = {},
-) => withSchema<C, { port: number; }>({
+  defaultPort: number,
+  { min = 1, max = 65535 }: MinMax = {},
+) =>
+  withSchema<C, { port: number }>({
     type: 'object',
     properties: {
       port: {

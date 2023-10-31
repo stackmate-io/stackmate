@@ -1,25 +1,27 @@
-import { provider as terraformLocalProvider } from '@cdktf/provider-local';
+import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 
-import { getStack } from '@core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@constants';
-import { getProvisionable } from '@core/operation';
-import {
-  LocalProvider, LocalProviderAttributes, LocalProviderProvisionable, onPrepare,
-} from '@providers/local/services/provider';
+import { getStack } from '@core/stack'
+import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { getProvisionable } from '@core/operation'
+import type {
+  LocalProviderAttributes,
+  LocalProviderProvisionable,
+} from '@providers/local/services/provider'
+import { LocalProvider, onPrepare } from '@providers/local/services/provider'
 
 describe('Local Provider', () => {
-  const service = LocalProvider;
+  const service = LocalProvider
 
   it('is a valid local provider service', () => {
-    expect(service.provider).toEqual(PROVIDER.LOCAL);
-    expect(service.type).toEqual(SERVICE_TYPE.PROVIDER);
-  });
+    expect(service.provider).toEqual(PROVIDER.LOCAL)
+    expect(service.type).toEqual(SERVICE_TYPE.PROVIDER)
+  })
 
   it('has the handlers registered only for the preparable scope', () => {
-    expect(service.handlers.get('preparable')).toEqual(onPrepare);
-    expect(service.handlers.get('deployable')).toBeUndefined();
-    expect(service.handlers.get('destroyable')).toBeUndefined();
-  });
+    expect(service.handlers.get('preparable')).toEqual(onPrepare)
+    expect(service.handlers.get('deployable')).toBeUndefined()
+    expect(service.handlers.get('destroyable')).toBeUndefined()
+  })
 
   it('provides the right schema', () => {
     expect(service.schema).toMatchObject({
@@ -42,24 +44,24 @@ describe('Local Provider', () => {
           type: 'string',
         },
       },
-    });
-  });
+    })
+  })
 
   describe('onPrepare provision handler', () => {
-    const stack = getStack('my-project', 'my-stage');
+    const stack = getStack('my-project', 'my-stage')
     const config: LocalProviderAttributes = {
       name: 'local-provider',
       provider: 'local',
       type: 'provider',
-    };
+    }
 
-    const provisionable = getProvisionable(config);
+    const provisionable = getProvisionable(config)
 
     it('registers the local provider', () => {
-      const resources = onPrepare(provisionable as LocalProviderProvisionable, stack);
-      expect(resources).toBeInstanceOf(Object);
-      expect(Object.keys(resources)).toEqual(['provider']);
-      expect(resources.provider).toBeInstanceOf(terraformLocalProvider.LocalProvider);
-    });
-  });
-});
+      const resources = onPrepare(provisionable as LocalProviderProvisionable, stack)
+      expect(resources).toBeInstanceOf(Object)
+      expect(Object.keys(resources)).toEqual(['provider'])
+      expect(resources.provider).toBeInstanceOf(terraformLocalProvider.LocalProvider)
+    })
+  })
+})

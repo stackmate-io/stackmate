@@ -1,10 +1,12 @@
 import { get, merge } from 'lodash'
-import { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
+import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 
-import { Stack } from '@core/stack'
-import { Obj, ChoiceOf } from '@lib/util'
-import { CORE_SERVICE_TYPES, PROVIDER, SERVICE_TYPE } from '@constants'
-import { ServiceSchema, mergeServiceSchemas, JsonSchema } from '@core/schema'
+import type { Stack } from '@core/stack'
+import type { Obj, ChoiceOf } from '@lib/util'
+import type { PROVIDER, SERVICE_TYPE } from '@constants'
+import { CORE_SERVICE_TYPES } from '@constants'
+import type { ServiceSchema, JsonSchema } from '@core/schema'
+import { mergeServiceSchemas } from '@core/schema'
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -60,7 +62,8 @@ export type AssociationReturnType = ProvisionResources | void
  * @type {AssociationLookup} the function which determines whether an association takes effect
  */
 export type AssociationLookup = (
-  config: BaseServiceAttributes, linkedConfig: BaseServiceAttributes,
+  config: BaseServiceAttributes,
+  linkedConfig: BaseServiceAttributes,
 ) => boolean
 
 /**
@@ -69,13 +72,8 @@ export type AssociationLookup = (
 export type AssociationHandler<
   Ret extends AssociationReturnType,
   Prov extends BaseProvisionable = BaseProvisionable,
-  Opts extends Obj = Obj
-> = (
-  current: Prov,
-  stack: Stack,
-  linked: BaseProvisionable,
-  opts?: Opts,
-) => Ret
+  Opts extends Obj = Obj,
+> = (current: Prov, stack: Stack, linked: BaseProvisionable, opts?: Opts) => Ret
 
 /**
  * @type {Association} describes an association between two services
@@ -100,24 +98,23 @@ export type AnyAssociationHandler = AssociationHandler<AssociationReturnType>
  */
 export type ServiceRequirement<
   Ret extends AssociationReturnType,
-  S extends ServiceTypeChoice = never
-> = Association<Ret> & { requirement: true, with?: S }
+  S extends ServiceTypeChoice = never,
+> = Association<Ret> & { requirement: true; with?: S }
 
 /**
  * @type {ServiceSideEffect} describes a generic association that is not a requirement
  */
-export type ServiceSideEffect<
-  Ret extends AssociationReturnType = ProvisionResources
-> = Association<Ret> & {
-  where?: AssociationLookup
-  sideEffect: true
-}
+export type ServiceSideEffect<Ret extends AssociationReturnType = ProvisionResources> =
+  Association<Ret> & {
+    where?: AssociationLookup
+    sideEffect: true
+  }
 
 /**
  * @type {ServiceAssociations} the service's associations
  */
 export type ServiceAssociations = {
-  [K in ServiceScopeChoice]?: Record<string, Association<any>>;
+  [K in ServiceScopeChoice]?: Record<string, Association<any>>
 }
 
 /**
@@ -125,11 +122,13 @@ export type ServiceAssociations = {
  */
 type ExtractServiceRequirements<
   Associations extends ServiceAssociations,
-  Scope extends ServiceScopeChoice
+  Scope extends ServiceScopeChoice,
 > = {
   [K in keyof Associations[Scope]]: Associations[Scope][K] extends infer A extends Association<any>
-    ? A['requirement'] extends true ? ReturnType<A['handler']> : never
-    : never;
+    ? A['requirement'] extends true
+      ? ReturnType<A['handler']>
+      : never
+    : never
 }
 
 /**
@@ -153,8 +152,8 @@ export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
   Scope extends ServiceScopeChoice,
-  Context extends Obj = {},
-  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>
+  Context extends Obj = Obj,
+  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
 > = BaseProvisionable<Attrs> & {
   service: Srv
   config: Attrs
@@ -198,7 +197,7 @@ export type BaseServiceAttributes = {
  */
 export type Service<
   Setup extends BaseServiceAttributes,
-  Associations extends ServiceAssociations = object
+  Associations extends ServiceAssociations = Obj,
 > = {
   provider: ProviderChoice
   type: ServiceTypeChoice
@@ -237,7 +236,8 @@ export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']
   description: 'The name for the service to deploy',
   errorMessage: {
     minLength: 'The service’s name should be two characters or more',
-    pattern: 'The name property on the service should only contain characters, numbers, dashes and underscores',
+    pattern:
+      'The name property on the service should only contain characters, numbers, dashes and underscores',
   },
 })
 
@@ -246,15 +246,16 @@ export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']
  * @param {ProviderChoice} defaultProvider the default provider for the service
  * @returns {JsonSchema} the provider's schema
  */
-export const getServiceProviderSchema = (providers: ProviderChoice[], defaultProvider?: ProviderChoice): JsonSchema<ProviderChoice> => ({
+export const getServiceProviderSchema = (
+  providers: ProviderChoice[],
+  defaultProvider?: ProviderChoice,
+): JsonSchema<ProviderChoice> => ({
   type: 'string',
   enum: providers,
   default: defaultProvider,
   isIncludedInConfigGeneration: true,
   errorMessage: {
-    enum: `The provider is invalid, available choices are: ${providers.join(
-      ', ',
-    )}`,
+    enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
   },
 })
 
@@ -263,14 +264,15 @@ export const getServiceProviderSchema = (providers: ProviderChoice[], defaultPro
  * @param {ServiceTypeChoice} defaultType the default type for the service
  * @returns {JsonSchema} the service's type schema
  */
-export const getServiceTypeSchema = (types: ServiceTypeChoice[], defaultType?: ServiceTypeChoice): JsonSchema<ServiceTypeChoice> => ({
+export const getServiceTypeSchema = (
+  types: ServiceTypeChoice[],
+  defaultType?: ServiceTypeChoice,
+): JsonSchema<ServiceTypeChoice> => ({
   type: 'string',
   enum: types,
   default: defaultType,
   errorMessage: {
-    enum: `You have to specify a valid service type, available are: ${types.join(
-      ', ',
-    )}`,
+    enum: `You have to specify a valid service type, available are: ${types.join(', ')}`,
   },
 })
 
@@ -281,7 +283,10 @@ export const getServiceTypeSchema = (types: ServiceTypeChoice[], defaultType?: S
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice): Service<BaseServiceAttributes & { provider: typeof provider, type: typeof type }> => {
+export const getCoreService = (
+  provider: ProviderChoice,
+  type: ServiceTypeChoice,
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const schemaId = `services/${provider}/${type}`
   const schema: ServiceSchema<BaseServiceAttributes> = {
     $id: schemaId,
@@ -290,14 +295,8 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
     additionalProperties: false,
     properties: {
       name: getServiceNameSchema(),
-      provider: getServiceProviderSchema(
-        [provider],
-        provider,
-      ),
-      type: getServiceTypeSchema(
-        [type],
-        type,
-      ),
+      provider: getServiceProviderSchema([provider], provider),
+      type: getServiceTypeSchema([type], type),
       region: {
         type: 'string',
         isIncludedInConfigGeneration: true,
@@ -313,7 +312,9 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
     environment: [],
     handlers: new Map(),
     associations: {
-      'deployable': {}, 'preparable': {}, 'destroyable': {},
+      deployable: {},
+      preparable: {},
+      destroyable: {},
     },
   }
 }
@@ -325,11 +326,11 @@ export const getCoreService = (provider: ProviderChoice, type: ServiceTypeChoice
  * @param type {ServiceTypeChoice} the service type for the cloud service
  * @returns {Service<Obj>} the cloud service
  */
-export const getCloudService = (provider: ProviderChoice, type: ServiceTypeChoice): Service<BaseServiceAttributes & { provider: typeof provider, type: typeof type }> => {
-  const core = getCoreService(
-    provider,
-    type,
-  )
+export const getCloudService = (
+  provider: ProviderChoice,
+  type: ServiceTypeChoice,
+): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
+  const core = getCoreService(provider, type)
   const schema: ServiceSchema<BaseServiceAttributes> = {
     ...core.schema,
     required: [...(core.schema.required || []), 'name', 'type'],
@@ -358,13 +359,7 @@ export const getCloudService = (provider: ProviderChoice, type: ServiceTypeChoic
  * @param {ServiceTypeChoice} type the type of service to check whether is a core service
  * @returns {Boolean} whether the given service type is a core service
  */
-export const isCoreService = (
-  type: ServiceTypeChoice,
-): boolean => (
-  CORE_SERVICE_TYPES.includes(
-    type,
-  )
-)
+export const isCoreService = (type: ServiceTypeChoice): boolean => CORE_SERVICE_TYPES.includes(type)
 
 /**
  * Updates a service given certain attributes
@@ -372,9 +367,9 @@ export const isCoreService = (
  * @param {Partial<Service>} attrs the service attributes to apply
  * @returns {Function<Service>} the updated service
  */
-export const withServiceProperties = <C extends BaseServiceAttributes, Attributes extends Obj = {}>(
-  attrs: Attributes,
-) => <T extends Service<C>>(srv: T): T & Attributes => ({
+export const withServiceProperties =
+  <C extends BaseServiceAttributes, Attributes extends Obj = Obj>(attrs: Attributes) =>
+  <T extends Service<C>>(srv: T): T & Attributes => ({
     ...srv,
     ...attrs,
   })
@@ -385,14 +380,11 @@ export const withServiceProperties = <C extends BaseServiceAttributes, Attribute
  * @param {JsonSchema} mods the schema modifications to apply
  * @returns {Function<Service>}
  */
-export const withSchema = <C extends BaseServiceAttributes, Additions extends Obj = {}>(
-  mods: ServiceSchema<Additions>,
-) => <T extends Service<C>>(srv: T): T & { schema: ServiceSchema<Additions> } => ({
+export const withSchema =
+  <C extends BaseServiceAttributes, Additions extends Obj = Obj>(mods: ServiceSchema<Additions>) =>
+  <T extends Service<C>>(srv: T): T & { schema: ServiceSchema<Additions> } => ({
     ...srv,
-    schema: mergeServiceSchemas(
-      srv.schema,
-      mods,
-    ),
+    schema: mergeServiceSchemas(srv.schema, mods),
   })
 
 /**
@@ -420,15 +412,11 @@ export const withSchema = <C extends BaseServiceAttributes, Additions extends Ob
  * @param {ServiceAssociations} associations the association configurations
  * @returns {Function<Service>}
  */
-export const associate = <C extends BaseServiceAttributes, A extends ServiceAssociations>(
-  associations: A,
-) => <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
+export const associate =
+  <C extends BaseServiceAttributes, A extends ServiceAssociations>(associations: A) =>
+  <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
     ...service,
-    associations: merge(
-      {},
-      service.associations,
-      associations,
-    ),
+    associations: merge({}, service.associations, associations),
   })
 
 /**
@@ -438,26 +426,20 @@ export const associate = <C extends BaseServiceAttributes, A extends ServiceAsso
  * @param {ProvisionHandler} handler the handler that provisions the service
  * @returns {Function<Service>}
  */
-export const withHandler = <C extends BaseServiceAttributes>(
-  scope: ServiceScopeChoice, handler: ProvisionHandler,
-) => <T extends Service<C>>(service: T): T => {
-  if (service.handlers.has(
-    scope,
-  )) {
-    throw new Error(
-      `There already is a handler for the “${scope}” scope for the “${service.type}” ${service.provider} service`,
-    )
-  }
+export const withHandler =
+  <C extends BaseServiceAttributes>(scope: ServiceScopeChoice, handler: ProvisionHandler) =>
+  <T extends Service<C>>(service: T): T => {
+    if (service.handlers.has(scope)) {
+      throw new Error(
+        `There already is a handler for the “${scope}” scope for the “${service.type}” ${service.provider} service`,
+      )
+    }
 
-  return {
-    ...service,
-    handlers: new Map(
-      [...Array.from(
-        service.handlers.entries(),
-      ), [scope, handler]],
-    ),
+    return {
+      ...service,
+      handlers: new Map([...Array.from(service.handlers.entries()), [scope, handler]]),
+    }
   }
-}
 
 /**
  * Registers the environment variables to use when adding the service to the stack
@@ -467,13 +449,18 @@ export const withHandler = <C extends BaseServiceAttributes>(
  * @param {Boolean} required whether the variable's presence is required
  * @returns {Function<Service>}
  */
-export const withEnvironment = <C extends BaseServiceAttributes>(
-  name: string, description: string, required: boolean = false,
-) => <T extends Service<C>>(service: T): T => ({
+export const withEnvironment =
+  <C extends BaseServiceAttributes>(name: string, description: string, required: boolean = false) =>
+  <T extends Service<C>>(service: T): T => ({
     ...service,
-    environment: [...service.environment, {
-      name, required, description,
-    }],
+    environment: [
+      ...service.environment,
+      {
+        name,
+        required,
+        description,
+      },
+    ],
   })
 
 /**
@@ -481,33 +468,27 @@ export const withEnvironment = <C extends BaseServiceAttributes>(
  * @param {ServiceScopeChoice} scope the scope for the services
  * @throws {Error} if a requirement is not satisfied
  */
-export const assertRequirementsSatisfied = (provisionable: BaseProvisionable, scope: ServiceScopeChoice) => {
-  const { service: { associations: allAssociations, type }, requirements } = provisionable
-  const associations: ServiceAssociations[ServiceScopeChoice] = get(
-    allAssociations,
-    scope,
-    {},
-  )
+export const assertRequirementsSatisfied = (
+  provisionable: BaseProvisionable,
+  scope: ServiceScopeChoice,
+) => {
+  const {
+    service: { associations: allAssociations, type },
+    requirements,
+  } = provisionable
+  const associations: ServiceAssociations[ServiceScopeChoice] = get(allAssociations, scope, {})
 
   if (!associations) {
     return
   }
 
-  Object.entries(
-    associations,
-  ).forEach(
-    (
-      [name, assoc],
-    ) => {
-      if (!assoc.requirement) {
-        return
-      }
+  Object.entries(associations).forEach(([name, assoc]) => {
+    if (!assoc.requirement) {
+      return
+    }
 
-      if (!requirements[name]) {
-        throw new Error(
-          `Requirement ${name} for service ${type} is not satisfied`,
-        )
-      }
-    },
-  )
+    if (!requirements[name]) {
+      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
+    }
+  })
 }
