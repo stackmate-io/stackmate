@@ -14,17 +14,17 @@ import type { BaseServiceAttributes, BaseProvisionable, Provisions,
   ServiceEnvironment, ServiceScopeChoice, ServiceAssociations, AnyAssociationHandler, AssociationReturnType } from '@core/service'
 import type { Stack } from '@core/stack'
 
-type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
+type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
 type AssociatedProvisionable = {
   name: string;
   target: BaseProvisionable;
   handler: AnyAssociationHandler;
-};
+}
 
-type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>;
+type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
-export type OperationType = 'deployment' | 'destruction' | 'setup';
+export type OperationType = 'deployment' | 'destruction' | 'setup'
 
 export const OPERATION_TYPE: Record<string, OperationType> = {
   DEPLOYMENT: 'deployment',
@@ -41,7 +41,7 @@ export type Operation = {
   readonly provisionables: ProvisionablesMap;
   environment(): ServiceEnvironment[];
   process(): object;
-};
+}
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration

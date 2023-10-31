@@ -1,31 +1,10 @@
 {
   "extends": [
-    "eslint:recommended",
+    "airbnb-typescript/base",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
     "plugin:import/warnings"
   ],
-  "rules": {
-    "@typescript-eslint/consistent-type-exports": "error",
-    "@typescript-eslint/consistent-type-imports": "error",
-    "prefer-const": "error",
-    "brace-style": "error",
-    "max-len": [
-      "error",
-      {
-        "code": 120
-      }
-    ],
-    "semi": ["error", "never"],
-    "arrow-body-style": [
-      "error",
-      "as-needed"
-    ],
-    "object-curly-spacing": [
-      "error",
-      "always"
-    ]
-  },
   "ignorePatterns": [
     "dist/**"
   ],
@@ -36,5 +15,18 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "@typescript-eslint/semi": ["error", "never"],
+        "semi": [
+          "error",
+          "never"
+        ],
+        "brace-style": "error"
+      }
+    }
+  ]
 }
