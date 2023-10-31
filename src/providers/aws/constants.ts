@@ -1,13 +1,11 @@
-export type RdsEngine = 'mariadb' | 'mysql' | 'postgres';
+export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
 
-export const DEFAULT_REGION = 'eu-central-1' as const;
-export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const;
-export const DEFAULT_RDS_ENGINE = 'mysql' as const;
-export const DEFAULT_VPC_IP = '10.0.0.0' as const;
+export const DEFAULT_REGION = 'eu-central-1' as const
+export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
+export const DEFAULT_RDS_ENGINE = 'mysql' as const
+export const DEFAULT_VPC_IP = '10.0.0.0' as const
 
-export const REGIONS = [
-  'eu-central-1',
-] as const;
+export const REGIONS = ['eu-central-1'] as const
 
 export const RDS_INSTANCE_SIZES = [
   'db.t3.micro',
@@ -34,7 +32,7 @@ export const RDS_INSTANCE_SIZES = [
   'db.m5.4xlarge',
   'db.m5.12xlarge',
   'db.m5.24xlarge',
-] as const;
+] as const
 
 export const RDS_PARAM_FAMILY_MAPPING = [
   ['mariadb', '10.2', 'mariadb10.2'],
@@ -49,22 +47,22 @@ export const RDS_PARAM_FAMILY_MAPPING = [
   ['postgres', '11', 'postgres11'],
   ['postgres', '10', 'postgres10'],
   ['postgres', '9', 'postgres9.6'],
-] as const;
+] as const
 
 export const RDS_MAJOR_VERSIONS_PER_ENGINE: Record<RdsEngine, readonly string[]> = {
-  'mariadb': ['10.5', '10.4', '10.3', '10.2'],
-  'mysql': ['8.0', '5.7', '5.6'],
-  'postgres': ['13', '12', '11', '10', '9.6'],
-} as const;
+  mariadb: ['10.5', '10.4', '10.3', '10.2'],
+  mysql: ['8.0', '5.7', '5.6'],
+  postgres: ['13', '12', '11', '10', '9.6'],
+} as const
 
 export const RDS_LOG_EXPORTS_PER_ENGINE: Record<RdsEngine, readonly string[]> = {
-  'mariadb': ['audit', 'error', 'general', 'slowquery'],
-  'mysql': ['audit', 'error', 'general', 'slowquery'],
-  'postgres': ['postgresql', 'upgrade'],
-} as const;
+  mariadb: ['audit', 'error', 'general', 'slowquery'],
+  mysql: ['audit', 'error', 'general', 'slowquery'],
+  postgres: ['postgresql', 'upgrade'],
+} as const
 
 export const RDS_DEFAULT_VERSIONS_PER_ENGINE: Record<RdsEngine, string> = {
-  'mariadb': '10.5',
-  'mysql': '8.0',
-  'postgres': '13',
-} as const;
+  mariadb: '10.5',
+  mysql: '8.0',
+  postgres: '13',
+} as const

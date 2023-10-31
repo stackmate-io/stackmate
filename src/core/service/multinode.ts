@@ -1,11 +1,12 @@
-import { MinMax } from '@lib/util';
-import { BaseServiceAttributes, withSchema } from './core';
+import type { MinMax } from '@lib/util'
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {MultiNodeAttributes} nodes attributes
  */
 
-export type MultiNodeAttributes = { nodes: number; };
+export type MultiNodeAttributes = { nodes: number }
 /**
  * Adds multiple-node support to a service (eg. multiple app server instances)
  *
@@ -17,19 +18,21 @@ export type MultiNodeAttributes = { nodes: number; };
  */
 
 export const multiNode = <C extends BaseServiceAttributes>(
-  defaultNodes = 1, { min = 1, max = 10000 }: MinMax = {}
-) => withSchema<C, MultiNodeAttributes>({
-  type: 'object',
-  properties: {
-    nodes: {
-      type: 'number',
-      minimum: min,
-      maximum: max,
-      default: defaultNodes,
-      errorMessage: {
-        minimum: `The nodes must be between ${min} and ${max}`,
-        maximum: `The nodes must be between ${min} and ${max}`,
+  defaultNodes = 1,
+  { min = 1, max = 10000 }: MinMax = {},
+) =>
+  withSchema<C, MultiNodeAttributes>({
+    type: 'object',
+    properties: {
+      nodes: {
+        type: 'number',
+        minimum: min,
+        maximum: max,
+        default: defaultNodes,
+        errorMessage: {
+          minimum: `The nodes must be between ${min} and ${max}`,
+          maximum: `The nodes must be between ${min} and ${max}`,
+        },
       },
     },
-  }
-});
+  })

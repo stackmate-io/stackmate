@@ -1,99 +1,109 @@
-import pipe from 'lodash/fp/pipe';
-import { isEmpty } from 'lodash';
-import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group';
-import {
+import pipe from 'lodash/fp/pipe'
+import { isEmpty } from 'lodash'
+import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group'
+import type {
   vpc,
   kmsKey,
   provider as terraformAwsProvider,
   dataAwsCallerIdentity,
-} from '@cdktf/provider-aws';
+} from '@cdktf/provider-aws'
 
-import { Stack } from '@core/stack';
-import { PROVIDER, SERVICE_TYPE } from '@constants';
-import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants';
-import { getCidrBlocks, getIpAddressParts } from '@lib/networking';
-import { hashString } from '@lib/hash';
-import { ChoiceOf, OneOfType } from '@lib/util';
-import {
-  associate, BaseService, BaseServiceAttributes, getCloudService, getCoreService, Provisions,
-  ServiceAssociations, BaseProvisionable, ServiceRequirement, ServiceTypeChoice, withRegions,
-  Provisionable, Service, LinkableAttributes, ConnectableAttributes, ExternallyLinkableAttributes,
-} from '@core/service';
-import {
+import type { Stack } from '@core/stack'
+import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
+import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
+import { hashString } from '@lib/hash'
+import type { ChoiceOf, Obj, OneOfType } from '@lib/util'
+import type {
+  BaseService,
+  BaseServiceAttributes,
+  Provisions,
+  ServiceAssociations,
+  BaseProvisionable,
+  ServiceRequirement,
+  ServiceTypeChoice,
+  Provisionable,
+  Service,
+  LinkableAttributes,
+  ConnectableAttributes,
+  ExternallyLinkableAttributes,
+} from '@core/service'
+import { associate, getCloudService, getCoreService, withRegions } from '@core/service'
+import type {
   AwsProviderAttributes,
   AwsProviderDeployableProvisionable,
   AwsProviderDestroyableProvisionable,
   AwsProviderPreparableProvisionable,
-} from '@providers/aws/services/provider';
-import {
+} from '@providers/aws/services/provider'
+import type {
   AwsAlarmPrerequisites,
   AwsServiceAlarmResources,
-  getMonitoringPrerequisites,
   MonitoredServiceProvisionable,
-} from '@providers/aws/alarms';
+} from '@providers/aws/alarms'
+import { getMonitoringPrerequisites } from '@providers/aws/alarms'
 
 type ProviderRequirement = ServiceRequirement<
-  terraformAwsProvider.AwsProvider, typeof SERVICE_TYPE.PROVIDER
->;
+  terraformAwsProvider.AwsProvider,
+  typeof SERVICE_TYPE.PROVIDER
+>
 
-type KmsKeyRequirement = ServiceRequirement<
-  kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER
->;
+type KmsKeyRequirement = ServiceRequirement<kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER>
 
-type VpcRequirement = ServiceRequirement<
-  vpc.Vpc, typeof SERVICE_TYPE.PROVIDER
->;
+type VpcRequirement = ServiceRequirement<vpc.Vpc, typeof SERVICE_TYPE.PROVIDER>
 
 type AccountRequirement = ServiceRequirement<
-  dataAwsCallerIdentity.DataAwsCallerIdentity, typeof SERVICE_TYPE.PROVIDER
->;
+  dataAwsCallerIdentity.DataAwsCallerIdentity,
+  typeof SERVICE_TYPE.PROVIDER
+>
 
 export type AwsServiceAssociations = {
   deployable: {
-    providerInstance: ProviderRequirement;
-    account: AccountRequirement;
-    kmsKey: KmsKeyRequirement;
-    vpc: VpcRequirement;
-  },
+    providerInstance: ProviderRequirement
+    account: AccountRequirement
+    kmsKey: KmsKeyRequirement
+    vpc: VpcRequirement
+  }
   preparable: {
-    account: AccountRequirement,
-    providerInstance: ProviderRequirement;
-    kmsKey: KmsKeyRequirement;
-  },
+    account: AccountRequirement
+    providerInstance: ProviderRequirement
+    kmsKey: KmsKeyRequirement
+  }
   destroyable: {
-    account: AccountRequirement;
-    providerInstance: ProviderRequirement;
-    kmsKey: KmsKeyRequirement;
-  },
-};
+    account: AccountRequirement
+    providerInstance: ProviderRequirement
+    kmsKey: KmsKeyRequirement
+  }
+}
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
-  provider: typeof PROVIDER.AWS;
-  region: ChoiceOf<typeof REGIONS>;
-};
+  provider: typeof PROVIDER.AWS
+  region: ChoiceOf<typeof REGIONS>
+}
 
 export type AwsService<
   Attrs extends BaseServiceAttributes,
-  Assocs extends ServiceAssociations = {},
-> = Service<AwsServiceAttributes<Attrs>, AwsServiceAssociations & Assocs>;
+  Assocs extends ServiceAssociations = Obj,
+> = Service<AwsServiceAttributes<Attrs>, AwsServiceAssociations & Assocs>
 
-type ProviderProvisionable = OneOfType<[
-  AwsProviderDeployableProvisionable,
-  AwsProviderDestroyableProvisionable,
-  AwsProviderPreparableProvisionable,
-]>;
+type ProviderProvisionable = OneOfType<
+  [
+    AwsProviderDeployableProvisionable,
+    AwsProviderDestroyableProvisionable,
+    AwsProviderPreparableProvisionable,
+  ]
+>
 
 type LinkableServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & LinkableAttributes & ConnectableAttributes>,
   Provisions,
   'deployable'
->;
+>
 
 type ExternallyLinkableServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & ExternallyLinkableAttributes & ConnectableAttributes>,
   Provisions,
   'deployable'
->;
+>
 
 /**
  * @returns {ProviderRequirement} the provider instance requirement for an aws service
@@ -101,13 +111,10 @@ type ExternallyLinkableServiceProvisionable = Provisionable<
 const getProviderInstanceRequirement = (): ProviderRequirement => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
-  where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) => (
-    config.provider === linked.provider && config.region === linked.region
-  ),
-  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => (
-    p.provisions.provider
-  ),
-});
+  where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) =>
+    config.provider === linked.provider && config.region === linked.region,
+  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => p.provisions.provider,
+})
 
 /**
  * @returns {AccountRequirement} the aws account associated with the service
@@ -115,15 +122,11 @@ const getProviderInstanceRequirement = (): ProviderRequirement => ({
 const getAccountRequirement = (): AccountRequirement => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
-  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
-    config.provider === linked.provider && config.region === linked.region
-  ),
-  handler: (
-    prov: ProviderProvisionable,
-  ): dataAwsCallerIdentity.DataAwsCallerIdentity => (
-    prov.provisions.account
-  ),
-});
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+    config.provider === linked.provider && config.region === linked.region,
+  handler: (prov: ProviderProvisionable): dataAwsCallerIdentity.DataAwsCallerIdentity =>
+    prov.provisions.account,
+})
 
 /**
  * @returns {KmsKeyRequirement} the KMS key requirement association
@@ -131,15 +134,12 @@ const getAccountRequirement = (): AccountRequirement => ({
 const getKmsKeyRequirement = (): KmsKeyRequirement => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
-  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
-    config.provider === linked.provider && config.region === linked.region
-  ),
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+    config.provider === linked.provider && config.region === linked.region,
   handler: (
     prov: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
-  ): kmsKey.KmsKey => (
-    prov.provisions.kmsKey
-  ),
-});
+  ): kmsKey.KmsKey => prov.provisions.kmsKey,
+})
 
 /**
  * @returns {VpcRequirement} the VPC requirement for the AWS service
@@ -147,13 +147,10 @@ const getKmsKeyRequirement = (): KmsKeyRequirement => ({
 const getVpcRequirement = (): VpcRequirement => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
-  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) => (
-    config.provider === linked.provider && config.region === linked.region
-  ),
-  handler: (prov: AwsProviderDeployableProvisionable): vpc.Vpc => (
-    prov.provisions.vpc
-  ),
-});
+  where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+    config.provider === linked.provider && config.region === linked.region,
+  handler: (prov: AwsProviderDeployableProvisionable): vpc.Vpc => prov.provisions.vpc,
+})
 
 /**
  *
@@ -163,53 +160,68 @@ const getVpcRequirement = (): VpcRequirement => ({
  * @returns
  */
 export const onServiceLinked = (
-  provisionable: LinkableServiceProvisionable, stack: Stack, linked: BaseProvisionable,
+  provisionable: LinkableServiceProvisionable,
+  stack: Stack,
+  linked: BaseProvisionable,
 ) => {
-  const { config: { port, name: toName }, requirements: { vpc } } = provisionable;
-  const { provisions = {}, config: { name: fromName } } = linked;
-  const sgName = `allow-incoming-from-${fromName}-to-${toName}`;
-  const { ip } = provisions;
+  const {
+    config: { port, name: toName },
+    requirements: { vpc },
+  } = provisionable
+  const {
+    provisions = {},
+    config: { name: fromName },
+  } = linked
+  const sgName = `allow-incoming-from-${fromName}-to-${toName}`
+  const { ip } = provisions
 
   if (!ip) {
-    throw new Error(`The IP resource on service ${fromName} is not provisioned yet`);
+    throw new Error(`The IP resource on service ${fromName} is not provisioned yet`)
   }
 
   return new SecurityGroup(stack.context, sgName, {
     vpcId: vpc.id,
     name: sgName,
-    ingress: [{
-      fromPort: port,
-      toPort: port,
-      description: `Allow connections from ${fromName} to ${toName}`,
-      cidrBlocks: [ip.expression()],
-    }],
-  });
-};
+    ingress: [
+      {
+        fromPort: port,
+        toPort: port,
+        description: `Allow connections from ${fromName} to ${toName}`,
+        cidrBlocks: [ip.expression()],
+      },
+    ],
+  })
+}
 
 export const onExternalLink = (
   provisionable: ExternallyLinkableServiceProvisionable,
   stack: Stack,
 ) => {
-  const { config: { externalLinks = [], port }, requirements: { vpc } } = provisionable;
+  const {
+    config: { externalLinks = [], port },
+    requirements: { vpc },
+  } = provisionable
 
   const securityGroups = externalLinks.map((ipAddress, idx) => {
-    const { ip, mask } = getIpAddressParts(ipAddress);
-    const sgName: string = `allow-external-ip-${hashString(ipAddress)}`;
+    const { ip, mask } = getIpAddressParts(ipAddress)
+    const sgName: string = `allow-external-ip-${hashString(ipAddress)}`
 
     return new SecurityGroup(stack.context, sgName, {
       vpcId: vpc.id,
       name: sgName,
-      ingress: [{
-        fromPort: port,
-        toPort: port,
-        description: `Allow connections from ${ipAddress}`,
-        cidrBlocks: getCidrBlocks(ip, mask),
-      }],
-    });
-  });
+      ingress: [
+        {
+          fromPort: port,
+          toPort: port,
+          description: `Allow connections from ${ipAddress}`,
+          cidrBlocks: getCidrBlocks(ip, mask),
+        },
+      ],
+    })
+  })
 
-  return securityGroups;
-};
+  return securityGroups
+}
 
 /**
  * @var {AwsServiceAssociations} associations every AWS service's associations
@@ -231,7 +243,7 @@ const associations: AwsServiceAssociations = {
     account: getAccountRequirement(),
     kmsKey: getKmsKeyRequirement(),
   },
-};
+}
 
 /**
  * @type {AwsServiceAlertsGenerator} describes an alert generator function
@@ -241,7 +253,7 @@ export type AwsServiceAlertsGenerator = (
   stack: Stack,
   resources: BaseProvisionable['provisions'],
   prerequisites: AwsAlarmPrerequisites,
-) => AwsServiceAlarmResources;
+) => AwsServiceAlarmResources
 
 /**
  * @param {MonitoredServiceProvisionable} provisionable the provisionable to set the alarms for
@@ -249,36 +261,36 @@ export type AwsServiceAlertsGenerator = (
  * @param {AwsServiceAlertsGenerator} alarmsGenerator the alarm generator function
  * @returns {ProvisionResources} the resources to be deployed in the stack
  */
-export const withAwsAlarms = <T extends MonitoredServiceProvisionable>(
-  provisionable: T, stack: Stack, alarmsGenerator: AwsServiceAlertsGenerator,
-) => (resources: T['provisions']): T['provisions'] | T['provisions'] & AwsServiceAlarmResources => {
-  const { config: { monitoring } } = provisionable;
+export const withAwsAlarms =
+  <T extends MonitoredServiceProvisionable>(
+    provisionable: T,
+    stack: Stack,
+    alarmsGenerator: AwsServiceAlertsGenerator,
+  ) =>
+  (resources: T['provisions']): T['provisions'] | (T['provisions'] & AwsServiceAlarmResources) => {
+    const {
+      config: { monitoring },
+    } = provisionable
 
-  // Monitoring not configured, bail...
-  if (isEmpty(monitoring) || (isEmpty(monitoring.emails) && isEmpty(monitoring.urls))) {
-    return resources as T['provisions'];
+    // Monitoring not configured, bail...
+    if (isEmpty(monitoring) || (isEmpty(monitoring.emails) && isEmpty(monitoring.urls))) {
+      return resources as T['provisions']
+    }
+
+    const prerequisites = getMonitoringPrerequisites(provisionable, stack)
+    const alarms = alarmsGenerator(provisionable, stack, resources, prerequisites)
+
+    return {
+      ...resources,
+      ...alarms,
+    }
   }
 
-  const prerequisites = getMonitoringPrerequisites(provisionable, stack)
-  const alarms = alarmsGenerator(provisionable, stack, resources, prerequisites);
+const getAwsService = (srv: BaseService) =>
+  pipe(associate(associations), withRegions(REGIONS, DEFAULT_REGION))(srv)
 
-  return {
-    ...resources,
-    ...alarms,
-  };
-};
-
-const getAwsService = (srv: BaseService) => (
-  pipe(
-    associate(associations),
-    withRegions(REGIONS, DEFAULT_REGION),
-  )(srv)
-);
-
-export const getAwsCoreService = (type: ServiceTypeChoice) => (
+export const getAwsCoreService = (type: ServiceTypeChoice) =>
   getAwsService(getCoreService(PROVIDER.AWS, type))
-);
 
-export const getAwsCloudService = (type: ServiceTypeChoice) => (
+export const getAwsCloudService = (type: ServiceTypeChoice) =>
   getAwsService(getCloudService(PROVIDER.AWS, type))
-);

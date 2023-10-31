@@ -1,17 +1,19 @@
-import addErrors from 'ajv-errors';
-import addFormats from 'ajv-formats';
-import { DataValidationCxt } from 'ajv/dist/types';
-import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash';
-import Ajv, { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv';
+import addErrors from 'ajv-errors'
+import addFormats from 'ajv-formats'
+import type { DataValidationCxt } from 'ajv/dist/types'
+import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash'
+import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
+import Ajv from 'ajv'
 
-import { Registry } from '@core/registry';
-import { readSchemaFile } from '@core/schema';
-import { isAddressValid } from '@lib/networking';
-import { getServiceProfile } from '@core/profile';
-import { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project';
-import { BaseServiceAttributes, ServiceEnvironment } from '@core/service';
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@constants';
-import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@lib/errors';
+import { Registry } from '@core/registry'
+import { readSchemaFile } from '@core/schema'
+import { isAddressValid } from '@lib/networking'
+import { getServiceProfile } from '@core/profile'
+import type { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project'
+import type { BaseServiceAttributes, ServiceEnvironment } from '@core/service'
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@constants'
+import type { ValidationErrorDescriptor } from '@lib/errors'
+import { ValidationError, EnvironmentValidationError } from '@lib/errors'
 
 export const AJV_OPTIONS: AjvOptions = {
   useDefaults: true,
@@ -22,7 +24,7 @@ export const AJV_OPTIONS: AjvOptions = {
   allowMatchingProperties: true,
   strict: false,
   $data: true,
-} as const;
+} as const
 
 /**
  * Extracts the service names given a path in the schema
@@ -33,13 +35,16 @@ export const AJV_OPTIONS: AjvOptions = {
  */
 export const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
   if (!path || !path.startsWith('/stages')) {
-    return [];
+    return []
   }
 
-  const stagePath = path.replace(/^\/(stages\/[0-9]+\/services).*$/i, '$1').split('/').join('.');
-  const services = get(data, stagePath, []) as CloudServiceConfiguration<true>[];
-  return services.map((cfg) => cfg.name);
-};
+  const stagePath = path
+    .replace(/^\/(stages\/[0-9]+\/services).*$/i, '$1')
+    .split('/')
+    .join('.')
+  const services = get(data, stagePath, []) as CloudServiceConfiguration<true>[]
+  return services.map((cfg) => cfg.name)
+}
 
 /**
  * Validates a service `profile` value
@@ -49,20 +54,20 @@ export const getServiceNamesFromPath = (path: string, data: object = {}): string
  * @returns {Boolean} whether the service profile validates
  */
 export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt): boolean => {
-  const type = get(dataCxt?.parentData, 'type');
-  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
+  const type = get(dataCxt?.parentData, 'type')
+  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null))
 
   if (!provider || !type) {
-    return false;
+    return false
   }
 
   try {
-    getServiceProfile(provider, type, profile);
-    return true;
+    getServiceProfile(provider, type, profile)
+    return true
   } catch (err) {
-    return false;
+    return false
   }
-};
+}
 
 /**
  * Validates a profile `overrides` value
@@ -72,24 +77,25 @@ export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt
  * @returns {Boolean} whether the overrides value validates
  */
 export const validateServiceProfileOverrides = (
-  overrides: any, dataCxt?: DataValidationCxt,
+  overrides: any,
+  dataCxt?: DataValidationCxt,
 ): boolean => {
-  const type = get(dataCxt?.parentData, 'type');
-  const profile = get(dataCxt?.parentData, 'profile', DEFAULT_PROFILE_NAME);
-  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null));
+  const type = get(dataCxt?.parentData, 'type')
+  const profile = get(dataCxt?.parentData, 'profile', DEFAULT_PROFILE_NAME)
+  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null))
 
   if (!provider || !type) {
-    return false;
+    return false
   }
 
   try {
-    const serviceOverrides = getServiceProfile(provider, type, profile);
+    const serviceOverrides = getServiceProfile(provider, type, profile)
     const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
-    return isEmpty(irrelevantKeys);
+    return isEmpty(irrelevantKeys)
   } catch (err) {
-    return false;
+    return false
   }
-};
+}
 
 /**
  * Validates a `links` value
@@ -100,24 +106,24 @@ export const validateServiceProfileOverrides = (
  */
 export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): boolean => {
   if (isEmpty(links)) {
-    return true;
+    return true
   }
 
   // We should allow service links only for cloud services
-  const block = dataCxt?.parentData || {};
-  const path = dataCxt?.instancePath || null;
+  const block = dataCxt?.parentData || {}
+  const path = dataCxt?.instancePath || null
 
   if (!path || !block) {
-    return true;
+    return true
   }
 
   // Get the stage's service names
-  const serviceNames = getServiceNamesFromPath(path, dataCxt?.rootData);
+  const serviceNames = getServiceNamesFromPath(path, dataCxt?.rootData)
 
   // Detect any service names that are not available within the schema
-  const irrelevantServices = difference(links, serviceNames);
-  return isEmpty(irrelevantServices);
-};
+  const irrelevantServices = difference(links, serviceNames)
+  return isEmpty(irrelevantServices)
+}
 
 /**
  * Returns or creates an Ajv instance
@@ -126,24 +132,27 @@ export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): b
  * @returns {Ajv} the Ajv instance
  */
 export const getAjv = (opts: AjvOptions = {}): Ajv => {
-  const ajv = new Ajv(defaults({ ...opts }, AJV_OPTIONS));
+  const ajv = new Ajv(defaults({ ...opts }, AJV_OPTIONS))
 
-  addFormats(ajv);
+  addFormats(ajv)
 
-  addErrors(ajv, { // https://ajv.js.org/packages/ajv-errors.html
+  addErrors(ajv, {
+    // https://ajv.js.org/packages/ajv-errors.html
     keepErrors: false,
     singleError: false,
-  });
+  })
 
-  ajv.addKeyword({  // no-op for config generator
+  ajv.addKeyword({
+    // no-op for config generator
     keyword: 'isIncludedInConfigGeneration',
     type: 'boolean',
-  });
+  })
 
-  ajv.addKeyword({  // no-op for config generator
+  ajv.addKeyword({
+    // no-op for config generator
     keyword: 'serviceConfigGenerationTemplate',
     type: 'string',
-  });
+  })
 
   ajv.addKeyword({
     keyword: 'serviceLinks',
@@ -151,31 +160,31 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
     errors: true,
     error: { message: 'Invalid links provided for the service' },
     compile: () => validateServiceLinks,
-  });
+  })
 
   ajv.addKeyword({
     keyword: 'serviceProfile',
     type: 'string',
     error: { message: 'Invalid service profile defined' },
     compile: () => validateServiceProfile,
-  });
+  })
 
   ajv.addKeyword({
     keyword: 'serviceProfileOverrides',
     type: 'object',
     error: { message: 'Invalid profile overrides defined' },
     compile: () => validateServiceProfileOverrides,
-  });
+  })
 
   ajv.addKeyword({
     keyword: 'isIpOrCidr',
     type: 'string',
     error: { message: 'Invalid IP specified' },
     compile: () => isAddressValid,
-  });
+  })
 
-  return ajv;
-};
+  return ajv
+}
 
 /**
  * Loads the main json schema into ajv
@@ -186,17 +195,15 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
  * @param {Boolean} opts.refresh whether to refresh the schema on the ajv instance
  * @void
  */
-export const loadJsonSchema = (
-  ajv: Ajv, schemaKey = JSON_SCHEMA_KEY, { refresh = false } = {},
-) => {
+export const loadJsonSchema = (ajv: Ajv, schemaKey = JSON_SCHEMA_KEY, { refresh = false } = {}) => {
   if (ajv.schemas[schemaKey] && !refresh) {
-    return;
+    return
   } else if (refresh) {
-    ajv.removeSchema(schemaKey);
+    ajv.removeSchema(schemaKey)
   }
 
-  ajv.addSchema(readSchemaFile(), schemaKey);
-};
+  ajv.addSchema(readSchemaFile(), schemaKey)
+}
 
 /**
  * Validates an attribute-set against a schema id found in the schema
@@ -206,30 +213,28 @@ export const loadJsonSchema = (
  * @param {AjvOptions} options any Ajv options to use
  * @returns {Object} the clean / validated attributes
  */
-export const validate = (
-  schemaId: string, data: any, options: AjvOptions = {},
-): any => {
+export const validate = (schemaId: string, data: any, options: AjvOptions = {}): any => {
   if (!schemaId) {
-    throw new Error('A schema ID should be provided');
+    throw new Error('A schema ID should be provided')
   }
 
-  const ajv = getAjv(options);
-  loadJsonSchema(ajv);
+  const ajv = getAjv(options)
+  loadJsonSchema(ajv)
 
-  const validData = options.useDefaults ? cloneDeep(data) : data;
-  const validateData = ajv.getSchema(schemaId);
+  const validData = options.useDefaults ? cloneDeep(data) : data
+  const validateData = ajv.getSchema(schemaId)
 
   if (!validateData) {
-    throw new Error(`Invalid schema definition “${schemaId}”`);
+    throw new Error(`Invalid schema definition “${schemaId}”`)
   }
 
   if (!validateData(validData) && !isEmpty(validateData.errors)) {
     const errors = parseErrors(validateData.errors || [])
-    throw new ValidationError(`Error while validating schema ${schemaId}`, errors);
+    throw new ValidationError(`Error while validating schema ${schemaId}`, errors)
   }
 
-  return validData;
-};
+  return validData
+}
 
 /**
  * Validates a single property in the schema
@@ -239,9 +244,8 @@ export const validate = (
  * @param {String} root the root for the property
  * @returns {Any}
  */
-export const validateProperty = (property: string, data: any, root = JSON_SCHEMA_ROOT): any => (
+export const validateProperty = (property: string, data: any, root = JSON_SCHEMA_ROOT): any =>
   validate(`${root}#/properties/${property}`, data)
-);
 
 /**
  * Parses Ajv errors to custom, error descriptors
@@ -250,16 +254,16 @@ export const validateProperty = (property: string, data: any, root = JSON_SCHEMA
  * @returns {ValidationErrorDescriptor[]} the parsed errors
  */
 export const parseErrors = (errors: AjvErrorObject[]): ValidationErrorDescriptor[] => {
-  const errs = errors.filter(
-    ({ keyword }) => !['if', 'then'].includes(keyword),
-  ).map(({ instancePath, message }) => {
-    const path = instancePath.replace(/\//g, '.').replace(/^\.(.*)/gi, '$1');
-    const defaultMessage = `Property ${path} is invalid`;
-    return { path, message: message || defaultMessage };
-  });
+  const errs = errors
+    .filter(({ keyword }) => !['if', 'then'].includes(keyword))
+    .map(({ instancePath, message }) => {
+      const path = instancePath.replace(/\//g, '.').replace(/^\.(.*)/gi, '$1')
+      const defaultMessage = `Property ${path} is invalid`
+      return { path, message: message || defaultMessage }
+    })
 
-  return uniqBy(errs, ({ path, message }) => `${path}-${message}`);
-};
+  return uniqBy(errs, ({ path, message }) => `${path}-${message}`)
+}
 
 /**
  * Validates an operation's environment variables
@@ -268,24 +272,25 @@ export const parseErrors = (errors: AjvErrorObject[]): ValidationErrorDescriptor
  * @throws {Error} if the environment is not properly set up
  */
 export const validateEnvironment = (required: ServiceEnvironment[], env = process.env): void => {
-  const missing: string[] = [];
+  const missing: string[] = []
 
   required.forEach((envVar) => {
     if (!envVar.required) {
-      return false;
+      return false
     }
 
     if (!(envVar.name in env)) {
-      missing.push(envVar.name);
+      missing.push(envVar.name)
     }
-  });
+  })
 
   if (!isEmpty(missing)) {
     throw new EnvironmentValidationError(
-      `Your environment is missing some variables: ${missing.join(', ')}`, missing,
-    );
+      `Your environment is missing some variables: ${missing.join(', ')}`,
+      missing,
+    )
   }
-};
+}
 
 /**
  * Validates a project configuration
@@ -294,17 +299,15 @@ export const validateEnvironment = (required: ServiceEnvironment[], env = proces
  * @param {AjvOptions} opts any options to pass to Ajv
  * @returns {Project} the validated project
  */
-export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project => (
+export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project =>
   validate(JSON_SCHEMA_ROOT, config, opts) as unknown as Project
-);
 
 export const validateServiceConfig = (cfg: BaseServiceAttributes): BaseServiceAttributes => {
-  const { schemaId } = Registry.fromConfig(cfg);
-  return validate(schemaId, cfg, { useDefaults: true });
-};
+  const { schemaId } = Registry.fromConfig(cfg)
+  return validate(schemaId, cfg, { useDefaults: true })
+}
 
-export const validateServices = () => (
-  services: BaseServiceAttributes[],
-): BaseServiceAttributes[] => (
-  services.map(srv => validateServiceConfig(srv))
-);
+export const validateServices =
+  () =>
+  (services: BaseServiceAttributes[]): BaseServiceAttributes[] =>
+    services.map((srv) => validateServiceConfig(srv))

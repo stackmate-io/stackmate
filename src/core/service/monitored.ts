@@ -1,15 +1,16 @@
-import { ServiceSchema } from '@core/schema';
-import { BaseServiceAttributes, withSchema } from './core';
+import type { ServiceSchema } from '@core/schema'
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {MonitoringAttributes} the configuration to use for setting up the alerts
  */
 export type MonitoringAttributes = {
   monitoring: {
-    emails: string[];
-    urls: string[];
-  };
-};
+    emails: string[]
+    urls: string[]
+  }
+}
 
 /**
  * @returns {ServiceSchema} the schema to use when validating alerting services
@@ -49,12 +50,10 @@ export const getMonitoringSchema = (): ServiceSchema<MonitoringAttributes> => ({
       },
     },
   },
-});
+})
 
 /**
  * @returns {Function<Service>}
  */
-export const monitored = <C extends BaseServiceAttributes>(
-) => withSchema<C, MonitoringAttributes>(
-  getMonitoringSchema(),
-);
+export const monitored = <C extends BaseServiceAttributes>() =>
+  withSchema<C, MonitoringAttributes>(getMonitoringSchema())

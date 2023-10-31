@@ -5,6 +5,8 @@
   },
   "exclude": [
     "src/bin/json-schema.ts",
+    "jest.setup.ts",
+    "jest.config.ts",
     "dist",
     "node_modules",
     "tests"

@@ -1,12 +1,13 @@
-import { MinMax } from '@lib/util';
-import { DEFAULT_SERVICE_STORAGE } from '@constants';
-import { BaseServiceAttributes, withSchema } from './core';
+import type { MinMax } from '@lib/util'
+import { DEFAULT_SERVICE_STORAGE } from '@constants'
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {StorableAttributes} storage specific attributes
  */
 
-export type StorableAttributes = { storage: number; };
+export type StorableAttributes = { storage: number }
 /**
  * Adds storage support to a service (eg. the database storage size)
  *
@@ -18,19 +19,21 @@ export type StorableAttributes = { storage: number; };
  */
 
 export const storable = <C extends BaseServiceAttributes>(
-  defaultValue = DEFAULT_SERVICE_STORAGE, { min = 1, max = 100000 }: MinMax = {}
-) => withSchema<C, StorableAttributes>({
-  type: 'object',
-  properties: {
-    storage: {
-      type: 'number',
-      minimum: min,
-      maximum: max,
-      default: defaultValue,
-      errorMessage: {
-        minimum: `The storage must be be between ${min} and ${max}`,
-        maximum: `The storage must be be between ${min} and ${max}`,
+  defaultValue = DEFAULT_SERVICE_STORAGE,
+  { min = 1, max = 100000 }: MinMax = {},
+) =>
+  withSchema<C, StorableAttributes>({
+    type: 'object',
+    properties: {
+      storage: {
+        type: 'number',
+        minimum: min,
+        maximum: max,
+        default: defaultValue,
+        errorMessage: {
+          minimum: `The storage must be be between ${min} and ${max}`,
+          maximum: `The storage must be be between ${min} and ${max}`,
+        },
       },
     },
-  }
-});
+  })
