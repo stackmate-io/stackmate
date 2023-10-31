@@ -20,6 +20,11 @@
     {
       "files": ["*.ts"],
       "rules": {
+        "operator-linebreak": [
+          "error",
+          "before"
+        ],
+        "quotes": ["error", "single"],
         "@typescript-eslint/semi": ["error", "never"],
         "semi": [
           "error",
