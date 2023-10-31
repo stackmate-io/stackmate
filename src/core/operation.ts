@@ -332,9 +332,6 @@ export const setup = (project: Project, stage: string) => (
 export const getOperationByName = (
   operation: OperationType, project: Project, stage: string,
 ): Operation => {
-  if (operation === 'deployment' || operation === 'setup' || operation === 'destruction' || operation === '') {
-    throw new Error('ok')
-  }
   switch (operation) {
     case OPERATION_TYPE.DEPLOYMENT:
       return deployment(project, stage)
