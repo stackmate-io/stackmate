@@ -4,6 +4,7 @@
     "source.organizeImports": "never"
   },
   "eslint.validate": [
-    "typescript"
+    "typescript",
+    "javascript"
   ]
 }
