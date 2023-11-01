@@ -150,7 +150,6 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
 export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
-  Scope extends ServiceScopeChoice,
   Context extends Obj = Obj,
   Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
 > = BaseProvisionable<Attrs> & {
@@ -158,7 +157,7 @@ export type Provisionable<
   config: Attrs
   provisions: Provs
   context: Context
-  requirements: ExtractServiceRequirements<Srv['associations'], Scope>
+  requirements: ExtractServiceRequirements<Srv['associations'], 'TODO:REMOVE'>
 }
 
 /**

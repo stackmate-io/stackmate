@@ -7,8 +7,8 @@ import {
 } from '@cdktf/provider-aws'
 
 import type {
+  AwsSecretsProvisionable,
   AwsSecretsVaultAttributes,
-  AwsSecretsVaultDeployableProvisionable,
 } from '@providers/aws/services/secrets'
 import { AwsSecretsVault, generateCredentials } from '@providers/aws/services/secrets'
 import type { BaseProvisionable } from '@core/service'
@@ -84,11 +84,7 @@ describe('AWS Secrets service', () => {
     })
 
     it('registers the provision credentials terraform resources', () => {
-      const resources = generateCredentials(
-        vault as AwsSecretsVaultDeployableProvisionable,
-        stack,
-        target,
-      )
+      const resources = generateCredentials(vault, stack, target)
       expect(resources).toBeInstanceOf(Object)
       expect(resources.username).toBeInstanceOf(TerraformLocal)
       expect(resources.password).toBeInstanceOf(TerraformLocal)
@@ -105,11 +101,7 @@ describe('AWS Secrets service', () => {
     })
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(
-        vault as AwsSecretsVaultDeployableProvisionable,
-        stack,
-        target,
-      )
+      const credentials = service.credentials(vault as AwsSecretsProvisionable, stack, target)
       expect(credentials).toBeInstanceOf(Object)
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi
       expect(credentials.username.asString).toEqual(expect.stringMatching(reg))

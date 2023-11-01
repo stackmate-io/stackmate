@@ -13,7 +13,7 @@ import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
-import type { ChoiceOf, Obj, OneOfType } from '@lib/util'
+import type { ChoiceOf, Obj } from '@lib/util'
 import type {
   BaseService,
   BaseServiceAttributes,
@@ -31,9 +31,7 @@ import type {
 import { associate, getCloudService, getCoreService, withRegions } from '@core/service'
 import type {
   AwsProviderAttributes,
-  AwsProviderDeployableProvisionable,
-  AwsProviderDestroyableProvisionable,
-  AwsProviderPreparableProvisionable,
+  AwsProviderProvisionable,
 } from '@providers/aws/services/provider'
 import type {
   AwsAlarmPrerequisites,
@@ -85,24 +83,14 @@ export type AwsService<
   Assocs extends ServiceAssociations = Obj,
 > = Service<AwsServiceAttributes<Attrs>, AwsServiceAssociations & Assocs>
 
-type ProviderProvisionable = OneOfType<
-  [
-    AwsProviderDeployableProvisionable,
-    AwsProviderDestroyableProvisionable,
-    AwsProviderPreparableProvisionable,
-  ]
->
-
 type LinkableServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & LinkableAttributes & ConnectableAttributes>,
-  Provisions,
-  'deployable'
+  Provisions
 >
 
 type ExternallyLinkableServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & ExternallyLinkableAttributes & ConnectableAttributes>,
-  Provisions,
-  'deployable'
+  Provisions
 >
 
 /**
@@ -113,7 +101,7 @@ const getProviderInstanceRequirement = (): ProviderRequirement => ({
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) =>
     config.provider === linked.provider && config.region === linked.region,
-  handler: (p: ProviderProvisionable): terraformAwsProvider.AwsProvider => p.provisions.provider,
+  handler: (p: AwsProviderProvisionable): terraformAwsProvider.AwsProvider => p.provisions.provider,
 })
 
 /**
@@ -124,7 +112,7 @@ const getAccountRequirement = (): AccountRequirement => ({
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
     config.provider === linked.provider && config.region === linked.region,
-  handler: (prov: ProviderProvisionable): dataAwsCallerIdentity.DataAwsCallerIdentity =>
+  handler: (prov: AwsProviderProvisionable): dataAwsCallerIdentity.DataAwsCallerIdentity =>
     prov.provisions.account,
 })
 
@@ -136,9 +124,7 @@ const getKmsKeyRequirement = (): KmsKeyRequirement => ({
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
     config.provider === linked.provider && config.region === linked.region,
-  handler: (
-    prov: AwsProviderDeployableProvisionable | AwsProviderPreparableProvisionable,
-  ): kmsKey.KmsKey => prov.provisions.kmsKey,
+  handler: (prov: AwsProviderProvisionable): kmsKey.KmsKey => prov.provisions.kmsKey,
 })
 
 /**
@@ -149,7 +135,7 @@ const getVpcRequirement = (): VpcRequirement => ({
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
     config.provider === linked.provider && config.region === linked.region,
-  handler: (prov: AwsProviderDeployableProvisionable): vpc.Vpc => prov.provisions.vpc,
+  handler: (prov: AwsProviderProvisionable): vpc.Vpc => prov.provisions.vpc,
 })
 
 /**

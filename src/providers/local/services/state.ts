@@ -22,11 +22,7 @@ export type LocalStateService = Service<LocalStateAttributes> & {
   associations: LocalServiceAssociations
 }
 
-export type LocalStateProvisionable = Provisionable<
-  LocalStateService,
-  LocalStateResources,
-  'preparable'
->
+export type LocalStateProvisionable = Provisionable<LocalStateService, LocalStateResources>
 
 export const resourceHandler = (
   provisionable: LocalStateProvisionable,

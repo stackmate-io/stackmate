@@ -6,7 +6,7 @@ import { kebabCase, snakeCase } from 'lodash'
 import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws'
 
 import type { Stack } from '@core/stack'
-import type { AwsDatabaseDeployableProvisionable } from '@providers/aws/services/database'
+import type { AwsDatabaseProvisionable } from '@providers/aws/services/database'
 import type { AwsServiceAlertsGenerator } from '@providers/aws/service'
 import type { AwsServiceAlarmResources, AwsAlarmPrerequisites } from '@providers/aws/alarms'
 
@@ -60,9 +60,9 @@ export type DatabasebAlertResources =
     }
 
 export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
-  provisionable: AwsDatabaseDeployableProvisionable,
+  provisionable: AwsDatabaseProvisionable,
   stack: Stack,
-  resources: AwsDatabaseDeployableProvisionable['provisions'],
+  resources: AwsDatabaseProvisionable['provisions'],
   prerequisites: AwsAlarmPrerequisites,
 ): DatabasebAlertResources => {
   const { topic } = prerequisites

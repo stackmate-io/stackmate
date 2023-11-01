@@ -7,15 +7,9 @@ import type {
   BaseServiceAttributes,
   CredentialsHandlerOptions,
 } from '@core/service'
-import type {
-  AwsProviderDeployableProvisionable,
-  AwsProviderDeployableResources,
-} from '@providers/aws/services/provider'
+import type { AwsProviderDeployableResources } from '@providers/aws/services/provider'
 import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
-import type {
-  AwsSecretsDeployableResources,
-  AwsSecretsVaultDeployableProvisionable,
-} from '@providers/aws/services/secrets'
+import type { AwsSecretsDeployableResources } from '@providers/aws/services/secrets'
 import { generateCredentials } from '@providers/aws/services/secrets'
 
 export const getProviderResources = (stack: Stack): AwsProviderDeployableResources => {
@@ -26,7 +20,7 @@ export const getProviderResources = (stack: Stack): AwsProviderDeployableResourc
     region: DEFAULT_REGION,
   })
 
-  return providerDeployHandler(provisionable as AwsProviderDeployableProvisionable, stack)
+  return providerDeployHandler(provisionable, stack)
 }
 
 export const getCredentialResources = (
@@ -44,12 +38,7 @@ export const getCredentialResources = (
 
   Object.assign(provisionable, { requirements: providerResources })
 
-  return generateCredentials(
-    provisionable as AwsSecretsVaultDeployableProvisionable,
-    stack,
-    target,
-    opts,
-  )
+  return generateCredentials(provisionable, stack, target, opts)
 }
 
 export const getAwsDeploymentProvisionableMock = <P extends BaseProvisionable>(

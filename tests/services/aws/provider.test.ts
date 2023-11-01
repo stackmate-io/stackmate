@@ -9,7 +9,6 @@ import {
 import type {
   AwsProviderDeployableResources,
   AwsProviderAttributes,
-  AwsProviderDeployableProvisionable,
 } from '@providers/aws/services/provider'
 import { AwsProvider } from '@providers/aws/services/provider'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
@@ -76,10 +75,7 @@ describe('AWS Provider', () => {
     })
 
     it('registers the service into the stack and creates the resources', () => {
-      const resources = service.handler(
-        provisionable as AwsProviderDeployableProvisionable,
-        stack,
-      ) as AwsProviderDeployableResources
+      const resources = service.handler(provisionable, stack) as AwsProviderDeployableResources
 
       expect(resources).toBeInstanceOf(Object)
       expect(new Set(Object.keys(resources))).toEqual(

@@ -20,7 +20,7 @@ import type {
   AwsMariaDBAttributes,
   AwsMySQLAttributes,
   AwsPostgreSQLAttributes,
-  AwsDatabaseDeployableProvisionable,
+  AwsDatabaseProvisionable,
 } from '@providers/aws/services/database'
 import {
   AWSMariaDB,
@@ -122,7 +122,7 @@ describe('AWS PostgreSQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -177,7 +177,7 @@ describe('AWS MySQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -231,7 +231,7 @@ describe('AWS MariaDB', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -269,7 +269,7 @@ describe('Database service monitoring', () => {
       },
     }
 
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
+    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },

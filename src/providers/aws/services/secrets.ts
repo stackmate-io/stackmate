@@ -36,23 +36,9 @@ export type AwsSecretsDestroyableResources = Obj
 export type AwsSecretsPreparableResources = Obj
 
 export type AwsSecretsVaultService = SecretsVaultService<AwsService<AwsSecretsVaultAttributes>>
-
-export type AwsSecretsVaultDeployableProvisionable = Provisionable<
+export type AwsSecretsProvisionable = Provisionable<
   AwsSecretsVaultService,
-  AwsSecretsDeployableResources,
-  'deployable'
->
-
-export type AwsSecretsVaultDestroyableProvisionable = Provisionable<
-  AwsSecretsVaultService,
-  AwsSecretsDestroyableResources,
-  'destroyable'
->
-
-export type AwsSecretsVaultPreparableProvisionable = Provisionable<
-  AwsSecretsVaultService,
-  AwsSecretsDestroyableResources,
-  'preparable'
+  AwsSecretsDeployableResources
 >
 
 type ProvisionCredentialsResources = Credentials & {
@@ -63,13 +49,13 @@ type ProvisionCredentialsResources = Credentials & {
 }
 
 /**
- * @param {AwsSecretsVaultDeployableProvisionable} provisionable the vault's provisionable
+ * @param {AwsSecretsProvisionable} provisionable the vault's provisionable
  * @param {Stack} stack the stack to deploy resources on
  * @param {CredentialsHandlerOptions} opts the credential handler's options
  * @returns {ProvisionCredentialsResources} the credentials objects
  */
 export const generateCredentials = (
-  vault: AwsSecretsVaultDeployableProvisionable,
+  vault: AwsSecretsProvisionable,
   stack: Stack,
   target: BaseProvisionable,
   options: CredentialsHandlerOptions = {},
