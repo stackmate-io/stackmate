@@ -22,9 +22,7 @@ type ProviderRequirement = ServiceRequirement<
 >
 
 export type LocalServiceAssociations = {
-  preparable: {
-    providerInstance: ProviderRequirement
-  }
+  providerInstance: ProviderRequirement
 }
 
 export type LocalServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
@@ -40,15 +38,13 @@ export type LocalService<
  * @var {LocalServiceAssociations} associations Service Associations applied to all local services
  */
 const associations: LocalServiceAssociations = {
-  preparable: {
-    providerInstance: {
-      with: SERVICE_TYPE.PROVIDER,
-      requirement: true,
-      where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) =>
-        config.provider === linked.provider,
-      handler: (p: LocalProviderProvisionable): terraformLocalProvider.LocalProvider => {
-        return p.provisions.provider
-      },
+  providerInstance: {
+    with: SERVICE_TYPE.PROVIDER,
+    requirement: true,
+    where: (config: LocalProviderAttributes, linked: BaseServiceAttributes) =>
+      config.provider === linked.provider,
+    handler: (p: LocalProviderProvisionable): terraformLocalProvider.LocalProvider => {
+      return p.provisions.provider
     },
   },
 }

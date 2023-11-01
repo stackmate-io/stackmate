@@ -1,4 +1,4 @@
-import { get, merge } from 'lodash'
+import { merge } from 'lodash'
 import { CORE_SERVICE_TYPES } from '@constants'
 import { mergeServiceSchemas } from '@core/schema'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
@@ -112,18 +112,13 @@ export type ServiceSideEffect<Ret extends AssociationReturnType = ProvisionResou
 /**
  * @type {ServiceAssociations} the service's associations
  */
-export type ServiceAssociations = {
-  [K in ServiceScopeChoice]?: Record<string, Association<any>>
-}
+export type ServiceAssociations = Record<string, Association<any>>
 
 /**
  * @type {ExtractServiceRequirements} extracts service requirements from its associations
  */
-type ExtractServiceRequirements<
-  Associations extends ServiceAssociations,
-  Scope extends ServiceScopeChoice,
-> = {
-  [K in keyof Associations[Scope]]: Associations[Scope][K] extends infer A extends Association<any>
+type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
+  [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
     ? A['requirement'] extends true
       ? ReturnType<A['handler']>
       : never
@@ -157,7 +152,7 @@ export type Provisionable<
   config: Attrs
   provisions: Provs
   context: Context
-  requirements: ExtractServiceRequirements<Srv['associations'], 'TODO:REMOVE'>
+  requirements: ExtractServiceRequirements<Srv['associations']>
 }
 
 /**
@@ -460,16 +455,11 @@ export const withEnvironment =
  * @param {ServiceScopeChoice} scope the scope for the services
  * @throws {Error} if a requirement is not satisfied
  */
-export const assertRequirementsSatisfied = (
-  provisionable: BaseProvisionable,
-  scope: ServiceScopeChoice,
-) => {
+export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
   const {
-    service: { associations: allAssociations, type },
+    service: { associations, type },
     requirements,
   } = provisionable
-  const associations: ServiceAssociations[ServiceScopeChoice] = get(allAssociations, scope, {})
-
   if (!associations) {
     return
   }
