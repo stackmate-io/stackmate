@@ -43,7 +43,6 @@ import {
   withDatabase,
   withEngine,
   withHandler,
-  withConfigHints,
   connectable,
   linkable,
   externallyLinkable,
@@ -190,15 +189,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     throw new Error(`There is no default port set for service ${type}`)
   }
 
-  const hints = {
-    name: {
-      isIncludedInConfigGeneration: true,
-      serviceConfigGenerationTemplate: '${type}-${stageName}-database',
-    },
-  }
-
   return pipe(
-    withConfigHints(hints),
     withRootCredentials(),
     withHandler(resourceHandler),
     linkable(onServiceLinked),

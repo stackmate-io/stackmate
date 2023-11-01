@@ -143,18 +143,6 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   })
 
   ajv.addKeyword({
-    // no-op for config generator
-    keyword: 'isIncludedInConfigGeneration',
-    type: 'boolean',
-  })
-
-  ajv.addKeyword({
-    // no-op for config generator
-    keyword: 'serviceConfigGenerationTemplate',
-    type: 'string',
-  })
-
-  ajv.addKeyword({
     keyword: 'serviceLinks',
     async: false,
     errors: true,

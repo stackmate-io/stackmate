@@ -45,8 +45,6 @@ describe('AWS state', () => {
           type: 'string',
           minLength: 3,
           maxLength: 63,
-          isIncludedInConfigGeneration: true,
-          serviceConfigGenerationTemplate: 'stackmate-state-${projectName}',
         },
       },
     })
