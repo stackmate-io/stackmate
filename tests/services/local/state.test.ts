@@ -1,6 +1,6 @@
 import { LocalBackend } from 'cdktf'
-import type { LocalStateAttributes, LocalStateProvisionable } from '@providers/local/services/state'
-import { LocalState, onPrepare } from '@providers/local/services/state'
+import type { LocalStateAttributes } from '@providers/local/services/state'
+import { LocalState } from '@providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getProvisionable } from '@core/operation'
 import { Stack } from '@core/stack'
@@ -11,12 +11,6 @@ describe('Local state', () => {
   it('is a valid local state service', () => {
     expect(service.provider).toEqual(PROVIDER.LOCAL)
     expect(service.type).toEqual(SERVICE_TYPE.STATE)
-  })
-
-  it('has the handlers registered only for the preparable scope', () => {
-    expect(service.handlers.get('preparable')).toEqual(onPrepare)
-    expect(service.handlers.get('deployable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
   })
 
   it('provides the right schema', () => {
@@ -43,7 +37,7 @@ describe('Local state', () => {
     })
   })
 
-  describe('onPrepare provision handler', () => {
+  describe('provision handler', () => {
     const stack = new Stack('stack-name')
     const config: LocalStateAttributes = {
       name: 'local-state',
@@ -54,7 +48,7 @@ describe('Local state', () => {
     const provisionable = getProvisionable(config)
 
     it('registers the local state backend', () => {
-      const resources = onPrepare(provisionable as LocalStateProvisionable, stack)
+      const resources = service.handler(provisionable, stack)
       expect(resources).toBeInstanceOf(Object)
       expect(Object.keys(resources)).toEqual(['backend'])
       expect(resources.backend).toBeInstanceOf(LocalBackend)

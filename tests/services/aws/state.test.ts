@@ -1,5 +1,4 @@
 import { TerraformBackend } from 'cdktf'
-
 import { Stack } from '@core/stack'
 import { AwsState } from '@providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
@@ -72,7 +71,7 @@ describe('AWS state', () => {
     })
 
     it('registers the backend', () => {
-      const resources = AwsState.handler(provisionable, stack)
+      const resources = service.handler(provisionable, stack)
       expect(Object.keys(resources)).toEqual(['backend'])
 
       const { backend } = resources

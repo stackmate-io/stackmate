@@ -1,11 +1,11 @@
 import { get, merge } from 'lodash'
+import { CORE_SERVICE_TYPES } from '@constants'
+import { mergeServiceSchemas } from '@core/schema'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { Stack } from '@core/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'
-import { CORE_SERVICE_TYPES } from '@constants'
 import type { ServiceSchema, JsonSchema } from '@core/schema'
-import { mergeServiceSchemas } from '@core/schema'
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -205,7 +205,6 @@ export type Service<
   schema: ServiceSchema<Setup>
   environment: ServiceEnvironment[]
   handler: ProvisionHandler
-  handlers: Map<ServiceScopeChoice, ProvisionHandler>
   associations: Associations
 }
 
@@ -310,7 +309,9 @@ export const getCoreService = (
     schema,
     schemaId,
     environment: [],
-    handlers: new Map(),
+    handler: () => {
+      throw new Error('You have to register a handler for the service')
+    },
     associations: {
       deployable: {},
       preparable: {},
