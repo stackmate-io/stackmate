@@ -1,0 +1,133 @@
+{
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
+    "plugin:import/warnings",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "unused-imports",
+    "import",
+    "prettier",
+    "jest"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "printWidth": 100,
+        "semi": false,
+        "singleQuote": true,
+        "tabWidth": 2,
+        "trailingComma": "all"
+      }
+    ],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/newline-after-import.md
+    "import/newline-after-import": [
+      "error"
+    ],
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-duplicates.md
+    "import/no-duplicates": [
+      "error"
+    ],
+
+    // https://www.npmjs.com/package/eslint-plugin-unused-imports
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
+      {
+        "multiline": {
+          "delimiter": "none",
+          "requireLast": true
+        },
+        "singleline": {
+          "delimiter": "semi",
+          "requireLast": false
+        },
+        "multilineDetection": "brackets"
+      }
+    ],
+
+    // https://typescript-eslint.io/rules/no-unnecessary-type-arguments/
+    "@typescript-eslint/no-unnecessary-type-arguments": "error",
+
+    // disallow reassignment of function parameters
+    // disallow parameter object manipulation except for specific exclusions
+    // rule: https://eslint.org/docs/rules/no-param-reassign.html
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": [
+          "acc", // for reduce accumulators
+          "accumulator", // for reduce accumulators
+          "e", // for e.returnvalue
+          "req", // for Express requests
+          "request", // for Express requests
+          "res", // for Express responses
+          "response" // for Express responses
+        ]
+      }
+    ],
+
+    // require the use of === and !==
+    // https://eslint.org/docs/rules/eqeqeq
+    "eqeqeq": [
+      "error",
+      "always",
+      {
+        "null": "ignore"
+      }
+    ],
+
+    // https://eslint.org/docs/latest/rules/array-element-newline
+    "array-element-newline": [
+      "error",
+      "consistent"
+    ],
+
+    // https://www.npmjs.com/package/eslint-plugin-jest
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "jest/prefer-to-have-length": "warn",
+    "jest/valid-expect": "warn",
+
+    // specify curly brace conventions for all control statements
+    // https://eslint.org/docs/rules/curly
+    "curly": [
+      "error",
+      "multi-line"
+    ],
+
+    // https://typescript-eslint.io/rules/consistent-type-imports/
+    "@typescript-eslint/consistent-type-imports": "error",
+
+    "@typescript-eslint/no-explicit-any": "warn",
+
+    // Warn about the use of console
+    "no-console": "warn"
+  }
+}

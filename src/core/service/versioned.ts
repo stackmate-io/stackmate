@@ -1,10 +1,11 @@
-import { BaseServiceAttributes, withSchema } from './core';
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {VersioningAttributes} version attributes
  */
 
-export type VersioningAttributes = { version: string; };
+export type VersioningAttributes = { version: string }
 /**
  * Adds version support to a service (eg. database version to run)
  *
@@ -14,14 +15,16 @@ export type VersioningAttributes = { version: string; };
  */
 
 export const versioned = <C extends BaseServiceAttributes>(
-  versions: readonly string[], defaultVersion: string
-) => withSchema<C, VersioningAttributes>({
-  type: 'object',
-  properties: {
-    version: {
-      type: 'string',
-      enum: versions,
-      default: defaultVersion,
+  versions: readonly string[],
+  defaultVersion: string,
+) =>
+  withSchema<C, VersioningAttributes>({
+    type: 'object',
+    properties: {
+      version: {
+        type: 'string',
+        enum: versions,
+        default: defaultVersion,
+      },
     },
-  }
-});
+  })

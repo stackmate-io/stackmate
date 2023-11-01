@@ -1,6 +1,6 @@
-import { dbInstance } from '@cdktf/provider-aws';
+import type { dbInstance } from '@cdktf/provider-aws'
 
-import { instance as instanceDefaults, params } from './default';
+import { instance as instanceDefaults, params } from './default'
 
 const instance: Partial<dbInstance.DbInstanceConfig> = {
   ...instanceDefaults,
@@ -11,9 +11,6 @@ const instance: Partial<dbInstance.DbInstanceConfig> = {
   multiAz: false,
   skipFinalSnapshot: false,
   storageType: 'gp2',
-};
+}
 
-export {
-  instance,
-  params,
-};
+export { instance, params }

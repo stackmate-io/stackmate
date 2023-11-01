@@ -1,4 +1,4 @@
-import { dbInstance, dbParameterGroup } from '@cdktf/provider-aws';
+import type { dbInstance, dbParameterGroup } from '@cdktf/provider-aws'
 
 const instance: Partial<dbInstance.DbInstanceConfig> = {
   allowMajorVersionUpgrade: false,
@@ -12,26 +12,29 @@ const instance: Partial<dbInstance.DbInstanceConfig> = {
   publiclyAccessible: false,
   skipFinalSnapshot: true,
   storageType: 'gp2',
-};
+}
 
-const params: dbParameterGroup.DbParameterGroupParameter[] = [{
-  name: 'character_set_server',
-  value: 'utf8mb4',
-}, {
-  name: 'character_set_client',
-  value: 'utf8mb4',
-}, {
-  name: 'character_set_connection',
-  value: 'utf8mb4',
-}, {
-  name: 'character_set_database',
-  value: 'utf8mb4',
-}, {
-  name: 'character_set_results',
-  value: 'utf8mb4',
-}];
+const params: dbParameterGroup.DbParameterGroupParameter[] = [
+  {
+    name: 'character_set_server',
+    value: 'utf8mb4',
+  },
+  {
+    name: 'character_set_client',
+    value: 'utf8mb4',
+  },
+  {
+    name: 'character_set_connection',
+    value: 'utf8mb4',
+  },
+  {
+    name: 'character_set_database',
+    value: 'utf8mb4',
+  },
+  {
+    name: 'character_set_results',
+    value: 'utf8mb4',
+  },
+]
 
-export {
-  instance,
-  params,
-};
+export { instance, params }

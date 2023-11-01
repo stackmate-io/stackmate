@@ -2,41 +2,41 @@
 Credits:
 https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/blob/master/alarms.tf
 */
-import { kebabCase, snakeCase } from 'lodash';
-import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws';
+import { kebabCase, snakeCase } from 'lodash'
+import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws'
 
-import { Stack } from '@core/stack';
-import { AwsDatabaseDeployableProvisionable } from '@providers/aws/services/database';
-import { AwsServiceAlertsGenerator } from '@providers/aws/service';
-import { AwsServiceAlarmResources, AwsAlarmPrerequisites, } from '@providers/aws/alarms';
+import type { Stack } from '@core/stack'
+import type { AwsDatabaseDeployableProvisionable } from '@providers/aws/services/database'
+import type { AwsServiceAlertsGenerator } from '@providers/aws/service'
+import type { AwsServiceAlarmResources, AwsAlarmPrerequisites } from '@providers/aws/alarms'
 
 /**
  * @type {RdsMonitoringThresholds} the monitoring thresholds applicable
  */
 export type RdsMonitoringThresholds = {
   /** The minimum percent of gp2 SSD I/O credits available */
-  burstBalance: number;
+  burstBalance: number
   /** Maximum percentage of CPU utilization */
-  cpuUtilization: number;
+  cpuUtilization: number
   /** Minimum number of credits (t2 class instances only) */
-  cpuCreditBalance: number;
+  cpuCreditBalance: number
   /** Maximum number of outstanding read/write requests that are waiting to access the disk */
-  diskQueueDepth: number;
+  diskQueueDepth: number
   /** The minimum amount of available memory (in bytes) */
-  freeableMemory: number;
+  freeableMemory: number
   /** The minimum amount of available free storage space (in bytes) */
-  freeStorageSpace: number;
+  freeStorageSpace: number
   /** Maximum amount of swap space used (in bytes) */
-  swapUsage: number;
-};
+  swapUsage: number
+}
 
 /**
  * @type {RdsAlarmOptions} the alarm options
  */
 export type RdsAlarmOptions = {
-  evaluationPeriods: number,
-  period: number,
-};
+  evaluationPeriods: number
+  period: number
+}
 
 export const thresholds: RdsMonitoringThresholds = {
   burstBalance: 20,
@@ -46,16 +46,18 @@ export const thresholds: RdsMonitoringThresholds = {
   freeableMemory: 64 * 1024 * 1024, // 64 MB
   freeStorageSpace: 3 * 1024 * 1024 * 1024, // 3 GB
   swapUsage: 256 * 1024 * 1024, // 256MB
-};
+}
 
 export const options: RdsAlarmOptions = {
   evaluationPeriods: 1,
   period: 300,
-};
+}
 
-export type DatabasebAlertResources = AwsServiceAlarmResources | {
-  eventSubscription: dbEventSubscription.DbEventSubscription;
-};
+export type DatabasebAlertResources =
+  | AwsServiceAlarmResources
+  | {
+      eventSubscription: dbEventSubscription.DbEventSubscription
+    }
 
 export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
   provisionable: AwsDatabaseDeployableProvisionable,
@@ -63,13 +65,17 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
   resources: AwsDatabaseDeployableProvisionable['provisions'],
   prerequisites: AwsAlarmPrerequisites,
 ): DatabasebAlertResources => {
-  const { topic } = prerequisites;
-  const { dbInstance } = resources;
-  const { config: { name: serviceName } } = provisionable;
+  const { topic } = prerequisites
+  const { dbInstance } = resources
+  const {
+    config: { name: serviceName },
+  } = provisionable
 
-  const eventSubscriptionId = `${provisionable.resourceId}-event-sub`;
+  const eventSubscriptionId = `${provisionable.resourceId}-event-sub`
   const eventSubscription = new dbEventSubscription.DbEventSubscription(
-    stack.context, eventSubscriptionId, {
+    stack.context,
+    eventSubscriptionId,
+    {
       name: snakeCase(`${serviceName}-${stack.stageName}-event-subscription`),
       snsTopic: topic.arn,
       sourceType: 'db-instance',
@@ -84,7 +90,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
         'recovery',
       ],
     },
-  );
+  )
 
   const opts: Omit<
     cloudwatchMetricAlarm.CloudwatchMetricAlarmConfig,
@@ -98,11 +104,13 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     dimensions: {
       DBInstanceIdentifier: dbInstance.id,
     },
-  };
+  }
 
-  const burstBalanceId = `${kebabCase(serviceName)}-${stack.stageName}-burst-balance-too-low`;
+  const burstBalanceId = `${kebabCase(serviceName)}-${stack.stageName}-burst-balance-too-low`
   const burstBalance = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, burstBalanceId, {
+    stack.context,
+    burstBalanceId,
+    {
       alarmName: snakeCase(burstBalanceId),
       comparisonOperator: 'LessThanThreshold',
       metricName: 'BurstBalance',
@@ -110,73 +118,83 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
       alarmDescription: 'Average database storage burst balance over last 5 minutes too low',
       ...opts,
     },
-  );
+  )
 
-  const cpuUtilizationId = `${kebabCase(serviceName)}-${stack.stageName}-cpu-utilization-too-high`;
+  const cpuUtilizationId = `${kebabCase(serviceName)}-${stack.stageName}-cpu-utilization-too-high`
   const cpuUtilization = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, cpuUtilizationId, {
+    stack.context,
+    cpuUtilizationId,
+    {
       alarmName: snakeCase(cpuUtilizationId),
       comparisonOperator: 'GreaterThanThreshold',
       metricName: 'CPUUtilization',
       threshold: thresholds.cpuUtilization,
       ...opts,
     },
-  );
+  )
 
-  const cpuUCreditBalanceId = `${kebabCase(serviceName)}-${stack.stageName}-cpu-credit-balance-too-low`;
+  const cpuUCreditBalanceId = `${kebabCase(serviceName)}-${
+    stack.stageName
+  }-cpu-credit-balance-too-low`
   const cpuCreditBalance = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, cpuUCreditBalanceId, {
+    stack.context,
+    cpuUCreditBalanceId,
+    {
       alarmName: snakeCase(cpuUCreditBalanceId),
       comparisonOperator: 'LessThanThreshold',
       metricName: 'CPUCreditBalance',
       threshold: thresholds.cpuCreditBalance,
       ...opts,
     },
-  );
+  )
 
-  const diskQueueDepthId = `${kebabCase(serviceName)}-${stack.stageName}-disk-depth-too-high`;
+  const diskQueueDepthId = `${kebabCase(serviceName)}-${stack.stageName}-disk-depth-too-high`
   const diskQueueDepth = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, diskQueueDepthId, {
+    stack.context,
+    diskQueueDepthId,
+    {
       alarmName: snakeCase(diskQueueDepthId),
       comparisonOperator: 'GreaterThanThreshold',
       metricName: 'DiskQueueDepth',
       threshold: thresholds.diskQueueDepth,
       ...opts,
     },
-  );
+  )
 
-  const freeableMemoryId = `${kebabCase(serviceName)}-${stack.stageName}-freeable-memory-too-low`;
+  const freeableMemoryId = `${kebabCase(serviceName)}-${stack.stageName}-freeable-memory-too-low`
   const freeableMemory = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, freeableMemoryId, {
+    stack.context,
+    freeableMemoryId,
+    {
       alarmName: snakeCase(freeableMemoryId),
       comparisonOperator: 'LessThanThreshold',
       metricName: 'FreeableMemory',
       threshold: thresholds.freeableMemory,
       ...opts,
     },
-  );
+  )
 
-  const freeStorageId = `${kebabCase(serviceName)}-${stack.stageName}-free-storage-space-too-low`;
+  const freeStorageId = `${kebabCase(serviceName)}-${stack.stageName}-free-storage-space-too-low`
   const freeStorage = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, freeStorageId, {
+    stack.context,
+    freeStorageId,
+    {
       alarmName: snakeCase(freeStorageId),
       comparisonOperator: 'LessThanThreshold',
       metricName: 'FreeStorageSpace',
       threshold: thresholds.freeStorageSpace,
       ...opts,
     },
-  );
+  )
 
-  const swapSpaceId = `${kebabCase(serviceName)}-${stack.stageName}-swap-usage-too-high`;
-  const swapSpace = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
-    stack.context, swapSpaceId, {
-      alarmName: snakeCase(swapSpaceId),
-      comparisonOperator: 'GreaterThanThreshold',
-      metricName: 'SwapUsage',
-      threshold: thresholds.swapUsage,
-      ...opts,
-    },
-  );
+  const swapSpaceId = `${kebabCase(serviceName)}-${stack.stageName}-swap-usage-too-high`
+  const swapSpace = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(stack.context, swapSpaceId, {
+    alarmName: snakeCase(swapSpaceId),
+    comparisonOperator: 'GreaterThanThreshold',
+    metricName: 'SwapUsage',
+    threshold: thresholds.swapUsage,
+    ...opts,
+  })
 
   return {
     burstBalance,
@@ -187,5 +205,5 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     freeStorage,
     swapSpace,
     eventSubscription,
-  };
-};
+  }
+}
