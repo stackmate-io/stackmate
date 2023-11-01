@@ -1,6 +1,6 @@
 import { defaults, fromPairs, groupBy, isEmpty, uniq } from 'lodash'
 
-import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, PROVIDER, SERVICE_TYPE } from '@constants'
+import { CLOUD_PROVIDER, JSON_SCHEMA_ROOT, SERVICE_TYPE } from '@constants'
 import type {
   CloudServiceAttributes,
   CloudServiceProvider,
@@ -503,15 +503,3 @@ export const getProjectSchema = (
     },
   }
 }
-
-/**
- * Replaces the state of the project with a local one
- *
- * @returns {Function<BaseServiceAttributes[]>} the services
- */
-export const withLocalState =
-  (): ((services: BaseServiceAttributes[]) => BaseServiceAttributes[]) => (services) => [
-    { name: 'local-state', type: SERVICE_TYPE.STATE, provider: PROVIDER.LOCAL },
-    { name: 'local-provider', type: SERVICE_TYPE.PROVIDER, provider: PROVIDER.LOCAL },
-    ...services,
-  ]

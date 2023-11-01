@@ -8,12 +8,7 @@ import type { BaseServiceAttributes } from '@core/service'
 import { isCoreService } from '@core/service'
 import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@constants'
 import type { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project'
-import {
-  getCloudServices,
-  getProjectSchema,
-  getServiceConfigurations,
-  withLocalState,
-} from '@core/project'
+import { getCloudServices, getProjectSchema, getServiceConfigurations } from '@core/project'
 
 describe('Project', () => {
   const [region] = REGIONS
@@ -174,26 +169,6 @@ describe('Project', () => {
       }
 
       expect(schema).toMatchObject(expectedSchema)
-    })
-  })
-
-  describe('withLocalState', () => {
-    const configs: BaseServiceAttributes[] = getServiceConfigurations('production')(project)
-
-    it('adds a local state & provider along with the AWS one', () => {
-      const updated = withLocalState()(configs)
-      expect(
-        updated.find((s) => s.type === SERVICE_TYPE.PROVIDER && s.provider === PROVIDER.AWS),
-      ).not.toBeUndefined()
-      expect(
-        updated.find((s) => s.type === SERVICE_TYPE.PROVIDER && s.provider === PROVIDER.LOCAL),
-      ).not.toBeUndefined()
-      expect(
-        updated.find((s) => s.type === SERVICE_TYPE.STATE && s.provider === PROVIDER.AWS),
-      ).not.toBeUndefined()
-      expect(
-        updated.find((s) => s.type === SERVICE_TYPE.STATE && s.provider === PROVIDER.LOCAL),
-      ).not.toBeUndefined()
     })
   })
 })
