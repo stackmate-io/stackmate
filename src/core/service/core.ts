@@ -18,11 +18,6 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>
 
 /**
- * @type {ServiceScopeChoice} the provisioning scopes available
- */
-export type ServiceScopeChoice = ChoiceOf<['deployable', 'preparable', 'destroyable']>
-
-/**
  * @type {Resource} a resource provisioned by the system
  */
 export type Resource = TerraformElement
@@ -388,20 +383,18 @@ export const withSchema =
  *  const AwsRdsService = compose(
  *    ...
  *    associate({
- *      deployable: {
- *        associationName: {
- *          with: SERVICE_TYPE.PROVIDER,
- *          where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
- *          handler: (p, stack) => p.provisions.find(p => p instanceof KmsKey),
- *        },
- *        // ...
+ *      associationName: {
+ *        with: SERVICE_TYPE.PROVIDER,
+ *        where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
+ *        handler: (p, stack) => p.provisions.find(p => p instanceof KmsKey),
  *      },
+ *      // ...
  *    }),
  *  )
  *
  * Which associate the current service (in our example AwsRdsService) with the "Provider" Service
- * for the `deployable` scope, under the alias `kmsKey`, when the criteria returned by `where`
- * match, using the `handler` function. The `handler` function returns the data to be used
+ * under the alias `kmsKey`, when the criteria returned by `where` match,
+ * using the `handler` function. The `handler` function returns the data to be used
  * as `requirements` when provisioning the service.
  *
  * @param {ServiceAssociations} associations the association configurations
@@ -415,9 +408,8 @@ export const associate =
   })
 
 /**
- * Registers a handler to use when provisioning the service under a specific scope
+ * Registers a handler to use when provisioning the service
  *
- * @param {ServiceScopeChoice} scope the scope to register the handler for
  * @param {ProvisionHandler} handler the handler that provisions the service
  * @returns {Function<Service>}
  */
@@ -452,7 +444,6 @@ export const withEnvironment =
 
 /**
  * @param {BaseProvisionable} provisionable the provisionable to check
- * @param {ServiceScopeChoice} scope the scope for the services
  * @throws {Error} if a requirement is not satisfied
  */
 export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
