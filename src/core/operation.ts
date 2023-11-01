@@ -203,7 +203,7 @@ export class Operation {
     const {
       config,
       service,
-      service: { handlers },
+      service: { handler: resourceHandler },
     } = provisionable
 
     // Validate the configuration
@@ -221,12 +221,8 @@ export class Operation {
 
     assertRequirementsSatisfied(provisionable, this.scope)
 
-    // there is a chance we don't have any handler for the current scope,
-    // for example it only has a handler for deployment, we're running a 'setup' operation
-    const registrationHandler = handlers.get(this.scope)
-
     Object.assign(provisionable, {
-      provisions: registrationHandler ? registrationHandler(provisionable, this.stack) : {},
+      provisions: resourceHandler(provisionable, this.stack),
       registered: true,
     })
 

@@ -30,12 +30,6 @@ describe('AWS Secrets service', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
-  it('does not have any handlers registered', () => {
-    expect(service.handlers.get('deployable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
-    expect(service.handlers.get('preparable')).toBeUndefined()
-  })
-
   it('contains a valid schema', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/secrets',

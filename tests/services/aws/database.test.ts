@@ -22,7 +22,12 @@ import type {
   AwsPostgreSQLAttributes,
   AwsDatabaseDeployableProvisionable,
 } from '@providers/aws/services/database'
-import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, resourceHandler } from '@providers/aws/services/database'
+import {
+  AWSMariaDB,
+  AWSMySQL,
+  AWSPostgreSQL,
+  resourceHandler,
+} from '@providers/aws/services/database'
 import type { RdsEngine } from '@providers/aws/constants'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
@@ -102,12 +107,6 @@ describe('AWS PostgreSQL', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
-  it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
-    expect(service.handlers.get('preparable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
-  })
-
   it('provides a valid schema', () => {
     const engine: RdsEngine = 'postgres'
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
@@ -129,7 +128,7 @@ describe('AWS PostgreSQL', () => {
       { withRootCredentials: true },
     )
 
-    const resources = resourceHandler(provisionable, stack)
+    const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
@@ -163,12 +162,6 @@ describe('AWS MySQL', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
-  it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
-    expect(service.handlers.get('preparable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
-  })
-
   it('provides a valid schema', () => {
     const engine: RdsEngine = 'mysql'
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
@@ -190,7 +183,7 @@ describe('AWS MySQL', () => {
       { withRootCredentials: true },
     )
 
-    const resources = resourceHandler(provisionable, stack)
+    const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
@@ -223,12 +216,6 @@ describe('AWS MariaDB', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
-  it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
-    expect(service.handlers.get('preparable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
-  })
-
   it('provides a valid schema', () => {
     const engine: RdsEngine = 'mariadb'
     const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
@@ -250,7 +237,7 @@ describe('AWS MariaDB', () => {
       { withRootCredentials: true },
     )
 
-    const resources = resourceHandler(provisionable, stack)
+    const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)

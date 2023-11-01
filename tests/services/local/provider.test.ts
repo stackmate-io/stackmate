@@ -2,11 +2,8 @@ import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getProvisionable } from '@core/operation'
 import { Stack } from '@core/stack'
-import type {
-  LocalProviderAttributes,
-  LocalProviderProvisionable,
-} from '@providers/local/services/provider'
-import { LocalProvider, onPrepare } from '@providers/local/services/provider'
+import { LocalProvider } from '@providers/local/services/provider'
+import type { LocalProviderAttributes } from '@providers/local/services/provider'
 
 describe('Local Provider', () => {
   const service = LocalProvider
@@ -14,12 +11,6 @@ describe('Local Provider', () => {
   it('is a valid local provider service', () => {
     expect(service.provider).toEqual(PROVIDER.LOCAL)
     expect(service.type).toEqual(SERVICE_TYPE.PROVIDER)
-  })
-
-  it('has the handlers registered only for the preparable scope', () => {
-    expect(service.handlers.get('preparable')).toEqual(onPrepare)
-    expect(service.handlers.get('deployable')).toBeUndefined()
-    expect(service.handlers.get('destroyable')).toBeUndefined()
   })
 
   it('provides the right schema', () => {
@@ -57,7 +48,7 @@ describe('Local Provider', () => {
     const provisionable = getProvisionable(config)
 
     it('registers the local provider', () => {
-      const resources = onPrepare(provisionable as LocalProviderProvisionable, stack)
+      const resources = service.handler(provisionable, stack)
       expect(resources).toBeInstanceOf(Object)
       expect(Object.keys(resources)).toEqual(['provider'])
       expect(resources.provider).toBeInstanceOf(terraformLocalProvider.LocalProvider)
