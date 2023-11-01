@@ -11,7 +11,7 @@ import type {
   AwsProviderDeployableProvisionable,
   AwsProviderDeployableResources,
 } from '@providers/aws/services/provider'
-import { onDeploy as providerDeployHandler } from '@providers/aws/services/provider'
+import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
 import type {
   AwsSecretsDeployableResources,
   AwsSecretsVaultDeployableProvisionable,

@@ -1,18 +1,12 @@
-import { s3Bucket } from '@cdktf/provider-aws'
 import { TerraformBackend } from 'cdktf'
 
 import { Stack } from '@core/stack'
-import type {
-  AwsStateAttributes,
-  AwsStateDeployableProvisionable,
-  AwsStateDestroyableProvisionable,
-  AwsStatePreparableProvisionable,
-} from '@providers/aws/services/state'
-import { AwsState, onDeploy, onDestroy, onPrepare } from '@providers/aws/services/state'
-import type { BaseProvisionable } from '@core/service'
+import { AwsState } from '@providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
+import type { BaseProvisionable } from '@core/service'
+import type { AwsStateAttributes } from '@providers/aws/services/state'
 
 describe('AWS state', () => {
   const service = AwsState
@@ -24,12 +18,6 @@ describe('AWS state', () => {
 
   it('has the AWS regions set', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
-  })
-
-  it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(onDeploy)
-    expect(service.handlers.get('preparable')).toEqual(onPrepare)
-    expect(service.handlers.get('destroyable')).toEqual(onDestroy)
   })
 
   it('contains a valid schema', () => {
@@ -83,28 +71,12 @@ describe('AWS state', () => {
       provisionable = getAwsDeploymentProvisionableMock(config, stack)
     })
 
-    it('registers the backend for the deployable scope', () => {
-      const resources = onDeploy(provisionable as AwsStateDeployableProvisionable, stack)
+    it('registers the backend', () => {
+      const resources = AwsState.handler(provisionable, stack)
       expect(Object.keys(resources)).toEqual(['backend'])
 
       const { backend } = resources
       expect(backend).toBeInstanceOf(TerraformBackend)
-    })
-
-    it('registers the backend for the destroyable scope', () => {
-      const resources = onDestroy(provisionable as AwsStateDestroyableProvisionable, stack)
-      expect(Object.keys(resources)).toEqual(['backend'])
-
-      const { backend } = resources
-      expect(backend).toBeInstanceOf(TerraformBackend)
-    })
-
-    it('registers the S3 bucket for the preparable scope', () => {
-      const resources = onPrepare(provisionable as AwsStatePreparableProvisionable, stack)
-      expect(Object.keys(resources)).toEqual(['bucket'])
-
-      const { bucket } = resources
-      expect(bucket).toBeInstanceOf(s3Bucket.S3Bucket)
     })
   })
 })

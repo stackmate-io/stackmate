@@ -1,13 +1,12 @@
 import { join as joinPaths } from 'node:path'
 import pipe from 'lodash/fp/pipe'
 import { LocalBackend } from 'cdktf'
-
-import type { Stack } from '@core/stack'
 import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@constants'
-import type { LocalServiceAssociations, LocalServiceAttributes } from '@providers/local/service'
 import { getLocalService } from '@providers/local/service'
-import type { BaseServiceAttributes, Provisionable, Service } from '@core/service'
 import { withHandler, withSchema } from '@core/service'
+import type { Stack } from '@core/stack'
+import type { LocalServiceAssociations, LocalServiceAttributes } from '@providers/local/service'
+import type { BaseServiceAttributes, Provisionable, Service } from '@core/service'
 
 export type LocalStateResources = { backend: LocalBackend }
 
@@ -29,7 +28,7 @@ export type LocalStateProvisionable = Provisionable<
   'preparable'
 >
 
-export const onPrepare = (
+export const resourceHandler = (
   provisionable: LocalStateProvisionable,
   stack: Stack,
 ): LocalStateResources => {
@@ -47,7 +46,7 @@ export const onPrepare = (
  */
 export const getStateService = (): LocalStateService =>
   pipe(
-    withHandler('preparable', onPrepare),
+    withHandler(resourceHandler),
     withSchema({
       type: 'object',
       properties: {

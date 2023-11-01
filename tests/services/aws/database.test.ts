@@ -22,7 +22,7 @@ import type {
   AwsPostgreSQLAttributes,
   AwsDatabaseDeployableProvisionable,
 } from '@providers/aws/services/database'
-import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, onDeploy } from '@providers/aws/services/database'
+import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, resourceHandler } from '@providers/aws/services/database'
 import type { RdsEngine } from '@providers/aws/constants'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
@@ -103,7 +103,7 @@ describe('AWS PostgreSQL', () => {
   })
 
   it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(onDeploy)
+    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
     expect(service.handlers.get('preparable')).toBeUndefined()
     expect(service.handlers.get('destroyable')).toBeUndefined()
   })
@@ -129,7 +129,7 @@ describe('AWS PostgreSQL', () => {
       { withRootCredentials: true },
     )
 
-    const resources = onDeploy(provisionable, stack)
+    const resources = resourceHandler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
@@ -164,7 +164,7 @@ describe('AWS MySQL', () => {
   })
 
   it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(onDeploy)
+    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
     expect(service.handlers.get('preparable')).toBeUndefined()
     expect(service.handlers.get('destroyable')).toBeUndefined()
   })
@@ -190,7 +190,7 @@ describe('AWS MySQL', () => {
       { withRootCredentials: true },
     )
 
-    const resources = onDeploy(provisionable, stack)
+    const resources = resourceHandler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
@@ -224,7 +224,7 @@ describe('AWS MariaDB', () => {
   })
 
   it('has the handlers registered', () => {
-    expect(service.handlers.get('deployable')).toEqual(onDeploy)
+    expect(service.handlers.get('deployable')).toEqual(resourceHandler)
     expect(service.handlers.get('preparable')).toBeUndefined()
     expect(service.handlers.get('destroyable')).toBeUndefined()
   })
@@ -250,7 +250,7 @@ describe('AWS MariaDB', () => {
       { withRootCredentials: true },
     )
 
-    const resources = onDeploy(provisionable, stack)
+    const resources = resourceHandler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
@@ -288,7 +288,7 @@ describe('Database service monitoring', () => {
       { withRootCredentials: true },
     )
 
-    onDeploy(provisionable, stack)
+    resourceHandler(provisionable, stack)
     const synthesized = Testing.synth(stack.context)
 
     const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)
