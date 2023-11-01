@@ -188,8 +188,8 @@ export type JsonSchema<T = undefined> = {
         maxLength?: string
         minLength?: string
 
-        properties?: { [property: string]: string } | Obj
-        required?: { [property: string]: string } | Obj
+        properties?: { [property: string]: string } | string
+        required?: { [property: string]: string } | string
       }
 }
 
