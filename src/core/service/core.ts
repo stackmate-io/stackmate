@@ -239,10 +239,7 @@ export const getServiceProviderSchema = (
   defaultProvider?: ProviderChoice,
 ): JsonSchema<ProviderChoice> => ({
   type: 'string',
-  enum: providers,
-  default: defaultProvider,
-  isIncludedInConfigGeneration: true,
-  errorMessage: {
+  enum: providers, default: defaultProvider errorMessage: {
     enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
   },
 })
@@ -285,10 +282,7 @@ export const getCoreService = (
       name: getServiceNameSchema(),
       provider: getServiceProviderSchema([provider], provider),
       type: getServiceTypeSchema([type], type),
-      region: {
-        type: 'string',
-        isIncludedInConfigGeneration: true,
-      },
+      region: { type: 'string' },
     },
   }
 
@@ -326,16 +320,8 @@ export const getCloudService = (
     required: [...(core.schema.required || []), 'name', 'type'],
     properties: {
       ...core.schema.properties,
-      type: {
-        ...(core.schema.properties.type || {}),
-        isIncludedInConfigGeneration: true,
-      },
       name: {
-        ...(core.schema.properties.name || {}),
-        minLength: 3,
-        isIncludedInConfigGeneration: true,
-        serviceConfigGenerationTemplate: '${type}-service-${stageName}',
-      },
+        ...(core.schema.properties.name || {}), minLength: 3 },
     },
   }
 

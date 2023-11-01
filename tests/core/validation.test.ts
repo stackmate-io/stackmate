@@ -58,16 +58,6 @@ describe('Validation', () => {
   })
 
   describe('getAjv', () => {
-    it('returns an Ajv instance with the isIncludedInConfigGeneration in place', () => {
-      const isIncludedInConfigGeneration = ajv.getKeyword('isIncludedInConfigGeneration')
-      expect(isIncludedInConfigGeneration).not.toBe(false)
-    })
-
-    it('returns an Ajv instance with the serviceConfigGenerationTemplate in place', () => {
-      const serviceConfigGenerationTemplate = ajv.getKeyword('serviceConfigGenerationTemplate')
-      expect(serviceConfigGenerationTemplate).not.toBe(false)
-    })
-
     it('returns an Ajv instance with serviceLinks keyword in place', () => {
       const serviceLinks = ajv.getKeyword('serviceLinks')
       expect(serviceLinks).not.toBe(false)
@@ -90,20 +80,6 @@ describe('Validation', () => {
       const overrides = ajv.getKeyword('serviceProfileOverrides')
       expect(overrides).not.toBe(false)
       expect((overrides as FuncKeywordDefinition).compile).toBeInstanceOf(Function)
-    })
-
-    it('returns an Ajv instance with no-op keyword isIncludedInConfigGeneration', () => {
-      const overrides = ajv.getKeyword('isIncludedInConfigGeneration')
-      expect(overrides).not.toBe(false)
-      expect((overrides as FuncKeywordDefinition).compile).toBeUndefined()
-      expect((overrides as FuncKeywordDefinition).validate).toBeUndefined()
-    })
-
-    it('returns an Ajv instance with no-op keyword serviceConfigGenerationTemplate', () => {
-      const overrides = ajv.getKeyword('serviceConfigGenerationTemplate')
-      expect(overrides).not.toBe(false)
-      expect((overrides as FuncKeywordDefinition).compile).toBeUndefined()
-      expect((overrides as FuncKeywordDefinition).validate).toBeUndefined()
     })
   })
 

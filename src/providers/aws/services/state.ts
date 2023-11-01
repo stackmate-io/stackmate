@@ -54,8 +54,6 @@ const getAdditionalPropertiesSchema = (): ServiceSchema<AdditionalAttrs> => ({
       minLength: 3,
       maxLength: 63,
       pattern: '(?!(^xn--|.+-s3alias$))^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$',
-      isIncludedInConfigGeneration: true,
-      serviceConfigGenerationTemplate: 'stackmate-state-${projectName}',
     },
   },
 })
