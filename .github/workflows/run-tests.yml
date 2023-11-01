@@ -1,4 +1,4 @@
-name: Run tests
+name: Lint & Test
 
 on:
   pull_request:
@@ -34,11 +34,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Lint the project
-        run: npm run lint
-
       - name: Install dependencies
         run: yarn install
+
+      - name: Lint the project
+        run: npm run lint
 
       - name: Run the tests
         env:
