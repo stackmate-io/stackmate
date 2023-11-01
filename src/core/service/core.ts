@@ -1,6 +1,5 @@
 import { get, merge } from 'lodash'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
-
 import type { Stack } from '@core/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'

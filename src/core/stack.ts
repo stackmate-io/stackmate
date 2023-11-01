@@ -32,6 +32,15 @@ export class Stack {
   }
 
   /**
+   * Registers CDTKF context
+   *
+   * @param handler {Function}
+   */
+  withContext(handler: (ctx: TerraformStack, app?: TerraformApp) => void) {
+    handler(this.context, this.app)
+  }
+
+  /**
    * @returns {Object} the stack exported as terraform json object
    */
   toObject(): object {
