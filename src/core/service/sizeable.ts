@@ -1,10 +1,11 @@
-import { BaseServiceAttributes, withSchema } from './core';
+import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {SizeableAttributes} size attributes
  */
 
-export type SizeableAttributes = { size: string; };
+export type SizeableAttributes = { size: string }
 /**
  * Adds size support to a service (eg. the database instance size)
  *
@@ -14,17 +15,19 @@ export type SizeableAttributes = { size: string; };
  */
 
 export const sizeable = <C extends BaseServiceAttributes>(
-  sizes: readonly string[], defaultSize: string
-) => withSchema<C, SizeableAttributes>({
-  type: 'object',
-  properties: {
-    size: {
-      type: 'string',
-      enum: sizes,
-      default: defaultSize,
-      errorMessage: {
-        enum: `The size must be one of ${sizes.join(', ')}`,
+  sizes: readonly string[],
+  defaultSize: string,
+) =>
+  withSchema<C, SizeableAttributes>({
+    type: 'object',
+    properties: {
+      size: {
+        type: 'string',
+        enum: sizes,
+        default: defaultSize,
+        errorMessage: {
+          enum: `The size must be one of ${sizes.join(', ')}`,
+        },
       },
     },
-  }
-});
+  })

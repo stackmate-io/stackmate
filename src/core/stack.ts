@@ -1,41 +1,42 @@
-import { TerraformStack, App as TerraformApp, AppConfig } from 'cdktf';
+import type { AppConfig } from 'cdktf'
+import { TerraformStack, App as TerraformApp } from 'cdktf'
 
 /**
  * @type {Stack} the stage's stack
  */
 export type Stack = {
-  readonly app: TerraformApp;
-  readonly context: TerraformStack,
-  readonly projectName: string;
-  readonly stageName: string;
-  toObject(): object;
-  toJson(): string;
-};
+  readonly app: TerraformApp
+  readonly context: TerraformStack
+  readonly projectName: string
+  readonly stageName: string
+  toObject(): object
+  toJson(): string
+}
 
 export class StageStack implements Stack {
   /**
    * @var {TerraformApp} app the terraform app for synthesizing the stack
    * @readonly
    */
-  readonly app: TerraformApp;
+  readonly app: TerraformApp
 
   /**
    * @var {TerraformStack} context the terraform stack object for synthesizing the stack
    * @readonly
    */
-  readonly context: TerraformStack;
+  readonly context: TerraformStack
 
   /**
    * @var {String} projectName the project's name
    * @readonly
    */
-  readonly projectName: string;
+  readonly projectName: string
 
   /**
    * @var {String} stageName the stage's name
    * @readonly
    */
-  readonly stageName: string;
+  readonly stageName: string
 
   /**
    * @constructor
@@ -44,24 +45,24 @@ export class StageStack implements Stack {
    * @param {AppConfig} options the terraform app options
    */
   constructor(projectName: string, stageName: string, options?: AppConfig) {
-    this.projectName = projectName;
-    this.stageName = stageName;
-    this.app = new TerraformApp(options);
-    this.context = new TerraformStack(this.app, `${this.projectName}-${this.stageName}`);
+    this.projectName = projectName
+    this.stageName = stageName
+    this.app = new TerraformApp(options)
+    this.context = new TerraformStack(this.app, `${this.projectName}-${this.stageName}`)
   }
 
   /**
    * @returns {Object} the stack exported as terraform json object
    */
   toObject(): object {
-    return this.context.toTerraform();
+    return this.context.toTerraform()
   }
 
   /**
    * @returns {String} the JSON representation of the stack
    */
   toJson(): string {
-    return JSON.stringify(this.toObject(), null, 2);
+    return JSON.stringify(this.toObject(), null, 2)
   }
 }
 
@@ -73,6 +74,5 @@ export class StageStack implements Stack {
  * @param {AppConfig} options the terraform app options
  * @returns {Stack} the stack object
  */
-export const getStack = (projectName: string, stageName: string, options?: AppConfig): Stack => (
+export const getStack = (projectName: string, stageName: string, options?: AppConfig): Stack =>
   new StageStack(projectName, stageName, options)
-);

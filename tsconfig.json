@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "skipLibCheck": true,
-    "target": "es2019",
+    "target": "ES2020",
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -35,6 +35,9 @@
       "@core/*": [
         "src/core/*"
       ],
+      "@providers": [
+        "src/providers/index"
+      ],
       "@providers/*": [
         "src/providers/*"
       ],
@@ -50,6 +53,7 @@
     "src/**/*",
     "tests/**/*",
     "jest.setup.ts",
+    "jest.config.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],
   "exclude": [

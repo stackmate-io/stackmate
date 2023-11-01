@@ -1,48 +1,53 @@
-import { uniq } from 'lodash';
+import { uniq } from 'lodash'
 
-import * as Services from '@providers/services';
-import { SERVICE_TYPE } from '@constants';
-import { Distribute } from '@lib/util';
-import {
-  ProviderChoice, ServiceTypeChoice, BaseService, BaseServiceAttributes, ExtractAttrs, isCoreService,
-} from '@core/service';
+import * as Services from '@providers/services'
+import type { SERVICE_TYPE } from '@constants'
+import type { Distribute } from '@lib/util'
+import type {
+  ProviderChoice,
+  ServiceTypeChoice,
+  BaseService,
+  BaseServiceAttributes,
+  ExtractAttrs,
+} from '@core/service'
+import { isCoreService } from '@core/service'
 
 export type ServicesRegistry = {
-  readonly items: BaseService[];
-  readonly regions: Map<ProviderChoice, Set<string>>;
-  get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService;
-  serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[];
-  providers(serviceType?: ServiceTypeChoice): ProviderChoice[];
-  ofType(type: ServiceTypeChoice): BaseService[];
-  ofProvider(provider: ProviderChoice): BaseService[];
-  fromConfig(config: BaseServiceAttributes): BaseService;
-};
+  readonly items: BaseService[]
+  readonly regions: Map<ProviderChoice, Set<string>>
+  get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService
+  serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[]
+  providers(serviceType?: ServiceTypeChoice): ProviderChoice[]
+  ofType(type: ServiceTypeChoice): BaseService[]
+  ofProvider(provider: ProviderChoice): BaseService[]
+  fromConfig(config: BaseServiceAttributes): BaseService
+}
 
 class Registry implements ServicesRegistry {
   /**
    * @var {BaseServices[]} items the service items in the registry
    * @readonly
    */
-  readonly items: BaseService[] = [];
+  readonly items: BaseService[] = []
 
   /**
    * @var {Map<ProviderChoice, readonly string[]>} regions the regions available per provider
    * @readonly
    */
-  readonly regions: Map<ProviderChoice, Set<string>> = new Map();
+  readonly regions: Map<ProviderChoice, Set<string>> = new Map()
 
   /**
    * @param {BaseService[]} services any services to initialize the registry with
    * @constructor
    */
   constructor(...services: BaseService[]) {
-    this.items.push(...services);
+    this.items.push(...services)
 
     // Extract the regions from each service and group them by provider
     services.forEach(({ provider, regions = [] }) => {
-      const updated = Array.from(this.regions.get(provider) || []).concat(regions || []);
-      this.regions.set(provider, new Set(updated));
-    });
+      const updated = Array.from(this.regions.get(provider) || []).concat(regions || [])
+      this.regions.set(provider, new Set(updated))
+    })
   }
 
   /**
@@ -52,10 +57,10 @@ class Registry implements ServicesRegistry {
    */
   providers(serviceType?: ServiceTypeChoice): ProviderChoice[] {
     if (!serviceType) {
-      return uniq(this.items.map((s) => s.provider));
+      return uniq(this.items.map((s) => s.provider))
     }
 
-    return uniq(this.items.filter((s) => s.type === serviceType).map((s) => s.provider));
+    return uniq(this.items.filter((s) => s.type === serviceType).map((s) => s.provider))
   }
 
   /**
@@ -65,10 +70,10 @@ class Registry implements ServicesRegistry {
    */
   serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[] {
     if (!provider) {
-      return uniq(this.items.map((s) => s.type));
+      return uniq(this.items.map((s) => s.type))
     }
 
-    return uniq(this.items.filter((s) => s.provider === provider).map((s) => s.type));
+    return uniq(this.items.filter((s) => s.provider === provider).map((s) => s.type))
   }
 
   /**
@@ -78,7 +83,7 @@ class Registry implements ServicesRegistry {
    * @returns {BaseService[]} ths services returned
    */
   ofType(type: ServiceTypeChoice): BaseService[] {
-    return this.items.filter((s) => s.type === type);
+    return this.items.filter((s) => s.type === type)
   }
 
   /**
@@ -88,7 +93,7 @@ class Registry implements ServicesRegistry {
    * @returns {BaseService[]} ths services returned
    */
   ofProvider(provider: ProviderChoice): BaseService[] {
-    return this.items.filter((s) => s.provider === provider);
+    return this.items.filter((s) => s.provider === provider)
   }
 
   /**
@@ -100,13 +105,13 @@ class Registry implements ServicesRegistry {
    * @throws {Error} if the service is not found
    */
   get(provider: ProviderChoice, type: ServiceTypeChoice): BaseService {
-    const service = this.items.find((s) => s.provider === provider && s.type === type);
+    const service = this.items.find((s) => s.provider === provider && s.type === type)
 
     if (!service) {
-      throw new Error(`Service ${type} for provider ${provider} was not found`);
+      throw new Error(`Service ${type} for provider ${provider} was not found`)
     }
 
-    return service;
+    return service
   }
 
   /**
@@ -117,69 +122,61 @@ class Registry implements ServicesRegistry {
    * @throws {Error} if the service is not found
    */
   fromConfig(config: BaseServiceAttributes): BaseService {
-    const { provider, type } = config;
-    return this.get(provider, type);
+    const { provider, type } = config
+    return this.get(provider, type)
   }
 }
 
-export const availableServices = Object.values(Services);
-export const cloudServices = availableServices.filter((s) => !isCoreService(s.type));
+export const availableServices = Object.values(Services)
+export const cloudServices = availableServices.filter((s) => !isCoreService(s.type))
 
-const registry = new Registry(...availableServices) as Registry;
+const registry = new Registry(...availableServices) as Registry
 
-type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER };
-type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE; };
-type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS };
-type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING };
+type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER }
+type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE }
+type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS }
+type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING }
 
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
-export type AvailableService = Distribute<typeof availableServices[number]>;
-export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableService>>;
+export type AvailableService = Distribute<(typeof availableServices)[number]>
+export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
 
-export type ProviderService = Distribute<
-  Extract<AvailableService, ProviderDiscrimination>
->;
+export type ProviderService = Distribute<Extract<AvailableService, ProviderDiscrimination>>
 export type ProviderServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, ProviderDiscrimination>
->;
+>
 
-export type StateService = Distribute<
-  Extract<AvailableService, StateDiscrimination>
->;
+export type StateService = Distribute<Extract<AvailableService, StateDiscrimination>>
 export type StateServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, StateDiscrimination>
->;
+>
 
-export type SecretVaultService = Distribute<
-  Extract<AvailableService, SecretsDiscrimination>
->;
+export type SecretVaultService = Distribute<Extract<AvailableService, SecretsDiscrimination>>
 export type SecretVaultServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, SecretsDiscrimination>
->;
+>
 
-export type MonitoringService = Distribute<
-  Extract<AvailableService, MonitoringDiscrimination>
->;
+export type MonitoringService = Distribute<Extract<AvailableService, MonitoringDiscrimination>>
 export type MonitoringServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, MonitoringDiscrimination>
->;
+>
 
 export type CoreService = Distribute<
   ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination
->;
+>
 export type CoreServiceAttributes = Distribute<
   StateServiceAttributes | SecretVaultServiceAttributes | ProviderServiceAttributes
->;
+>
 
 export type CloudService = Distribute<
   Exclude<AvailableService, ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination>
->;
+>
 export type CloudServiceAttributes = Distribute<
   Exclude<AvailableServiceAttributes, CoreServiceAttributes>
->;
-export type CloudServiceType = CloudServiceAttributes['type'];
-export type CloudServiceProvider = CloudServiceAttributes['provider'];
+>
+export type CloudServiceType = CloudServiceAttributes['type']
+export type CloudServiceProvider = CloudServiceAttributes['provider']
 
-export { registry as Registry };
+export { registry as Registry }

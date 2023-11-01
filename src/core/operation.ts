@@ -1,61 +1,68 @@
-import pipe from 'lodash/fp/pipe';
-import { get, isEmpty, uniqBy } from 'lodash';
+import pipe from 'lodash/fp/pipe'
+import { Registry } from '@core/registry'
+import { hashObject } from '@lib/hash'
+import { get, isEmpty, uniqBy } from 'lodash'
+import { getStack } from '@core/stack'
+import { DEFAULT_PROJECT_NAME } from '@constants'
+import { validate, validateEnvironment, validateServices } from '@core/validation'
+import { getServiceConfigurations, withLocalState } from '@core/project'
+import { assertRequirementsSatisfied } from '@core/service'
+import type { Project } from '@core/project'
+import type { Stack } from '@core/stack'
+import type {
+  BaseServiceAttributes,
+  BaseProvisionable,
+  Provisions,
+  ServiceEnvironment,
+  ServiceScopeChoice,
+  ServiceAssociations,
+  AnyAssociationHandler,
+  AssociationReturnType,
+} from '@core/service'
 
-import { Registry } from '@core/registry';
-import { hashObject } from '@lib/hash';
-import { getStack, Stack } from '@core/stack';
-import { DEFAULT_PROJECT_NAME } from '@constants';
-import { validate, validateEnvironment, validateServices } from '@core/validation';
-import { getServiceConfigurations, Project, withLocalState } from '@core/project';
-import {
-  assertRequirementsSatisfied, BaseServiceAttributes, BaseProvisionable, Provisions,
-  ServiceEnvironment, ServiceScopeChoice, ServiceAssociations, AnyAssociationHandler,
-} from '@core/service';
-
-type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>;
+type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
 type AssociatedProvisionable = {
-  name: string;
-  target: BaseProvisionable;
-  handler: AnyAssociationHandler;
-};
+  name: string
+  target: BaseProvisionable
+  handler: AnyAssociationHandler
+}
 
-type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>;
+type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
-export type OperationType = 'deployment' | 'destruction' | 'setup';
+export type OperationType = 'deployment' | 'destruction' | 'setup'
 
 export const OPERATION_TYPE: Record<string, OperationType> = {
   DEPLOYMENT: 'deployment',
   DESTRUCTION: 'destruction',
   SETUP: 'setup',
-} as const;
+} as const
 
 /**
  * @type {Operation} an operation that synthesizes the terraform files
  */
 export type Operation = {
-  readonly stack: Stack;
-  readonly scope: ServiceScopeChoice;
-  readonly provisionables: ProvisionablesMap;
-  environment(): ServiceEnvironment[];
-  process(): object;
-};
+  readonly stack: Stack
+  readonly scope: ServiceScopeChoice
+  readonly provisionables: ProvisionablesMap
+  environment(): ServiceEnvironment[]
+  process(): object
+}
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration
  * @param {String} stageName the stage's name
  * @returns {String} the id to use as a terraform resource identifier
  */
-const getProvisionableResourceId = (config: BaseServiceAttributes): string => (
+const getProvisionableResourceId = (config: BaseServiceAttributes): string =>
   `${config.name || config.type}-${config.provider}-${config.region || 'default'}`
-);
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration
  * @returns {BaseProvisionable} the provisionable to use in operations
  */
 export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionable => {
-  const service = Registry.fromConfig(config);
+  const service = Registry.fromConfig(config)
 
   return {
     id: hashObject(config),
@@ -66,42 +73,42 @@ export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionab
     sideEffects: {},
     registered: false,
     resourceId: getProvisionableResourceId(config),
-  };
-};
+  }
+}
 
 class StageOperation implements Operation {
   /**
    * @var {Stack} stack the stack to deploy
    * @readonly
    */
-  readonly stack: Stack;
+  readonly stack: Stack
 
   /**
    * @var {ServiceScopeChoice} scope the services scope
    * @readonly
    */
-  readonly scope: ServiceScopeChoice;
+  readonly scope: ServiceScopeChoice
 
   /**
    * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
-  readonly provisionables: ProvisionablesMap = new Map();
+  readonly provisionables: ProvisionablesMap = new Map()
 
   /**
    * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
    * @private
    */
-  #environment: ServiceEnvironment[];
+  #environment: ServiceEnvironment[]
 
   /**
    * @var {AssociationHandlersMapping} requirements the provisionable id per requirement mapping
    */
-  #requirements: AssociatedProvisionablesMapping = new Map();
+  #requirements: AssociatedProvisionablesMapping = new Map()
 
   /**
    * @var {AssociationHandlersMapping} sideEffects the provisionable id per side-effects mapping
    */
-  #sideEffects: AssociatedProvisionablesMapping = new Map();
+  #sideEffects: AssociatedProvisionablesMapping = new Map()
 
   /**
    * @constructor
@@ -110,11 +117,13 @@ class StageOperation implements Operation {
    * @param {ServiceScopeChoice} scope the services provisionable scope
    */
   constructor(
-    services: BaseServiceAttributes[], stack: Stack, scope: ServiceScopeChoice = 'deployable',
+    services: BaseServiceAttributes[],
+    stack: Stack,
+    scope: ServiceScopeChoice = 'deployable',
   ) {
-    this.stack = stack;
-    this.scope = scope;
-    this.setupProvisionables(services);
+    this.stack = stack
+    this.scope = scope
+    this.setupProvisionables(services)
   }
 
   /**
@@ -123,9 +132,10 @@ class StageOperation implements Operation {
    * @returns {Object} the terraform configuration object
    */
   process(): object {
-    validateEnvironment(this.environment());
-    this.provisionables.forEach(provisionable => this.register(provisionable));
-    return this.stack.toObject();
+    validateEnvironment(this.environment())
+    this.provisionables.forEach((provisionable) => this.register(provisionable))
+
+    return this.stack.toObject()
   }
 
   /**
@@ -135,16 +145,15 @@ class StageOperation implements Operation {
    */
   environment(): ServiceEnvironment[] {
     if (!this.#environment) {
-      const envVariables = Array.from(this.provisionables.values()).map(
-        p => p.service.environment,
-      ).filter(
-        e => !isEmpty(e),
-      ).flat();
+      const envVariables = Array.from(this.provisionables.values())
+        .map((p) => p.service.environment)
+        .filter((e) => !isEmpty(e))
+        .flat()
 
-      this.#environment = uniqBy(envVariables, e => e.name);
+      this.#environment = uniqBy(envVariables, (e) => e.name)
     }
 
-    return this.#environment;
+    return this.#environment
   }
 
   /**
@@ -152,15 +161,16 @@ class StageOperation implements Operation {
    */
   protected setupProvisionables(services: BaseServiceAttributes[]) {
     services.forEach((config) => {
-      const provisionable = getProvisionable(config);
-      this.provisionables.set(provisionable.id, provisionable);
-    });
+      const provisionable = getProvisionable(config)
+      this.provisionables.set(provisionable.id, provisionable)
+    })
 
     for (const provisionable of this.provisionables.values()) {
-      const { config, service: { associations: assocs } } = provisionable;
-      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(
-        assocs, this.scope, {},
-      );
+      const {
+        config,
+        service: { associations: assocs },
+      } = provisionable
+      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(assocs, this.scope, {})
 
       for (const [associationName, association] of Object.entries(scopeAssociations || {})) {
         const {
@@ -168,24 +178,28 @@ class StageOperation implements Operation {
           handler: associationHandler,
           with: associatedServiceType,
           requirement: isRequirement,
-        } = association;
+        } = association
 
         for (const linked of this.provisionables.values()) {
           if (associatedServiceType && linked.service.type !== associatedServiceType) {
-            continue;
+            continue
           }
 
           if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
-            continue;
+            continue
           }
 
-          const targetMap = isRequirement ? this.#requirements : this.#sideEffects;
-          const links = targetMap.get(provisionable.id) || [];
+          const targetMap = isRequirement ? this.#requirements : this.#sideEffects
+          const links = targetMap.get(provisionable.id) || []
 
           targetMap.set(provisionable.id, [
             ...links,
-            { target: linked, name: associationName, handler: associationHandler },
-          ]);
+            {
+              target: linked,
+              name: associationName,
+              handler: associationHandler,
+            },
+          ])
         }
       }
     }
@@ -199,66 +213,86 @@ class StageOperation implements Operation {
   protected register(provisionable: BaseProvisionable): Provisions {
     // Item has already been provisioned, bail...
     if (provisionable.registered) {
-      return provisionable.provisions;
+      return provisionable.provisions
     }
 
-    const { config, service, service: { handlers } } = provisionable;
+    const {
+      config,
+      service,
+      service: { handlers },
+    } = provisionable
 
     // Validate the configuration
-    validate(service.schemaId, config, { useDefaults: true });
+    validate(service.schemaId, config, {
+      useDefaults: true,
+    })
 
     // Provision & verify the requirements first
     Object.assign(provisionable, {
-      requirements: this.registerAssociated(provisionable, this.#requirements.get(provisionable.id)),
-    });
+      requirements: this.registerAssociated(
+        provisionable,
+        this.#requirements.get(provisionable.id),
+      ),
+    })
 
-    assertRequirementsSatisfied(provisionable, this.scope);
+    assertRequirementsSatisfied(provisionable, this.scope)
 
     // there is a chance we don't have any handler for the current scope,
     // for example it only has a handler for deployment, we're running a 'setup' operation
-    const registrationHandler = handlers.get(this.scope);
+    const registrationHandler = handlers.get(this.scope)
 
     Object.assign(provisionable, {
       provisions: registrationHandler ? registrationHandler(provisionable, this.stack) : {},
       registered: true,
-    });
+    })
 
     // Now that the provisionable is registered into the stack, take care of the side-effetcs
     Object.assign(provisionable, {
       sideEffects: this.registerAssociated(provisionable, this.#sideEffects.get(provisionable.id)),
-    });
+    })
 
-    this.provisionables.set(provisionable.id, provisionable);
-    return provisionable.provisions;
+    this.provisionables.set(provisionable.id, provisionable)
+
+    return provisionable.provisions
   }
 
   /**
    * @param {BaseProvisionable} provisionable the source provisionable
    * @param {AssociatedProvisionable[]} links the linked provisionables
    * @returns {Object} the output
-  */
+   */
   protected registerAssociated(
-    provisionable: BaseProvisionable, links?: AssociatedProvisionable[],
-  ): Object {
+    provisionable: BaseProvisionable,
+    links?: AssociatedProvisionable[],
+  ): Record<string, AssociationReturnType> {
     if (!links) {
-      return {};
+      return {}
     }
 
-    const output = {};
+    const output = {}
 
     links.forEach((link) => {
-      const { target, name, handler } = link;
-      const linkedProvisions = this.register(target);
-      const out = handler({ ...target, provisions: linkedProvisions }, this.stack, provisionable);
+      const { target, name, handler } = link
+      const linkedProvisions = this.register(target)
+      const out = handler(
+        {
+          ...target,
+          provisions: linkedProvisions,
+        },
+        this.stack,
+        provisionable,
+      )
 
       if (output) {
-        Object.assign(output, { [name]: out });
+        Object.assign(output, {
+          [name]: out,
+        })
       }
-    });
+    })
 
-    return output;
+    return output
   }
-};
+}
 
 /**
  * Returns an operation for a project, stage and services
@@ -268,12 +302,13 @@ class StageOperation implements Operation {
  * @param {ServiceScopeChoice} scope the operation's scope
  * @returns
  */
-const getOperation = (
-  projectName: string, stageName: string, scope: ServiceScopeChoice,
-) => (services: BaseServiceAttributes[]): Operation => {
-  const stack = getStack(projectName, stageName);
-  return new StageOperation(services, stack, scope);
-};
+const getOperation =
+  (projectName: string, stageName: string, scope: ServiceScopeChoice) =>
+  (services: BaseServiceAttributes[]): Operation => {
+    const stack = getStack(projectName, stageName)
+
+    return new StageOperation(services, stack, scope)
+  }
 
 /**
  * Returns a deployment operation
@@ -282,13 +317,12 @@ const getOperation = (
  * @param {String} stage the stage's name
  * @returns {Operation} the deployment operation
  */
-export const deployment = (project: Project, stage: string) => (
+export const deployment = (project: Project, stage: string) =>
   pipe(
     getServiceConfigurations(stage),
     validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'deployable'),
   )(project)
-);
 
 /**
  * Returns a destruction operation
@@ -297,13 +331,12 @@ export const deployment = (project: Project, stage: string) => (
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const destruction = (project: Project, stage: string) => (
+export const destruction = (project: Project, stage: string) =>
   pipe(
     getServiceConfigurations(stage),
     validateServices(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
   )(project)
-);
 
 /**
  * Returns a setup operation (which uses a local state service)
@@ -312,14 +345,13 @@ export const destruction = (project: Project, stage: string) => (
  * @param {String} stage the stage's name
  * @returns {Operation} the destruction operation
  */
-export const setup = (project: Project, stage: string) => (
+export const setup = (project: Project, stage: string) =>
   pipe(
     getServiceConfigurations(stage),
     validateServices(),
     withLocalState(),
     getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
   )(project)
-);
 
 /**
  * Returns an operation by its name
@@ -330,19 +362,21 @@ export const setup = (project: Project, stage: string) => (
  * @returns {Operation} the operation to use
  */
 export const getOperationByName = (
-  operation: OperationType, project: Project, stage: string,
+  operation: OperationType,
+  project: Project,
+  stage: string,
 ): Operation => {
   switch (operation) {
     case OPERATION_TYPE.DEPLOYMENT:
-      return deployment(project, stage);
+      return deployment(project, stage)
 
     case OPERATION_TYPE.DESTRUCTION:
-      return destruction(project, stage);
+      return destruction(project, stage)
 
     case OPERATION_TYPE.SETUP:
-      return setup(project, stage);
+      return setup(project, stage)
 
     default:
-      throw new Error(`Operation ${operation} is invalid`);
+      throw new Error(`Operation ${operation} is invalid`)
   }
-};
+}
