@@ -5,7 +5,7 @@ import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-a
 
 import type { Stack } from '@core/stack'
 import { getResourcesProfile } from '@core/profile'
-import type { ChoiceOf, OneOfType } from '@lib/util'
+import type { ChoiceOf, Obj, OneOfType } from '@lib/util'
 import type { DatabaseServiceAttributes } from '@providers/types'
 import type { PROVIDER } from '@constants'
 import { DEFAULT_PORT, SERVICE_TYPE } from '@constants'
