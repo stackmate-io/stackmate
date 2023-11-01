@@ -2,7 +2,7 @@ import { Stack } from '@core/stack'
 import { TerraformStack, App as TerraformApp } from 'cdktf'
 
 describe('Stack', () => {
-  const stackName = 'my-stage-name'
+  const stackName = 'my-stack-name'
 
   it('instantiates properly', () => {
     const stack = new Stack(stackName.toUpperCase())

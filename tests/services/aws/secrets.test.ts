@@ -58,8 +58,8 @@ describe('AWS Secrets service', () => {
 
   describe('credentials resources registrations', () => {
     let stack: Stack
-    let vault: BaseProvisionable
     let target: BaseProvisionable
+    let vault: AwsSecretsProvisionable
     let config: AwsSecretsVaultAttributes
 
     beforeEach(() => {
@@ -101,7 +101,7 @@ describe('AWS Secrets service', () => {
     })
 
     it('returns the credentials as an object when calling the credentials method', () => {
-      const credentials = service.credentials(vault as AwsSecretsProvisionable, stack, target)
+      const credentials = service.credentials(vault, stack, target)
       expect(credentials).toBeInstanceOf(Object)
       const reg = /\${TfToken\[TOKEN.(\d+)\]}/gi
       expect(credentials.username.asString).toEqual(expect.stringMatching(reg))

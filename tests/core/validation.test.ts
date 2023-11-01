@@ -38,20 +38,15 @@ describe('Validation', () => {
       monitoring: {
         emails: [faker.internet.email()],
       },
-      stages: [
+      services: [
         {
-          name: 'production',
-          services: [
-            {
-              name: 'mysql-database',
-              type: 'mysql',
-              size: 'db.t3.micro',
-            },
-            {
-              name: 'postgresql-database',
-              type: 'postgresql',
-            },
-          ],
+          name: 'mysql-database',
+          type: 'mysql',
+          size: 'db.t3.micro',
+        },
+        {
+          name: 'postgresql-database',
+          type: 'postgresql',
         },
       ],
     }
@@ -128,7 +123,7 @@ describe('Validation', () => {
           },
           {
             path: '',
-            message: expect.stringContaining('You should define at least one stage'),
+            message: expect.stringContaining('You should define at least one service'),
           },
         ]),
       )
@@ -183,31 +178,29 @@ describe('Validation', () => {
       )
     })
 
-    it('raises an error when the stages don’t contain services', () => {
-      const { errors } = getValidationError({ stages: [] })
+    it('raises an error when the project doesn’t contain any services', () => {
+      const { errors } = getValidationError({ services: [] })
       expect(errors).toEqual(
         expect.arrayContaining([
           {
-            path: 'stages',
-            message: expect.stringContaining('You should define at least one stage'),
+            path: 'services',
+            message: expect.stringContaining('You should define at least one service'),
           },
         ]),
       )
     })
 
-    it('raises an error when the stage is an empty object', () => {
-      const { errors } = getValidationError({ stages: [{}] })
+    it('raises an error when the services key contains empty objects', () => {
+      const { errors } = getValidationError({ services: [{}] })
       expect(errors).toEqual(
         expect.arrayContaining([
           {
-            path: 'stages.0',
-            message: expect.stringContaining(
-              'You should define at least one service or a source stage to copy from',
-            ),
+            path: 'services.0',
+            message: expect.stringContaining('Every service should feature a "name" property'),
           },
           {
-            path: 'stages.0',
-            message: expect.stringContaining('You should define a name for the stage'),
+            path: 'services.0',
+            message: expect.stringContaining('Every service should feature a "type" property'),
           },
         ]),
       )
@@ -244,13 +237,10 @@ describe('Validation', () => {
       // make sure the default values have been applied
       expect(validated).toMatchObject({
         ...projectConfig,
-        stages: projectConfig.stages!.map((stage) => ({
-          ...stage,
-          services: stage.services!.map((service) => ({
-            ...service,
-            provider: 'aws',
-            region: 'eu-central-1',
-          })),
+        services: projectConfig.services!.map((service) => ({
+          ...service,
+          provider: 'aws',
+          region: 'eu-central-1',
         })),
       })
     })
@@ -294,7 +284,7 @@ describe('Validation', () => {
     })
 
     it('validates a nested property', () => {
-      expect(() => validateProperty('stages/items/properties/name', 'my-stage-name')).not.toThrow()
+      expect(() => validateProperty('services/items/properties/name', 'my-service')).not.toThrow()
     })
   })
 
@@ -333,7 +323,7 @@ describe('Validation', () => {
     describe('serviceLinks', () => {
       it('raises an error when the service links contain invalid entries', () => {
         const invalid = merge({}, projectConfig, {
-          stages: [{ services: [{ links: ['invalid-link'] }] }],
+          services: [{ links: ['invalid-link'] }],
         })
 
         expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
@@ -341,18 +331,15 @@ describe('Validation', () => {
 
       it('proceeds without an error for valid service links', () => {
         const links = ['postgresql-database']
-        const withLinks = merge({}, projectConfig, { stages: [{ services: [{ links }] }] })
+        const withLinks = merge({}, projectConfig, { services: [{ links }] })
 
         const validated = validate(JSON_SCHEMA_ROOT, withLinks)
         expect(validated).toMatchObject(projectConfig)
 
         const {
-          stages: [
-            {
-              services: [serviceWithLinks],
-            },
-          ],
+          services: [serviceWithLinks],
         } = validated
+
         expect(serviceWithLinks).toMatchObject({ links: expect.arrayContaining(links) })
       })
     })
@@ -360,7 +347,7 @@ describe('Validation', () => {
     describe('serviceProfile', () => {
       it('raises an error when the service profile is invalid', () => {
         const invalid = merge({}, projectConfig, {
-          stages: [{ services: [{ profile: 'invalid-profile' }] }],
+          services: [{ profile: 'invalid-profile' }],
         })
 
         expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
@@ -368,17 +355,13 @@ describe('Validation', () => {
 
       it('proceeds without errors for valid service profiles', () => {
         const withProfile = merge({}, projectConfig, {
-          stages: [{ services: [{ profile: 'default' }] }],
+          services: [{ profile: 'default' }],
         })
 
         const validated = validate(JSON_SCHEMA_ROOT, withProfile)
 
         const {
-          stages: [
-            {
-              services: [serviceWithProfile],
-            },
-          ],
+          services: [serviceWithProfile],
         } = validated
         expect(serviceWithProfile).toMatchObject({
           overrides: {},
@@ -390,7 +373,7 @@ describe('Validation', () => {
     describe('serviceProfileOverrides', () => {
       it('raises an error when the overrides does not contain keys defined by the profile', () => {
         const invalid = merge({}, projectConfig, {
-          stages: [{ services: [{ overrides: { something: true, invalid: true } }] }],
+          services: [{ overrides: { something: true, invalid: true } }],
         })
 
         expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
@@ -398,16 +381,12 @@ describe('Validation', () => {
 
       it('proceeds without an error when the overrides are valid', () => {
         const overrides = { instance: {}, params: {} }
-        const withOverrides = merge({}, projectConfig, { stages: [{ services: [{ overrides }] }] })
+        const withOverrides = merge({}, projectConfig, { services: [{ overrides }] })
 
         const validated = validate(JSON_SCHEMA_ROOT, withOverrides)
 
         const {
-          stages: [
-            {
-              services: [serviceWithOverrides],
-            },
-          ],
+          services: [serviceWithOverrides],
         } = validated
         expect(serviceWithOverrides).toMatchObject({ overrides })
       })
@@ -416,7 +395,7 @@ describe('Validation', () => {
     describe('isIpOrCidr', () => {
       it('raises an error when an invalid IP is used', () => {
         const invalid = merge({}, projectConfig, {
-          stages: [{ services: [{ externalLinks: ['abcdefg'] }] }],
+          services: [{ externalLinks: ['abcdefg'] }],
         })
 
         expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
@@ -425,35 +404,28 @@ describe('Validation', () => {
       it('proceeds without an error when the IPs used are valid', () => {
         const externalLinks = ['192.168.1.1', '192.168.29.32']
         const withCidr = merge({}, projectConfig, {
-          stages: [{ services: [{ externalLinks }] }],
+          services: [{ externalLinks }],
         })
 
         const validated = validate(JSON_SCHEMA_ROOT, withCidr)
 
         const {
-          stages: [
-            {
-              services: [serviceWithOverrides],
-            },
-          ],
+          services: [serviceWithOverrides],
         } = validated
+
         expect(serviceWithOverrides).toMatchObject({ externalLinks })
       })
 
       it('proceeds without an error when the CIDR used is valid', () => {
         const externalLinks = ['192.168.1.1/24', '192.168.29.32/32']
         const withCidr = merge({}, projectConfig, {
-          stages: [{ services: [{ externalLinks }] }],
+          services: [{ externalLinks }],
         })
 
         const validated = validate(JSON_SCHEMA_ROOT, withCidr)
 
         const {
-          stages: [
-            {
-              services: [serviceWithOverrides],
-            },
-          ],
+          services: [serviceWithOverrides],
         } = validated
         expect(serviceWithOverrides).toMatchObject({ externalLinks })
       })

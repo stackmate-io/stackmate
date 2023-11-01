@@ -35,15 +35,11 @@ export type RootCredentialsRequirement = ServiceRequirement<
 >
 
 export type CredentialsAssociations = {
-  deployable: {
-    credentials: CredentialsRequirement
-  }
+  credentials: CredentialsRequirement
 }
 
 export type RootCredentialsAssociations = {
-  deployable: {
-    rootCredentials: RootCredentialsRequirement
-  }
+  rootCredentials: RootCredentialsRequirement
 }
 
 /**
@@ -86,16 +82,14 @@ export const withCredentials =
   <C extends BaseServiceAttributes>() =>
   <T extends Service<C>>(srv: T): WithAssociations<T, CredentialsAssociations> =>
     associate({
-      deployable: {
-        credentials: {
-          with: SERVICE_TYPE.SECRETS,
-          requirement: true,
-          handler: (
-            vault: VaultProvisionable,
-            stack: Stack,
-            target: BaseProvisionable,
-          ): Credentials => vault.service.credentials(vault, stack, target),
-        },
+      credentials: {
+        with: SERVICE_TYPE.SECRETS,
+        requirement: true,
+        handler: (
+          vault: VaultProvisionable,
+          stack: Stack,
+          target: BaseProvisionable,
+        ): Credentials => vault.service.credentials(vault, stack, target),
       },
     })(srv)
 
@@ -106,16 +100,14 @@ export const withRootCredentials =
   <C extends BaseServiceAttributes>() =>
   <T extends Service<C>>(srv: T): WithAssociations<T, RootCredentialsAssociations> =>
     associate({
-      deployable: {
-        rootCredentials: {
-          with: SERVICE_TYPE.SECRETS,
-          requirement: true,
-          handler: (
-            vault: VaultProvisionable,
-            stack: Stack,
-            target: BaseProvisionable,
-          ): Credentials => vault.service.credentials(vault, stack, target, { root: true }),
-        },
+      rootCredentials: {
+        with: SERVICE_TYPE.SECRETS,
+        requirement: true,
+        handler: (
+          vault: VaultProvisionable,
+          stack: Stack,
+          target: BaseProvisionable,
+        ): Credentials => vault.service.credentials(vault, stack, target, { root: true }),
       },
     })(srv)
 

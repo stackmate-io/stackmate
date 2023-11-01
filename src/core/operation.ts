@@ -23,14 +23,6 @@ type AssociatedProvisionable = {
 
 type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
-export type OperationType = 'deployment' | 'destruction' | 'setup'
-
-export const OPERATION_TYPE: Record<string, OperationType> = {
-  DEPLOYMENT: 'deployment',
-  DESTRUCTION: 'destruction',
-  SETUP: 'setup',
-} as const
-
 /**
  * @param {BaseServiceAttributes} config the service's configuration
  * @returns {String} the id to use as a terraform resource identifier

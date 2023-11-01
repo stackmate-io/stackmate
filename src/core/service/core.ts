@@ -239,7 +239,9 @@ export const getServiceProviderSchema = (
   defaultProvider?: ProviderChoice,
 ): JsonSchema<ProviderChoice> => ({
   type: 'string',
-  enum: providers, default: defaultProvider errorMessage: {
+  enum: providers,
+  default: defaultProvider,
+  errorMessage: {
     enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
   },
 })
@@ -292,13 +294,9 @@ export const getCoreService = (
     schema,
     schemaId,
     environment: [],
+    associations: {},
     handler: () => {
       throw new Error('You have to register a handler for the service')
-    },
-    associations: {
-      deployable: {},
-      preparable: {},
-      destroyable: {},
     },
   }
 }
@@ -321,7 +319,9 @@ export const getCloudService = (
     properties: {
       ...core.schema.properties,
       name: {
-        ...(core.schema.properties.name || {}), minLength: 3 },
+        ...(core.schema.properties.name || {}),
+        minLength: 3,
+      },
     },
   }
 
