@@ -9,7 +9,6 @@ import type {
   BaseProvisionable,
   Provisions,
   ServiceEnvironment,
-  ServiceScopeChoice,
   AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
@@ -67,12 +66,6 @@ export class Operation {
   readonly stack: Stack
 
   /**
-   * @var {ServiceScopeChoice} scope the services scope
-   * @readonly
-   */
-  readonly scope: ServiceScopeChoice
-
-  /**
    * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
   readonly provisionables: ProvisionablesMap = new Map()
@@ -97,15 +90,9 @@ export class Operation {
    * @constructor
    * @param {BaseServiceAttributes[]} services the services to provision
    * @param {Stack} stack the stage's stack
-   * @param {ServiceScopeChoice} scope the services provisionable scope
    */
-  constructor(
-    services: BaseServiceAttributes[],
-    stack: Stack,
-    scope: ServiceScopeChoice = 'deployable',
-  ) {
+  constructor(services: BaseServiceAttributes[], stack: Stack) {
     this.stack = stack
-    this.scope = scope
     this.setupProvisionables(services)
   }
 
