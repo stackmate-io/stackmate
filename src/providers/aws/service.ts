@@ -55,22 +55,10 @@ type AccountRequirement = ServiceRequirement<
 >
 
 export type AwsServiceAssociations = {
-  deployable: {
-    providerInstance: ProviderRequirement
-    account: AccountRequirement
-    kmsKey: KmsKeyRequirement
-    vpc: VpcRequirement
-  }
-  preparable: {
-    account: AccountRequirement
-    providerInstance: ProviderRequirement
-    kmsKey: KmsKeyRequirement
-  }
-  destroyable: {
-    account: AccountRequirement
-    providerInstance: ProviderRequirement
-    kmsKey: KmsKeyRequirement
-  }
+  account: AccountRequirement
+  providerInstance: ProviderRequirement
+  kmsKey: KmsKeyRequirement
+  vpc: VpcRequirement
 }
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
@@ -213,22 +201,10 @@ export const onExternalLink = (
  * @var {AwsServiceAssociations} associations every AWS service's associations
  */
 const associations: AwsServiceAssociations = {
-  deployable: {
-    providerInstance: getProviderInstanceRequirement(),
-    account: getAccountRequirement(),
-    kmsKey: getKmsKeyRequirement(),
-    vpc: getVpcRequirement(),
-  },
-  destroyable: {
-    providerInstance: getProviderInstanceRequirement(),
-    account: getAccountRequirement(),
-    kmsKey: getKmsKeyRequirement(),
-  },
-  preparable: {
-    providerInstance: getProviderInstanceRequirement(),
-    account: getAccountRequirement(),
-    kmsKey: getKmsKeyRequirement(),
-  },
+  providerInstance: getProviderInstanceRequirement(),
+  account: getAccountRequirement(),
+  kmsKey: getKmsKeyRequirement(),
+  vpc: getVpcRequirement(),
 }
 
 /**

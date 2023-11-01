@@ -1,6 +1,6 @@
 import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
-import { get, isEmpty, uniqBy } from 'lodash'
+import { isEmpty, uniqBy } from 'lodash'
 import { validate, validateEnvironment } from '@core/validation'
 import { assertRequirementsSatisfied } from '@core/service'
 import type { Stack } from '@core/stack'
@@ -10,7 +10,6 @@ import type {
   Provisions,
   ServiceEnvironment,
   ServiceScopeChoice,
-  ServiceAssociations,
   AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
@@ -152,11 +151,9 @@ export class Operation {
     for (const provisionable of this.provisionables.values()) {
       const {
         config,
-        service: { associations: assocs },
+        service: { associations },
       } = provisionable
-      const scopeAssociations: ServiceAssociations[ServiceScopeChoice] = get(assocs, this.scope, {})
-
-      for (const [associationName, association] of Object.entries(scopeAssociations || {})) {
+      for (const [associationName, association] of Object.entries(associations || {})) {
         const {
           where: isAssociated,
           handler: associationHandler,
@@ -219,7 +216,7 @@ export class Operation {
       ),
     })
 
-    assertRequirementsSatisfied(provisionable, this.scope)
+    assertRequirementsSatisfied(provisionable)
 
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),
