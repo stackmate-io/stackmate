@@ -27,26 +27,6 @@ export const AJV_OPTIONS: AjvOptions = {
 } as const
 
 /**
- * Extracts the service names given a path in the schema
- *
- * @param {String} path the path to extract the services from
- * @param {Object} data the data to extract the service names from
- * @returns {String} the service names
- */
-export const getServiceNamesFromPath = (path: string, data: object = {}): string[] => {
-  if (!path || !path.startsWith('/stages')) {
-    return []
-  }
-
-  const stagePath = path
-    .replace(/^\/(stages\/[0-9]+\/services).*$/i, '$1')
-    .split('/')
-    .join('.')
-  const services = get(data, stagePath, []) as CloudServiceConfiguration<true>[]
-  return services.map((cfg) => cfg.name)
-}
-
-/**
  * Validates a service `profile` value
  *
  * @param {Any|String} profile the value for the profile attribute
@@ -117,8 +97,10 @@ export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): b
     return true
   }
 
-  // Get the stage's service names
-  const serviceNames = getServiceNamesFromPath(path, dataCxt?.rootData)
+  // Get the project's service names
+  const serviceNames = path?.startsWith('/services')
+    ? get(dataCxt?.rootData || {}, 'services', []).map((cfg: CloudServiceConfiguration) => cfg.name)
+    : []
 
   // Detect any service names that are not available within the schema
   const irrelevantServices = difference(links, serviceNames)

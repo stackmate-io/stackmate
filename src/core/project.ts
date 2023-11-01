@@ -27,49 +27,17 @@ import type {
   DistributiveOptionalKeys,
   DistributivePartial,
   DistributiveRequireKeys,
-  OneOfType,
   OptionalKeys,
 } from '@lib/util'
 import type { JsonSchema } from '@core/schema'
 import { getProviderServiceSchemas, getRegionConditional, getRegionsSchema } from '@core/schema'
 
 /**
- * @type {CopiedStage} a stage which is a copy of another one
- */
-type CopiedStage = {
-  copy?: string
-  skip?: string[]
-}
-
-/**
- * @type {StageWithServices} a stage that is not coppied, rather has services configured
- */
-type StageWithServices<IsPartial extends boolean = false> = {
-  services?: CloudServiceConfiguration<IsPartial>[]
-}
-
-/**
  * @type {CloudServiceConfiguration} describes the cloud service configuration
  */
-export type CloudServiceConfiguration<IsPartial extends boolean = false> = IsPartial extends true
-  ? DistributiveRequireKeys<DistributivePartial<CloudServiceAttributes>, 'name' | 'type'>
-  : CloudServiceAttributes
-
-/**
- * @type {StageConfiguration} the configuration for the project stages
- */
-export type StageConfiguration<IsPartial extends boolean = false> = OneOfType<
-  [CopiedStage, StageWithServices<IsPartial>]
-> & {
-  name: string
-}
-
-/**
- * @type {TransformableConfiguration} the service's configuration
- */
-export type TransformableConfiguration = OptionalKeys<
-  BaseServiceAttributes,
-  'name' | 'provider' | 'region'
+export type CloudServiceConfiguration = DistributiveRequireKeys<
+  DistributivePartial<CloudServiceAttributes>,
+  'name' | 'type'
 >
 
 /**
@@ -79,7 +47,7 @@ export type Project = {
   name: string
   provider: CloudServiceProvider
   region: string
-  stages: StageConfiguration[]
+  services: CloudServiceAttributes[]
   state: StateServiceAttributes
   secrets: SecretVaultServiceAttributes
   monitoring: Partial<MonitoringAttributes['monitoring']>
@@ -88,8 +56,8 @@ export type Project = {
 /**
  * @type {ProjectConfiguration} the configuration object that creates a project
  */
-export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | 'secrets'> & {
-  stages?: StageConfiguration<true>[]
+export type ProjectConfiguration = Partial<Omit<Project, 'services' | 'state' | 'secrets'>> & {
+  services?: CloudServiceConfiguration[]
   state?: DistributiveOmit<
     DistributiveOptionalKeys<StateServiceAttributes, 'region'>,
     'name' | 'type'
@@ -101,34 +69,12 @@ export type ProjectConfiguration = Omit<Partial<Project>, 'stages' | 'state' | '
 }
 
 /**
- * @param {Project} project the project's configuration
- * @param {String} stageName the name of the stage to get
- * @returns {StageConfiguration} the stage's configuration
- * @throws {Error} when the stage is not available in the project
- */
-export const getStage = (project: Project, stageName: string): StageConfiguration => {
-  const { stages = [] } = project
-
-  if (isEmpty(stages)) {
-    throw new Error('There aren’t any stages defined for the project')
-  }
-
-  const stage = stages.find((s) => s.name === stageName)
-
-  if (!stage) {
-    throw new Error(`Stage ${stageName} is not available in the project`)
-  }
-
-  return stage
-}
-
-/**
- * @param {TransformableConfiguration} config the service's configuration
+ * @param {Object} config the service's configuration
  * @param {Project} project the project to use
  * @returns {BaseServiceAttributes} the configuration with credentials applied
  */
 const applyProjectDefaults = (
-  config: TransformableConfiguration,
+  config: OptionalKeys<BaseServiceAttributes, 'name' | 'provider' | 'region'>,
   project: Project,
 ): BaseServiceAttributes => {
   const cfg = defaults({}, config, {
@@ -141,42 +87,6 @@ const applyProjectDefaults = (
   }
 
   return cfg
-}
-
-/**
- * Returns the list of the cloud services that are managed by the given stage
- *
- * @param {Project} project the configuration object
- * @param {String} stage the stage to get
- * @param {String[]} skippedServices any names of services to skip (when copying the stage)
- * @returns {BaseServiceAttributes[]} the cloud services deployed by this stage
- */
-export const getCloudServices = (
-  project: Project,
-  stage: string,
-  skippedServices: string[] = [],
-): BaseServiceAttributes[] => {
-  const {
-    copy: copyFrom = null,
-    skip = [],
-    services: stageServices = [],
-  } = getStage(project, stage)
-
-  if (isEmpty(stageServices) && !copyFrom) {
-    throw new Error(
-      `Stage ${stage} is improperly configured. It doesn't provide any services or stage to copy from`,
-    )
-  }
-
-  const services = []
-
-  if (copyFrom) {
-    services.push(...getCloudServices(project, copyFrom, skip))
-  }
-
-  services.push(...stageServices.filter((srv) => !skippedServices.includes(srv.name)))
-
-  return services.map((service) => applyProjectDefaults(service, project))
 }
 
 /**
@@ -294,53 +204,51 @@ export const getCoreServiceConfigurations = (
 }
 
 /**
- * Returns the service configurations for the project and stage
+ * Returns the service configurations for the project
  *
- * @param {String} stage the name of the stage to get configurations for
+ * @param {Project} project the configuration for the project
  * @returns {Function<BaseServiceAttributes[]>} the configurations for the services to deploy
  */
-export const getServiceConfigurations =
-  (stage: string): ((project: Project) => BaseServiceAttributes[]) =>
-  (project) => {
-    const cloudServices = getCloudServices(project, stage)
-    const coreServices: BaseServiceAttributes[] = []
-    const { provider, state, secrets } = project
+export const getProjectServices = (project: Project): BaseServiceAttributes[] => {
+  const coreServices: BaseServiceAttributes[] = []
+  const { provider, state, secrets, services } = project
+  const cloudServices = services.map((service) => applyProjectDefaults(service, project))
 
-    if (isEmpty(cloudServices)) {
-      throw new Error(`There are no services defined for stage ${stage}`)
-    }
-
-    const initialCoreConfigs: [ServiceTypeChoice, BaseServiceAttributes | null][] = [
-      [
-        SERVICE_TYPE.PROVIDER,
-        applyProjectDefaults(
-          {
-            type: SERVICE_TYPE.PROVIDER,
-            name: `${provider}-provider-service`,
-          },
-          project,
-        ),
-      ],
-      [
-        SERVICE_TYPE.STATE,
-        !isEmpty(state)
-          ? applyProjectDefaults({ ...state, type: SERVICE_TYPE.STATE }, project)
-          : null,
-      ],
-      [
-        SERVICE_TYPE.SECRETS,
-        !isEmpty(secrets)
-          ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
-          : null,
-      ],
-    ]
-
-    initialCoreConfigs.forEach(([type, initialConfig]) => {
-      coreServices.push(...getCoreServiceConfigurations(initialConfig, type, cloudServices))
-    })
-
-    return [...cloudServices, ...coreServices]
+  if (isEmpty(cloudServices)) {
+    throw new Error('No services were found in this project')
   }
+
+  const initialCoreConfigs: [ServiceTypeChoice, BaseServiceAttributes | null][] = [
+    [
+      SERVICE_TYPE.PROVIDER,
+      applyProjectDefaults(
+        {
+          type: SERVICE_TYPE.PROVIDER,
+          name: `${provider}-provider-service`,
+        },
+        project,
+      ),
+    ],
+    [
+      SERVICE_TYPE.STATE,
+      !isEmpty(state)
+        ? applyProjectDefaults({ ...state, type: SERVICE_TYPE.STATE }, project)
+        : null,
+    ],
+    [
+      SERVICE_TYPE.SECRETS,
+      !isEmpty(secrets)
+        ? applyProjectDefaults({ ...secrets, type: SERVICE_TYPE.SECRETS }, project)
+        : null,
+    ],
+  ]
+
+  initialCoreConfigs.forEach(([type, initialConfig]) => {
+    coreServices.push(...getCoreServiceConfigurations(initialConfig, type, cloudServices))
+  })
+
+  return [...cloudServices, ...coreServices]
+}
 
 /**
  * Populates the project schema
@@ -416,74 +324,26 @@ export const getProjectSchema = (
           provider: getServiceProviderSchema(Registry.providers(SERVICE_TYPE.STATE)),
         },
       },
-      stages: {
+      services: {
         type: 'array',
-        description: 'The deployment stages for your projects',
         minItems: 1,
+        uniqueItems: true,
         errorMessage: {
-          minItems: 'You should define at least one stage',
+          minItems: 'You should define at least one service to deploy',
         },
         items: {
           type: 'object',
-          required: ['name'],
-          oneOf: [
-            {
-              required: ['name', 'services'],
-              errorMessage: {
-                required: 'You should define at least one service or a source stage to copy from',
-              },
-            },
-            {
-              required: ['name', 'copy'],
-              errorMessage: {
-                required: 'You should define at least one service or a source stage to copy from',
-              },
-            },
-          ],
-          errorMessage: {
-            oneOf: 'You should define at least one service or a source stage to copy from',
-            required: {
-              name: 'You should define a name for the stage',
-            },
-          },
+          additionalProperties: true,
+          required: ['name', 'type'],
           properties: {
-            name: {
-              type: 'string',
-              pattern: '^([a-zA-Z0-9_-]+)$',
-              description: 'The name of the stage',
-              errorMessage: {
-                pattern:
-                  'The stage name should only contain characters, numbers, dashes and underscores',
-              },
-            },
-            services: {
-              type: 'array',
-              items: {
-                type: 'object',
-                additionalProperties: true,
-                required: ['name', 'type'],
-                minItems: 1,
-                properties: {
-                  name: getServiceNameSchema(),
-                  provider: getServiceProviderSchema(providers),
-                  type: getServiceTypeSchema(Registry.serviceTypes()),
-                },
-                errorMessage: {
-                  required: {
-                    name: 'Every service should feature a "name" property',
-                    type: 'Every service should feature a "type" property',
-                  },
-                },
-              },
-            },
-            copy: {
-              type: 'string',
-              description: 'The name of the stage to copy configuration from',
-            },
-            skip: {
-              type: 'array',
-              items: { type: 'string' },
-              description: 'The names of services to skip when copying the aforementioned stage',
+            name: getServiceNameSchema(),
+            type: getServiceTypeSchema(Registry.serviceTypes()),
+            provider: getServiceProviderSchema(providers),
+          },
+          errorMessage: {
+            required: {
+              name: 'Every service should feature a "name" property',
+              type: 'Every service should feature a "type" property',
             },
           },
         },
@@ -491,14 +351,14 @@ export const getProjectSchema = (
     },
     allOf,
     $defs,
-    required: ['name', 'provider', 'region', 'stages'],
+    required: ['name', 'provider', 'region', 'services'],
     errorMessage: {
       type: 'The project configuration must be an object',
       required: {
         name: 'You need to set a name for the project',
         provider: 'You need to set a default provider for the project',
         region: 'You need to set a default region for the project',
-        stages: 'You should define at least one stage to deploy',
+        services: 'You should define at least one service',
       },
     },
   }

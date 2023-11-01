@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker'
-import { sortBy } from 'lodash'
 
 import { REGIONS } from '@providers/aws/constants'
 import type { JsonSchema } from '@core/schema'
@@ -8,13 +7,13 @@ import type { BaseServiceAttributes } from '@core/service'
 import { isCoreService } from '@core/service'
 import { JSON_SCHEMA_ROOT, PROVIDER, CORE_SERVICE_TYPES, SERVICE_TYPE } from '@constants'
 import type { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project'
-import { getCloudServices, getProjectSchema, getServiceConfigurations } from '@core/project'
+import { getProjectSchema, getProjectServices } from '@core/project'
 
 describe('Project', () => {
   const [region] = REGIONS
   const provider = PROVIDER.AWS
 
-  const servicesConfig: CloudServiceConfiguration<true>[] = [
+  const servicesConfig: CloudServiceConfiguration[] = [
     { name: 'my-mysql-database', type: SERVICE_TYPE.MYSQL, provider, region },
     { name: 'my-postgresql-service', type: SERVICE_TYPE.POSTGRESQL, provider, region },
     { name: 'my-mariadb-service', type: SERVICE_TYPE.MARIADB, provider, region },
@@ -36,78 +35,15 @@ describe('Project', () => {
       bucket: 'my-aws-bucket',
       region,
     },
-    stages: [
-      {
-        name: 'production',
-        services: servicesConfig,
-      },
-      {
-        name: 'production-clone',
-        copy: 'production',
-      },
-      {
-        name: 'without-postgresql',
-        copy: 'production',
-        skip: ['my-postgresql-service'],
-      },
-      {
-        name: 'without-postgres-or-mariadb',
-        copy: 'production',
-        skip: ['my-postgresql-service', 'my-mariadb-service'],
-      },
-    ],
+    services: servicesConfig,
   }
 
   const project: Project = validateProject(projectConfig)
-  const services = project.stages[0].services || []
+  const services = project.services || []
   expect(services).toHaveLength(servicesConfig.length)
 
-  describe('getCloudServices', () => {
-    it('extracts all cloud services assigned in the production stage', () => {
-      const cloudServices = getCloudServices(project, 'production')
-      expect(Array.isArray(services)).toBe(true)
-      expect(cloudServices).toHaveLength(services.length)
-      expect(sortBy(cloudServices, 'name')).toEqual(sortBy(services, 'name'))
-    })
-
-    it('extracts all cloud for a stage which is an exact clone of the production one', () => {
-      const production = getCloudServices(project, 'production')
-      const cloned = getCloudServices(project, 'production-clone')
-      expect(Array.isArray(cloned)).toBe(true)
-      expect(cloned).toHaveLength(production.length)
-      expect(sortBy(cloned, 'name')).toEqual(sortBy(production, 'name'))
-    })
-
-    it('extracts all production cloud services without postgresql when it is marked as skipped', () => {
-      const production = getCloudServices(project, 'production')
-      const withoutPostgres = getCloudServices(project, 'without-postgresql')
-      expect(Array.isArray(withoutPostgres)).toBe(true)
-      expect(withoutPostgres).toHaveLength(production.length - 1)
-      expect(sortBy(withoutPostgres, 'name')).toEqual(
-        sortBy(
-          production.filter((s) => s.name !== 'my-postgresql-service'),
-          'name',
-        ),
-      )
-    })
-
-    it('extracts all production cloud services minus the ones specified - more than one', () => {
-      const production = getCloudServices(project, 'production')
-      const withoutDbs = getCloudServices(project, 'without-postgres-or-mariadb')
-      expect(Array.isArray(withoutDbs)).toBe(true)
-      const excluded = ['my-postgresql-service', 'my-mariadb-service']
-      expect(withoutDbs).toHaveLength(production.length - excluded.length)
-      expect(sortBy(withoutDbs, 'name')).toEqual(
-        sortBy(
-          production.filter((s) => !excluded.includes(s.name)),
-          'name',
-        ),
-      )
-    })
-  })
-
-  describe('getServiceConfigurations', () => {
-    const configs: BaseServiceAttributes[] = getServiceConfigurations('production')(project)
+  describe('get project services', () => {
+    const configs: BaseServiceAttributes[] = getProjectServices(project)
 
     it('returns all cloud configurations for the project', () => {
       const cloudServices = configs.filter(
@@ -142,7 +78,7 @@ describe('Project', () => {
       const expectedSchema: JsonSchema<Project> = {
         $id: JSON_SCHEMA_ROOT,
         type: 'object',
-        required: ['name', 'provider', 'region', 'stages'],
+        required: ['name', 'provider', 'region', 'services'],
         $defs: {},
         properties: {
           name: { type: 'string' },
@@ -150,20 +86,9 @@ describe('Project', () => {
           region: { type: 'string' },
           secrets: { type: 'object' },
           state: { type: 'object' },
-          stages: {
+          services: {
             type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                copy: { type: 'string' },
-                skip: { type: 'array', items: { type: 'string' } },
-                services: {
-                  type: 'array',
-                  items: { type: 'object', required: ['name', 'type'] },
-                },
-              },
-            },
+            items: { type: 'object', required: ['name', 'type'] },
           },
         },
       }

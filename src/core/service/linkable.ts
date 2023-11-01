@@ -56,14 +56,14 @@ export type ExternalLinkHandler = AssociationHandler<
  * @type {LinkableAssociations} associations for services that are linkable
  */
 export type LinkableAssociations = {
-  deployable: { linkable: ServiceSideEffect }
+  linkable: ServiceSideEffect
 }
 
 /**
  * @type {LinkableAssociations} associations for services that are linkable
  */
 export type ExternallyLinkableAssociations = {
-  deployable: { externallyLinkable: ServiceSideEffect }
+  externallyLinkable: ServiceSideEffect
 }
 
 /**
@@ -94,24 +94,19 @@ export const linkable =
         },
       }),
       associate({
-        deployable: {
-          linkable: {
-            sideEffect: true,
-            handler: onServiceLinked,
-            where: (
-              config: C & LinkableAttributes,
-              linkedConfig: BaseServiceAttributes,
-            ): boolean => {
-              if (!config.links.includes(linkedConfig.name)) {
-                return false
-              }
+        linkable: {
+          sideEffect: true,
+          handler: onServiceLinked,
+          where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
+            if (!config.links.includes(linkedConfig.name)) {
+              return false
+            }
 
-              if (typeof lookup !== 'function') {
-                return false
-              }
+            if (typeof lookup !== 'function') {
+              return false
+            }
 
-              return lookup(config, linkedConfig)
-            },
+            return lookup(config, linkedConfig)
           },
         },
       }),
@@ -141,14 +136,12 @@ export const externallyLinkable =
         },
       }),
       associate({
-        deployable: {
-          externallyLinkable: {
-            sideEffect: true,
-            handler: onExternalLink,
-            with: SERVICE_TYPE.PROVIDER,
-            where: (config: C & ExternallyLinkableAttributes): boolean =>
-              !isEmpty(config.externalLinks),
-          },
+        externallyLinkable: {
+          sideEffect: true,
+          handler: onExternalLink,
+          with: SERVICE_TYPE.PROVIDER,
+          where: (config: C & ExternallyLinkableAttributes): boolean =>
+            !isEmpty(config.externalLinks),
         },
       }),
     )(srv)

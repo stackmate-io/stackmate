@@ -279,7 +279,7 @@ export const getRegionConditional = (provider: ProviderChoice, schema: JsonSchem
  *  - adds a discrimination based on the service's type and points to the specific reference
  *
  * @param {ProviderChoice} provider the provider to get the validations schema for
- * @returns {JsonSchema[]} the stage services validation schema
+ * @returns {JsonSchema[]} the services validation schema
  */
 export const getProviderServiceSchemas = (provider: ProviderChoice, services: BaseService[]) => {
   const schemas: RequireKeys<JsonSchema, '$id'>[] = []
@@ -332,51 +332,43 @@ export const getProviderServiceSchemas = (provider: ProviderChoice, services: Ba
       },
       then: {
         properties: {
-          stages: {
+          services: {
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                services: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      // Set the accepted service types
-                      type: {
-                        enum: cloudServices.map((srv) => srv.type),
-                      },
-                    },
-                    // Add type discriminations for every cloud service available
-                    allOf: cloudServices.map(
-                      (service): JsonSchema => ({
-                        if: {
-                          anyOf: [
-                            {
-                              // Provider is not defined at service level
-                              not: { required: ['provider'] },
-                              properties: {
-                                type: { const: service.type },
-                              },
-                            },
-                            {
-                              // Provider is defined set to the current one
-                              required: ['provider'],
-                              properties: {
-                                provider: { const: provider },
-                                type: { const: service.type },
-                              },
-                            },
-                          ],
-                        },
-                        then: {
-                          $ref: service.schemaId,
-                        },
-                      }),
-                    ),
-                  },
+                // Set the accepted service types
+                type: {
+                  enum: cloudServices.map((srv) => srv.type),
                 },
               },
+              // Add type discriminations for every cloud service available
+              allOf: cloudServices.map(
+                (service): JsonSchema => ({
+                  if: {
+                    anyOf: [
+                      {
+                        // Provider is not defined at service level
+                        not: { required: ['provider'] },
+                        properties: {
+                          type: { const: service.type },
+                        },
+                      },
+                      {
+                        // Provider is defined set to the current one
+                        required: ['provider'],
+                        properties: {
+                          provider: { const: provider },
+                          type: { const: service.type },
+                        },
+                      },
+                    ],
+                  },
+                  then: {
+                    $ref: service.schemaId,
+                  },
+                }),
+              ),
             },
           },
         },
