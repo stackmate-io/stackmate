@@ -83,9 +83,7 @@ export const generateCredentials = (
     requirements: { kmsKey, providerInstance },
   } = vault
   const idPrefix = `${snakeCase(targetName)}_secrets`
-  const secretName = `${stack.projectName}/${stack.stageName}/${kebabCase(
-    targetName.toLowerCase(),
-  )}`
+  const secretName = `${stack.name}/${kebabCase(targetName.toLowerCase())}`
 
   // we only use the default profile, since this is a core service
   const { secret, version, password } = getServiceProfile(

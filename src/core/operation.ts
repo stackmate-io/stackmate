@@ -1,13 +1,8 @@
-import pipe from 'lodash/fp/pipe'
 import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { get, isEmpty, uniqBy } from 'lodash'
-import { getStack } from '@core/stack'
-import { DEFAULT_PROJECT_NAME } from '@constants'
-import { validate, validateEnvironment, validateServices } from '@core/validation'
-import { getServiceConfigurations, withLocalState } from '@core/project'
+import { validate, validateEnvironment } from '@core/validation'
 import { assertRequirementsSatisfied } from '@core/service'
-import type { Project } from '@core/project'
 import type { Stack } from '@core/stack'
 import type {
   BaseServiceAttributes,
@@ -39,17 +34,6 @@ export const OPERATION_TYPE: Record<string, OperationType> = {
 } as const
 
 /**
- * @type {Operation} an operation that synthesizes the terraform files
- */
-export type Operation = {
-  readonly stack: Stack
-  readonly scope: ServiceScopeChoice
-  readonly provisionables: ProvisionablesMap
-  environment(): ServiceEnvironment[]
-  process(): object
-}
-
-/**
  * @param {BaseServiceAttributes} config the service's configuration
  * @param {String} stageName the stage's name
  * @returns {String} the id to use as a terraform resource identifier
@@ -76,7 +60,7 @@ export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionab
   }
 }
 
-class StageOperation implements Operation {
+export class Operation {
   /**
    * @var {Stack} stack the stack to deploy
    * @readonly
@@ -291,92 +275,5 @@ class StageOperation implements Operation {
     })
 
     return output
-  }
-}
-
-/**
- * Returns an operation for a project, stage and services
- *
- * @param {String} projectName the project's name
- * @param {String} stageName the stage's name
- * @param {ServiceScopeChoice} scope the operation's scope
- * @returns
- */
-const getOperation =
-  (projectName: string, stageName: string, scope: ServiceScopeChoice) =>
-  (services: BaseServiceAttributes[]): Operation => {
-    const stack = getStack(projectName, stageName)
-
-    return new StageOperation(services, stack, scope)
-  }
-
-/**
- * Returns a deployment operation
- *
- * @param {Project} project the project's configuration
- * @param {String} stage the stage's name
- * @returns {Operation} the deployment operation
- */
-export const deployment = (project: Project, stage: string) =>
-  pipe(
-    getServiceConfigurations(stage),
-    validateServices(),
-    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'deployable'),
-  )(project)
-
-/**
- * Returns a destruction operation
- *
- * @param {Project} project the project's configuration
- * @param {String} stage the stage's name
- * @returns {Operation} the destruction operation
- */
-export const destruction = (project: Project, stage: string) =>
-  pipe(
-    getServiceConfigurations(stage),
-    validateServices(),
-    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'destroyable'),
-  )(project)
-
-/**
- * Returns a setup operation (which uses a local state service)
- *
- * @param {Project} project the project's configuration
- * @param {String} stage the stage's name
- * @returns {Operation} the destruction operation
- */
-export const setup = (project: Project, stage: string) =>
-  pipe(
-    getServiceConfigurations(stage),
-    validateServices(),
-    withLocalState(),
-    getOperation(project.name || DEFAULT_PROJECT_NAME, stage, 'preparable'),
-  )(project)
-
-/**
- * Returns an operation by its name
- *
- * @param {OperationType} operation the operation to get
- * @param {Project} project the validated project configuration
- * @param {String} stage the stage name
- * @returns {Operation} the operation to use
- */
-export const getOperationByName = (
-  operation: OperationType,
-  project: Project,
-  stage: string,
-): Operation => {
-  switch (operation) {
-    case OPERATION_TYPE.DEPLOYMENT:
-      return deployment(project, stage)
-
-    case OPERATION_TYPE.DESTRUCTION:
-      return destruction(project, stage)
-
-    case OPERATION_TYPE.SETUP:
-      return setup(project, stage)
-
-    default:
-      throw new Error(`Operation ${operation} is invalid`)
   }
 }
