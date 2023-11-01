@@ -262,7 +262,7 @@ export const getServiceTypeSchema = (
 })
 
 /**
- * Returns a base core service (one that cannot be part of a stage)
+ * Returns a base core service (one that cannot be part of the services list)
  *
  * @param provider {ProviderChoice} the provider for the core service
  * @param type {ServiceTypeChoice} the service type for the core service
@@ -304,7 +304,7 @@ export const getCoreService = (
 }
 
 /**
- * Returns a base cloud service (one that can be provisioned in stages)
+ * Returns a base cloud service (one that can be provisioned in the services list)
  *
  * @param provider {ProviderChoice} the provider for the cloud service
  * @param type {ServiceTypeChoice} the service type for the cloud service

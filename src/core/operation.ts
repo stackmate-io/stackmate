@@ -33,7 +33,6 @@ export const OPERATION_TYPE: Record<string, OperationType> = {
 
 /**
  * @param {BaseServiceAttributes} config the service's configuration
- * @param {String} stageName the stage's name
  * @returns {String} the id to use as a terraform resource identifier
  */
 const getProvisionableResourceId = (config: BaseServiceAttributes): string =>
@@ -89,7 +88,7 @@ export class Operation {
   /**
    * @constructor
    * @param {BaseServiceAttributes[]} services the services to provision
-   * @param {Stack} stack the stage's stack
+   * @param {Stack} stack the stack we're deploying
    */
   constructor(services: BaseServiceAttributes[], stack: Stack) {
     this.stack = stack
