@@ -176,7 +176,7 @@ const deployDatabases =
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-export const onDeploy = (
+export const resourceHandler = (
   provisionable: AwsDatabaseDeployableProvisionable,
   stack: Stack,
 ): AwsDatabaseDeployableResources =>
@@ -209,7 +209,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   return pipe(
     withConfigHints(hints),
     withRootCredentials(),
-    withHandler('deployable', onDeploy),
+    withHandler(resourceHandler),
     linkable(onServiceLinked),
     externallyLinkable(onExternalLink),
     monitored(),

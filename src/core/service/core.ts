@@ -204,6 +204,7 @@ export type Service<
   schemaId: string
   schema: ServiceSchema<Setup>
   environment: ServiceEnvironment[]
+  handler: ProvisionHandler
   handlers: Map<ServiceScopeChoice, ProvisionHandler>
   associations: Associations
 }
@@ -426,19 +427,11 @@ export const associate =
  * @returns {Function<Service>}
  */
 export const withHandler =
-  <C extends BaseServiceAttributes>(scope: ServiceScopeChoice, handler: ProvisionHandler) =>
-  <T extends Service<C>>(service: T): T => {
-    if (service.handlers.has(scope)) {
-      throw new Error(
-        `There already is a handler for the “${scope}” scope for the “${service.type}” ${service.provider} service`,
-      )
-    }
-
-    return {
-      ...service,
-      handlers: new Map([...Array.from(service.handlers.entries()), [scope, handler]]),
-    }
-  }
+  <C extends BaseServiceAttributes>(handler: ProvisionHandler) =>
+  <T extends Service<C>>(service: T): T => ({
+    ...service,
+    handler,
+  })
 
 /**
  * Registers the environment variables to use when adding the service to the stack

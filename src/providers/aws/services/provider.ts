@@ -70,24 +70,31 @@ export type AwsProviderDestroyableProvisionable = Provisionable<
 >
 
 /**
- * Registers the prerequisites required by all operation types
- *
- * @param {AwsProviderBaseProvisionable} provisionable the provisionable item
+ * @param {AwsProviderDeployableProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
- * @returns {ProviderPrerequisites} the provider prerequisite resources
+ * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
-export const registerPrerequisites = (
-  provisionable: AwsProviderPreparableProvisionable | AwsProviderDestroyableProvisionable,
+export const resourceHandler = (
+  provisionable: AwsProviderDeployableProvisionable,
   stack: Stack,
-): ProviderPrerequisites => {
+): AwsProviderDeployableResources => {
   const {
+    config,
     config: { region },
     resourceId,
   } = provisionable
-  const alias = `aws-${kebabCase(region)}-provider`
+
+  const {
+    vpc: vpcConfig,
+    subnet: subnetConfig,
+    gateway: gatewayConfig,
+  } = getResourcesProfile(config)
+
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
+
   const provider = new awsProvider.AwsProvider(stack.context, PROVIDER.AWS, {
     region,
-    alias,
+    alias: `aws-${kebabCase(region)}-provider`,
     defaultTags: [
       {
         tags: {
@@ -115,26 +122,6 @@ export const registerPrerequisites = (
       provider,
     },
   )
-
-  return { provider, kmsKey, account, outputs: [] }
-}
-
-/**
- * @param {AwsProviderDeployableProvisionable} provisionable the provisionable item
- * @param {Stack} stack the stack to deploy resources to
- * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
- */
-export const onDeploy = (
-  provisionable: AwsProviderDeployableProvisionable,
-  stack: Stack,
-): AwsProviderDeployableResources => {
-  const { config, resourceId } = provisionable
-  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
-  const {
-    vpc: vpcConfig,
-    subnet: subnetConfig,
-    gateway: gatewayConfig,
-  } = getResourcesProfile(config)
 
   const vpc = new awsVpc.Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -167,7 +154,9 @@ export const onDeploy = (
   ]
 
   return {
-    ...registerPrerequisites(provisionable, stack),
+    provider,
+    kmsKey,
+    account,
     vpc,
     subnets,
     gateway,
@@ -182,9 +171,7 @@ export const getProviderService = (): AwsProviderService =>
   pipe(
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
-    withHandler('deployable', onDeploy),
-    withHandler('preparable', registerPrerequisites),
-    withHandler('destroyable', registerPrerequisites),
+    withHandler(resourceHandler),
   )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()

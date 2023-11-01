@@ -1,6 +1,6 @@
 import pipe from 'lodash/fp/pipe'
 import { S3Backend } from 'cdktf'
-import { s3Bucket } from '@cdktf/provider-aws'
+import type { s3Bucket } from '@cdktf/provider-aws'
 
 import type { Stack } from '@core/stack'
 import { SERVICE_TYPE } from '@constants'
@@ -44,7 +44,7 @@ export type AwsStatePreparableProvisionable = Provisionable<
   'preparable'
 >
 
-const registerBackend = (
+const resourceHandler = (
   provisionable: AwsStateDeployableProvisionable | AwsStateDestroyableProvisionable,
   stack: Stack,
 ): AwsStateDestroyableResources | AwsStateDeployableResources => {
@@ -63,31 +63,6 @@ const registerBackend = (
   })
 
   return { backend }
-}
-
-export const onDeploy = registerBackend
-export const onDestroy = registerBackend
-export const onPrepare = (
-  provisionable: AwsStatePreparableProvisionable,
-  stack: Stack,
-): AwsStatePreparableResources => {
-  const {
-    config,
-    requirements: { providerInstance },
-    resourceId,
-  } = provisionable
-
-  const bucket = new s3Bucket.S3Bucket(stack.context, resourceId, {
-    acl: 'private',
-    bucket: config.bucket,
-    provider: providerInstance,
-    versioning: {
-      enabled: true,
-      mfaDelete: true,
-    },
-  })
-
-  return { bucket }
 }
 
 const getAdditionalPropertiesSchema = (): ServiceSchema<AdditionalAttrs> => ({
@@ -115,9 +90,7 @@ const getAdditionalPropertiesSchema = (): ServiceSchema<AdditionalAttrs> => ({
 export const getStateService = (): AwsStateService =>
   pipe(
     withRegions(REGIONS, DEFAULT_REGION),
-    withHandler('deployable', onDeploy),
-    withHandler('destroyable', onDestroy),
-    withHandler('preparable', onPrepare),
+    withHandler(resourceHandler),
     withSchema<AwsStateAttributes, AdditionalAttrs>(getAdditionalPropertiesSchema()),
   )(getAwsCoreService(SERVICE_TYPE.STATE))
 
