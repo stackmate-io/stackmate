@@ -7,12 +7,15 @@ import type {
   BaseServiceAttributes,
   CredentialsHandlerOptions,
 } from '@core/service'
-import type { AwsProviderDeployableResources } from '@providers/aws/services/provider'
-import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
-import type { AwsSecretsDeployableResources } from '@providers/aws/services/secrets'
 import { generateCredentials } from '@providers/aws/services/secrets'
+import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
+import type {
+  AwsProviderProvisionable,
+  AwsProviderResources,
+} from '@providers/aws/services/provider'
+import type { AwsSecretsResources, AwsSecretsProvisionable } from '@providers/aws/services/secrets'
 
-export const getProviderResources = (stack: Stack): AwsProviderDeployableResources => {
+export const getProviderResources = (stack: Stack): AwsProviderResources => {
   const provisionable = getProvisionable({
     provider: PROVIDER.AWS,
     name: 'aws-provider-service',
@@ -20,15 +23,15 @@ export const getProviderResources = (stack: Stack): AwsProviderDeployableResourc
     region: DEFAULT_REGION,
   })
 
-  return providerDeployHandler(provisionable, stack)
+  return providerDeployHandler(provisionable as AwsProviderProvisionable, stack)
 }
 
 export const getCredentialResources = (
-  providerResources: AwsProviderDeployableResources,
+  providerResources: AwsProviderResources,
   target: BaseProvisionable,
   stack: Stack,
   opts?: CredentialsHandlerOptions,
-): AwsSecretsDeployableResources => {
+): AwsSecretsResources => {
   const provisionable = getProvisionable({
     provider: PROVIDER.AWS,
     name: 'aws-secrets-service',
@@ -38,7 +41,7 @@ export const getCredentialResources = (
 
   Object.assign(provisionable, { requirements: providerResources })
 
-  return generateCredentials(provisionable, stack, target, opts)
+  return generateCredentials(provisionable as AwsSecretsProvisionable, stack, target, opts)
 }
 
 export const getAwsDeploymentProvisionableMock = <P extends BaseProvisionable>(

@@ -31,15 +31,9 @@ export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   region: ChoiceOf<typeof REGIONS>
 }
 
-export type AwsSecretsDeployableResources = Obj
-export type AwsSecretsDestroyableResources = Obj
-export type AwsSecretsPreparableResources = Obj
-
+export type AwsSecretsResources = Obj
 export type AwsSecretsVaultService = SecretsVaultService<AwsService<AwsSecretsVaultAttributes>>
-export type AwsSecretsProvisionable = Provisionable<
-  AwsSecretsVaultService,
-  AwsSecretsDeployableResources
->
+export type AwsSecretsProvisionable = Provisionable<AwsSecretsVaultService, AwsSecretsResources>
 
 type ProvisionCredentialsResources = Credentials & {
   randomPassword: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword
