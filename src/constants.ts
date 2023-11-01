@@ -18,7 +18,7 @@ export const PROVIDER = {
 export const SERVICE_TYPE = {
   CDN: 'cdn',
   DNS: 'dns',
-  ELASTIC_STORAGE: 'elasticstorage',
+  OBJECT_STORAGE: 'objectstore',
   INSTANCE: 'instance',
   LOAD_BALANCER: 'loadbalancer',
   MEMCACHED: 'memcached',

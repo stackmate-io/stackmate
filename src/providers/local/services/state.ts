@@ -34,9 +34,9 @@ export const onPrepare = (
   stack: Stack,
 ): LocalStateResources => {
   const { config } = provisionable
-  const path = config.path || `${stack.stageName.toLowerCase()}-initial.tfstate`
+  const path = config.path || `${stack.name}-initial.tfstate`
   const workspaceDir =
-    config.directory || joinPaths(USER_HOME_DIRECTORY, stack.projectName.toLocaleLowerCase())
+    config.directory || joinPaths(USER_HOME_DIRECTORY, stack.name.toLocaleLowerCase())
 
   const backend = new LocalBackend(stack.context, { path, workspaceDir })
   return { backend }

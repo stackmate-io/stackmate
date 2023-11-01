@@ -57,7 +57,7 @@ const registerBackend = (
     acl: 'private',
     bucket: config.bucket,
     encrypt: true,
-    key: `${stack.projectName}/${stack.stageName}/terraform.tfstate`,
+    key: `${stack.name}/terraform.tfstate`,
     kmsKeyId: kmsKey.id,
     region: config.region,
   })

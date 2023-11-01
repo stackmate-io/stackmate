@@ -1,3 +1,4 @@
+import { kebabCase } from 'lodash'
 import type { AppConfig } from 'cdktf'
 import { TerraformStack, App as TerraformApp } from 'cdktf'
 
@@ -5,10 +6,9 @@ import { TerraformStack, App as TerraformApp } from 'cdktf'
  * @type {Stack} the stage's stack
  */
 export type Stack = {
+  readonly name: string
   readonly app: TerraformApp
   readonly context: TerraformStack
-  readonly projectName: string
-  readonly stageName: string
   toObject(): object
   toJson(): string
 }
@@ -27,28 +27,19 @@ export class StageStack implements Stack {
   readonly context: TerraformStack
 
   /**
-   * @var {String} projectName the project's name
-   * @readonly
+   * @var {string} name the stack's name
    */
-  readonly projectName: string
-
-  /**
-   * @var {String} stageName the stage's name
-   * @readonly
-   */
-  readonly stageName: string
+  readonly name: string
 
   /**
    * @constructor
-   * @param {String} projectName the project's name
-   * @param {String} stageName the stage's name
+   * @param {String} name the stack's name
    * @param {AppConfig} options the terraform app options
    */
-  constructor(projectName: string, stageName: string, options?: AppConfig) {
-    this.projectName = projectName
-    this.stageName = stageName
+  constructor(name: string, options?: AppConfig) {
+    this.name = kebabCase(name.toLowerCase())
     this.app = new TerraformApp(options)
-    this.context = new TerraformStack(this.app, `${this.projectName}-${this.stageName}`)
+    this.context = new TerraformStack(this.app, this.name)
   }
 
   /**
@@ -69,10 +60,9 @@ export class StageStack implements Stack {
 /**
  * Returns a stack object to be used for stage composition
  *
- * @param {String} projectName the project's name
- * @param {String} stageName the stage's name
+ * @param {String} environmentName the project's name
  * @param {AppConfig} options the terraform app options
  * @returns {Stack} the stack object
  */
-export const getStack = (projectName: string, stageName: string, options?: AppConfig): Stack =>
-  new StageStack(projectName, stageName, options)
+export const getStack = (environmentName: string, options?: AppConfig): Stack =>
+  new StageStack(environmentName, options)
