@@ -1,10 +1,9 @@
 import { LocalBackend } from 'cdktf'
-
-import { getStack } from '@core/stack'
 import type { LocalStateAttributes, LocalStateProvisionable } from '@providers/local/services/state'
 import { LocalState, onPrepare } from '@providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getProvisionable } from '@core/operation'
+import { Stack } from '@core/stack'
 
 describe('Local state', () => {
   const service = LocalState
@@ -45,7 +44,7 @@ describe('Local state', () => {
   })
 
   describe('onPrepare provision handler', () => {
-    const stack = getStack('my-project', 'my-stage')
+    const stack = new Stack('stack-name')
     const config: LocalStateAttributes = {
       name: 'local-state',
       provider: 'local',

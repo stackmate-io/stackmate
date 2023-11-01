@@ -1,8 +1,7 @@
 import { s3Bucket } from '@cdktf/provider-aws'
 import { TerraformBackend } from 'cdktf'
 
-import type { Stack } from '@core/stack'
-import { getStack } from '@core/stack'
+import { Stack } from '@core/stack'
 import type {
   AwsStateAttributes,
   AwsStateDeployableProvisionable,
@@ -72,8 +71,7 @@ describe('AWS state', () => {
     let config: AwsStateAttributes
 
     beforeEach(() => {
-      stack = getStack('my-project', 'a-stage')
-
+      stack = new Stack('stack-name')
       config = {
         name: 'aws-state-service',
         provider: PROVIDER.AWS,

@@ -11,7 +11,7 @@ import {
   snsTopicPolicy,
 } from '@cdktf/provider-aws'
 
-import { getStack } from '@core/stack'
+import { Stack } from '@core/stack'
 import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
 import type { ServiceTypeChoice } from '@core/service'
 import { PROVIDER, SERVICE_TYPE, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants'
@@ -121,7 +121,7 @@ describe('AWS PostgreSQL', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = getStack('some-project', 'some-stage')
+    const stack = new Stack('stack-name')
     const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres')
     const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config,
@@ -142,7 +142,7 @@ describe('AWS PostgreSQL', () => {
       port: config.port,
       allocated_storage: config.storage,
       db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+      identifier: kebabCase(`${config.name}-${stack.name}`),
     })
 
     expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
@@ -182,7 +182,7 @@ describe('AWS MySQL', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = getStack('some-project', 'some-stage')
+    const stack = new Stack('stack-name')
     const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql')
     const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config,
@@ -202,7 +202,7 @@ describe('AWS MySQL', () => {
       port: config.port,
       allocated_storage: config.storage,
       db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+      identifier: kebabCase(`${config.name}-${stack.name}`),
     })
 
     expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
@@ -242,7 +242,7 @@ describe('AWS MariaDB', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = getStack('some-project', 'some-stage')
+    const stack = new Stack('stack-name')
     const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb')
     const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseDeployableProvisionable>(
       config,
@@ -262,7 +262,7 @@ describe('AWS MariaDB', () => {
       port: config.port,
       allocated_storage: config.storage,
       db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+      identifier: kebabCase(`${config.name}-${stack.name}`),
     })
 
     expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
@@ -273,7 +273,7 @@ describe('AWS MariaDB', () => {
 
 describe('Database service monitoring', () => {
   it('provides monitoring for the database service', () => {
-    const stack = getStack('some-project', 'some-stage')
+    const stack = new Stack('stack-name')
     const config: AwsMariaDBAttributes = {
       ...getDatabaseConfig('mariadb', 'mariadb'),
       monitoring: {
@@ -291,7 +291,7 @@ describe('Database service monitoring', () => {
     onDeploy(provisionable, stack)
     const synthesized = Testing.synth(stack.context)
 
-    const alarmPrefix = snakeCase(`${config.name}_${stack.stageName}`)
+    const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)
     expect(synthesized).toHaveResourceWithProperties(snsTopic.SnsTopic, {
       name: expect.stringContaining(snakeCase(config.name)),
     })

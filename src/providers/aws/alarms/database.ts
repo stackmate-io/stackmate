@@ -76,7 +76,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     stack.context,
     eventSubscriptionId,
     {
-      name: snakeCase(`${serviceName}-${stack.stageName}-event-subscription`),
+      name: snakeCase(`${serviceName}-${stack.name}-event-subscription`),
       snsTopic: topic.arn,
       sourceType: 'db-instance',
       sourceIds: [dbInstance.id],
@@ -106,7 +106,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   }
 
-  const burstBalanceId = `${kebabCase(serviceName)}-${stack.stageName}-burst-balance-too-low`
+  const burstBalanceId = `${kebabCase(serviceName)}-${stack.name}-burst-balance-too-low`
   const burstBalance = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     burstBalanceId,
@@ -120,7 +120,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const cpuUtilizationId = `${kebabCase(serviceName)}-${stack.stageName}-cpu-utilization-too-high`
+  const cpuUtilizationId = `${kebabCase(serviceName)}-${stack.name}-cpu-utilization-too-high`
   const cpuUtilization = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     cpuUtilizationId,
@@ -133,9 +133,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const cpuUCreditBalanceId = `${kebabCase(serviceName)}-${
-    stack.stageName
-  }-cpu-credit-balance-too-low`
+  const cpuUCreditBalanceId = `${kebabCase(serviceName)}-${stack.name}-cpu-credit-balance-too-low`
   const cpuCreditBalance = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     cpuUCreditBalanceId,
@@ -148,7 +146,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const diskQueueDepthId = `${kebabCase(serviceName)}-${stack.stageName}-disk-depth-too-high`
+  const diskQueueDepthId = `${kebabCase(serviceName)}-${stack.name}-disk-depth-too-high`
   const diskQueueDepth = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     diskQueueDepthId,
@@ -161,7 +159,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const freeableMemoryId = `${kebabCase(serviceName)}-${stack.stageName}-freeable-memory-too-low`
+  const freeableMemoryId = `${kebabCase(serviceName)}-${stack.name}-freeable-memory-too-low`
   const freeableMemory = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     freeableMemoryId,
@@ -174,7 +172,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const freeStorageId = `${kebabCase(serviceName)}-${stack.stageName}-free-storage-space-too-low`
+  const freeStorageId = `${kebabCase(serviceName)}-${stack.name}-free-storage-space-too-low`
   const freeStorage = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     freeStorageId,
@@ -187,7 +185,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const swapSpaceId = `${kebabCase(serviceName)}-${stack.stageName}-swap-usage-too-high`
+  const swapSpaceId = `${kebabCase(serviceName)}-${stack.name}-swap-usage-too-high`
   const swapSpace = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(stack.context, swapSpaceId, {
     alarmName: snakeCase(swapSpaceId),
     comparisonOperator: 'GreaterThanThreshold',
