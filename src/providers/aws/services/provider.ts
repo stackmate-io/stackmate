@@ -91,7 +91,7 @@ export const registerPrerequisites = (
     defaultTags: [
       {
         tags: {
-          Environment: stack.stageName,
+          Environment: stack.name,
           Description: DEFAULT_RESOURCE_COMMENT,
         },
       },

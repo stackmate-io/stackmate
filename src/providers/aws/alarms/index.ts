@@ -81,7 +81,7 @@ export const getMonitoringPrerequisites = (
     requirements: { account, providerInstance },
   } = provisionable
 
-  const topicId = `${name}-${region || 'global'}-${stack.stageName}`
+  const topicId = `${name}-${region || 'global'}-${stack.name}`
   const topic = new snsTopic.SnsTopic(stack.context, topicId, {
     name: snakeCase(topicId),
     provider: providerInstance,

@@ -14,8 +14,7 @@ import { AwsSecretsVault, generateCredentials } from '@providers/aws/services/se
 import type { BaseProvisionable } from '@core/service'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
-import type { Stack } from '@core/stack'
-import { getStack } from '@core/stack'
+import { Stack } from '@core/stack'
 import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/operation'
 
@@ -70,7 +69,7 @@ describe('AWS Secrets service', () => {
     let config: AwsSecretsVaultAttributes
 
     beforeEach(() => {
-      stack = getStack('my-project', 'my-stage')
+      stack = new Stack('stack-name')
 
       config = {
         provider: PROVIDER.AWS,

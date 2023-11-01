@@ -2,18 +2,7 @@ import { kebabCase } from 'lodash'
 import type { AppConfig } from 'cdktf'
 import { TerraformStack, App as TerraformApp } from 'cdktf'
 
-/**
- * @type {Stack} the stage's stack
- */
-export type Stack = {
-  readonly name: string
-  readonly app: TerraformApp
-  readonly context: TerraformStack
-  toObject(): object
-  toJson(): string
-}
-
-export class StageStack implements Stack {
+export class Stack {
   /**
    * @var {TerraformApp} app the terraform app for synthesizing the stack
    * @readonly
@@ -56,13 +45,3 @@ export class StageStack implements Stack {
     return JSON.stringify(this.toObject(), null, 2)
   }
 }
-
-/**
- * Returns a stack object to be used for stage composition
- *
- * @param {String} environmentName the project's name
- * @param {AppConfig} options the terraform app options
- * @returns {Stack} the stack object
- */
-export const getStack = (environmentName: string, options?: AppConfig): Stack =>
-  new StageStack(environmentName, options)

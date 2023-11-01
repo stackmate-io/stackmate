@@ -145,7 +145,7 @@ const deployDatabases =
       ] as unknown as string[],
       engine: config.engine,
       engineVersion: config.version,
-      identifier: kebabCase(`${config.name}-${stack.stageName}`),
+      identifier: kebabCase(`${config.name}-${stack.name}`),
       instanceClass: config.size,
       dbName: config.database,
       parameterGroupName: paramGroup.name,

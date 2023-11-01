@@ -19,8 +19,7 @@ import { AwsProvider } from '@providers/aws/services/provider'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import type { BaseProvisionable, ServiceScopeChoice } from '@core/service'
-import type { Stack } from '@core/stack'
-import { getStack } from '@core/stack'
+import { Stack } from '@core/stack'
 import { getProvisionable } from '@core/operation'
 
 describe('AWS Provider', () => {
@@ -75,7 +74,7 @@ describe('AWS Provider', () => {
     let config: AwsProviderAttributes
 
     beforeEach(() => {
-      stack = getStack('my-project', 'a-stage')
+      stack = new Stack('stack-name')
       config = {
         provider: 'aws',
         name: 'aws-provider',
