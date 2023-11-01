@@ -5,7 +5,7 @@ import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-a
 
 import type { Stack } from '@core/stack'
 import { getResourcesProfile } from '@core/profile'
-import type { ChoiceOf, Obj, OneOfType } from '@lib/util'
+import type { ChoiceOf, OneOfType } from '@lib/util'
 import type { DatabaseServiceAttributes } from '@providers/types'
 import type { PROVIDER } from '@constants'
 import { DEFAULT_PORT, SERVICE_TYPE } from '@constants'
@@ -81,13 +81,7 @@ export type AwsMariaDBService = AwsDbService<AwsMariaDBAttributes>
 
 type AwsDb = OneOfType<[AwsMySQLService, AwsPostgreSQLService, AwsMariaDBService]>
 
-export type AwsDatabaseDestroyableProvisionable = Provisionable<AwsDb, Obj, 'destroyable'>
-export type AwsDatabasPreparableProvisionable = Provisionable<AwsDb, Obj, 'preparable'>
-export type AwsDatabaseDeployableProvisionable = Provisionable<
-  AwsDb,
-  AwsDatabaseDeployableResources,
-  'deployable'
->
+export type AwsDatabaseProvisionable = Provisionable<AwsDb, AwsDatabaseDeployableResources>
 
 /**
  * @param {DatabaseAttributes} config the service's configuration
@@ -110,15 +104,12 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
 /**
  * Provisions the database service
  *
- * @param {AwsDatabaseDeployableProvisionable} provisionable the service's configuration
+ * @param {AwsDatabaseProvisionable} provisionable the service's configuration
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
 const deployDatabases =
-  (
-    provisionable: AwsDatabaseDeployableProvisionable,
-    stack: Stack,
-  ): (() => AwsDatabaseDeployableResources) =>
+  (provisionable: AwsDatabaseProvisionable, stack: Stack): (() => AwsDatabaseDeployableResources) =>
   (): AwsDatabaseDeployableResources => {
     const {
       config,
@@ -172,17 +163,17 @@ const deployDatabases =
 /**
  * Provisions the database resources along with monitoring resources
  *
- * @param {AwsDatabaseDeployableProvisionable} provisionable the service's configuration
+ * @param {AwsDatabaseProvisionable} provisionable the service's configuration
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
 export const resourceHandler = (
-  provisionable: AwsDatabaseDeployableProvisionable,
+  provisionable: AwsDatabaseProvisionable,
   stack: Stack,
 ): AwsDatabaseDeployableResources =>
   pipe(
     deployDatabases(provisionable, stack),
-    withAwsAlarms<AwsDatabaseDeployableProvisionable>(provisionable, stack, awsDatabaseAlarms),
+    withAwsAlarms<AwsDatabaseProvisionable>(provisionable, stack, awsDatabaseAlarms),
   )()
 
 /**

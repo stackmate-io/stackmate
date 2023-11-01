@@ -18,11 +18,7 @@ export type LocalProviderAttributes = LocalServiceAttributes<
 
 export type LocalProviderResources = ProviderInstanceResources
 export type LocalProviderService = Service<LocalProviderAttributes>
-export type LocalProviderProvisionable = Provisionable<
-  LocalProviderService,
-  LocalProviderResources,
-  'preparable'
->
+export type LocalProviderProvisionable = Provisionable<LocalProviderService, LocalProviderResources>
 
 export const resourceHandler = (
   provisionable: LocalProviderProvisionable,

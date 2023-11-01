@@ -40,8 +40,7 @@ export type AwsAlarmPrerequisites = {
 
 export type MonitoredServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & MonitoringAttributes>,
-  Provisions,
-  'deployable'
+  Provisions
 >
 
 export const AWS_SERVICE_INFO: Map<ServiceTypeChoice, { name: string; url: string }> = new Map([

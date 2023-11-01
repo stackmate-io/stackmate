@@ -50,32 +50,18 @@ export type AwsProviderAttributes = AwsServiceAttributes<
 >
 
 export type AwsProviderService = Service<AwsProviderAttributes>
-
-export type AwsProviderDeployableProvisionable = Provisionable<
+export type AwsProviderProvisionable = Provisionable<
   AwsProviderService,
-  AwsProviderDeployableResources,
-  'deployable'
->
-
-export type AwsProviderPreparableProvisionable = Provisionable<
-  AwsProviderService,
-  AwsProviderPreparableResources,
-  'preparable'
->
-
-export type AwsProviderDestroyableProvisionable = Provisionable<
-  AwsProviderService,
-  AwsProviderDestroyableResources,
-  'destroyable'
+  AwsProviderDeployableResources
 >
 
 /**
- * @param {AwsProviderDeployableProvisionable} provisionable the provisionable item
+ * @param {AwsProviderProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
  * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
  */
 export const resourceHandler = (
-  provisionable: AwsProviderDeployableProvisionable,
+  provisionable: AwsProviderProvisionable,
   stack: Stack,
 ): AwsProviderDeployableResources => {
   const {

@@ -25,27 +25,10 @@ export type AwsStateAttributes = AwsServiceAttributes<
 >
 
 export type AwsStateService = AwsService<AwsStateAttributes>
-
-export type AwsStateDeployableProvisionable = Provisionable<
-  AwsStateService,
-  AwsStateDeployableResources,
-  'deployable'
->
-
-export type AwsStateDestroyableProvisionable = Provisionable<
-  AwsStateService,
-  AwsStateDestroyableResources,
-  'destroyable'
->
-
-export type AwsStatePreparableProvisionable = Provisionable<
-  AwsStateService,
-  AwsStatePreparableResources,
-  'preparable'
->
+export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateDeployableResources>
 
 const resourceHandler = (
-  provisionable: AwsStateDeployableProvisionable | AwsStateDestroyableProvisionable,
+  provisionable: AwsStateProvisionable,
   stack: Stack,
 ): AwsStateDestroyableResources | AwsStateDeployableResources => {
   const {
