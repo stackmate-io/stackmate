@@ -25,21 +25,15 @@ import type {
 } from '@core/service'
 import { getCoreService, profilable, withHandler, withRegions } from '@core/service'
 
-export type ProviderPrerequisites = {
+export type AwsProviderResources = {
   provider: awsProvider.AwsProvider
   kmsKey: awsKmsKey.KmsKey
   account: callerIdentity.DataAwsCallerIdentity
   outputs: TerraformOutput[]
-}
-
-export type AwsProviderDeployableResources = ProviderPrerequisites & {
   gateway: internetGateway.InternetGateway
   subnets: awsSubnet.Subnet[]
   vpc: awsVpc.Vpc
 }
-
-export type AwsProviderPreparableResources = ProviderPrerequisites
-export type AwsProviderDestroyableResources = ProviderPrerequisites
 
 export type AwsProviderAttributes = AwsServiceAttributes<
   BaseServiceAttributes &
@@ -50,20 +44,17 @@ export type AwsProviderAttributes = AwsServiceAttributes<
 >
 
 export type AwsProviderService = Service<AwsProviderAttributes>
-export type AwsProviderProvisionable = Provisionable<
-  AwsProviderService,
-  AwsProviderDeployableResources
->
+export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 
 /**
  * @param {AwsProviderProvisionable} provisionable the provisionable item
  * @param {Stack} stack the stack to deploy resources to
- * @returns {AwsProviderDeployableResources} the resources deployed by the AWS provider
+ * @returns {AwsProviderResources} the resources deployed by the AWS provider
  */
 export const resourceHandler = (
   provisionable: AwsProviderProvisionable,
   stack: Stack,
-): AwsProviderDeployableResources => {
+): AwsProviderResources => {
   const {
     config,
     config: { region },

@@ -1,6 +1,5 @@
 import pipe from 'lodash/fp/pipe'
 import { S3Backend } from 'cdktf'
-import type { s3Bucket } from '@cdktf/provider-aws'
 
 import type { Stack } from '@core/stack'
 import { SERVICE_TYPE } from '@constants'
@@ -10,10 +9,6 @@ import type { AwsService, AwsServiceAttributes } from '@providers/aws/service'
 import { getAwsCoreService } from '@providers/aws/service'
 import type { BaseServiceAttributes, Provisionable } from '@core/service'
 import { withRegions, withHandler, withSchema } from '@core/service'
-
-export type AwsStateDeployableResources = { backend: S3Backend }
-export type AwsStatePreparableResources = { bucket: s3Bucket.S3Bucket }
-export type AwsStateDestroyableResources = { backend: S3Backend }
 
 type AdditionalAttrs = { bucket: string }
 
@@ -25,12 +20,10 @@ export type AwsStateAttributes = AwsServiceAttributes<
 >
 
 export type AwsStateService = AwsService<AwsStateAttributes>
-export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateDeployableResources>
+export type AwsStateResources = { backend: S3Backend }
+export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateResources>
 
-const resourceHandler = (
-  provisionable: AwsStateProvisionable,
-  stack: Stack,
-): AwsStateDestroyableResources | AwsStateDeployableResources => {
+const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): AwsStateResources => {
   const {
     config,
     requirements: { kmsKey },

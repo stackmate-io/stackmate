@@ -58,7 +58,7 @@ type DatabaseAttributes = DatabaseServiceAttributes &
     provider: typeof PROVIDER.AWS
   }
 
-export type AwsDatabaseDeployableResources = {
+export type AwsDatabaseResources = {
   dbInstance: rdsDbInstance.DbInstance
   paramGroup: dbParameterGroup.DbParameterGroup
   outputs: TerraformOutput[]
@@ -81,7 +81,7 @@ export type AwsMariaDBService = AwsDbService<AwsMariaDBAttributes>
 
 type AwsDb = OneOfType<[AwsMySQLService, AwsPostgreSQLService, AwsMariaDBService]>
 
-export type AwsDatabaseProvisionable = Provisionable<AwsDb, AwsDatabaseDeployableResources>
+export type AwsDatabaseProvisionable = Provisionable<AwsDb, AwsDatabaseResources>
 
 /**
  * @param {DatabaseAttributes} config the service's configuration
@@ -109,8 +109,8 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
  * @returns {Provisions} the provisions generated
  */
 const deployDatabases =
-  (provisionable: AwsDatabaseProvisionable, stack: Stack): (() => AwsDatabaseDeployableResources) =>
-  (): AwsDatabaseDeployableResources => {
+  (provisionable: AwsDatabaseProvisionable, stack: Stack): (() => AwsDatabaseResources) =>
+  (): AwsDatabaseResources => {
     const {
       config,
       requirements: { providerInstance, rootCredentials },
@@ -170,7 +170,7 @@ const deployDatabases =
 export const resourceHandler = (
   provisionable: AwsDatabaseProvisionable,
   stack: Stack,
-): AwsDatabaseDeployableResources =>
+): AwsDatabaseResources =>
   pipe(
     deployDatabases(provisionable, stack),
     withAwsAlarms<AwsDatabaseProvisionable>(provisionable, stack, awsDatabaseAlarms),

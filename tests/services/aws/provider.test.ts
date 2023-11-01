@@ -7,7 +7,7 @@ import {
 } from '@cdktf/provider-aws'
 
 import type {
-  AwsProviderDeployableResources,
+  AwsProviderResources,
   AwsProviderAttributes,
 } from '@providers/aws/services/provider'
 import { AwsProvider } from '@providers/aws/services/provider'
@@ -75,7 +75,7 @@ describe('AWS Provider', () => {
     })
 
     it('registers the service into the stack and creates the resources', () => {
-      const resources = service.handler(provisionable, stack) as AwsProviderDeployableResources
+      const resources = service.handler(provisionable, stack) as AwsProviderResources
 
       expect(resources).toBeInstanceOf(Object)
       expect(new Set(Object.keys(resources))).toEqual(
