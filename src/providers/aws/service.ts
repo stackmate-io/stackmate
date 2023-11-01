@@ -202,7 +202,7 @@ export const onExternalLink = (
     requirements: { vpc },
   } = provisionable
 
-  const securityGroups = externalLinks.map((ipAddress, idx) => {
+  const securityGroups = externalLinks.map((ipAddress) => {
     const { ip, mask } = getIpAddressParts(ipAddress)
     const sgName: string = `allow-external-ip-${hashString(ipAddress)}`
 
