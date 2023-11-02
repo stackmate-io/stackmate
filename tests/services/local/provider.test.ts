@@ -23,12 +23,10 @@ describe('Local Provider', () => {
         provider: {
           type: 'string',
           enum: [PROVIDER.LOCAL],
-          default: PROVIDER.LOCAL,
         },
         type: {
           type: 'string',
           enum: [SERVICE_TYPE.PROVIDER],
-          default: SERVICE_TYPE.PROVIDER,
         },
         region: {
           type: 'string',

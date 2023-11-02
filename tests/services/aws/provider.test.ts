@@ -41,7 +41,6 @@ describe('AWS Provider', () => {
         type: {
           type: 'string',
           enum: [SERVICE_TYPE.PROVIDER],
-          default: SERVICE_TYPE.PROVIDER,
         },
         region: {
           type: 'string',

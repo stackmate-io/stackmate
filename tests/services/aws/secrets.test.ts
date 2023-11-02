@@ -45,7 +45,6 @@ describe('AWS Secrets service', () => {
         type: {
           type: 'string',
           enum: [SERVICE_TYPE.SECRETS],
-          default: SERVICE_TYPE.SECRETS,
         },
         region: {
           type: 'string',
