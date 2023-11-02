@@ -132,32 +132,31 @@ export const cloudServices = availableServices.filter((s) => !isCoreService(s.ty
 
 const registry = new Registry(...availableServices) as Registry
 
-type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER }
-type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE }
-type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS }
-type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING }
-
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
 export type AvailableService = Distribute<(typeof availableServices)[number]>
 export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
 
+type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER }
 export type ProviderService = Distribute<Extract<AvailableService, ProviderDiscrimination>>
 export type ProviderServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, ProviderDiscrimination>
 >
 
+type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE }
 export type StateService = Distribute<Extract<AvailableService, StateDiscrimination>>
 export type StateServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, StateDiscrimination>
 >
 
+type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS }
 export type SecretVaultService = Distribute<Extract<AvailableService, SecretsDiscrimination>>
 export type SecretVaultServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, SecretsDiscrimination>
 >
 
+type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING }
 export type MonitoringService = Distribute<Extract<AvailableService, MonitoringDiscrimination>>
 export type MonitoringServiceAttributes = Distribute<
   Extract<AvailableServiceAttributes, MonitoringDiscrimination>
