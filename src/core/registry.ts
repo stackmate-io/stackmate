@@ -1,8 +1,7 @@
 import { uniq } from 'lodash'
 
 import * as Services from '@providers/services'
-import type { SERVICE_TYPE } from '@constants'
-import type { Distribute } from '@lib/util'
+import type { Distribute, DistributiveRequireKeys } from '@lib/util'
 import type {
   ProviderChoice,
   ServiceTypeChoice,
@@ -135,47 +134,11 @@ const registry = new Registry(...availableServices) as Registry
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
-export type AvailableService = Distribute<(typeof availableServices)[number]>
-export type AvailableServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
-
-type ProviderDiscrimination = { type: typeof SERVICE_TYPE.PROVIDER }
-export type ProviderService = Distribute<Extract<AvailableService, ProviderDiscrimination>>
-export type ProviderServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, ProviderDiscrimination>
+type AvailableService = Distribute<(typeof availableServices)[number]>
+type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
+type ServiceConfiguration = DistributiveRequireKeys<
+  ServiceAttributes,
+  'name' | 'type' | 'provider' | 'region'
 >
 
-type StateDiscrimination = { type: typeof SERVICE_TYPE.STATE }
-export type StateService = Distribute<Extract<AvailableService, StateDiscrimination>>
-export type StateServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, StateDiscrimination>
->
-
-type SecretsDiscrimination = { type: typeof SERVICE_TYPE.SECRETS }
-export type SecretVaultService = Distribute<Extract<AvailableService, SecretsDiscrimination>>
-export type SecretVaultServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, SecretsDiscrimination>
->
-
-type MonitoringDiscrimination = { type: typeof SERVICE_TYPE.MONITORING }
-export type MonitoringService = Distribute<Extract<AvailableService, MonitoringDiscrimination>>
-export type MonitoringServiceAttributes = Distribute<
-  Extract<AvailableServiceAttributes, MonitoringDiscrimination>
->
-
-export type CoreService = Distribute<
-  ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination
->
-export type CoreServiceAttributes = Distribute<
-  StateServiceAttributes | SecretVaultServiceAttributes | ProviderServiceAttributes
->
-
-export type CloudService = Distribute<
-  Exclude<AvailableService, ProviderDiscrimination | StateDiscrimination | SecretsDiscrimination>
->
-export type CloudServiceAttributes = Distribute<
-  Exclude<AvailableServiceAttributes, CoreServiceAttributes>
->
-export type CloudServiceType = CloudServiceAttributes['type']
-export type CloudServiceProvider = CloudServiceAttributes['provider']
-
-export { registry as Registry }
+export { registry as Registry, type ServiceAttributes, type ServiceConfiguration }

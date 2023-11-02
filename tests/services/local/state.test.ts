@@ -1,9 +1,9 @@
 import { LocalBackend } from 'cdktf'
-import type { LocalStateAttributes } from '@providers/local/services/state'
 import { LocalState } from '@providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getProvisionable } from '@core/operation'
+import { getProvisionable } from '@core/project'
 import { Stack } from '@core/stack'
+import type { LocalStateAttributes } from '@providers/local/services/state'
 
 describe('Local state', () => {
   const service = LocalState

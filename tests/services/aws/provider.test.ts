@@ -12,7 +12,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import type { BaseProvisionable } from '@core/service'
 import { Stack } from '@core/stack'
-import { getProvisionable } from '@core/operation'
+import { getProvisionable } from '@core/project'
 
 describe('AWS Provider', () => {
   const service = AwsProvider

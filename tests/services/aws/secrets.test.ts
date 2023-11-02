@@ -16,7 +16,7 @@ import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { Stack } from '@core/stack'
 import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
-import { getProvisionable } from '@core/operation'
+import { getProvisionable } from '@core/project'
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault

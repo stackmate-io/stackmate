@@ -1,19 +1,19 @@
 import Ajv from 'ajv'
 import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
-import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash'
-import { readSchemaFile } from '@core/schema'
+import { cloneDeep, defaults, difference, get, isEmpty, isFunction, uniqBy } from 'lodash'
+import type { JsonSchema } from '@core/schema'
 import { isAddressValid } from '@lib/networking'
 import { getServiceProfile } from '@core/profile'
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY } from '@constants'
+import { DEFAULT_PROFILE_NAME } from '@constants'
 import { ValidationError, EnvironmentValidationError } from '@lib/errors'
 import type { DataValidationCxt } from 'ajv/dist/types'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
-import type { CloudServiceConfiguration } from '@core/project'
 import type { ServiceEnvironment } from '@core/service'
 import type { ValidationErrorDescriptor } from '@lib/errors'
+import type { ServiceConfiguration } from '@core/registry'
 
-export const AJV_OPTIONS: AjvOptions = {
+const AJV_DEFAULTS: AjvOptions = {
   useDefaults: true,
   allErrors: true,
   discriminator: false,
@@ -97,7 +97,7 @@ export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): b
 
   // Get the project's service names
   const serviceNames = path?.startsWith('/services')
-    ? get(dataCxt?.rootData || {}, 'services', []).map((cfg: CloudServiceConfiguration) => cfg.name)
+    ? get(dataCxt?.rootData || {}, 'services', []).map((cfg: ServiceConfiguration) => cfg.name)
     : []
 
   // Detect any service names that are not available within the schema
@@ -112,7 +112,7 @@ export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): b
  * @returns {Ajv} the Ajv instance
  */
 export const getAjv = (opts: AjvOptions = {}): Ajv => {
-  const ajv = new Ajv(defaults({ ...opts }, AJV_OPTIONS))
+  const ajv = new Ajv(defaults({ ...opts }, AJV_DEFAULTS))
 
   addFormats(ajv)
 
@@ -155,56 +155,6 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
 }
 
 /**
- * Loads the main json schema into ajv
- *
- * @param {Ajv} ajv the ajv instance
- * @param {String} schemaKey the key to use for the ajv schema cache
- * @param {Object} opts additional options
- * @param {Boolean} opts.refresh whether to refresh the schema on the ajv instance
- * @void
- */
-export const loadJsonSchema = (ajv: Ajv, schemaKey = JSON_SCHEMA_KEY, { refresh = false } = {}) => {
-  if (ajv.schemas[schemaKey] && !refresh) {
-    return
-  } else if (refresh) {
-    ajv.removeSchema(schemaKey)
-  }
-
-  ajv.addSchema(readSchemaFile(), schemaKey)
-}
-
-/**
- * Validates an attribute-set against a schema id found in the schema
- *
- * @param {String} schemaId the schema id to use for validation
- * @param {Any} data the data to validate
- * @param {AjvOptions} options any Ajv options to use
- * @returns {Object} the clean / validated attributes
- */
-export const validate = (schemaId: string, data: any, options: AjvOptions = {}): any => {
-  if (!schemaId) {
-    throw new Error('A schema ID should be provided')
-  }
-
-  const ajv = getAjv(options)
-  loadJsonSchema(ajv)
-
-  const validData = options.useDefaults ? cloneDeep(data) : data
-  const validateData = ajv.getSchema(schemaId)
-
-  if (!validateData) {
-    throw new Error(`Invalid schema definition “${schemaId}”`)
-  }
-
-  if (!validateData(validData) && !isEmpty(validateData.errors)) {
-    const errors = parseErrors(validateData.errors || [])
-    throw new ValidationError(`Error while validating schema ${schemaId}`, errors)
-  }
-
-  return validData
-}
-
-/**
  * Parses Ajv errors to custom, error descriptors
  *
  * @param {AjvErrorObject[]} errors the raw, AJV errors available
@@ -222,6 +172,38 @@ export const parseErrors = (errors: AjvErrorObject[]): ValidationErrorDescriptor
   return uniqBy(errs, ({ path, message }) => `${path}-${message}`)
 }
 
+export const getValidData = <R, T>(
+  rawData: R,
+  schema: JsonSchema<T>,
+  options: AjvOptions = {},
+): T => {
+  const ajv = getAjv(options)
+  const schemaId = schema.$id
+
+  if (!schemaId) {
+    throw new Error('A schema ID should be provided')
+  }
+
+  if (!ajv.schemas[schemaId]) {
+    ajv.addSchema(schema, schemaId)
+  }
+
+  // We need to clone the data because when using defaults, the data gets mutated
+  // this can lead to all kinds of errors and the impression that data isn't valid
+  const data = cloneDeep(rawData)
+  const validateData = ajv.getSchema(schemaId)
+
+  if (!isFunction(validateData)) {
+    throw new Error('The schema provided was invalid')
+  }
+
+  if (!validateData(data)) {
+    const errors = parseErrors(validateData.errors || [])
+    throw new ValidationError(`Error while validating schema ${schemaId}`, errors)
+  }
+
+  return data as unknown as T
+}
 /**
  * Validates an operation's environment variables
  *
