@@ -1,19 +1,15 @@
-import { Registry } from '@core/registry'
-import { hashObject } from '@lib/hash'
 import { isEmpty, uniqBy } from 'lodash'
-import { validate, validateEnvironment } from '@core/validation'
+import { validateEnvironment } from '@core/validation'
 import { Stack } from '@core/stack'
 import type {
-  BaseServiceAttributes,
   BaseProvisionable,
   Provisions,
   ServiceEnvironment,
   AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
-import { JSON_SCHEMA_ROOT } from '@constants'
-
-type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
+import { getProvisionables, type ProvisionablesMap } from './project'
+import type { ServiceConfiguration } from './registry'
 
 type AssociatedProvisionable = {
   name: string
@@ -24,32 +20,10 @@ type AssociatedProvisionable = {
 type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
 /**
- * @param {BaseServiceAttributes} config the service's configuration
- * @returns {String} the id to use as a terraform resource identifier
- */
-const getProvisionableResourceId = (config: BaseServiceAttributes): string =>
-  `${config.name || config.type}-${config.provider}-${config.region || 'default'}`
-
-/**
- * @param {BaseServiceAttributes} config the service's configuration
- * @returns {BaseProvisionable} the provisionable to use in operations
- */
-export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionable => ({
-  id: hashObject(config),
-  config,
-  service: Registry.fromConfig(config),
-  requirements: {},
-  provisions: {},
-  sideEffects: {},
-  registered: false,
-  resourceId: getProvisionableResourceId(config),
-})
-
-/**
  * @param {BaseProvisionable} provisionable the provisionable to check
  * @throws {Error} if a requirement is not satisfied
  */
-export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
+const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
   const {
     service: { associations = {}, type },
     requirements,
@@ -92,18 +66,13 @@ export class Operation {
 
   /**
    * @constructor
-   * @param {BaseServiceAttributes[]} serviceConfigs the services to provision
+   * @param {ServiceConfiguration[]} serviceConfigs the services to provision
    * @param {string} envName the name of the environment we're deploying
    */
-  constructor(serviceConfigs: BaseServiceAttributes[], envName: string) {
+  constructor(serviceConfigs: ServiceConfiguration[], envName: string) {
     this.stack = new Stack(envName)
-
-    // Get services validated and apply default values
-    const services = validate(JSON_SCHEMA_ROOT, serviceConfigs, {
-      useDefaults: true,
-    })
-
-    this.setupProvisionables(services)
+    this.provisionables = getProvisionables(serviceConfigs)
+    this.initialize()
   }
 
   /**
@@ -137,24 +106,9 @@ export class Operation {
   }
 
   /**
-   * @param {BaseServiceAttributes[]} services the services to set up as provisionables
+   * Initializes the operation
    */
-  protected setupProvisionables(services: BaseServiceAttributes[]) {
-    services.forEach((config) => {
-      const provisionable: BaseProvisionable = {
-        id: hashObject(config),
-        config,
-        service: Registry.fromConfig(config),
-        requirements: {},
-        provisions: {},
-        sideEffects: {},
-        registered: false,
-        resourceId: getProvisionableResourceId(config),
-      }
-
-      this.provisionables.set(provisionable.id, provisionable)
-    })
-
+  protected initialize() {
     for (const provisionable of this.provisionables.values()) {
       const {
         config,
@@ -205,15 +159,8 @@ export class Operation {
     }
 
     const {
-      config,
-      service,
       service: { handler: resourceHandler },
     } = provisionable
-
-    // Validate the configuration
-    validate(service.schemaId, config, {
-      useDefaults: true,
-    })
 
     // Provision & verify the requirements first
     Object.assign(provisionable, {

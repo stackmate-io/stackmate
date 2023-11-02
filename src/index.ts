@@ -9,7 +9,6 @@ export * from '@core/project'
 
 export { JsonSchema } from '@core/schema'
 export { Operation } from '@core/operation'
-export { validate, validateEnvironment, validateServices } from '@core/validation'
 
 export { DEFAULT_REGIONS } from '@providers'
 export {

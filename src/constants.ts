@@ -41,12 +41,6 @@ export const CORE_SERVICE_TYPES = [
   SERVICE_TYPE.PROVIDER,
 ] as ServiceTypeChoice[]
 
-// Json Schema & artifacts
-export const ARTIFACTS_PATH = path.resolve(__dirname, '..', 'dist')
-export const JSON_SCHEMA_PATH = path.join(ARTIFACTS_PATH, 'stackmate.schema.json')
-export const JSON_SCHEMA_ROOT = 'StackmateProject'
-export const JSON_SCHEMA_KEY = 'stackmate-json-schema'
-
 export const PROFILES_PATH = path.resolve(__dirname, 'profiles')
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL')
 

@@ -1,8 +1,7 @@
-import fs from 'node:fs'
 import { isEmpty, merge, uniq } from 'lodash'
 
 import type { Obj, RequireKeys } from '@lib/util'
-import { JSON_SCHEMA_PATH, SERVICE_TYPE } from '@constants'
+import { SERVICE_TYPE } from '@constants'
 import type { BaseService, ProviderChoice, ServiceTypeChoice } from '@core/service/core'
 import { isCoreService } from '@core/service/core'
 
@@ -195,21 +194,6 @@ export type JsonSchema<T = undefined> = {
  * @type {ServiceSchema} special case for service schemas
  */
 export type ServiceSchema<T extends Obj = Obj> = RequireKeys<JsonSchema<T>, 'properties'>
-
-/**
- * Returns the stored JSON schema file. The schema is generated at build time and is
- * bundled within the app's distribution files.
- *
- * @returns {JsonSchema} the schema
- */
-export const readSchemaFile = (): JsonSchema<Obj> => {
-  if (!fs.existsSync(JSON_SCHEMA_PATH)) {
-    throw new Error('JSON Schema file not found')
-  }
-
-  const content = fs.readFileSync(JSON_SCHEMA_PATH).toString()
-  return JSON.parse(content)
-}
 
 /**
  * Merges two JSON schemas into one

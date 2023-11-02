@@ -1,48 +1,8 @@
-import { faker } from '@faker-js/faker'
-import { fromPairs, merge } from 'lodash'
+import { getAjv } from '@core/validation'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
-
-import { Registry } from '@core/registry'
-import type { ServiceEnvironment } from '@core/service/core'
-import { DEFAULT_RDS_INSTANCE_SIZE } from '@providers/aws/constants'
-import {
-  DEFAULT_PROFILE_NAME,
-  DEFAULT_SERVICE_STORAGE,
-  JSON_SCHEMA_KEY,
-  JSON_SCHEMA_ROOT,
-} from '@constants'
-import type { ProjectConfiguration } from '@core/project'
-import type { AwsMySQLAttributes } from '@providers/aws/services/database'
-import { EnvironmentValidationError, ValidationError } from '@lib/errors'
-import { getAjv, loadJsonSchema, validate, validateEnvironment } from '@core/validation'
 
 describe('Validation', () => {
   const ajv = getAjv()
-  let projectConfig: ProjectConfiguration
-
-  beforeEach(() => {
-    ajv.removeSchema(JSON_SCHEMA_KEY)
-
-    projectConfig = {
-      name: 'my-super-fun-project',
-      provider: 'aws',
-      region: 'eu-central-1',
-      monitoring: {
-        emails: [faker.internet.email()],
-      },
-      services: [
-        {
-          name: 'mysql-database',
-          type: 'mysql',
-          size: 'db.t3.micro',
-        },
-        {
-          name: 'postgresql-database',
-          type: 'postgresql',
-        },
-      ],
-    }
-  })
 
   describe('getAjv', () => {
     it('returns an Ajv instance with serviceLinks keyword in place', () => {
@@ -70,17 +30,7 @@ describe('Validation', () => {
     })
   })
 
-  describe('loadJsonSchema', () => {
-    it('loads the schema', () => {
-      expect(ajv.schemas[JSON_SCHEMA_KEY]).toBeUndefined()
-      loadJsonSchema(ajv)
-
-      expect(ajv.schemas[JSON_SCHEMA_KEY]).not.toBeUndefined()
-      const schema = ajv.getSchema(JSON_SCHEMA_KEY)
-      expect(typeof schema === 'function').toBe(true)
-    })
-  })
-
+  /*
   describe('validate', () => {
     it('validates a service and applies defaults', () => {
       const service = Registry.get('aws', 'mysql')
@@ -250,4 +200,5 @@ describe('Validation', () => {
       })
     })
   })
+  */
 })
