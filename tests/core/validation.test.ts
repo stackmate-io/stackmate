@@ -1,4 +1,3 @@
-import { fail } from 'node:assert'
 import { faker } from '@faker-js/faker'
 import { fromPairs, merge } from 'lodash'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
@@ -15,14 +14,7 @@ import {
 import type { ProjectConfiguration } from '@core/project'
 import type { AwsMySQLAttributes } from '@providers/aws/services/database'
 import { EnvironmentValidationError, ValidationError } from '@lib/errors'
-import {
-  getAjv,
-  loadJsonSchema,
-  validate,
-  validateEnvironment,
-  validateProject,
-  validateProperty,
-} from '@core/validation'
+import { getAjv, loadJsonSchema, validate, validateEnvironment } from '@core/validation'
 
 describe('Validation', () => {
   const ajv = getAjv()
@@ -89,164 +81,6 @@ describe('Validation', () => {
     })
   })
 
-  describe('validateProject', () => {
-    const getValidationError = (config: object): ValidationError => {
-      try {
-        validateProject(config)
-      } catch (err) {
-        if (!(err instanceof ValidationError)) {
-          fail('Expected an instance of ValidationError but got a different tyoe of error')
-        }
-
-        return err
-      }
-
-      fail('Expected validate function to raise an error but got nothing instead')
-    }
-
-    it('raises an error when the root configuration is invalid', () => {
-      const error = getValidationError({})
-      expect(error).toBeInstanceOf(ValidationError)
-      expect(error.errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: '',
-            message: expect.stringContaining('You need to set a name for the project'),
-          },
-          {
-            path: '',
-            message: expect.stringContaining('You need to set a default provider'),
-          },
-          {
-            path: '',
-            message: expect.stringContaining('You need to set a default region'),
-          },
-          {
-            path: '',
-            message: expect.stringContaining('You should define at least one service'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the project name is less than 3 characters', () => {
-      const { errors } = getValidationError({ name: 'ab' })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'name',
-            message: 'The "name" property should be more than 3 characters',
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the project name doesn’t match the regex pattern', () => {
-      const { errors } = getValidationError({ name: 'this # is # invalid' })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'name',
-            message:
-              'The "name" property should consist of letters, numbers, dashes, dots, underscores and forward slashes',
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the provider is not in the list', () => {
-      const { errors } = getValidationError({ provider: 'INVALID' })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'provider',
-            message: expect.stringContaining('The provider is invalid, available choices'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the region is not in the list', () => {
-      const { errors } = getValidationError({ region: 'INVALID' })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'region',
-            message: expect.stringContaining('The region is invalid. Available options are'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the project doesn’t contain any services', () => {
-      const { errors } = getValidationError({ services: [] })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'services',
-            message: expect.stringContaining('You should define at least one service'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the services key contains empty objects', () => {
-      const { errors } = getValidationError({ services: [{}] })
-
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'services.0',
-            message: expect.stringContaining('Every service should feature a "name" property'),
-          },
-          {
-            path: 'services.0',
-            message: expect.stringContaining('Every service should feature a "type" property'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the state configuration is invalid', () => {
-      const { errors } = getValidationError({ state: { provider: 'INVALID' } })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'state.provider',
-            message: expect.stringContaining('The provider is invalid, available choices are'),
-          },
-        ]),
-      )
-    })
-
-    it('raises an error when the secrets configuration is invalid', () => {
-      const { errors } = getValidationError({ secrets: { provider: 'INVALID' } })
-      expect(errors).toEqual(
-        expect.arrayContaining([
-          {
-            path: 'secrets.provider',
-            message: expect.stringContaining('The provider is invalid, available choices are'),
-          },
-        ]),
-      )
-    })
-
-    it('returns the validated data with defaults, for a valid project configuration', () => {
-      const validated = validateProject(projectConfig)
-      expect(validated).toBeInstanceOf(Object)
-
-      // make sure the default values have been applied
-      expect(validated).toMatchObject({
-        ...projectConfig,
-        services: projectConfig.services!.map((service) => ({
-          ...service,
-          provider: 'aws',
-          region: 'eu-central-1',
-        })),
-      })
-    })
-  })
-
   describe('validate', () => {
     it('validates a service and applies defaults', () => {
       const service = Registry.get('aws', 'mysql')
@@ -270,22 +104,6 @@ describe('Validation', () => {
         storage: DEFAULT_SERVICE_STORAGE,
         version: '8.0',
       })
-    })
-  })
-
-  describe('validateProperty', () => {
-    it('throws a validation error for an invalid property', () => {
-      expect(() => validateProperty('name', 'this is invalid because of all the spaces')).toThrow(
-        ValidationError,
-      )
-    })
-
-    it('does not throw for a valid name', () => {
-      expect(() => validateProperty('name', 'my-project-name')).not.toThrow()
-    })
-
-    it('validates a nested property', () => {
-      expect(() => validateProperty('services/items/properties/name', 'my-service')).not.toThrow()
     })
   })
 

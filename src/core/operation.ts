@@ -2,7 +2,7 @@ import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { isEmpty, uniqBy } from 'lodash'
 import { validate, validateEnvironment } from '@core/validation'
-import type { Stack } from '@core/stack'
+import { Stack } from '@core/stack'
 import type {
   BaseServiceAttributes,
   BaseProvisionable,
@@ -11,6 +11,7 @@ import type {
   AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
+import { JSON_SCHEMA_ROOT } from '@constants'
 
 type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
@@ -33,20 +34,16 @@ const getProvisionableResourceId = (config: BaseServiceAttributes): string =>
  * @param {BaseServiceAttributes} config the service's configuration
  * @returns {BaseProvisionable} the provisionable to use in operations
  */
-export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionable => {
-  const service = Registry.fromConfig(config)
-
-  return {
-    id: hashObject(config),
-    config,
-    service,
-    requirements: {},
-    provisions: {},
-    sideEffects: {},
-    registered: false,
-    resourceId: getProvisionableResourceId(config),
-  }
-}
+export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionable => ({
+  id: hashObject(config),
+  config,
+  service: Registry.fromConfig(config),
+  requirements: {},
+  provisions: {},
+  sideEffects: {},
+  registered: false,
+  resourceId: getProvisionableResourceId(config),
+})
 
 /**
  * @param {BaseProvisionable} provisionable the provisionable to check
@@ -54,19 +51,12 @@ export const getProvisionable = (config: BaseServiceAttributes): BaseProvisionab
  */
 export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
   const {
-    service: { associations, type },
+    service: { associations = {}, type },
     requirements,
   } = provisionable
-  if (!associations) {
-    return
-  }
 
   Object.entries(associations).forEach(([name, assoc]) => {
-    if (!assoc.requirement) {
-      return
-    }
-
-    if (!requirements[name]) {
+    if (assoc.requirement && !requirements[name]) {
       throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
     }
   })
@@ -102,11 +92,17 @@ export class Operation {
 
   /**
    * @constructor
-   * @param {BaseServiceAttributes[]} services the services to provision
-   * @param {Stack} stack the stack we're deploying
+   * @param {BaseServiceAttributes[]} serviceConfigs the services to provision
+   * @param {string} envName the name of the environment we're deploying
    */
-  constructor(services: BaseServiceAttributes[], stack: Stack) {
-    this.stack = stack
+  constructor(serviceConfigs: BaseServiceAttributes[], envName: string) {
+    this.stack = new Stack(envName)
+
+    // Get services validated and apply default values
+    const services = validate(JSON_SCHEMA_ROOT, serviceConfigs, {
+      useDefaults: true,
+    })
+
     this.setupProvisionables(services)
   }
 
@@ -145,7 +141,17 @@ export class Operation {
    */
   protected setupProvisionables(services: BaseServiceAttributes[]) {
     services.forEach((config) => {
-      const provisionable = getProvisionable(config)
+      const provisionable: BaseProvisionable = {
+        id: hashObject(config),
+        config,
+        service: Registry.fromConfig(config),
+        requirements: {},
+        provisions: {},
+        sideEffects: {},
+        registered: false,
+        resourceId: getProvisionableResourceId(config),
+      }
+
       this.provisionables.set(provisionable.id, provisionable)
     })
 

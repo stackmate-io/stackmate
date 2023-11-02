@@ -1,19 +1,17 @@
+import Ajv from 'ajv'
 import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
-import type { DataValidationCxt } from 'ajv/dist/types'
 import { cloneDeep, defaults, difference, get, isEmpty, uniqBy } from 'lodash'
-import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
-import Ajv from 'ajv'
-
-import { Registry } from '@core/registry'
 import { readSchemaFile } from '@core/schema'
 import { isAddressValid } from '@lib/networking'
 import { getServiceProfile } from '@core/profile'
-import type { CloudServiceConfiguration, Project, ProjectConfiguration } from '@core/project'
-import type { BaseServiceAttributes, ServiceEnvironment } from '@core/service'
-import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY, JSON_SCHEMA_ROOT } from '@constants'
-import type { ValidationErrorDescriptor } from '@lib/errors'
+import { DEFAULT_PROFILE_NAME, JSON_SCHEMA_KEY } from '@constants'
 import { ValidationError, EnvironmentValidationError } from '@lib/errors'
+import type { DataValidationCxt } from 'ajv/dist/types'
+import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
+import type { CloudServiceConfiguration } from '@core/project'
+import type { ServiceEnvironment } from '@core/service'
+import type { ValidationErrorDescriptor } from '@lib/errors'
 
 export const AJV_OPTIONS: AjvOptions = {
   useDefaults: true,
@@ -207,17 +205,6 @@ export const validate = (schemaId: string, data: any, options: AjvOptions = {}):
 }
 
 /**
- * Validates a single property in the schema
- *
- * @param {String} property the name of the property to validate
- * @param {Any} data the data to validate
- * @param {String} root the root for the property
- * @returns {Any}
- */
-export const validateProperty = (property: string, data: any, root = JSON_SCHEMA_ROOT): any =>
-  validate(`${root}#/properties/${property}`, data)
-
-/**
  * Parses Ajv errors to custom, error descriptors
  *
  * @param {AjvErrorObject[]} errors the raw, AJV errors available
@@ -261,23 +248,3 @@ export const validateEnvironment = (required: ServiceEnvironment[], env = proces
     )
   }
 }
-
-/**
- * Validates a project configuration
- *
- * @param {ProjectConfiguration} config the project's configuration
- * @param {AjvOptions} opts any options to pass to Ajv
- * @returns {Project} the validated project
- */
-export const validateProject = (config: ProjectConfiguration, opts: AjvOptions = {}): Project =>
-  validate(JSON_SCHEMA_ROOT, config, opts) as unknown as Project
-
-export const validateServiceConfig = (cfg: BaseServiceAttributes): BaseServiceAttributes => {
-  const { schemaId } = Registry.fromConfig(cfg)
-  return validate(schemaId, cfg, { useDefaults: true })
-}
-
-export const validateServices =
-  () =>
-  (services: BaseServiceAttributes[]): BaseServiceAttributes[] =>
-    services.map((srv) => validateServiceConfig(srv))
