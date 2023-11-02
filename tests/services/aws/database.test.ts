@@ -50,7 +50,7 @@ const getDatabaseSchemaExpectation = (
   additionalProperties: false,
   properties: {
     provider: { type: 'string', enum: [PROVIDER.AWS], default: PROVIDER.AWS },
-    type: { type: 'string', enum: [type], default: type },
+    type: { type: 'string', enum: [type] },
     region: { type: 'string', enum: Array.from(REGIONS), default: DEFAULT_REGION },
     name: { type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') },
     version: { type: 'string', enum: Array.from(versions), default: defaultVersion },

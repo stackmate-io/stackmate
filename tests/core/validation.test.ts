@@ -192,6 +192,7 @@ describe('Validation', () => {
 
     it('raises an error when the services key contains empty objects', () => {
       const { errors } = getValidationError({ services: [{}] })
+
       expect(errors).toEqual(
         expect.arrayContaining([
           {

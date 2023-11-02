@@ -28,7 +28,6 @@ describe('Local state', () => {
         type: {
           type: 'string',
           enum: [SERVICE_TYPE.STATE],
-          default: SERVICE_TYPE.STATE,
         },
         region: {
           type: 'string',

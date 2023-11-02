@@ -253,11 +253,9 @@ export const getServiceProviderSchema = (
  */
 export const getServiceTypeSchema = (
   types: ServiceTypeChoice[],
-  defaultType?: ServiceTypeChoice,
 ): JsonSchema<ServiceTypeChoice> => ({
   type: 'string',
   enum: types,
-  default: defaultType,
   errorMessage: {
     enum: `You have to specify a valid service type, available are: ${types.join(', ')}`,
   },
@@ -283,7 +281,7 @@ export const getCoreService = (
     properties: {
       name: getServiceNameSchema(),
       provider: getServiceProviderSchema([provider], provider),
-      type: getServiceTypeSchema([type], type),
+      type: getServiceTypeSchema([type]),
       region: { type: 'string' },
     },
   }
