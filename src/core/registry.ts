@@ -9,7 +9,6 @@ import type {
   BaseServiceAttributes,
   ExtractAttrs,
 } from '@core/service'
-import { isCoreService } from '@core/service'
 
 export type ServicesRegistry = {
   readonly items: BaseService[]
@@ -126,19 +125,17 @@ class Registry implements ServicesRegistry {
   }
 }
 
-export const availableServices = Object.values(Services)
-export const cloudServices = availableServices.filter((s) => !isCoreService(s.type))
-
+const availableServices = Object.values(Services)
 const registry = new Registry(...availableServices) as Registry
 
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
 type AvailableService = Distribute<(typeof availableServices)[number]>
-type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
-type ServiceConfiguration = DistributiveRequireKeys<
+export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
+export type ServiceConfiguration = DistributiveRequireKeys<
   ServiceAttributes,
   'name' | 'type' | 'provider' | 'region'
 >
 
-export { registry as Registry, type ServiceAttributes, type ServiceConfiguration }
+export { registry as Registry }
