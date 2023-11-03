@@ -2,9 +2,18 @@ import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData } from '@core/validation'
 import { getSchema } from '@core/schema'
-import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { AnyAssociationHandler, BaseProvisionable } from '@core/service'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
+import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
+import type { Obj } from '@lib/util'
+import type { Stack } from '@core/stack'
+import type {
+  AnyAssociationHandler,
+  Association,
+  BaseService,
+  BaseServiceAttributes,
+  ExtractAttrs,
+  ServiceAssociations,
+} from '@core/service'
 
 /**
  * @type {Resource} a resource provisioned by the system
@@ -35,6 +44,56 @@ export type Provisions = Record<string, ProvisionResources> & {
    */
   resourceRef?: TerraformLocal
 }
+
+/**
+ * @type {ExtractServiceRequirements} extracts service requirements from its associations
+ */
+type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
+  [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
+    ? A['requirement'] extends true
+      ? ReturnType<A['handler']>
+      : never
+    : never
+}
+
+/**
+ * @type {BaseProvisionable} base provisionable
+ */
+export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
+  id: string
+  service: BaseService
+  config: Attrs
+  provisions: Provisions
+  resourceId: string
+  registered: boolean
+  sideEffects: Provisions
+  requirements: Record<string, ProvisionResources>
+}
+
+/**
+ * @type {Provisionable} represents a piece of configuration and service to be deployed
+ */
+export type Provisionable<
+  Srv extends BaseService,
+  Provs extends Provisions,
+  Context extends Obj = Obj,
+  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
+> = BaseProvisionable<Attrs> & {
+  service: Srv
+  config: Attrs
+  provisions: Provs
+  context: Context
+  requirements: ExtractServiceRequirements<Srv['associations']>
+}
+
+/**
+ * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
+ */
+export type ProvisionHandler = (
+  provisionable: BaseProvisionable,
+  stack: Stack,
+  opts?: object,
+) => Provisions
 
 export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 

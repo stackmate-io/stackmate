@@ -2,18 +2,15 @@ import { isEmpty, uniqBy } from 'lodash'
 import { validateEnvironment } from '@core/validation'
 import { Stack } from '@core/stack'
 import { assertRequirementsSatisfied, getProvisionables } from '@core/provision'
+import type { ServiceEnvironment, AssociationReturnType } from '@core/service'
+import type { ServiceConfiguration } from '@core/registry'
 import type {
   BaseProvisionable,
-  Provisions,
-  ServiceEnvironment,
-  AssociationReturnType,
-} from '@core/service'
-import type {
   AssociatedProvisionable,
   AssociatedProvisionablesMap,
   ProvisionablesMap,
+  Provisions,
 } from '@core/provision'
-import type { ServiceConfiguration } from '@core/registry'
 
 export class Operation {
   /**

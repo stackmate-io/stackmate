@@ -9,21 +9,16 @@ import {
   provider as awsProvider,
   dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws'
-
-import type { Stack } from '@core/stack'
 import { getResourcesProfile } from '@core/profile'
-import type { AwsServiceAttributes } from '@providers/aws/service'
-import type { ChoiceOf } from '@lib/util'
 import { getCidrBlocks } from '@lib/networking'
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants'
-import type {
-  BaseServiceAttributes,
-  Provisionable,
-  RegionalAttributes,
-  Service,
-} from '@core/service'
 import { getBaseService, profilable, withHandler, withRegions } from '@core/service'
+import type { Stack } from '@core/stack'
+import type { ChoiceOf } from '@lib/util'
+import type { Provisionable } from '@core/provision'
+import type { AwsServiceAttributes } from '@providers/aws/service'
+import type { BaseServiceAttributes, RegionalAttributes, Service } from '@core/service'
 
 export type AwsProviderResources = {
   provider: awsProvider.AwsProvider

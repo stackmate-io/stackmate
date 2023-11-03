@@ -4,7 +4,7 @@ import type { Stack } from '@core/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'
 import type { ServiceSchema, JsonSchema } from '@core/schema'
-import type { ProvisionResources, Provisions } from '@core/provision'
+import type { BaseProvisionable, ProvisionHandler, ProvisionResources } from '@core/provision'
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -77,56 +77,6 @@ export type ServiceSideEffect<Ret extends AssociationReturnType = ProvisionResou
  * @type {ServiceAssociations} the service's associations
  */
 export type ServiceAssociations = Record<string, Association<any>>
-
-/**
- * @type {ExtractServiceRequirements} extracts service requirements from its associations
- */
-type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
-  [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
-    ? A['requirement'] extends true
-      ? ReturnType<A['handler']>
-      : never
-    : never
-}
-
-/**
- * @type {BaseProvisionable} base provisionable
- */
-export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
-  id: string
-  service: BaseService
-  config: Attrs
-  provisions: Provisions
-  resourceId: string
-  registered: boolean
-  sideEffects: Provisions
-  requirements: Record<string, ProvisionResources>
-}
-
-/**
- * @type {Provisionable} represents a piece of configuration and service to be deployed
- */
-export type Provisionable<
-  Srv extends BaseService,
-  Provs extends Provisions,
-  Context extends Obj = Obj,
-  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
-> = BaseProvisionable<Attrs> & {
-  service: Srv
-  config: Attrs
-  provisions: Provs
-  context: Context
-  requirements: ExtractServiceRequirements<Srv['associations']>
-}
-
-/**
- * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
- */
-export type ProvisionHandler = (
-  provisionable: BaseProvisionable,
-  stack: Stack,
-  opts?: object,
-) => Provisions
 
 /**
  * @type {ServiceEnvironment} the environment variable required by a service

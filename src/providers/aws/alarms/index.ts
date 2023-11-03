@@ -12,13 +12,8 @@ import type { Stack } from '@core/stack'
 import { SERVICE_TYPE } from '@constants'
 import { hashString } from '@lib/hash'
 import type { AwsService } from '@providers/aws/service'
-import type {
-  BaseServiceAttributes,
-  MonitoringAttributes,
-  Provisionable,
-  Provisions,
-  ServiceTypeChoice,
-} from '@core/service'
+import type { BaseServiceAttributes, MonitoringAttributes, ServiceTypeChoice } from '@core/service'
+import type { Provisions, Provisionable } from '@core/provision'
 
 /**
  * @type {AwsServiceAlarmResources} the alarms resources
