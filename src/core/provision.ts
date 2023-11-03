@@ -4,14 +4,45 @@ import { getValidData } from '@core/validation'
 import { getSchema } from '@core/schema'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { AnyAssociationHandler, BaseProvisionable } from '@core/service'
+import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
+
+/**
+ * @type {Resource} a resource provisioned by the system
+ */
+export type Resource = TerraformElement
+
+/**
+ * @type {ProvisionResources} types of resources that are provisioned by the handlers
+ */
+export type ProvisionResources = Resource | Resource[] | Record<string, Resource>
+
+/**
+ * @type {Provisions} the type returned by provision handlers
+ */
+export type Provisions = Record<string, ProvisionResources> & {
+  /**
+   * The service's IP address to allow linking with services with
+   */
+  ip?: TerraformLocal
+
+  /**
+   * The service's outputs
+   */
+  outputs?: TerraformOutput[]
+
+  /**
+   * A resource reference such as a resource's ID to link with services within the same provider
+   */
+  resourceRef?: TerraformLocal
+}
+
+export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
 export type AssociatedProvisionable = {
   name: string
   target: BaseProvisionable
   handler: AnyAssociationHandler
 }
-
-export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
 /**

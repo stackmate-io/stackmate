@@ -8,15 +8,16 @@ import type {
   dataAwsCallerIdentity,
 } from '@cdktf/provider-aws'
 
-import type { Stack } from '@core/stack'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
+import { getMonitoringPrerequisites } from '@providers/aws/alarms'
+import { associate, getBaseService, withRegions } from '@core/service'
 import type { ChoiceOf, Obj } from '@lib/util'
+import type { Stack } from '@core/stack'
 import type {
   BaseServiceAttributes,
-  Provisions,
   ServiceAssociations,
   BaseProvisionable,
   ServiceRequirement,
@@ -27,7 +28,6 @@ import type {
   ConnectableAttributes,
   ExternallyLinkableAttributes,
 } from '@core/service'
-import { associate, getBaseService, withRegions } from '@core/service'
 import type {
   AwsProviderAttributes,
   AwsProviderProvisionable,
@@ -37,7 +37,7 @@ import type {
   AwsServiceAlarmResources,
   MonitoredServiceProvisionable,
 } from '@providers/aws/alarms'
-import { getMonitoringPrerequisites } from '@providers/aws/alarms'
+import type { Provisions } from '@core/provision'
 
 type ProviderRequirement = ServiceRequirement<
   terraformAwsProvider.AwsProvider,
