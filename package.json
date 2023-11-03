@@ -69,15 +69,13 @@
     "dist/"
   ],
   "scripts": {
-    "bin:schema": "ts-node -r tsconfig-paths/register src/bin/json-schema.ts",
-    "build": "yarn clean && yarn bin:schema && yarn build:project && yarn build:aliases",
+    "build": "yarn clean && yarn build:project && yarn build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
     "build:project": "tsc -p ./tsconfig.build.json",
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
-    "test:full": "yarn bin:schema && yarn test",
     "test:watch": "yarn test --watchAll"
   }
 }
