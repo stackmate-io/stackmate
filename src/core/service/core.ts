@@ -296,7 +296,7 @@ export const withHandler =
  * @returns {Function<Service>}
  */
 export const withEnvironment =
-  <C extends BaseServiceAttributes>(name: string, description: string, required: boolean = false) =>
+  <C extends BaseServiceAttributes>(name: string, description: string, required: boolean = true) =>
   <T extends Service<C>>(service: T): T => ({
     ...service,
     environment: [

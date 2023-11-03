@@ -13,7 +13,13 @@ import { getResourcesProfile } from '@core/profile'
 import { getCidrBlocks } from '@lib/networking'
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants'
-import { getBaseService, profilable, withHandler, withRegions } from '@core/service'
+import {
+  getBaseService,
+  profilable,
+  withEnvironment,
+  withHandler,
+  withRegions,
+} from '@core/service'
 import type { Stack } from '@core/stack'
 import type { ChoiceOf } from '@lib/util'
 import type { Provisionable } from '@core/provision'
@@ -144,6 +150,8 @@ export const getProviderService = (): AwsProviderService =>
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler(resourceHandler),
+    withEnvironment('AWS_ACCESS_KEY_ID', 'AWS Access Key ID', true),
+    withEnvironment('AWS_SECRET_ACCESS_KEY', 'AWS Secret Access Key', true),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()
