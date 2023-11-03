@@ -1,7 +1,7 @@
 import pipe from 'lodash/fp/pipe'
 import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getCoreService, withHandler } from '@core/service'
+import { getBaseService, withHandler } from '@core/service'
 import type { LocalServiceAttributes } from '@providers/local/service'
 import type { Stack } from '@core/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@core/service'
@@ -37,6 +37,6 @@ export const resourceHandler = (
  * @returns {AwsProviderService} the secrets vault service
  */
 export const getProviderService = (): LocalProviderService =>
-  pipe(withHandler(resourceHandler))(getCoreService(PROVIDER.LOCAL, SERVICE_TYPE.PROVIDER))
+  pipe(withHandler(resourceHandler))(getBaseService(PROVIDER.LOCAL, SERVICE_TYPE.PROVIDER))
 
 export const LocalProvider = getProviderService()

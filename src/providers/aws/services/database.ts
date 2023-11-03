@@ -13,7 +13,7 @@ import type { RootCredentialsAssociations } from '@core/service/credentials'
 import { withRootCredentials } from '@core/service/credentials'
 import type { AwsService } from '@providers/aws/service'
 import {
-  getAwsCloudService,
+  getAwsService,
   onExternalLink,
   onServiceLinked,
   withAwsAlarms,
@@ -203,7 +203,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     multiNode(),
     profilable(),
     withDatabase(),
-  )(getAwsCloudService(type))
+  )(getAwsService(type))
 }
 
 export const AWSMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql')

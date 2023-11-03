@@ -6,7 +6,7 @@ import { SERVICE_TYPE } from '@constants'
 import type { ServiceSchema } from '@core/schema'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import type { AwsService, AwsServiceAttributes } from '@providers/aws/service'
-import { getAwsCoreService } from '@providers/aws/service'
+import { getAwsService } from '@providers/aws/service'
 import type { BaseServiceAttributes, Provisionable } from '@core/service'
 import { withRegions, withHandler, withSchema } from '@core/service'
 
@@ -66,6 +66,6 @@ export const getStateService = (): AwsStateService =>
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler(resourceHandler),
     withSchema<AwsStateAttributes, AdditionalAttrs>(getAdditionalPropertiesSchema()),
-  )(getAwsCoreService(SERVICE_TYPE.STATE))
+  )(getAwsService(SERVICE_TYPE.STATE))
 
 export const AwsState = getStateService()

@@ -14,7 +14,7 @@ import type { ChoiceOf, Obj } from '@lib/util'
 import { extractTokenFromJsonString } from '@lib/terraform'
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@constants'
 import type { AwsService } from '@providers/aws/service'
-import { getAwsCoreService } from '@providers/aws/service'
+import { getAwsService } from '@providers/aws/service'
 import type {
   BaseProvisionable,
   BaseServiceAttributes,
@@ -145,6 +145,6 @@ export const generateCredentials = (
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
 export const getSecretsVaultService = (): AwsSecretsVaultService =>
-  withCredentialsGenerator(generateCredentials)(getAwsCoreService(SERVICE_TYPE.SECRETS))
+  withCredentialsGenerator(generateCredentials)(getAwsService(SERVICE_TYPE.SECRETS))
 
 export const AwsSecretsVault = getSecretsVaultService()
