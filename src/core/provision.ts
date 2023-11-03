@@ -1,4 +1,4 @@
-import { Registry } from '@core/registry'
+import { Services } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData } from '@core/validation'
 import { getSchema } from '@core/schema'
@@ -117,7 +117,7 @@ export const getProvisionable = (config: ServiceAttributes): BaseProvisionable =
   return {
     id: hashObject(config),
     config,
-    service: Registry.fromConfig(config),
+    service: Services.fromConfig(config),
     requirements: {},
     provisions: {},
     sideEffects: {},
