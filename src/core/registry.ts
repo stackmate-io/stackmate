@@ -135,7 +135,7 @@ type AvailableService = Distribute<(typeof availableServices)[number]>
 export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
 export type ServiceConfiguration = DistributiveRequireKeys<
   ServiceAttributes,
-  'name' | 'type' | 'provider' | 'region'
+  'name' | 'type' | 'provider'
 >
 
 export { registry as Registry }
