@@ -1,6 +1,6 @@
 import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getProvisionable } from '@core/project'
+import { getProvisionable } from '@core/service/provisionable'
 import { Stack } from '@core/stack'
 import { LocalProvider } from '@providers/local/services/provider'
 import type { LocalProviderAttributes } from '@providers/local/services/provider'
