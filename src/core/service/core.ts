@@ -1,10 +1,10 @@
 import { merge } from 'lodash'
 import { mergeServiceSchemas } from '@core/schema'
-import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { Stack } from '@core/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'
 import type { ServiceSchema, JsonSchema } from '@core/schema'
+import type { ProvisionResources, Provisions } from '@core/provision'
 
 /**
  * @type {ProviderChoice} a provider choice
@@ -15,36 +15,6 @@ export type ProviderChoice = ChoiceOf<typeof PROVIDER>
  * @type {ServiceTypeChoice} a service type choice
  */
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>
-
-/**
- * @type {Resource} a resource provisioned by the system
- */
-export type Resource = TerraformElement
-
-/**
- * @type {ProvisionResources} types of resources that are provisioned by the handlers
- */
-export type ProvisionResources = Resource | Resource[] | Record<string, Resource>
-
-/**
- * @type {Provisions} the type returned by provision handlers
- */
-export type Provisions = Record<string, ProvisionResources> & {
-  /**
-   * The service's IP address to allow linking with services with
-   */
-  ip?: TerraformLocal
-
-  /**
-   * The service's outputs
-   */
-  outputs?: TerraformOutput[]
-
-  /**
-   * A resource reference such as a resource's ID to link with services within the same provider
-   */
-  resourceRef?: TerraformLocal
-}
 
 /**
  * @type {AssociationReturnType} the return types for association handlers
