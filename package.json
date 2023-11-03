@@ -71,6 +71,7 @@
   "scripts": {
     "build": "yarn clean && yarn build:project && yarn build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
+    "build:check": "tsc -p ./tsconfig.json --noEmit",
     "build:project": "tsc -p ./tsconfig.build.json",
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",

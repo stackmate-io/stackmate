@@ -1,5 +1,5 @@
 import { fromPairs, merge, uniq } from 'lodash'
-import { Registry } from '@core/registry'
+import { Services } from '@core/registry'
 import { getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema } from '@core/service'
 import type { Dictionary } from 'lodash'
 import type { ServiceAttributes } from '@core/registry'
@@ -249,7 +249,7 @@ export const getServiceMatcher = (service: BaseService): JsonSchema => ({
  * @returns {JsonSchema<ServiceAttributes[]>}
  */
 export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
-  const services = Registry.items
+  const services = Services.all()
 
   const allOf = services.map((service) => getServiceMatcher(service))
   const $defs: Dictionary<JsonSchema<ServiceAttributes>> = fromPairs(
@@ -271,8 +271,8 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       required: ['name', 'type', 'provider'],
       properties: {
         name: getServiceNameSchema(),
-        type: getServiceTypeSchema(Registry.serviceTypes()),
-        provider: getServiceProviderSchema(Registry.providers()),
+        type: getServiceTypeSchema(Services.serviceTypes()),
+        provider: getServiceProviderSchema(Services.providers()),
       },
       allOf,
       errorMessage: {
