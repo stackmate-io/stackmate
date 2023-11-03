@@ -1,7 +1,7 @@
 import { LocalBackend } from 'cdktf'
 import { LocalState } from '@providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getProvisionable } from '@core/service/provisionable'
+import { getProvisionable } from '@core/provision'
 import { Stack } from '@core/stack'
 import type { LocalStateAttributes } from '@providers/local/services/state'
 
