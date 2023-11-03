@@ -1,5 +1,4 @@
 import { merge } from 'lodash'
-import { CORE_SERVICE_TYPES } from '@constants'
 import { mergeServiceSchemas } from '@core/schema'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { Stack } from '@core/stack'
@@ -328,12 +327,6 @@ export const getCloudService = (
     schema,
   }
 }
-
-/**
- * @param {ServiceTypeChoice} type the type of service to check whether is a core service
- * @returns {Boolean} whether the given service type is a core service
- */
-export const isCoreService = (type: ServiceTypeChoice): boolean => CORE_SERVICE_TYPES.includes(type)
 
 /**
  * Updates a service given certain attributes

@@ -35,12 +35,6 @@ export const SERVICE_TYPE = {
   VOLUME: 'volume',
 } as const
 
-export const CORE_SERVICE_TYPES = [
-  SERVICE_TYPE.STATE,
-  SERVICE_TYPE.SECRETS,
-  SERVICE_TYPE.PROVIDER,
-] as ServiceTypeChoice[]
-
 export const PROFILES_PATH = path.resolve(__dirname, 'profiles')
 export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL')
 
