@@ -13,7 +13,7 @@ import type {
   ServiceRequirement,
   ServiceTypeChoice,
 } from '@core/service'
-import { associate, getCoreService } from '@core/service'
+import { associate, getBaseService } from '@core/service'
 import type { Obj } from '@lib/util'
 
 type ProviderRequirement = ServiceRequirement<
@@ -50,4 +50,4 @@ const associations: LocalServiceAssociations = {
 }
 
 export const getLocalService = (type: ServiceTypeChoice) =>
-  pipe(associate(associations))(getCoreService(PROVIDER.LOCAL, type))
+  pipe(associate(associations))(getBaseService(PROVIDER.LOCAL, type))

@@ -267,7 +267,7 @@ export const getServiceTypeSchema = (
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-export const getCoreService = (
+export const getBaseService = (
   provider: ProviderChoice,
   type: ServiceTypeChoice,
 ): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
@@ -275,7 +275,7 @@ export const getCoreService = (
   const schema: ServiceSchema<BaseServiceAttributes> = {
     $id: schemaId,
     type: 'object',
-    required: [],
+    required: ['name', 'type', 'provider'],
     additionalProperties: false,
     properties: {
       name: getServiceNameSchema(),
@@ -295,36 +295,6 @@ export const getCoreService = (
     handler: () => {
       throw new Error('You have to register a handler for the service')
     },
-  }
-}
-
-/**
- * Returns a base cloud service (one that can be provisioned in the services list)
- *
- * @param provider {ProviderChoice} the provider for the cloud service
- * @param type {ServiceTypeChoice} the service type for the cloud service
- * @returns {Service<Obj>} the cloud service
- */
-export const getCloudService = (
-  provider: ProviderChoice,
-  type: ServiceTypeChoice,
-): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
-  const core = getCoreService(provider, type)
-  const schema: ServiceSchema<BaseServiceAttributes> = {
-    ...core.schema,
-    required: [...(core.schema.required || []), 'name', 'type'],
-    properties: {
-      ...core.schema.properties,
-      name: {
-        ...(core.schema.properties.name || {}),
-        minLength: 3,
-      },
-    },
-  }
-
-  return {
-    ...core,
-    schema,
   }
 }
 

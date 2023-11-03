@@ -23,7 +23,7 @@ import type {
   RegionalAttributes,
   Service,
 } from '@core/service'
-import { getCoreService, profilable, withHandler, withRegions } from '@core/service'
+import { getBaseService, profilable, withHandler, withRegions } from '@core/service'
 
 export type AwsProviderResources = {
   provider: awsProvider.AwsProvider
@@ -149,6 +149,6 @@ export const getProviderService = (): AwsProviderService =>
     profilable(),
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler(resourceHandler),
-  )(getCoreService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
+  )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()

@@ -15,7 +15,6 @@ import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type {
-  BaseService,
   BaseServiceAttributes,
   Provisions,
   ServiceAssociations,
@@ -28,7 +27,7 @@ import type {
   ConnectableAttributes,
   ExternallyLinkableAttributes,
 } from '@core/service'
-import { associate, getCloudService, getCoreService, withRegions } from '@core/service'
+import { associate, getBaseService, withRegions } from '@core/service'
 import type {
   AwsProviderAttributes,
   AwsProviderProvisionable,
@@ -248,11 +247,8 @@ export const withAwsAlarms =
     }
   }
 
-const getAwsService = (srv: BaseService) =>
-  pipe(associate(associations), withRegions(REGIONS, DEFAULT_REGION))(srv)
-
-export const getAwsCoreService = (type: ServiceTypeChoice) =>
-  getAwsService(getCoreService(PROVIDER.AWS, type))
-
-export const getAwsCloudService = (type: ServiceTypeChoice) =>
-  getAwsService(getCloudService(PROVIDER.AWS, type))
+export const getAwsService = (type: ServiceTypeChoice) =>
+  pipe(
+    associate(associations),
+    withRegions(REGIONS, DEFAULT_REGION),
+  )(getBaseService(PROVIDER.AWS, type))
