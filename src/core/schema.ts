@@ -1,12 +1,10 @@
-import { fromPairs, isEmpty, merge, uniq } from 'lodash'
+import { fromPairs, merge, uniq } from 'lodash'
 import { Registry } from '@core/registry'
 import { getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema } from '@core/service'
+import type { Dictionary } from 'lodash'
 import type { ServiceAttributes } from '@core/registry'
-
-import { SERVICE_TYPE } from '@constants'
-import { isCoreService } from '@core/service/core'
 import type { Obj, RequireKeys } from '@lib/util'
-import type { BaseService, ProviderChoice, ServiceTypeChoice } from '@core/service/core'
+import type { BaseService } from '@core/service/core'
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
@@ -93,9 +91,18 @@ export type JsonSchema<T = undefined> = {
   /**
    * Holds simple JSON Schema definitions for referencing from elsewhere
    */
-  $defs?: { [property: string]: JsonSchema }
+  $defs?: T extends ArrayLike<any>
+    ? JsonSchema<T[number]>
+    : T extends Obj
+    ? { [K in keyof T]?: JsonSchema<T[K]> }
+    : never
 
-  definitions?: T extends Obj ? { [K in keyof T]?: JsonSchema<T[K]> } : never
+  definitions?: T extends ArrayLike<any>
+    ? JsonSchema<T[number]>
+    : T extends Obj
+    ? { [K in keyof T]?: JsonSchema<T[K]> }
+    : never
+
   /**
    * The keys that can exist on the object with the json schema that should validate their value
    */
@@ -219,182 +226,35 @@ export const mergeServiceSchemas = <A extends Obj = Obj, B extends Obj = Obj>(
 }
 
 /**
- * Returns the schema for a set of a provider's regions
+ * Returns the schema that matches the service's main attributes with the service reference id
  *
- * @param {ProviderChoice} provider the provider to register the regions for
- * @param {String[]} regions the regions available for the provider
- * @returns {JsonSchema} the regions schema
+ * @param {BaseService} service the service to get the matcher for
+ * @returns {JsonSchema}
  */
-export const getRegionsSchema = (
-  provider: ProviderChoice,
-  regions: string[],
-): JsonSchema<string> => ({
-  $id: `regions/${provider}`,
-  type: 'string',
-  enum: regions,
-  errorMessage: {
-    enum: `The region is invalid. Available options are: ${regions.join(', ')}`,
+export const getServiceMatcher = (service: BaseService): JsonSchema => ({
+  if: {
+    properties: {
+      provider: { const: service.provider },
+      type: { const: service.type },
+    },
+  },
+  then: {
+    $ref: service.schemaId,
   },
 })
-
-/**
- * Returns a conditional schema for the regions, that allows us to validate different
- * regions per provider (at project level)
- *
- * @param {ProviderChoice} provider the provider associated with the regions
- * @param {JsonSchema} schema the regions schema definition
- * @returns {JsonSchema} the conditionals for the regions
- * @see {getRegionsSchema}
- */
-export const getRegionConditional = (provider: ProviderChoice, schema: JsonSchema<string>) => {
-  if (!schema.$id) {
-    throw new Error('The $id property should be defined in the schema')
-  }
-
-  return {
-    if: { properties: { provider: { const: provider } } },
-    then: { properties: { region: { $ref: schema.$id } } },
-  }
-}
-
-/**
- * Returns the schemas to be used when validating either core or cloud services
- *
- * How the validtion works:
- *  - it uses the `provider` property assigned in the service configuration (if any)
- *  - otherwise it uses the default cloud provider (the one set at root level)
- *  - adds a discrimination based on the service's type and points to the specific reference
- *
- * @param {ProviderChoice} provider the provider to get the validations schema for
- * @returns {JsonSchema[]} the services validation schema
- */
-export const getProviderServiceSchemas = (provider: ProviderChoice, services: BaseService[]) => {
-  const schemas: RequireKeys<JsonSchema, '$id'>[] = []
-  const cloudServices = services.filter((srv) => !isCoreService(srv.type))
-  const rootCoreServiceTypes = [
-    SERVICE_TYPE.STATE,
-    SERVICE_TYPE.SECRETS,
-    SERVICE_TYPE.MONITORING,
-  ] as ServiceTypeChoice[]
-
-  // Start with the root-level core services (eg. state, secrets, monitoring)
-  services
-    .filter((srv) => rootCoreServiceTypes.includes(srv.type))
-    .forEach((service) => {
-      schemas.push({
-        $id: `${provider}-${service.type}-core-service`,
-        if: {
-          anyOf: [
-            {
-              // Provider is defined at root-level, not defined on the core service configuration
-              properties: {
-                provider: { const: provider },
-                [service.type]: { not: { required: ['provider'] } },
-              },
-            },
-            {
-              // Provider is explicitly defined at core service configuration level
-              properties: {
-                [service.type]: {
-                  required: ['provider'],
-                  properties: { provider: { const: provider } },
-                },
-              },
-            },
-          ],
-        },
-        then: {
-          properties: { [service.type]: { $ref: service.schemaId } },
-        },
-      })
-    })
-
-  // Finally, add the provider's cloud services
-  if (!isEmpty(cloudServices)) {
-    schemas.push({
-      $id: `${provider}-cloud-services`,
-      if: {
-        // Provider defined at root-level
-        properties: { provider: { const: provider } },
-      },
-      then: {
-        properties: {
-          services: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                // Set the accepted service types
-                type: {
-                  enum: cloudServices.map((srv) => srv.type),
-                },
-              },
-              // Add type discriminations for every cloud service available
-              allOf: cloudServices.map(
-                (service): JsonSchema => ({
-                  if: {
-                    anyOf: [
-                      {
-                        // Provider is not defined at service level
-                        not: { required: ['provider'] },
-                        properties: {
-                          type: { const: service.type },
-                        },
-                      },
-                      {
-                        // Provider is defined set to the current one
-                        required: ['provider'],
-                        properties: {
-                          provider: { const: provider },
-                          type: { const: service.type },
-                        },
-                      },
-                    ],
-                  },
-                  then: {
-                    $ref: service.schemaId,
-                  },
-                }),
-              ),
-            },
-          },
-        },
-      },
-    })
-  }
-
-  return schemas
-}
 
 /**
  * Populates the project schema
  *
  * @returns {JsonSchema<ServiceAttributes[]>}
  */
-export const getProjectSchema = (): JsonSchema<ServiceAttributes[]> => {
-  const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(Registry.regions.entries())
-    .filter(([_, regions]) => !isEmpty(regions))
-    .map(([provider, regions]) => [provider, getRegionsSchema(provider, Array.from(regions))])
+export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
+  const services = Registry.items
 
-  const allOf: JsonSchema[] = [
-    ...regions.map(([provider, schema]) => getRegionConditional(provider, schema)),
-  ]
-
-  const $defs = {
-    ...fromPairs(Registry.items.map((service) => [service.schemaId, service.schema])),
-    ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
-  }
-
-  // Add type discriminations for the cloud providers available
-  const providers = Registry.providers()
-  providers.forEach((provider) => {
-    getProviderServiceSchemas(provider, Registry.ofProvider(provider)).forEach((schema) => {
-      const { $id: schemaId } = schema
-
-      Object.assign($defs, { [schemaId]: schema })
-      allOf.push({ $ref: schemaId })
-    })
-  })
+  const allOf = services.map((service) => getServiceMatcher(service))
+  const $defs: Dictionary<JsonSchema<ServiceAttributes>> = fromPairs(
+    services.map((service) => [service.schemaId, service.schema]),
+  )
 
   return {
     $id: 'stackmate-services-configuration',
@@ -408,20 +268,21 @@ export const getProjectSchema = (): JsonSchema<ServiceAttributes[]> => {
     items: {
       type: 'object',
       additionalProperties: true,
-      required: ['name', 'type'],
+      required: ['name', 'type', 'provider'],
       properties: {
         name: getServiceNameSchema(),
         type: getServiceTypeSchema(Registry.serviceTypes()),
-        provider: getServiceProviderSchema(providers),
+        provider: getServiceProviderSchema(Registry.providers()),
       },
+      allOf,
       errorMessage: {
         required: {
           name: 'Every service should feature a "name" property',
           type: 'Every service should feature a "type" property',
+          provider: 'Every service should feature a "provider" property',
         },
       },
     },
-    allOf,
     $defs,
   }
 }

@@ -172,26 +172,40 @@ export const parseErrors = (errors: AjvErrorObject[]): ValidationErrorDescriptor
   return uniqBy(errs, ({ path, message }) => `${path}-${message}`)
 }
 
+/**
+ * Returns the validated data according to a given schema
+ *
+ * @param {object} rawData the raw data to validate
+ * @param {JsonSchema} schema the schema to use for validation
+ * @param {AjvOptions} options the ajv options to use
+ * @returns {object} the validated data, mutated by ajv
+ * @throws {ValidationError}
+ */
 export const getValidData = <R, T>(
   rawData: R,
   schema: JsonSchema<T>,
   options: AjvOptions = {},
 ): T => {
-  const ajv = getAjv(options)
+  const {
+    schemas: loadedSchemas,
+    addSchema: addSchemaToAjv,
+    getSchema: getSchemaValidator,
+  } = getAjv(options)
+
   const schemaId = schema.$id
 
   if (!schemaId) {
     throw new Error('A schema ID should be provided')
   }
 
-  if (!ajv.schemas[schemaId]) {
-    ajv.addSchema(schema, schemaId)
+  if (!loadedSchemas[schemaId]) {
+    addSchemaToAjv(schema, schemaId)
   }
 
   // We need to clone the data because when using defaults, the data gets mutated
   // this can lead to all kinds of errors and the impression that data isn't valid
   const data = cloneDeep(rawData)
-  const validateData = ajv.getSchema(schemaId)
+  const validateData = getSchemaValidator(schemaId)
 
   if (!isFunction(validateData)) {
     throw new Error('The schema provided was invalid')
@@ -204,6 +218,7 @@ export const getValidData = <R, T>(
 
   return data as unknown as T
 }
+
 /**
  * Validates an operation's environment variables
  *

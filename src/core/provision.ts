@@ -1,7 +1,7 @@
 import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData } from '@core/validation'
-import { getProjectSchema } from '@core/schema'
+import { getSchema } from '@core/schema'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { AnyAssociationHandler, BaseProvisionable } from '@core/service'
 
@@ -48,7 +48,7 @@ export const getProvisionables = (configs: ServiceConfiguration[]): Provisionabl
   // Get services validated and apply default values
   const serviceAttributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
     configs,
-    getProjectSchema(),
+    getSchema(),
   )
 
   serviceAttributes.forEach((config) => {
