@@ -1,7 +1,7 @@
 import type { Stack } from '@core/stack'
 import { DEFAULT_REGION } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getProvisionable } from '@core/service/provisionable'
+import { getProvisionable } from '@core/provision'
 import type {
   BaseProvisionable,
   BaseServiceAttributes,
