@@ -9,11 +9,10 @@ import type {
   Service,
   ServiceSideEffect,
   AssociationLookup,
-  ProvisionResources,
   WithAssociations,
-  BaseProvisionable,
 } from '@core/service/core'
 import { associate, withSchema } from '@core/service/core'
+import type { ProvisionResources, BaseProvisionable } from '@core/provision'
 
 /**
  * @type {LinkableAttributes} internal link service attributes

@@ -1,17 +1,16 @@
-import type { TerraformLocal } from 'cdktf'
-
-import type { Stack } from '@core/stack'
 import { SERVICE_TYPE } from '@constants'
+import { associate } from '@core/service'
+import type { TerraformLocal } from 'cdktf'
+import type { Stack } from '@core/stack'
+import type { BaseProvisionable } from '@core/provision'
 import type {
   BaseService,
   BaseServiceAttributes,
-  BaseProvisionable,
   Service,
   ServiceRequirement,
   WithAssociations,
   AssociationHandler,
 } from '@core/service'
-import { associate } from '@core/service'
 
 /**
  * @type {Credentials} a credentials object returned by the credentials provision handler

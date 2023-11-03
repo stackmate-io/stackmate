@@ -16,13 +16,12 @@ import { getMonitoringPrerequisites } from '@providers/aws/alarms'
 import { associate, getBaseService, withRegions } from '@core/service'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { Stack } from '@core/stack'
+import type { Provisionable, BaseProvisionable, Provisions } from '@core/provision'
 import type {
   BaseServiceAttributes,
   ServiceAssociations,
-  BaseProvisionable,
   ServiceRequirement,
   ServiceTypeChoice,
-  Provisionable,
   Service,
   LinkableAttributes,
   ConnectableAttributes,
@@ -37,7 +36,6 @@ import type {
   AwsServiceAlarmResources,
   MonitoredServiceProvisionable,
 } from '@providers/aws/alarms'
-import type { Provisions } from '@core/provision'
 
 type ProviderRequirement = ServiceRequirement<
   terraformAwsProvider.AwsProvider,
