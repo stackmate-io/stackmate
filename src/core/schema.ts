@@ -1,9 +1,12 @@
-import { isEmpty, merge, uniq } from 'lodash'
+import { fromPairs, isEmpty, merge, uniq } from 'lodash'
+import { Registry } from '@core/registry'
+import { getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema } from '@core/service'
+import type { ServiceAttributes } from '@core/registry'
 
-import type { Obj, RequireKeys } from '@lib/util'
 import { SERVICE_TYPE } from '@constants'
-import type { BaseService, ProviderChoice, ServiceTypeChoice } from '@core/service/core'
 import { isCoreService } from '@core/service/core'
+import type { Obj, RequireKeys } from '@lib/util'
+import type { BaseService, ProviderChoice, ServiceTypeChoice } from '@core/service/core'
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
@@ -361,4 +364,64 @@ export const getProviderServiceSchemas = (provider: ProviderChoice, services: Ba
   }
 
   return schemas
+}
+
+/**
+ * Populates the project schema
+ *
+ * @returns {JsonSchema<ServiceAttributes[]>}
+ */
+export const getProjectSchema = (): JsonSchema<ServiceAttributes[]> => {
+  const regions: [ProviderChoice, JsonSchema<string>][] = Array.from(Registry.regions.entries())
+    .filter(([_, regions]) => !isEmpty(regions))
+    .map(([provider, regions]) => [provider, getRegionsSchema(provider, Array.from(regions))])
+
+  const allOf: JsonSchema[] = [
+    ...regions.map(([provider, schema]) => getRegionConditional(provider, schema)),
+  ]
+
+  const $defs = {
+    ...fromPairs(Registry.items.map((service) => [service.schemaId, service.schema])),
+    ...fromPairs(regions.map(([_ig, schema]) => [schema.$id, schema])),
+  }
+
+  // Add type discriminations for the cloud providers available
+  const providers = Registry.providers()
+  providers.forEach((provider) => {
+    getProviderServiceSchemas(provider, Registry.ofProvider(provider)).forEach((schema) => {
+      const { $id: schemaId } = schema
+
+      Object.assign($defs, { [schemaId]: schema })
+      allOf.push({ $ref: schemaId })
+    })
+  })
+
+  return {
+    $id: 'stackmate-services-configuration',
+    $schema: 'http://json-schema.org/draft-07/schema',
+    type: 'array',
+    minItems: 1,
+    uniqueItems: true,
+    errorMessage: {
+      minItems: 'You should define at least one service to deploy',
+    },
+    items: {
+      type: 'object',
+      additionalProperties: true,
+      required: ['name', 'type'],
+      properties: {
+        name: getServiceNameSchema(),
+        type: getServiceTypeSchema(Registry.serviceTypes()),
+        provider: getServiceProviderSchema(providers),
+      },
+      errorMessage: {
+        required: {
+          name: 'Every service should feature a "name" property',
+          type: 'Every service should feature a "type" property',
+        },
+      },
+    },
+    allOf,
+    $defs,
+  }
 }

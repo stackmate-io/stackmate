@@ -8,7 +8,7 @@ import type {
   AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
-import { getProvisionables, type ProvisionablesMap } from './project'
+import { getProvisionables, type ProvisionablesMap } from './service/provisionable'
 import type { ServiceConfiguration } from './registry'
 
 type AssociatedProvisionable = {

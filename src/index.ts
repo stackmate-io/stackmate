@@ -5,7 +5,6 @@ export * from '@lib/util'
 
 export * from '@core/registry'
 export * from '@core/service'
-export * from '@core/project'
 
 export { JsonSchema } from '@core/schema'
 export { Operation } from '@core/operation'
