@@ -1,40 +1,19 @@
 import { isEmpty, uniqBy } from 'lodash'
 import { validateEnvironment } from '@core/validation'
 import { Stack } from '@core/stack'
+import { assertRequirementsSatisfied, getProvisionables } from '@core/provision'
 import type {
   BaseProvisionable,
   Provisions,
   ServiceEnvironment,
-  AnyAssociationHandler,
   AssociationReturnType,
 } from '@core/service'
-import { getProvisionables, type ProvisionablesMap } from './provision'
-import type { ServiceConfiguration } from './registry'
-
-type AssociatedProvisionable = {
-  name: string
-  target: BaseProvisionable
-  handler: AnyAssociationHandler
-}
-
-type AssociatedProvisionablesMapping = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
-
-/**
- * @param {BaseProvisionable} provisionable the provisionable to check
- * @throws {Error} if a requirement is not satisfied
- */
-const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
-  const {
-    service: { associations = {}, type },
-    requirements,
-  } = provisionable
-
-  Object.entries(associations).forEach(([name, assoc]) => {
-    if (assoc.requirement && !requirements[name]) {
-      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
-    }
-  })
-}
+import type {
+  AssociatedProvisionable,
+  AssociatedProvisionablesMap,
+  ProvisionablesMap,
+} from '@core/provision'
+import type { ServiceConfiguration } from '@core/registry'
 
 export class Operation {
   /**
@@ -57,12 +36,12 @@ export class Operation {
   /**
    * @var {AssociationHandlersMapping} requirements the provisionable id per requirement mapping
    */
-  #requirements: AssociatedProvisionablesMapping = new Map()
+  #requirements: AssociatedProvisionablesMap = new Map()
 
   /**
    * @var {AssociationHandlersMapping} sideEffects the provisionable id per side-effects mapping
    */
-  #sideEffects: AssociatedProvisionablesMapping = new Map()
+  #sideEffects: AssociatedProvisionablesMap = new Map()
 
   /**
    * @constructor
