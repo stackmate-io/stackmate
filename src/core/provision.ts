@@ -3,9 +3,16 @@ import { hashObject } from '@lib/hash'
 import { getValidData } from '@core/validation'
 import { getProjectSchema } from '@core/schema'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { BaseProvisionable } from '@core/service'
+import type { AnyAssociationHandler, BaseProvisionable } from '@core/service'
+
+export type AssociatedProvisionable = {
+  name: string
+  target: BaseProvisionable
+  handler: AnyAssociationHandler
+}
 
 export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
+export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
 /**
  * Gets a provisionable based on a service's attributes
@@ -50,4 +57,21 @@ export const getProvisionables = (configs: ServiceConfiguration[]): Provisionabl
   })
 
   return provisionables
+}
+
+/**
+ * @param {BaseProvisionable} provisionable the provisionable to check
+ * @throws {Error} if a requirement is not satisfied
+ */
+export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
+  const {
+    service: { associations = {}, type },
+    requirements,
+  } = provisionable
+
+  Object.entries(associations).forEach(([name, assoc]) => {
+    if (assoc.requirement && !requirements[name]) {
+      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
+    }
+  })
 }
