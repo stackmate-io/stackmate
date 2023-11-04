@@ -7,7 +7,7 @@ import {
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
 import { getAwsService } from '@providers/aws/service'
-import { withCredentialsGenerator } from '@core/service'
+import { withCredentialsGenerator } from 'src/services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@constants'
 import { getServiceProfile } from '@core/profile'
@@ -15,10 +15,14 @@ import type { Stack } from '@lib/stack'
 import type { REGIONS } from '@providers/aws/constants'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { AwsService } from '@providers/aws/service'
-import type { BaseServiceAttributes } from '@services/types'
+import type { BaseServiceAttributes } from 'src/services/types'
 import type { Provisionable } from '@core/provision'
-import type { BaseProvisionable } from '@core/services/types/provisionable'
-import type { Credentials, CredentialsHandlerOptions, SecretsVaultService } from '@core/service'
+import type { BaseProvisionable } from 'src/services/types/provisionable'
+import type {
+  Credentials,
+  CredentialsHandlerOptions,
+  SecretsVaultService,
+} from 'src/services/behaviors'
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS

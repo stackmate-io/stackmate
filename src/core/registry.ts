@@ -1,8 +1,8 @@
 import { uniq } from 'lodash'
 import * as Services from '@providers/services'
 import type { Distribute, DistributiveRequireKeys } from '@lib/util'
-import type { ProviderChoice, ServiceTypeChoice, BaseServiceAttributes } from '@services/types'
-import type { BaseService, ExtractAttrs } from '@core/service'
+import type { ProviderChoice, ServiceTypeChoice, BaseServiceAttributes } from 'src/services/types'
+import type { BaseService, ExtractAttrs } from 'src/services/behaviors'
 
 class Registry {
   /**

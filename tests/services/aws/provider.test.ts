@@ -11,7 +11,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { Stack } from '@lib/stack'
 import { getProvisionable } from '@core/provision'
-import { type BaseProvisionable } from '@core/services/types/provisionable'
+import { type BaseProvisionable } from 'src/services/types/provisionable'
 import type { AwsProviderResources, AwsProviderAttributes } from '@providers/aws/services/provider'
 
 describe('AWS Provider', () => {

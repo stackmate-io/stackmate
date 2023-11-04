@@ -5,7 +5,6 @@
     "plugin:import/typescript",
     "plugin:import/warnings",
     "plugin:prettier/recommended",
-    "plugin:jsdoc/recommended",
     "prettier"
   ],
   "ignorePatterns": [

@@ -35,8 +35,11 @@
       "@core/*": [
         "src/core/*"
       ],
+      "@services": [
+        "src/services/index"
+      ],
       "@services/*": [
-        "src/core/services/*"
+        "src/services/*"
       ],
       "@providers": [
         "src/providers/index"

@@ -1,13 +1,11 @@
 import { isEmpty, uniqBy } from 'lodash'
 import { Stack } from '@lib/stack'
 import { getProvisionables } from '@core/provision'
-import type { AssociationReturnType } from '@core/service'
-import type { ServiceEnvironment } from '@services/types'
+import { validateEnvironment } from 'src/services/utils'
 import type { ServiceConfiguration } from '@core/registry'
+import type { AssociationReturnType, ServiceEnvironment, Provisions } from 'src/services/types'
 import type { AssociatedProvisionable, AssociatedProvisionablesMap } from '@core/provision'
-import type { ProvisionablesMap, BaseProvisionable } from './services/types/provisionable'
-import type { Provisions } from './services/types/resources'
-import { validateEnvironment } from './services/utils/validation/validateEnvironment'
+import type { ProvisionablesMap, BaseProvisionable } from '../services/types/provisionable'
 
 export class Operation {
   /**

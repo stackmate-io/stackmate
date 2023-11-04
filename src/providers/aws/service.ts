@@ -7,7 +7,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
 import { getMonitoringPrerequisites } from '@providers/aws/alarms'
-import { associate, getBaseService, withRegions } from '@core/service'
+import { associate, getBaseService, withRegions } from 'src/services/behaviors'
 import type {
   vpc,
   kmsKey,
@@ -17,9 +17,9 @@ import type {
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
 import type { Provisionable } from '@core/provision'
-import type { BaseProvisionable } from '@core/services/types/provisionable'
-import type { Provisions } from '@core/services/types/resources'
-import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
+import type { BaseProvisionable } from 'src/services/types/provisionable'
+import type { Provisions } from 'src/services/types/resources'
+import type { BaseServiceAttributes, ServiceTypeChoice } from 'src/services/types'
 import type {
   ServiceAssociations,
   ServiceRequirement,
@@ -27,7 +27,7 @@ import type {
   LinkableAttributes,
   ConnectableAttributes,
   ExternallyLinkableAttributes,
-} from '@core/service'
+} from 'src/services/behaviors'
 import type {
   AwsProviderAttributes,
   AwsProviderProvisionable,

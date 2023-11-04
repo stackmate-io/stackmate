@@ -3,9 +3,9 @@ import { join as joinPaths } from 'node:path'
 import { merge } from 'lodash'
 
 import { DEFAULT_PROFILE_NAME, PROFILES_PATH } from '@constants'
-import { PROFILE_DIRECTORY_OVERRIDES } from '@core/services/constants'
-import type { BaseServiceAttributes, ProviderChoice, ServiceTypeChoice } from '@services/types'
-import type { ProfilableAttributes } from '@core/service'
+import { PROFILE_DIRECTORY_OVERRIDES } from 'src/services/constants'
+import type { BaseServiceAttributes, ProviderChoice, ServiceTypeChoice } from 'src/services/types'
+import type { ProfilableAttributes } from 'src/services/behaviors'
 
 /**
  * Returns the absolute path to the profile file

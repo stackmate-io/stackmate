@@ -4,11 +4,11 @@ import { S3Backend } from 'cdktf'
 import { SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getAwsService } from '@providers/aws/service'
-import { withRegions, withHandler, withSchema } from '@core/service'
+import { withRegions, withHandler, withSchema } from 'src/services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
 import type { Provisionable } from '@core/provision'
-import type { BaseServiceAttributes } from '@services/types'
+import type { BaseServiceAttributes } from 'src/services/types'
 import type { AwsService, AwsServiceAttributes } from '@providers/aws/service'
 
 type AdditionalAttrs = { bucket: string }
