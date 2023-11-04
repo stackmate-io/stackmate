@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
 import { isEmpty, merge } from 'lodash'
+import type { Dictionary } from 'lodash'
 import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
 import type { ProfilableAttributes } from '@services/behaviors'
 
@@ -35,7 +36,7 @@ export const getProfile = ({
     throw new Error(`Profile file ${profilePath} does not exist`)
   }
 
-  let profileConfig = {}
+  let profileConfig: Dictionary<any> = {}
 
   try {
     // eslint-disable-next-line global-require,import/no-dynamic-require

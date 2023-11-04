@@ -9,44 +9,13 @@ import {
   provider as awsProvider,
   dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws'
-import { getResourcesProfile } from '@src/services/utils/profiles/getProfilePath'
 import { getCidrBlocks } from '@lib/networking'
-import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constants'
-import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants'
-import {
-  getBaseService,
-  profileable,
-  withEnvironment,
-  withHandler,
-  withRegions,
-} from 'src/services/behaviors'
+import { getBaseService, getProfile } from '@src/services/utils'
+import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
+import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { profileable, withEnvironment, withHandler, withRegions } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { ChoiceOf } from '@lib/util'
-import type { Provisionable } from '@core/provision'
-import type { AwsServiceAttributes } from '@providers/aws/service'
-import type { BaseServiceAttributes } from 'src/services/types'
-import type { RegionalAttributes, Service } from 'src/services/behaviors'
-
-export type AwsProviderResources = {
-  provider: awsProvider.AwsProvider
-  kmsKey: awsKmsKey.KmsKey
-  account: callerIdentity.DataAwsCallerIdentity
-  outputs: TerraformOutput[]
-  gateway: internetGateway.InternetGateway
-  subnets: awsSubnet.Subnet[]
-  vpc: awsVpc.Vpc
-}
-
-export type AwsProviderAttributes = AwsServiceAttributes<
-  BaseServiceAttributes &
-    RegionalAttributes<ChoiceOf<typeof REGIONS>> & {
-      type: typeof SERVICE_TYPE.PROVIDER
-      rootIp?: string
-    }
->
-
-export type AwsProviderService = Service<AwsProviderAttributes>
-export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
+import type { AwsProviderProvisionable, AwsProviderResources, AwsProviderService } from '@aws/types'
 
 /**
  * @param {AwsProviderProvisionable} provisionable the provisionable item
@@ -63,11 +32,7 @@ export const resourceHandler = (
     resourceId,
   } = provisionable
 
-  const {
-    vpc: vpcConfig,
-    subnet: subnetConfig,
-    gateway: gatewayConfig,
-  } = getResourcesProfile(config)
+  const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
 
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
 

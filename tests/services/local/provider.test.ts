@@ -1,9 +1,9 @@
 import { provider as terraformLocalProvider } from '@cdktf/provider-local'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getProvisionable } from '@core/provision'
 import { Stack } from '@lib/stack'
-import { LocalProvider } from '@providers/local/services/provider'
-import type { LocalProviderAttributes } from '@providers/local/services/provider'
+import { LocalProvider } from '@src/services/providers/local/services/provider'
+import type { LocalProviderAttributes } from '@src/services/providers/local/services/provider'
 
 describe('Local Provider', () => {
   const service = LocalProvider

@@ -1,6 +1,6 @@
 import { uniq } from 'lodash'
-import * as Services from '@providers/services'
-import { hashObject } from '@src/lib/hash'
+import * as Services from '@services/providers/services'
+import { hashObject } from '@lib/hash'
 import type { Distribute, DistributiveRequireKeys } from '@lib/util'
 import type {
   ProviderChoice,

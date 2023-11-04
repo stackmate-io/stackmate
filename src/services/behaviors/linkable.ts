@@ -1,6 +1,6 @@
 import pipe from 'lodash/fp/pipe'
 import { isEmpty } from 'lodash'
-import { SERVICE_TYPE } from '@constants'
+import { SERVICE_TYPE } from '@src/constants'
 import type {
   Service,
   AssociationHandler,

@@ -4,11 +4,10 @@ https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/blob/maste
 */
 import { kebabCase, snakeCase } from 'lodash'
 import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws'
-
 import type { Stack } from '@lib/stack'
-import type { AwsDatabaseProvisionable } from '@providers/aws/services/database'
-import type { AwsServiceAlertsGenerator } from '@providers/aws/service'
-import type { AwsServiceAlarmResources, AwsAlarmPrerequisites } from '@providers/aws/alarms'
+import type { AwsDatabaseProvisionable } from '@aws/services/database'
+import type { AwsServiceAlertsGenerator } from '@aws/utils/withAlerts'
+import type { AwsServiceAlertResources, AwsAlertPrerequisites } from '@aws/types'
 
 /**
  * @type {RdsMonitoringThresholds} the monitoring thresholds applicable
@@ -31,9 +30,9 @@ export type RdsMonitoringThresholds = {
 }
 
 /**
- * @type {RdsAlarmOptions} the alarm options
+ * @type {RdsAlertOptions} the alarm options
  */
-export type RdsAlarmOptions = {
+export type RdsAlertOptions = {
   evaluationPeriods: number
   period: number
 }
@@ -48,13 +47,13 @@ export const thresholds: RdsMonitoringThresholds = {
   swapUsage: 256 * 1024 * 1024, // 256MB
 }
 
-export const options: RdsAlarmOptions = {
+export const options: RdsAlertOptions = {
   evaluationPeriods: 1,
   period: 300,
 }
 
 export type DatabasebAlertResources =
-  | AwsServiceAlarmResources
+  | AwsServiceAlertResources
   | {
       eventSubscription: dbEventSubscription.DbEventSubscription
     }
@@ -63,7 +62,7 @@ export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
   provisionable: AwsDatabaseProvisionable,
   stack: Stack,
   resources: AwsDatabaseProvisionable['provisions'],
-  prerequisites: AwsAlarmPrerequisites,
+  prerequisites: AwsAlertPrerequisites,
 ): DatabasebAlertResources => {
   const { topic } = prerequisites
   const { dbInstance } = resources

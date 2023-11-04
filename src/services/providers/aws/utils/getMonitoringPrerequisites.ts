@@ -5,40 +5,11 @@ import {
   snsTopicSubscription,
   dataAwsIamPolicyDocument,
 } from '@cdktf/provider-aws'
-
-import { SERVICE_TYPE } from '@constants'
+import { SERVICE_TYPE } from '@src/constants'
 import { hashString } from '@lib/hash'
 import type { Stack } from '@lib/stack'
-import type { cloudwatchMetricAlarm } from '@cdktf/provider-aws'
-import type { TerraformResource } from 'cdktf'
-import type { AwsService } from '@providers/aws/service'
-import type { MonitoringAttributes } from 'src/services/behaviors'
-import type { BaseServiceAttributes, ServiceTypeChoice } from 'src/services/types'
-import type { Provisionable } from '@core/provision'
-import type { Provisions } from 'src/services/types/resources'
-
-/**
- * @type {AwsServiceAlarmResources} the alarms resources
- */
-export type AwsServiceAlarmResources = Record<
-  string,
-  cloudwatchMetricAlarm.CloudwatchMetricAlarm | TerraformResource
->
-
-/**
- * @type {AwsAlarmPrerequisites} the prerequisites for alert generators
- */
-export type AwsAlarmPrerequisites = {
-  topic: snsTopic.SnsTopic
-  policy: snsTopicPolicy.SnsTopicPolicy
-  document: dataAwsIamPolicyDocument.DataAwsIamPolicyDocument
-  subscriptions: snsTopicSubscription.SnsTopicSubscription[]
-}
-
-export type MonitoredServiceProvisionable = Provisionable<
-  AwsService<BaseServiceAttributes & MonitoringAttributes>,
-  Provisions
->
+import type { AwsAlertPrerequisites, MonitoredServiceProvisionable } from '@aws/types'
+import type { ServiceTypeChoice } from '@services/types'
 
 export const AWS_SERVICE_INFO: Map<ServiceTypeChoice, { name: string; url: string }> = new Map([
   [SERVICE_TYPE.MYSQL, { name: 'Allow RDS Events', url: 'rds.amazonaws.com' }],
@@ -65,12 +36,12 @@ export const SNS_RETRY_POLICY = {
 /**
  * @param {MonitoredServiceProvisionable} provisionable the current service's provisionable
  * @param {Stack} stack the stack to provision resources on
- * @returns {AwsAlarmPrerequisites} the prerequisites for alert generator functions
+ * @returns {AwsAlertPrerequisites} the prerequisites for alert generator functions
  */
 export const getMonitoringPrerequisites = (
   provisionable: MonitoredServiceProvisionable,
   stack: Stack,
-): AwsAlarmPrerequisites => {
+): AwsAlertPrerequisites => {
   const {
     service: { type: targetType },
     config: { name, region, monitoring },

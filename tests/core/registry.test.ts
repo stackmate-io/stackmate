@@ -1,6 +1,6 @@
 import { Registry } from '@core/registry'
-import { REGIONS as AWS_REGIONS } from '@providers/aws/constants'
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@constants'
+import { REGIONS as AWS_REGIONS } from '@src/services/providers/aws/constants'
+import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@src/constants'
 
 describe('Registry', () => {
   describe('all', () => {

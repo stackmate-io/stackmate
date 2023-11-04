@@ -1,9 +1,9 @@
 import pipe from 'lodash/fp/pipe'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getBaseService } from '@services/utils'
 import { withAssociations } from '@services/behaviors'
 import type { provider as terraformLocalProvider } from '@cdktf/provider-local'
-import type { LocalProviderProvisionable } from '@providers/local/services/provider'
+import type { LocalProviderProvisionable } from '@src/services/providers/local/services/provider'
 import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
 import type { LocalProviderAttributes, LocalServiceAssociations } from './types'
 

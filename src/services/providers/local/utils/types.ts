@@ -1,5 +1,5 @@
 import type { Obj } from '@lib/util'
-import type { PROVIDER, SERVICE_TYPE } from '@constants'
+import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import type {
   Service,
