@@ -1,11 +1,17 @@
 import { isEmpty, uniqBy } from 'lodash'
 import { Stack } from '@lib/stack'
-import { getProvisionables } from '@core/provision'
-import { validateEnvironment } from 'src/services/utils'
-import type { ServiceConfiguration } from '@core/registry'
-import type { AssociationReturnType, ServiceEnvironment, Provisions } from 'src/services/types'
-import type { AssociatedProvisionable, AssociatedProvisionablesMap } from '@core/provision'
-import type { ProvisionablesMap, BaseProvisionable } from './services/types/provisionable'
+import { validateEnvironment } from '@services/utils'
+import { Registry, type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
+import { getSchema, getValidData } from '@src/validation'
+import type {
+  AssociationReturnType,
+  ServiceEnvironment,
+  Provisions,
+  AssociatedProvisionable,
+  AssociatedProvisionablesMap,
+  ProvisionablesMap,
+  BaseProvisionable,
+} from '@services/types'
 
 export class Operation {
   /**
@@ -42,8 +48,7 @@ export class Operation {
    */
   constructor(serviceConfigs: ServiceConfiguration[], envName: string) {
     this.stack = new Stack(envName)
-    this.provisionables = getProvisionables(serviceConfigs)
-    this.initialize()
+    this.init(serviceConfigs)
   }
 
   /**
@@ -76,10 +81,25 @@ export class Operation {
     return this.#environment
   }
 
+  protected init(configs: ServiceConfiguration[]) {
+    // Get services validated and apply default values
+    const serviceAttributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
+      configs,
+      getSchema(),
+    )
+
+    for (const attrs of serviceAttributes) {
+      const provisionable = Registry.provisionable(attrs)
+      this.provisionables.set(provisionable.id, provisionable)
+    }
+
+    this.associateProvisionables()
+  }
+
   /**
    * Initializes the operation
    */
-  protected initialize() {
+  protected associateProvisionables() {
     for (const provisionable of this.provisionables.values()) {
       const {
         config,

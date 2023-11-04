@@ -1,7 +1,7 @@
+import type { Dictionary } from 'lodash'
 import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
 import type { BaseService, ExtractAttrs } from './service'
-import type { Dictionary } from 'lodash'
 import type { BaseServiceAttributes } from './util'
 import type { Provisions, ProvisionResources } from './resources'
 import type { AnyAssociationHandler, Association, ServiceAssociations } from './association'

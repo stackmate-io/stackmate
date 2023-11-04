@@ -4,7 +4,7 @@ import addFormats from 'ajv-formats'
 import { cloneDeep, defaults, fromPairs, isFunction, uniqBy } from 'lodash'
 import { isAddressValid } from '@lib/networking'
 import { ValidationError } from '@lib/errors'
-import { Registry, type ServiceAttributes } from '@core/registry'
+import { Registry, type ServiceAttributes } from '@services/registry'
 import {
   getNameSchema,
   getTypeSchema,
