@@ -6,7 +6,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getAwsService } from '@providers/aws/service'
 import { withRegions, withHandler, withSchema } from '@core/service'
 import type { Stack } from '@core/stack'
-import type { ServiceSchema } from '@core/schema'
+import type { JsonSchema } from '@lib/schema'
 import type { Provisionable } from '@core/provision'
 import type { BaseServiceAttributes } from '@core/service'
 import type { AwsService, AwsServiceAttributes } from '@providers/aws/service'
@@ -42,7 +42,7 @@ const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): Aw
   return { backend }
 }
 
-const getAdditionalPropertiesSchema = (): ServiceSchema<AdditionalAttrs> => ({
+const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
   type: 'object',
   required: ['bucket'],
   properties: {
