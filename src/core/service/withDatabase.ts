@@ -1,4 +1,4 @@
-import type { BaseServiceAttributes } from '@core/services/types/base'
+import type { BaseServiceAttributes } from '@core/services/types/util'
 import { withSchema } from './core'
 
 /**

@@ -1,22 +1,19 @@
 import type { MinMax } from '@lib/util'
-import type { BaseServiceAttributes } from '@core/services/types/base'
+import type { BaseServiceAttributes } from '@core/services/types/util'
 import { withSchema } from './core'
 
 /**
  * @type {MultiNodeAttributes} nodes attributes
  */
-
 export type MultiNodeAttributes = { nodes: number }
+
 /**
  * Adds multiple-node support to a service (eg. multiple app server instances)
- *
- * @param {Number} defaultNodes the default number of nodes
- * @param {Object} opts
- * @param {Number} opts.min the minimum number of nodes
- * @param {Number} opts.max the maximum number of nodes
+ * @param {number} defaultNodes the default number of nodes
+ * @param {number} opts.min the minimum number of nodes
+ * @param {number} opts.max the maximum number of nodes
  * @returns {Function<Service>}
  */
-
 export const multiNode = <C extends BaseServiceAttributes>(
   defaultNodes = 1,
   { min = 1, max = 10000 }: MinMax = {},

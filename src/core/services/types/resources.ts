@@ -4,11 +4,11 @@ import type { Dictionary } from 'lodash'
 /**
  * @type {ProvisionResources} types of resources that are provisioned by the handlers
  */
-
 export type ProvisionResources =
   | TerraformElement
   | TerraformElement[]
   | Dictionary<TerraformElement>
+
 /**
  * @type {Provisions} the type returned by provision handlers
  */

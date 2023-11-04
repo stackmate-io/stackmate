@@ -1,7 +1,7 @@
 import type { Stack } from '@lib/stack'
 import type { BaseService } from '@core/service/core'
 import type { Dictionary } from 'lodash'
-import type { BaseServiceAttributes } from './base'
+import type { BaseServiceAttributes } from './util'
 import type { Provisions, ProvisionResources } from './resources'
 
 /**
