@@ -15,7 +15,7 @@ import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constant
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants'
 import {
   getBaseService,
-  profilable,
+  profileable,
   withEnvironment,
   withHandler,
   withRegions,
@@ -148,7 +148,7 @@ export const resourceHandler = (
  */
 export const getProviderService = (): AwsProviderService =>
   pipe(
-    profilable(),
+    profileable(),
     withRegions(REGIONS, DEFAULT_REGION),
     withHandler(resourceHandler),
     withEnvironment('AWS_ACCESS_KEY_ID', 'AWS Access Key ID', true),

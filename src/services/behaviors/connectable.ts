@@ -1,4 +1,4 @@
-import { withSchema } from 'src/services/utils/withSchema'
+import { withSchema } from '@src/services/behaviors/withSchema'
 import type { MinMax } from '@lib/util'
 import type { BaseServiceAttributes } from 'src/services/types/util'
 

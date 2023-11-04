@@ -2,8 +2,8 @@ import pipe from 'lodash/fp/pipe'
 import { isEmpty } from 'lodash'
 
 import { SERVICE_TYPE } from '@constants'
-import { associate } from 'src/services/utils/associate'
-import { withSchema } from 'src/services/utils/withSchema'
+import { withAssociations } from 'src/services/utils/associate'
+import { withSchema } from '@src/services/behaviors/withSchema'
 import type { ConnectableAttributes } from './connectable'
 import type { Service, WithAssociations } from 'src/services/types/service'
 import type {
@@ -93,7 +93,7 @@ export const linkable =
           },
         },
       }),
-      associate({
+      withAssociations({
         linkable: {
           sideEffect: true,
           handler: onServiceLinked,
@@ -135,7 +135,7 @@ export const externallyLinkable =
           },
         },
       }),
-      associate({
+      withAssociations({
         externallyLinkable: {
           sideEffect: true,
           handler: onExternalLink,

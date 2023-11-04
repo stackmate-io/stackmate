@@ -11,7 +11,7 @@ import type {
  * For example:
  *  const AwsRdsService = compose(
  *    ...
- *    associate({
+ *    withAssociations({
  *      associationName: {
  *        with: SERVICE_TYPE.PROVIDER,
  *        where: (cfg, providerCfg) => cfg.region === providerCfg.region && ....,
@@ -29,7 +29,7 @@ import type {
  * @param {ServiceAssociations} associations the association configurations
  * @returns {Function<Service>}
  */
-export const associate =
+export const withAssociations =
   <C extends BaseServiceAttributes, A extends ServiceAssociations>(associations: A) =>
   <T extends Service<C>>(service: T): WithAssociations<T, A> => ({
     ...service,
