@@ -7,7 +7,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
 import { getMonitoringPrerequisites } from '@providers/aws/alarms'
-import { associate, getBaseService, withRegions } from 'src/services/behaviors'
+import { withAssociations, getBaseService, withRegions } from '@services/utils'
 import type {
   vpc,
   kmsKey,
@@ -248,6 +248,6 @@ export const withAwsAlarms =
 
 export const getAwsService = (type: ServiceTypeChoice) =>
   pipe(
-    associate(associations),
+    withAssociations(associations),
     withRegions(REGIONS, DEFAULT_REGION),
   )(getBaseService(PROVIDER.AWS, type))

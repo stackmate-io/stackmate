@@ -23,7 +23,7 @@ import {
 } from '@providers/aws/constants'
 import {
   multiNode,
-  profilable,
+  profileable,
   sizeable,
   storable,
   versioned,
@@ -201,7 +201,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     storable(),
     withEngine(engine),
     multiNode(),
-    profilable(),
+    profileable(),
     withDatabase(),
   )(getAwsService(type))
 }

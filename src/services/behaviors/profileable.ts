@@ -14,7 +14,7 @@ export type ProfilableAttributes = { profile: string; overrides: object }
  * @returns {Function<Service>}
  */
 
-export const profilable = <C extends BaseServiceAttributes>(
+export const profileable = <C extends BaseServiceAttributes>(
   defaultProfile: string = DEFAULT_PROFILE_NAME,
 ) =>
   withSchema<C, ProfilableAttributes>({

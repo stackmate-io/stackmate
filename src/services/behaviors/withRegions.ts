@@ -1,7 +1,7 @@
 import pipe from 'lodash/fp/pipe'
 
-import { withSchema } from 'src/services/utils/withSchema'
-import { withProperties } from 'src/services/utils/withProperties'
+import { withSchema } from '@src/services/behaviors/withSchema'
+import { withProperties } from '@src/services/behaviors/withProperties'
 import type { Service, BaseServiceAttributes } from 'src/services/types'
 
 /**
