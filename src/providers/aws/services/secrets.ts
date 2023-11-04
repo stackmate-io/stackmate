@@ -15,13 +15,9 @@ import type { Stack } from '@lib/stack'
 import type { REGIONS } from '@providers/aws/constants'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { AwsService } from '@providers/aws/service'
+import type { BaseServiceAttributes } from '@services/types'
 import type { BaseProvisionable, Provisionable } from '@core/provision'
-import type {
-  BaseServiceAttributes,
-  Credentials,
-  CredentialsHandlerOptions,
-  SecretsVaultService,
-} from '@core/service'
+import type { Credentials, CredentialsHandlerOptions, SecretsVaultService } from '@core/service'
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS

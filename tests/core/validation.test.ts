@@ -6,7 +6,7 @@ import { ValidationError } from '@lib/errors'
 import type { JsonSchema } from '@lib/schema'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { ServiceEnvironment } from '@core/service'
+import type { ServiceEnvironment } from '@services/types'
 
 describe('Validation', () => {
   const ajv = getAjv()

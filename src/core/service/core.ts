@@ -1,20 +1,12 @@
 import { merge } from 'lodash'
 import { mergeSchemas } from '@lib/schema'
+import { getNameSchema, getProviderSchema, getTypeSchema } from '@services/utils/schema'
+import type { BaseServiceAttributes, ServiceEnvironment } from '@core/services/types/base'
+import type { ServiceTypeChoice, ProviderChoice } from '@core/services/types'
 import type { Stack } from '@lib/stack'
-import type { Obj, ChoiceOf } from '@lib/util'
-import type { PROVIDER, SERVICE_TYPE } from '@constants'
+import type { Obj } from '@lib/util'
 import type { JsonSchema } from '@lib/schema'
 import type { BaseProvisionable, ProvisionHandler, ProvisionResources } from '@core/provision'
-
-/**
- * @type {ProviderChoice} a provider choice
- */
-export type ProviderChoice = ChoiceOf<typeof PROVIDER>
-
-/**
- * @type {ServiceTypeChoice} a service type choice
- */
-export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>
 
 /**
  * @type {AssociationReturnType} the return types for association handlers
@@ -79,25 +71,6 @@ export type ServiceSideEffect<Ret extends AssociationReturnType = ProvisionResou
 export type ServiceAssociations = Record<string, Association<any>>
 
 /**
- * @type {ServiceEnvironment} the environment variable required by a service
- */
-export type ServiceEnvironment = {
-  name: string
-  required: boolean
-  description?: string
-}
-
-/**
- * @type {BaseServiceAttributes} Base attributes for any service in the system
- */
-export type BaseServiceAttributes = {
-  name: string
-  provider: ProviderChoice
-  type: ServiceTypeChoice
-  region?: string
-}
-
-/**
  * @type {Service} accepts a set of service attributes and returns a Service object
  * @param {BaseServiceAttributes}
  * @param {Associations}
@@ -134,53 +107,6 @@ export type WithAssociations<T extends BaseService, A extends ServiceAssociation
 }
 
 /**
- * @returns {JsonSchema} the service's name schema
- */
-export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']> => ({
-  type: 'string',
-  pattern: '^([a-zA-Z0-9_-]+)$',
-  minLength: 2,
-  description: 'The name for the service to deploy',
-  errorMessage: {
-    minLength: 'The service’s name should be two characters or more',
-    pattern:
-      'The name property on the service should only contain characters, numbers, dashes and underscores',
-  },
-})
-
-/**
- * @param {ProviderChoice[]} providers the providers to allow in the schema
- * @param {ProviderChoice} defaultProvider the default provider for the service
- * @returns {JsonSchema} the provider's schema
- */
-export const getServiceProviderSchema = (
-  providers: ProviderChoice[],
-  defaultProvider?: ProviderChoice,
-): JsonSchema<ProviderChoice> => ({
-  type: 'string',
-  enum: providers,
-  default: defaultProvider,
-  errorMessage: {
-    enum: `The provider is invalid, available choices are: ${providers.join(', ')}`,
-  },
-})
-
-/**
- * @param {ServiceTypeChoice[]} types the service types available
- * @param {ServiceTypeChoice} defaultType the default type for the service
- * @returns {JsonSchema} the service's type schema
- */
-export const getServiceTypeSchema = (
-  types: ServiceTypeChoice[],
-): JsonSchema<ServiceTypeChoice> => ({
-  type: 'string',
-  enum: types,
-  errorMessage: {
-    enum: `You have to specify a valid service type, available are: ${types.join(', ')}`,
-  },
-})
-
-/**
  * Returns a base core service (one that cannot be part of the services list)
  *
  * @param provider {ProviderChoice} the provider for the core service
@@ -198,9 +124,9 @@ export const getBaseService = (
     required: ['name', 'type', 'provider'],
     additionalProperties: false,
     properties: {
-      name: getServiceNameSchema(),
-      provider: getServiceProviderSchema([provider], provider),
-      type: getServiceTypeSchema([type]),
+      name: getNameSchema(),
+      provider: getProviderSchema([provider], provider),
+      type: getTypeSchema([type]),
       region: { type: 'string' },
     },
   }

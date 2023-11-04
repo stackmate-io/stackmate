@@ -1,11 +1,11 @@
-import type { BaseServiceAttributes } from './core'
+import type { BaseServiceAttributes } from '@core/services/types/base'
 import { withSchema } from './core'
 
 /**
  * @type {SizeableAttributes} size attributes
  */
-
 export type SizeableAttributes = { size: string }
+
 /**
  * Adds size support to a service (eg. the database instance size)
  *

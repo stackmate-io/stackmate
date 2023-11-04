@@ -6,12 +6,12 @@ import { associate, withSchema } from '@core/service/core'
 import type { ConnectableAttributes } from './connectable'
 import type {
   AssociationHandler,
-  BaseServiceAttributes,
   Service,
   ServiceSideEffect,
   AssociationLookup,
   WithAssociations,
 } from '@core/service/core'
+import type { BaseServiceAttributes } from '@core/services/types/base'
 import type { ProvisionResources, BaseProvisionable } from '@core/provision'
 
 /**

@@ -3,9 +3,9 @@ import { associate } from '@core/service'
 import type { TerraformLocal } from 'cdktf'
 import type { Stack } from '@lib/stack'
 import type { BaseProvisionable } from '@core/provision'
+import type { BaseServiceAttributes } from '@services/types'
 import type {
   BaseService,
-  BaseServiceAttributes,
   Service,
   ServiceRequirement,
   WithAssociations,
