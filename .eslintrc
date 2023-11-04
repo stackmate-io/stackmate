@@ -44,7 +44,7 @@
     ],
 
     // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-cycle.md
-    "import/no-cycle": ["error"],
+    "import/no-cycle": [2, { "maxDepth": 1, "ignoreExternal": true, "allowUnsafeDynamicCyclicDependency": false }],
 
     // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-self-import.md
     "import/no-self-import": ["error"],

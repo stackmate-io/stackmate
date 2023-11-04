@@ -52,6 +52,9 @@
   "include": [
     "src/**/*",
     "tests/**/*",
+    "tsconfig.json",
+    "jest.setup.ts",
+    "jest.config.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],
   "exclude": [
