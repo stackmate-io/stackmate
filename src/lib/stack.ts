@@ -1,5 +1,5 @@
 import { kebabCase } from 'lodash'
-import { TerraformStack, App as TerraformApp, type AppConfig } from 'cdktf'
+import { TerraformStack, App as TerraformApp } from 'cdktf'
 
 export class Stack {
   /**
@@ -22,11 +22,10 @@ export class Stack {
   /**
    * @constructor
    * @param {String} name the stack's name
-   * @param {AppConfig} options the terraform app options
    */
-  constructor(name: string, options?: AppConfig) {
+  constructor(name: string) {
     this.name = kebabCase(name.replace('([^a-zA-Z0-9s-_]+)', '').toLowerCase())
-    this.app = new TerraformApp(options)
+    this.app = new TerraformApp()
     this.context = new TerraformStack(this.app, this.name)
   }
 
@@ -35,7 +34,7 @@ export class Stack {
    *
    * @param handler {Function}
    */
-  withContext(handler: (ctx: TerraformStack, app?: TerraformApp) => void) {
+  inContext(handler: (ctx: TerraformStack, app?: TerraformApp) => void) {
     handler(this.context, this.app)
   }
 
@@ -49,7 +48,7 @@ export class Stack {
   /**
    * @returns {String} the JSON representation of the stack
    */
-  toJson(): string {
-    return JSON.stringify(this.toObject(), null, 2)
+  toJson(spacing = 2): string {
+    return JSON.stringify(this.toObject(), null, spacing)
   }
 }
