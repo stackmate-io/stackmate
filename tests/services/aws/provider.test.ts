@@ -10,8 +10,7 @@ import { AwsProvider } from '@providers/aws/services/provider'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { Stack } from '@core/stack'
-import { getProvisionable } from '@core/provision'
-import type { BaseProvisionable } from '@core/service'
+import { getProvisionable, type BaseProvisionable } from '@core/provision'
 import type { AwsProviderResources, AwsProviderAttributes } from '@providers/aws/services/provider'
 
 describe('AWS Provider', () => {
@@ -30,7 +29,7 @@ describe('AWS Provider', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/provider',
       type: 'object',
-      required: [],
+      required: expect.arrayContaining(['name', 'provider', 'type']),
       additionalProperties: false,
       properties: {
         provider: {

@@ -9,19 +9,6 @@ import type {
   ExtractAttrs,
 } from '@core/service'
 
-const availableServices = Object.values(Services)
-
-// In order for hints to work properly when we type project configurations (eg. in tests),
-// the union types extracted from AvailableServices should be distributive
-// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
-export type AvailableServices = Distribute<typeof availableServices>
-export type AvailableService = Distribute<AvailableServices[number]>
-export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
-export type ServiceConfiguration = DistributiveRequireKeys<
-  ServiceAttributes,
-  'name' | 'type' | 'provider'
->
-
 class Registry {
   /**
    * @var {BaseServices[]} items the service items in the registry
@@ -39,8 +26,8 @@ class Registry {
    * @param {BaseService[]} services any services to initialize the registry with
    * @constructor
    */
-  constructor() {
-    this.#items.push(...availableServices)
+  constructor(services: BaseService[]) {
+    this.#items.push(...services)
 
     // Extract the regions from each service and group them by provider
     this.#items.forEach(({ provider, regions = [] }) => {
@@ -146,5 +133,17 @@ class Registry {
   }
 }
 
-const registry = new Registry()
+const availableServices = Object.values(Services)
+
+// In order for hints to work properly when we type project configurations (eg. in tests),
+// the union types extracted from AvailableServices should be distributive
+// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+export type AvailableServices = Distribute<typeof availableServices>
+export type AvailableService = Distribute<AvailableServices[number]>
+export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
+export type ServiceConfiguration = DistributiveRequireKeys<
+  ServiceAttributes,
+  'name' | 'type' | 'provider'
+>
+const registry = new Registry(availableServices)
 export { registry as Services }

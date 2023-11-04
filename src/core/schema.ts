@@ -1,8 +1,4 @@
-import { fromPairs, merge, uniq } from 'lodash'
-import { Services } from '@core/registry'
-import { getServiceProviderSchema, getServiceNameSchema, getServiceTypeSchema } from '@core/service'
-import type { Dictionary } from 'lodash'
-import type { ServiceAttributes } from '@core/registry'
+import { merge, uniq } from 'lodash'
 import type { Obj, RequireKeys } from '@lib/util'
 import type { BaseService } from '@core/service/core'
 
@@ -242,47 +238,3 @@ export const getServiceMatcher = (service: BaseService): JsonSchema => ({
     $ref: service.schemaId,
   },
 })
-
-/**
- * Populates the project schema
- *
- * @returns {JsonSchema<ServiceAttributes[]>}
- */
-export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
-  const services = Services.all()
-
-  const allOf = services.map((service) => getServiceMatcher(service))
-  const $defs: Dictionary<JsonSchema<ServiceAttributes>> = fromPairs(
-    services.map((service) => [service.schemaId, service.schema]),
-  )
-
-  return {
-    $id: 'stackmate-services-configuration',
-    $schema: 'http://json-schema.org/draft-07/schema',
-    type: 'array',
-    minItems: 1,
-    uniqueItems: true,
-    errorMessage: {
-      minItems: 'You should define at least one service to deploy',
-    },
-    items: {
-      type: 'object',
-      additionalProperties: true,
-      required: ['name', 'type', 'provider'],
-      properties: {
-        name: getServiceNameSchema(),
-        type: getServiceTypeSchema(Services.types()),
-        provider: getServiceProviderSchema(Services.providers()),
-      },
-      allOf,
-      errorMessage: {
-        required: {
-          name: 'Every service should feature a "name" property',
-          type: 'Every service should feature a "type" property',
-          provider: 'Every service should feature a "provider" property',
-        },
-      },
-    },
-    $defs,
-  }
-}

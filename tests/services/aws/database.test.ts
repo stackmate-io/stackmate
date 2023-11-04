@@ -46,7 +46,7 @@ const getDatabaseSchemaExpectation = (
 ) => ({
   $id: `services/aws/${type}`,
   type: 'object',
-  required: ['name', 'type'],
+  required: expect.arrayContaining(['provider', 'name', 'type']),
   additionalProperties: false,
   properties: {
     provider: { type: 'string', enum: [PROVIDER.AWS], default: PROVIDER.AWS },
