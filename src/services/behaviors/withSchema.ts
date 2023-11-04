@@ -1,7 +1,7 @@
 import { mergeSchemas } from '@lib/schema'
 import type { JsonSchema } from '@lib/schema'
 import type { Obj } from '@lib/util'
-import type { BaseServiceAttributes, Service } from 'src/services/types'
+import type { BaseServiceAttributes, Service } from '@services/types'
 
 /**
  * Adds schema modifications to a service (eg. when adding a new attribute)

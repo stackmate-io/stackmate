@@ -1,5 +1,5 @@
-import { withSchema } from 'src/services/utils'
-import type { BaseServiceAttributes } from 'src/services/types'
+import type { BaseServiceAttributes } from '@services/types'
+import { withSchema } from './withSchema'
 
 /**
  * @type {DatabaseAttributes} database attributes

@@ -1,6 +1,6 @@
 import { DEFAULT_PROFILE_NAME } from '@constants'
-import { withSchema } from 'src/services/utils'
-import type { BaseServiceAttributes } from 'src/services/types/util'
+import type { BaseServiceAttributes } from '@services/types'
+import { withSchema } from './withSchema'
 
 /**
  * @type {Profilable} profile-related attributes

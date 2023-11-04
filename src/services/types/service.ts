@@ -36,10 +36,3 @@ export type BaseService = Service<BaseServiceAttributes>
  * @type {ExtractAttrs} extracts arguments from a service
  */
 export type ExtractAttrs<T> = T extends Service<infer Attrs> ? Attrs : never
-
-/**
- * @type {WithAssociations} returns a service with additional associations
- */
-export type WithAssociations<T extends BaseService, A extends ServiceAssociations> = T & {
-  associations: A
-}
