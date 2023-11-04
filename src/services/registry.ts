@@ -161,8 +161,9 @@ const availableServices = Object.values(Services)
 // In order for hints to work properly when we type project configurations (eg. in tests),
 // the union types extracted from AvailableServices should be distributive
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
-export type AvailableServices = Distribute<typeof availableServices>
-export type AvailableService = Distribute<AvailableServices[number]>
+type AvailableServices = Distribute<typeof availableServices>
+type AvailableService = Distribute<AvailableServices[number]>
+
 export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
 export type ServiceConfiguration = DistributiveRequireKeys<
   ServiceAttributes,
