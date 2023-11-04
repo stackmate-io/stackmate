@@ -1,9 +1,3 @@
-import { omit } from 'lodash'
-
-export const { env: ENV } = process
-export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate'
-export const DEBUG_MODE = Boolean(ENV.DEBUG) || false
-
 export const PROVIDER = {
   AWS: 'aws',
   LOCAL: 'local',
@@ -29,9 +23,8 @@ export const SERVICE_TYPE = {
   VOLUME: 'volume',
 } as const
 
-export const CLOUD_PROVIDER = omit({ ...PROVIDER }, 'LOCAL')
-
 // Service defaults
+export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate'
 export const DEFAULT_PROFILE_NAME = 'default' as const
 export const DEFAULT_SERVICE_STORAGE = 30 as const
 export const DEFAULT_PASSWORD_LENGTH = 16 as const
