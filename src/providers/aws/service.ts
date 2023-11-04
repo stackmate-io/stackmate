@@ -1,12 +1,6 @@
 import pipe from 'lodash/fp/pipe'
 import { isEmpty } from 'lodash'
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group'
-import type {
-  vpc,
-  kmsKey,
-  provider as terraformAwsProvider,
-  dataAwsCallerIdentity,
-} from '@cdktf/provider-aws'
 
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
@@ -14,6 +8,12 @@ import { getCidrBlocks, getIpAddressParts } from '@lib/networking'
 import { hashString } from '@lib/hash'
 import { getMonitoringPrerequisites } from '@providers/aws/alarms'
 import { associate, getBaseService, withRegions } from '@core/service'
+import type {
+  vpc,
+  kmsKey,
+  provider as terraformAwsProvider,
+  dataAwsCallerIdentity,
+} from '@cdktf/provider-aws'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { Stack } from '@core/stack'
 import type { Provisionable, BaseProvisionable, Provisions } from '@core/provision'

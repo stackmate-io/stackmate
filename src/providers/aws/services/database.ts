@@ -6,20 +6,12 @@ import { DEFAULT_PORT, SERVICE_TYPE } from '@constants'
 import { withRootCredentials } from '@core/service/credentials'
 import { awsDatabaseAlarms } from '@providers/aws/alarms/database'
 import { getResourcesProfile } from '@core/profile'
-import type { Stack } from '@core/stack'
-import type { ChoiceOf, OneOfType } from '@lib/util'
-import type { DatabaseServiceAttributes } from '@providers/types'
-import type { PROVIDER } from '@constants'
-import type { RootCredentialsAssociations } from '@core/service/credentials'
-import type { Provisionable } from '@core/provision'
-import type { AwsService } from '@providers/aws/service'
 import {
   getAwsService,
   onExternalLink,
   onServiceLinked,
   withAwsAlarms,
 } from '@providers/aws/service'
-import type { RdsEngine, REGIONS } from '@providers/aws/constants'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
@@ -28,12 +20,6 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_PARAM_FAMILY_MAPPING,
 } from '@providers/aws/constants'
-import type {
-  EngineAttributes,
-  RegionalAttributes,
-  ServiceTypeChoice,
-  MonitoringAttributes,
-} from '@core/service'
 import {
   multiNode,
   profilable,
@@ -47,6 +33,20 @@ import {
   linkable,
   externallyLinkable,
   monitored,
+} from '@core/service'
+import type { Stack } from '@core/stack'
+import type { ChoiceOf, OneOfType } from '@lib/util'
+import type { DatabaseServiceAttributes } from '@providers/types'
+import type { PROVIDER } from '@constants'
+import type { RootCredentialsAssociations } from '@core/service/credentials'
+import type { Provisionable } from '@core/provision'
+import type { AwsService } from '@providers/aws/service'
+import type { RdsEngine, REGIONS } from '@providers/aws/constants'
+import type {
+  EngineAttributes,
+  RegionalAttributes,
+  ServiceTypeChoice,
+  MonitoringAttributes,
 } from '@core/service'
 
 type DatabaseAttributes = DatabaseServiceAttributes &

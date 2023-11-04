@@ -43,6 +43,29 @@
       "error"
     ],
 
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-cycle.md
+    "import/no-cycle": ["error"],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-self-import.md
+    "import/no-self-import": ["error"],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "object",
+          "type",
+          "index",
+          "sibling",
+          "parent"
+        ]
+      }
+    ],
+
     // https://www.npmjs.com/package/eslint-plugin-unused-imports
     "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
