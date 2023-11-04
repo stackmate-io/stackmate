@@ -3,7 +3,7 @@ import { join as joinPaths } from 'node:path'
 import { merge } from 'lodash'
 
 import { DEFAULT_PROFILE_NAME, PROFILES_PATH } from '@constants'
-import { PROFILE_DIRECTORY_OVERRIDES } from '@services/config'
+import { PROFILE_DIRECTORY_OVERRIDES } from '@core/services/constants'
 import type { BaseServiceAttributes, ProviderChoice, ServiceTypeChoice } from '@services/types'
 import type { ProfilableAttributes } from '@core/service'
 

@@ -12,7 +12,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { Stack } from '@lib/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
-import type { BaseProvisionable } from '@core/provision'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
 import type {
   AwsSecretsProvisionable,
   AwsSecretsVaultAttributes,

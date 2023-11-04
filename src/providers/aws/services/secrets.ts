@@ -16,7 +16,8 @@ import type { REGIONS } from '@providers/aws/constants'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { AwsService } from '@providers/aws/service'
 import type { BaseServiceAttributes } from '@services/types'
-import type { BaseProvisionable, Provisionable } from '@core/provision'
+import type { Provisionable } from '@core/provision'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
 import type { Credentials, CredentialsHandlerOptions, SecretsVaultService } from '@core/service'
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {

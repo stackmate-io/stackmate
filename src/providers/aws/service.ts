@@ -16,7 +16,9 @@ import type {
 } from '@cdktf/provider-aws'
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
-import type { Provisionable, BaseProvisionable, Provisions } from '@core/provision'
+import type { Provisionable } from '@core/provision'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
+import type { Provisions } from '@core/services/types/resources'
 import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
 import type {
   ServiceAssociations,
