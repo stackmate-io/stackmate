@@ -1,5 +1,5 @@
+import type { BaseServiceAttributes } from '@services/types'
 import type {
-  BaseServiceAttributes,
   ConnectableAttributes,
   ExternallyLinkableAttributes,
   LinkableAttributes,

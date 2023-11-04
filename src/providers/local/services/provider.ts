@@ -5,7 +5,8 @@ import { getBaseService, withHandler } from '@core/service'
 import type { Stack } from '@lib/stack'
 import type { Provisionable } from '@core/provision'
 import type { LocalServiceAttributes } from '@providers/local/service'
-import type { BaseServiceAttributes, Service } from '@core/service'
+import type { BaseServiceAttributes } from '@services/types'
+import type { Service } from '@core/service'
 
 export type ProviderInstanceResources = {
   provider: terraformLocalProvider.LocalProvider

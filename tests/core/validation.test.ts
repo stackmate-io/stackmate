@@ -1,4 +1,5 @@
-import { getAjv, getValidData, validateEnvironment, getSchema } from '@core/validation'
+import { getAjv, getValidData, getSchema } from '@core/validation'
+import { validateEnvironment } from '@core/services/utils/validation/validateEnvironment'
 import { faker } from '@faker-js/faker'
 import { fromPairs, merge } from 'lodash'
 import { EnvironmentValidationError } from 'src'

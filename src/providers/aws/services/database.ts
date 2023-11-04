@@ -2,7 +2,8 @@ import pipe from 'lodash/fp/pipe'
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws'
-import { DEFAULT_PORT, SERVICE_TYPE } from '@constants'
+import { SERVICE_TYPE } from '@constants'
+import { DEFAULT_PORT } from '@services/config'
 import { withRootCredentials } from '@core/service/credentials'
 import { awsDatabaseAlarms } from '@providers/aws/alarms/database'
 import { getResourcesProfile } from '@core/profile'
@@ -42,12 +43,8 @@ import type { RootCredentialsAssociations } from '@core/service/credentials'
 import type { Provisionable } from '@core/provision'
 import type { AwsService } from '@providers/aws/service'
 import type { RdsEngine, REGIONS } from '@providers/aws/constants'
-import type {
-  EngineAttributes,
-  RegionalAttributes,
-  ServiceTypeChoice,
-  MonitoringAttributes,
-} from '@core/service'
+import type { ServiceTypeChoice } from '@services/types'
+import type { EngineAttributes, RegionalAttributes, MonitoringAttributes } from '@core/service'
 
 type DatabaseAttributes = DatabaseServiceAttributes &
   RegionalAttributes<ChoiceOf<typeof REGIONS>> &

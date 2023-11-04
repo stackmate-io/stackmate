@@ -7,13 +7,8 @@ import type {
   LocalProviderAttributes,
   LocalProviderProvisionable,
 } from '@providers/local/services/provider'
-import type {
-  BaseServiceAttributes,
-  Service,
-  ServiceAssociations,
-  ServiceRequirement,
-  ServiceTypeChoice,
-} from '@core/service'
+import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
+import type { Service, ServiceAssociations, ServiceRequirement } from '@core/service'
 import type { Obj } from '@lib/util'
 
 type ProviderRequirement = ServiceRequirement<
