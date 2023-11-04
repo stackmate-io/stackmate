@@ -9,13 +9,13 @@ import type {
   Provisionable,
 } from '@services/types'
 
-type ProviderRequirement = ServiceRequirement<
+export type LocalProviderRequirement = ServiceRequirement<
   terraformLocalProvider.LocalProvider,
   typeof SERVICE_TYPE.PROVIDER
 >
 
 export type LocalServiceAssociations = {
-  providerInstance: ProviderRequirement
+  providerInstance: LocalProviderRequirement
 }
 
 export type LocalServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
