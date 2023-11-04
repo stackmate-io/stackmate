@@ -17,7 +17,7 @@ describe('Local Provider', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/local/provider',
       type: 'object',
-      required: [],
+      required: ['name', 'type', 'provider'],
       additionalProperties: false,
       properties: {
         provider: {
