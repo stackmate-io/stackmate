@@ -1,12 +1,11 @@
 import { isEmpty, uniqBy } from 'lodash'
 import { Stack } from '@lib/stack'
 import { getProvisionables } from '@core/provision'
-import { assertRequirementsSatisfied } from './operation'
 import type { AssociationReturnType } from '@core/service'
 import type { ServiceEnvironment } from '@services/types'
 import type { ServiceConfiguration } from '@core/registry'
 import type { AssociatedProvisionable, AssociatedProvisionablesMap } from '@core/provision'
-import type { ProvisionablesMap, BaseProvisionable, BaseProvisionable } from './services/types/provisionable'
+import type { ProvisionablesMap, BaseProvisionable } from './services/types/provisionable'
 import type { Provisions } from './services/types/resources'
 import { validateEnvironment } from './services/utils/validation/validateEnvironment'
 
@@ -133,7 +132,8 @@ export class Operation {
     }
 
     const {
-      service: { handler: resourceHandler },
+      service: { type, handler: resourceHandler, associations = {} },
+      requirements,
     } = provisionable
 
     // Provision & verify the requirements first
@@ -144,7 +144,11 @@ export class Operation {
       ),
     })
 
-    assertRequirementsSatisfied(provisionable)
+    Object.entries(associations).forEach(([name, assoc]) => {
+      if (assoc.requirement && !requirements[name]) {
+        throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
+      }
+    })
 
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),
@@ -198,20 +202,3 @@ export class Operation {
     return output
   }
 }
-/**
- * @param {BaseProvisionable} provisionable the provisionable to check
- * @throws {Error} if a requirement is not satisfied
- */
-
-export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
-  const {
-    service: { associations = {}, type }, requirements,
-  } = provisionable
-
-  Object.entries(associations).forEach(([name, assoc]) => {
-    if (assoc.requirement && !requirements[name]) {
-      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
-    }
-  })
-}
-
