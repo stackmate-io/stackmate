@@ -1,5 +1,5 @@
 import { TerraformBackend } from 'cdktf'
-import { Stack } from '@core/stack'
+import { Stack } from '@lib/stack'
 import { AwsState } from '@providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'

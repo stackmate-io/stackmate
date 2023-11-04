@@ -20,7 +20,7 @@ import {
   withHandler,
   withRegions,
 } from '@core/service'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { ChoiceOf } from '@lib/util'
 import type { Provisionable } from '@core/provision'
 import type { AwsServiceAttributes } from '@providers/aws/service'

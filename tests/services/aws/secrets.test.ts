@@ -9,7 +9,7 @@ import {
 import { AwsSecretsVault, generateCredentials } from '@providers/aws/services/secrets'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
-import { Stack } from '@core/stack'
+import { Stack } from '@lib/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
 import type { BaseProvisionable } from '@core/provision'

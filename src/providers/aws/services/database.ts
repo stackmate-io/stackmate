@@ -34,7 +34,7 @@ import {
   externallyLinkable,
   monitored,
 } from '@core/service'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
 import type { DatabaseServiceAttributes } from '@providers/types'
 import type { PROVIDER } from '@constants'

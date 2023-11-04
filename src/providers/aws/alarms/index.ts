@@ -8,7 +8,7 @@ import {
 
 import { SERVICE_TYPE } from '@constants'
 import { hashString } from '@lib/hash'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { cloudwatchMetricAlarm } from '@cdktf/provider-aws'
 import type { TerraformResource } from 'cdktf'
 import type { AwsService } from '@providers/aws/service'

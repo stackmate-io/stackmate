@@ -4,7 +4,7 @@ import { getValidData, getSchema } from '@core/validation'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { Obj } from '@lib/util'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type {
   AnyAssociationHandler,
   Association,
