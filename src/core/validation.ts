@@ -6,14 +6,14 @@ import { isAddressValid } from '@lib/networking'
 import { ValidationError } from '@lib/errors'
 import { Services, type ServiceAttributes } from '@core/registry'
 import { getNameSchema, getTypeSchema, getProviderSchema } from '@services/utils/schema'
-import type { BaseServiceAttributes } from '@services/types'
+import type { BaseServiceAttributes } from 'src/services/types'
 import type { JsonSchema } from '@lib/schema'
 import type { Dictionary } from 'lodash'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
 import type { ValidationErrorDescriptor } from '@lib/errors'
-import { validateServiceProfile } from './services/utils/validation/validateServiceProfile'
-import { validateServiceProfileOverrides } from './services/utils/validation/validateServiceProfileOverrides'
-import { validateServiceLinks } from './services/utils/validation/validateServiceLinks'
+import { validateServiceProfile } from '../services/utils/validation/validateServiceProfile'
+import { validateServiceProfileOverrides } from '../services/utils/validation/validateServiceProfileOverrides'
+import { validateServiceLinks } from '../services/utils/validation/validateServiceLinks'
 
 const AJV_DEFAULTS: AjvOptions = {
   useDefaults: true,

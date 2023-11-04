@@ -3,16 +3,16 @@ import { hashObject } from '@lib/hash'
 import { getValidData, getSchema } from '@core/validation'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { Obj } from '@lib/util'
-import type { BaseServiceAttributes } from '@services/types'
+import type { BaseServiceAttributes } from 'src/services/types'
 import type {
   AnyAssociationHandler,
   Association,
   BaseService,
   ExtractAttrs,
   ServiceAssociations,
-} from '@core/service'
-import type { Provisions } from './services/types/resources'
-import type { BaseProvisionable, ProvisionablesMap } from './services/types/provisionable'
+} from 'src/services/behaviors'
+import type { Provisions } from '../services/types/resources'
+import type { BaseProvisionable, ProvisionablesMap } from '../services/types/provisionable'
 
 /**
  * @type {ExtractServiceRequirements} extracts service requirements from its associations
@@ -50,7 +50,6 @@ export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], Associate
 
 /**
  * Gets a provisionable based on a service's attributes
- *
  * @param {BaseServiceAttributes} config the service's configuration
  * @returns {BaseProvisionable} the provisionable to use in operations
  */
@@ -72,7 +71,6 @@ export const getProvisionable = (config: ServiceAttributes): BaseProvisionable =
 
 /**
  * Maps a list of service configurations to provisionables
- *
  * @param {ServiceConfiguration[]} configs the services configurations
  * @returns {ProvisionablesMap}
  */

@@ -3,8 +3,8 @@ import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws'
 import { SERVICE_TYPE } from '@constants'
-import { DEFAULT_PORT } from '@core/services/constants'
-import { withRootCredentials } from '@core/service/credentials'
+import { DEFAULT_PORT } from 'src/services/constants'
+import { withRootCredentials } from 'src/services/behaviors/credentials'
 import { awsDatabaseAlarms } from '@providers/aws/alarms/database'
 import { getResourcesProfile } from '@core/profile'
 import {
@@ -34,17 +34,21 @@ import {
   linkable,
   externallyLinkable,
   monitored,
-} from '@core/service'
+} from 'src/services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
-import type { DatabaseServiceAttributes } from '@providers/types'
+import type { DatabaseServiceAttributes } from '@services/types/database'
 import type { PROVIDER } from '@constants'
-import type { RootCredentialsAssociations } from '@core/service/credentials'
+import type { RootCredentialsAssociations } from 'src/services/behaviors/credentials'
 import type { Provisionable } from '@core/provision'
 import type { AwsService } from '@providers/aws/service'
 import type { RdsEngine, REGIONS } from '@providers/aws/constants'
-import type { ServiceTypeChoice } from '@services/types'
-import type { EngineAttributes, RegionalAttributes, MonitoringAttributes } from '@core/service'
+import type { ServiceTypeChoice } from 'src/services/types'
+import type {
+  EngineAttributes,
+  RegionalAttributes,
+  MonitoringAttributes,
+} from 'src/services/behaviors'
 
 type DatabaseAttributes = DatabaseServiceAttributes &
   RegionalAttributes<ChoiceOf<typeof REGIONS>> &

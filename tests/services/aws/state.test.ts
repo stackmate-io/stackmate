@@ -4,7 +4,7 @@ import { AwsState } from '@providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getAwsProvisionableMock } from '@mocks/aws'
-import type { BaseProvisionable } from '@core/services/types/provisionable'
+import type { BaseProvisionable } from 'src/services/types/provisionable'
 import type { AwsStateAttributes } from '@providers/aws/services/state'
 
 describe('AWS state', () => {

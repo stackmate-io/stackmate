@@ -12,10 +12,10 @@ import type { Stack } from '@lib/stack'
 import type { cloudwatchMetricAlarm } from '@cdktf/provider-aws'
 import type { TerraformResource } from 'cdktf'
 import type { AwsService } from '@providers/aws/service'
-import type { MonitoringAttributes } from '@core/service'
-import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
+import type { MonitoringAttributes } from 'src/services/behaviors'
+import type { BaseServiceAttributes, ServiceTypeChoice } from 'src/services/types'
 import type { Provisionable } from '@core/provision'
-import type { Provisions } from '@core/services/types/resources'
+import type { Provisions } from 'src/services/types/resources'
 
 /**
  * @type {AwsServiceAlarmResources} the alarms resources

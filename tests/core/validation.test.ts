@@ -1,5 +1,5 @@
 import { getAjv, getValidData, getSchema } from '@core/validation'
-import { validateEnvironment } from '@core/services/utils/validation/validateEnvironment'
+import { validateEnvironment } from 'src/services/utils/validation/validateEnvironment'
 import { faker } from '@faker-js/faker'
 import { fromPairs, merge } from 'lodash'
 import { EnvironmentValidationError } from 'src'
@@ -7,7 +7,7 @@ import { ValidationError } from '@lib/errors'
 import type { JsonSchema } from '@lib/schema'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { ServiceEnvironment } from '@services/types'
+import type { ServiceEnvironment } from 'src/services/types'
 
 describe('Validation', () => {
   const ajv = getAjv()
