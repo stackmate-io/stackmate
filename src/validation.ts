@@ -13,7 +13,7 @@ import {
   validateServiceLinks,
   validateServiceProfile,
 } from '@services/utils'
-import type { BaseServiceAttributes } from 'src/services/types'
+import type { BaseServiceAttributes } from '@services/types'
 import type { JsonSchema } from '@lib/schema'
 import type { Dictionary } from 'lodash'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'

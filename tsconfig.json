@@ -44,6 +44,9 @@
       "@aws/*": [
         "src/services/providers/aws/*"
       ],
+      "@local/*": [
+        "src/services/providers/local/*"
+      ],
       "@lib/*": [
         "src/lib/*"
       ],
