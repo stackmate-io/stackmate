@@ -1,17 +1,33 @@
 import Ajv from 'ajv'
 import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
-import { cloneDeep, defaults, difference, get, isEmpty, isFunction, uniqBy } from 'lodash'
+import {
+  cloneDeep,
+  defaults,
+  difference,
+  fromPairs,
+  get,
+  isEmpty,
+  isFunction,
+  uniqBy,
+} from 'lodash'
 import { isAddressValid } from '@lib/networking'
 import { getServiceProfile } from '@core/profile'
 import { DEFAULT_PROFILE_NAME } from '@constants'
 import { ValidationError, EnvironmentValidationError } from '@lib/errors'
-import type { JsonSchema } from '@core/schema'
+import { Services, type ServiceConfiguration, type ServiceAttributes } from '@core/registry'
+import { getServiceMatcher, type JsonSchema } from '@core/schema'
+import {
+  getServiceNameSchema,
+  type BaseServiceAttributes,
+  type ServiceEnvironment,
+  getServiceTypeSchema,
+  getServiceProviderSchema,
+} from '@core/service'
+import type { Dictionary } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
-import type { ServiceEnvironment } from '@core/service'
 import type { ValidationErrorDescriptor } from '@lib/errors'
-import type { ServiceConfiguration } from '@core/registry'
 
 const AJV_DEFAULTS: AjvOptions = {
   useDefaults: true,
@@ -240,4 +256,48 @@ export const getValidData = <R, T>(
   }
 
   return data as unknown as T
+}
+
+/**
+ * Populates the project schema
+ *
+ * @returns {JsonSchema<ServiceAttributes[]>}
+ */
+export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
+  const services = Services.all()
+
+  const allOf = services.map((service) => getServiceMatcher(service))
+  const $defs: Dictionary<JsonSchema<BaseServiceAttributes>> = fromPairs(
+    services.map((service) => [service.schemaId, service.schema]),
+  )
+
+  return {
+    $id: 'stackmate-services-configuration',
+    $schema: 'http://json-schema.org/draft-07/schema',
+    type: 'array',
+    minItems: 1,
+    uniqueItems: true,
+    errorMessage: {
+      minItems: 'You should define at least one service to deploy',
+    },
+    items: {
+      type: 'object',
+      additionalProperties: true,
+      required: ['name', 'type', 'provider'],
+      properties: {
+        name: getServiceNameSchema(),
+        type: getServiceTypeSchema(Services.types()),
+        provider: getServiceProviderSchema(Services.providers()),
+      },
+      allOf,
+      errorMessage: {
+        required: {
+          name: 'Every service should feature a "name" property',
+          type: 'Every service should feature a "type" property',
+          provider: 'Every service should feature a "provider" property',
+        },
+      },
+    },
+    $defs,
+  }
 }

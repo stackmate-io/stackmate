@@ -12,7 +12,7 @@ import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { Stack } from '@core/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
-import type { BaseProvisionable } from '@core/service'
+import type { BaseProvisionable } from '@core/provision'
 import type {
   AwsSecretsProvisionable,
   AwsSecretsVaultAttributes,
@@ -34,7 +34,7 @@ describe('AWS Secrets service', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/secrets',
       type: 'object',
-      required: [],
+      required: expect.arrayContaining(['name', 'provider', 'type']),
       additionalProperties: false,
       properties: {
         provider: {

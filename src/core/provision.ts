@@ -1,7 +1,6 @@
 import { Services } from '@core/registry'
 import { hashObject } from '@lib/hash'
-import { getValidData } from '@core/validation'
-import { getSchema } from '@core/schema'
+import { getValidData, getSchema } from '@core/validation'
 import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { Obj } from '@lib/util'
