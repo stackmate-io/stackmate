@@ -1,15 +1,9 @@
 /* eslint-disable max-classes-per-file */
-/**
- * @type {ValidationErrorDescriptor} describes a Validation Error entry
- */
 export type ValidationErrorDescriptor = {
   path: string
   message: string
 }
 
-/**
- * @class ValidationError
- */
 export class ValidationError extends Error {
   readonly errors: ValidationErrorDescriptor[] = []
 
@@ -19,9 +13,6 @@ export class ValidationError extends Error {
   }
 }
 
-/**
- * @class EnvironmentValidationError
- */
 export class EnvironmentValidationError extends Error {
   readonly vars: string[] = []
 
