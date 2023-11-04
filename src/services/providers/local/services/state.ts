@@ -1,7 +1,7 @@
 import { join as joinPaths } from 'node:path'
 import pipe from 'lodash/fp/pipe'
 import { LocalBackend } from 'cdktf'
-import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@src/constants'
+import { SERVICE_TYPE } from '@src/constants'
 import { withHandler, withSchema } from 'src/services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { BaseServiceAttributes } from 'src/services/types'
@@ -18,7 +18,7 @@ export type LocalStateResources = { backend: LocalBackend }
 export type LocalStateAttributes = LocalServiceAttributes<
   BaseServiceAttributes & {
     type: typeof SERVICE_TYPE.STATE
-    path?: string
+    fileName?: string
     directory?: string
   }
 >
@@ -35,8 +35,7 @@ export const resourceHandler = (
 ): LocalStateResources => {
   const { config } = provisionable
   const path = config.path || `${stack.name}-initial.tfstate`
-  const workspaceDir =
-    config.directory || joinPaths(USER_HOME_DIRECTORY, stack.name.toLocaleLowerCase())
+  const workspaceDir = config.directory || joinPaths(__dirname, stack.name.toLocaleLowerCase())
 
   const backend = new LocalBackend(stack.context, { path, workspaceDir })
   return { backend }
@@ -50,8 +49,9 @@ export const getStateService = (): LocalStateService =>
     withHandler(resourceHandler),
     withSchema({
       type: 'object',
+      required: ['directory'],
       properties: {
-        path: { type: 'string' },
+        fileName: { type: 'string' },
         directory: { type: 'string' },
       },
     }),
