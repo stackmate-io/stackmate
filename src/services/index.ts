@@ -14,7 +14,6 @@ import type {
  * @param type {ServiceTypeChoice} the service type for the core service
  * @returns {Service<Obj>} the core service
  */
-
 export const getBaseService = (
   provider: ProviderChoice,
   type: ServiceTypeChoice,

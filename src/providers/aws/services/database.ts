@@ -6,7 +6,7 @@ import { SERVICE_TYPE } from '@constants'
 import { DEFAULT_PORT } from 'src/services/constants'
 import { withRootCredentials } from 'src/services/behaviors/credentials'
 import { awsDatabaseAlarms } from '@providers/aws/alarms/database'
-import { getResourcesProfile } from '@core/profile'
+import { getResourcesProfile } from '@src/services/utils/profiles/getProfilePath'
 import {
   getAwsService,
   onExternalLink,

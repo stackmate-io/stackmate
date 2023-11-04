@@ -1,4 +1,4 @@
-import { getServiceProfile } from '@core/profile'
+import { getProfile } from '@core/profile'
 import { get } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'
 
@@ -19,7 +19,7 @@ export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt
   }
 
   try {
-    getServiceProfile(provider, type, profile)
+    getProfile(provider, type, profile)
     return true
   } catch (err) {
     return false

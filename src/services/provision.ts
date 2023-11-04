@@ -1,4 +1,4 @@
-import { Services } from '@core/registry'
+import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData, getSchema } from '@core/validation'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
@@ -11,8 +11,8 @@ import type {
   ExtractAttrs,
   ServiceAssociations,
 } from 'src/services/behaviors'
-import type { Provisions } from '../services/types/resources'
-import type { BaseProvisionable, ProvisionablesMap } from '../services/types/provisionable'
+import type { Provisions } from './types/resources'
+import type { BaseProvisionable, ProvisionablesMap } from './types/provisionable'
 
 /**
  * @type {ExtractServiceRequirements} extracts service requirements from its associations
@@ -60,7 +60,7 @@ export const getProvisionable = (config: ServiceAttributes): BaseProvisionable =
   return {
     id: hashObject(config),
     config,
-    service: Services.fromConfig(config),
+    service: Registry.fromConfig(config),
     requirements: {},
     provisions: {},
     sideEffects: {},
