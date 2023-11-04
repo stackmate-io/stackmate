@@ -9,7 +9,7 @@ import {
   provider as awsProvider,
   dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws'
-import { getResourcesProfile } from '@core/profile'
+import { getResourcesProfile } from '@src/services/utils/profiles/getProfilePath'
 import { getCidrBlocks } from '@lib/networking'
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@providers/aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@constants'

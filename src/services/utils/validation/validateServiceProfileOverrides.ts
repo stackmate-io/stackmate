@@ -1,5 +1,5 @@
 import { DEFAULT_PROFILE_NAME } from '@constants'
-import { getServiceProfile } from '@core/profile'
+import { getProfile } from '@core/profile'
 import { get, difference, isEmpty } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'
 
@@ -24,7 +24,7 @@ export const validateServiceProfileOverrides = (
   }
 
   try {
-    const serviceOverrides = getServiceProfile(provider, type, profile)
+    const serviceOverrides = getProfile(provider, type, profile)
     const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
     return isEmpty(irrelevantKeys)
   } catch (err) {

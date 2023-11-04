@@ -4,16 +4,20 @@ import addFormats from 'ajv-formats'
 import { cloneDeep, defaults, fromPairs, isFunction, uniqBy } from 'lodash'
 import { isAddressValid } from '@lib/networking'
 import { ValidationError } from '@lib/errors'
-import { Services, type ServiceAttributes } from '@core/registry'
-import { getNameSchema, getTypeSchema, getProviderSchema } from '@services/utils/schema'
+import { Registry, type ServiceAttributes } from '@core/registry'
+import {
+  getNameSchema,
+  getTypeSchema,
+  getProviderSchema,
+  validateServiceProfileOverrides,
+  validateServiceLinks,
+  validateServiceProfile,
+} from '@services/utils'
 import type { BaseServiceAttributes } from 'src/services/types'
 import type { JsonSchema } from '@lib/schema'
 import type { Dictionary } from 'lodash'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
 import type { ValidationErrorDescriptor } from '@lib/errors'
-import { validateServiceProfile } from '../services/utils/validation/validateServiceProfile'
-import { validateServiceProfileOverrides } from '../services/utils/validation/validateServiceProfileOverrides'
-import { validateServiceLinks } from '../services/utils/validation/validateServiceLinks'
 
 const AJV_DEFAULTS: AjvOptions = {
   useDefaults: true,
@@ -142,7 +146,7 @@ export const getValidData = <R, T>(
  * @returns {JsonSchema<ServiceAttributes[]>}
  */
 export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
-  const services = Services.all()
+  const services = Registry.all()
 
   const allOf = services.map((service) => ({
     if: {
@@ -175,8 +179,8 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       required: ['name', 'type', 'provider'],
       properties: {
         name: getNameSchema(),
-        type: getTypeSchema(Services.types()),
-        provider: getProviderSchema(Services.providers()),
+        type: getTypeSchema(Registry.types()),
+        provider: getProviderSchema(Registry.providers()),
       },
       allOf,
       errorMessage: {

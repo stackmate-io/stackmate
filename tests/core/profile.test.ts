@@ -2,7 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import assert from 'node:assert'
 
-import { getProfilePath, getServiceProfile } from '@core/profile'
+import { getProfile } from '@core/profile'
+import { getProfilePath } from '@src/services/utils/profiles/getProfilePath'
 import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@constants'
 
 describe('getProfilePath', () => {
@@ -33,7 +34,7 @@ describe('getServiceProfile', () => {
     })
     assert.equal(fs.existsSync(p), true)
 
-    const profile = getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.MYSQL, existingProfile)
+    const profile = getProfile(PROVIDER.AWS, SERVICE_TYPE.MYSQL, existingProfile)
     expect(Object.keys(profile)).toEqual(expect.arrayContaining(['instance', 'params']))
   })
 
@@ -44,7 +45,7 @@ describe('getServiceProfile', () => {
 
     assert.equal(fs.existsSync(p), false)
 
-    expect(() => getServiceProfile(PROVIDER.AWS, SERVICE_TYPE.MYSQL, missingProfile)).toThrow(
+    expect(() => getProfile(PROVIDER.AWS, SERVICE_TYPE.MYSQL, missingProfile)).toThrow(
       `The profile ${missingProfile} was not found in the system`,
     )
   })

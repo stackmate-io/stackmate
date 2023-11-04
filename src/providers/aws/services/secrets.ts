@@ -10,7 +10,7 @@ import { getAwsService } from '@providers/aws/service'
 import { withCredentialsGenerator } from 'src/services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
 import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@constants'
-import { getServiceProfile } from '@core/profile'
+import { getProfile } from '@core/profile'
 import type { Stack } from '@lib/stack'
 import type { REGIONS } from '@providers/aws/constants'
 import type { ChoiceOf, Obj } from '@lib/util'
@@ -65,7 +65,7 @@ export const generateCredentials = (
   const secretName = `${stack.name}/${kebabCase(targetName.toLowerCase())}`
 
   // we only use the default profile, since this is a core service
-  const { secret, version, password } = getServiceProfile(
+  const { secret, version, password } = getProfile(
     PROVIDER.AWS,
     SERVICE_TYPE.SECRETS,
     DEFAULT_PROFILE_NAME,

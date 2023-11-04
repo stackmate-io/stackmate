@@ -1,3 +1,6 @@
+export * from './profiles/getProfile'
+export * from './profiles/getProfilePath'
+export * from './profiles/getResourcesProfile'
 export * from './schema/getNameSchema'
 export * from './schema/getProviderSchema'
 export * from './schema/getTypeSchema'

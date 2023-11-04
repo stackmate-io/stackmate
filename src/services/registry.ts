@@ -141,4 +141,4 @@ export type ServiceConfiguration = DistributiveRequireKeys<
   'name' | 'type' | 'provider'
 >
 const registry = new Registry(availableServices)
-export { registry as Services }
+export { registry as Registry }
