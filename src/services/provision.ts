@@ -2,51 +2,7 @@ import { Registry } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData, getSchema } from '@core/validation'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { Obj } from '@lib/util'
-import type { BaseServiceAttributes } from 'src/services/types'
-import type {
-  AnyAssociationHandler,
-  Association,
-  BaseService,
-  ExtractAttrs,
-  ServiceAssociations,
-} from 'src/services/behaviors'
-import type { Provisions } from './types/resources'
 import type { BaseProvisionable, ProvisionablesMap } from './types/provisionable'
-
-/**
- * @type {ExtractServiceRequirements} extracts service requirements from its associations
- */
-type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
-  [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
-    ? A['requirement'] extends true
-      ? ReturnType<A['handler']>
-      : never
-    : never
-}
-
-/**
- * @type {Provisionable} represents a piece of configuration and service to be deployed
- */
-export type Provisionable<
-  Srv extends BaseService,
-  Provs extends Provisions,
-  Context extends Obj = Obj,
-  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
-> = BaseProvisionable<Attrs> & {
-  service: Srv
-  config: Attrs
-  provisions: Provs
-  context: Context
-  requirements: ExtractServiceRequirements<Srv['associations']>
-}
-
-export type AssociatedProvisionable = {
-  name: string
-  target: BaseProvisionable
-  handler: AnyAssociationHandler
-}
-export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
 /**
  * Gets a provisionable based on a service's attributes
