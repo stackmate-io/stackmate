@@ -1,4 +1,4 @@
-import type { BaseServiceAttributes, ProvisionHandler, Service } from 'src/services/types'
+import type { BaseServiceAttributes, ProvisionHandler, Service } from '@services/types'
 
 /**
  * Registers a handler to use when provisioning the service

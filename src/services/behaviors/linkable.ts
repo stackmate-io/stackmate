@@ -1,19 +1,18 @@
 import pipe from 'lodash/fp/pipe'
 import { isEmpty } from 'lodash'
-
 import { SERVICE_TYPE } from '@constants'
-import { withAssociations } from 'src/services/utils/associate'
-import { withSchema } from '@src/services/behaviors/withSchema'
-import type { ConnectableAttributes } from './connectable'
-import type { Service, WithAssociations } from 'src/services/types/service'
 import type {
+  Service,
   AssociationHandler,
   ServiceSideEffect,
   AssociationLookup,
-} from 'src/services/types/association'
-import type { BaseServiceAttributes } from 'src/services/types/util'
-import type { ProvisionResources } from 'src/services/types/resources'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
+  BaseServiceAttributes,
+  ProvisionResources,
+  BaseProvisionable,
+} from '@services/types'
+import type { ConnectableAttributes } from './connectable'
+import { type WithAssociations, withAssociations } from './withAssociations'
+import { withSchema } from './withSchema'
 
 /**
  * @type {LinkableAttributes} internal link service attributes

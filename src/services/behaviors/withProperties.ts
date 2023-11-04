@@ -1,5 +1,5 @@
 import type { Obj } from '@lib/util'
-import type { BaseServiceAttributes, Service } from 'src/services/types'
+import type { BaseServiceAttributes, Service } from '@services/types'
 
 /**
  * Updates a service given certain attributes

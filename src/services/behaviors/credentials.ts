@@ -1,16 +1,16 @@
 import { SERVICE_TYPE } from '@constants'
-import { associate } from 'src/services/behaviors'
-import type { Credentials } from 'src/services/types/util'
-import type { Stack } from '@lib/stack'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
-import type { BaseServiceAttributes } from 'src/services/types'
 import type {
+  Credentials,
+  BaseServiceAttributes,
   BaseService,
   Service,
   ServiceRequirement,
-  WithAssociations,
   AssociationHandler,
-} from 'src/services/behaviors'
+  BaseProvisionable,
+} from '@services/types'
+import type { Stack } from '@lib/stack'
+import type { WithAssociations } from './withAssociations'
+import { withAssociations } from './withAssociations'
 
 /**
  * @type {CredentialsRequirement} adds a requirement for credentials
@@ -72,7 +72,7 @@ export type CredentialsHandler = AssociationHandler<
 export const withCredentials =
   <C extends BaseServiceAttributes>() =>
   <T extends Service<C>>(srv: T): WithAssociations<T, CredentialsAssociations> =>
-    associate({
+    withAssociations({
       credentials: {
         with: SERVICE_TYPE.SECRETS,
         requirement: true,
@@ -90,7 +90,7 @@ export const withCredentials =
 export const withRootCredentials =
   <C extends BaseServiceAttributes>() =>
   <T extends Service<C>>(srv: T): WithAssociations<T, RootCredentialsAssociations> =>
-    associate({
+    withAssociations({
       rootCredentials: {
         with: SERVICE_TYPE.SECRETS,
         requirement: true,

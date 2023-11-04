@@ -1,10 +1,18 @@
 import { merge } from 'lodash'
 import type {
+  BaseService,
   BaseServiceAttributes,
-  ServiceAssociations,
   Service,
-  WithAssociations,
-} from 'src/services/types'
+  ServiceAssociations,
+} from '@services/types'
+
+/**
+ * @type {WithAssociations} returns a service with additional associations
+ */
+
+export type WithAssociations<T extends BaseService, A extends ServiceAssociations> = T & {
+  associations: A
+}
 
 /**
  * Associates two services.

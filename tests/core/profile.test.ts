@@ -2,9 +2,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import assert from 'node:assert'
 
-import { getProfile } from '@core/profile'
-import { getProfilePath } from '@src/services/utils/profiles/getProfilePath'
-import { PROFILES_PATH, PROVIDER, SERVICE_TYPE } from '@constants'
+import { getProfile } from '@services/utils'
+import { PROVIDER, SERVICE_TYPE } from '@constants'
+
+const PROFILES_PATH = 'fail'
+const getProfilePath = (...args: any[]) => fail('failed on purpose')
 
 describe('getProfilePath', () => {
   it('returns the path for a profile for a service without overrides', () => {

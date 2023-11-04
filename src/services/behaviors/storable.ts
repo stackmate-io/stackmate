@@ -1,7 +1,7 @@
 import { DEFAULT_SERVICE_STORAGE } from '@constants'
-import { withSchema } from 'src/services/utils'
 import type { MinMax } from '@lib/util'
-import type { BaseServiceAttributes } from 'src/services/types/util'
+import type { BaseServiceAttributes } from '@services/types'
+import { withSchema } from './withSchema'
 
 /**
  * @type {StorableAttributes} storage specific attributes

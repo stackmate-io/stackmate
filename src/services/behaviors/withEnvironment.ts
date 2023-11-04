@@ -1,4 +1,4 @@
-import type { BaseServiceAttributes, Service } from 'src/services/types'
+import type { BaseServiceAttributes, Service } from '@services/types'
 
 /**
  * Registers the environment variables to use when adding the service to the stack
