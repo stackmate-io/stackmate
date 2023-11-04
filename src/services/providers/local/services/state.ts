@@ -44,7 +44,7 @@ export const getStateService = (): LocalStateService =>
     withHandler(resourceHandler),
     withSchema({
       type: 'object',
-      required: ['directory'],
+      required: ['fileName', 'directory'],
       properties: {
         fileName: { type: 'string' },
         directory: { type: 'string' },
