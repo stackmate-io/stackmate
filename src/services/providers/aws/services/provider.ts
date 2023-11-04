@@ -10,7 +10,7 @@ import {
   dataAwsCallerIdentity as callerIdentity,
 } from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@lib/networking'
-import { getBaseService, getProfile } from '@src/services/utils'
+import { getBaseService, getProfile } from '@services/utils'
 import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { profileable, withEnvironment, withHandler, withRegions } from '@services/behaviors'

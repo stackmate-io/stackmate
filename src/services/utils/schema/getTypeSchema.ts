@@ -1,5 +1,5 @@
 import type { JsonSchema } from '@lib/schema'
-import type { ServiceTypeChoice } from 'src/services/types'
+import type { ServiceTypeChoice } from '@services/types'
 
 /**
  * @param {ServiceTypeChoice[]} types the service types available

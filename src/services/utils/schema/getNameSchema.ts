@@ -1,5 +1,5 @@
 import type { JsonSchema } from '@lib/schema'
-import type { BaseServiceAttributes } from 'src/services/types'
+import type { BaseServiceAttributes } from '@services/types'
 
 /**
  * @returns {JsonSchema} the service's name schema

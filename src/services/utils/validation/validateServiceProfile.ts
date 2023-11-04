@@ -1,4 +1,4 @@
-import { getProfile } from '@core/profile'
+import { getProfile } from '@services/utils/getProfile'
 import { get } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'
 
@@ -9,7 +9,6 @@ import type { DataValidationCxt } from 'ajv/dist/types'
  * @param {DataValidationCxt} dataCxt the data validation context
  * @returns {Boolean} whether the service profile validates
  */
-
 export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt): boolean => {
   const type = get(dataCxt?.parentData, 'type')
   const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null))
@@ -19,7 +18,7 @@ export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt
   }
 
   try {
-    getProfile(provider, type, profile)
+    getProfile({ provider, type, profile })
     return true
   } catch (err) {
     return false

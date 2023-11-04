@@ -1,5 +1,5 @@
 import { isEmpty, difference } from 'lodash'
-import type { ServiceConfiguration } from '@core/registry'
+import type { ServiceConfiguration } from '@services/registry'
 import type { DataValidationCxt } from 'ajv/dist/types'
 
 /**
