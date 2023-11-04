@@ -6,23 +6,23 @@ import {
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
-import { getAwsService } from '@providers/aws/service'
-import { withCredentialsGenerator } from 'src/services/behaviors'
+import { withCredentialsGenerator } from '@services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
-import { DEFAULT_PASSWORD_LENGTH, DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@constants'
-import { getProfile } from '@core/profile'
+import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE } from '@src/constants'
+import { getProfile } from '@services/utils'
+import { getAwsService } from '@aws/utils/getAwsService'
+import type { PROVIDER } from '@src/constants'
+import type { CredentialsHandlerOptions, SecretsVaultService } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { REGIONS } from '@providers/aws/constants'
+import type { REGIONS } from '@aws/constants'
 import type { ChoiceOf, Obj } from '@lib/util'
-import type { AwsService } from '@providers/aws/service'
-import type { BaseServiceAttributes } from 'src/services/types'
-import type { Provisionable } from '@core/provision'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
+import type { AwsService } from '@aws/types'
 import type {
+  BaseServiceAttributes,
+  BaseProvisionable,
+  Provisionable,
   Credentials,
-  CredentialsHandlerOptions,
-  SecretsVaultService,
-} from 'src/services/behaviors'
+} from '@services/types'
 
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS
@@ -56,20 +56,17 @@ export const generateCredentials = (
   const {
     config: { name: targetName },
   } = target
-  const { root = false, length: passwordLength, exclude: excludeCharacters = [] } = options
+
   const {
     service,
+    config,
     requirements: { kmsKey, providerInstance },
   } = vault
+
+  const { root = false, length: passwordLength, exclude: excludeCharacters = [] } = options
   const idPrefix = `${snakeCase(targetName)}_secrets`
   const secretName = `${stack.name}/${kebabCase(targetName.toLowerCase())}`
-
-  // we only use the default profile, since this is a core service
-  const { secret, version, password } = getProfile(
-    PROVIDER.AWS,
-    SERVICE_TYPE.SECRETS,
-    DEFAULT_PROFILE_NAME,
-  )
+  const { secret, version, password } = getProfile(config)
 
   const passResource = new dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword(
     stack.context,

@@ -1,4 +1,4 @@
-import { DEFAULT_PROFILE_NAME } from '@constants'
+import { DEFAULT_PROFILE_NAME } from '@src/constants'
 import type { BaseServiceAttributes } from '@services/types'
 import { withSchema } from './withSchema'
 

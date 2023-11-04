@@ -13,13 +13,18 @@ import {
 
 import { Stack } from '@lib/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
-import { PROVIDER, SERVICE_TYPE, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants'
+import {
+  PROVIDER,
+  SERVICE_TYPE,
+  DEFAULT_PROFILE_NAME,
+  DEFAULT_SERVICE_STORAGE,
+} from '@src/constants'
 import {
   AWSMariaDB,
   AWSMySQL,
   AWSPostgreSQL,
   resourceHandler,
-} from '@providers/aws/services/database'
+} from '@src/services/providers/aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   DEFAULT_REGION,
@@ -27,7 +32,7 @@ import {
   REGIONS,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
-} from '@providers/aws/constants'
+} from '@src/services/providers/aws/constants'
 import type { ServiceTypeChoice } from 'src/services/types'
 import type {
   AwsDatabaseAttributes,
@@ -35,8 +40,8 @@ import type {
   AwsMySQLAttributes,
   AwsPostgreSQLAttributes,
   AwsDatabaseProvisionable,
-} from '@providers/aws/services/database'
-import type { RdsEngine } from '@providers/aws/constants'
+} from '@src/services/providers/aws/services/database'
+import type { RdsEngine } from '@src/services/providers/aws/constants'
 
 const getDatabaseSchemaExpectation = (
   type: ServiceTypeChoice,

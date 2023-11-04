@@ -1,11 +1,11 @@
 import { TerraformBackend } from 'cdktf'
 import { Stack } from '@lib/stack'
-import { AwsState } from '@providers/aws/services/state'
-import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { AwsState } from '@src/services/providers/aws/services/state'
+import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getAwsProvisionableMock } from '@mocks/aws'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
-import type { AwsStateAttributes } from '@providers/aws/services/state'
+import type { AwsStateAttributes } from '@src/services/providers/aws/services/state'
 
 describe('AWS state', () => {
   const service = AwsState

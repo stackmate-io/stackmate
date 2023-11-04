@@ -6,13 +6,13 @@ import {
   vpc as awsVpc,
 } from '@cdktf/provider-aws'
 
-import { AwsProvider } from '@providers/aws/services/provider'
-import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { AwsProvider } from '@src/services/providers/aws/services/provider'
+import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { Stack } from '@lib/stack'
 import { getProvisionable } from '@core/provision'
 import { type BaseProvisionable } from 'src/services/types/provisionable'
-import type { AwsProviderResources, AwsProviderAttributes } from '@providers/aws/services/provider'
+import type { AwsProviderResources, AwsProviderAttributes } from '@src/services/providers/aws/types'
 
 describe('AWS Provider', () => {
   const service = AwsProvider

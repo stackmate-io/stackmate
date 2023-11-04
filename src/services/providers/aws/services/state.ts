@@ -1,15 +1,13 @@
 import pipe from 'lodash/fp/pipe'
 import { S3Backend } from 'cdktf'
-
-import { SERVICE_TYPE } from '@constants'
-import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
-import { getAwsService } from '@providers/aws/service'
-import { withRegions, withHandler, withSchema } from 'src/services/behaviors'
+import { SERVICE_TYPE } from '@src/constants'
+import { DEFAULT_REGION, REGIONS } from '@aws/constants'
+import { getAwsService } from '@aws/utils/getAwsService'
+import { withRegions, withHandler, withSchema } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
-import type { Provisionable } from '@core/provision'
-import type { BaseServiceAttributes } from 'src/services/types'
-import type { AwsService, AwsServiceAttributes } from '@providers/aws/service'
+import type { Provisionable, BaseServiceAttributes } from '@services/types'
+import type { AwsService, AwsServiceAttributes } from '@aws/types'
 
 type AdditionalAttrs = { bucket: string }
 

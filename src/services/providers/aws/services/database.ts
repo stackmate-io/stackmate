@@ -2,17 +2,12 @@ import pipe from 'lodash/fp/pipe'
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws'
-import { SERVICE_TYPE } from '@constants'
-import { DEFAULT_PORT } from 'src/services/constants'
-import { withRootCredentials } from 'src/services/behaviors/credentials'
-import { awsDatabaseAlarms } from '@providers/aws/alarms/database'
+import { SERVICE_TYPE } from '@src/constants'
+import { DEFAULT_PORT } from '@services/constants'
+import { withRootCredentials } from '@services/behaviors/credentials'
+import { awsDatabaseAlarms } from '@aws/alerts/database'
 import { getProfile } from '@services/utils'
-import {
-  getAwsService,
-  onExternalLink,
-  onServiceLinked,
-  withAwsAlarms,
-} from '@providers/aws/service'
+import { getAwsService } from '@aws/utils/getAwsService'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
@@ -20,7 +15,7 @@ import {
   RDS_LOG_EXPORTS_PER_ENGINE,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_PARAM_FAMILY_MAPPING,
-} from '@providers/aws/constants'
+} from '@aws/constants'
 import {
   multiNode,
   profileable,
@@ -34,21 +29,23 @@ import {
   linkable,
   externallyLinkable,
   monitored,
-} from 'src/services/behaviors'
+} from '@services/behaviors'
+import { onServiceLinked } from '@aws/utils/onServiceLinked'
+import { onExternalLink } from '@aws/utils/onExternalLink'
+import { withAwsAlerts } from '@aws/utils/withAlerts'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
 import type { DatabaseServiceAttributes } from '@services/types/database'
-import type { PROVIDER } from '@constants'
-import type { RootCredentialsAssociations } from 'src/services/behaviors/credentials'
-import type { Provisionable } from '@services/types'
-import type { AwsService } from '@providers/aws/service'
-import type { RdsEngine, REGIONS } from '@providers/aws/constants'
-import type { ServiceTypeChoice } from 'src/services/types'
+import type { PROVIDER } from '@src/constants'
 import type {
+  RootCredentialsAssociations,
   EngineAttributes,
   RegionalAttributes,
   MonitoringAttributes,
-} from 'src/services/behaviors'
+} from '@services/behaviors'
+import type { Provisionable, ServiceTypeChoice } from '@services/types'
+import type { AwsService } from '@aws/types'
+import type { RdsEngine, REGIONS } from '@aws/constants'
 
 type DatabaseAttributes = DatabaseServiceAttributes &
   RegionalAttributes<ChoiceOf<typeof REGIONS>> &
@@ -172,7 +169,7 @@ export const resourceHandler = (
 ): AwsDatabaseResources =>
   pipe(
     deployDatabases(provisionable, stack),
-    withAwsAlarms<AwsDatabaseProvisionable>(provisionable, stack, awsDatabaseAlarms),
+    withAwsAlerts<AwsDatabaseProvisionable>(provisionable, stack, awsDatabaseAlarms),
   )()
 
 /**

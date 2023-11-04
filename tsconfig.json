@@ -32,9 +32,6 @@
       "@src/*": [
         "src/*"
       ],
-      "@constants": [
-        "src/constants"
-      ],
       "@core/*": [
         "src/core/*"
       ],
@@ -44,11 +41,8 @@
       "@services/*": [
         "src/services/*"
       ],
-      "@providers": [
-        "src/providers/index"
-      ],
-      "@providers/*": [
-        "src/providers/*"
+      "@aws/*": [
+        "src/services/providers/aws/*"
       ],
       "@lib/*": [
         "src/lib/*"

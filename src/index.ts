@@ -1,4 +1,4 @@
-export * from '@constants'
+export * from '@src/constants'
 export * from '@lib/errors'
 export * from '@lib/util'
 

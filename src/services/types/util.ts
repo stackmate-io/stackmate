@@ -1,5 +1,5 @@
 import type { TerraformLocal } from 'cdktf'
-import type { PROVIDER, SERVICE_TYPE } from '@constants'
+import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { ChoiceOf } from '@lib/util'
 
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>

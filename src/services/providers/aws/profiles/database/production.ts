@@ -1,5 +1,4 @@
 import type { dbInstance } from '@cdktf/provider-aws'
-
 import { instance as instanceDefaults, params } from './default'
 
 const instance: Partial<dbInstance.DbInstanceConfig> = {

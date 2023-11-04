@@ -1,4 +1,4 @@
-import { DEFAULT_PROFILE_NAME } from '@constants'
+import { DEFAULT_PROFILE_NAME } from '@src/constants'
 import { getProfile } from '@core/profile'
 import { get, difference, isEmpty } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'

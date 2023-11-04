@@ -6,9 +6,9 @@ import {
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
 
-import { AwsSecretsVault, generateCredentials } from '@providers/aws/services/secrets'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
+import { AwsSecretsVault, generateCredentials } from '@src/services/providers/aws/services/secrets'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
 import { Stack } from '@lib/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
@@ -16,7 +16,7 @@ import type { BaseProvisionable } from 'src/services/types/provisionable'
 import type {
   AwsSecretsProvisionable,
   AwsSecretsVaultAttributes,
-} from '@providers/aws/services/secrets'
+} from '@src/services/providers/aws/services/secrets'
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault

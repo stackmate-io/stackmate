@@ -1,17 +1,20 @@
-import { DEFAULT_REGION } from '@providers/aws/constants'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { DEFAULT_REGION } from '@src/services/providers/aws/constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getProvisionable } from '@core/provision'
-import { generateCredentials } from '@providers/aws/services/secrets'
-import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
+import { generateCredentials } from '@src/services/providers/aws/services/secrets'
+import { resourceHandler as providerDeployHandler } from '@src/services/providers/aws/services/provider'
 import type { Stack } from '@lib/stack'
 import type { ServiceAttributes } from '@core/registry'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 import type { CredentialsHandlerOptions } from 'src/services/behaviors'
-import type { AwsSecretsResources, AwsSecretsProvisionable } from '@providers/aws/services/secrets'
+import type {
+  AwsSecretsResources,
+  AwsSecretsProvisionable,
+} from '@src/services/providers/aws/services/secrets'
 import type {
   AwsProviderProvisionable,
   AwsProviderResources,
-} from '@providers/aws/services/provider'
+} from '@src/services/providers/aws/types'
 
 export const getProviderResources = (stack: Stack): AwsProviderResources => {
   const provisionable = getProvisionable({

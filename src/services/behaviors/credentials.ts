@@ -1,4 +1,4 @@
-import { SERVICE_TYPE } from '@constants'
+import { SERVICE_TYPE } from '@src/constants'
 import type {
   Credentials,
   BaseServiceAttributes,

@@ -1,13 +1,16 @@
 import { join as joinPaths } from 'node:path'
 import pipe from 'lodash/fp/pipe'
 import { LocalBackend } from 'cdktf'
-import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@constants'
+import { SERVICE_TYPE, USER_HOME_DIRECTORY } from '@src/constants'
 import { withHandler, withSchema } from 'src/services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { BaseServiceAttributes } from 'src/services/types'
 import type { Service } from 'src/services/behaviors'
 import type { Provisionable } from '@core/provision'
-import type { LocalServiceAssociations, LocalServiceAttributes } from '@providers/local/service'
+import type {
+  LocalServiceAssociations,
+  LocalServiceAttributes,
+} from '@src/services/providers/local/service'
 import { getLocalService } from '../utils/getLocalService'
 
 export type LocalStateResources = { backend: LocalBackend }

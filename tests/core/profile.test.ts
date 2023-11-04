@@ -3,7 +3,7 @@ import path from 'node:path'
 import assert from 'node:assert'
 
 import { getProfile } from '@services/utils'
-import { PROVIDER, SERVICE_TYPE } from '@constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 
 const PROFILES_PATH = 'fail'
 const getProfilePath = (...args: any[]) => fail('failed on purpose')
