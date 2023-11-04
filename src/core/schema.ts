@@ -271,7 +271,7 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       required: ['name', 'type', 'provider'],
       properties: {
         name: getServiceNameSchema(),
-        type: getServiceTypeSchema(Services.serviceTypes()),
+        type: getServiceTypeSchema(Services.types()),
         provider: getServiceProviderSchema(Services.providers()),
       },
       allOf,

@@ -26,7 +26,7 @@ export class Stack {
    * @param {AppConfig} options the terraform app options
    */
   constructor(name: string, options?: AppConfig) {
-    this.name = kebabCase(name.toLowerCase())
+    this.name = kebabCase(name.replace('([^a-zA-Z0-9s-_]+)', '').toLowerCase())
     this.app = new TerraformApp(options)
     this.context = new TerraformStack(this.app, this.name)
   }

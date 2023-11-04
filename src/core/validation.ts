@@ -96,8 +96,8 @@ export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): b
   }
 
   // Get the project's service names
-  const serviceNames = path?.startsWith('/services')
-    ? get(dataCxt?.rootData || {}, 'services', []).map((cfg: ServiceConfiguration) => cfg.name)
+  const serviceNames = path?.match(/[0-9]+\/links/gi)
+    ? (dataCxt?.rootData || []).map((cfg: ServiceConfiguration) => cfg.name)
     : []
 
   // Detect any service names that are not available within the schema
@@ -155,6 +155,33 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
 }
 
 /**
+ * Validates an operation's environment variables
+ *
+ * @param {ServiceEnvironment[]} required the variables required in the environment
+ * @throws {Error} if the environment is not properly set up
+ */
+export const validateEnvironment = (required: ServiceEnvironment[], env = process.env): void => {
+  const missing: string[] = []
+
+  required.forEach((envVar) => {
+    if (!envVar.required) {
+      return false
+    }
+
+    if (!(envVar.name in env)) {
+      missing.push(envVar.name)
+    }
+  })
+
+  if (!isEmpty(missing)) {
+    throw new EnvironmentValidationError(
+      `Your environment is missing some variables: ${missing.join(', ')}`,
+      missing,
+    )
+  }
+}
+
+/**
  * Parses Ajv errors to custom, error descriptors
  *
  * @param {AjvErrorObject[]} errors the raw, AJV errors available
@@ -186,11 +213,7 @@ export const getValidData = <R, T>(
   schema: JsonSchema<T>,
   options: AjvOptions = {},
 ): T => {
-  const {
-    schemas: loadedSchemas,
-    addSchema: addSchemaToAjv,
-    getSchema: getSchemaValidator,
-  } = getAjv(options)
+  const ajv = getAjv(defaults(options, AJV_DEFAULTS))
 
   const schemaId = schema.$id
 
@@ -198,14 +221,14 @@ export const getValidData = <R, T>(
     throw new Error('A schema ID should be provided')
   }
 
-  if (!loadedSchemas[schemaId]) {
-    addSchemaToAjv(schema, schemaId)
+  if (!ajv.schemas[schemaId]) {
+    ajv.addSchema(schema, schemaId)
   }
 
   // We need to clone the data because when using defaults, the data gets mutated
   // this can lead to all kinds of errors and the impression that data isn't valid
   const data = cloneDeep(rawData)
-  const validateData = getSchemaValidator(schemaId)
+  const validateData = ajv.getSchema(schemaId)
 
   if (!isFunction(validateData)) {
     throw new Error('The schema provided was invalid')
@@ -217,31 +240,4 @@ export const getValidData = <R, T>(
   }
 
   return data as unknown as T
-}
-
-/**
- * Validates an operation's environment variables
- *
- * @param {ServiceEnvironment[]} required the variables required in the environment
- * @throws {Error} if the environment is not properly set up
- */
-export const validateEnvironment = (required: ServiceEnvironment[], env = process.env): void => {
-  const missing: string[] = []
-
-  required.forEach((envVar) => {
-    if (!envVar.required) {
-      return false
-    }
-
-    if (!(envVar.name in env)) {
-      missing.push(envVar.name)
-    }
-  })
-
-  if (!isEmpty(missing)) {
-    throw new EnvironmentValidationError(
-      `Your environment is missing some variables: ${missing.join(', ')}`,
-      missing,
-    )
-  }
 }

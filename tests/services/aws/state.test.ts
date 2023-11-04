@@ -3,7 +3,7 @@ import { Stack } from '@core/stack'
 import { AwsState } from '@providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
-import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
+import { getAwsProvisionableMock } from '@mocks/aws'
 import type { BaseProvisionable } from '@core/service'
 import type { AwsStateAttributes } from '@providers/aws/services/state'
 
@@ -64,7 +64,7 @@ describe('AWS state', () => {
         bucket: 'some-bucket-name',
       }
 
-      provisionable = getAwsDeploymentProvisionableMock(config, stack)
+      provisionable = getAwsProvisionableMock(config, stack)
     })
 
     it('registers the backend', () => {
