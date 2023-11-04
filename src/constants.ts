@@ -1,3 +1,5 @@
+import type { ServiceTypeChoice } from '@services/types'
+
 export const PROVIDER = {
   AWS: 'aws',
   LOCAL: 'local',
@@ -22,6 +24,14 @@ export const SERVICE_TYPE = {
   SECRETS: 'secrets',
   VOLUME: 'volume',
 } as const
+
+export const DEFAULT_PORT: Map<ServiceTypeChoice, number> = new Map([
+  [SERVICE_TYPE.MEMCACHED, 11211],
+  [SERVICE_TYPE.MARIADB, 3306],
+  [SERVICE_TYPE.MYSQL, 3306],
+  [SERVICE_TYPE.POSTGRESQL, 5432],
+  [SERVICE_TYPE.REDIS, 6379],
+])
 
 // Service defaults
 export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate'
