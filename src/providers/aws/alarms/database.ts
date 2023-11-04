@@ -5,7 +5,7 @@ https://github.com/cloudposse/terraform-aws-rds-cloudwatch-sns-alarms/blob/maste
 import { kebabCase, snakeCase } from 'lodash'
 import { cloudwatchMetricAlarm, dbEventSubscription } from '@cdktf/provider-aws'
 
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { AwsDatabaseProvisionable } from '@providers/aws/services/database'
 import type { AwsServiceAlertsGenerator } from '@providers/aws/service'
 import type { AwsServiceAlarmResources, AwsAlarmPrerequisites } from '@providers/aws/alarms'

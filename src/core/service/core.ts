@@ -1,6 +1,6 @@
 import { merge } from 'lodash'
 import { mergeSchemas } from '@lib/schema'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'
 import type { JsonSchema } from '@lib/schema'

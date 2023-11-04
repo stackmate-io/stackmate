@@ -15,7 +15,7 @@ import type {
   dataAwsCallerIdentity,
 } from '@cdktf/provider-aws'
 import type { ChoiceOf, Obj } from '@lib/util'
-import type { Stack } from '@core/stack'
+import type { Stack } from '@lib/stack'
 import type { Provisionable, BaseProvisionable, Provisions } from '@core/provision'
 import type {
   BaseServiceAttributes,

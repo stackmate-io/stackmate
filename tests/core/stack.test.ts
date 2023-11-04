@@ -1,6 +1,6 @@
 import { kebabCase } from 'lodash'
 import { faker } from '@faker-js/faker'
-import { Stack } from '@core/stack'
+import { Stack } from '@lib/stack'
 import { TerraformStack, App as TerraformApp } from 'cdktf'
 
 describe('Stack', () => {
