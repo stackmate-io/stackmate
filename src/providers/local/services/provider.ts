@@ -3,24 +3,6 @@ import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getBaseService, withHandler } from 'src/services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { Provisionable } from '@core/provision'
-import type { LocalServiceAttributes } from '@providers/local/service'
-import type { BaseServiceAttributes } from 'src/services/types'
-import type { Service } from 'src/services/behaviors'
-
-export type ProviderInstanceResources = {
-  provider: terraformLocalProvider.LocalProvider
-}
-
-export type LocalProviderAttributes = LocalServiceAttributes<
-  BaseServiceAttributes & {
-    type: typeof SERVICE_TYPE.PROVIDER
-  }
->
-
-export type LocalProviderResources = ProviderInstanceResources
-export type LocalProviderService = Service<LocalProviderAttributes>
-export type LocalProviderProvisionable = Provisionable<LocalProviderService, LocalProviderResources>
 
 export const resourceHandler = (
   provisionable: LocalProviderProvisionable,
