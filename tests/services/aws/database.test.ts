@@ -13,22 +13,13 @@ import {
 
 import { Stack } from '@core/stack'
 import { getAwsProvisionableMock } from '@mocks/aws'
-import type { ServiceTypeChoice } from '@core/service'
 import { PROVIDER, SERVICE_TYPE, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants'
-import type {
-  AwsDatabaseAttributes,
-  AwsMariaDBAttributes,
-  AwsMySQLAttributes,
-  AwsPostgreSQLAttributes,
-  AwsDatabaseProvisionable,
-} from '@providers/aws/services/database'
 import {
   AWSMariaDB,
   AWSMySQL,
   AWSPostgreSQL,
   resourceHandler,
 } from '@providers/aws/services/database'
-import type { RdsEngine } from '@providers/aws/constants'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   DEFAULT_REGION,
@@ -37,6 +28,15 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@providers/aws/constants'
+import type { ServiceTypeChoice } from '@core/service'
+import type {
+  AwsDatabaseAttributes,
+  AwsMariaDBAttributes,
+  AwsMySQLAttributes,
+  AwsPostgreSQLAttributes,
+  AwsDatabaseProvisionable,
+} from '@providers/aws/services/database'
+import type { RdsEngine } from '@providers/aws/constants'
 
 const getDatabaseSchemaExpectation = (
   type: ServiceTypeChoice,
@@ -122,11 +122,9 @@ describe('AWS PostgreSQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres')
-    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
-      config,
-      stack,
-      { withRootCredentials: true },
-    )
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(config, stack, {
+      withRootCredentials: true,
+    })
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -177,11 +175,9 @@ describe('AWS MySQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql')
-    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
-      config,
-      stack,
-      { withRootCredentials: true },
-    )
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(config, stack, {
+      withRootCredentials: true,
+    })
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -231,11 +227,9 @@ describe('AWS MariaDB', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb')
-    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
-      config,
-      stack,
-      { withRootCredentials: true },
-    )
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(config, stack, {
+      withRootCredentials: true,
+    })
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -269,11 +263,9 @@ describe('Database service monitoring', () => {
       },
     }
 
-    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
-      config,
-      stack,
-      { withRootCredentials: true },
-    )
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(config, stack, {
+      withRootCredentials: true,
+    })
 
     resourceHandler(provisionable, stack)
     const synthesized = Testing.synth(stack.context)

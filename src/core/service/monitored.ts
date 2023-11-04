@@ -1,5 +1,5 @@
-import { withSchema } from './core'
 import type { BaseServiceAttributes } from './core'
+import { withSchema } from './core'
 
 /**
  * @type {MonitoringAttributes} the configuration to use for setting up the alerts

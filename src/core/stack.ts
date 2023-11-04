@@ -1,6 +1,6 @@
 import { kebabCase } from 'lodash'
-import type { AppConfig } from 'cdktf'
 import { TerraformStack, App as TerraformApp } from 'cdktf'
+import type { AppConfig } from 'cdktf'
 
 export class Stack {
   /**

@@ -1,5 +1,5 @@
-import type { MinMax } from '@lib/util'
 import { DEFAULT_SERVICE_STORAGE } from '@constants'
+import type { MinMax } from '@lib/util'
 import type { BaseServiceAttributes } from './core'
 import { withSchema } from './core'
 

@@ -2,6 +2,7 @@ import pipe from 'lodash/fp/pipe'
 import { isEmpty } from 'lodash'
 
 import { SERVICE_TYPE } from '@constants'
+import { associate, withSchema } from '@core/service/core'
 import type { ConnectableAttributes } from './connectable'
 import type {
   AssociationHandler,
@@ -11,7 +12,6 @@ import type {
   AssociationLookup,
   WithAssociations,
 } from '@core/service/core'
-import { associate, withSchema } from '@core/service/core'
 import type { ProvisionResources, BaseProvisionable } from '@core/provision'
 
 /**
