@@ -87,7 +87,7 @@ export const linkable =
             serviceLinks: true,
             items: {
               type: 'string',
-              pattern: srv.schema.properties.name?.pattern,
+              pattern: srv.schema.properties?.name?.pattern,
             },
           },
         },

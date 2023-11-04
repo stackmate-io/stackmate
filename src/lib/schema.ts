@@ -1,6 +1,5 @@
 import { merge, uniq } from 'lodash'
-import type { Obj, RequireKeys } from '@lib/util'
-import type { BaseService } from '@core/service/core'
+import type { Obj } from '@lib/util'
 
 /**
  * @type {JsonSchema<T>} the JSON schema type
@@ -197,21 +196,16 @@ export type JsonSchema<T = undefined> = {
 }
 
 /**
- * @type {ServiceSchema} special case for service schemas
- */
-export type ServiceSchema<T extends Obj = Obj> = RequireKeys<JsonSchema<T>, 'properties'>
-
-/**
  * Merges two JSON schemas into one
  *
- * @param {ServiceSchema} a the source schema
- * @param {ServiceSchema} b the target schema
- * @returns {ServiceSchema} the final schema
+ * @param {JsonSchema} a the source schema
+ * @param {JsonSchema} b the target schema
+ * @returns {JsonSchema} the final schema
  */
-export const mergeServiceSchemas = <A extends Obj = Obj, B extends Obj = Obj>(
-  a: ServiceSchema<A>,
-  b: ServiceSchema<B>,
-): ServiceSchema<A> & ServiceSchema<B> => {
+export const mergeSchemas = <A extends Obj = Obj, B extends Obj = Obj>(
+  a: JsonSchema<A>,
+  b: JsonSchema<B>,
+): JsonSchema<A> & JsonSchema<B> => {
   const { required: requiredA = [] } = a
   const { required: requiredB = [] } = b
 
@@ -220,21 +214,3 @@ export const mergeServiceSchemas = <A extends Obj = Obj, B extends Obj = Obj>(
     required: uniq([...requiredA, ...requiredB]),
   }
 }
-
-/**
- * Returns the schema that matches the service's main attributes with the service reference id
- *
- * @param {BaseService} service the service to get the matcher for
- * @returns {JsonSchema}
- */
-export const getServiceMatcher = (service: BaseService): JsonSchema => ({
-  if: {
-    properties: {
-      provider: { const: service.provider },
-      type: { const: service.type },
-    },
-  },
-  then: {
-    $ref: service.schemaId,
-  },
-})

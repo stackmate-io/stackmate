@@ -16,14 +16,9 @@ import { getServiceProfile } from '@core/profile'
 import { DEFAULT_PROFILE_NAME } from '@constants'
 import { ValidationError, EnvironmentValidationError } from '@lib/errors'
 import { Services, type ServiceConfiguration, type ServiceAttributes } from '@core/registry'
-import { getServiceMatcher, type JsonSchema } from '@core/schema'
-import {
-  getServiceNameSchema,
-  type BaseServiceAttributes,
-  type ServiceEnvironment,
-  getServiceTypeSchema,
-  getServiceProviderSchema,
-} from '@core/service'
+import { getServiceNameSchema, getServiceTypeSchema, getServiceProviderSchema } from '@core/service'
+import type { BaseService, BaseServiceAttributes, ServiceEnvironment } from '@core/service'
+import type { JsonSchema } from '@lib/schema'
 import type { Dictionary } from 'lodash'
 import type { DataValidationCxt } from 'ajv/dist/types'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
@@ -257,6 +252,24 @@ export const getValidData = <R, T>(
 
   return data as unknown as T
 }
+
+/**
+ * Returns the schema that matches the service's main attributes with the service reference id
+ *
+ * @param {BaseService} service the service to get the matcher for
+ * @returns {JsonSchema}
+ */
+export const getServiceMatcher = (service: BaseService): JsonSchema => ({
+  if: {
+    properties: {
+      provider: { const: service.provider },
+      type: { const: service.type },
+    },
+  },
+  then: {
+    $ref: service.schemaId,
+  },
+})
 
 /**
  * Populates the project schema

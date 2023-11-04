@@ -1,9 +1,9 @@
 import { merge } from 'lodash'
-import { mergeServiceSchemas } from '@core/schema'
+import { mergeSchemas } from '@lib/schema'
 import type { Stack } from '@core/stack'
 import type { Obj, ChoiceOf } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@constants'
-import type { ServiceSchema, JsonSchema } from '@core/schema'
+import type { JsonSchema } from '@lib/schema'
 import type { BaseProvisionable, ProvisionHandler, ProvisionResources } from '@core/provision'
 
 /**
@@ -110,7 +110,7 @@ export type Service<
   type: ServiceTypeChoice
   regions?: readonly string[]
   schemaId: string
-  schema: ServiceSchema<Setup>
+  schema: JsonSchema<Setup>
   environment: ServiceEnvironment[]
   handler: ProvisionHandler
   associations: Associations
@@ -192,7 +192,7 @@ export const getBaseService = (
   type: ServiceTypeChoice,
 ): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
   const schemaId = `services/${provider}/${type}`
-  const schema: ServiceSchema<BaseServiceAttributes> = {
+  const schema: JsonSchema<BaseServiceAttributes> = {
     $id: schemaId,
     type: 'object',
     required: ['name', 'type', 'provider'],
@@ -238,10 +238,10 @@ export const withServiceProperties =
  * @returns {Function<Service>}
  */
 export const withSchema =
-  <C extends BaseServiceAttributes, Additions extends Obj = Obj>(mods: ServiceSchema<Additions>) =>
-  <T extends Service<C>>(srv: T): T & { schema: ServiceSchema<Additions> } => ({
+  <C extends BaseServiceAttributes, Additions extends Obj = Obj>(mods: JsonSchema<Additions>) =>
+  <T extends Service<C>>(srv: T): T & { schema: JsonSchema<Additions> } => ({
     ...srv,
-    schema: mergeServiceSchemas(srv.schema, mods),
+    schema: mergeSchemas(srv.schema, mods),
   })
 
 /**
