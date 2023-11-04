@@ -11,13 +11,35 @@
     "dist/**",
     "node_modules"
   ],
+  "overrides": [
+    {
+      "files": [
+        "tests/**/*.test.ts"
+      ],
+      "plugins": [
+        "plugin:jest/recommended",
+        "jest"
+      ],
+      "env": {
+        "jest/globals": true,
+        "node": true
+      },
+      "rules": {
+        // https://www.npmjs.com/package/eslint-plugin-jest
+        "jest/no-disabled-tests": "warn",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/prefer-to-have-length": "warn",
+        "jest/valid-expect": "warn"
+      }
+    }
+  ],
   "plugins": [
     "@typescript-eslint",
     "unused-imports",
     "import",
     "prettier",
-    "jsdoc",
-    "jest"
+    "jsdoc"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -132,13 +154,6 @@
       "error",
       "consistent"
     ],
-
-    // https://www.npmjs.com/package/eslint-plugin-jest
-    "jest/no-disabled-tests": "warn",
-    "jest/no-focused-tests": "error",
-    "jest/no-identical-title": "error",
-    "jest/prefer-to-have-length": "warn",
-    "jest/valid-expect": "warn",
 
     // specify curly brace conventions for all control statements
     // https://eslint.org/docs/rules/curly
