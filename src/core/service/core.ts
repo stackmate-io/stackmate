@@ -2,11 +2,12 @@ import { merge } from 'lodash'
 import { mergeSchemas } from '@lib/schema'
 import { getNameSchema, getProviderSchema, getTypeSchema } from '@services/utils/schema'
 import type { BaseServiceAttributes, ServiceEnvironment } from '@core/services/types/base'
+import type { ProvisionResources } from '@core/services/types/resources'
 import type { ServiceTypeChoice, ProviderChoice } from '@core/services/types'
 import type { Stack } from '@lib/stack'
 import type { Obj } from '@lib/util'
 import type { JsonSchema } from '@lib/schema'
-import type { BaseProvisionable, ProvisionHandler, ProvisionResources } from '@core/provision'
+import type { ProvisionHandler, BaseProvisionable } from '@core/services/types/provisionable'
 
 /**
  * @type {AssociationReturnType} the return types for association handlers

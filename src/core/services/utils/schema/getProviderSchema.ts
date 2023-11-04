@@ -6,7 +6,6 @@ import type { ProviderChoice } from '@services/types'
  * @param {ProviderChoice} defaultProvider the default provider for the service
  * @returns {JsonSchema} the provider's schema
  */
-
 export const getProviderSchema = (
   providers: ProviderChoice[],
   defaultProvider?: ProviderChoice,

@@ -5,7 +5,7 @@ import { generateCredentials } from '@providers/aws/services/secrets'
 import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
 import type { Stack } from '@lib/stack'
 import type { ServiceAttributes } from '@core/registry'
-import type { BaseProvisionable } from '@core/provision'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
 import type { CredentialsHandlerOptions } from '@core/service'
 import type { AwsSecretsResources, AwsSecretsProvisionable } from '@providers/aws/services/secrets'
 import type {

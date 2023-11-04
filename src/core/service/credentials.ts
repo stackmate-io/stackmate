@@ -2,7 +2,7 @@ import { SERVICE_TYPE } from '@constants'
 import { associate } from '@core/service'
 import type { TerraformLocal } from 'cdktf'
 import type { Stack } from '@lib/stack'
-import type { BaseProvisionable } from '@core/provision'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
 import type { BaseServiceAttributes } from '@services/types'
 import type {
   BaseService,

@@ -12,7 +12,8 @@ import type {
   WithAssociations,
 } from '@core/service/core'
 import type { BaseServiceAttributes } from '@core/services/types/base'
-import type { ProvisionResources, BaseProvisionable } from '@core/provision'
+import type { ProvisionResources } from '@core/services/types/resources'
+import type { BaseProvisionable } from '@core/services/types/provisionable'
 
 /**
  * @type {LinkableAttributes} internal link service attributes

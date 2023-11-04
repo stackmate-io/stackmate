@@ -1,10 +1,8 @@
 import { Services } from '@core/registry'
 import { hashObject } from '@lib/hash'
 import { getValidData, getSchema } from '@core/validation'
-import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { Obj } from '@lib/util'
-import type { Stack } from '@lib/stack'
 import type { BaseServiceAttributes } from '@services/types'
 import type {
   AnyAssociationHandler,
@@ -13,36 +11,8 @@ import type {
   ExtractAttrs,
   ServiceAssociations,
 } from '@core/service'
-
-/**
- * @type {Resource} a resource provisioned by the system
- */
-export type Resource = TerraformElement
-
-/**
- * @type {ProvisionResources} types of resources that are provisioned by the handlers
- */
-export type ProvisionResources = Resource | Resource[] | Record<string, Resource>
-
-/**
- * @type {Provisions} the type returned by provision handlers
- */
-export type Provisions = Record<string, ProvisionResources> & {
-  /**
-   * The service's IP address to allow linking with services with
-   */
-  ip?: TerraformLocal
-
-  /**
-   * The service's outputs
-   */
-  outputs?: TerraformOutput[]
-
-  /**
-   * A resource reference such as a resource's ID to link with services within the same provider
-   */
-  resourceRef?: TerraformLocal
-}
+import type { Provisions } from './services/types/resources'
+import type { BaseProvisionable, ProvisionablesMap } from './services/types/provisionable'
 
 /**
  * @type {ExtractServiceRequirements} extracts service requirements from its associations
@@ -53,20 +23,6 @@ type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
       ? ReturnType<A['handler']>
       : never
     : never
-}
-
-/**
- * @type {BaseProvisionable} base provisionable
- */
-export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
-  id: string
-  service: BaseService
-  config: Attrs
-  provisions: Provisions
-  resourceId: string
-  registered: boolean
-  sideEffects: Provisions
-  requirements: Record<string, ProvisionResources>
 }
 
 /**
@@ -84,17 +40,6 @@ export type Provisionable<
   context: Context
   requirements: ExtractServiceRequirements<Srv['associations']>
 }
-
-/**
- * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
- */
-export type ProvisionHandler = (
-  provisionable: BaseProvisionable,
-  stack: Stack,
-  opts?: object,
-) => Provisions
-
-export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
 export type AssociatedProvisionable = {
   name: string
@@ -146,21 +91,4 @@ export const getProvisionables = (configs: ServiceConfiguration[]): Provisionabl
   })
 
   return provisionables
-}
-
-/**
- * @param {BaseProvisionable} provisionable the provisionable to check
- * @throws {Error} if a requirement is not satisfied
- */
-export const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
-  const {
-    service: { associations = {}, type },
-    requirements,
-  } = provisionable
-
-  Object.entries(associations).forEach(([name, assoc]) => {
-    if (assoc.requirement && !requirements[name]) {
-      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
-    }
-  })
 }
