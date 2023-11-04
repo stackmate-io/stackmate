@@ -1,28 +1,19 @@
 import Ajv from 'ajv'
 import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
-import {
-  cloneDeep,
-  defaults,
-  difference,
-  fromPairs,
-  get,
-  isEmpty,
-  isFunction,
-  uniqBy,
-} from 'lodash'
+import { cloneDeep, defaults, fromPairs, isFunction, uniqBy } from 'lodash'
 import { isAddressValid } from '@lib/networking'
-import { getServiceProfile } from '@core/profile'
-import { DEFAULT_PROFILE_NAME } from '@constants'
-import { ValidationError, EnvironmentValidationError } from '@lib/errors'
-import { Services, type ServiceConfiguration, type ServiceAttributes } from '@core/registry'
-import { getServiceNameSchema, getServiceTypeSchema, getServiceProviderSchema } from '@core/service'
-import type { BaseServiceAttributes, ServiceEnvironment } from '@core/service'
+import { ValidationError } from '@lib/errors'
+import { Services, type ServiceAttributes } from '@core/registry'
+import { getNameSchema, getTypeSchema, getProviderSchema } from '@services/utils/schema'
+import type { BaseServiceAttributes } from '@services/types'
 import type { JsonSchema } from '@lib/schema'
 import type { Dictionary } from 'lodash'
-import type { DataValidationCxt } from 'ajv/dist/types'
 import type { Options as AjvOptions, ErrorObject as AjvErrorObject } from 'ajv'
 import type { ValidationErrorDescriptor } from '@lib/errors'
+import { validateServiceProfile } from './services/utils/validation/validateServiceProfile'
+import { validateServiceProfileOverrides } from './services/utils/validation/validateServiceProfileOverrides'
+import { validateServiceLinks } from './services/utils/validation/validateServiceLinks'
 
 const AJV_DEFAULTS: AjvOptions = {
   useDefaults: true,
@@ -34,87 +25,6 @@ const AJV_DEFAULTS: AjvOptions = {
   strict: false,
   $data: true,
 } as const
-
-/**
- * Validates a service `profile` value
- *
- * @param {Any|String} profile the value for the profile attribute
- * @param {DataValidationCxt} dataCxt the data validation context
- * @returns {Boolean} whether the service profile validates
- */
-export const validateServiceProfile = (profile: any, dataCxt?: DataValidationCxt): boolean => {
-  const type = get(dataCxt?.parentData, 'type')
-  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null))
-
-  if (!provider || !type) {
-    return false
-  }
-
-  try {
-    getServiceProfile(provider, type, profile)
-    return true
-  } catch (err) {
-    return false
-  }
-}
-
-/**
- * Validates a profile `overrides` value
- *
- * @param {Any|Object} overrides the value for overrides to validate
- * @param {DataValidationCxt} dataCxt the data validation context
- * @returns {Boolean} whether the overrides value validates
- */
-export const validateServiceProfileOverrides = (
-  overrides: any,
-  dataCxt?: DataValidationCxt,
-): boolean => {
-  const type = get(dataCxt?.parentData, 'type')
-  const profile = get(dataCxt?.parentData, 'profile', DEFAULT_PROFILE_NAME)
-  const provider = get(dataCxt?.parentData, 'provider', get(dataCxt?.rootData, 'provider', null))
-
-  if (!provider || !type) {
-    return false
-  }
-
-  try {
-    const serviceOverrides = getServiceProfile(provider, type, profile)
-    const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
-    return isEmpty(irrelevantKeys)
-  } catch (err) {
-    return false
-  }
-}
-
-/**
- * Validates a `links` value
- *
- * @param {Any|String[]} links the value for overrides to validate
- * @param {DataValidationCxt} dataCxt the data validation context
- * @returns {Boolean} whether the links value validates
- */
-export const validateServiceLinks = (links: any, dataCxt?: DataValidationCxt): boolean => {
-  if (isEmpty(links)) {
-    return true
-  }
-
-  // We should allow service links only for cloud services
-  const block = dataCxt?.parentData || {}
-  const path = dataCxt?.instancePath || null
-
-  if (!path || !block) {
-    return true
-  }
-
-  // Get the project's service names
-  const serviceNames = path?.match(/[0-9]+\/links/gi)
-    ? (dataCxt?.rootData || []).map((cfg: ServiceConfiguration) => cfg.name)
-    : []
-
-  // Detect any service names that are not available within the schema
-  const irrelevantServices = difference(links, serviceNames)
-  return isEmpty(irrelevantServices)
-}
 
 /**
  * Returns or creates an Ajv instance
@@ -163,33 +73,6 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
   })
 
   return ajv
-}
-
-/**
- * Validates an operation's environment variables
- *
- * @param {ServiceEnvironment[]} required the variables required in the environment
- * @throws {Error} if the environment is not properly set up
- */
-export const validateEnvironment = (required: ServiceEnvironment[], env = process.env): void => {
-  const missing: string[] = []
-
-  required.forEach((envVar) => {
-    if (!envVar.required) {
-      return false
-    }
-
-    if (!(envVar.name in env)) {
-      missing.push(envVar.name)
-    }
-  })
-
-  if (!isEmpty(missing)) {
-    throw new EnvironmentValidationError(
-      `Your environment is missing some variables: ${missing.join(', ')}`,
-      missing,
-    )
-  }
 }
 
 /**
@@ -291,9 +174,9 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       additionalProperties: true,
       required: ['name', 'type', 'provider'],
       properties: {
-        name: getServiceNameSchema(),
-        type: getServiceTypeSchema(Services.types()),
-        provider: getServiceProviderSchema(Services.providers()),
+        name: getNameSchema(),
+        type: getTypeSchema(Services.types()),
+        provider: getProviderSchema(Services.providers()),
       },
       allOf,
       errorMessage: {

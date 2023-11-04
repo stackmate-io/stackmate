@@ -1,5 +1,5 @@
 import { DEFAULT_PROFILE_NAME } from '@constants'
-import type { BaseServiceAttributes } from '@core/services/types/base';
+import type { BaseServiceAttributes } from '@core/services/types/base'
 import { withSchema } from './core'
 
 /**

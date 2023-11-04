@@ -17,11 +17,10 @@ import type {
 import type { ChoiceOf, Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
 import type { Provisionable, BaseProvisionable, Provisions } from '@core/provision'
+import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
 import type {
-  BaseServiceAttributes,
   ServiceAssociations,
   ServiceRequirement,
-  ServiceTypeChoice,
   Service,
   LinkableAttributes,
   ConnectableAttributes,
