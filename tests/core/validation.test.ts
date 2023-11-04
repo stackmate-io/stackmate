@@ -134,58 +134,36 @@ describe('Validation', () => {
         expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
       })
 
-      // it('proceeds without an error when the overrides are valid', () => {
-      //   const overrides = { instance: {}, params: {} }
-      //   const withOverrides = merge({}, projectConfig, { services: [{ overrides }] })
+      it('proceeds without an error when the overrides are valid', () => {
+        const overrides = { instance: {}, params: {} }
+        const withOverrides = merge([], servicesConfig, [{ overrides }])
 
-      //   const validated = validate(JSON_SCHEMA_ROOT, withOverrides)
-
-      //   const {
-      //     services: [serviceWithOverrides],
-      //   } = validated
-      //   expect(serviceWithOverrides).toMatchObject({ overrides })
-      // })
+        const [serviceWithOverrides] = getValidData(withOverrides, schema)
+        expect(serviceWithOverrides).toMatchObject({ overrides })
+      })
     })
 
-    /*
     describe('isIpOrCidr', () => {
       it('raises an error when an invalid IP is used', () => {
-        const invalid = merge({}, projectConfig, {
-          services: [{ externalLinks: ['abcdefg'] }],
-        })
-
-        expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
+        const invalid = merge([], servicesConfig, [{ externalLinks: ['abcdefg'] }])
+        expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
       })
 
       it('proceeds without an error when the IPs used are valid', () => {
         const externalLinks = ['192.168.1.1', '192.168.29.32']
-        const withCidr = merge({}, projectConfig, {
-          services: [{ externalLinks }],
-        })
+        const withIPs = merge([], servicesConfig, [{ externalLinks }])
 
-        const validated = validate(JSON_SCHEMA_ROOT, withCidr)
-
-        const {
-          services: [serviceWithOverrides],
-        } = validated
-
-        expect(serviceWithOverrides).toMatchObject({ externalLinks })
+        const [serviceWithExtraLinks] = getValidData(withIPs, schema)
+        expect(serviceWithExtraLinks).toMatchObject({ externalLinks })
       })
 
       it('proceeds without an error when the CIDR used is valid', () => {
         const externalLinks = ['192.168.1.1/24', '192.168.29.32/32']
-        const withCidr = merge({}, projectConfig, {
-          services: [{ externalLinks }],
-        })
+        const withCidr = merge([], servicesConfig, [{ externalLinks }])
 
-        const validated = validate(JSON_SCHEMA_ROOT, withCidr)
-
-        const {
-          services: [serviceWithOverrides],
-        } = validated
-        expect(serviceWithOverrides).toMatchObject({ externalLinks })
+        const [serviceWithExtraLinks] = getValidData(withCidr, schema)
+        expect(serviceWithExtraLinks).toMatchObject({ externalLinks })
       })
     })
-    */
   })
 })
