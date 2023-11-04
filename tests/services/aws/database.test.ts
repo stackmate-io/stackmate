@@ -28,7 +28,7 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@providers/aws/constants'
-import type { ServiceTypeChoice } from '@core/service'
+import type { ServiceTypeChoice } from '@services/types'
 import type {
   AwsDatabaseAttributes,
   AwsMariaDBAttributes,

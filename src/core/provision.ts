@@ -5,11 +5,11 @@ import type { TerraformElement, TerraformLocal, TerraformOutput } from 'cdktf'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
 import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
+import type { BaseServiceAttributes } from '@services/types'
 import type {
   AnyAssociationHandler,
   Association,
   BaseService,
-  BaseServiceAttributes,
   ExtractAttrs,
   ServiceAssociations,
 } from '@core/service'

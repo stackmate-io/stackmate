@@ -1,7 +1,6 @@
 import os from 'node:os'
 import path from 'node:path'
 import { omit } from 'lodash'
-import type { ServiceTypeChoice } from './core/service'
 
 export const { env: ENV } = process
 export const STACKMATE_DIRECTORY = '.stackmate'
@@ -43,19 +42,3 @@ export const DEFAULT_PROFILE_NAME = 'default' as const
 export const DEFAULT_SERVICE_STORAGE = 30 as const
 export const DEFAULT_CLOUD_PROVIDER = PROVIDER.AWS
 export const DEFAULT_PASSWORD_LENGTH = 16 as const
-
-export const DEFAULT_PORT: Map<ServiceTypeChoice, number> = new Map([
-  [SERVICE_TYPE.MEMCACHED, 11211],
-  [SERVICE_TYPE.MARIADB, 3306],
-  [SERVICE_TYPE.MYSQL, 3306],
-  [SERVICE_TYPE.POSTGRESQL, 5432],
-  [SERVICE_TYPE.REDIS, 6379],
-])
-
-export const PROFILE_DIRECTORY_OVERRIDES: Map<ServiceTypeChoice, string> = new Map([
-  [SERVICE_TYPE.MEMCACHED, 'cache'],
-  [SERVICE_TYPE.REDIS, 'cache'],
-  [SERVICE_TYPE.MARIADB, 'database'],
-  [SERVICE_TYPE.MYSQL, 'database'],
-  [SERVICE_TYPE.POSTGRESQL, 'database'],
-])
