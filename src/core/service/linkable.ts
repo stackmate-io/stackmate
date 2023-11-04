@@ -4,14 +4,13 @@ import { isEmpty } from 'lodash'
 import { SERVICE_TYPE } from '@constants'
 import { associate, withSchema } from '@core/service/core'
 import type { ConnectableAttributes } from './connectable'
+import type { Service, WithAssociations } from '@core/service/core'
 import type {
   AssociationHandler,
-  Service,
   ServiceSideEffect,
   AssociationLookup,
-  WithAssociations,
-} from '@core/service/core'
-import type { BaseServiceAttributes } from '@core/services/types/base'
+} from '@core/services/types/association'
+import type { BaseServiceAttributes } from '@core/services/types/util'
 import type { ProvisionResources } from '@core/services/types/resources'
 import type { BaseProvisionable } from '@core/services/types/provisionable'
 

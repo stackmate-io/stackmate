@@ -1,7 +1,7 @@
 import pipe from 'lodash/fp/pipe'
 
 import type { Service } from './core'
-import type { BaseServiceAttributes } from '@core/services/types/base'
+import type { BaseServiceAttributes } from '@core/services/types/util'
 import { withServiceProperties, withSchema } from './core'
 
 /**
@@ -16,9 +16,8 @@ type AdditionalProps = { regions: readonly string[] }
 
 /**
  * Enhances a service to support regions
- *
- * @param {String[]} regions the regions that the service can be provisioned in
- * @param {String} defaultRegion the default region to provision the service in
+ * @param {string[]} regions the regions that the service can be provisioned in
+ * @param {string} defaultRegion the default region to provision the service in
  * @returns {Function<Service>}
  */
 export const withRegions =
