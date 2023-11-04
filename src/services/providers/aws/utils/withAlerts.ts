@@ -1,7 +1,7 @@
 import { isEmpty } from 'lodash'
 import { getMonitoringPrerequisites } from '@aws/utils/getMonitoringPrerequisites'
-import type { Stack } from '@src/lib/stack'
-import type { BaseProvisionable } from '@src/services/types'
+import type { Stack } from '@lib/stack'
+import type { BaseProvisionable } from '@services/types'
 import type {
   AwsAlertPrerequisites,
   AwsServiceAlertResources,

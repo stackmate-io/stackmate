@@ -1,5 +1,5 @@
 import type { JsonSchema } from '@lib/schema'
-import type { ProviderChoice } from 'src/services/types'
+import type { ProviderChoice } from '@services/types'
 
 /**
  * @param {ProviderChoice[]} providers the providers to allow in the schema

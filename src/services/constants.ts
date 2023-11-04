@@ -1,5 +1,5 @@
 import { SERVICE_TYPE } from '@src/constants'
-import type { ServiceTypeChoice } from 'src/services/types'
+import type { ServiceTypeChoice } from '@services/types'
 
 export const DEFAULT_PORT: Map<ServiceTypeChoice, number> = new Map([
   [SERVICE_TYPE.MEMCACHED, 11211],

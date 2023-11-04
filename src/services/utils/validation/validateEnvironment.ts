@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash'
 import { EnvironmentValidationError } from '@lib/errors'
-import type { ServiceEnvironment } from 'src/services/types'
+import type { ServiceEnvironment } from '@services/types'
 
 /**
  * Validates an operation's environment variables
