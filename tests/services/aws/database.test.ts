@@ -12,7 +12,7 @@ import {
 } from '@cdktf/provider-aws'
 
 import { Stack } from '@core/stack'
-import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
+import { getAwsProvisionableMock } from '@mocks/aws'
 import type { ServiceTypeChoice } from '@core/service'
 import { PROVIDER, SERVICE_TYPE, DEFAULT_PROFILE_NAME, DEFAULT_SERVICE_STORAGE } from '@constants'
 import type {
@@ -122,7 +122,7 @@ describe('AWS PostgreSQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -177,7 +177,7 @@ describe('AWS MySQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -231,7 +231,7 @@ describe('AWS MariaDB', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb')
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },
@@ -269,7 +269,7 @@ describe('Database service monitoring', () => {
       },
     }
 
-    const provisionable = getAwsDeploymentProvisionableMock<AwsDatabaseProvisionable>(
+    const provisionable = getAwsProvisionableMock<AwsDatabaseProvisionable>(
       config,
       stack,
       { withRootCredentials: true },

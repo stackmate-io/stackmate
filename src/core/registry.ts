@@ -137,7 +137,7 @@ class Registry {
    *
    * @returns {ServiceTypeChoice[]} the service types available for the provider (if any, otherwise all)
    */
-  serviceTypes(provider?: ProviderChoice): ServiceTypeChoice[] {
+  types(provider?: ProviderChoice): ServiceTypeChoice[] {
     if (!provider) {
       return uniq(this.#items.map((s) => s.type))
     }

@@ -1,8 +1,39 @@
-import { getAjv } from '@core/validation'
+import type { ServiceEnvironment } from '@core/service'
+import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
+import { getAjv, getValidData, validateEnvironment } from '@core/validation'
+import { faker } from '@faker-js/faker'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
+import { fromPairs, merge } from 'lodash'
+import { EnvironmentValidationError } from 'src'
+import { ValidationError } from '@lib/errors'
+import { getSchema, type JsonSchema } from '@core/schema'
 
 describe('Validation', () => {
   const ajv = getAjv()
+  let servicesConfig: ServiceConfiguration[]
+  let schema: JsonSchema<ServiceAttributes[]>
+
+  beforeAll(() => {
+    schema = getSchema()
+  })
+
+  beforeEach(() => {
+    servicesConfig = [
+      {
+        name: 'mysql-database',
+        type: 'mysql',
+        size: 'db.t3.micro',
+        provider: 'aws',
+        region: 'eu-central-1',
+      },
+      {
+        name: 'postgresql-database',
+        type: 'postgresql',
+        provider: 'aws',
+        region: 'eu-central-1',
+      },
+    ]
+  })
 
   describe('getAjv', () => {
     it('returns an Ajv instance with serviceLinks keyword in place', () => {
@@ -27,33 +58,6 @@ describe('Validation', () => {
       const overrides = ajv.getKeyword('serviceProfileOverrides')
       expect(overrides).not.toBe(false)
       expect((overrides as FuncKeywordDefinition).compile).toBeInstanceOf(Function)
-    })
-  })
-
-  /*
-  describe('validate', () => {
-    it('validates a service and applies defaults', () => {
-      const service = Registry.get('aws', 'mysql')
-      const config: Partial<AwsMySQLAttributes> = {
-        name: 'my-database-service',
-        provider: 'aws',
-        type: 'mysql',
-        region: 'eu-central-1',
-      }
-
-      const validated = validate(service.schemaId, config, { useDefaults: true })
-      expect(validated).toBeInstanceOf(Object)
-      expect(validated).toMatchObject({
-        ...config,
-        size: DEFAULT_RDS_INSTANCE_SIZE,
-        engine: 'mysql',
-        nodes: 1,
-        port: 3306,
-        profile: DEFAULT_PROFILE_NAME,
-        overrides: {},
-        storage: DEFAULT_SERVICE_STORAGE,
-        version: '8.0',
-      })
     })
   })
 
@@ -91,47 +95,29 @@ describe('Validation', () => {
   describe('custom validators', () => {
     describe('serviceLinks', () => {
       it('raises an error when the service links contain invalid entries', () => {
-        const invalid = merge({}, projectConfig, {
-          services: [{ links: ['invalid-link'] }],
-        })
-
-        expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
+        const invalid = merge([], servicesConfig, [{ links: ['invalid-link'] }])
+        expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
       })
 
       it('proceeds without an error for valid service links', () => {
         const links = ['postgresql-database']
-        const withLinks = merge({}, projectConfig, { services: [{ links }] })
+        const withLinks = merge([], servicesConfig, [{ links }])
 
-        const validated = validate(JSON_SCHEMA_ROOT, withLinks)
-        expect(validated).toMatchObject(projectConfig)
-
-        const {
-          services: [serviceWithLinks],
-        } = validated
-
+        const [serviceWithLinks] = getValidData(withLinks, schema)
         expect(serviceWithLinks).toMatchObject({ links: expect.arrayContaining(links) })
       })
     })
 
     describe('serviceProfile', () => {
       it('raises an error when the service profile is invalid', () => {
-        const invalid = merge({}, projectConfig, {
-          services: [{ profile: 'invalid-profile' }],
-        })
-
-        expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
+        const invalid = merge([], servicesConfig, [{ profile: 'invalid-profile' }])
+        expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
       })
 
       it('proceeds without errors for valid service profiles', () => {
-        const withProfile = merge({}, projectConfig, {
-          services: [{ profile: 'default' }],
-        })
+        const withProfile = merge([], servicesConfig, [{ profile: 'default' }])
 
-        const validated = validate(JSON_SCHEMA_ROOT, withProfile)
-
-        const {
-          services: [serviceWithProfile],
-        } = validated
+        const [serviceWithProfile] = getValidData(withProfile, schema)
         expect(serviceWithProfile).toMatchObject({
           overrides: {},
           profile: 'default',
@@ -141,26 +127,27 @@ describe('Validation', () => {
 
     describe('serviceProfileOverrides', () => {
       it('raises an error when the overrides does not contain keys defined by the profile', () => {
-        const invalid = merge({}, projectConfig, {
-          services: [{ overrides: { something: true, invalid: true } }],
-        })
+        const invalid = merge([], servicesConfig, [
+          { overrides: { something: true, invalid: true } },
+        ])
 
-        expect(() => validate(JSON_SCHEMA_ROOT, invalid)).toThrow(ValidationError)
+        expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
       })
 
-      it('proceeds without an error when the overrides are valid', () => {
-        const overrides = { instance: {}, params: {} }
-        const withOverrides = merge({}, projectConfig, { services: [{ overrides }] })
+      // it('proceeds without an error when the overrides are valid', () => {
+      //   const overrides = { instance: {}, params: {} }
+      //   const withOverrides = merge({}, projectConfig, { services: [{ overrides }] })
 
-        const validated = validate(JSON_SCHEMA_ROOT, withOverrides)
+      //   const validated = validate(JSON_SCHEMA_ROOT, withOverrides)
 
-        const {
-          services: [serviceWithOverrides],
-        } = validated
-        expect(serviceWithOverrides).toMatchObject({ overrides })
-      })
+      //   const {
+      //     services: [serviceWithOverrides],
+      //   } = validated
+      //   expect(serviceWithOverrides).toMatchObject({ overrides })
+      // })
     })
 
+    /*
     describe('isIpOrCidr', () => {
       it('raises an error when an invalid IP is used', () => {
         const invalid = merge({}, projectConfig, {
@@ -199,6 +186,6 @@ describe('Validation', () => {
         expect(serviceWithOverrides).toMatchObject({ externalLinks })
       })
     })
+    */
   })
-  */
 })

@@ -1,19 +1,17 @@
-import type { Stack } from '@core/stack'
 import { DEFAULT_REGION } from '@providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { getProvisionable } from '@core/provision'
-import type {
-  BaseProvisionable,
-  BaseServiceAttributes,
-  CredentialsHandlerOptions,
-} from '@core/service'
 import { generateCredentials } from '@providers/aws/services/secrets'
 import { resourceHandler as providerDeployHandler } from '@providers/aws/services/provider'
+import type { Stack } from '@core/stack'
+import type { ServiceAttributes } from '@core/registry'
+import type { BaseProvisionable } from '@core/provision'
+import type { CredentialsHandlerOptions } from '@core/service'
+import type { AwsSecretsResources, AwsSecretsProvisionable } from '@providers/aws/services/secrets'
 import type {
   AwsProviderProvisionable,
   AwsProviderResources,
 } from '@providers/aws/services/provider'
-import type { AwsSecretsResources, AwsSecretsProvisionable } from '@providers/aws/services/secrets'
 
 export const getProviderResources = (stack: Stack): AwsProviderResources => {
   const provisionable = getProvisionable({
@@ -44,8 +42,8 @@ export const getCredentialResources = (
   return generateCredentials(provisionable as AwsSecretsProvisionable, stack, target, opts)
 }
 
-export const getAwsDeploymentProvisionableMock = <P extends BaseProvisionable>(
-  config: BaseServiceAttributes,
+export const getAwsProvisionableMock = <P extends BaseProvisionable>(
+  config: ServiceAttributes,
   stack: Stack,
   { withCredentials = false, withRootCredentials = false } = {},
 ): P => {

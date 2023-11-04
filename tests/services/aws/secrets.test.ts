@@ -15,7 +15,7 @@ import type { BaseProvisionable } from '@core/service'
 import { PROVIDER, SERVICE_TYPE } from '@constants'
 import { DEFAULT_REGION, REGIONS } from '@providers/aws/constants'
 import { Stack } from '@core/stack'
-import { getAwsDeploymentProvisionableMock } from '@mocks/aws'
+import { getAwsProvisionableMock } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
 
 describe('AWS Secrets service', () => {
@@ -78,7 +78,7 @@ describe('AWS Secrets service', () => {
         region: DEFAULT_REGION,
       }
 
-      vault = getAwsDeploymentProvisionableMock(config, stack)
+      vault = getAwsProvisionableMock(config, stack)
       target = getProvisionable(targetConfig)
     })
 
