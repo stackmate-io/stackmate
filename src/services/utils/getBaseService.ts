@@ -1,11 +1,11 @@
-import { getNameSchema, getProviderSchema, getTypeSchema } from 'src/services/utils'
+import { getNameSchema, getProviderSchema, getTypeSchema } from '@services/utils'
 import type { JsonSchema } from '@lib/schema'
 import type {
   ProviderChoice,
   ServiceTypeChoice,
   Service,
   BaseServiceAttributes,
-} from 'src/services/types'
+} from '@services/types'
 
 /**
  * Returns a base core service (one that cannot be part of the services list)

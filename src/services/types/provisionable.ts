@@ -1,12 +1,19 @@
+import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
-import type { BaseService } from './service'
+import type { BaseService, ExtractAttrs } from './service'
 import type { Dictionary } from 'lodash'
 import type { BaseServiceAttributes } from './util'
 import type { Provisions, ProvisionResources } from './resources'
+import type { AnyAssociationHandler, Association, ServiceAssociations } from './association'
 
-/**
- * @type {BaseProvisionable} base provisionable
- */
+type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
+  [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
+    ? A['requirement'] extends true
+      ? ReturnType<A['handler']>
+      : never
+    : never
+}
+
 export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceAttributes> = {
   id: string
   service: BaseService
@@ -18,10 +25,6 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   requirements: Dictionary<ProvisionResources>
 }
 
-/**
- * @type {ProvisionHandler} a function that can be used to deploy, prepare or destroy a service
- */
-
 export type ProvisionHandler = (
   provisionable: BaseProvisionable,
   stack: Stack,
@@ -29,3 +32,24 @@ export type ProvisionHandler = (
 ) => Provisions
 
 export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
+
+export type Provisionable<
+  Srv extends BaseService,
+  Provs extends Provisions,
+  Context extends Obj = Obj,
+  Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
+> = BaseProvisionable<Attrs> & {
+  service: Srv
+  config: Attrs
+  provisions: Provs
+  context: Context
+  requirements: ExtractServiceRequirements<Srv['associations']>
+}
+
+export type AssociatedProvisionable = {
+  name: string
+  target: BaseProvisionable
+  handler: AnyAssociationHandler
+}
+
+export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>

@@ -5,7 +5,7 @@ import { validateEnvironment } from 'src/services/utils'
 import type { ServiceConfiguration } from '@core/registry'
 import type { AssociationReturnType, ServiceEnvironment, Provisions } from 'src/services/types'
 import type { AssociatedProvisionable, AssociatedProvisionablesMap } from '@core/provision'
-import type { ProvisionablesMap, BaseProvisionable } from '../services/types/provisionable'
+import type { ProvisionablesMap, BaseProvisionable } from './services/types/provisionable'
 
 export class Operation {
   /**
