@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import { getAwsDbMock } from '@mocks/aws'
+import { getAwsDbMock } from '@tests/mocks'
 import { ValidationError } from '@lib/errors'
 import { getSchema, getValidData } from '@src/validation'
 import type { ValidationErrorDescriptor } from '@lib/errors'
