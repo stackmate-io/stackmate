@@ -1,7 +1,7 @@
 import { merge } from 'lodash'
 import { ValidationError } from '@lib/errors'
 import { getSchema, getValidData } from '@src/validation'
-import { getAwsDbMock } from '@mocks/aws'
+import { getAwsDbMock } from '@tests/mocks'
 import type { ServiceAttributes } from '@services/registry'
 import type { AwsMariaDBAttributes, AwsPostgreSQLAttributes } from '@aws/services/database'
 
@@ -21,12 +21,7 @@ describe('serviceLinks', () => {
     const links = [db2.name]
     const withLinks = merge([], config, [{ links }])
 
-    try {
-      const [serviceWithLinks] = getValidData(withLinks, schema)
-      expect(serviceWithLinks).toMatchObject({ links: expect.arrayContaining(links) })
-    } catch (error: any) {
-      console.log(config)
-      console.log(error.errors)
-    }
+    const [serviceWithLinks] = getValidData(withLinks, schema)
+    expect(serviceWithLinks).toMatchObject({ links: expect.arrayContaining(links) })
   })
 })

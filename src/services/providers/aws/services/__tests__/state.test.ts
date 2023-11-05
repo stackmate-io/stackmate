@@ -3,7 +3,7 @@ import { Stack } from '@lib/stack'
 import { AwsState } from '@src/services/providers/aws/services/state'
 import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@mocks/aws'
+import { getAwsProvisionable } from '@tests/mocks'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 
 describe('AWS state', () => {
