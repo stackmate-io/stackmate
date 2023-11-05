@@ -29,17 +29,23 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@constants": [
-        "src/constants"
+      "@src/*": [
+        "src/*"
       ],
       "@core/*": [
         "src/core/*"
       ],
-      "@providers": [
-        "src/providers/index"
+      "@services": [
+        "src/services/index"
       ],
-      "@providers/*": [
-        "src/providers/*"
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@aws/*": [
+        "src/services/providers/aws/*"
+      ],
+      "@local/*": [
+        "src/services/providers/local/*"
       ],
       "@lib/*": [
         "src/lib/*"
@@ -52,6 +58,7 @@
   "include": [
     "src/**/*",
     "tests/**/*",
+    "tsconfig.json",
     "jest.setup.ts",
     "jest.config.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"

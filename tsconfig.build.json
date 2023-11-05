@@ -4,7 +4,7 @@
     "composite": false
   },
   "exclude": [
-    "src/bin/json-schema.ts",
+    "tsconfig.json",
     "jest.setup.ts",
     "jest.config.ts",
     "dist",

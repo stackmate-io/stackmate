@@ -1,4 +1,5 @@
 {
+  "root": true,
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript",
@@ -10,12 +11,34 @@
     "dist/**",
     "node_modules"
   ],
+  "overrides": [
+    {
+      "files": [
+        "tests/**/*.test.ts"
+      ],
+      "plugins": [
+        "jest"
+      ],
+      "env": {
+        "jest/globals": true,
+        "node": true
+      },
+      "rules": {
+        // https://www.npmjs.com/package/eslint-plugin-jest
+        "jest/no-disabled-tests": "warn",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/prefer-to-have-length": "warn",
+        "jest/valid-expect": "warn"
+      }
+    }
+  ],
   "plugins": [
     "@typescript-eslint",
     "unused-imports",
     "import",
     "prettier",
-    "jest"
+    "jsdoc"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -40,6 +63,29 @@
     // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-duplicates.md
     "import/no-duplicates": [
       "error"
+    ],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-cycle.md
+    "import/no-cycle": [2, { "maxDepth": 3, "ignoreExternal": true, "allowUnsafeDynamicCyclicDependency": false }],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-self-import.md
+    "import/no-self-import": ["error"],
+
+    // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "object",
+          "type",
+          "index",
+          "sibling",
+          "parent"
+        ]
+      }
     ],
 
     // https://www.npmjs.com/package/eslint-plugin-unused-imports
@@ -107,13 +153,6 @@
       "error",
       "consistent"
     ],
-
-    // https://www.npmjs.com/package/eslint-plugin-jest
-    "jest/no-disabled-tests": "warn",
-    "jest/no-focused-tests": "error",
-    "jest/no-identical-title": "error",
-    "jest/prefer-to-have-length": "warn",
-    "jest/valid-expect": "warn",
 
     // specify curly brace conventions for all control statements
     // https://eslint.org/docs/rules/curly
