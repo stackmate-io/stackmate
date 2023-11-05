@@ -1,6 +1,6 @@
-import { Registry } from '@core/registry'
-import { REGIONS as AWS_REGIONS } from '@src/services/providers/aws/constants'
-import { CLOUD_PROVIDER, PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { Registry } from '@services/registry'
+import { REGIONS as AWS_REGIONS } from '@aws/constants'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 
 describe('Registry', () => {
   describe('all', () => {
@@ -56,13 +56,13 @@ describe('Registry', () => {
   describe('providers', () => {
     it('returns all providers available with no service provided', () => {
       expect(Registry.providers()).toEqual(
-        expect.arrayContaining(Array.from(Object.values(CLOUD_PROVIDER))),
+        expect.arrayContaining([PROVIDER.AWS, PROVIDER.LOCAL]),
       )
     })
 
     it('returns all providers for a given service', () => {
       expect(Registry.providers(SERVICE_TYPE.MARIADB)).toEqual(
-        expect.arrayContaining(Array.from(Object.values(CLOUD_PROVIDER))),
+        expect.arrayContaining([PROVIDER.AWS]),
       )
     })
   })
