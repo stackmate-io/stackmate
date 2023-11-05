@@ -22,11 +22,14 @@ export const validateServiceProfileOverrides = (
     return false
   }
 
+  let serviceOverrides = {}
+
   try {
-    const serviceOverrides = getProfile({ provider, type, profile })
-    const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
-    return isEmpty(irrelevantKeys)
+    serviceOverrides = getProfile({ provider, type, profile })
   } catch (err) {
-    return false
+    serviceOverrides = {}
   }
+
+  const irrelevantKeys = difference(Object.keys(overrides), Object.keys(serviceOverrides))
+  return isEmpty(irrelevantKeys)
 }

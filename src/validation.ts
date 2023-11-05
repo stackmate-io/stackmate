@@ -28,6 +28,8 @@ const AJV_DEFAULTS: AjvOptions = {
   $data: true,
 } as const
 
+let ajv: Ajv
+
 /**
  * Returns or creates an Ajv instance
  *
@@ -35,7 +37,11 @@ const AJV_DEFAULTS: AjvOptions = {
  * @returns {Ajv} the Ajv instance
  */
 export const getAjv = (opts: AjvOptions = {}): Ajv => {
-  const ajv = new Ajv(defaults({ ...opts }, AJV_DEFAULTS))
+  if (ajv) {
+    return ajv
+  }
+
+  ajv = new Ajv(defaults({ ...opts }, AJV_DEFAULTS))
 
   addFormats(ajv)
 
