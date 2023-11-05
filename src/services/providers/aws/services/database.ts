@@ -195,7 +195,7 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
     versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
     connectable(defaultPort),
     storable(),
-    withEngine(engine),
+    withEngine<typeof engine>(engine),
     multiNode(),
     profileable(),
     withDatabase(),
