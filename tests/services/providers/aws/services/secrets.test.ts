@@ -6,17 +6,17 @@ import {
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
 
-import { AwsSecretsVault, generateCredentials } from '@src/services/providers/aws/services/secrets'
+import { AwsSecretsVault, generateCredentials } from '@aws/services/secrets'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
+import { REGIONS } from '@aws/constants'
 import { Stack } from '@lib/stack'
+import { Registry } from '@services/registry'
 import { getAwsProvisionable } from '@mocks/aws'
-import { getProvisionable } from '@core/provision'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
+import type { BaseProvisionable } from '@services/types/provisionable'
 import type {
   AwsSecretsProvisionable,
   AwsSecretsVaultAttributes,
-} from '@src/services/providers/aws/services/secrets'
+} from '@aws/services/secrets'
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault
@@ -27,7 +27,7 @@ describe('AWS Secrets service', () => {
   })
 
   it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
+    expect(service.regions).toEqual(expect.arrayContaining(REGIONS))
   })
 
   it('contains a valid schema', () => {
@@ -37,20 +37,9 @@ describe('AWS Secrets service', () => {
       required: expect.arrayContaining(['name', 'provider', 'type']),
       additionalProperties: false,
       properties: {
-        provider: {
-          type: 'string',
-          enum: [PROVIDER.AWS],
-          default: 'aws',
-        },
-        type: {
-          type: 'string',
-          enum: [SERVICE_TYPE.SECRETS],
-        },
-        region: {
-          type: 'string',
-          enum: Array.from(REGIONS),
-          default: DEFAULT_REGION,
-        },
+        provider: expect.objectContaining({ const: PROVIDER.AWS }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.SECRETS }),
+        region: expect.objectContaining({ type: 'string', enum: expect.arrayContaining(REGIONS) }),
       },
     })
   })
@@ -68,18 +57,18 @@ describe('AWS Secrets service', () => {
         provider: PROVIDER.AWS,
         name: 'aws-secrets-service',
         type: SERVICE_TYPE.SECRETS,
-        region: DEFAULT_REGION,
+        region: 'eu-central-1',
       }
 
       const targetConfig = {
         provider: PROVIDER.AWS,
         name: 'aws-secrets-service',
         type: SERVICE_TYPE.SECRETS,
-        region: DEFAULT_REGION,
+        region: 'eu-central-1',
       }
 
       vault = getAwsProvisionable(config, stack)
-      target = getProvisionable(targetConfig)
+      target = Registry.provisionable(targetConfig)
     })
 
     it('registers the provision credentials terraform resources', () => {

@@ -10,7 +10,6 @@ import {
   snsTopic,
   snsTopicPolicy,
 } from '@cdktf/provider-aws'
-
 import { Stack } from '@lib/stack'
 import { getAwsProvisionable } from '@mocks/aws'
 import {
@@ -24,24 +23,23 @@ import {
   AWSMySQL,
   AWSPostgreSQL,
   resourceHandler,
-} from '@src/services/providers/aws/services/database'
+} from '@aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
-  DEFAULT_REGION,
   RDS_INSTANCE_SIZES,
   REGIONS,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
-} from '@src/services/providers/aws/constants'
-import type { ServiceTypeChoice } from 'src/services/types'
+} from '@aws/constants'
+import type { ServiceTypeChoice } from '@services/types'
 import type {
   AwsDatabaseAttributes,
   AwsMariaDBAttributes,
   AwsMySQLAttributes,
   AwsPostgreSQLAttributes,
   AwsDatabaseProvisionable,
-} from '@src/services/providers/aws/services/database'
-import type { RdsEngine } from '@src/services/providers/aws/constants'
+} from '@aws/services/database'
+import type { RdsEngine } from '@aws/constants'
 
 const getDatabaseSchemaExpectation = (
   type: ServiceTypeChoice,
@@ -54,27 +52,27 @@ const getDatabaseSchemaExpectation = (
   required: expect.arrayContaining(['provider', 'name', 'type']),
   additionalProperties: false,
   properties: {
-    provider: { type: 'string', enum: [PROVIDER.AWS], default: PROVIDER.AWS },
-    type: { type: 'string', enum: [type] },
-    region: { type: 'string', enum: Array.from(REGIONS), default: DEFAULT_REGION },
-    name: { type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') },
-    version: { type: 'string', enum: Array.from(versions), default: defaultVersion },
-    engine: { type: 'string', enum: [engine], default: engine },
-    nodes: { type: 'number', minimum: 1, maximum: 10000, default: 1 },
-    profile: { type: 'string', default: DEFAULT_PROFILE_NAME, serviceProfile: true },
-    overrides: { type: 'object', default: {}, serviceProfileOverrides: true },
-    database: { type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') },
-    storage: {
+    provider: expect.objectContaining({ const: PROVIDER.AWS }),
+    type: expect.objectContaining({ const: type }),
+    region: expect.objectContaining({ type: 'string', enum: expect.arrayContaining(REGIONS) }),
+    name: expect.objectContaining({ type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') }),
+    version: expect.objectContaining({ type: 'string', enum: Array.from(versions), default: defaultVersion }),
+    engine: expect.objectContaining({ type: 'string', enum: [engine], default: engine }),
+    nodes: expect.objectContaining({ type: 'number', minimum: 1, maximum: 10000, default: 1 }),
+    profile: expect.objectContaining({ type: 'string', default: DEFAULT_PROFILE_NAME, serviceProfile: true }),
+    overrides: expect.objectContaining({ type: 'object', default: {}, serviceProfileOverrides: true }),
+    database: expect.objectContaining({ type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') }),
+    storage: expect.objectContaining({
       type: 'number',
       minimum: 1,
       maximum: 100000,
       default: DEFAULT_SERVICE_STORAGE,
-    },
-    size: {
+    }),
+    size: expect.objectContaining({
       type: 'string',
       enum: Array.from(RDS_INSTANCE_SIZES),
       default: DEFAULT_RDS_INSTANCE_SIZE,
-    },
+    }),
   },
 })
 

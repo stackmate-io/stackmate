@@ -14,8 +14,7 @@ import { getAwsService } from '@aws/utils/getAwsService'
 import type { PROVIDER } from '@src/constants'
 import type { CredentialsHandlerOptions, SecretsVaultService } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { REGIONS } from '@aws/constants'
-import type { ChoiceOf, Obj } from '@lib/util'
+import type { Obj } from '@lib/util'
 import type { AwsService } from '@aws/types'
 import type {
   BaseServiceAttributes,
@@ -27,7 +26,7 @@ import type {
 export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.AWS
   type: typeof SERVICE_TYPE.SECRETS
-  region: ChoiceOf<typeof REGIONS>
+  region: string
 }
 
 export type AwsSecretsResources = Obj

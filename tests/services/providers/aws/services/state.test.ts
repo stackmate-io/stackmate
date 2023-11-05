@@ -1,7 +1,7 @@
 import { S3Backend } from 'cdktf'
 import { Stack } from '@lib/stack'
 import { AwsState } from '@src/services/providers/aws/services/state'
-import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
+import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 import { getAwsProvisionable } from '@mocks/aws'
@@ -50,7 +50,7 @@ describe('AWS state', () => {
         name: 'aws-state-service',
         provider: PROVIDER.AWS,
         type: SERVICE_TYPE.STATE,
-        region: DEFAULT_REGION,
+        region: 'eu-central-1',
         bucket: 'some-bucket-name',
       }, stack)
     })

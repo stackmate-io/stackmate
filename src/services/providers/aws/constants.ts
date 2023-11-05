@@ -1,6 +1,5 @@
 export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
 
-export const DEFAULT_REGION = 'eu-central-1' as const
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
 export const DEFAULT_RDS_ENGINE = 'mysql' as const
 export const DEFAULT_VPC_IP = '10.0.0.0' as const
