@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
 import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
 import { isEmpty, merge } from 'lodash'
@@ -22,7 +22,7 @@ export const getProfile = ({
   profile = DEFAULT_PROFILE_NAME,
   overrides = {},
 }: Args) => {
-  const profilePath = join(
+  const profilePath = resolve(
     __dirname,
     '..',
     'providers',
