@@ -11,7 +11,7 @@ import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { REGIONS } from '@aws/constants'
 import { Stack } from '@lib/stack'
 import { Registry } from '@services/registry'
-import { getAwsProvisionable } from '@mocks/aws'
+import { getAwsProvisionable } from '@tests/mocks'
 import type { BaseProvisionable } from '@services/types/provisionable'
 import type { AwsSecretsProvisionable, AwsSecretsVaultAttributes } from '@aws/services/secrets'
 
