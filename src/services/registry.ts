@@ -103,7 +103,7 @@ class Registry {
    * @returns {BaseService} the service matching the configuration
    * @throws {Error} if the service is not found
    */
-  fromConfig(config: ServiceAttributes): AvailableService {
+  fromConfig(config: ServiceConfiguration): AvailableService {
     const { provider, type } = config
     return this.get(provider, type)
   }
