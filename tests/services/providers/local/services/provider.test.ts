@@ -1,9 +1,9 @@
 import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getProvisionable } from '@core/provision'
+import { Registry } from '@services/registry'
 import { Stack } from '@lib/stack'
 import { LocalProvider } from '@src/services/providers/local/services/provider'
-import type { LocalProviderAttributes } from '@src/services/providers/local/services/provider'
+import type { LocalProviderAttributes } from '@local/types'
 
 describe('Local Provider', () => {
   const service = LocalProvider
@@ -17,17 +17,11 @@ describe('Local Provider', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/local/provider',
       type: 'object',
-      required: ['name', 'type', 'provider'],
+      required: expect.arrayContaining(['name', 'type', 'provider']),
       additionalProperties: false,
       properties: {
-        provider: {
-          type: 'string',
-          enum: [PROVIDER.LOCAL],
-        },
-        type: {
-          type: 'string',
-          enum: [SERVICE_TYPE.PROVIDER],
-        },
+        provider: expect.objectContaining({ const: PROVIDER.LOCAL }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.PROVIDER }),
         region: {
           type: 'string',
         },
@@ -43,7 +37,7 @@ describe('Local Provider', () => {
       type: 'provider',
     }
 
-    const provisionable = getProvisionable(config)
+    const provisionable = Registry.provisionable(config)
 
     it('registers the local provider', () => {
       const resources = service.handler(provisionable, stack)

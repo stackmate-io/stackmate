@@ -1,9 +1,9 @@
 import { LocalBackend } from 'cdktf'
 import { LocalState } from '@src/services/providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getProvisionable } from '@core/provision'
+import { Registry } from '@services/registry'
 import { Stack } from '@lib/stack'
-import type { LocalStateAttributes } from '@src/services/providers/local/services/state'
+import type { LocalStateAttributes } from '@local/services/state'
 
 describe('Local state', () => {
   const service = LocalState
@@ -17,21 +17,11 @@ describe('Local state', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/local/state',
       type: 'object',
-      required: ['name', 'type', 'provider'],
+      required: expect.arrayContaining(['name', 'type', 'provider']),
       additionalProperties: false,
       properties: {
-        provider: {
-          type: 'string',
-          enum: [PROVIDER.LOCAL],
-          default: PROVIDER.LOCAL,
-        },
-        type: {
-          type: 'string',
-          enum: [SERVICE_TYPE.STATE],
-        },
-        region: {
-          type: 'string',
-        },
+        provider: expect.objectContaining({ const: PROVIDER.LOCAL }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.STATE }),
       },
     })
   })
@@ -44,7 +34,7 @@ describe('Local state', () => {
       type: 'state',
     }
 
-    const provisionable = getProvisionable(config)
+    const provisionable = Registry.provisionable(config)
 
     it('registers the local state backend', () => {
       const resources = service.handler(provisionable, stack)
