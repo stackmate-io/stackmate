@@ -1,10 +1,8 @@
-import { DEFAULT_REGION } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getProvisionable } from '@core/provision'
-import { generateCredentials } from '@src/services/providers/aws/services/secrets'
-import { resourceHandler as providerDeployHandler } from '@src/services/providers/aws/services/provider'
+import { Registry, type ServiceAttributes } from '@services/registry'
+import { generateCredentials } from '@aws/services/secrets'
+import { resourceHandler as providerDeployHandler } from '@aws/services/provider'
 import type { Stack } from '@lib/stack'
-import type { ServiceAttributes } from '@core/registry'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 import type { CredentialsHandlerOptions } from 'src/services/behaviors'
 import type {
@@ -17,11 +15,11 @@ import type {
 } from '@src/services/providers/aws/types'
 
 export const getProviderResources = (stack: Stack): AwsProviderResources => {
-  const provisionable = getProvisionable({
+  const provisionable = Registry.provisionable({
     provider: PROVIDER.AWS,
     name: 'aws-provider-service',
     type: SERVICE_TYPE.PROVIDER,
-    region: DEFAULT_REGION,
+    region: 'eu-central-1',
   })
 
   return providerDeployHandler(provisionable as AwsProviderProvisionable, stack)
@@ -33,11 +31,11 @@ export const getCredentialResources = (
   stack: Stack,
   opts?: CredentialsHandlerOptions,
 ): AwsSecretsResources => {
-  const provisionable = getProvisionable({
+  const provisionable = Registry.provisionable({
     provider: PROVIDER.AWS,
     name: 'aws-secrets-service',
     type: SERVICE_TYPE.SECRETS,
-    region: DEFAULT_REGION,
+    region: 'eu-central-1',
   })
 
   Object.assign(provisionable, { requirements: providerResources })
@@ -45,12 +43,12 @@ export const getCredentialResources = (
   return generateCredentials(provisionable as AwsSecretsProvisionable, stack, target, opts)
 }
 
-export const getAwsProvisionableMock = <P extends BaseProvisionable>(
+export const getAwsProvisionable = <P extends BaseProvisionable>(
   config: ServiceAttributes,
   stack: Stack,
   { withCredentials = false, withRootCredentials = false } = {},
 ): P => {
-  const provisionable = getProvisionable(config)
+  const provisionable = Registry.provisionable(config)
   const providerResources = getProviderResources(stack)
 
   Object.assign(provisionable, {

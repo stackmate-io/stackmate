@@ -1,11 +1,10 @@
-import { TerraformBackend } from 'cdktf'
+import { S3Backend } from 'cdktf'
 import { Stack } from '@lib/stack'
 import { AwsState } from '@src/services/providers/aws/services/state'
 import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionableMock } from '@mocks/aws'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
-import type { AwsStateAttributes } from '@src/services/providers/aws/services/state'
+import { getAwsProvisionable } from '@mocks/aws'
 
 describe('AWS state', () => {
   const service = AwsState
@@ -23,28 +22,20 @@ describe('AWS state', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/state',
       type: 'object',
-      required: expect.arrayContaining(['provider', 'name', 'type', 'bucket']),
+      required: expect.arrayContaining(['provider', 'name', 'type', 'region', 'bucket']),
       additionalProperties: false,
       properties: {
-        provider: {
-          type: 'string',
-          enum: [PROVIDER.AWS],
-          default: 'aws',
-        },
-        type: {
-          type: 'string',
-          enum: [SERVICE_TYPE.STATE],
-        },
-        region: {
+        provider: expect.objectContaining({ const: PROVIDER.AWS }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.STATE }),
+        region: expect.objectContaining({
           type: 'string',
           enum: Array.from(REGIONS),
-          default: DEFAULT_REGION,
-        },
-        bucket: {
+        }),
+        bucket: expect.objectContaining({
           type: 'string',
           minLength: 3,
           maxLength: 63,
-        },
+        }),
       },
     })
   })
@@ -52,19 +43,16 @@ describe('AWS state', () => {
   describe('provision handlers', () => {
     let stack: Stack
     let provisionable: BaseProvisionable
-    let config: AwsStateAttributes
 
     beforeEach(() => {
-      stack = new Stack('stack-name')
-      config = {
+      stack = new Stack('mystack')
+      provisionable = getAwsProvisionable({
         name: 'aws-state-service',
         provider: PROVIDER.AWS,
         type: SERVICE_TYPE.STATE,
         region: DEFAULT_REGION,
         bucket: 'some-bucket-name',
-      }
-
-      provisionable = getAwsProvisionableMock(config, stack)
+      }, stack)
     })
 
     it('registers the backend', () => {
@@ -72,7 +60,7 @@ describe('AWS state', () => {
       expect(Object.keys(resources)).toEqual(['backend'])
 
       const { backend } = resources
-      expect(backend).toBeInstanceOf(TerraformBackend)
+      expect(backend).toBeInstanceOf(S3Backend)
     })
   })
 })
