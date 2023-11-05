@@ -36,18 +36,18 @@ describe('Stack', () => {
   })
 
   it('exports the stack as a terraform object', () => {
-    const output = subject.toObject();
+    const output = subject.toObject()
     expect(output).toMatchObject({
       '//': {
         metadata: { stackName },
         outputs: {},
       },
-    });
-  });
+    })
+  })
 
   it('exports the stack as a json string', () => {
     const output = subject.toJson(0)
     expect(output).toMatch('"//":{')
     expect(output).toMatch(`"stackName":"${stackName}"`)
-  });
+  })
 })

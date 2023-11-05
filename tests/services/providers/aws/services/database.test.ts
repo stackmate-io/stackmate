@@ -18,12 +18,7 @@ import {
   DEFAULT_PROFILE_NAME,
   DEFAULT_SERVICE_STORAGE,
 } from '@src/constants'
-import {
-  AWSMariaDB,
-  AWSMySQL,
-  AWSPostgreSQL,
-  resourceHandler,
-} from '@aws/services/database'
+import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, resourceHandler } from '@aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   RDS_INSTANCE_SIZES,
@@ -55,13 +50,31 @@ const getDatabaseSchemaExpectation = (
     provider: expect.objectContaining({ const: PROVIDER.AWS }),
     type: expect.objectContaining({ const: type }),
     region: expect.objectContaining({ type: 'string', enum: expect.arrayContaining(REGIONS) }),
-    name: expect.objectContaining({ type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') }),
-    version: expect.objectContaining({ type: 'string', enum: Array.from(versions), default: defaultVersion }),
+    name: expect.objectContaining({
+      type: 'string',
+      pattern: expect.stringContaining('a-zA-Z0-9'),
+    }),
+    version: expect.objectContaining({
+      type: 'string',
+      enum: Array.from(versions),
+      default: defaultVersion,
+    }),
     engine: expect.objectContaining({ type: 'string', enum: [engine], default: engine }),
     nodes: expect.objectContaining({ type: 'number', minimum: 1, maximum: 10000, default: 1 }),
-    profile: expect.objectContaining({ type: 'string', default: DEFAULT_PROFILE_NAME, serviceProfile: true }),
-    overrides: expect.objectContaining({ type: 'object', default: {}, serviceProfileOverrides: true }),
-    database: expect.objectContaining({ type: 'string', pattern: expect.stringContaining('a-zA-Z0-9') }),
+    profile: expect.objectContaining({
+      type: 'string',
+      default: DEFAULT_PROFILE_NAME,
+      serviceProfile: true,
+    }),
+    overrides: expect.objectContaining({
+      type: 'object',
+      default: {},
+      serviceProfileOverrides: true,
+    }),
+    database: expect.objectContaining({
+      type: 'string',
+      pattern: expect.stringContaining('a-zA-Z0-9'),
+    }),
     storage: expect.objectContaining({
       type: 'number',
       minimum: 1,

@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { ValidationError, ValidationErrorDescriptor, EnvironmentValidationError } from '@lib/errors'
+import { ValidationError, EnvironmentValidationError } from '@lib/errors'
+import type { ValidationErrorDescriptor } from '@lib/errors'
 
 describe('ValidationError', () => {
   let message: string
@@ -12,7 +13,7 @@ describe('ValidationError', () => {
       {
         message: faker.lorem.sentence(),
         path: faker.system.directoryPath(),
-      }
+      },
     ]
 
     subject = new ValidationError(message, errors)
@@ -34,7 +35,10 @@ describe('EnvironmentValidationError', () => {
 
   beforeEach(() => {
     message = faker.lorem.sentence()
-    vars = faker.lorem.words(4).split(' ').map(w => w.toUpperCase())
+    vars = faker.lorem
+      .words(4)
+      .split(' ')
+      .map((w) => w.toUpperCase())
 
     subject = new EnvironmentValidationError(message, vars)
   })

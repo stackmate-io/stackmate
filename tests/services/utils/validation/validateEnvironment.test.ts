@@ -1,8 +1,8 @@
 import { fromPairs } from 'lodash'
 import { faker } from '@faker-js/faker'
 import { EnvironmentValidationError } from '@lib/errors'
-import { ServiceEnvironment } from '@services/types'
 import { validateEnvironment } from '@services/utils'
+import type { ServiceEnvironment } from '@services/types'
 
 describe('validateEnvironment', () => {
   const vars: ServiceEnvironment[] = []

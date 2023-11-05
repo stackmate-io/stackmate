@@ -1,4 +1,5 @@
-import { JsonSchema, mergeSchemas } from '@src/lib/schema'
+import { mergeSchemas } from '@src/lib/schema'
+import type { JsonSchema } from '@src/lib/schema'
 
 type Subject = {
   a: string

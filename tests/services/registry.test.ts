@@ -55,9 +55,7 @@ describe('Registry', () => {
 
   describe('providers', () => {
     it('returns all providers available with no service provided', () => {
-      expect(Registry.providers()).toEqual(
-        expect.arrayContaining([PROVIDER.AWS, PROVIDER.LOCAL]),
-      )
+      expect(Registry.providers()).toEqual(expect.arrayContaining([PROVIDER.AWS, PROVIDER.LOCAL]))
     })
 
     it('returns all providers for a given service', () => {

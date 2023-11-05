@@ -1,7 +1,8 @@
 import fs from 'node:fs'
 import { getAwsDbMock } from '@mocks/aws'
-import { ValidationError, ValidationErrorDescriptor } from '@lib/errors'
+import { ValidationError } from '@lib/errors'
 import { getSchema, getValidData } from '@src/validation'
+import type { ValidationErrorDescriptor } from '@lib/errors'
 
 describe('serviceProfile', () => {
   const db = getAwsDbMock()
@@ -22,9 +23,11 @@ describe('serviceProfile', () => {
       errors = err.errors
     }
 
-    expect(errors).toEqual(expect.arrayContaining([
-      expect.objectContaining({ path: '0.profile', message: 'Invalid service profile defined' })
-    ]))
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: '0.profile', message: 'Invalid service profile defined' }),
+      ]),
+    )
 
     existMock.mockRestore()
   })
