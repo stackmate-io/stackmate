@@ -1,9 +1,9 @@
 import { merge } from 'lodash'
 import { ValidationError } from '@lib/errors'
 import { getSchema, getValidData } from '@src/validation'
-import { ServiceAttributes } from '@services/registry'
 import { getAwsDbMock } from '@mocks/aws'
-import { AwsMariaDBAttributes, AwsPostgreSQLAttributes } from '@aws/services/database'
+import type { ServiceAttributes } from '@services/registry'
+import type { AwsMariaDBAttributes, AwsPostgreSQLAttributes } from '@aws/services/database'
 
 describe('serviceLinks', () => {
   const schema = getSchema()

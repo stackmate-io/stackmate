@@ -14,12 +14,14 @@ describe('getProfile', () => {
   it('raises an error for a missing service profile', () => {
     const existsMock = jest.spyOn(fs, 'existsSync').mockReturnValue(false)
     const profilePath = path.resolve(
-      __dirname, '..', '..', '..', ...('src/services/providers/aws/profiles/database/default.ts'.split('/')),
+      __dirname,
+      '..',
+      '..',
+      '..',
+      ...'src/services/providers/aws/profiles/database/default.ts'.split('/'),
     )
 
-    expect(() => getProfile(config)).toThrow(
-      `Profile file ${profilePath} does not exist`
-    )
+    expect(() => getProfile(config)).toThrow(`Profile file ${profilePath} does not exist`)
 
     expect(existsMock).toHaveBeenCalledWith(profilePath)
 

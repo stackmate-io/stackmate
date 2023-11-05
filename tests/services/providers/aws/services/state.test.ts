@@ -3,8 +3,8 @@ import { Stack } from '@lib/stack'
 import { AwsState } from '@src/services/providers/aws/services/state'
 import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
 import { getAwsProvisionable } from '@mocks/aws'
+import type { BaseProvisionable } from 'src/services/types/provisionable'
 
 describe('AWS state', () => {
   const service = AwsState
@@ -46,13 +46,16 @@ describe('AWS state', () => {
 
     beforeEach(() => {
       stack = new Stack('mystack')
-      provisionable = getAwsProvisionable({
-        name: 'aws-state-service',
-        provider: PROVIDER.AWS,
-        type: SERVICE_TYPE.STATE,
-        region: 'eu-central-1',
-        bucket: 'some-bucket-name',
-      }, stack)
+      provisionable = getAwsProvisionable(
+        {
+          name: 'aws-state-service',
+          provider: PROVIDER.AWS,
+          type: SERVICE_TYPE.STATE,
+          region: 'eu-central-1',
+          bucket: 'some-bucket-name',
+        },
+        stack,
+      )
     })
 
     it('registers the backend', () => {

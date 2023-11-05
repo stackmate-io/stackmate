@@ -9,9 +9,7 @@ describe('isIpOrCidr', () => {
   const config = [db]
 
   it('raises an error when the overrides does not contain keys defined by the profile', () => {
-    const invalid = merge([], config, [
-      { overrides: { something: true, invalid: true } },
-    ])
+    const invalid = merge([], config, [{ overrides: { something: true, invalid: true } }])
 
     expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
   })

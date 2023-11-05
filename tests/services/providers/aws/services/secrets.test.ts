@@ -13,10 +13,7 @@ import { Stack } from '@lib/stack'
 import { Registry } from '@services/registry'
 import { getAwsProvisionable } from '@mocks/aws'
 import type { BaseProvisionable } from '@services/types/provisionable'
-import type {
-  AwsSecretsProvisionable,
-  AwsSecretsVaultAttributes,
-} from '@aws/services/secrets'
+import type { AwsSecretsProvisionable, AwsSecretsVaultAttributes } from '@aws/services/secrets'
 
 describe('AWS Secrets service', () => {
   const service = AwsSecretsVault

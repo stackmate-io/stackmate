@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { hashObject, hashString, uniqueIdentifier } from '@lib/hash'
-import { Obj } from '@lib/util'
+import type { Obj } from '@lib/util'
 
 describe('hashString', () => {
   const txt = faker.lorem.sentence()
@@ -52,7 +52,7 @@ describe('uniqueIdentifier', () => {
   })
 
   it('provides a unique identifier when hashing the same content', () => {
-    const id1 = uniqueIdentifier(prefix, hashable, {  separator: '-'})
+    const id1 = uniqueIdentifier(prefix, hashable, { separator: '-' })
     const id2 = uniqueIdentifier(prefix, hashable, { separator: '-' })
     expect(id1).not.toEqual(id2)
   })

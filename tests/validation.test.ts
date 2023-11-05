@@ -60,12 +60,12 @@ describe('Validation', () => {
         minItems: 1,
         items: expect.objectContaining({
           type: 'object',
-          required: expect.arrayContaining(['name', 'type', 'provider'])
+          required: expect.arrayContaining(['name', 'type', 'provider']),
         }),
       })
 
       expect(Object.keys(schema.$defs || {})).toEqual(
-        expect.arrayContaining(Services.all().map(srv => srv.schemaId))
+        expect.arrayContaining(Services.all().map((srv) => srv.schemaId)),
       )
     })
   })
@@ -73,7 +73,9 @@ describe('Validation', () => {
   describe('getValidData', () => {
     it('validates data', () => {
       const valid = getValidData(config, schema)
-      expect(valid).toEqual(expect.arrayContaining(config.map(cfg => expect.objectContaining(cfg))))
+      expect(valid).toEqual(
+        expect.arrayContaining(config.map((cfg) => expect.objectContaining(cfg))),
+      )
     })
   })
 })

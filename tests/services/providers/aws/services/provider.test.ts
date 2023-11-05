@@ -11,7 +11,7 @@ import { REGIONS } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { Stack } from '@lib/stack'
 import { Registry } from '@services/registry'
-import { BaseProvisionable } from '@src/services/types'
+import type { BaseProvisionable } from '@src/services/types'
 import type { AwsProviderResources } from '@aws/types'
 
 describe('AWS Provider', () => {
@@ -69,9 +69,17 @@ describe('AWS Provider', () => {
       const resources = service.handler(provisionable, stack) as AwsProviderResources
 
       expect(resources).toBeInstanceOf(Object)
-      expect(Object.keys(resources)).toEqual(expect.arrayContaining([
-        'gateway', 'account', 'kmsKey', 'vpc', 'provider', 'subnets', 'outputs',
-      ]))
+      expect(Object.keys(resources)).toEqual(
+        expect.arrayContaining([
+          'gateway',
+          'account',
+          'kmsKey',
+          'vpc',
+          'provider',
+          'subnets',
+          'outputs',
+        ]),
+      )
       expect(resources.gateway).toBeInstanceOf(awsInternetGateway.InternetGateway)
       expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey)
       expect(resources.vpc).toBeInstanceOf(awsVpc.Vpc)
