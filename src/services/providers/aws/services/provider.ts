@@ -11,7 +11,7 @@ import {
 } from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@lib/networking'
 import { getBaseService, getProfile } from '@services/utils'
-import { DEFAULT_REGION, DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
+import { DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { profileable, withEnvironment, withHandler, withRegions } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
@@ -114,7 +114,7 @@ export const resourceHandler = (
 export const getProviderService = (): AwsProviderService =>
   pipe(
     profileable(),
-    withRegions(REGIONS, DEFAULT_REGION),
+    withRegions(REGIONS),
     withHandler(resourceHandler),
     withEnvironment('AWS_ACCESS_KEY_ID', 'AWS Access Key ID', true),
     withEnvironment('AWS_SECRET_ACCESS_KEY', 'AWS Secret Access Key', true),

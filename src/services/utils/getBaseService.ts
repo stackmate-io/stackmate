@@ -1,4 +1,4 @@
-import { getNameSchema, getProviderSchema, getTypeSchema } from '@services/utils'
+import { getNameSchema } from '@services/utils'
 import type { JsonSchema } from '@lib/schema'
 import type {
   ProviderChoice,
@@ -25,10 +25,10 @@ export const getBaseService = (
     required: ['name', 'type', 'provider'],
     additionalProperties: false,
     properties: {
-      name: getNameSchema(),
-      provider: getProviderSchema([provider], provider),
-      type: getTypeSchema([type]),
+      provider: { const: provider },
+      type: { const: type },
       region: { type: 'string' },
+      name: getNameSchema(),
     },
   }
 

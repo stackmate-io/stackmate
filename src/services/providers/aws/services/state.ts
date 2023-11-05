@@ -1,7 +1,7 @@
 import pipe from 'lodash/fp/pipe'
 import { S3Backend } from 'cdktf'
 import { SERVICE_TYPE } from '@src/constants'
-import { DEFAULT_REGION, REGIONS } from '@aws/constants'
+import { REGIONS } from '@aws/constants'
 import { getAwsService } from '@aws/utils/getAwsService'
 import { withRegions, withHandler, withSchema } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
@@ -62,7 +62,7 @@ const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
  */
 export const getStateService = (): AwsStateService =>
   pipe(
-    withRegions(REGIONS, DEFAULT_REGION),
+    withRegions(REGIONS),
     withHandler(resourceHandler),
     withSchema<AwsStateAttributes, AdditionalAttrs>(getAdditionalPropertiesSchema()),
   )(getAwsService(SERVICE_TYPE.STATE))
