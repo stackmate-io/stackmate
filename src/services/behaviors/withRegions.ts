@@ -20,7 +20,7 @@ type AdditionalProps = { regions: readonly string[] }
  * @returns {Function<Service>}
  */
 export const withRegions =
-  <C extends BaseServiceAttributes>(regions: readonly string[]) =>
+  <C extends BaseServiceAttributes>(regions: string[] | readonly string[]) =>
   <T extends Service<C>>(srv: T): T & AdditionalProps =>
     pipe(
       withProperties<C, AdditionalProps>({ regions }),

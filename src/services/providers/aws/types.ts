@@ -17,7 +17,7 @@ import type {
   dataAwsCallerIdentity,
 } from '@cdktf/provider-aws'
 import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import type { ChoiceOf, Obj } from '@lib/util'
+import type { Obj } from '@lib/util'
 import type {
   ServiceAssociations,
   Service,
@@ -27,7 +27,6 @@ import type {
   Provisions,
 } from '@services/types'
 import type { TerraformOutput, TerraformResource } from 'cdktf'
-import type { REGIONS } from '@aws/constants'
 
 /**
  * @type {AwsServiceAlertResources} the alarms resources
@@ -50,7 +49,7 @@ export type AwsAlertPrerequisites = {
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.AWS
-  region: ChoiceOf<typeof REGIONS>
+  region: string
 }
 
 export type AwsService<
@@ -70,7 +69,7 @@ export type AwsProviderResources = {
 
 export type AwsProviderAttributes = AwsServiceAttributes<
   BaseServiceAttributes &
-    RegionalAttributes<ChoiceOf<typeof REGIONS>> & {
+    RegionalAttributes & {
       type: typeof SERVICE_TYPE.PROVIDER
       rootIp?: string
     }
