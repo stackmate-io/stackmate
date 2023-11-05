@@ -54,6 +54,18 @@ describe('Validation', () => {
 
   describe('getSchema', () => {
     it('returns a valid schema', () => {
+      const ajv = getAjv()
+      const schemaId = schema.$id
+
+      if (!schemaId) {
+        throw new Error('')
+      }
+
+      expect(() => ajv.validateSchema(schema, true)).not.toThrow()
+      expect(ajv.errors).toBeNull()
+    })
+
+    it('requires that the schema is an array of objects', () => {
       expect(schema).toMatchObject({
         $id: 'stackmate-services-configuration',
         type: 'array',
