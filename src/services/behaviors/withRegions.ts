@@ -20,20 +20,25 @@ type AdditionalProps = { regions: readonly string[] }
  * @returns {Function<Service>}
  */
 export const withRegions =
-  <C extends BaseServiceAttributes>(regions: readonly string[], defaultRegion: string) =>
+  <C extends BaseServiceAttributes>(regions: readonly string[]) =>
   <T extends Service<C>>(srv: T): T & AdditionalProps =>
     pipe(
       withProperties<C, AdditionalProps>({ regions }),
       withSchema<C, RegionalAttributes>({
         type: 'object',
+        required: ['region'],
         properties: {
           region: {
             type: 'string',
             enum: regions,
-            default: defaultRegion,
             errorMessage: {
               enum: `The region must be one of ${regions.join(', ')}`,
             },
+          },
+        },
+        errorMessage: {
+          required: {
+            region: 'You need to specify a region for the service',
           },
         },
       }),

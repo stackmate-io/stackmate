@@ -7,8 +7,6 @@ import { ValidationError } from '@lib/errors'
 import { Registry, type ServiceAttributes } from '@services/registry'
 import {
   getNameSchema,
-  getTypeSchema,
-  getProviderSchema,
   validateServiceProfileOverrides,
   validateServiceLinks,
   validateServiceProfile,
@@ -179,8 +177,14 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       required: ['name', 'type', 'provider'],
       properties: {
         name: getNameSchema(),
-        type: getTypeSchema(Registry.types()),
-        provider: getProviderSchema(Registry.providers()),
+        type: {
+          type: 'string',
+          enum: Registry.types(),
+        },
+        provider: {
+          type: 'string',
+          enum: Registry.providers(),
+        },
       },
       allOf,
       errorMessage: {

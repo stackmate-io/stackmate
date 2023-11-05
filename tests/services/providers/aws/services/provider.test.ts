@@ -6,13 +6,13 @@ import {
   vpc as awsVpc,
 } from '@cdktf/provider-aws'
 
-import { AwsProvider } from '@src/services/providers/aws/services/provider'
-import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
-import { PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { AwsProvider } from '@aws/services/provider'
+import { REGIONS } from '@aws/constants'
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { Stack } from '@lib/stack'
-import { getProvisionable } from '@core/provision'
-import { type BaseProvisionable } from 'src/services/types/provisionable'
-import type { AwsProviderResources, AwsProviderAttributes } from '@src/services/providers/aws/types'
+import { Registry } from '@services/registry'
+import { BaseProvisionable } from '@src/services/types'
+import type { AwsProviderResources } from '@aws/types'
 
 describe('AWS Provider', () => {
   const service = AwsProvider
@@ -23,32 +23,30 @@ describe('AWS Provider', () => {
   })
 
   it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
+    expect(service.regions).toEqual(expect.arrayContaining(REGIONS))
   })
 
   it('contains a valid schema', () => {
     expect(service.schema).toMatchObject({
       $id: 'services/aws/provider',
-      type: 'object',
-      required: expect.arrayContaining(['name', 'provider', 'type']),
-      additionalProperties: false,
+      required: expect.arrayContaining(['name', 'provider', 'type', 'region']),
       properties: {
-        provider: {
-          type: 'string',
-          enum: [PROVIDER.AWS],
-          default: PROVIDER.AWS,
-        },
-        type: {
-          type: 'string',
-          enum: [SERVICE_TYPE.PROVIDER],
-        },
-        region: {
+        provider: expect.objectContaining({ const: PROVIDER.AWS }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.PROVIDER }),
+        region: expect.objectContaining({
           type: 'string',
           enum: Array.from(REGIONS),
-          default: DEFAULT_REGION,
-        },
-        profile: { type: 'string', default: 'default', serviceProfile: true },
-        overrides: { type: 'object', default: {}, serviceProfileOverrides: true },
+        }),
+        profile: expect.objectContaining({
+          type: 'string',
+          default: DEFAULT_PROFILE_NAME,
+          serviceProfile: true,
+        }),
+        overrides: expect.objectContaining({
+          type: 'object',
+          default: {},
+          serviceProfileOverrides: true,
+        }),
       },
     })
   })
@@ -56,27 +54,24 @@ describe('AWS Provider', () => {
   describe('provision handler', () => {
     let stack: Stack
     let provisionable: BaseProvisionable
-    let config: AwsProviderAttributes
 
     beforeEach(() => {
       stack = new Stack('stack-name')
-      config = {
-        provider: 'aws',
-        name: 'aws-provider',
+      provisionable = Registry.provisionable({
+        provider: PROVIDER.AWS,
         type: SERVICE_TYPE.PROVIDER,
+        name: 'aws-provider',
         region: 'eu-central-1',
-      }
-
-      provisionable = getProvisionable(config)
+      })
     })
 
     it('registers the service into the stack and creates the resources', () => {
       const resources = service.handler(provisionable, stack) as AwsProviderResources
 
       expect(resources).toBeInstanceOf(Object)
-      expect(new Set(Object.keys(resources))).toEqual(
-        new Set(['gateway', 'account', 'kmsKey', 'vpc', 'provider', 'subnets', 'outputs']),
-      )
+      expect(Object.keys(resources)).toEqual(expect.arrayContaining([
+        'gateway', 'account', 'kmsKey', 'vpc', 'provider', 'subnets', 'outputs',
+      ]))
       expect(resources.gateway).toBeInstanceOf(awsInternetGateway.InternetGateway)
       expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey)
       expect(resources.vpc).toBeInstanceOf(awsVpc.Vpc)

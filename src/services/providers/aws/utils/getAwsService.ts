@@ -1,6 +1,6 @@
 import pipe from 'lodash/fp/pipe'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { DEFAULT_REGION, REGIONS } from '@aws/constants'
+import { REGIONS } from '@aws/constants'
 import { getBaseService } from '@services/utils'
 import { withAssociations, withRegions } from '@services/behaviors'
 import type {
@@ -76,7 +76,4 @@ const associations: AwsServiceAssociations = {
 }
 
 export const getAwsService = (type: ServiceTypeChoice) =>
-  pipe(
-    withAssociations(associations),
-    withRegions(REGIONS, DEFAULT_REGION),
-  )(getBaseService(PROVIDER.AWS, type))
+  pipe(withAssociations(associations), withRegions(REGIONS))(getBaseService(PROVIDER.AWS, type))
