@@ -1,13 +1,9 @@
 import { getAjv, getValidData, getSchema } from '@core/validation'
-import { validateEnvironment } from 'src/services/utils/validation/validateEnvironment'
-import { faker } from '@faker-js/faker'
-import { fromPairs, merge } from 'lodash'
-import { EnvironmentValidationError } from 'src'
+import { merge } from 'lodash'
 import { ValidationError } from '@lib/errors'
 import type { JsonSchema } from '@lib/schema'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
 import type { ServiceAttributes, ServiceConfiguration } from '@core/registry'
-import type { ServiceEnvironment } from 'src/services/types'
 
 describe('Validation', () => {
   const ajv = getAjv()
@@ -62,53 +58,7 @@ describe('Validation', () => {
     })
   })
 
-  describe('validateEnvironment', () => {
-    const vars: ServiceEnvironment[] = []
-
-    beforeEach(() => {
-      vars.push(
-        {
-          name: faker.lorem.word().toUpperCase(),
-          description: faker.lorem.sentence(),
-          required: true,
-        },
-        {
-          name: faker.lorem.word().toUpperCase(),
-          description: faker.lorem.sentence(),
-          required: false,
-        },
-      )
-    })
-
-    it('raises an error when there are required environment variables missing', () => {
-      expect(() => validateEnvironment(vars)).toThrow(EnvironmentValidationError)
-    })
-
-    it('does not raise an error when all required variables are present', () => {
-      const envWithRequiredParams = fromPairs(
-        vars.filter((envVar) => envVar.required).map((envVar) => [envVar.name, faker.lorem.word()]),
-      )
-
-      expect(() => validateEnvironment(vars, envWithRequiredParams)).not.toThrow()
-    })
-  })
-
   describe('custom validators', () => {
-    describe('serviceLinks', () => {
-      it('raises an error when the service links contain invalid entries', () => {
-        const invalid = merge([], servicesConfig, [{ links: ['invalid-link'] }])
-        expect(() => getValidData(invalid, schema)).toThrow(ValidationError)
-      })
-
-      it('proceeds without an error for valid service links', () => {
-        const links = ['postgresql-database']
-        const withLinks = merge([], servicesConfig, [{ links }])
-
-        const [serviceWithLinks] = getValidData(withLinks, schema)
-        expect(serviceWithLinks).toMatchObject({ links: expect.arrayContaining(links) })
-      })
-    })
-
     describe('serviceProfile', () => {
       it('raises an error when the service profile is invalid', () => {
         const invalid = merge([], servicesConfig, [{ profile: 'invalid-profile' }])

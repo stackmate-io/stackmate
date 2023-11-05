@@ -1,3 +1,6 @@
+import { SERVICE_TYPE } from '@src/constants'
+import type { ServiceTypeChoice } from '@services/types'
+
 export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
 
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
@@ -5,6 +8,13 @@ export const DEFAULT_RDS_ENGINE = 'mysql' as const
 export const DEFAULT_VPC_IP = '10.0.0.0' as const
 
 export const REGIONS = ['eu-central-1'] as const
+
+export type AwsDbServiceType = Extract<ServiceTypeChoice, 'mysql' | 'mariadb' | 'postgresql'>
+export const RDS_ENGINE_PER_SERVICE_TYPE: Record<AwsDbServiceType, RdsEngine> = {
+  [SERVICE_TYPE.MYSQL]: 'mysql',
+  [SERVICE_TYPE.MARIADB]: 'mariadb',
+  [SERVICE_TYPE.POSTGRESQL]: 'postgres',
+}
 
 export const RDS_INSTANCE_SIZES = [
   'db.t3.micro',

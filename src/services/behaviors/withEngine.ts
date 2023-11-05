@@ -13,7 +13,13 @@ export type EngineAttributes<T extends string = string> = { engine: T }
  * @returns {Function<Service>}
  */
 
-export const withEngine = <C extends BaseServiceAttributes>(engine: string, isRequired = false) =>
+export const withEngine = <
+  E extends string,
+  C extends BaseServiceAttributes = BaseServiceAttributes,
+>(
+  engine: E,
+  isRequired = false,
+) =>
   withSchema<C, EngineAttributes>({
     type: 'object',
     required: isRequired ? ['engine'] : [],
