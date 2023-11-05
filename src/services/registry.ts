@@ -5,18 +5,30 @@ import type { Distribute, DistributiveRequireKeys } from '@lib/util'
 import type {
   ProviderChoice,
   ServiceTypeChoice,
-  BaseServiceAttributes,
-  BaseService,
   ExtractAttrs,
   BaseProvisionable,
 } from '@services/types'
+
+const availableServices = Object.values(Services)
+
+// In order for hints to work properly when we type project configurations (eg. in tests),
+// the union types extracted from AvailableServices should be distributive
+// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
+type AvailableServices = Distribute<typeof availableServices>
+type AvailableService = Distribute<AvailableServices[number]>
+
+export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
+export type ServiceConfiguration = DistributiveRequireKeys<
+  ServiceAttributes,
+  'name' | 'type' | 'provider'
+>
 
 class Registry {
   /**
    * @var {BaseServices[]} items the service items in the registry
    * @readonly
    */
-  readonly #items: BaseService[] = []
+  readonly #items: AvailableService[] = []
 
   /**
    * @var {Map<ProviderChoice, readonly string[]>} regions the regions available per provider
@@ -25,11 +37,10 @@ class Registry {
   readonly #regions: Map<ProviderChoice, Set<string>> = new Map()
 
   /**
-   * @param {BaseService[]} services any services to initialize the registry with
    * @constructor
    */
-  constructor(services: BaseService[]) {
-    this.#items.push(...services)
+  constructor() {
+    this.#items.push(...availableServices)
 
     // Extract the regions from each service and group them by provider
     this.#items.forEach(({ provider, regions = [] }) => {
@@ -71,7 +82,7 @@ class Registry {
    * @param {ServiceTypeChoice} type the type to look services up by
    * @returns {BaseService[]} ths services returned
    */
-  ofType(type: ServiceTypeChoice): BaseService[] {
+  ofType(type: ServiceTypeChoice): AvailableService[] {
     return this.#items.filter((s) => s.type === type)
   }
 
@@ -81,7 +92,7 @@ class Registry {
    * @param {ProviderChoice} provider the provider to look services up by
    * @returns {BaseService[]} ths services returned
    */
-  ofProvider(provider: ProviderChoice): BaseService[] {
+  ofProvider(provider: ProviderChoice): AvailableService[] {
     return this.#items.filter((s) => s.provider === provider)
   }
 
@@ -92,7 +103,7 @@ class Registry {
    * @returns {BaseService} the service matching the configuration
    * @throws {Error} if the service is not found
    */
-  fromConfig(config: BaseServiceAttributes): BaseService {
+  fromConfig(config: ServiceAttributes): AvailableService {
     const { provider, type } = config
     return this.get(provider, type)
   }
@@ -139,7 +150,7 @@ class Registry {
    * @param {BaseServiceAttributes} config the service's configuration
    * @returns {BaseProvisionable} the provisionable to use in operations
    */
-  provisionable(config: BaseServiceAttributes): BaseProvisionable {
+  provisionable<C extends ServiceAttributes = ServiceAttributes>(config: C): BaseProvisionable<C> {
     const { name, type, provider, region } = config
     const resourceId = `${name || type}-${provider}-${region || 'default'}`
 
@@ -156,18 +167,5 @@ class Registry {
   }
 }
 
-const availableServices = Object.values(Services)
-
-// In order for hints to work properly when we type project configurations (eg. in tests),
-// the union types extracted from AvailableServices should be distributive
-// https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
-type AvailableServices = Distribute<typeof availableServices>
-type AvailableService = Distribute<AvailableServices[number]>
-
-export type ServiceAttributes = Distribute<ExtractAttrs<AvailableService>>
-export type ServiceConfiguration = DistributiveRequireKeys<
-  ServiceAttributes,
-  'name' | 'type' | 'provider'
->
-const registry = new Registry(availableServices)
+const registry = new Registry()
 export { registry as Registry }

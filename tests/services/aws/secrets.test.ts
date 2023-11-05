@@ -10,7 +10,7 @@ import { AwsSecretsVault, generateCredentials } from '@src/services/providers/aw
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { DEFAULT_REGION, REGIONS } from '@src/services/providers/aws/constants'
 import { Stack } from '@lib/stack'
-import { getAwsProvisionableMock } from '@mocks/aws'
+import { getAwsProvisionable } from '@mocks/aws'
 import { getProvisionable } from '@core/provision'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 import type {
@@ -78,7 +78,7 @@ describe('AWS Secrets service', () => {
         region: DEFAULT_REGION,
       }
 
-      vault = getAwsProvisionableMock(config, stack)
+      vault = getAwsProvisionable(config, stack)
       target = getProvisionable(targetConfig)
     })
 
