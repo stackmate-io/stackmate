@@ -1,4 +1,4 @@
-import { resolve } from 'node:path'
+import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
 import { isEmpty, merge } from 'lodash'
@@ -22,7 +22,7 @@ export const getProfile = ({
   profile = DEFAULT_PROFILE_NAME,
   overrides = {},
 }: Args) => {
-  const profilePath = resolve(
+  const profilePath = join(
     __dirname,
     '..',
     'providers',
@@ -42,6 +42,8 @@ export const getProfile = ({
     // eslint-disable-next-line global-require,import/no-dynamic-require
     profileConfig = require(profilePath)
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.warn('Error thrown while requiring the profile', error)
     throw new Error(`Failed to load profile ${profile} for ${provider} service ${type}`)
   }
 

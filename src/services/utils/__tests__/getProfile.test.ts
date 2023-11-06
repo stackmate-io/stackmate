@@ -18,7 +18,7 @@ describe('getProfile', () => {
       '..',
       '..',
       '..',
-      ...'src/services/providers/aws/profiles/database/default.ts'.split('/'),
+      ...'services/providers/aws/profiles/database/default.ts'.split('/'),
     )
 
     expect(() => getProfile(config)).toThrow(`Profile file ${profilePath} does not exist`)
