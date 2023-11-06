@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 import path, { join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { readdirSync, statSync, writeFileSync } from 'node:fs'
 import { Operation } from '@src/operation'
 import type { ServiceConfiguration } from '@src/services/registry'
 
-const CFG_NAME = 'config.json'
+const CFG_NAME = 'config.ts'
+const STACK_FILE = 'main.tf.json'
 const PATH = resolve(__dirname, '..', '..', 'e2e')
 const directories = readdirSync(PATH).filter((file) => statSync(join(PATH, file)))
 const TF_PATH = process.env.TF_PATH || '/usr/local/bin/terraform'
@@ -37,7 +38,7 @@ export const runTerraform = (directory: string) => {
 export const runTest = (
   directory: string,
   config: ServiceConfiguration[],
-  filename = 'stackmate.tf.json',
+  filename = STACK_FILE,
 ) => {
   const operation = new Operation(config, 'e2e-test')
   const output = path.join(directory, filename)
@@ -52,10 +53,15 @@ const runAllTests = () => {
     const filename = join(fullDir, CFG_NAME)
 
     try {
-      config = JSON.parse(readFileSync(filename, 'utf-8'))
+      // eslint-disable-next-line global-require,import/no-dynamic-require,@typescript-eslint/no-var-requires
+      ;({ config } = require(filename))
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn(`No ${CFG_NAME} is available under ${dir}. You need to provide that for testing`)
+      if (err instanceof Error) {
+        console.warn('Error thrown while requiring the file', err.message)
+      }
+
       continue
     }
 
