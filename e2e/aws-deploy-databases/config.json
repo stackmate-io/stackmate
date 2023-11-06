@@ -6,10 +6,22 @@
     "region": "eu-central-1"
   },
   {
+    "name": "aws-provider",
+    "type": "secrets",
+    "provider": "aws",
+    "region": "eu-central-1"
+  },
+  {
     "name": "aws-state",
     "type": "state",
     "provider": "aws",
     "region": "eu-central-1",
     "bucket": "stackmate-state-bucket-0b231xvb"
+  },
+  {
+    "name": "aws-db",
+    "provider": "aws",
+    "region": "eu-central-1",
+    "type": "mysql"
   }
 ]
