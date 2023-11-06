@@ -81,6 +81,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "test:e2e": "ts-node -r tsconfig-paths/register tests/bin/run-e2e.ts",
     "test:watch": "yarn test --watchAll"
   }
 }
