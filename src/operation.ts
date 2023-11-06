@@ -13,6 +13,31 @@ import type {
   BaseProvisionable,
 } from '@services/types'
 
+/**
+ * @param {BaseProvisionable} provisionable the provisionable to check
+ * @throws {Error} if a requirement is not satisfied
+ */
+const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
+  const {
+    service: { associations, type },
+    requirements,
+  } = provisionable
+
+  if (!associations) {
+    return
+  }
+
+  Object.entries(associations).forEach(([name, assoc]) => {
+    if (!assoc.requirement) {
+      return
+    }
+
+    if (!requirements[name]) {
+      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
+    }
+  })
+}
+
 export class Operation {
   /**
    * @var {Stack} stack the stack to deploy
@@ -105,6 +130,7 @@ export class Operation {
         config,
         service: { associations },
       } = provisionable
+
       for (const [associationName, association] of Object.entries(associations || {})) {
         const {
           where: isAssociated,
@@ -150,8 +176,7 @@ export class Operation {
     }
 
     const {
-      service: { type, handler: resourceHandler, associations = {} },
-      requirements,
+      service: { handler: resourceHandler },
     } = provisionable
 
     // Provision & verify the requirements first
@@ -162,11 +187,7 @@ export class Operation {
       ),
     })
 
-    Object.entries(associations).forEach(([name, assoc]) => {
-      if (assoc.requirement && !requirements[name]) {
-        throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
-      }
-    })
+    assertRequirementsSatisfied(provisionable)
 
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),
