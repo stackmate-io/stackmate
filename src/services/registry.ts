@@ -1,4 +1,4 @@
-import { uniq } from 'lodash'
+import { snakeCase, uniq } from 'lodash'
 import * as Services from '@services/providers/services'
 import { hashObject } from '@lib/hash'
 import type { Distribute, DistributiveRequireKeys } from '@lib/util'
@@ -152,7 +152,7 @@ class Registry {
    */
   provisionable<C extends ServiceAttributes = ServiceAttributes>(config: C): BaseProvisionable<C> {
     const { name, type, provider, region } = config
-    const resourceId = `${name || type}-${provider}-${region || 'default'}`
+    const resourceId = snakeCase(`${name || type}-${provider}-${region || 'default'}`)
 
     return {
       id: hashObject(config),
