@@ -13,7 +13,7 @@ node_modules
 # Terraform specific
 cdktf.out
 .terraform
-stackmate.tf.json
+*.tf.json
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
