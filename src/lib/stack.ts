@@ -44,11 +44,4 @@ export class Stack {
   toObject(): object {
     return this.context.toTerraform()
   }
-
-  /**
-   * @returns {String} the JSON representation of the stack
-   */
-  toJson(spacing = 2): string {
-    return JSON.stringify(this.toObject(), null, spacing)
-  }
 }

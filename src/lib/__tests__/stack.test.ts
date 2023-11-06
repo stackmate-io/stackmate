@@ -44,10 +44,4 @@ describe('Stack', () => {
       },
     })
   })
-
-  it('exports the stack as a json string', () => {
-    const output = subject.toJson(0)
-    expect(output).toMatch('"//":{')
-    expect(output).toMatch(`"stackName":"${stackName}"`)
-  })
 })
