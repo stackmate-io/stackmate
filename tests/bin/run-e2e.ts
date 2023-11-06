@@ -11,8 +11,13 @@ const PATH = resolve(__dirname, '..', '..', 'e2e')
 const directories = readdirSync(PATH).filter((file) => statSync(join(PATH, file)))
 const TF_PATH = process.env.TERRAFORM_CLI_PATH || '/usr/local/bin/terraform'
 
-export const runTerraform = (directory: string) => {
-  const child = spawn(TF_PATH, ['test', '-verbose'], { cwd: directory })
+const execute = (
+  command: string[],
+  cwd: string,
+  callback: (code: number | null, errors?: string[]) => void,
+) => {
+  const [executable, ...args] = command
+  const child = spawn(executable, args, { cwd })
 
   child.stdout.setEncoding('utf8')
   child.stdout.on('data', (data) => {
@@ -25,7 +30,16 @@ export const runTerraform = (directory: string) => {
     errors.push(String(data))
   })
 
-  child.on('close', function (code) {
+  child.on('close', (code) => callback(code, errors))
+}
+
+export const runTerraform = (directory: string) => {
+  console.info('Initializing terraform inside', directory)
+  execute([TF_PATH, 'init'], directory, (_code, errors) => {
+    console.info('Terraform initialization finished', errors)
+  })
+
+  execute([TF_PATH, 'test', '-verbose', directory], directory, (code, errors) => {
     if (errors) {
       console.error('Terraform test exited with code', code)
       console.error(errors.join('\n'))
