@@ -9,7 +9,7 @@ const CFG_NAME = 'config.ts'
 const STACK_FILE = 'main.tf.json'
 const PATH = resolve(__dirname, '..', '..', 'e2e')
 const directories = readdirSync(PATH).filter((file) => statSync(join(PATH, file)))
-const TF_PATH = process.env.TF_PATH || '/usr/local/bin/terraform'
+const TF_PATH = process.env.TERRAFORM_CLI_PATH || '/usr/local/bin/terraform'
 
 export const runTerraform = (directory: string) => {
   const child = spawn(TF_PATH, ['test', '-verbose'], { cwd: directory })
