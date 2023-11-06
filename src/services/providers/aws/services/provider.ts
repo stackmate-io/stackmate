@@ -49,7 +49,7 @@ export const resourceHandler = (
     ],
   })
 
-  const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}-key`, {
+  const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}_key`, {
     customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
     deletionWindowInDays: 30,
     description: 'Stackmate default encryption key',
@@ -61,7 +61,7 @@ export const resourceHandler = (
 
   const account = new callerIdentity.DataAwsCallerIdentity(
     stack.context,
-    `${resourceId}-account-id`,
+    `${resourceId}_account_id`,
     {
       provider,
     },
@@ -74,24 +74,24 @@ export const resourceHandler = (
 
   const subnets = subnetCidrs.map(
     (cidrBlock, idx) =>
-      new awsSubnet.Subnet(stack.context, `${resourceId}-subnet${idx + 1}`, {
+      new awsSubnet.Subnet(stack.context, `${resourceId}_subnet${idx + 1}`, {
         ...subnetConfig,
         vpcId: vpc.id,
         cidrBlock,
       }),
   )
 
-  const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}-gateway`, {
+  const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,
     vpcId: vpc.id,
   })
 
   const outputs: TerraformOutput[] = [
-    new TerraformOutput(stack.context, `${resourceId}-vpc-id`, {
+    new TerraformOutput(stack.context, `${resourceId}_vpc_id`, {
       description: 'VPC ID',
       value: vpc.id,
     }),
-    new TerraformOutput(stack.context, `${resourceId}-vpc-cidr-block`, {
+    new TerraformOutput(stack.context, `${resourceId}_vpc_cidr_block`, {
       description: 'VPC CIDR block',
       value: vpc.cidrBlock,
     }),
