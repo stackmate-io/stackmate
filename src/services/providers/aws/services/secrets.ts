@@ -6,11 +6,12 @@ import {
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
-import { withCredentialsGenerator } from '@services/behaviors'
+import { withCredentialsGenerator, withHandler } from '@services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
 import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE } from '@src/constants'
 import { getProfile } from '@services/utils'
 import { getAwsService } from '@aws/utils/getAwsService'
+import { pipe } from 'lodash/fp'
 import type { PROVIDER } from '@src/constants'
 import type { CredentialsHandlerOptions, SecretsVaultService } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
@@ -140,6 +141,9 @@ export const generateCredentials = (
  * @returns {AwsSecretsVaultService} the secrets vault service
  */
 export const getSecretsVaultService = (): AwsSecretsVaultService =>
-  withCredentialsGenerator(generateCredentials)(getAwsService(SERVICE_TYPE.SECRETS))
+  pipe(
+    withHandler(() => ({})),
+    withCredentialsGenerator(generateCredentials),
+  )(getAwsService(SERVICE_TYPE.SECRETS))
 
 export const AwsSecretsVault = getSecretsVaultService()
