@@ -11,7 +11,7 @@ const directories = readdirSync(PATH).filter((file) => statSync(join(PATH, file)
 const TF_PATH = process.env.TF_PATH || '/usr/local/bin/terraform'
 
 export const runTerraform = (directory: string) => {
-  const child = spawn(TF_PATH, ['test', `-test-directory=${directory}`, '-verbose'])
+  const child = spawn(TF_PATH, ['test', '-verbose'], { cwd: directory })
 
   child.stdout.setEncoding('utf8')
   child.stdout.on('data', (data) => {
