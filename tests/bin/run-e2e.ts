@@ -2,6 +2,7 @@
 import path, { join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
 import { readdirSync, statSync, writeFileSync } from 'node:fs'
+import { isEmpty } from 'lodash'
 import { Operation } from '@src/operation'
 import type { ServiceConfiguration } from '@src/services/registry'
 
@@ -11,45 +12,52 @@ const PATH = resolve(__dirname, '..', '..', 'e2e')
 const directories = readdirSync(PATH).filter((file) => statSync(join(PATH, file)))
 const TF_PATH = process.env.TERRAFORM_CLI_PATH || '/usr/local/bin/terraform'
 
-const execute = (
+const execute = async (
   command: string[],
   cwd: string,
-  callback: (code: number | null, errors?: string[]) => void,
-) => {
-  const [executable, ...args] = command
-  const child = spawn(executable, args, { cwd })
+): Promise<{ code: number; errors?: string[]; output: string }> =>
+  new Promise((resolve, reject) => {
+    const [executable, ...args] = command
+    const child = spawn(executable, args, { cwd })
 
-  child.stdout.setEncoding('utf8')
-  child.stdout.on('data', (data) => {
-    console.log(data)
+    let output = ''
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (data) => {
+      output += data
+      console.log(data)
+    })
+
+    let errorOutput = ''
+    const errors: string[] = []
+    child.stderr.setEncoding('utf8')
+    child.stderr.on('data', function (data) {
+      errorOutput += data
+      errors.push(String(data))
+    })
+
+    child.on('close', (code) => {
+      if (code === 0 && isEmpty(errors)) {
+        return resolve({ code, output })
+      }
+
+      return reject({ code, errors, output: errorOutput })
+    })
   })
 
-  const errors: string[] = []
-  child.stderr.setEncoding('utf8')
-  child.stderr.on('data', function (data) {
-    errors.push(String(data))
-  })
+export const runTerraform = async (directory: string) => {
+  try {
+    console.info('Initializing terraform inside', directory)
+    await execute([TF_PATH, 'init'], directory)
 
-  child.on('close', (code) => callback(code, errors))
+    console.info('Running terraform inside', directory)
+    await execute([TF_PATH, 'test', '-verbose', directory], directory)
+  } catch (err) {
+    console.error('Error while executing terraform')
+    console.error(err)
+  }
 }
 
-export const runTerraform = (directory: string) => {
-  console.info('Initializing terraform inside', directory)
-  execute([TF_PATH, 'init'], directory, (_code, errors) => {
-    console.info('Terraform initialization finished', errors)
-  })
-
-  execute([TF_PATH, 'test', '-verbose', directory], directory, (code, errors) => {
-    if (errors) {
-      console.error('Terraform test exited with code', code)
-      console.error(errors.join('\n'))
-    } else {
-      console.log('Terraform test finished with code', code)
-    }
-  })
-}
-
-export const runTest = (
+export const runTest = async (
   directory: string,
   config: ServiceConfiguration[],
   filename = STACK_FILE,
@@ -57,10 +65,10 @@ export const runTest = (
   const operation = new Operation(config, 'e2e-test')
   const output = path.join(directory, filename)
   writeFileSync(output, JSON.stringify(operation.process(), null, 2))
-  runTerraform(directory)
+  await runTerraform(directory)
 }
 
-const runAllTests = () => {
+const runAllTests = async () => {
   for (const dir of directories) {
     let config
     const fullDir = join(PATH, dir)
@@ -79,8 +87,10 @@ const runAllTests = () => {
       continue
     }
 
-    runTest(fullDir, config)
+    await runTest(fullDir, config)
   }
 }
 
 runAllTests()
+  .then(() => console.info('Ran end to end tests'))
+  .catch((err) => console.error('End to end tests failed', err))
