@@ -15,7 +15,7 @@ import { DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { profileable, withEnvironment, withHandler, withRegions } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { AwsProviderProvisionable, AwsProviderResources, AwsProviderService } from '@aws/types'
+import type { AwsProviderService, AwsProviderProvisionable, AwsProviderResources } from '@aws/types'
 
 /**
  * @param {AwsProviderProvisionable} provisionable the provisionable item
@@ -116,8 +116,11 @@ export const getProviderService = (): AwsProviderService =>
     profileable(),
     withRegions(REGIONS),
     withHandler(resourceHandler),
-    withEnvironment('AWS_ACCESS_KEY_ID', 'AWS Access Key ID', true),
-    withEnvironment('AWS_SECRET_ACCESS_KEY', 'AWS Secret Access Key', true),
+    withEnvironment({
+      AWS_ACCESS_KEY_ID: { description: 'AWS Secret Key ID', required: true },
+      AWS_SECRET_ACCESS_KEY: { description: 'AWS Secret Access Key', required: true },
+      AWS_KMS_KEY_ARN: { description: 'AWS KMS key ARN', required: true },
+    }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()
