@@ -1,3 +1,4 @@
+import type { TerraformLocal } from 'cdktf'
 import type { Dictionary } from 'lodash'
 import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
@@ -44,6 +45,7 @@ export type Provisionable<
   provisions: Provs
   context: Context
   requirements: ExtractServiceRequirements<Srv['associations']>
+  environment: { [K in keyof Srv['environment']]: TerraformLocal }
 }
 
 export type AssociatedProvisionable = {
