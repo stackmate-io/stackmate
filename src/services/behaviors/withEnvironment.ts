@@ -1,4 +1,6 @@
-import type { BaseServiceAttributes, Service } from '@services/types'
+import type { BaseServiceAttributes, Service, ServiceEnvironment } from '@services/types'
+
+type Envs = ServiceEnvironment<string[]>
 
 /**
  * Registers the environment variables to use when adding the service to the stack
@@ -9,15 +11,8 @@ import type { BaseServiceAttributes, Service } from '@services/types'
  * @returns {Function<Service>}
  */
 export const withEnvironment =
-  <C extends BaseServiceAttributes>(name: string, description: string, required: boolean = true) =>
-  <T extends Service<C>>(service: T): T => ({
-    ...service,
-    environment: [
-      ...service.environment,
-      {
-        name,
-        required,
-        description,
-      },
-    ],
+  <C extends BaseServiceAttributes, Attributes extends Envs = Envs>(attrs: Attributes) =>
+  <T extends Service<C>>(srv: T): T & { environment: Attributes } => ({
+    ...srv,
+    environment: attrs,
   })

@@ -1,11 +1,11 @@
-import { isEmpty, uniqBy } from 'lodash'
+import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
 import { validateEnvironment } from '@services/utils'
 import { Registry, type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
 import { getSchema, getValidData } from '@src/validation'
+import type { Dictionary } from 'lodash'
 import type {
   AssociationReturnType,
-  ServiceEnvironment,
   Provisions,
   AssociatedProvisionable,
   AssociatedProvisionablesMap,
@@ -46,15 +46,14 @@ export class Operation {
   readonly stack: Stack
 
   /**
-   * @var {ProvisionablesMap} provisionables the list of provisionable services
+   * @var {Dictionary<string | undefined >} variables the variables to use
    */
-  readonly provisionables: ProvisionablesMap = new Map()
+  readonly #variables: Dictionary<string | undefined>
 
   /**
-   * @var {ServiceEnvironment[]} #environment the environment variables required for the operation
-   * @private
+   * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
-  #environment: ServiceEnvironment[]
+  #provisionables: ProvisionablesMap = new Map()
 
   /**
    * @var {AssociationHandlersMapping} requirements the provisionable id per requirement mapping
@@ -71,9 +70,25 @@ export class Operation {
    * @param {ServiceConfiguration[]} serviceConfigs the services to provision
    * @param {string} envName the name of the environment we're deploying
    */
-  constructor(serviceConfigs: ServiceConfiguration[], envName: string) {
-    this.stack = new Stack(envName)
+  constructor(
+    serviceConfigs: ServiceConfiguration[],
+    envName: string,
+    variables: Dictionary<string | undefined> = process.env,
+  ) {
+    this.#variables = variables
+    this.stack = new Stack(envName, this.#variables)
     this.init(serviceConfigs)
+  }
+
+  /**
+   * @returns {Map} the provisionables
+   */
+  get provisionables() {
+    if (!this.#provisionables.size) {
+      throw new Error('No provisionables found, have you ran the `init` method?')
+    }
+
+    return this.#provisionables
   }
 
   /**
@@ -82,41 +97,31 @@ export class Operation {
    * @returns {Object} the terraform configuration object
    */
   process(): object {
-    validateEnvironment(this.environment())
+    const allEnvs = Array.from(this.provisionables.values()).map((p) => p.service.environment)
+    validateEnvironment(allEnvs, this.#variables)
+
     this.provisionables.forEach((provisionable) => this.register(provisionable))
 
     return this.stack.toObject()
   }
 
   /**
-   * Returns the environment variables required by the services
+   * Initializes and validates the service configurations
    *
-   * @returns {ServiceEnvironment[]} the environment variables
+   * @param {ServiceConfiguration[]} configs
    */
-  environment(): ServiceEnvironment[] {
-    if (!this.#environment) {
-      const envVariables = Array.from(this.provisionables.values())
-        .map((p) => p.service.environment)
-        .filter((e) => !isEmpty(e))
-        .flat()
-
-      this.#environment = uniqBy(envVariables, (e) => e.name)
-    }
-
-    return this.#environment
-  }
-
   protected init(configs: ServiceConfiguration[]) {
-    // Get services validated and apply default values
     const serviceAttributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
       configs,
       getSchema(),
     )
 
-    for (const attrs of serviceAttributes) {
-      const provisionable = Registry.provisionable(attrs)
-      this.provisionables.set(provisionable.id, provisionable)
-    }
+    this.#provisionables = new Map(
+      serviceAttributes.map((attrs) => {
+        const provisionable = Registry.provisionable(attrs)
+        return [provisionable.id, provisionable]
+      }),
+    )
 
     this.associateProvisionables()
   }
@@ -192,6 +197,9 @@ export class Operation {
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),
       registered: true,
+      environment: fromPairs(
+        Object.keys(provisionable.service.environment).map((env) => [env, this.stack.local(env)]),
+      ),
     })
 
     // Now that the provisionable is registered into the stack, take care of the side-effetcs
