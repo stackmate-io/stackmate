@@ -24,6 +24,7 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   registered: boolean
   sideEffects: Provisions
   requirements: Dictionary<ProvisionResources>
+  variables: { [K: string]: TerraformLocal }
 }
 
 export type ProvisionHandler = (
@@ -45,7 +46,7 @@ export type Provisionable<
   provisions: Provs
   context: Context
   requirements: ExtractServiceRequirements<Srv['associations']>
-  environment: { [K in keyof Srv['environment']]: TerraformLocal }
+  variables: { [K in keyof Srv['environment']]: TerraformLocal }
 }
 
 export type AssociatedProvisionable = {

@@ -197,7 +197,7 @@ export class Operation {
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),
       registered: true,
-      environment: fromPairs(
+      variables: fromPairs(
         Object.keys(provisionable.service.environment).map((env) => [env, this.stack.local(env)]),
       ),
     })
