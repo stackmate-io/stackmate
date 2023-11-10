@@ -1,6 +1,6 @@
-import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { TerraformOutput, TerraformResource } from 'cdktf'
 import type { Obj } from '@lib/util'
+import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { MonitoringAttributes, RegionalAttributes } from '@services/behaviors'
 import type {
   internetGateway,
@@ -56,12 +56,12 @@ export type AwsProviderAttributes = AwsServiceAttributes<
     }
 >
 
-export type AwsProviderEnvironmentVars = [
-  'AWS_ACCESS_KEY_ID',
-  'AWS_SECRET_ACCESS_KEY',
-  'AWS_KMS_KEY_ARN',
-]
-export type AwsProviderService = Service<AwsProviderAttributes, Obj, AwsProviderEnvironmentVars>
+export type AwsProviderService = Service<
+  AwsProviderAttributes,
+  Obj,
+  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_KMS_KEY_ARN']
+>
+
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 
 export type AwsServiceAssociations = {
