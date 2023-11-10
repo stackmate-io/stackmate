@@ -1,6 +1,6 @@
 import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
-import { getValidData, getSchema, validateEnvironment } from '@src/validation'
+import { getValidData, getSchema } from '@src/validation'
 import type { ServiceConfiguration, ServiceAttributes } from '@services/registry'
 import type {
   ProvisionablesMap,
@@ -14,6 +14,7 @@ import type {
 import type { Dictionary } from 'lodash'
 import { assertRequirementsSatisfied } from './utils/assertRequirementsSatisfied'
 import { getProvisionable } from './utils/getProvisionable'
+import { assertEnvironmentValid } from './utils/assertEnvironmentValid'
 
 export class Operation {
   /**
@@ -82,7 +83,8 @@ export class Operation {
    */
   process(): object {
     const allEnvs = Array.from(this.provisionables.values()).map((p) => p.service.environment)
-    validateEnvironment(allEnvs, this.#variables)
+    assertEnvironmentValid(allEnvs, this.#variables)
+
     this.provisionables.forEach((provisionable) => this.register(provisionable))
     return this.stack.toObject()
   }
