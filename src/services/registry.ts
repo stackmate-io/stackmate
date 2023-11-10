@@ -71,26 +71,6 @@ class Registry {
   }
 
   /**
-   * Returns services of a specific service type
-   *
-   * @param {ServiceTypeChoice} type the type to look services up by
-   * @returns {BaseService[]} ths services returned
-   */
-  ofType(type: ServiceTypeChoice): AvailableService[] {
-    return this.#items.filter((s) => s.type === type)
-  }
-
-  /**
-   * Returns services of a specific service provider
-   *
-   * @param {ProviderChoice} provider the provider to look services up by
-   * @returns {BaseService[]} ths services returned
-   */
-  ofProvider(provider: ProviderChoice): AvailableService[] {
-    return this.#items.filter((s) => s.provider === provider)
-  }
-
-  /**
    * Finds and returns a service in the registry given its configuration
    *
    * @param {BaseServiceAttributes} config the service configuration

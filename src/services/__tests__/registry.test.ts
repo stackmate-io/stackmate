@@ -10,24 +10,6 @@ describe('Registry', () => {
     })
   })
 
-  describe('ofType', () => {
-    it('returns all services of a given type', () => {
-      const services = Registry.ofType(SERVICE_TYPE.MARIADB)
-      expect(services).toBeInstanceOf(Array)
-      expect(services.length).toBeGreaterThan(0)
-      expect(new Set(services.map((s) => s.type))).toEqual(new Set([SERVICE_TYPE.MARIADB]))
-    })
-  })
-
-  describe('ofProvider', () => {
-    it('returns all services of a given provider', () => {
-      const services = Registry.ofProvider(PROVIDER.AWS)
-      expect(services).toBeInstanceOf(Array)
-      expect(services.length).toBeGreaterThan(0)
-      expect(new Set(services.map((s) => s.provider))).toEqual(new Set([PROVIDER.AWS]))
-    })
-  })
-
   describe('get', () => {
     it('returns a service based on its provider and type', () => {
       const service = Registry.get(PROVIDER.AWS, SERVICE_TYPE.MARIADB)

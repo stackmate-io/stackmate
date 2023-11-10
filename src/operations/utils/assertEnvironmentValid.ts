@@ -9,7 +9,7 @@ import type { ServiceEnvironment } from '@services/types'
  * @param {Dictionary<string|unknown>} variables the variables repository
  * @throws {Error} if the environment is not properly set up
  */
-export const validateEnvironment = (
+export const assertEnvironmentValid = (
   environment: ServiceEnvironment<string[]>[],
   variables = process.env,
 ): void => {
