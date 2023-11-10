@@ -4,6 +4,7 @@ import { SERVICE_TYPE } from '@src/constants'
 import { REGIONS } from '@aws/constants'
 import { getAwsService } from '@aws/utils/getAwsService'
 import { withRegions, withHandler, withSchema } from '@services/behaviors'
+import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
 import type { Provisionable, BaseServiceAttributes } from '@services/types'
@@ -18,9 +19,19 @@ export type AwsStateAttributes = AwsServiceAttributes<
     }
 >
 
+// Deployable service
 export type AwsStateService = AwsService<AwsStateAttributes>
 export type AwsStateResources = { backend: S3Backend }
 export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateResources>
+
+// Prerequisite service
+export type AwsStatePreparator = AwsService<AwsStateAttributes>
+
+export type AwsStatePrerequisites = { bucket: S3Bucket }
+export type AwsStatePrerequisiteProvisionable = Provisionable<
+  AwsStateService,
+  AwsStatePrerequisites
+>
 
 const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): AwsStateResources => {
   const {
@@ -38,6 +49,32 @@ const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): Aw
   })
 
   return { backend }
+}
+
+const prerequisitesHandler = (provisionable: AwsStateProvisionable, stack: Stack) => {
+  const {
+    config,
+    resourceId,
+    requirements: { providerInstance, kmsKey },
+  } = provisionable
+
+  const bucket = new S3Bucket(stack.context, resourceId, {
+    acl: 'private',
+    bucket: config.bucket,
+    provider: providerInstance,
+    dependsOn: [providerInstance],
+  })
+  // const backend = new S3Backend(stack.context, {
+  //   acl: 'private',
+  //   bucket: config.bucket,
+  //   encrypt: true,
+  //   key: `${stack.name}/terraform.tfstate`,
+  //   kmsKeyId: kmsKey.id,
+  //   region: config.region,
+  // })
+
+  // return { backend }
+  return { bucket }
 }
 
 const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
