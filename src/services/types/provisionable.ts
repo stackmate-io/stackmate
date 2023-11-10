@@ -7,6 +7,8 @@ import type { BaseServiceAttributes } from './util'
 import type { Provisions, ProvisionResources } from './resources'
 import type { AnyAssociationHandler, Association, ServiceAssociations } from './association'
 
+export type Scope = 'deployment' | 'prerequisites'
+
 type ExtractServiceRequirements<Associations extends ServiceAssociations> = {
   [K in keyof Associations]: Associations[K] extends infer A extends Association<any>
     ? A['requirement'] extends true

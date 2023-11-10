@@ -1,6 +1,6 @@
 import { merge } from 'lodash'
 import { getAwsDbMock } from '@tests/mocks'
-import { getSchema, getValidData } from '@src/validation'
+import { getSchema, getValidData } from '@src/validation/utils/getSchema'
 import { ValidationError } from '@lib/errors'
 
 describe('isIpOrCidr', () => {

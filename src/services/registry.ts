@@ -1,13 +1,7 @@
-import { snakeCase, uniq } from 'lodash'
+import { uniq } from 'lodash'
 import * as Services from '@services/providers/services'
-import { hashObject } from '@lib/hash'
 import type { Distribute, DistributiveRequireKeys } from '@lib/util'
-import type {
-  ProviderChoice,
-  ServiceTypeChoice,
-  ExtractAttrs,
-  BaseProvisionable,
-} from '@services/types'
+import type { ProviderChoice, ServiceTypeChoice, ExtractAttrs } from '@services/types'
 
 const availableServices = Object.values(Services)
 
@@ -143,27 +137,6 @@ class Registry {
     }
 
     return uniq(this.#items.filter((s) => s.provider === provider).map((s) => s.type))
-  }
-
-  /**
-   * Gets a provisionable based on a service's attributes
-   * @param {BaseServiceAttributes} config the service's configuration
-   * @returns {BaseProvisionable} the provisionable to use in operations
-   */
-  provisionable<C extends ServiceAttributes = ServiceAttributes>(config: C): BaseProvisionable<C> {
-    const { name, type, provider, region } = config
-    const resourceId = snakeCase(`${name || type}-${provider}-${region || 'default'}`)
-
-    return {
-      id: hashObject(config),
-      config,
-      service: this.fromConfig(config),
-      requirements: {},
-      provisions: {},
-      sideEffects: {},
-      registered: false,
-      resourceId: resourceId,
-    }
   }
 }
 
