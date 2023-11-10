@@ -1,42 +1,19 @@
 import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
-import { validateEnvironment } from '@services/utils'
-import { Registry, type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
-import { getSchema, getValidData } from '@src/validation'
-import type { Dictionary } from 'lodash'
+import { getValidData, getSchema, validateEnvironment } from '@src/validation'
+import type { ServiceConfiguration, ServiceAttributes } from '@services/registry'
 import type {
-  AssociationReturnType,
+  ProvisionablesMap,
+  AssociatedProvisionablesMap,
+  Scope,
+  BaseProvisionable,
   Provisions,
   AssociatedProvisionable,
-  AssociatedProvisionablesMap,
-  ProvisionablesMap,
-  BaseProvisionable,
+  AssociationReturnType,
 } from '@services/types'
-
-/**
- * @param {BaseProvisionable} provisionable the provisionable to check
- * @throws {Error} if a requirement is not satisfied
- */
-const assertRequirementsSatisfied = (provisionable: BaseProvisionable) => {
-  const {
-    service: { associations, type },
-    requirements,
-  } = provisionable
-
-  if (!associations) {
-    return
-  }
-
-  Object.entries(associations).forEach(([name, assoc]) => {
-    if (!assoc.requirement) {
-      return
-    }
-
-    if (!requirements[name]) {
-      throw new Error(`Requirement ${name} for service ${type} is not satisfied`)
-    }
-  })
-}
+import type { Dictionary } from 'lodash'
+import { assertRequirementsSatisfied } from './utils/assertRequirementsSatisfied'
+import { getProvisionable } from './utils/getProvisionable'
 
 export class Operation {
   /**
@@ -66,6 +43,11 @@ export class Operation {
   #sideEffects: AssociatedProvisionablesMap = new Map()
 
   /**
+   * @var {operationType} type the type of the operation
+   */
+  #scope: Scope
+
+  /**
    * @constructor
    * @param {ServiceConfiguration[]} serviceConfigs the services to provision
    * @param {string} envName the name of the environment we're deploying
@@ -74,7 +56,9 @@ export class Operation {
     serviceConfigs: ServiceConfiguration[],
     envName: string,
     variables: Dictionary<string | undefined> = process.env,
+    scope: Scope = 'deployment',
   ) {
+    this.#scope = scope
     this.#variables = variables
     this.stack = new Stack(envName, this.#variables)
     this.init(serviceConfigs)
@@ -99,9 +83,7 @@ export class Operation {
   process(): object {
     const allEnvs = Array.from(this.provisionables.values()).map((p) => p.service.environment)
     validateEnvironment(allEnvs, this.#variables)
-
     this.provisionables.forEach((provisionable) => this.register(provisionable))
-
     return this.stack.toObject()
   }
 
@@ -118,55 +100,12 @@ export class Operation {
 
     this.#provisionables = new Map(
       serviceAttributes.map((attrs) => {
-        const provisionable = Registry.provisionable(attrs)
+        const provisionable = getProvisionable(attrs, this.#scope)
         return [provisionable.id, provisionable]
       }),
     )
 
     this.associateProvisionables()
-  }
-
-  /**
-   * Initializes the operation
-   */
-  protected associateProvisionables() {
-    for (const provisionable of this.provisionables.values()) {
-      const {
-        config,
-        service: { associations },
-      } = provisionable
-
-      for (const [associationName, association] of Object.entries(associations || {})) {
-        const {
-          where: isAssociated,
-          handler: associationHandler,
-          with: associatedServiceType,
-          requirement: isRequirement,
-        } = association
-
-        for (const linked of this.provisionables.values()) {
-          if (associatedServiceType && linked.service.type !== associatedServiceType) {
-            continue
-          }
-
-          if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
-            continue
-          }
-
-          const targetMap = isRequirement ? this.#requirements : this.#sideEffects
-          const links = targetMap.get(provisionable.id) || []
-
-          targetMap.set(provisionable.id, [
-            ...links,
-            {
-              target: linked,
-              name: associationName,
-              handler: associationHandler,
-            },
-          ])
-        }
-      }
-    }
   }
 
   /**
@@ -247,5 +186,48 @@ export class Operation {
     })
 
     return output
+  }
+
+  /**
+   * Initializes the operation
+   */
+  protected associateProvisionables() {
+    for (const provisionable of this.provisionables.values()) {
+      const {
+        config,
+        service: { associations },
+      } = provisionable
+
+      for (const [associationName, association] of Object.entries(associations || {})) {
+        const {
+          where: isAssociated,
+          handler: associationHandler,
+          with: associatedServiceType,
+          requirement: isRequirement,
+        } = association
+
+        for (const linked of this.provisionables.values()) {
+          if (associatedServiceType && linked.service.type !== associatedServiceType) {
+            continue
+          }
+
+          if (typeof isAssociated === 'function' && !isAssociated(config, linked.config)) {
+            continue
+          }
+
+          const targetMap = isRequirement ? this.#requirements : this.#sideEffects
+          const links = targetMap.get(provisionable.id) || []
+
+          targetMap.set(provisionable.id, [
+            ...links,
+            {
+              target: linked,
+              name: associationName,
+              handler: associationHandler,
+            },
+          ])
+        }
+      }
+    }
   }
 }

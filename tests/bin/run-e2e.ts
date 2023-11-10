@@ -3,7 +3,7 @@ import path, { join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
 import { readdirSync, statSync, writeFileSync } from 'node:fs'
 import { isEmpty } from 'lodash'
-import { Operation } from '@src/operation'
+import { Operation } from '@src/operations'
 import type { ServiceConfiguration } from '@src/services/registry'
 
 const CFG_NAME = 'config.ts'

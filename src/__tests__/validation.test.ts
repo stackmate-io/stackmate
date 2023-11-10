@@ -1,5 +1,6 @@
 import { Services } from '@src/index'
-import { getAjv, getValidData, getSchema } from '@src/validation'
+import { getSchema, getValidData } from '@src/validation/utils/getSchema'
+import { getAjv } from '@src/validation/utils/getAjv'
 import type { FuncKeywordDefinition } from 'ajv/dist/types'
 import type { ServiceConfiguration } from '@services/registry'
 
