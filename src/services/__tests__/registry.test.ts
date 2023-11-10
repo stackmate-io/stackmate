@@ -19,22 +19,6 @@ describe('Registry', () => {
     })
   })
 
-  describe('fromConfig', () => {
-    it('returns a service based on its configuration object', () => {
-      const config = {
-        provider: PROVIDER.AWS,
-        name: 'aws-mariadb-service',
-        type: SERVICE_TYPE.MARIADB,
-        region: AWS_REGIONS[0],
-      }
-
-      const service = Registry.fromConfig(config)
-      expect(service).toBeInstanceOf(Object)
-      expect(service.provider).toEqual(PROVIDER.AWS)
-      expect(service.type).toEqual(SERVICE_TYPE.MARIADB)
-    })
-  })
-
   describe('providers', () => {
     it('returns all providers available with no service provided', () => {
       expect(Registry.providers()).toEqual(expect.arrayContaining([PROVIDER.AWS, PROVIDER.LOCAL]))

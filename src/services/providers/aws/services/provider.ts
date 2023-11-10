@@ -111,7 +111,7 @@ export const resourceHandler = (
 /**
  * @returns {AwsProviderService} the secrets vault service
  */
-export const getProviderService = (): AwsProviderService =>
+const getProviderService = (): AwsProviderService =>
   pipe(
     profileable(),
     withRegions(REGIONS),
@@ -124,6 +124,3 @@ export const getProviderService = (): AwsProviderService =>
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()
-
-export const AwsProviderDeployment = getProviderService()
-export const AwsProviderPrerequisites = getProviderService()

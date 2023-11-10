@@ -14,14 +14,11 @@ export const getProvisionable = <C extends ServiceAttributes = ServiceAttributes
 ): BaseProvisionable<C> => {
   const { name, type, provider, region } = config
   const resourceId = snakeCase(`${name || type}-${provider}-${region || 'default'}`)
-  const unscopedService = Registry.fromConfig(config)
-  const service =
-    scope === 'prerequisites' ? unscopedService.preparable() : unscopedService.deployable()
 
   return {
     id: hashObject(config),
     config,
-    service,
+    service: Registry.get(provider, type),
     requirements: {},
     provisions: {},
     sideEffects: {},

@@ -71,18 +71,6 @@ class Registry {
   }
 
   /**
-   * Finds and returns a service in the registry given its configuration
-   *
-   * @param {BaseServiceAttributes} config the service configuration
-   * @returns {BaseService} the service matching the configuration
-   * @throws {Error} if the service is not found
-   */
-  fromConfig(config: ServiceConfiguration): AvailableService {
-    const { provider, type } = config
-    return this.get(provider, type)
-  }
-
-  /**
    * Returns the providers for a specific services (if provided), or all available otherwise
    *
    * @returns {ProviderChoice[]} the providers available for the service (if any, otherwise all)
