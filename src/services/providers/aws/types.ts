@@ -59,7 +59,7 @@ export type AwsProviderAttributes = AwsServiceAttributes<
 export type AwsProviderService = Service<
   AwsProviderAttributes,
   Obj,
-  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_KMS_KEY_ARN']
+  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
 >
 
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
