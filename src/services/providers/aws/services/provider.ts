@@ -17,11 +17,6 @@ import { profileable, withEnvironment, withHandler, withRegions } from '@service
 import type { Stack } from '@lib/stack'
 import type { AwsProviderService, AwsProviderProvisionable, AwsProviderResources } from '@aws/types'
 
-/**
- * @param {AwsProviderProvisionable} provisionable the provisionable item
- * @param {Stack} stack the stack to deploy resources to
- * @returns {AwsProviderResources} the resources deployed by the AWS provider
- */
 export const resourceHandler = (
   provisionable: AwsProviderProvisionable,
   stack: Stack,
@@ -119,7 +114,6 @@ const getProviderService = (): AwsProviderService =>
     withEnvironment({
       AWS_ACCESS_KEY_ID: { description: 'AWS Secret Key ID', required: true },
       AWS_SECRET_ACCESS_KEY: { description: 'AWS Secret Access Key', required: true },
-      AWS_KMS_KEY_ARN: { description: 'AWS KMS key ARN', required: true },
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
