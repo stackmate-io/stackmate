@@ -114,14 +114,14 @@ const deployDatabases =
 
     const paramGroup = new dbParameterGroup.DbParameterGroup(
       stack.context,
-      `${provisionable.resourceId}-params`,
+      `${provisionable.resourceId}_params`,
       {
         ...params,
         family: getParamGroupFamily(config),
       },
     )
 
-    const dbInstance = new rdsDbInstance.DbInstance(stack.context, config.name, {
+    const dbInstance = new rdsDbInstance.DbInstance(stack.context, provisionable.resourceId, {
       ...instance,
       allocatedStorage: config.storage,
       applyImmediately: true,
@@ -146,7 +146,7 @@ const deployDatabases =
     })
 
     const outputs: TerraformOutput[] = [
-      new TerraformOutput(stack.context, `${config.name}-endpoint-output`, {
+      new TerraformOutput(stack.context, `${provisionable.resourceId}_endpoint`, {
         description: `Connection endpoint for "${config.name}" RDS service`,
         value: dbInstance.endpoint,
       }),

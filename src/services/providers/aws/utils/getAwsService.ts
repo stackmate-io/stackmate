@@ -11,19 +11,15 @@ import type {
 } from '@cdktf/provider-aws'
 import type { BaseServiceAttributes, ServiceTypeChoice } from '@services/types'
 import type {
-  AwsAccountRequirement,
   AwsProviderAttributes,
   AwsProviderProvisionable,
   AwsServiceAssociations,
-  AwsKmsKeyRequirement,
-  AwsProviderRequirement,
-  AwsVpcRequirement,
 } from '@aws/types'
 
 /**
- * @returns {AwsProviderRequirement} the provider instance requirement for an aws service
+ * @returns {AwsServiceAssociations['providerInstance']} the provider instance requirement for an aws service
  */
-const getProviderInstanceRequirement = (): AwsProviderRequirement => ({
+const getProviderInstanceRequirement = (): AwsServiceAssociations['providerInstance'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) =>
@@ -32,9 +28,9 @@ const getProviderInstanceRequirement = (): AwsProviderRequirement => ({
 })
 
 /**
- * @returns {AwsAccountRequirement} the aws account associated with the service
+ * @returns {AwsServiceAssociations['account']} the aws account associated with the service
  */
-const getAccountRequirement = (): AwsAccountRequirement => ({
+const getAccountRequirement = (): AwsServiceAssociations['account'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
@@ -44,9 +40,9 @@ const getAccountRequirement = (): AwsAccountRequirement => ({
 })
 
 /**
- * @returns {AwsKmsKeyRequirement} the KMS key requirement association
+ * @returns {AwsServiceAssociations['kmsKey']} the KMS key requirement association
  */
-const getKmsKeyRequirement = (): AwsKmsKeyRequirement => ({
+const getKmsKeyRequirement = (): AwsServiceAssociations['kmsKey'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
@@ -55,9 +51,9 @@ const getKmsKeyRequirement = (): AwsKmsKeyRequirement => ({
 })
 
 /**
- * @returns {AwsVpcRequirement} the VPC requirement for the AWS service
+ * @returns {AwsServiceAssociations['vpc']} the VPC requirement for the AWS service
  */
-const getVpcRequirement = (): AwsVpcRequirement => ({
+const getVpcRequirement = (): AwsServiceAssociations['vpc'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>

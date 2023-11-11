@@ -1,5 +1,6 @@
-import { kebabCase } from 'lodash'
-import { TerraformStack, App as TerraformApp } from 'cdktf'
+import { kebabCase, snakeCase } from 'lodash'
+import { TerraformStack, App as TerraformApp, TerraformLocal } from 'cdktf'
+import type { Dictionary } from 'lodash'
 
 export class Stack {
   /**
@@ -20,13 +21,29 @@ export class Stack {
   readonly name: string
 
   /**
+   * @var {Dictionary<string>} variables the variables available in the operation
+   */
+  readonly #variables: Dictionary<string | undefined>
+
+  /**
    * @constructor
    * @param {String} name the stack's name
    */
-  constructor(name: string) {
+  constructor(name: string, variables: Dictionary<string | undefined> = {}) {
+    this.#variables = variables
     this.name = kebabCase(name.replace('([^a-zA-Z0-9s-_]+)', '').toLowerCase())
     this.app = new TerraformApp()
     this.context = new TerraformStack(this.app, this.name)
+  }
+
+  /**
+   * Registers a local variable to the stack
+   *
+   * @param {String} name the name of the variable
+   * @returns {TerraformLocal}
+   */
+  local(name: string) {
+    return new TerraformLocal(this.context, snakeCase(`var_${name}`), this.#variables[name] || '')
   }
 
   /**
@@ -43,12 +60,5 @@ export class Stack {
    */
   toObject(): object {
     return this.context.toTerraform()
-  }
-
-  /**
-   * @returns {String} the JSON representation of the stack
-   */
-  toJson(spacing = 2): string {
-    return JSON.stringify(this.toObject(), null, spacing)
   }
 }

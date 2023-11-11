@@ -80,7 +80,9 @@
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "test": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "jest": "jest --verbose --useStderr --detectOpenHandles --silent=false",
+    "test": "yarn jest **/__tests__/**/*.test.ts",
+    "test:e2e": "yarn jest e2e/**/*.test.ts",
     "test:watch": "yarn test --watchAll"
   }
 }

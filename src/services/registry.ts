@@ -1,13 +1,7 @@
 import { uniq } from 'lodash'
 import * as Services from '@services/providers/services'
-import { hashObject } from '@lib/hash'
 import type { Distribute, DistributiveRequireKeys } from '@lib/util'
-import type {
-  ProviderChoice,
-  ServiceTypeChoice,
-  ExtractAttrs,
-  BaseProvisionable,
-} from '@services/types'
+import type { ProviderChoice, ServiceTypeChoice, ExtractAttrs } from '@services/types'
 
 const availableServices = Object.values(Services)
 
@@ -77,38 +71,6 @@ class Registry {
   }
 
   /**
-   * Returns services of a specific service type
-   *
-   * @param {ServiceTypeChoice} type the type to look services up by
-   * @returns {BaseService[]} ths services returned
-   */
-  ofType(type: ServiceTypeChoice): AvailableService[] {
-    return this.#items.filter((s) => s.type === type)
-  }
-
-  /**
-   * Returns services of a specific service provider
-   *
-   * @param {ProviderChoice} provider the provider to look services up by
-   * @returns {BaseService[]} ths services returned
-   */
-  ofProvider(provider: ProviderChoice): AvailableService[] {
-    return this.#items.filter((s) => s.provider === provider)
-  }
-
-  /**
-   * Finds and returns a service in the registry given its configuration
-   *
-   * @param {BaseServiceAttributes} config the service configuration
-   * @returns {BaseService} the service matching the configuration
-   * @throws {Error} if the service is not found
-   */
-  fromConfig(config: ServiceConfiguration): AvailableService {
-    const { provider, type } = config
-    return this.get(provider, type)
-  }
-
-  /**
    * Returns the providers for a specific services (if provided), or all available otherwise
    *
    * @returns {ProviderChoice[]} the providers available for the service (if any, otherwise all)
@@ -143,27 +105,6 @@ class Registry {
     }
 
     return uniq(this.#items.filter((s) => s.provider === provider).map((s) => s.type))
-  }
-
-  /**
-   * Gets a provisionable based on a service's attributes
-   * @param {BaseServiceAttributes} config the service's configuration
-   * @returns {BaseProvisionable} the provisionable to use in operations
-   */
-  provisionable<C extends ServiceAttributes = ServiceAttributes>(config: C): BaseProvisionable<C> {
-    const { name, type, provider, region } = config
-    const resourceId = `${name || type}-${provider}-${region || 'default'}`
-
-    return {
-      id: hashObject(config),
-      config,
-      service: this.fromConfig(config),
-      requirements: {},
-      provisions: {},
-      sideEffects: {},
-      registered: false,
-      resourceId: resourceId,
-    }
   }
 }
 

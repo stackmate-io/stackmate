@@ -17,13 +17,14 @@ import type {
 export type Service<
   Setup extends BaseServiceAttributes,
   Associations extends ServiceAssociations = Obj,
+  Envs extends string[] = [],
 > = {
   provider: ProviderChoice
   type: ServiceTypeChoice
   regions?: readonly string[]
   schemaId: string
   schema: JsonSchema<Setup>
-  environment: ServiceEnvironment[]
+  environment: ServiceEnvironment<Envs>
   handler: ProvisionHandler
   associations: Associations
 }

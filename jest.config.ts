@@ -13,7 +13,6 @@ const opts: JestConfigWithTsJest = {
   rootDir: './',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
-  testRegex: `tests/.*\\.test\\.ts$`,
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json', diagnostics: true }],
   },

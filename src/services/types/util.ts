@@ -5,10 +5,11 @@ import type { ChoiceOf } from '@lib/util'
 export type ProviderChoice = ChoiceOf<typeof PROVIDER>
 export type ServiceTypeChoice = ChoiceOf<typeof SERVICE_TYPE>
 
-export type ServiceEnvironment = {
-  name: string
-  required: boolean
-  description?: string
+export type ServiceEnvironment<Vars extends string[] = []> = {
+  [K in Vars[number]]: {
+    required: boolean
+    description?: string
+  }
 }
 
 export type BaseServiceAttributes = {

@@ -7,9 +7,12 @@
     "tsconfig.json",
     "jest.setup.ts",
     "jest.config.ts",
+    "jest.config.e2e.ts",
     "dist",
     "node_modules",
-    "tests"
+    "**/__tests__/**/*",
+    "tests",
+    "e2e"
   ],
   "tsc-alias": {
     "verbose": true,
