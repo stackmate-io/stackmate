@@ -27,3 +27,7 @@ export const config: ServiceConfiguration[] = [
     type: 'mysql',
   },
 ]
+
+describe('AWS databases deployment', () => {
+  test.todo('it is pending')
+})
