@@ -1,7 +1,7 @@
 import { snakeCase } from 'lodash'
 import { hashObject } from '@lib/hash'
 import { Registry, type ServiceAttributes } from '@services/registry'
-import type { BaseProvisionable, Scope } from '@services/types'
+import type { BaseProvisionable } from '@services/types'
 
 /**
  * Gets a provisionable based on a service's attributes
@@ -10,7 +10,6 @@ import type { BaseProvisionable, Scope } from '@services/types'
  */
 export const getProvisionable = <C extends ServiceAttributes = ServiceAttributes>(
   config: C,
-  scope: Scope,
 ): BaseProvisionable<C> => {
   const { name, type, provider, region } = config
   const resourceId = snakeCase(`${name || type}-${provider}-${region || 'default'}`)
