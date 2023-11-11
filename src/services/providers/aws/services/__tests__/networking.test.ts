@@ -1,24 +1,20 @@
-import {
-  dataAwsCallerIdentity,
-  kmsKey,
-  provider as terraformAwsProvider,
-} from '@cdktf/provider-aws'
-import { AwsProvider } from '@aws/services/provider'
+import { internetGateway, subnet, vpc } from '@cdktf/provider-aws'
 import { REGIONS } from '@aws/constants'
-import { PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getProvisionable } from '@tests/mocks/getProvisionable'
 import { Stack } from '@lib/stack'
 import { faker } from '@faker-js/faker'
 import { TerraformOutput } from 'cdktf'
+import { AwsNetworking } from '@aws/services/networking'
 import type { BaseProvisionable } from '@src/services/types'
-import type { AwsProviderResources } from '@aws/types'
+import type { AwsNetworkingResources } from '../../types'
 
-describe('AWS Provider', () => {
-  const service = AwsProvider
+describe('AWS Networking', () => {
+  const service = AwsNetworking
 
-  it('is a valid AWS provider service', () => {
+  it('is a valid AWS networking service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
-    expect(service.type).toEqual(SERVICE_TYPE.PROVIDER)
+    expect(service.type).toEqual(SERVICE_TYPE.NETWORKING)
   })
 
   it('has the AWS regions set', () => {
@@ -27,14 +23,24 @@ describe('AWS Provider', () => {
 
   it('contains a valid schema', () => {
     expect(service.schema).toMatchObject({
-      $id: 'services/aws/provider',
+      $id: 'services/aws/networking',
       required: expect.arrayContaining(['name', 'provider', 'type', 'region']),
       properties: {
         provider: expect.objectContaining({ const: PROVIDER.AWS }),
-        type: expect.objectContaining({ const: SERVICE_TYPE.PROVIDER }),
+        type: expect.objectContaining({ const: SERVICE_TYPE.NETWORKING }),
         region: expect.objectContaining({
           type: 'string',
           enum: Array.from(REGIONS),
+        }),
+        profile: expect.objectContaining({
+          type: 'string',
+          default: DEFAULT_PROFILE_NAME,
+          serviceProfile: true,
+        }),
+        overrides: expect.objectContaining({
+          type: 'object',
+          default: {},
+          serviceProfileOverrides: true,
         }),
       },
     })
@@ -48,22 +54,23 @@ describe('AWS Provider', () => {
       stack = new Stack(faker.lorem.word())
       provisionable = getProvisionable({
         provider: PROVIDER.AWS,
-        type: SERVICE_TYPE.PROVIDER,
-        name: 'aws-provider',
+        type: SERVICE_TYPE.NETWORKING,
+        name: 'aws-networking',
         region: 'eu-central-1',
       })
     })
 
     it('registers the service into the stack and creates the resources', () => {
-      const resources = service.handler(provisionable, stack) as AwsProviderResources
+      const resources = service.handler(provisionable, stack) as AwsNetworkingResources
 
       expect(resources).toBeInstanceOf(Object)
       expect(Object.keys(resources)).toEqual(
-        expect.arrayContaining(['account', 'kmsKey', 'providerInstance', 'outputs']),
+        expect.arrayContaining(['vpc', 'subnets', 'gateway', 'outputs']),
       )
-      expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey)
-      expect(resources.account).toBeInstanceOf(dataAwsCallerIdentity.DataAwsCallerIdentity)
-      expect(resources.providerInstance).toBeInstanceOf(terraformAwsProvider.AwsProvider)
+      expect(resources.vpc).toBeInstanceOf(vpc.Vpc)
+      expect(resources.gateway).toBeInstanceOf(internetGateway.InternetGateway)
+      expect(Array.isArray(resources.subnets)).toBe(true)
+      expect(resources.subnets.every((s) => s instanceof subnet.Subnet)).toBe(true)
       expect(Array.isArray(resources.outputs)).toBe(true)
       expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
     })

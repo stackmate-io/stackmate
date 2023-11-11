@@ -160,7 +160,7 @@ export const resourceHandler = (
  * @param {RdsEngine} engine the RDS engine to use
  * @returns {AwsDatabaseService<DatabaseAttributes>} the database service
  */
-export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
+const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
   type: T,
   engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {

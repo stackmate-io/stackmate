@@ -1,12 +1,21 @@
+import type {
+  ServiceRequirement,
+  ServiceAssociations,
+  Service,
+  BaseServiceAttributes,
+  Provisionable,
+  Provisions,
+} from '@services/types'
 import type { TerraformOutput, TerraformResource } from 'cdktf'
 import type { Obj } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import type { MonitoringAttributes, RegionalAttributes } from '@services/behaviors'
 import type {
-  internetGateway,
+  MonitoringAttributes,
+  ProfilableAttributes,
+  RegionalAttributes,
+} from '@services/behaviors'
+import type {
   kmsKey as awsKmsKey,
-  subnet as awsSubnet,
-  vpc as awsVpc,
   provider as awsProvider,
   dataAwsCallerIdentity as callerIdentity,
   snsTopic,
@@ -14,39 +23,57 @@ import type {
   snsTopicSubscription,
   dataAwsIamPolicyDocument,
   cloudwatchMetricAlarm,
+  subnet,
   vpc,
-  kmsKey,
-  provider as terraformAwsProvider,
-  dataAwsCallerIdentity,
+  internetGateway,
 } from '@cdktf/provider-aws'
-import type {
-  ServiceAssociations,
-  Service,
-  BaseServiceAttributes,
-  Provisionable,
-  ServiceRequirement,
-  Provisions,
-} from '@services/types'
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.AWS
   region: string
 }
 
+export type AwsProviderResources = {
+  kmsKey: awsKmsKey.KmsKey
+  account: callerIdentity.DataAwsCallerIdentity
+  providerInstance: awsProvider.AwsProvider
+  outputs: TerraformOutput[]
+}
+
+export type AwsNetworkingResources = {
+  outputs: TerraformOutput[]
+  gateway: internetGateway.InternetGateway
+  subnets: subnet.Subnet[]
+  vpc: vpc.Vpc
+}
+
+export type AwsProviderAssociations = Omit<
+  {
+    [K in keyof AwsProviderResources]: ServiceRequirement<
+      AwsProviderResources[K],
+      typeof SERVICE_TYPE.PROVIDER
+    >
+  },
+  'outputs'
+>
+
+export type AwsNetworkingAssociations = Omit<
+  {
+    [K in keyof AwsNetworkingResources]: ServiceRequirement<
+      AwsNetworkingResources[K],
+      typeof SERVICE_TYPE.NETWORKING
+    >
+  },
+  'outputs'
+>
+
 export type AwsService<
   Attrs extends BaseServiceAttributes,
   Assocs extends ServiceAssociations = Obj,
-> = Service<AwsServiceAttributes<Attrs>, AwsServiceAssociations & Assocs>
-
-export type AwsProviderResources = {
-  provider: awsProvider.AwsProvider
-  kmsKey: awsKmsKey.KmsKey
-  account: callerIdentity.DataAwsCallerIdentity
-  outputs: TerraformOutput[]
-  gateway: internetGateway.InternetGateway
-  subnets: awsSubnet.Subnet[]
-  vpc: awsVpc.Vpc
-}
+> = Service<
+  AwsServiceAttributes<Attrs>,
+  AwsProviderAssociations & AwsNetworkingAssociations & Assocs
+>
 
 export type AwsProviderAttributes = AwsServiceAttributes<
   BaseServiceAttributes &
@@ -64,18 +91,21 @@ export type AwsProviderService = Service<
 
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 
-export type AwsServiceAssociations = {
-  account: ServiceRequirement<
-    dataAwsCallerIdentity.DataAwsCallerIdentity,
-    typeof SERVICE_TYPE.PROVIDER
-  >
-  providerInstance: ServiceRequirement<
-    terraformAwsProvider.AwsProvider,
-    typeof SERVICE_TYPE.PROVIDER
-  >
-  kmsKey: ServiceRequirement<kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER>
-  vpc: ServiceRequirement<vpc.Vpc, typeof SERVICE_TYPE.PROVIDER>
-}
+export type AwsNetworkingAttributes = AwsServiceAttributes<
+  BaseServiceAttributes &
+    ProfilableAttributes &
+    RegionalAttributes & {
+      type: typeof SERVICE_TYPE.NETWORKING
+      rootIp?: string
+    }
+>
+
+export type AwsNetworkingService = Service<
+  AwsServiceAttributes<AwsNetworkingAttributes>,
+  AwsProviderAssociations
+>
+
+export type AwsNetworkingProvisionable = Provisionable<AwsNetworkingService, AwsNetworkingResources>
 
 // Monitoring / Alerting
 export type MonitoredServiceProvisionable = Provisionable<
