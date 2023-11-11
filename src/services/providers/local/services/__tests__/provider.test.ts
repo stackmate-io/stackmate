@@ -1,8 +1,8 @@
 import { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { Registry } from '@services/registry'
 import { Stack } from '@lib/stack'
 import { LocalProvider } from '@src/services/providers/local/services/provider'
+import { getProvisionable } from '@tests/mocks/getProvisionable'
 import type { LocalProviderAttributes } from '@local/types'
 
 describe('Local Provider', () => {
@@ -37,7 +37,7 @@ describe('Local Provider', () => {
       type: 'provider',
     }
 
-    const provisionable = Registry.provisionable(config)
+    const provisionable = getProvisionable(config)
 
     it('registers the local provider', () => {
       const resources = service.handler(provisionable, stack)

@@ -1,21 +1,19 @@
-import { fromPairs, snakeCase } from 'lodash'
+import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
 import { getValidData, getSchema } from '@src/validation'
-import { hashObject } from '@src/lib/hash'
-import { type ServiceConfiguration, type ServiceAttributes, Registry } from '@services/registry'
+import { type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
 import type {
-  ProvisionablesMap,
-  AssociatedProvisionablesMap,
   BaseProvisionable,
   Provisions,
   AssociatedProvisionable,
   AssociationReturnType,
-  ProviderChoice,
-  ServiceTypeChoice,
 } from '@services/types'
 import type { Dictionary } from 'lodash'
+import { ProvisionablesMap } from './provisionables'
 import { assertRequirementsSatisfied } from './assertRequirementsSatisfied'
 import { assertEnvironmentValid } from './assertEnvironmentValid'
+
+type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
 
 export class Operation {
   /**
@@ -32,7 +30,7 @@ export class Operation {
   /**
    * @var {ProvisionablesMap} provisionables the list of provisionable services
    */
-  #provisionables: ProvisionablesMap = new Map()
+  #provisionables: ProvisionablesMap = new ProvisionablesMap()
 
   /**
    * @var {AssociationHandlersMapping} requirements the provisionable id per requirement mapping
@@ -43,11 +41,6 @@ export class Operation {
    * @var {AssociationHandlersMapping} sideEffects the provisionable id per side-effects mapping
    */
   #sideEffects: AssociatedProvisionablesMap = new Map()
-
-  /**
-   * @var {Map} serviceCounts the counts per service type and provider
-   */
-  #serviceCounts: Map<string, number> = new Map()
 
   /**
    * @constructor
@@ -94,16 +87,10 @@ export class Operation {
    * @param {ServiceConfiguration[]} configs
    */
   protected init(configs: ServiceConfiguration[]) {
-    const serviceAttributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
-      configs,
-      getSchema(),
-    )
-
-    this.#provisionables = new Map(
-      serviceAttributes.map((attrs) => {
-        const provisionable = this.getProvisionable(attrs)
-        return [provisionable.id, provisionable]
-      }),
+    getValidData<ServiceConfiguration[], ServiceAttributes[]>(configs, getSchema()).forEach(
+      (config) => {
+        this.#provisionables.create(config)
+      },
     )
 
     this.associateProvisionables()
@@ -230,47 +217,5 @@ export class Operation {
         }
       }
     }
-  }
-
-  /**
-   * Gets a provisionable based on a service's attributes
-   * @param {BaseServiceAttributes} config the service's configuration
-   * @returns {BaseProvisionable} the provisionable to use in operations
-   */
-  protected getProvisionable<C extends ServiceAttributes = ServiceAttributes>(
-    config: C,
-  ): BaseProvisionable<C> {
-    const { type, provider } = config
-
-    return {
-      id: hashObject(config),
-      config,
-      service: Registry.get(provider, type),
-      requirements: {},
-      provisions: {},
-      sideEffects: {},
-      registered: false,
-      resourceId: this.getResourceId(provider, type),
-      variables: {},
-    }
-  }
-
-  /**
-   * Returns a resource's id based on its provider, type and unique count
-   *
-   * !!!!!!!
-   * WARNING: Changing the resource ID will trigger new service deployment
-   * !!!!!!!
-   *
-   * @param {ProviderChoice} provider the resource's provider
-   * @param {ServiceTypeChoice} type the resource's type
-   * @returns {String} the resource id
-   */
-  protected getResourceId(provider: ProviderChoice, type: ServiceTypeChoice): string {
-    const serviceGroup = `${provider}-${type}`
-    const index = (this.#serviceCounts.get(serviceGroup) || 0) + 1
-    this.#serviceCounts.set(serviceGroup, index)
-
-    return snakeCase(`${serviceGroup} ${index || ''}`.trim())
   }
 }

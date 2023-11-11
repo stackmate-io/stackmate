@@ -1,8 +1,8 @@
 import { LocalBackend } from 'cdktf'
 import { LocalState } from '@src/services/providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { Registry } from '@services/registry'
 import { Stack } from '@lib/stack'
+import { getProvisionable } from '@tests/mocks/getProvisionable'
 import type { LocalStateAttributes } from '@local/services/state'
 
 describe('Local state', () => {
@@ -34,7 +34,7 @@ describe('Local state', () => {
       type: 'state',
     }
 
-    const provisionable = Registry.provisionable(config)
+    const provisionable = getProvisionable(config)
 
     it('registers the local state backend', () => {
       const resources = service.handler(provisionable, stack)

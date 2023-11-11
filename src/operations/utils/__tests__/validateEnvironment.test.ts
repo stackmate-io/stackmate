@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { EnvironmentValidationError } from '@lib/errors'
-import { validateEnvironment } from '@services/utils'
+import { assertEnvironmentValid } from '@src/operations/utils/assertEnvironmentValid'
 import { fromPairs } from 'lodash'
 import type { ServiceEnvironment } from '@services/types'
 
-describe('validateEnvironment', () => {
+describe('assertEnvironmentValid', () => {
   let vars: ServiceEnvironment<string[]>[]
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('validateEnvironment', () => {
   })
 
   it('raises an error when there are required environment variables missing', () => {
-    expect(() => validateEnvironment(vars)).toThrow(EnvironmentValidationError)
+    expect(() => assertEnvironmentValid(vars)).toThrow(EnvironmentValidationError)
   })
 
   it('does not raise an error when all required variables are present', () => {
@@ -46,6 +46,6 @@ describe('validateEnvironment', () => {
         .flat(),
     )
 
-    expect(() => validateEnvironment(vars, envWithRequiredParams)).not.toThrow()
+    expect(() => assertEnvironmentValid(vars, envWithRequiredParams)).not.toThrow()
   })
 })

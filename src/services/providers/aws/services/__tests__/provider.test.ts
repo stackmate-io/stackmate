@@ -9,8 +9,9 @@ import {
 import { AwsProvider } from '@aws/services/provider'
 import { REGIONS } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { getProvisionable } from '@tests/mocks/getProvisionable'
 import { Stack } from '@lib/stack'
-import { Registry } from '@services/registry'
+import { faker } from '@faker-js/faker'
 import type { BaseProvisionable } from '@src/services/types'
 import type { AwsProviderResources } from '@aws/types'
 
@@ -56,8 +57,8 @@ describe('AWS Provider', () => {
     let provisionable: BaseProvisionable
 
     beforeEach(() => {
-      stack = new Stack('stack-name')
-      provisionable = Registry.provisionable({
+      stack = new Stack(faker.lorem.word())
+      provisionable = getProvisionable({
         provider: PROVIDER.AWS,
         type: SERVICE_TYPE.PROVIDER,
         name: 'aws-provider',

@@ -4,7 +4,7 @@ import { SERVICE_TYPE } from '@src/constants'
 import { REGIONS } from '@aws/constants'
 import { getAwsService } from '@aws/utils/getAwsService'
 import { withRegions, withHandler, withSchema } from '@services/behaviors'
-import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket'
+import type { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
 import type { Provisionable, BaseServiceAttributes } from '@services/types'
@@ -49,32 +49,6 @@ const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): Aw
   })
 
   return { backend }
-}
-
-const prerequisitesHandler = (provisionable: AwsStateProvisionable, stack: Stack) => {
-  const {
-    config,
-    resourceId,
-    requirements: { providerInstance, kmsKey },
-  } = provisionable
-
-  const bucket = new S3Bucket(stack.context, resourceId, {
-    acl: 'private',
-    bucket: config.bucket,
-    provider: providerInstance,
-    dependsOn: [providerInstance],
-  })
-  // const backend = new S3Backend(stack.context, {
-  //   acl: 'private',
-  //   bucket: config.bucket,
-  //   encrypt: true,
-  //   key: `${stack.name}/terraform.tfstate`,
-  //   kmsKeyId: kmsKey.id,
-  //   region: config.region,
-  // })
-
-  // return { backend }
-  return { bucket }
 }
 
 const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({

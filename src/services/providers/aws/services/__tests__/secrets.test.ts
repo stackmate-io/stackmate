@@ -10,8 +10,8 @@ import { AwsSecretsVault, generateCredentials } from '@aws/services/secrets'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { REGIONS } from '@aws/constants'
 import { Stack } from '@lib/stack'
-import { Registry } from '@services/registry'
 import { getAwsProvisionable } from '@tests/mocks'
+import { getProvisionable } from '@tests/mocks/getProvisionable'
 import type { BaseProvisionable } from '@services/types/provisionable'
 import type { AwsSecretsProvisionable, AwsSecretsVaultAttributes } from '@aws/services/secrets'
 
@@ -65,7 +65,7 @@ describe('AWS Secrets service', () => {
       }
 
       vault = getAwsProvisionable(config, stack)
-      target = Registry.provisionable(targetConfig)
+      target = getProvisionable(targetConfig)
     })
 
     it('registers the provision credentials terraform resources', () => {

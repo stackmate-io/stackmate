@@ -3,13 +3,11 @@ import addErrors from 'ajv-errors'
 import addFormats from 'ajv-formats'
 import { defaults } from 'lodash'
 import { isAddressValid } from '@lib/networking'
-import {
-  validateServiceProfileOverrides,
-  validateServiceLinks,
-  validateServiceProfile,
-} from '@services/utils'
 import { AJV_DEFAULTS } from '@src/validation/constants'
 import type { Options as AjvOptions } from 'ajv'
+import { validateServiceLinks } from './validateServiceLinks'
+import { validateServiceProfile } from './validateServiceProfile'
+import { validateServiceProfileOverrides } from './validateServiceProfileOverrides'
 
 let ajv: Ajv
 /**

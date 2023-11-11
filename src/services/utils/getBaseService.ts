@@ -1,4 +1,4 @@
-import { getNameSchema } from '@src/validation'
+import { getNameSchema } from '@src/validation/utils/getNameSchema'
 import type { JsonSchema } from '@lib/schema'
 import type {
   ProviderChoice,
