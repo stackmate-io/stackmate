@@ -16,6 +16,7 @@ export const SERVICE_TYPE = {
   MARIADB: 'mariadb',
   MONITORING: 'monitoring',
   MYSQL: 'mysql',
+  NETWORKING: 'networking',
   POSTGRESQL: 'postgresql',
   PROVIDER: 'provider',
   REDIS: 'redis',
