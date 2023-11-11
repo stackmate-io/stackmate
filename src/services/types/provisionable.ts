@@ -1,3 +1,4 @@
+import type { TerraformLocal } from 'cdktf'
 import type { Dictionary } from 'lodash'
 import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
@@ -23,6 +24,7 @@ export type BaseProvisionable<Attrs extends BaseServiceAttributes = BaseServiceA
   registered: boolean
   sideEffects: Provisions
   requirements: Dictionary<ProvisionResources>
+  variables: { [K: string]: TerraformLocal }
 }
 
 export type ProvisionHandler = (
@@ -30,8 +32,6 @@ export type ProvisionHandler = (
   stack: Stack,
   opts?: object,
 ) => Provisions
-
-export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
 
 export type Provisionable<
   Srv extends BaseService,
@@ -44,6 +44,7 @@ export type Provisionable<
   provisions: Provs
   context: Context
   requirements: ExtractServiceRequirements<Srv['associations']>
+  variables: { [K in keyof Srv['environment']]: TerraformLocal }
 }
 
 export type AssociatedProvisionable = {
@@ -51,5 +52,3 @@ export type AssociatedProvisionable = {
   target: BaseProvisionable
   handler: AnyAssociationHandler
 }
-
-export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>

@@ -1,3 +1,6 @@
+import type { TerraformOutput, TerraformResource } from 'cdktf'
+import type { Obj } from '@lib/util'
+import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { MonitoringAttributes, RegionalAttributes } from '@services/behaviors'
 import type {
   internetGateway,
@@ -16,8 +19,6 @@ import type {
   provider as terraformAwsProvider,
   dataAwsCallerIdentity,
 } from '@cdktf/provider-aws'
-import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import type { Obj } from '@lib/util'
 import type {
   ServiceAssociations,
   Service,
@@ -26,26 +27,6 @@ import type {
   ServiceRequirement,
   Provisions,
 } from '@services/types'
-import type { TerraformOutput, TerraformResource } from 'cdktf'
-
-/**
- * @type {AwsServiceAlertResources} the alarms resources
- */
-
-export type AwsServiceAlertResources = Record<
-  string,
-  cloudwatchMetricAlarm.CloudwatchMetricAlarm | TerraformResource
->
-/**
- * @type {AwsAlertPrerequisites} the prerequisites for alert generators
- */
-
-export type AwsAlertPrerequisites = {
-  topic: snsTopic.SnsTopic
-  policy: snsTopicPolicy.SnsTopicPolicy
-  document: dataAwsIamPolicyDocument.DataAwsIamPolicyDocument
-  subscriptions: snsTopicSubscription.SnsTopicSubscription[]
-}
 
 export type AwsServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
   provider: typeof PROVIDER.AWS
@@ -75,31 +56,41 @@ export type AwsProviderAttributes = AwsServiceAttributes<
     }
 >
 
-export type AwsProviderService = Service<AwsProviderAttributes>
+export type AwsProviderService = Service<
+  AwsProviderAttributes,
+  Obj,
+  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_KMS_KEY_ARN']
+>
+
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 
-export type AwsProviderRequirement = ServiceRequirement<
-  terraformAwsProvider.AwsProvider,
-  typeof SERVICE_TYPE.PROVIDER
->
-
-export type AwsKmsKeyRequirement = ServiceRequirement<kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER>
-
-export type AwsVpcRequirement = ServiceRequirement<vpc.Vpc, typeof SERVICE_TYPE.PROVIDER>
-
-export type AwsAccountRequirement = ServiceRequirement<
-  dataAwsCallerIdentity.DataAwsCallerIdentity,
-  typeof SERVICE_TYPE.PROVIDER
->
-
 export type AwsServiceAssociations = {
-  account: AwsAccountRequirement
-  providerInstance: AwsProviderRequirement
-  kmsKey: AwsKmsKeyRequirement
-  vpc: AwsVpcRequirement
+  account: ServiceRequirement<
+    dataAwsCallerIdentity.DataAwsCallerIdentity,
+    typeof SERVICE_TYPE.PROVIDER
+  >
+  providerInstance: ServiceRequirement<
+    terraformAwsProvider.AwsProvider,
+    typeof SERVICE_TYPE.PROVIDER
+  >
+  kmsKey: ServiceRequirement<kmsKey.KmsKey, typeof SERVICE_TYPE.PROVIDER>
+  vpc: ServiceRequirement<vpc.Vpc, typeof SERVICE_TYPE.PROVIDER>
 }
 
+// Monitoring / Alerting
 export type MonitoredServiceProvisionable = Provisionable<
   AwsService<BaseServiceAttributes & MonitoringAttributes>,
   Provisions
 >
+
+export type AwsServiceAlertResources = Record<
+  string,
+  cloudwatchMetricAlarm.CloudwatchMetricAlarm | TerraformResource
+>
+
+export type AwsAlertPrerequisites = {
+  topic: snsTopic.SnsTopic
+  policy: snsTopicPolicy.SnsTopicPolicy
+  document: dataAwsIamPolicyDocument.DataAwsIamPolicyDocument
+  subscriptions: snsTopicSubscription.SnsTopicSubscription[]
+}

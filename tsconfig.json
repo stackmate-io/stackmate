@@ -50,16 +50,19 @@
       "@lib/*": [
         "src/lib/*"
       ],
-      "@mocks/*": [
-        "tests/mocks/*"
+      "@tests/*": [
+        "tests/*"
       ]
     }
   },
   "include": [
     "src/**/*",
     "tests/**/*",
+    "e2e/**/*",
+    "**/__tests__/**/*",
     "tsconfig.json",
     "jest.setup.ts",
+    "jest.config.e2e.ts",
     "jest.config.ts",
     "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
   ],

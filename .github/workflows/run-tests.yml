@@ -38,7 +38,13 @@ jobs:
         run: yarn install
 
       - name: Lint the project
-        run: npm run lint
+        run: yarn lint
+
+      - name: Check for TypeScript errors
+        run: yarn check:all
+
+      - name: Check for circular imports
+        run: yarn check:circular
 
       - name: Run the tests
         env:

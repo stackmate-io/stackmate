@@ -10,10 +10,10 @@ package-lock.json
 tmp
 node_modules
 
-# Stackmate specific
-.stackmate
+# Terraform specific
 cdktf.out
-stackmate.schema.json
+.terraform
+*.tf.json
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
@@ -21,9 +21,6 @@ stackmate.schema.json
 
 # Jest
 .jestcache
-
-# Oclif specific
-oclif.manifest.json
 
 ### yarn ###
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored

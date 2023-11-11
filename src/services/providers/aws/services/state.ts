@@ -4,6 +4,7 @@ import { SERVICE_TYPE } from '@src/constants'
 import { REGIONS } from '@aws/constants'
 import { getAwsService } from '@aws/utils/getAwsService'
 import { withRegions, withHandler, withSchema } from '@services/behaviors'
+import type { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
 import type { Provisionable, BaseServiceAttributes } from '@services/types'
@@ -18,9 +19,19 @@ export type AwsStateAttributes = AwsServiceAttributes<
     }
 >
 
+// Deployable service
 export type AwsStateService = AwsService<AwsStateAttributes>
 export type AwsStateResources = { backend: S3Backend }
 export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateResources>
+
+// Prerequisite service
+export type AwsStatePreparator = AwsService<AwsStateAttributes>
+
+export type AwsStatePrerequisites = { bucket: S3Bucket }
+export type AwsStatePrerequisiteProvisionable = Provisionable<
+  AwsStateService,
+  AwsStatePrerequisites
+>
 
 const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): AwsStateResources => {
   const {

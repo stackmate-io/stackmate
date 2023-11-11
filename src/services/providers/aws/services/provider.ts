@@ -15,7 +15,7 @@ import { DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { profileable, withEnvironment, withHandler, withRegions } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
-import type { AwsProviderProvisionable, AwsProviderResources, AwsProviderService } from '@aws/types'
+import type { AwsProviderService, AwsProviderProvisionable, AwsProviderResources } from '@aws/types'
 
 /**
  * @param {AwsProviderProvisionable} provisionable the provisionable item
@@ -49,7 +49,7 @@ export const resourceHandler = (
     ],
   })
 
-  const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}-key`, {
+  const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}_key`, {
     customerMasterKeySpec: 'SYMMETRIC_DEFAULT',
     deletionWindowInDays: 30,
     description: 'Stackmate default encryption key',
@@ -61,7 +61,7 @@ export const resourceHandler = (
 
   const account = new callerIdentity.DataAwsCallerIdentity(
     stack.context,
-    `${resourceId}-account-id`,
+    `${resourceId}_account_id`,
     {
       provider,
     },
@@ -74,24 +74,24 @@ export const resourceHandler = (
 
   const subnets = subnetCidrs.map(
     (cidrBlock, idx) =>
-      new awsSubnet.Subnet(stack.context, `${resourceId}-subnet${idx + 1}`, {
+      new awsSubnet.Subnet(stack.context, `${resourceId}_subnet${idx + 1}`, {
         ...subnetConfig,
         vpcId: vpc.id,
         cidrBlock,
       }),
   )
 
-  const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}-gateway`, {
+  const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,
     vpcId: vpc.id,
   })
 
   const outputs: TerraformOutput[] = [
-    new TerraformOutput(stack.context, `${resourceId}-vpc-id`, {
+    new TerraformOutput(stack.context, `${resourceId}_vpc_id`, {
       description: 'VPC ID',
       value: vpc.id,
     }),
-    new TerraformOutput(stack.context, `${resourceId}-vpc-cidr-block`, {
+    new TerraformOutput(stack.context, `${resourceId}_vpc_cidr_block`, {
       description: 'VPC CIDR block',
       value: vpc.cidrBlock,
     }),
@@ -111,13 +111,16 @@ export const resourceHandler = (
 /**
  * @returns {AwsProviderService} the secrets vault service
  */
-export const getProviderService = (): AwsProviderService =>
+const getProviderService = (): AwsProviderService =>
   pipe(
     profileable(),
     withRegions(REGIONS),
     withHandler(resourceHandler),
-    withEnvironment('AWS_ACCESS_KEY_ID', 'AWS Access Key ID', true),
-    withEnvironment('AWS_SECRET_ACCESS_KEY', 'AWS Secret Access Key', true),
+    withEnvironment({
+      AWS_ACCESS_KEY_ID: { description: 'AWS Secret Key ID', required: true },
+      AWS_SECRET_ACCESS_KEY: { description: 'AWS Secret Access Key', required: true },
+      AWS_KMS_KEY_ARN: { description: 'AWS KMS key ARN', required: true },
+    }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()
