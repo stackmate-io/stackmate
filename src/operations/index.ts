@@ -5,7 +5,6 @@ import type { ServiceConfiguration, ServiceAttributes } from '@services/registry
 import type {
   ProvisionablesMap,
   AssociatedProvisionablesMap,
-  Scope,
   BaseProvisionable,
   Provisions,
   AssociatedProvisionable,
@@ -44,11 +43,6 @@ export class Operation {
   #sideEffects: AssociatedProvisionablesMap = new Map()
 
   /**
-   * @var {operationType} type the type of the operation
-   */
-  #scope: Scope
-
-  /**
    * @constructor
    * @param {ServiceConfiguration[]} serviceConfigs the services to provision
    * @param {string} envName the name of the environment we're deploying
@@ -57,9 +51,7 @@ export class Operation {
     serviceConfigs: ServiceConfiguration[],
     envName: string,
     variables: Dictionary<string | undefined> = process.env,
-    scope: Scope = 'deployment',
   ) {
-    this.#scope = scope
     this.#variables = variables
     this.stack = new Stack(envName, this.#variables)
     this.init(serviceConfigs)
@@ -102,7 +94,7 @@ export class Operation {
 
     this.#provisionables = new Map(
       serviceAttributes.map((attrs) => {
-        const provisionable = getProvisionable(attrs, this.#scope)
+        const provisionable = getProvisionable(attrs)
         return [provisionable.id, provisionable]
       }),
     )
