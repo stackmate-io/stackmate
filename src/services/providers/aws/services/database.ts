@@ -3,54 +3,35 @@ import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws'
 import { SERVICE_TYPE, DEFAULT_PORT } from '@src/constants'
-import { withRootCredentials } from '@services/behaviors/credentials'
 import { awsDatabaseAlarms } from '@aws/alerts/database'
 import { getProfile } from '@services/utils'
 import { getAwsService } from '@aws/utils/getAwsService'
-import {
-  DEFAULT_RDS_INSTANCE_SIZE,
-  RDS_DEFAULT_VERSIONS_PER_ENGINE,
-  RDS_INSTANCE_SIZES,
-  RDS_LOG_EXPORTS_PER_ENGINE,
-  RDS_MAJOR_VERSIONS_PER_ENGINE,
-  RDS_PARAM_FAMILY_MAPPING,
-} from '@aws/constants'
-import {
-  multiNode,
-  profileable,
-  sizeable,
-  storable,
-  versioned,
-  withDatabase,
-  withEngine,
-  withHandler,
-  connectable,
-  linkable,
-  externallyLinkable,
-  monitored,
-} from '@services/behaviors'
+import * as AWS from '@aws/constants'
+import * as behavior from '@services/behaviors'
 import { onServiceLinked } from '@aws/utils/onServiceLinked'
 import { onExternalLink } from '@aws/utils/onExternalLink'
 import { withAwsAlerts } from '@aws/utils/withAlerts'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
-import type { DatabaseServiceAttributes } from '@services/types/database'
 import type { PROVIDER } from '@src/constants'
-import type {
-  RootCredentialsAssociations,
-  EngineAttributes,
-  RegionalAttributes,
-  MonitoringAttributes,
-} from '@services/behaviors'
-import type { Provisionable, ServiceTypeChoice } from '@services/types'
+import type { BaseServiceAttributes, Provisionable, ServiceTypeChoice } from '@services/types'
 import type { AwsService } from '@aws/types'
 import type { RdsEngine, REGIONS } from '@aws/constants'
 
-type DatabaseAttributes = DatabaseServiceAttributes &
-  RegionalAttributes<ChoiceOf<typeof REGIONS>> &
-  EngineAttributes<RdsEngine> &
-  MonitoringAttributes & {
+type DatabaseAttributes = BaseServiceAttributes &
+  behavior.SizeableAttributes &
+  behavior.VersioningAttributes &
+  behavior.LinkableAttributes &
+  behavior.ExternallyLinkableAttributes &
+  behavior.MultiNodeAttributes &
+  behavior.StorableAttributes &
+  behavior.ConnectableAttributes &
+  behavior.ProfilableAttributes &
+  behavior.RegionalAttributes<ChoiceOf<typeof REGIONS>> &
+  behavior.EngineAttributes<RdsEngine> &
+  behavior.MonitoringAttributes & {
     provider: typeof PROVIDER.AWS
+    database: string
   }
 
 export type AwsDatabaseResources = {
@@ -62,13 +43,16 @@ export type AwsDatabaseResources = {
 export type AwsDatabaseAttributes<
   T extends ServiceTypeChoice,
   E extends RdsEngine,
-> = DatabaseAttributes & EngineAttributes<E> & { type: T }
+> = DatabaseAttributes & behavior.EngineAttributes<E> & { type: T }
 
 export type AwsMySQLAttributes = AwsDatabaseAttributes<'mysql', 'mysql'>
 export type AwsPostgreSQLAttributes = AwsDatabaseAttributes<'postgresql', 'postgres'>
 export type AwsMariaDBAttributes = AwsDatabaseAttributes<'mariadb', 'mariadb'>
 
-type AwsDbService<Attrs extends DatabaseAttributes> = AwsService<Attrs, RootCredentialsAssociations>
+type AwsDbService<Attrs extends DatabaseAttributes> = AwsService<
+  Attrs,
+  behavior.RootCredentialsAssociations
+>
 
 export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>
 export type AwsPostgreSQLService = AwsDbService<AwsPostgreSQLAttributes>
@@ -83,7 +67,7 @@ export type AwsDatabaseProvisionable = Provisionable<AwsDb, AwsDatabaseResources
  * @returns {String} the parameter group family to use when provisioning the database
  */
 export const getParamGroupFamily = (config: DatabaseAttributes): string => {
-  const triad = RDS_PARAM_FAMILY_MAPPING.find(
+  const triad = AWS.RDS_PARAM_FAMILY_MAPPING.find(
     ([engine, version]) => engine === config.engine && config.version.startsWith(version),
   )
 
@@ -126,7 +110,7 @@ const deployDatabases =
       allocatedStorage: config.storage,
       applyImmediately: true,
       count: config.nodes,
-      enabledCloudwatchLogsExports: RDS_LOG_EXPORTS_PER_ENGINE[
+      enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[
         config.engine
       ] as unknown as string[],
       engine: config.engine,
@@ -176,7 +160,7 @@ export const resourceHandler = (
  * @param {RdsEngine} engine the RDS engine to use
  * @returns {AwsDatabaseService<DatabaseAttributes>} the database service
  */
-export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
+const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
   type: T,
   engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {
@@ -186,19 +170,22 @@ export const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEng
   }
 
   return pipe(
-    withRootCredentials(),
-    withHandler(resourceHandler),
-    linkable(onServiceLinked),
-    externallyLinkable(onExternalLink),
-    monitored(),
-    sizeable(RDS_INSTANCE_SIZES, DEFAULT_RDS_INSTANCE_SIZE),
-    versioned(RDS_MAJOR_VERSIONS_PER_ENGINE[engine], RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]),
-    connectable(defaultPort),
-    storable(),
-    withEngine<typeof engine>(engine),
-    multiNode(),
-    profileable(),
-    withDatabase(),
+    behavior.withRootCredentials(),
+    behavior.withHandler(resourceHandler),
+    behavior.linkable(onServiceLinked),
+    behavior.externallyLinkable(onExternalLink),
+    behavior.monitored(),
+    behavior.sizeable(AWS.RDS_INSTANCE_SIZES, AWS.DEFAULT_RDS_INSTANCE_SIZE),
+    behavior.versioned(
+      AWS.RDS_MAJOR_VERSIONS_PER_ENGINE[engine],
+      AWS.RDS_DEFAULT_VERSIONS_PER_ENGINE[engine],
+    ),
+    behavior.connectable(defaultPort),
+    behavior.storable(),
+    behavior.withEngine<typeof engine>(engine),
+    behavior.multiNode(),
+    behavior.profileable(),
+    behavior.withDatabase(),
   )(getAwsService(type))
 }
 

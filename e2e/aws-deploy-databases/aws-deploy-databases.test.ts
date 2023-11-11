@@ -8,6 +8,12 @@ export const config: ServiceConfiguration[] = [
     region: 'eu-central-1',
   },
   {
+    name: 'aws-networking',
+    provider: 'aws',
+    region: 'eu-central-1',
+    type: 'networking',
+  },
+  {
     name: 'aws-secrets',
     provider: 'aws',
     type: 'secrets',
