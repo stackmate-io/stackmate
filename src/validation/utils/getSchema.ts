@@ -1,9 +1,9 @@
 import { fromPairs } from 'lodash'
 import { Registry, type ServiceAttributes } from '@services/registry'
-import { getNameSchema } from '@src/validation'
 import type { BaseServiceAttributes } from '@services/types'
 import type { Dictionary } from 'lodash'
 import type { JsonSchema } from '@lib/schema'
+import { getNameSchema } from './getNameSchema'
 
 /**
  * Populates the project schema

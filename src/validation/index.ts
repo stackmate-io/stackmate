@@ -1,7 +1,2 @@
-export * from './utils/getAjv'
-export * from './utils/getNameSchema'
 export * from './utils/getSchema'
 export * from './utils/getValidData'
-export * from './utils/validateServiceLinks'
-export * from './utils/validateServiceProfile'
-export * from './utils/validateServiceProfileOverrides'

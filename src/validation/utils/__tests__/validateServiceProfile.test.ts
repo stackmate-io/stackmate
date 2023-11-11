@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { getAwsDbMock } from '@tests/mocks'
 import { ValidationError } from '@lib/errors'
-import { getSchema, getValidData } from '@src/validation/utils/getSchema'
+import { getSchema, getValidData } from '@src/validation'
 import type { ValidationErrorDescriptor } from '@lib/errors'
 
 describe('serviceProfile', () => {

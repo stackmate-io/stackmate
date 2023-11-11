@@ -33,8 +33,6 @@ export type ProvisionHandler = (
   opts?: object,
 ) => Provisions
 
-export type ProvisionablesMap = Map<BaseProvisionable['id'], BaseProvisionable>
-
 export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
@@ -54,5 +52,3 @@ export type AssociatedProvisionable = {
   target: BaseProvisionable
   handler: AnyAssociationHandler
 }
-
-export type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>

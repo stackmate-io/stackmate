@@ -1,6 +1,7 @@
 import { ValidationError } from '@src/lib/errors'
 import { defaults, cloneDeep, isFunction } from 'lodash'
 import type { JsonSchema } from '@src/lib/schema'
+import type { Options as AjvOptions } from 'ajv'
 import { getAjv } from './getAjv'
 import { parseErrors } from './parseErrors'
 import { AJV_DEFAULTS } from '../constants'

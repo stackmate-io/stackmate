@@ -1,5 +1,4 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { Registry } from '@services/registry'
 import { generateCredentials } from '@aws/services/secrets'
 import type { Stack } from '@lib/stack'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
@@ -9,6 +8,7 @@ import type {
   AwsSecretsProvisionable,
 } from '@src/services/providers/aws/services/secrets'
 import type { AwsProviderResources } from '@src/services/providers/aws/types'
+import { getProvisionable } from './getProvisionable'
 
 export const getCredentialResources = (
   providerResources: AwsProviderResources,
@@ -16,7 +16,7 @@ export const getCredentialResources = (
   stack: Stack,
   opts?: CredentialsHandlerOptions,
 ): AwsSecretsResources => {
-  const provisionable = Registry.provisionable({
+  const provisionable = getProvisionable({
     provider: PROVIDER.AWS,
     name: 'aws-secrets-service',
     type: SERVICE_TYPE.SECRETS,
