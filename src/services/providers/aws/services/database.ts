@@ -1,7 +1,7 @@
 import pipe from 'lodash/fp/pipe'
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
-import { dbInstance as rdsDbInstance, dbParameterGroup } from '@cdktf/provider-aws'
+import { dbInstance as rdsDbInstance, dbParameterGroup, dbSubnetGroup } from '@cdktf/provider-aws'
 import { SERVICE_TYPE, DEFAULT_PORT } from '@src/constants'
 import { awsDatabaseAlarms } from '@aws/alerts/database'
 import { getProfile } from '@services/utils'
@@ -37,6 +37,7 @@ type DatabaseAttributes = BaseServiceAttributes &
 export type AwsDatabaseResources = {
   dbInstance: rdsDbInstance.DbInstance
   paramGroup: dbParameterGroup.DbParameterGroup
+  subnetGroup: dbSubnetGroup.DbSubnetGroup
   outputs: TerraformOutput[]
 }
 
@@ -92,20 +93,32 @@ const deployDatabases =
   (): AwsDatabaseResources => {
     const {
       config,
-      requirements: { providerInstance, rootCredentials },
+      requirements: { providerInstance, rootCredentials, vpc, subnets },
+      resourceId,
     } = provisionable
     const { instance, params } = getProfile(config)
+    const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
+
+    const subnetGroup = new dbSubnetGroup.DbSubnetGroup(
+      stack.context,
+      `${dbInstanceName}-subnetGroup`,
+      {
+        subnetIds: subnets.map((subnet) => subnet.id),
+        namePrefix: dbInstanceName,
+        provider: providerInstance,
+      },
+    )
 
     const paramGroup = new dbParameterGroup.DbParameterGroup(
       stack.context,
-      `${provisionable.resourceId}_params`,
+      `${resourceId}_params`,
       {
         ...params,
         family: getParamGroupFamily(config),
       },
     )
 
-    const dbInstance = new rdsDbInstance.DbInstance(stack.context, provisionable.resourceId, {
+    const dbInstance = new rdsDbInstance.DbInstance(stack.context, resourceId, {
       ...instance,
       allocatedStorage: config.storage,
       applyImmediately: true,
@@ -115,28 +128,29 @@ const deployDatabases =
       ] as unknown as string[],
       engine: config.engine,
       engineVersion: config.version,
-      identifier: kebabCase(`${config.name}-${stack.name}`),
+      identifier: dbInstanceName,
       instanceClass: config.size,
       dbName: config.database,
       parameterGroupName: paramGroup.name,
       port: config.port,
       provider: providerInstance,
-      dbSubnetGroupName: `db-subnet-${provisionable.resourceId}`,
+      dbSubnetGroupName: subnetGroup.name,
       username: rootCredentials.username.expression,
       password: rootCredentials.password.expression,
+      vpcSecurityGroupIds: [vpc.defaultSecurityGroupId],
       lifecycle: {
         createBeforeDestroy: true,
       },
     })
 
     const outputs: TerraformOutput[] = [
-      new TerraformOutput(stack.context, `${provisionable.resourceId}_endpoint`, {
+      new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
         description: `Connection endpoint for "${config.name}" RDS service`,
         value: dbInstance.endpoint,
       }),
     ]
 
-    return { dbInstance, paramGroup, outputs }
+    return { dbInstance, paramGroup, subnetGroup, outputs }
   }
 
 /**
@@ -160,7 +174,7 @@ export const resourceHandler = (
  * @param {RdsEngine} engine the RDS engine to use
  * @returns {AwsDatabaseService<DatabaseAttributes>} the database service
  */
-const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
+const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>(
   type: T,
   engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {
@@ -175,7 +189,7 @@ const getDatabaseService = <T extends ServiceTypeChoice, E extends RdsEngine>(
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),
     behavior.monitored(),
-    behavior.sizeable(AWS.RDS_INSTANCE_SIZES, AWS.DEFAULT_RDS_INSTANCE_SIZE),
+    behavior.sizeable('^db\\.[a-z0-9]+\\.[a-z0-9]+$', AWS.DEFAULT_RDS_INSTANCE_SIZE),
     behavior.versioned(
       AWS.RDS_MAJOR_VERSIONS_PER_ENGINE[engine],
       AWS.RDS_DEFAULT_VERSIONS_PER_ENGINE[engine],
