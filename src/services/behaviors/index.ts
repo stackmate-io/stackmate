@@ -1,3 +1,4 @@
+export * from './clustered'
 export * from './connectable'
 export * from './credentials'
 export * from './linkable'

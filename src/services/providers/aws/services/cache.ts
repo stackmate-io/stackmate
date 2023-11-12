@@ -13,9 +13,11 @@ import {
   elasticacheParameterGroup,
   elasticacheSubnetGroup,
   elasticacheCluster,
+  cloudwatchLogGroup,
 } from '@cdktf/provider-aws'
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
+import { elasticacheClusterLogDeliveryConfigurationToTerraform } from '@cdktf/provider-aws/lib/elasticache-cluster'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
 import type { PROVIDER } from '@src/constants'
@@ -24,6 +26,7 @@ import type { AwsService } from '@aws/types'
 import type { ElasticacheEngine, REGIONS } from '@aws/constants'
 
 type CacheAttributes = BaseServiceAttributes &
+  behavior.ClusteredAttributes &
   behavior.SizeableAttributes &
   behavior.VersioningAttributes &
   behavior.LinkableAttributes &
@@ -41,6 +44,7 @@ type CacheAttributes = BaseServiceAttributes &
 export type AwsCacheResources = {
   instance?: elasticacheCluster.ElasticacheCluster
   cluster?: elasticacheReplicationGroup.ElasticacheReplicationGroup
+  logGroup: cloudwatchLogGroup.CloudwatchLogGroup
   paramGroup: elasticacheParameterGroup.ElasticacheParameterGroup
   subnetGroup: elasticacheSubnetGroup.ElasticacheSubnetGroup
   outputs: TerraformOutput[]
@@ -140,18 +144,34 @@ const deployCaches =
       },
     )
 
+    const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(
+      stack.context,
+      `${resourceId}_log_group`,
+      {
+        name: `${resourceId}-log-group`,
+      },
+    )
+
+    const logDeliveryConfiguration = elasticacheClusterLogDeliveryConfigurationToTerraform({
+      destination: logGroup.name,
+      destinationType: 'cloudwatch-logs',
+      logFormat: 'text',
+      logType: 'slow-log',
+    })
+
     let instance: elasticacheCluster.ElasticacheCluster | undefined
     let cluster: elasticacheReplicationGroup.ElasticacheReplicationGroup | undefined
     const outputs: TerraformOutput[] = []
 
-    if (config.nodes === 1) {
+    if (config.nodes === 1 && !config.cluster) {
       instance = new elasticacheCluster.ElasticacheCluster(stack.context, resourceId, {
         ...instanceOptions,
         applyImmediately: true,
-        nodeType: config.size,
+        clusterId: clusterName,
         engine: config.engine,
         engineVersion: config.version,
-        clusterId: clusterName,
+        logDeliveryConfiguration,
+        nodeType: config.size,
         numCacheNodes: config.nodes,
         port: config.port,
         provider: providerInstance,
@@ -177,16 +197,17 @@ const deployCaches =
         {
           ...clusterOptions,
           applyImmediately: true,
-          nodeType: config.size,
           engine: config.engine,
           engineVersion: config.version,
-          replicationGroupId: clusterName,
+          logDeliveryConfiguration,
+          nodeType: config.size,
           numCacheClusters: 1,
           numNodeGroups: nodeGroups,
-          replicasPerNodeGroup: replicas,
           port: config.port,
           provider: providerInstance,
           parameterGroupName: paramGroup.name,
+          replicasPerNodeGroup: replicas,
+          replicationGroupId: clusterName,
           securityGroupIds: [vpc.defaultSecurityGroupId],
         },
       )
@@ -199,7 +220,7 @@ const deployCaches =
       )
     }
 
-    return { instance, cluster, paramGroup, subnetGroup, outputs }
+    return { instance, cluster, logGroup, paramGroup, subnetGroup, outputs }
   }
 
 /**
@@ -233,6 +254,7 @@ const getCacheService = <T extends ServiceTypeChoice, E extends ElasticacheEngin
   }
 
   return pipe(
+    behavior.clustered(),
     behavior.withHandler(resourceHandler),
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),
