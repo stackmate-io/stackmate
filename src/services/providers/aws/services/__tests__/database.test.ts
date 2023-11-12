@@ -18,7 +18,7 @@ import {
   DEFAULT_PROFILE_NAME,
   DEFAULT_SERVICE_STORAGE,
 } from '@src/constants'
-import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, resourceHandler } from '@aws/services/database'
+import { AwsMariaDB, AwsMySQL, AwsPostgreSQL, resourceHandler } from '@aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   REGIONS,
@@ -87,7 +87,7 @@ const getDatabaseSchemaExpectation = (
 })
 
 describe('AWS PostgreSQL', () => {
-  const service = AWSPostgreSQL
+  const service = AwsPostgreSQL
 
   it('is a valid AWS PostgreSQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -125,7 +125,7 @@ describe('AWS PostgreSQL', () => {
 })
 
 describe('AWS MySQL', () => {
-  const service = AWSMySQL
+  const service = AwsMySQL
 
   it('is a valid AWS MySQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -163,7 +163,7 @@ describe('AWS MySQL', () => {
 })
 
 describe('AWS MariaDB', () => {
-  const service = AWSMariaDB
+  const service = AwsMariaDB
 
   it('is a valid AWS MySQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
