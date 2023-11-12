@@ -14,7 +14,10 @@ const opts: JestConfigWithTsJest = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json', diagnostics: true }],
+    '^.+\\.ts$': [
+      'ts-jest',
+      { tsconfig: '<rootDir>/tsconfig.json', diagnostics: true, isolatedModules: true },
+    ],
   },
   modulePaths: ['<rootDir>'],
   moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>' }),
