@@ -24,7 +24,7 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    *
    * @param {ServiceConfiguration} config the configuration of the item to add
    */
-  create<C extends ServiceConfiguration = ServiceConfiguration>(config: C) {
+  create<C extends ServiceConfiguration = ServiceConfiguration>(config: C): BaseProvisionable<C> {
     const provisionable = this.getProvisionable<C>(config)
     this.add(provisionable)
     return provisionable

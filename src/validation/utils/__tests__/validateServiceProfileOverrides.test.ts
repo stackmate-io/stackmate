@@ -1,10 +1,10 @@
 import { merge } from 'lodash'
-import { getAwsDbMock } from '@tests/mocks'
+import { getAwsDbConfigMock } from '@tests/mocks'
 import { getSchema, getValidData } from '@src/validation'
 import { ValidationError } from '@lib/errors'
 
 describe('isIpOrCidr', () => {
-  const db = getAwsDbMock()
+  const db = getAwsDbConfigMock()
   const schema = getSchema()
   const config = [db]
 
