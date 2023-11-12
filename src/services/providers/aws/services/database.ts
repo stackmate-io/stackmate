@@ -211,9 +211,9 @@ const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>
   )(getAwsService(type))
 }
 
-export const AWSMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql')
-export const AWSMariaDB: AwsMariaDBService = getDatabaseService(SERVICE_TYPE.MARIADB, 'mariadb')
-export const AWSPostgreSQL: AwsPostgreSQLService = getDatabaseService(
+export const AwsMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql')
+export const AwsMariaDB: AwsMariaDBService = getDatabaseService(SERVICE_TYPE.MARIADB, 'mariadb')
+export const AwsPostgreSQL: AwsPostgreSQLService = getDatabaseService(
   SERVICE_TYPE.POSTGRESQL,
   'postgres',
 )
