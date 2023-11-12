@@ -1,4 +1,3 @@
-import { type ServiceAttributes } from '@services/registry'
 import { ProvisionablesMap } from '@src/operations/utils/provisionables'
 import { assertRequirementsSatisfied } from '@src/operations/utils/assertRequirementsSatisfied'
 import type { Stack } from '@lib/stack'
@@ -7,7 +6,7 @@ import { getCredentialResources } from './getCredentialResources'
 import { getAwsServicePrerequisites } from './getAwsServicePrerequisites'
 
 export const getAwsProvisionable = <P extends BaseProvisionable>(
-  config: ServiceAttributes,
+  config: P['config'],
   stack: Stack,
   { withCredentials = false, withRootCredentials = false } = {},
 ): P => {

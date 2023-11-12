@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker'
 import { snakeCase } from 'lodash'
 import { Testing } from 'cdktf'
 import {
@@ -18,23 +17,17 @@ import {
   DEFAULT_PROFILE_NAME,
   DEFAULT_SERVICE_STORAGE,
 } from '@src/constants'
-import { AwsMariaDB, AwsMySQL, AwsPostgreSQL, resourceHandler } from '@aws/services/database'
+import { AwsMariaDB, AwsMySQL, AwsPostgreSQL } from '@aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
   REGIONS,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@aws/constants'
-import type { ServiceTypeChoice } from '@services/types'
-import type {
-  AwsMariaDBAttributes,
-  AwsMySQLAttributes,
-  AwsDatabaseProvisionable,
-} from '@aws/services/database'
-import type { RdsEngine } from '@aws/constants'
+import type { AwsDbServiceType, RdsEngine } from '@aws/constants'
 
 const getDatabaseSchemaExpectation = (
-  type: ServiceTypeChoice,
+  type: AwsDbServiceType,
   engine: RdsEngine,
   versions: readonly string[],
   defaultVersion: string,
@@ -150,7 +143,7 @@ describe('AWS MySQL', () => {
 
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMySQLAttributes = getAwsDbConfigMock('mysql', 'mysql')
+    const config = getAwsDbConfigMock('mysql', 'mysql')
     const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
@@ -188,7 +181,7 @@ describe('AWS MariaDB', () => {
 
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMariaDBAttributes = getAwsDbConfigMock('mariadb', 'mariadb')
+    const config = getAwsDbConfigMock('mariadb', 'mariadb')
     const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
@@ -201,21 +194,17 @@ describe('AWS MariaDB', () => {
 })
 
 describe('Database service monitoring', () => {
+  const service = AwsMariaDB
+
   it('provides monitoring for the database service', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMariaDBAttributes = {
-      ...getAwsDbConfigMock('mariadb', 'mariadb'),
-      monitoring: {
-        emails: [faker.internet.email()],
-        urls: [faker.internet.url()],
-      },
-    }
+    const config = getAwsDbConfigMock('mariadb', 'mariadb')
 
-    const provisionable = getAwsProvisionable<AwsDatabaseProvisionable>(config, stack, {
+    const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
 
-    resourceHandler(provisionable, stack)
+    service.handler(provisionable, stack)
     const synthesized = Testing.synth(stack.context)
 
     const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)

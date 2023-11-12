@@ -4,6 +4,7 @@ import { AwsState } from '@src/services/providers/aws/services/state'
 import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getAwsProvisionable } from '@tests/mocks'
+import type { AwsStateProvisionable } from '@src/services/providers/aws/services/state'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 
 describe('AWS state', () => {
@@ -46,7 +47,7 @@ describe('AWS state', () => {
 
     beforeEach(() => {
       stack = new Stack('mystack')
-      provisionable = getAwsProvisionable(
+      provisionable = getAwsProvisionable<AwsStateProvisionable>(
         {
           name: 'aws-state-service',
           provider: PROVIDER.AWS,

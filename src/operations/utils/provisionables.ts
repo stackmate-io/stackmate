@@ -2,7 +2,12 @@ import { isEqual, snakeCase } from 'lodash'
 import { hashObject } from '@lib/hash'
 import { Registry } from '@services/registry'
 import type { ServiceConfiguration } from '@services/registry'
-import type { BaseProvisionable, ProviderChoice, ServiceTypeChoice } from '@services/types'
+import type {
+  BaseProvisionable,
+  BaseServiceAttributes,
+  ProviderChoice,
+  ServiceTypeChoice,
+} from '@services/types'
 
 export class ProvisionablesMap extends Map<string, BaseProvisionable> {
   /**
@@ -24,7 +29,7 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    *
    * @param {ServiceConfiguration} config the configuration of the item to add
    */
-  create<C extends ServiceConfiguration = ServiceConfiguration>(config: C): BaseProvisionable<C> {
+  create<C extends BaseServiceAttributes>(config: C): BaseProvisionable<C> {
     const provisionable = this.getProvisionable<C>(config)
     this.add(provisionable)
     return provisionable
@@ -54,9 +59,7 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    * @param {BaseServiceAttributes} config the service's configuration
    * @returns {BaseProvisionable} the provisionable to use in operations
    */
-  protected getProvisionable<C extends ServiceConfiguration = ServiceConfiguration>(
-    config: C,
-  ): BaseProvisionable<C> {
+  protected getProvisionable<C extends BaseServiceAttributes>(config: C): BaseProvisionable<C> {
     const { type, provider } = config
 
     return {
