@@ -1,11 +1,11 @@
 import fs from 'node:fs'
-import { getAwsDbMock } from '@tests/mocks'
+import { getAwsDbConfigMock } from '@tests/mocks'
 import { ValidationError } from '@lib/errors'
 import { getSchema, getValidData } from '@src/validation'
 import type { ValidationErrorDescriptor } from '@lib/errors'
 
 describe('serviceProfile', () => {
-  const db = getAwsDbMock()
+  const db = getAwsDbConfigMock()
   const config = [db]
   const schema = getSchema()
 
