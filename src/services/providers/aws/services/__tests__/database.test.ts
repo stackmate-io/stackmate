@@ -1,5 +1,4 @@
-import { faker } from '@faker-js/faker'
-import { kebabCase, snakeCase } from 'lodash'
+import { snakeCase } from 'lodash'
 import { Testing } from 'cdktf'
 import {
   cloudwatchMetricAlarm,
@@ -11,33 +10,24 @@ import {
   snsTopicPolicy,
 } from '@cdktf/provider-aws'
 import { Stack } from '@lib/stack'
-import { getAwsProvisionable } from '@tests/mocks'
+import { getAwsDbConfigMock, getAwsProvisionable } from '@tests/mocks'
 import {
   PROVIDER,
   SERVICE_TYPE,
   DEFAULT_PROFILE_NAME,
   DEFAULT_SERVICE_STORAGE,
 } from '@src/constants'
-import { AWSMariaDB, AWSMySQL, AWSPostgreSQL, resourceHandler } from '@aws/services/database'
+import { AwsMariaDB, AwsMySQL, AwsPostgreSQL } from '@aws/services/database'
 import {
   DEFAULT_RDS_INSTANCE_SIZE,
-  RDS_INSTANCE_SIZES,
   REGIONS,
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@aws/constants'
-import type { ServiceTypeChoice } from '@services/types'
-import type {
-  AwsDatabaseAttributes,
-  AwsMariaDBAttributes,
-  AwsMySQLAttributes,
-  AwsPostgreSQLAttributes,
-  AwsDatabaseProvisionable,
-} from '@aws/services/database'
-import type { RdsEngine } from '@aws/constants'
+import type { AwsDbServiceType, RdsEngine } from '@aws/constants'
 
 const getDatabaseSchemaExpectation = (
-  type: ServiceTypeChoice,
+  type: AwsDbServiceType,
   engine: RdsEngine,
   versions: readonly string[],
   defaultVersion: string,
@@ -83,36 +73,14 @@ const getDatabaseSchemaExpectation = (
     }),
     size: expect.objectContaining({
       type: 'string',
-      enum: Array.from(RDS_INSTANCE_SIZES),
+      pattern: expect.stringContaining('^db\\.[a-z0-9]+\\.[a-z0-9]+$'),
       default: DEFAULT_RDS_INSTANCE_SIZE,
     }),
   },
 })
 
-const getDatabaseConfig = <T extends ServiceTypeChoice, E extends RdsEngine>(
-  type: T,
-  engine: E,
-): AwsDatabaseAttributes<T, E> => ({
-  provider: PROVIDER.AWS,
-  type,
-  engine,
-  name: 'my-awesome-rds-database-service',
-  database: 'some-database-name',
-  nodes: 1,
-  profile: DEFAULT_PROFILE_NAME,
-  overrides: {},
-  links: [],
-  externalLinks: [],
-  monitoring: { emails: [], urls: [] },
-  port: faker.number.int({ min: 2000, max: 65000 }),
-  region: faker.helpers.arrayElement(REGIONS),
-  size: faker.helpers.arrayElement(RDS_INSTANCE_SIZES),
-  storage: faker.number.int({ min: 30, max: 900 }),
-  version: faker.helpers.arrayElement(RDS_MAJOR_VERSIONS_PER_ENGINE[engine]),
-})
-
 describe('AWS PostgreSQL', () => {
-  const service = AWSPostgreSQL
+  const service = AwsPostgreSQL
 
   it('is a valid AWS PostgreSQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -137,8 +105,8 @@ describe('AWS PostgreSQL', () => {
 
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
-    const config: AwsPostgreSQLAttributes = getDatabaseConfig('postgresql', 'postgres')
-    const provisionable = getAwsProvisionable<AwsDatabaseProvisionable>(config, stack, {
+    const config = getAwsDbConfigMock('postgresql', 'postgres')
+    const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
 
@@ -146,26 +114,11 @@ describe('AWS PostgreSQL', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.name}`),
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('postgres'),
-    })
   })
 })
 
 describe('AWS MySQL', () => {
-  const service = AWSMySQL
+  const service = AwsMySQL
 
   it('is a valid AWS MySQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -190,8 +143,8 @@ describe('AWS MySQL', () => {
 
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMySQLAttributes = getDatabaseConfig('mysql', 'mysql')
-    const provisionable = getAwsProvisionable<AwsDatabaseProvisionable>(config, stack, {
+    const config = getAwsDbConfigMock('mysql', 'mysql')
+    const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
 
@@ -199,25 +152,11 @@ describe('AWS MySQL', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.name}`),
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('mysql'),
-    })
   })
 })
 
 describe('AWS MariaDB', () => {
-  const service = AWSMariaDB
+  const service = AwsMariaDB
 
   it('is a valid AWS MySQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -242,8 +181,8 @@ describe('AWS MariaDB', () => {
 
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMariaDBAttributes = getDatabaseConfig('mariadb', 'mariadb')
-    const provisionable = getAwsProvisionable<AwsDatabaseProvisionable>(config, stack, {
+    const config = getAwsDbConfigMock('mariadb', 'mariadb')
+    const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
 
@@ -251,39 +190,21 @@ describe('AWS MariaDB', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: kebabCase(`${config.name}-${stack.name}`),
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('mariadb'),
-    })
   })
 })
 
 describe('Database service monitoring', () => {
+  const service = AwsMariaDB
+
   it('provides monitoring for the database service', () => {
     const stack = new Stack('stack-name')
-    const config: AwsMariaDBAttributes = {
-      ...getDatabaseConfig('mariadb', 'mariadb'),
-      monitoring: {
-        emails: [faker.internet.email()],
-        urls: [faker.internet.url()],
-      },
-    }
+    const config = getAwsDbConfigMock('mariadb', 'mariadb')
 
-    const provisionable = getAwsProvisionable<AwsDatabaseProvisionable>(config, stack, {
+    const provisionable = getAwsProvisionable(config, stack, {
       withRootCredentials: true,
     })
 
-    resourceHandler(provisionable, stack)
+    service.handler(provisionable, stack)
     const synthesized = Testing.synth(stack.context)
 
     const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)

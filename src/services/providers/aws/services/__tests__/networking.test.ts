@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker'
 import { TerraformOutput } from 'cdktf'
 import { AwsNetworking } from '@aws/services/networking'
 import type { BaseProvisionable } from '@src/services/types'
-import type { AwsNetworkingResources } from '../../types'
+import type { AwsNetworkingResources } from '@aws/types'
 
 describe('AWS Networking', () => {
   const service = AwsNetworking
