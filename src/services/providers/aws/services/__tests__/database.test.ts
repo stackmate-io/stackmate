@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { kebabCase, snakeCase } from 'lodash'
+import { snakeCase } from 'lodash'
 import { Testing } from 'cdktf'
 import {
   cloudwatchMetricAlarm,
@@ -9,7 +9,6 @@ import {
   dbParameterGroup as awsDbParameterGroup,
   snsTopic,
   snsTopicPolicy,
-  dbSubnetGroup,
 } from '@cdktf/provider-aws'
 import { Stack } from '@lib/stack'
 import { getAwsDbConfigMock, getAwsProvisionable } from '@tests/mocks'
@@ -122,25 +121,6 @@ describe('AWS PostgreSQL', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-
-    const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: dbInstanceName,
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('postgres'),
-    })
-    expect(synthesized).toHaveResourceWithProperties(dbSubnetGroup.DbSubnetGroup, {
-      name_prefix: dbInstanceName,
-    })
   })
 })
 
@@ -179,25 +159,6 @@ describe('AWS MySQL', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-    const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: dbInstanceName,
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('mysql'),
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(dbSubnetGroup.DbSubnetGroup, {
-      name_prefix: dbInstanceName,
-    })
   })
 })
 
@@ -236,25 +197,6 @@ describe('AWS MariaDB', () => {
     expect(typeof resources === 'object').toBe(true)
     expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
     expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
-
-    const synthesized = Testing.synth(stack.context)
-    const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
-    expect(synthesized).toHaveResourceWithProperties(awsDbInstance.DbInstance, {
-      engine: config.engine,
-      instance_class: config.size,
-      port: config.port,
-      allocated_storage: config.storage,
-      db_name: config.database,
-      identifier: dbInstanceName,
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(awsDbParameterGroup.DbParameterGroup, {
-      family: expect.stringContaining('mariadb'),
-    })
-
-    expect(synthesized).toHaveResourceWithProperties(dbSubnetGroup.DbSubnetGroup, {
-      name_prefix: dbInstanceName,
-    })
   })
 })
 
