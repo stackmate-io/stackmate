@@ -101,7 +101,7 @@ const deployDatabases =
 
     const subnetGroup = new dbSubnetGroup.DbSubnetGroup(
       stack.context,
-      `${dbInstanceName}-subnetGroup`,
+      `${resourceId}-subnetGroup`,
       {
         subnetIds: subnets.map((subnet) => subnet.id),
         namePrefix: dbInstanceName,
@@ -147,6 +147,14 @@ const deployDatabases =
       new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
         description: `Connection endpoint for "${config.name}" RDS service`,
         value: dbInstance.endpoint,
+      }),
+      new TerraformOutput(stack.context, `${resourceId}_root_credentials`, {
+        description: `Root Credentials`,
+        sensitive: true,
+        value: {
+          username: rootCredentials.username.asString,
+          password: rootCredentials.password.asString,
+        },
       }),
     ]
 

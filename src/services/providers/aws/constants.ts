@@ -1,47 +1,20 @@
 import { SERVICE_TYPE } from '@src/constants'
 import type { ServiceTypeChoice } from '@services/types'
 
-export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
-
-export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
-export const DEFAULT_RDS_ENGINE = 'mysql' as const
 export const DEFAULT_VPC_IP = '10.0.0.0' as const
-
 export const REGIONS = ['eu-central-1'] as const
 
+/* RDS options */
+export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
+export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
+export const DEFAULT_RDS_ENGINE = 'mysql' as const
 export type AwsDbServiceType = Extract<ServiceTypeChoice, 'mysql' | 'mariadb' | 'postgresql'>
+
 export const RDS_ENGINE_PER_SERVICE_TYPE: Record<AwsDbServiceType, RdsEngine> = {
   [SERVICE_TYPE.MYSQL]: 'mysql',
   [SERVICE_TYPE.MARIADB]: 'mariadb',
   [SERVICE_TYPE.POSTGRESQL]: 'postgres',
 }
-
-export const RDS_INSTANCE_SIZES = [
-  'db.t3.micro',
-  'db.t3.small',
-  'db.t3.medium',
-  'db.t3.large',
-  'db.t3.xlarge',
-  'db.t3.2xlarge',
-  'db.t2.micro',
-  'db.t2.small',
-  'db.t2.medium',
-  'db.t2.large',
-  'db.t2.xlarge',
-  'db.t2.2xlarge',
-  'db.m4.large',
-  'db.m4.xlarge',
-  'db.m4.2xlarge',
-  'db.m4.4xlarge',
-  'db.m4.10xlarge',
-  'db.m4.16xlarge',
-  'db.m5.large',
-  'db.m5.xlarge',
-  'db.m5.2xlarge',
-  'db.m5.4xlarge',
-  'db.m5.12xlarge',
-  'db.m5.24xlarge',
-] as const
 
 export const RDS_PARAM_FAMILY_MAPPING = [
   ['mariadb', '10.2', 'mariadb10.2'],
@@ -75,3 +48,48 @@ export const RDS_DEFAULT_VERSIONS_PER_ENGINE: Record<RdsEngine, string> = {
   mysql: '8.0',
   postgres: '13',
 } as const
+
+/* Elasticache options */
+export type ElasticacheEngine = 'redis' | 'memcached'
+export const DEFAULT_ELASTICACHE_INSTANCE_SIZE = 'cache.t3.micro' as const
+export const ELASTICACHE_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, readonly string[]> = {
+  redis: ['7.0', '6.2', '6.0', '5.0.6', '4.0.10'],
+  memcached: [
+    '1.6.17',
+    '1.6.12',
+    '1.6.6',
+    '1.5.16',
+    '1.5.10',
+    '1.4.34',
+    '1.4.33',
+    '1.4.24',
+    '1.4.14',
+    '1.4.5',
+  ],
+} as const
+
+export const ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, string> = {
+  redis: '7.0',
+  memcached: '1.6.17',
+} as const
+
+export const ELASTICACHE_PARAM_FAMILY_MAPPING = [
+  ['redis', '7.0', 'default.redis7'],
+  ['redis', '7.0', 'default.redis7.cluster.on'],
+  ['redis', '6.2', 'default.redis6.x'],
+  ['redis', '6.2', 'default.redis6.x.cluster.on'],
+  ['redis', '5.0.6', 'default.redis5.0'],
+  ['redis', '5.0.6', 'default.redis5.0.cluster.on'],
+  ['redis', '4.0.10', 'default.redis4.0'],
+  ['redis', '4.0.10', 'default.redis4.0.cluster.on'],
+  ['memcached', '1.6.17', 'default.memcached1.6'],
+  ['memcached', '1.6.12', 'default.memcached1.6'],
+  ['memcached', '1.6.6', 'default.memcached1.6'],
+  ['memcached', '1.5.16', 'default.memcached1.5'],
+  ['memcached', '1.5.10', 'default.memcached1.5'],
+  ['memcached', '1.4.34', 'default.memcached1.4'],
+  ['memcached', '1.4.33', 'default.memcached1.4'],
+  ['memcached', '1.4.24', 'default.memcached1.4'],
+  ['memcached', '1.4.14', 'default.memcached1.4'],
+  ['memcached', '1.4.5', 'default.memcached1.4'],
+] as const
