@@ -51,6 +51,7 @@ export const RDS_DEFAULT_VERSIONS_PER_ENGINE: Record<RdsEngine, string> = {
 
 /* Elasticache options */
 export type ElasticacheEngine = 'redis' | 'memcached'
+export type AwsCacheServiceType = Extract<ServiceTypeChoice, 'redis' | 'memcached'>
 export const DEFAULT_ELASTICACHE_INSTANCE_SIZE = 'cache.t3.micro' as const
 export const ELASTICACHE_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, readonly string[]> = {
   redis: ['7.0', '6.2', '6.0', '5.0.6', '4.0.10'],

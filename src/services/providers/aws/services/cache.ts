@@ -1,6 +1,6 @@
 import pipe from 'lodash/fp/pipe'
 import { SERVICE_TYPE, DEFAULT_PORT } from '@src/constants'
-import { awsDatabaseAlarms } from '@aws/alerts/database'
+import { awsCacheAlarms } from '@aws/alerts/cache'
 import { getProfile } from '@services/utils'
 import { getAwsService } from '@aws/utils/getAwsService'
 import * as AWS from '@aws/constants'
@@ -32,7 +32,6 @@ type CacheAttributes = BaseServiceAttributes &
   behavior.LinkableAttributes &
   behavior.ExternallyLinkableAttributes &
   behavior.MultiNodeAttributes &
-  behavior.StorableAttributes &
   behavior.ConnectableAttributes &
   behavior.ProfilableAttributes &
   behavior.RegionalAttributes<ChoiceOf<typeof REGIONS>> &
@@ -163,7 +162,7 @@ const deployCaches =
     let cluster: elasticacheReplicationGroup.ElasticacheReplicationGroup | undefined
     const outputs: TerraformOutput[] = []
 
-    if (config.nodes === 1 && !config.cluster) {
+    if (config.type === SERVICE_TYPE.MEMCACHED || (config.nodes === 1 && !config.cluster)) {
       instance = new elasticacheCluster.ElasticacheCluster(stack.context, resourceId, {
         ...instanceOptions,
         applyImmediately: true,
@@ -236,7 +235,7 @@ export const resourceHandler = (
 ): AwsCacheResources =>
   pipe(
     deployCaches(provisionable, stack),
-    withAwsAlerts<AwsCacheProvisionable>(provisionable, stack, awsDatabaseAlarms),
+    withAwsAlerts<AwsCacheProvisionable>(provisionable, stack, awsCacheAlarms),
   )()
 
 /**
@@ -265,11 +264,9 @@ const getCacheService = <T extends ServiceTypeChoice, E extends ElasticacheEngin
       AWS.ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine],
     ),
     behavior.connectable(defaultPort),
-    behavior.storable(),
     behavior.withEngine<typeof engine>(engine),
     behavior.multiNode(),
     behavior.profileable(),
-    behavior.withDatabase(),
   )(getAwsService(type))
 }
 
