@@ -1,13 +1,17 @@
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group'
 import { hashString } from '@lib/hash'
 import { getIpAddressParts, getCidrBlocks } from '@lib/networking'
+import type { PROVIDER } from '@src/constants'
 import type { Stack } from '@lib/stack'
 import type { ExternallyLinkableAttributes, ConnectableAttributes } from '@services/behaviors'
-import type { Provisionable, BaseServiceAttributes, Provisions } from '@services/types'
-import type { AwsService } from '@aws/types'
+import type { Provisionable, BaseServiceAttributes, Provisions, Service } from '@services/types'
 
 type ExternallyLinkableServiceProvisionable = Provisionable<
-  AwsService<BaseServiceAttributes & ExternallyLinkableAttributes & ConnectableAttributes>,
+  Service<
+    BaseServiceAttributes &
+      ExternallyLinkableAttributes &
+      ConnectableAttributes & { provider: typeof PROVIDER.AWS }
+  >,
   Provisions
 >
 

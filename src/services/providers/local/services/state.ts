@@ -1,26 +1,24 @@
 import { join as joinPaths } from 'node:path'
 import pipe from 'lodash/fp/pipe'
 import { LocalBackend } from 'cdktf'
-import { SERVICE_TYPE } from '@src/constants'
-import { withHandler, withSchema } from '@services/behaviors'
-import { getLocalService } from '@local/utils/getLocalService'
+import { PROVIDER, SERVICE_TYPE } from '@src/constants'
+import { withAssociations, withHandler, withSchema } from '@services/behaviors'
+import { getBaseService } from '@src/services/utils'
+import { getLocalProviderAssociations } from '@local/utils/getLocalProviderAssociations'
 import type { Stack } from '@lib/stack'
 import type { BaseServiceAttributes, Service, Provisionable } from '@services/types'
-import type { LocalServiceAssociations, LocalServiceAttributes } from '@local/types'
+import type { LocalProviderAssociations } from '@local/types'
 
 export type LocalStateResources = { backend: LocalBackend }
 
-export type LocalStateAttributes = LocalServiceAttributes<
-  BaseServiceAttributes & {
-    type: typeof SERVICE_TYPE.STATE
-    fileName?: string
-    directory?: string
-  }
->
-
-export type LocalStateService = Service<LocalStateAttributes> & {
-  associations: LocalServiceAssociations
+export type LocalStateAttributes = BaseServiceAttributes & {
+  provider: typeof PROVIDER.LOCAL
+  type: typeof SERVICE_TYPE.STATE
+  fileName?: string
+  directory?: string
 }
+
+export type LocalStateService = Service<LocalStateAttributes, LocalProviderAssociations>
 
 export type LocalStateProvisionable = Provisionable<LocalStateService, LocalStateResources>
 
@@ -50,6 +48,7 @@ export const getStateService = (): LocalStateService =>
         directory: { type: 'string' },
       },
     }),
-  )(getLocalService(SERVICE_TYPE.STATE))
+    withAssociations(getLocalProviderAssociations()),
+  )(getBaseService(PROVIDER.LOCAL, SERVICE_TYPE.STATE))
 
 export const LocalState = getStateService()

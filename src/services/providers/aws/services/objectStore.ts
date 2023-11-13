@@ -23,11 +23,11 @@ import { S3BucketAcl } from '@cdktf/provider-aws/lib/s3-bucket-acl'
 import { S3BucketOwnershipControls } from '@cdktf/provider-aws/lib/s3-bucket-ownership-controls'
 import { S3BucketPublicAccessBlock } from '@cdktf/provider-aws/lib/s3-bucket-public-access-block'
 import { getBaseService } from '@src/services/utils'
+import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import type { ITerraformDependable } from 'cdktf'
 import type { BaseServiceAttributes, Provisionable, Service } from '@services/types'
 import type { Stack } from '@src/lib/stack'
-import type { AwsProviderAssociations } from '../types'
-import { getProviderAssociations } from '../utils/getProviderAssociations'
+import type { AwsProviderAssociations } from '@aws/types'
 
 export type AwsObjectStoreAttributes = BaseServiceAttributes &
   LinkableAttributes & {

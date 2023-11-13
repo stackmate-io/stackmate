@@ -1,9 +1,7 @@
-import type { Obj } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { provider as terraformLocalProvider } from '@cdktf/provider-local'
 import type {
   Service,
-  ServiceAssociations,
   ServiceRequirement,
   BaseServiceAttributes,
   Provisionable,
@@ -14,24 +12,14 @@ export type LocalProviderRequirement = ServiceRequirement<
   typeof SERVICE_TYPE.PROVIDER
 >
 
-export type LocalServiceAssociations = {
+export type LocalProviderAssociations = {
   providerInstance: LocalProviderRequirement
 }
 
-export type LocalServiceAttributes<Attrs extends BaseServiceAttributes> = Attrs & {
+export type LocalProviderAttributes = BaseServiceAttributes & {
   provider: typeof PROVIDER.LOCAL
+  type: typeof SERVICE_TYPE.PROVIDER
 }
-
-export type LocalService<
-  Attrs extends BaseServiceAttributes,
-  Assocs extends ServiceAssociations = Obj,
-> = Service<LocalServiceAttributes<Attrs>, LocalServiceAssociations & Assocs>
-
-export type LocalProviderAttributes = LocalServiceAttributes<
-  BaseServiceAttributes & {
-    type: typeof SERVICE_TYPE.PROVIDER
-  }
->
 
 type LocalProviderInstanceResources = {
   provider: terraformLocalProvider.LocalProvider

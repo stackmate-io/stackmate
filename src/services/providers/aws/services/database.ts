@@ -2,21 +2,27 @@ import pipe from 'lodash/fp/pipe'
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup, dbSubnetGroup } from '@cdktf/provider-aws'
-import { SERVICE_TYPE, DEFAULT_PORT } from '@src/constants'
+import { SERVICE_TYPE, DEFAULT_PORT, PROVIDER } from '@src/constants'
 import { awsDatabaseAlarms } from '@aws/alerts/database'
-import { getProfile } from '@services/utils'
-import { getAwsService } from '@aws/utils/getAwsService'
+import { getBaseService, getProfile } from '@services/utils'
 import * as AWS from '@aws/constants'
 import * as behavior from '@services/behaviors'
 import { onServiceLinked } from '@aws/utils/onServiceLinked'
 import { onExternalLink } from '@aws/utils/onExternalLink'
 import { withAwsAlerts } from '@aws/utils/withAlerts'
+import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
+import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
+import { REGIONS } from '@aws/constants'
+import type { RdsEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
-import type { PROVIDER } from '@src/constants'
-import type { BaseServiceAttributes, Provisionable, ServiceTypeChoice } from '@services/types'
-import type { AwsService } from '@aws/types'
-import type { RdsEngine, REGIONS } from '@aws/constants'
+import type {
+  BaseServiceAttributes,
+  Provisionable,
+  Service,
+  ServiceTypeChoice,
+} from '@services/types'
+import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
 
 type DatabaseAttributes = BaseServiceAttributes &
   behavior.SizeableAttributes &
@@ -50,9 +56,9 @@ export type AwsMySQLAttributes = AwsDatabaseAttributes<'mysql', 'mysql'>
 export type AwsPostgreSQLAttributes = AwsDatabaseAttributes<'postgresql', 'postgres'>
 export type AwsMariaDBAttributes = AwsDatabaseAttributes<'mariadb', 'mariadb'>
 
-type AwsDbService<Attrs extends DatabaseAttributes> = AwsService<
+type AwsDbService<Attrs extends DatabaseAttributes> = Service<
   Attrs,
-  behavior.RootCredentialsAssociations
+  AwsProviderAssociations & AwsNetworkingAssociations & behavior.RootCredentialsAssociations
 >
 
 export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>
@@ -208,7 +214,12 @@ const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>
     behavior.multiNode(),
     behavior.profileable(),
     behavior.withDatabase(),
-  )(getAwsService(type))
+    behavior.withRegions(REGIONS),
+    behavior.withAssociations({
+      ...getProviderAssociations(),
+      ...getNetworkingAssociations(),
+    }),
+  )(getBaseService(PROVIDER.AWS, type))
 }
 
 export const AwsMySQL: AwsMySQLService = getDatabaseService(SERVICE_TYPE.MYSQL, 'mysql')
