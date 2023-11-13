@@ -6,32 +6,44 @@ import {
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
-import { withCredentialsGenerator, withHandler } from '@services/behaviors'
+import {
+  withAssociations,
+  withCredentialsGenerator,
+  withHandler,
+  withRegions,
+} from '@services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
-import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE } from '@src/constants'
-import { getProfile } from '@services/utils'
-import { getAwsService } from '@aws/utils/getAwsService'
+import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE, PROVIDER } from '@src/constants'
+import { getBaseService, getProfile } from '@services/utils'
 import { pipe } from 'lodash/fp'
-import type { PROVIDER } from '@src/constants'
-import type { CredentialsHandlerOptions, SecretsVaultService } from '@services/behaviors'
+import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
+import { REGIONS } from '@aws/constants'
+import type {
+  CredentialsHandlerOptions,
+  RegionalAttributes,
+  SecretsVaultService,
+} from '@services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { Obj } from '@lib/util'
-import type { AwsService } from '@aws/types'
+import type { AwsProviderAssociations } from '@aws/types'
 import type {
   BaseServiceAttributes,
   BaseProvisionable,
   Provisionable,
   Credentials,
+  Service,
 } from '@services/types'
 
-export type AwsSecretsVaultAttributes = BaseServiceAttributes & {
-  provider: typeof PROVIDER.AWS
-  type: typeof SERVICE_TYPE.SECRETS
-  region: string
-}
+export type AwsSecretsVaultAttributes = BaseServiceAttributes &
+  RegionalAttributes & {
+    provider: typeof PROVIDER.AWS
+    type: typeof SERVICE_TYPE.SECRETS
+  }
 
 export type AwsSecretsResources = Obj
-export type AwsSecretsVaultService = SecretsVaultService<AwsService<AwsSecretsVaultAttributes>>
+export type AwsSecretsVaultService = SecretsVaultService<
+  Service<AwsSecretsVaultAttributes, AwsProviderAssociations>
+>
 export type AwsSecretsProvisionable = Provisionable<AwsSecretsVaultService, AwsSecretsResources>
 
 type ProvisionCredentialsResources = Credentials & {
@@ -144,6 +156,9 @@ export const getSecretsVaultService = (): AwsSecretsVaultService =>
   pipe(
     withHandler(() => ({})),
     withCredentialsGenerator(generateCredentials),
-  )(getAwsService(SERVICE_TYPE.SECRETS))
+    withAssociations(getProviderAssociations()),
+    withRegions(REGIONS),
+    withAssociations(getProviderAssociations()),
+  )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.SECRETS))
 
 export const AwsSecretsVault = getSecretsVaultService()
