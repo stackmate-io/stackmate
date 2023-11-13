@@ -7,13 +7,6 @@ import type {
 } from '@local/types'
 import type { BaseServiceAttributes } from '@services/types'
 
-import type { BaseServiceAttributes } from '@src/services/types'
-import type {
-  LocalProviderAssociations,
-  LocalProviderAttributes,
-  LocalProviderProvisionable,
-} from '../types'
-
 export const getLocalProviderAssociations = (): LocalProviderAssociations => ({
   providerInstance: {
     with: SERVICE_TYPE.PROVIDER,
