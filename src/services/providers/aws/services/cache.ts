@@ -1,8 +1,7 @@
 import pipe from 'lodash/fp/pipe'
-import { SERVICE_TYPE, DEFAULT_PORT } from '@src/constants'
+import { SERVICE_TYPE, DEFAULT_PORT, PROVIDER } from '@src/constants'
 import { awsCacheAlarms } from '@aws/alerts/cache'
-import { getProfile } from '@services/utils'
-import { getAwsService } from '@aws/utils/getAwsService'
+import { getBaseService, getProfile } from '@services/utils'
 import * as AWS from '@aws/constants'
 import * as behavior from '@services/behaviors'
 import { onServiceLinked } from '@aws/utils/onServiceLinked'
@@ -18,14 +17,22 @@ import {
 import { kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { elasticacheClusterLogDeliveryConfigurationToTerraform } from '@cdktf/provider-aws/lib/elasticache-cluster'
+import { REGIONS } from '@aws/constants'
+import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
+import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
+import type { ElasticacheEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
 import type { ChoiceOf, OneOfType } from '@lib/util'
-import type { PROVIDER } from '@src/constants'
-import type { BaseServiceAttributes, Provisionable, ServiceTypeChoice } from '@services/types'
-import type { AwsService } from '@aws/types'
-import type { ElasticacheEngine, REGIONS } from '@aws/constants'
+import type {
+  BaseServiceAttributes,
+  Provisionable,
+  Service,
+  ServiceTypeChoice,
+} from '@services/types'
+import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
 
 type CacheAttributes = BaseServiceAttributes &
+  behavior.RegionalAttributes &
   behavior.ClusteredAttributes &
   behavior.SizeableAttributes &
   behavior.VersioningAttributes &
@@ -57,7 +64,10 @@ export type AwsCacheAttributes<
 export type AwsRedisAttributes = AwsCacheAttributes<'redis', 'redis'>
 export type AwsMemcachedAttributes = AwsCacheAttributes<'memcached', 'memcached'>
 
-type AwsCacheService<Attrs extends CacheAttributes> = AwsService<Attrs>
+type AwsCacheService<Attrs extends CacheAttributes> = Service<
+  Attrs,
+  AwsProviderAssociations & AwsNetworkingAssociations
+>
 
 export type AwsRedisService = AwsCacheService<AwsRedisAttributes>
 export type AwsMemcachedService = AwsCacheService<AwsMemcachedAttributes>
@@ -267,7 +277,12 @@ const getCacheService = <T extends ServiceTypeChoice, E extends ElasticacheEngin
     behavior.withEngine<typeof engine>(engine),
     behavior.multiNode(),
     behavior.profileable(),
-  )(getAwsService(type))
+    behavior.withRegions(REGIONS),
+    behavior.withAssociations({
+      ...getProviderAssociations(),
+      ...getNetworkingAssociations(),
+    }),
+  )(getBaseService(PROVIDER.AWS, type))
 }
 
 export const AwsRedis: AwsRedisService = getCacheService(SERVICE_TYPE.REDIS, 'redis')

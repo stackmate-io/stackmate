@@ -1,4 +1,5 @@
 import { SecurityGroup } from '@cdktf/provider-aws/lib/security-group'
+import type { PROVIDER } from '@src/constants'
 import type { Stack } from '@lib/stack'
 import type { LinkableAttributes, ConnectableAttributes } from '@services/behaviors'
 import type {
@@ -6,11 +7,15 @@ import type {
   BaseServiceAttributes,
   Provisions,
   BaseProvisionable,
+  Service,
 } from '@services/types'
-import type { AwsService } from '@aws/types'
 
 type LinkableServiceProvisionable = Provisionable<
-  AwsService<BaseServiceAttributes & LinkableAttributes & ConnectableAttributes>,
+  Service<
+    BaseServiceAttributes &
+      LinkableAttributes &
+      ConnectableAttributes & { provider: typeof PROVIDER.AWS }
+  >,
   Provisions
 >
 
