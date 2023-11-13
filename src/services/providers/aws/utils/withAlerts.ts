@@ -2,15 +2,9 @@ import { isEmpty } from 'lodash'
 import { getMonitoringPrerequisites } from '@aws/utils/getMonitoringPrerequisites'
 import type { Stack } from '@lib/stack'
 import type { BaseProvisionable } from '@services/types'
-import type {
-  AwsAlertPrerequisites,
-  AwsServiceAlertResources,
-  MonitoredServiceProvisionable,
-} from '@aws/types'
+import type { AwsAlertPrerequisites, AwsServiceAlertResources } from '@aws/types'
+import type { MonitoredServiceProvisionable } from '@src/services/behaviors'
 
-/**
- * @type {AwsServiceAlertsGenerator} describes an alert generator function
- */
 export type AwsServiceAlertsGenerator = (
   provisionable: BaseProvisionable,
   stack: Stack,
@@ -18,12 +12,6 @@ export type AwsServiceAlertsGenerator = (
   prerequisites: AwsAlertPrerequisites,
 ) => AwsServiceAlertResources
 
-/**
- * @param {MonitoredServiceProvisionable} provisionable the provisionable to set the alerts for
- * @param {Stack} stack the stack to deploy the resources on
- * @param {AwsServiceAlertsGenerator} alertsGenerator the alarm generator function
- * @returns {ProvisionResources} the resources to be deployed in the stack
- */
 export const withAwsAlerts =
   <T extends MonitoredServiceProvisionable>(
     provisionable: T,

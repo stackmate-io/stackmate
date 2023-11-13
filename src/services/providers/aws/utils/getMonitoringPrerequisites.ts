@@ -8,7 +8,8 @@ import {
 import { SERVICE_TYPE } from '@src/constants'
 import { hashString } from '@lib/hash'
 import type { Stack } from '@lib/stack'
-import type { AwsAlertPrerequisites, MonitoredServiceProvisionable } from '@aws/types'
+import type { AwsAlertPrerequisites } from '@aws/types'
+import type { MonitoredServiceProvisionable } from '@src/services/behaviors'
 import type { ServiceTypeChoice } from '@services/types'
 
 export const AWS_SERVICE_INFO: Map<ServiceTypeChoice, { name: string; url: string }> = new Map([

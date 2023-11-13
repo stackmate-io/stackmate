@@ -1,9 +1,7 @@
-import type { BaseServiceAttributes } from '@services/types'
+import type { BaseServiceAttributes, Provisions, Service } from '@services/types'
+import type { Provisionable } from '../types/provisionable'
 import { withSchema } from './withSchema'
 
-/**
- * @type {MonitoringAttributes} the configuration to use for setting up the alerts
- */
 export type MonitoringAttributes = {
   monitoring: {
     emails: string[]
@@ -11,9 +9,11 @@ export type MonitoringAttributes = {
   }
 }
 
-/**
- * @returns {Function<Service>}
- */
+export type MonitoredServiceProvisionable = Provisionable<
+  Service<BaseServiceAttributes & MonitoringAttributes>,
+  Provisions
+>
+
 export const monitored = <C extends BaseServiceAttributes>() =>
   withSchema<C, MonitoringAttributes>({
     type: 'object',
