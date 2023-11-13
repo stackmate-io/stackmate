@@ -89,14 +89,14 @@ export type JsonSchema<T = undefined> = {
   $defs?: T extends ArrayLike<any>
     ? JsonSchema<T[number]>
     : T extends Obj
-    ? { [K in keyof T]?: JsonSchema<T[K]> }
-    : never
+      ? { [K in keyof T]?: JsonSchema<T[K]> }
+      : never
 
   definitions?: T extends ArrayLike<any>
     ? JsonSchema<T[number]>
     : T extends Obj
-    ? { [K in keyof T]?: JsonSchema<T[K]> }
-    : never
+      ? { [K in keyof T]?: JsonSchema<T[K]> }
+      : never
 
   /**
    * The keys that can exist on the object with the json schema that should validate their value
@@ -132,18 +132,18 @@ export type JsonSchema<T = undefined> = {
   type?: T extends undefined
     ? string // undefined, string TYPE by default
     : T extends number
-    ? 'number'
-    : T extends string
-    ? 'string' | string // string type or some explicit string passed (eg. eu-central-1)
-    : T extends boolean
-    ? 'boolean'
-    : T extends ArrayLike<any>
-    ? 'array'
-    : T extends null
-    ? 'null'
-    : T extends object
-    ? 'object'
-    : string // explicitly defined, string type
+      ? 'number'
+      : T extends string
+        ? 'string' | string // string type or some explicit string passed (eg. eu-central-1)
+        : T extends boolean
+          ? 'boolean'
+          : T extends ArrayLike<any>
+            ? 'array'
+            : T extends null
+              ? 'null'
+              : T extends object
+                ? 'object'
+                : string // explicitly defined, string type
 
   format?: string
 
