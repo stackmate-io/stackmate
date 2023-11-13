@@ -19,6 +19,7 @@ import {
 } from '@cdktf/provider-aws'
 import { Testing } from 'cdktf'
 import { snakeCase } from 'lodash'
+import { Registry } from '@src/services/registry'
 import type { BaseServiceAttributes } from '@src/services/types'
 import type { AwsCacheServiceType, ElasticacheEngine } from '@aws/constants'
 
@@ -71,6 +72,10 @@ describe('Redis cache', () => {
   it('is a valid AWS Redis Elasticache service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
     expect(service.type).toEqual(SERVICE_TYPE.REDIS)
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.REDIS))
   })
 
   it('has the AWS regions set', () => {
@@ -128,6 +133,10 @@ describe('Memcached cache', () => {
   it('is a valid AWS Memcached Elasticache service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
     expect(service.type).toEqual(SERVICE_TYPE.MEMCACHED)
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.REDIS))
   })
 
   it('has the AWS regions set', () => {

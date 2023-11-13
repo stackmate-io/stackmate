@@ -24,6 +24,7 @@ import {
   RDS_MAJOR_VERSIONS_PER_ENGINE,
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@aws/constants'
+import { Registry } from '@src/services/registry'
 import type { AwsDbServiceType, RdsEngine } from '@aws/constants'
 
 const getDatabaseSchemaExpectation = (
@@ -87,6 +88,10 @@ describe('AWS PostgreSQL', () => {
     expect(service.type).toEqual(SERVICE_TYPE.POSTGRESQL)
   })
 
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL))
+  })
+
   it('has the AWS regions set', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
@@ -125,6 +130,10 @@ describe('AWS MySQL', () => {
     expect(service.type).toEqual(SERVICE_TYPE.MYSQL)
   })
 
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.MYSQL))
+  })
+
   it('has the AWS regions set', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
@@ -161,6 +170,10 @@ describe('AWS MariaDB', () => {
   it('is a valid AWS MySQL service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
     expect(service.type).toEqual(SERVICE_TYPE.MARIADB)
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.MARIADB))
   })
 
   it('has the AWS regions set', () => {
