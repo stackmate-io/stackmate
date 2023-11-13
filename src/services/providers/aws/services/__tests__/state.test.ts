@@ -4,6 +4,7 @@ import { AwsState } from '@src/services/providers/aws/services/state'
 import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getAwsProvisionable } from '@tests/mocks'
+import { Registry } from '@src/services/registry'
 import type { AwsStateProvisionable } from '@src/services/providers/aws/services/state'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 
@@ -17,6 +18,10 @@ describe('AWS state', () => {
 
   it('has the AWS regions set', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.STATE))
   })
 
   it('contains a valid schema', () => {
