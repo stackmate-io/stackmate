@@ -6,6 +6,7 @@ import { Stack } from '@lib/stack'
 import { faker } from '@faker-js/faker'
 import { TerraformOutput } from 'cdktf'
 import { AwsNetworking } from '@aws/services/networking'
+import { Registry } from '@src/services/registry'
 import type { BaseProvisionable } from '@src/services/types'
 import type { AwsNetworkingResources } from '@aws/types'
 
@@ -15,6 +16,10 @@ describe('AWS Networking', () => {
   it('is a valid AWS networking service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
     expect(service.type).toEqual(SERVICE_TYPE.NETWORKING)
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.NETWORKING))
   })
 
   it('has the AWS regions set', () => {
