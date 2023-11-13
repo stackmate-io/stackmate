@@ -10,6 +10,7 @@ import { getProvisionable } from '@tests/mocks/getProvisionable'
 import { Stack } from '@lib/stack'
 import { faker } from '@faker-js/faker'
 import { TerraformOutput } from 'cdktf'
+import { Registry } from '@src/services/registry'
 import type { BaseProvisionable } from '@src/services/types'
 import type { AwsProviderResources } from '@aws/types'
 
@@ -19,6 +20,10 @@ describe('AWS Provider', () => {
   it('is a valid AWS provider service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
     expect(service.type).toEqual(SERVICE_TYPE.PROVIDER)
+  })
+
+  it('is fetched by the registry', () => {
+    expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
   })
 
   it('has the AWS regions set', () => {
