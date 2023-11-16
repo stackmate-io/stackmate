@@ -81,10 +81,10 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "jest": "jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1",
-    "test": "yarn jest",
-    "test:all": "yarn jest **/__tests__/**/*.test.ts",
-    "test:e2e": "yarn jest e2e/**/*.test.ts --testTimeout=60000000",
-    "test:e2e:local": "AWS_PROFILE=engine-tests-local yarn test:e2e",
-    "test:watch": "yarn test --watchAll"
+    "test": "NODE_ENV=test yarn jest",
+    "test:all": "NODE_ENV=test yarn jest **/__tests__/**/*.test.ts",
+    "test:e2e": "NODE_ENV=test yarn jest e2e/**/*.test.ts --testTimeout=60000000",
+    "test:e2e:local": "NODE_ENV=test AWS_PROFILE=engine-tests-local yarn test:e2e",
+    "test:watch": "NODE_ENV=test yarn test --watchAll"
   }
 }
