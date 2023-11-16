@@ -15,7 +15,7 @@ import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { REGIONS } from '@aws/constants'
 import type { RdsEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
-import type { ChoiceOf, OneOfType } from '@lib/util'
+import type { OneOfType } from '@lib/util'
 import type {
   BaseServiceAttributes,
   Provisionable,
@@ -33,7 +33,7 @@ type DatabaseAttributes = BaseServiceAttributes &
   behavior.StorableAttributes &
   behavior.ConnectableAttributes &
   behavior.ProfilableAttributes &
-  behavior.RegionalAttributes<ChoiceOf<typeof REGIONS>> &
+  behavior.RegionalAttributes &
   behavior.EngineAttributes<RdsEngine> &
   behavior.MonitoringAttributes & {
     provider: typeof PROVIDER.AWS

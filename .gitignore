@@ -14,6 +14,7 @@ node_modules
 cdktf.out
 .terraform
 *.tf.json
+*.lock.hcl
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo

@@ -15,16 +15,16 @@ const execute = async (
     let output = ''
     child.stdout.setEncoding('utf8')
     child.stdout.on('data', (data) => {
-      output += data
-      console.log(data)
+      output += data.toString()
+      console.log(data.toString())
     })
 
     let errorOutput = ''
     const errors: string[] = []
     child.stderr.setEncoding('utf8')
     child.stderr.on('data', function (data) {
-      errorOutput += data
-      errors.push(String(data))
+      errorOutput += data.toString()
+      errors.push(data.toString())
     })
 
     child.on('close', (code) => {
@@ -36,15 +36,7 @@ const execute = async (
     })
   })
 
-export const runTerraform = async (directory: string, terraformPath: string = TF_PATH) => {
-  try {
-    console.info('Initializing terraform inside', directory)
-    await execute([terraformPath, 'init'], directory)
-
-    console.info('Running terraform inside', directory)
-    await execute([terraformPath, 'test', '-verbose', directory], directory)
-  } catch (err) {
-    console.error('Error while executing terraform')
-    console.error(err)
-  }
+export const runTerraformTest = async (directory: string, terraformPath: string = TF_PATH) => {
+  await execute([terraformPath, 'init', '-migrate-state'], directory)
+  await execute([terraformPath, 'test', '-verbose'], directory)
 }

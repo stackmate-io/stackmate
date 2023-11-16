@@ -1,10 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-const STACK_FILE = 'main.tf.json'
-
-export const createJsonFile = (contents: object, directory: string, filename = STACK_FILE) => {
-  if (!fs.lstatSync(directory).isDirectory()) {
+export const createJsonFile = (contents: object, directory: string, filename: string) => {
+  if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory()) {
     fs.mkdirSync(directory, { recursive: true })
   }
 
