@@ -38,6 +38,7 @@ const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): Aw
     key: `${stack.name}/terraform.tfstate`,
     kmsKeyId: kmsKey.id,
     region: config.region,
+    dynamodbTable: 'stackmate-terraform-state-lock',
   })
 
   return { backend }
