@@ -113,7 +113,7 @@ export const generateCredentials = (
         password: passResource.randomPassword,
       }),
       lifecycle: {
-        ignoreChanges: ['secret_string'],
+        ignoreChanges: ['secretString'],
       },
     },
   )

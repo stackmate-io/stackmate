@@ -22,7 +22,7 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import type { ElasticacheEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
-import type { ChoiceOf, OneOfType } from '@lib/util'
+import type { OneOfType } from '@lib/util'
 import type {
   BaseServiceAttributes,
   Provisionable,
@@ -41,7 +41,7 @@ type CacheAttributes = BaseServiceAttributes &
   behavior.MultiNodeAttributes &
   behavior.ConnectableAttributes &
   behavior.ProfilableAttributes &
-  behavior.RegionalAttributes<ChoiceOf<typeof REGIONS>> &
+  behavior.RegionalAttributes &
   behavior.EngineAttributes<ElasticacheEngine> &
   behavior.MonitoringAttributes & {
     provider: typeof PROVIDER.AWS

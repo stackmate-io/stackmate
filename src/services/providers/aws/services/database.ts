@@ -29,7 +29,6 @@ type DatabaseAttributes = BaseServiceAttributes &
   behavior.VersioningAttributes &
   behavior.LinkableAttributes &
   behavior.ExternallyLinkableAttributes &
-  behavior.MultiNodeAttributes &
   behavior.StorableAttributes &
   behavior.ConnectableAttributes &
   behavior.ProfilableAttributes &
@@ -128,7 +127,6 @@ const deployDatabases =
       ...instance,
       allocatedStorage: config.storage,
       applyImmediately: true,
-      count: config.nodes,
       enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[
         config.engine
       ] as unknown as string[],
@@ -211,7 +209,6 @@ const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>
     behavior.connectable(defaultPort),
     behavior.storable(),
     behavior.withEngine<typeof engine>(engine),
-    behavior.multiNode(),
     behavior.profileable(),
     behavior.withDatabase(),
     behavior.withRegions(REGIONS),

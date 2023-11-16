@@ -6,7 +6,7 @@ import { withSchema } from './withSchema'
 /**
  * @type {RegionalAttributes} region-specific attributes
  */
-export type RegionalAttributes<T extends string = string> = { region: T }
+export type RegionalAttributes = { region: string }
 
 /**
  * @type {AdditionalProps} the service additional properties
