@@ -19,9 +19,7 @@ export const resourceHandler = (
   stack: Stack,
 ): AwsNetworkingResources => {
   const { config, resourceId } = provisionable
-
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
-
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
 
   const vpc = new awsVpc.Vpc(stack.context, resourceId, {
@@ -29,12 +27,18 @@ export const resourceHandler = (
     cidrBlock: vpcCidr,
   })
 
+  if (subnetCidrs.length > 3) {
+    throw new Error('It is advised to use up to 3 subnets')
+  }
+
+  const availabilityZones = 'abcd'.split('').map((suffix) => `${config.region}${suffix}`)
   const subnets = subnetCidrs.map(
     (cidrBlock, idx) =>
       new subnet.Subnet(stack.context, `${resourceId}_subnet${idx + 1}`, {
         ...subnetConfig,
         vpcId: vpc.id,
         cidrBlock,
+        availabilityZone: availabilityZones[idx],
       }),
   )
 

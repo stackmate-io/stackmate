@@ -13,11 +13,12 @@ import {
   withRegions,
 } from '@services/behaviors'
 import { extractTokenFromJsonString } from '@lib/terraform'
-import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE, PROVIDER } from '@src/constants'
+import { DEFAULT_PASSWORD_LENGTH, SERVICE_TYPE, PROVIDER, isTestMode } from '@src/constants'
 import { getBaseService, getProfile } from '@services/utils'
 import { pipe } from 'lodash/fp'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { REGIONS } from '@aws/constants'
+import { hashObject } from '@src/lib/hash'
 import type {
   CredentialsHandlerOptions,
   RegionalAttributes,
@@ -98,6 +99,7 @@ export const generateCredentials = (
       description: `Secrets for the ${service} service`,
       kmsKeyId: kmsKey.id,
       provider: providerInstance,
+      recoveryWindowInDays: isTestMode ? 0 : 7,
       ...secret,
     },
   )
@@ -113,7 +115,7 @@ export const generateCredentials = (
         password: passResource.randomPassword,
       }),
       lifecycle: {
-        ignoreChanges: ['secretString'],
+        ignoreChanges: ['secret_string'],
       },
     },
   )
@@ -123,7 +125,7 @@ export const generateCredentials = (
     `${idPrefix}_data`,
     {
       secretId: secretResource.id,
-      versionId: secretVersionResource.id,
+      versionId: hashObject(config),
     },
   )
 

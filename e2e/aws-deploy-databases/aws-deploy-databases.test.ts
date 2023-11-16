@@ -35,7 +35,7 @@ export const config: ServiceConfiguration[] = [
     region: testsConfig.region,
   },
   {
-    name: 'aws-db',
+    name: 'aws-mysql-database',
     provider: 'aws',
     type: 'mysql',
     region: testsConfig.region,
