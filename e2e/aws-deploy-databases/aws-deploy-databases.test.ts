@@ -1,39 +1,55 @@
+import path from 'node:path'
+import { createTerraformStack } from '@tests/e2e/createTerraformStack'
+import { runTerraformTest } from '@tests/e2e/runTerraform'
+import { getAwsTestsConfig } from '@tests/e2e/getAwsTestsConfig'
 import type { ServiceConfiguration } from '@services/registry'
+
+const testsConfig = getAwsTestsConfig(path.basename(__filename))
 
 export const config: ServiceConfiguration[] = [
   {
     name: 'aws-provider',
     provider: 'aws',
     type: 'provider',
-    region: 'eu-central-1',
-  },
-  {
-    name: 'aws-networking',
-    provider: 'aws',
-    region: 'eu-central-1',
-    type: 'networking',
-  },
-  {
-    name: 'aws-secrets',
-    provider: 'aws',
-    type: 'secrets',
-    region: 'eu-central-1',
+    region: testsConfig.region,
   },
   {
     name: 'aws-state',
     type: 'state',
     provider: 'aws',
-    region: 'eu-central-1',
-    bucket: 'stackmate-state-bucket-0b231xvb',
+    region: testsConfig.region,
+    bucket: testsConfig.bucket,
+    lockTable: testsConfig.lock,
+    statePath: testsConfig.key,
+  },
+  {
+    name: 'aws-networking',
+    provider: 'aws',
+    type: 'networking',
+    region: testsConfig.region,
+  },
+  {
+    name: 'aws-secrets',
+    provider: 'aws',
+    type: 'secrets',
+    region: testsConfig.region,
   },
   {
     name: 'aws-db',
     provider: 'aws',
-    region: 'eu-central-1',
     type: 'mysql',
+    region: testsConfig.region,
   },
 ]
 
 describe('AWS databases deployment', () => {
-  test.todo('it is pending')
+  const output = path.dirname(__filename)
+
+  beforeAll(() => {
+    createTerraformStack(config, 'deploy-aws-databases', output)
+  })
+
+  it('deploys all resources properly', async () => {
+    await runTerraformTest(output)
+  })
 })

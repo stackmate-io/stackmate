@@ -5,7 +5,6 @@ import type {
   Provisionable,
 } from '@services/types'
 import type { TerraformOutput, TerraformResource } from 'cdktf'
-import type { Obj } from '@lib/util'
 import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import type { ProfilableAttributes, RegionalAttributes } from '@services/behaviors'
 import type {
@@ -63,11 +62,7 @@ export type AwsProviderAttributes = BaseServiceAttributes &
     rootIp?: string
   }
 
-export type AwsProviderService = Service<
-  AwsProviderAttributes,
-  Obj,
-  ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
->
+export type AwsProviderService = Service<AwsProviderAttributes>
 
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 

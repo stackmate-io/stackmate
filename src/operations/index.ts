@@ -43,6 +43,11 @@ export class Operation {
   #sideEffects: AssociatedProvisionablesMap = new Map()
 
   /**
+   * @var {ServiceAttributes[]} attributes the service attributes after they are validated
+   */
+  #attributes: ServiceAttributes[]
+
+  /**
    * @constructor
    * @param {ServiceConfiguration[]} serviceConfigs the services to provision
    * @param {string} envName the name of the environment we're deploying
@@ -69,6 +74,17 @@ export class Operation {
   }
 
   /**
+   * @returns {ServiceAttributes[]} the service attributes for the operation after they're validated
+   */
+  get config(): ServiceAttributes[] {
+    if (!this.#attributes) {
+      throw new Error()
+    }
+
+    return this.#attributes
+  }
+
+  /**
    * Processes an operation and returns the Terraform configuration as an object
    *
    * @returns {Object} the terraform configuration object
@@ -87,11 +103,14 @@ export class Operation {
    * @param {ServiceConfiguration[]} configs
    */
   protected init(configs: ServiceConfiguration[]) {
-    getValidData<ServiceConfiguration[], ServiceAttributes[]>(configs, getSchema()).forEach(
-      (config) => {
-        this.#provisionables.create(config)
-      },
+    this.#attributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
+      configs,
+      getSchema(),
     )
+
+    this.#attributes.forEach((config) => {
+      this.#provisionables.create(config)
+    })
 
     this.associateProvisionables()
   }

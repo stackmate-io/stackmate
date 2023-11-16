@@ -73,15 +73,9 @@ export const resourceHandler = (
 
   const outputs: TerraformOutput[] = []
   const buckets: s3Bucket.S3Bucket[] = config.buckets.map((cfg) => {
-    const bucketOptions: s3Bucket.S3BucketConfig = {
+    const bucket = new s3Bucket.S3Bucket(stack.context, `${resourceId}_bucket_${cfg.name}`, {
       bucket: cfg.name,
-    }
-
-    const bucket = new s3Bucket.S3Bucket(
-      stack.context,
-      `${resourceId}_bucket_${cfg.name}`,
-      bucketOptions,
-    )
+    })
 
     if (cfg.encrypted) {
       new S3BucketServerSideEncryptionConfigurationA(
