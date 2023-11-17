@@ -1,8 +1,8 @@
 import pipe from 'lodash/fp/pipe'
-import { kebabCase } from 'lodash'
+import { camelCase, kebabCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import { dbInstance as rdsDbInstance, dbParameterGroup, dbSubnetGroup } from '@cdktf/provider-aws'
-import { SERVICE_TYPE, DEFAULT_PORT, PROVIDER } from '@src/constants'
+import { SERVICE_TYPE, DEFAULT_PORT, PROVIDER, DEFAULT_RESOURCE_COMMENT } from '@src/constants'
 import { awsDatabaseAlarms } from '@aws/alerts/database'
 import { getBaseService, getProfile } from '@services/utils'
 import * as AWS from '@aws/constants'
@@ -57,7 +57,7 @@ export type AwsMariaDBAttributes = AwsDatabaseAttributes<'mariadb', 'mariadb'>
 
 type AwsDbService<Attrs extends DatabaseAttributes> = Service<
   Attrs,
-  AwsProviderAssociations & AwsNetworkingAssociations & behavior.RootCredentialsAssociations
+  AwsProviderAssociations & AwsNetworkingAssociations
 >
 
 export type AwsMySQLService = AwsDbService<AwsMySQLAttributes>
@@ -98,7 +98,7 @@ const deployDatabases =
   (): AwsDatabaseResources => {
     const {
       config,
-      requirements: { providerInstance, rootCredentials, vpc, subnets },
+      requirements: { providerInstance, vpc, subnets, kmsKey },
       resourceId,
     } = provisionable
     const { instance, params } = getProfile(config)
@@ -111,6 +111,7 @@ const deployDatabases =
         subnetIds: subnets.map((subnet) => subnet.id),
         namePrefix: dbInstanceName,
         provider: providerInstance,
+        description: DEFAULT_RESOURCE_COMMENT,
       },
     )
 
@@ -120,6 +121,8 @@ const deployDatabases =
       {
         ...params,
         family: getParamGroupFamily(config),
+        description: DEFAULT_RESOURCE_COMMENT,
+        namePrefix: kebabCase(`stackmate-${dbInstanceName}`),
       },
     )
 
@@ -139,8 +142,9 @@ const deployDatabases =
       port: config.port,
       provider: providerInstance,
       dbSubnetGroupName: subnetGroup.name,
-      username: rootCredentials.username.expression,
-      password: rootCredentials.password.expression,
+      manageMasterUserPassword: true,
+      masterUserSecretKmsKeyId: kmsKey.id,
+      username: camelCase(`stackmate-${config.name}-${stack.name}`),
       vpcSecurityGroupIds: [vpc.defaultSecurityGroupId],
       lifecycle: {
         createBeforeDestroy: true,
@@ -152,13 +156,10 @@ const deployDatabases =
         description: `Connection endpoint for "${config.name}" RDS service`,
         value: dbInstance.endpoint,
       }),
-      new TerraformOutput(stack.context, `${resourceId}_root_credentials`, {
-        description: `Root Credentials`,
+      new TerraformOutput(stack.context, `${resourceId}_secret`, {
+        description: 'Database master password in secrets manager',
         sensitive: true,
-        value: {
-          username: rootCredentials.username.asString,
-          password: rootCredentials.password.asString,
-        },
+        value: dbInstance.masterUserSecret.get(0).fqn,
       }),
     ]
 
@@ -196,7 +197,6 @@ const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>
   }
 
   return pipe(
-    behavior.withRootCredentials(),
     behavior.withHandler(resourceHandler),
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),

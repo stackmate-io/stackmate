@@ -1,8 +1,7 @@
-import { TerraformLocal } from 'cdktf'
-import { kebabCase, snakeCase } from 'lodash'
+import { Fn, TerraformLocal } from 'cdktf'
+import { snakeCase } from 'lodash'
 import {
   dataAwsSecretsmanagerRandomPassword,
-  dataAwsSecretsmanagerSecretVersion,
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
@@ -18,7 +17,6 @@ import { getBaseService, getProfile } from '@services/utils'
 import { pipe } from 'lodash/fp'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { REGIONS } from '@aws/constants'
-import { hashObject } from '@src/lib/hash'
 import type {
   CredentialsHandlerOptions,
   RegionalAttributes,
@@ -51,7 +49,6 @@ type ProvisionCredentialsResources = Credentials & {
   randomPassword: dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword
   secret: secretsmanagerSecret.SecretsmanagerSecret
   version: secretsmanagerSecretVersion.SecretsmanagerSecretVersion
-  data: dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion
 }
 
 /**
@@ -67,18 +64,21 @@ export const generateCredentials = (
   options: CredentialsHandlerOptions = {},
 ): ProvisionCredentialsResources => {
   const {
-    config: { name: targetName },
+    config: { name: targetName, type: targetType },
   } = target
 
   const {
-    service,
     config,
     requirements: { kmsKey, providerInstance },
   } = vault
 
-  const { root = false, length: passwordLength, exclude: excludeCharacters = [] } = options
-  const idPrefix = `${snakeCase(targetName)}_secrets`
-  const secretName = `${stack.name}/${kebabCase(targetName.toLowerCase())}`
+  const {
+    root = false,
+    length: passwordLength,
+    exclude: excludeCharacters = ['/', '\\', '@', ' '],
+  } = options
+  const secretName = `${snakeCase(targetName)}_${targetType}_${root ? '_root_' : '_'}`
+  const idPrefix = `${secretName}_secrets`
   const { secret, version, password } = getProfile(config)
 
   const passResource = new dataAwsSecretsmanagerRandomPassword.DataAwsSecretsmanagerRandomPassword(
@@ -96,10 +96,10 @@ export const generateCredentials = (
     `${idPrefix}_secret`,
     {
       name: secretName,
-      description: `Secrets for the ${service} service`,
+      description: `Secrets for the ${targetName} ${targetType} service`,
       kmsKeyId: kmsKey.id,
       provider: providerInstance,
-      recoveryWindowInDays: isTestMode ? 0 : 7,
+      recoveryWindowInDays: !isTestMode ? secret.recoveryWindowInDays || 30 : 0,
       ...secret,
     },
   )
@@ -110,7 +110,7 @@ export const generateCredentials = (
     {
       ...version,
       secretId: secretResource.id,
-      secretString: JSON.stringify({
+      secretString: Fn.jsonencode({
         username: `${snakeCase(targetName)}_${root ? 'root' : 'user'}`,
         password: passResource.randomPassword,
       }),
@@ -120,25 +120,16 @@ export const generateCredentials = (
     },
   )
 
-  const data = new dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion(
-    stack.context,
-    `${idPrefix}_data`,
-    {
-      secretId: secretResource.id,
-      versionId: hashObject(config),
-    },
-  )
-
   const usernameLocal = new TerraformLocal(
     stack.context,
     `${idPrefix}_var_username`,
-    extractTokenFromJsonString(data.secretString, 'username'),
+    extractTokenFromJsonString(secretVersionResource.secretString, 'username'),
   )
 
   const passwordLocal = new TerraformLocal(
     stack.context,
     `${idPrefix}_var_password`,
-    extractTokenFromJsonString(data.secretString, 'password'),
+    extractTokenFromJsonString(secretVersionResource.secretString, 'password'),
   )
 
   return {
@@ -147,7 +138,6 @@ export const generateCredentials = (
     randomPassword: passResource,
     secret: secretResource,
     version: secretVersionResource,
-    data,
   }
 }
 
