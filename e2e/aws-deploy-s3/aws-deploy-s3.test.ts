@@ -32,12 +32,25 @@ export const config: ServiceConfiguration[] = [
   {
     name: faker.internet.domainWord(),
     provider: 'aws',
-    type: 'mysql',
-    region: testsConfig.region,
+    type: 'objectstore',
+    buckets: [
+      {
+        name: 'bucket1',
+        encrypted: false,
+        publicRead: false,
+        versioning: false,
+      },
+      {
+        name: 'bucket2',
+        encrypted: true,
+        publicRead: false,
+        versioning: true,
+      },
+    ],
   },
 ]
 
-describe('AWS RDS MySQL deployment', () => {
+describe('AWS S3 deployment', () => {
   const output = path.dirname(__filename)
 
   beforeAll(() => {
