@@ -2,19 +2,26 @@ import path from 'node:path'
 import { createTerraformStack } from '@tests/e2e/createTerraformStack'
 import { runTerraformTest } from '@tests/e2e/runTerraform'
 import { getAwsTestsConfig } from '@tests/e2e/getAwsTestsConfig'
+import { faker } from '@faker-js/faker'
 import type { ServiceConfiguration } from '@services/registry'
 
 const testsConfig = getAwsTestsConfig(path.basename(__filename))
 
 export const config: ServiceConfiguration[] = [
   {
-    name: 'aws-provider',
+    name: 'provider',
     provider: 'aws',
     type: 'provider',
     region: testsConfig.region,
   },
   {
-    name: 'aws-state',
+    name: 'networking',
+    provider: 'aws',
+    type: 'networking',
+    region: testsConfig.region,
+  },
+  {
+    name: 'state',
     type: 'state',
     provider: 'aws',
     region: testsConfig.region,
@@ -23,19 +30,7 @@ export const config: ServiceConfiguration[] = [
     statePath: testsConfig.key,
   },
   {
-    name: 'aws-networking',
-    provider: 'aws',
-    type: 'networking',
-    region: testsConfig.region,
-  },
-  {
-    name: 'aws-secrets',
-    provider: 'aws',
-    type: 'secrets',
-    region: testsConfig.region,
-  },
-  {
-    name: 'aws-mysql-database',
+    name: faker.internet.domainWord(),
     provider: 'aws',
     type: 'mysql',
     region: testsConfig.region,
@@ -46,7 +41,7 @@ describe('AWS databases deployment', () => {
   const output = path.dirname(__filename)
 
   beforeAll(() => {
-    createTerraformStack(config, 'deploy-aws-databases', output)
+    createTerraformStack(config, output)
   })
 
   it('deploys all resources properly', async () => {
