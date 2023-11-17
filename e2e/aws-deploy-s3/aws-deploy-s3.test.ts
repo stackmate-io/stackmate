@@ -15,12 +15,6 @@ export const config: ServiceConfiguration[] = [
     region: testsConfig.region,
   },
   {
-    name: 'networking',
-    provider: 'aws',
-    type: 'networking',
-    region: testsConfig.region,
-  },
-  {
     name: 'state',
     type: 'state',
     provider: 'aws',
@@ -35,13 +29,13 @@ export const config: ServiceConfiguration[] = [
     type: 'objectstore',
     buckets: [
       {
-        name: 'bucket1',
+        name: 'stackmate-e2e-bucket-test-1',
         encrypted: false,
         publicRead: false,
         versioning: false,
       },
       {
-        name: 'bucket2',
+        name: 'stackmate-e2e-bucket-test-2',
         encrypted: true,
         publicRead: false,
         versioning: true,
