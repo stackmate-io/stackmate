@@ -144,7 +144,7 @@ const deployDatabases =
       dbSubnetGroupName: subnetGroup.name,
       manageMasterUserPassword: true,
       masterUserSecretKmsKeyId: kmsKey.id,
-      username: camelCase(`stackmate-${config.name}-${stack.name}`),
+      username: camelCase(`stackmate-${config.name}-root`),
       vpcSecurityGroupIds: [vpc.defaultSecurityGroupId],
       lifecycle: {
         createBeforeDestroy: true,

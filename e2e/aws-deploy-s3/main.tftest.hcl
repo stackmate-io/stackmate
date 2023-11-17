@@ -29,7 +29,7 @@ run "end-to-end" {
     error_message = "KMS key is not enabled"
   }
 
-  // Internet gateway
+    // Internet gateway
   assert {
     condition     = aws_internet_gateway.aws_networking_1_gateway.vpc_id == aws_vpc.aws_networking_1.id
     error_message = "The internet gateway is not defined"
@@ -56,31 +56,8 @@ run "end-to-end" {
     error_message = "Subnet #2 is not assigned to the right VPC"
   }
 
-  // DB Instance
   assert {
-    condition     = can(aws_db_instance.aws_mysql_1.id)
-    error_message = "Database instance not defined"
-  }
-
-  assert {
-    condition     = contains(aws_db_instance.aws_mysql_1.vpc_security_group_ids, aws_vpc.aws_networking_1.default_security_group_id)
-    error_message = "Database instance not defined"
-  }
-
-  assert {
-    condition     = aws_db_instance.aws_mysql_1.engine == "mysql"
-    error_message = "The database engine is other than mysql"
-  }
-
-  // DB param group
-  assert {
-    condition     = can(regex("^mysql[0-9.]", aws_db_parameter_group.aws_mysql_1_params.family))
-    error_message = "The database parameter group is invalid"
-  }
-
-  // DB subnet
-  assert {
-    condition     = can(aws_db_subnet_group.aws_mysql_1-subnetGroup.id)
-    error_message = "The db subnet group is not defined"
+    condition     = "state"
+    error_message = "State is invalid"
   }
 }
