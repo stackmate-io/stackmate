@@ -3,6 +3,10 @@ import { spawn } from 'node:child_process'
 import { isEmpty } from 'lodash'
 
 const TF_PATH = process.env.TERRAFORM_CLI_PATH || '/usr/local/bin/terraform'
+const TEST_ENV = {
+  NODE_ENV: 'test',
+  AWS_PROFILE: 'engine-tests-local',
+}
 
 const execute = async (
   command: string[],
@@ -10,7 +14,7 @@ const execute = async (
 ): Promise<{ code: number; errors?: string[]; output: string }> =>
   new Promise((resolve, reject) => {
     const [executable, ...args] = command
-    const child = spawn(executable, args, { cwd })
+    const child = spawn(executable, args, { cwd, env: TEST_ENV })
 
     let output = ''
     child.stdout.setEncoding('utf8')

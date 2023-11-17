@@ -10,10 +10,10 @@ import {
   dataAwsIamPolicyDocument,
   iamUser,
   iamPolicy,
-  iamPolicyAttachment,
   s3Bucket,
+  iamUserPolicyAttachment,
 } from '@cdktf/provider-aws'
-import { camelCase, startCase } from 'lodash'
+import { camelCase, snakeCase, upperFirst } from 'lodash'
 import { dataAwsIamPolicyDocumentStatementToTerraform } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document'
 import { TerraformOutput } from 'cdktf'
 import { getBucketNamingSchema } from '@aws/utils/getBucketNamingSchema'
@@ -45,7 +45,7 @@ export type AwsObjectStoreService = Service<AwsObjectStoreAttributes, AwsProvide
 export type AwsObjectStoreResources = {
   user: iamUser.IamUser
   policy: iamPolicy.IamPolicy
-  attachment: iamPolicyAttachment.IamPolicyAttachment
+  attachment: iamUserPolicyAttachment.IamUserPolicyAttachment
   buckets: s3Bucket.S3Bucket[]
   outputs: TerraformOutput[]
 }
@@ -63,24 +63,25 @@ export const resourceHandler = (
     config,
     requirements: { providerInstance, kmsKey },
   } = provisionable
-  const prefix = startCase(camelCase(resourceId))
-  const userName = `${prefix}StorageUser`
+  const prefix = upperFirst(camelCase(resourceId))
+  const userName = `Stackmate${prefix}StorageUser`
 
-  const user = new iamUser.IamUser(stack.context, resourceId, {
+  const user = new iamUser.IamUser(stack.context, `${resourceId}_user`, {
     name: userName,
     provider: providerInstance,
   })
 
   const outputs: TerraformOutput[] = []
   const buckets: s3Bucket.S3Bucket[] = config.buckets.map((cfg) => {
-    const bucket = new s3Bucket.S3Bucket(stack.context, `${resourceId}_bucket_${cfg.name}`, {
+    const bucketName = snakeCase(cfg.name)
+    const bucket = new s3Bucket.S3Bucket(stack.context, `${resourceId}_bucket_${bucketName}`, {
       bucket: cfg.name,
     })
 
     if (cfg.encrypted) {
       new S3BucketServerSideEncryptionConfigurationA(
         stack.context,
-        `${resourceId}_${cfg.name}_encryption`,
+        `${resourceId}_${bucketName}_encryption`,
         {
           bucket: bucket.id,
           rule: [
@@ -97,7 +98,7 @@ export const resourceHandler = (
 
     const ownership = new S3BucketOwnershipControls(
       stack.context,
-      `${resourceId}_${cfg.name}_ownership`,
+      `${resourceId}_${bucketName}_ownership`,
       {
         bucket: bucket.id,
         rule: {
@@ -111,7 +112,7 @@ export const resourceHandler = (
     if (cfg.publicRead) {
       const block = new S3BucketPublicAccessBlock(
         stack.context,
-        `${resourceId}_${cfg.name}_access_block`,
+        `${resourceId}_${bucketName}_access_block`,
         {
           bucket: bucket.id,
           blockPublicAcls: false,
@@ -124,13 +125,13 @@ export const resourceHandler = (
       aclDependsOn.push(block)
     }
 
-    new S3BucketAcl(stack.context, `${resourceId}_${cfg.name}_acl`, {
+    new S3BucketAcl(stack.context, `${resourceId}_${bucketName}_acl`, {
       bucket: bucket.id,
       acl: cfg.publicRead ? 'public-read' : 'private',
       dependsOn: aclDependsOn,
     })
 
-    new S3BucketVersioningA(stack.context, `${resourceId}_${cfg.name}_versioning`, {
+    new S3BucketVersioningA(stack.context, `${resourceId}_${bucketName}_versioning`, {
       bucket: bucket.id,
       versioningConfiguration: {
         status: cfg.versioning ? 'Enabled' : 'Disabled',
@@ -138,12 +139,16 @@ export const resourceHandler = (
     })
 
     outputs.push(
-      new TerraformOutput(stack.context, `${resourceId}_bucket_${cfg.name}_domain_name`, {
+      new TerraformOutput(stack.context, `${resourceId}_bucket_${bucketName}_domain_name`, {
         value: bucket.bucketDomainName,
       }),
-      new TerraformOutput(stack.context, `${resourceId}_bucket_${cfg.name}_regional_domain_name`, {
-        value: bucket.bucketRegionalDomainName,
-      }),
+      new TerraformOutput(
+        stack.context,
+        `${resourceId}_bucket_${bucketName}_regional_domain_name`,
+        {
+          value: bucket.bucketRegionalDomainName,
+        },
+      ),
     )
 
     return bucket
@@ -152,7 +157,7 @@ export const resourceHandler = (
   // See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_s3_rw-bucket.html
   const policyDocument = new dataAwsIamPolicyDocument.DataAwsIamPolicyDocument(
     stack.context,
-    `${prefix}_policy_document`,
+    `${resourceId}_policy_document`,
     {
       dependsOn: [user],
       provider: providerInstance,
@@ -160,14 +165,12 @@ export const resourceHandler = (
         dataAwsIamPolicyDocumentStatementToTerraform({
           sid: 'ListObjectsInBucket',
           effect: 'Allow',
-          principals: [{ type: 'AWS', identifiers: [user.arn] }],
           actions: ['s3:ListBucket'],
           resources: buckets.map((bk) => `arn:aws:s3:::${bk.bucket}`),
         }),
         dataAwsIamPolicyDocumentStatementToTerraform({
           sid: 'AllObjectActions',
           effect: 'Allow',
-          principals: [{ type: 'AWS', identifiers: [user.arn] }],
           actions: ['s3:*Object'],
           resources: buckets.map((bk) => `arn:aws:s3:::${bk.bucket}/*`),
         }),
@@ -181,13 +184,12 @@ export const resourceHandler = (
     description: 'S3 User Policy',
   })
 
-  const attachment = new iamPolicyAttachment.IamPolicyAttachment(
+  const attachment = new iamUserPolicyAttachment.IamUserPolicyAttachment(
     stack.context,
     `${resourceId}_policy_attachment`,
     {
-      name: `${prefix}PolicyAttachment`,
       policyArn: policy.arn,
-      users: [user.arn],
+      user: user.name,
     },
   )
 
@@ -203,6 +205,7 @@ export const resourceHandler = (
 const getObjectStoreService = (): AwsObjectStoreService =>
   pipe(
     withHandler(resourceHandler),
+    withAssociations(getProviderAssociations()),
     withSchema({
       type: 'object',
       properties: {
@@ -234,9 +237,6 @@ const getObjectStoreService = (): AwsObjectStoreService =>
           },
         },
       },
-    }),
-    withAssociations({
-      ...getProviderAssociations(),
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.OBJECT_STORAGE))
 
