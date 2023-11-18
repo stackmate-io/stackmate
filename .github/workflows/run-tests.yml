@@ -46,7 +46,7 @@ jobs:
       - name: Check for circular imports
         run: yarn check:circular
 
-      - name: Run the tests
+      - name: Run the unit tests
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
-        run: yarn test:all
+        run: yarn test:unit

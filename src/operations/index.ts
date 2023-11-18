@@ -126,13 +126,6 @@ export class Operation {
       return provisionable.provisions
     }
 
-    console.log(
-      'Registering provisionable',
-      provisionable.config.name,
-      'for service',
-      provisionable.service.type,
-    )
-
     const {
       service: { handler: resourceHandler },
     } = provisionable

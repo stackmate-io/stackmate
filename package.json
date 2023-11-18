@@ -82,7 +82,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "jest": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
     "test": "yarn jest",
-    "test:all": "yarn jest **/__tests__/**/*.test.ts",
+    "test:unit": "yarn jest **/__tests__/**/*.test.ts",
     "test:e2e": "yarn jest e2e/**/*.test.ts",
     "test:watch": "NODE_ENV=test yarn test --watchAll"
   }
