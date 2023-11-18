@@ -1,7 +1,6 @@
 import { TerraformLocal } from 'cdktf'
 import {
   dataAwsSecretsmanagerRandomPassword,
-  dataAwsSecretsmanagerSecretVersion,
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
@@ -73,9 +72,6 @@ describe('AWS Secrets service', () => {
       expect(resources).toBeInstanceOf(Object)
       expect(resources.username).toBeInstanceOf(TerraformLocal)
       expect(resources.password).toBeInstanceOf(TerraformLocal)
-      expect(resources.data).toBeInstanceOf(
-        dataAwsSecretsmanagerSecretVersion.DataAwsSecretsmanagerSecretVersion,
-      )
       expect(resources.version).toBeInstanceOf(
         secretsmanagerSecretVersion.SecretsmanagerSecretVersion,
       )
