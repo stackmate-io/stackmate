@@ -71,7 +71,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "yarn clean && yarn build:project && yarn build:aliases",
+    "build": "npm run clean && npm run build:project && npm run build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
     "check:build": "tsc -p ./tsconfig.build.json --noEmit",
     "check:all": "tsc -p ./tsconfig.json --noEmit",
@@ -81,9 +81,8 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "jest": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
-    "test": "yarn jest",
-    "test:unit": "yarn jest **/__tests__/**/*.test.ts",
-    "test:e2e": "yarn jest e2e/**/*.test.ts",
-    "test:watch": "NODE_ENV=test yarn test --watchAll"
+    "test:unit": "npm run jest src/.*.test.ts",
+    "test:e2e": "npm run jest e2e/.*.test.ts",
+    "test:watch": "npm run jest --watchAll"
   }
 }
