@@ -4,6 +4,7 @@
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "never"
   },
+  "files.restoreUndoStack": true,
   "eslint.validate": [
     "typescript",
     "javascript"
