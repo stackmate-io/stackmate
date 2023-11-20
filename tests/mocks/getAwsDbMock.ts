@@ -28,7 +28,6 @@ export const getAwsDbConfigMock = (
   engine,
   links: [],
   externalLinks: [],
-  nodes: faker.number.int({ min: 1, max: 10 }),
   storage: faker.number.int({ min: 10, max: 100000 }),
   port: faker.internet.port(),
   profile: DEFAULT_PROFILE_NAME,

@@ -1,24 +1,26 @@
 name: End to End tests
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   tests:
     name: End to end tests
     runs-on: ubuntu-latest
+    # Required by the configure-aws-credentials action and GitHub OIDC Token endpoint
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
           path: |
-            .yarn/cache
             **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-modules-
+            ${{ runner.os }}-npm-modules-
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -26,11 +28,17 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.6.3"
 
-      - name: Run tests
-        run: yarn test:e2e
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::827160314823:role/StackmateEngineTestsRunner
+          role-session-name: SessionInGitHubActions
+          aws-region: eu-central-1
+
+      - name: Run end to end tests
+        run: npm run test:e2e

@@ -22,7 +22,7 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import type { ElasticacheEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
-import type { ChoiceOf, OneOfType } from '@lib/util'
+import type { OneOfType } from '@lib/util'
 import type {
   BaseServiceAttributes,
   Provisionable,
@@ -41,7 +41,7 @@ type CacheAttributes = BaseServiceAttributes &
   behavior.MultiNodeAttributes &
   behavior.ConnectableAttributes &
   behavior.ProfilableAttributes &
-  behavior.RegionalAttributes<ChoiceOf<typeof REGIONS>> &
+  behavior.RegionalAttributes &
   behavior.EngineAttributes<ElasticacheEngine> &
   behavior.MonitoringAttributes & {
     provider: typeof PROVIDER.AWS
@@ -81,7 +81,11 @@ export type AwsCacheProvisionable = Provisionable<AwsCache, AwsCacheResources>
  * @returns {String} the parameter group family to use when provisioning the database
  */
 export const getParamGroupFamily = (config: CacheAttributes): string => {
-  const triad = AWS.ELASTICACHE_PARAM_FAMILY_MAPPING.find(
+  const source = config.cluster
+    ? AWS.ELASTICACHE_CLUSTER_PARAM_FAMILY_MAPPING
+    : AWS.ELASTICACHE_INSTANCE_FAMILY_MAPPING
+
+  const triad = source.find(
     ([engine, version]) => engine === config.engine && config.version.startsWith(version),
   )
 
@@ -136,7 +140,7 @@ const deployCaches =
 
     const subnetGroup = new elasticacheSubnetGroup.ElasticacheSubnetGroup(
       stack.context,
-      `${resourceId}-subnetGroup`,
+      `${resourceId}_subnet_group`,
       {
         subnetIds: subnets.map((subnet) => subnet.id),
         name: `${clusterName}-subnet-group`,
@@ -150,6 +154,7 @@ const deployCaches =
       {
         ...params,
         family: getParamGroupFamily(config),
+        name: kebabCase(`stackmate-${clusterName}`),
       },
     )
 
@@ -186,6 +191,7 @@ const deployCaches =
         provider: providerInstance,
         parameterGroupName: paramGroup.name,
         securityGroupIds: [vpc.defaultSecurityGroupId],
+        subnetGroupName: subnetGroup.name,
       })
 
       outputs.push(
@@ -218,6 +224,7 @@ const deployCaches =
           replicasPerNodeGroup: replicas,
           replicationGroupId: clusterName,
           securityGroupIds: [vpc.defaultSecurityGroupId],
+          subnetGroupName: subnetGroup.name,
         },
       )
 

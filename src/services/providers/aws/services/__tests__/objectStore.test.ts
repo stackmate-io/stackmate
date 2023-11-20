@@ -4,7 +4,7 @@ import { Stack } from '@src/lib/stack'
 
 import { AwsObjectStore } from '@aws/services/objectStore'
 import { faker } from '@faker-js/faker'
-import { iamPolicy, iamPolicyAttachment, s3Bucket } from '@cdktf/provider-aws'
+import { iamPolicy, iamUserPolicyAttachment, s3Bucket } from '@cdktf/provider-aws'
 import { TerraformOutput } from 'cdktf'
 import { Registry } from '@src/services/registry'
 import type { AwsObjectStoreAttributes, AwsObjectStoreResources } from '@aws/services/objectStore'
@@ -69,7 +69,7 @@ describe('AWS Object store', () => {
     expect(resources.buckets).toHaveLength(1)
     expect(resources.buckets.every((b) => b instanceof s3Bucket.S3Bucket)).toBe(true)
     expect(resources.policy).toBeInstanceOf(iamPolicy.IamPolicy)
-    expect(resources.attachment).toBeInstanceOf(iamPolicyAttachment.IamPolicyAttachment)
+    expect(resources.attachment).toBeInstanceOf(iamUserPolicyAttachment.IamUserPolicyAttachment)
     expect(Array.isArray(resources.outputs)).toBe(true)
     expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
   })

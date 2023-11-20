@@ -9,7 +9,7 @@ import {
 import { getBaseService } from '@services/utils'
 import { REGIONS } from '@aws/constants'
 import { DEFAULT_RESOURCE_COMMENT, PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { withEnvironment, withHandler, withRegions } from '@services/behaviors'
+import { withHandler, withRegions } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { AwsProviderService, AwsProviderProvisionable, AwsProviderResources } from '@aws/types'
 
@@ -73,10 +73,6 @@ const getProviderService = (): AwsProviderService =>
   pipe(
     withRegions(REGIONS),
     withHandler(resourceHandler),
-    withEnvironment({
-      AWS_ACCESS_KEY_ID: { description: 'AWS Secret Key ID', required: true },
-      AWS_SECRET_ACCESS_KEY: { description: 'AWS Secret Access Key', required: true },
-    }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.PROVIDER))
 
 export const AwsProvider = getProviderService()

@@ -54,7 +54,7 @@ export type ElasticacheEngine = 'redis' | 'memcached'
 export type AwsCacheServiceType = Extract<ServiceTypeChoice, 'redis' | 'memcached'>
 export const DEFAULT_ELASTICACHE_INSTANCE_SIZE = 'cache.t3.micro' as const
 export const ELASTICACHE_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, readonly string[]> = {
-  redis: ['7.0', '6.2', '6.0', '5.0.6', '4.0.10'],
+  redis: ['7.1', '7.0', '6.2', '6.0', '5.0.6', '4.0.10'],
   memcached: [
     '1.6.17',
     '1.6.12',
@@ -70,11 +70,31 @@ export const ELASTICACHE_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, readonly
 } as const
 
 export const ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, string> = {
-  redis: '7.0',
+  redis: '7.1',
   memcached: '1.6.17',
 } as const
 
-export const ELASTICACHE_PARAM_FAMILY_MAPPING = [
+export const ELASTICACHE_INSTANCE_FAMILY_MAPPING = [
+  ['redis', '7.1', 'redis7'],
+  ['redis', '7.0', 'redis7'],
+  ['redis', '6.2', 'redis6.x'],
+  ['redis', '5.0.6', 'redis5.0'],
+  ['redis', '4.0.10', 'redis4.0'],
+  ['memcached', '1.6.17', 'memcached1.6'],
+  ['memcached', '1.6.12', 'memcached1.6'],
+  ['memcached', '1.6.6', 'memcached1.6'],
+  ['memcached', '1.5.16', 'memcached1.5'],
+  ['memcached', '1.5.10', 'memcached1.5'],
+  ['memcached', '1.4.34', 'memcached1.4'],
+  ['memcached', '1.4.33', 'memcached1.4'],
+  ['memcached', '1.4.24', 'memcached1.4'],
+  ['memcached', '1.4.14', 'memcached1.4'],
+  ['memcached', '1.4.5', 'memcached1.4'],
+] as const
+
+export const ELASTICACHE_CLUSTER_PARAM_FAMILY_MAPPING = [
+  ['redis', '7.1', 'default.redis7'],
+  ['redis', '7.1', 'default.redis7.cluster.on'],
   ['redis', '7.0', 'default.redis7'],
   ['redis', '7.0', 'default.redis7.cluster.on'],
   ['redis', '6.2', 'default.redis6.x'],

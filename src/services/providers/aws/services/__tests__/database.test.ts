@@ -51,7 +51,6 @@ const getDatabaseSchemaExpectation = (
       default: defaultVersion,
     }),
     engine: expect.objectContaining({ type: 'string', enum: [engine], default: engine }),
-    nodes: expect.objectContaining({ type: 'number', minimum: 1, maximum: 10000, default: 1 }),
     profile: expect.objectContaining({
       type: 'string',
       default: DEFAULT_PROFILE_NAME,

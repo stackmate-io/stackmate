@@ -15,7 +15,8 @@ const getProviderInstanceRequirement = (): AwsProviderAssociations['providerInst
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: AwsProviderAttributes, linked: BaseServiceAttributes) =>
-    config.provider === linked.provider && config.region === linked.region,
+    config.provider === linked.provider &&
+    ((config.region && config.region === linked.region) || !config.region),
   handler: (p: AwsProviderProvisionable): terraformAwsProvider.AwsProvider =>
     p.provisions.providerInstance,
 })
@@ -24,7 +25,8 @@ const getAccountRequirement = (): AwsProviderAssociations['account'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
-    config.provider === linked.provider && config.region === linked.region,
+    config.provider === linked.provider &&
+    ((config.region && config.region === linked.region) || !config.region),
   handler: (prov: AwsProviderProvisionable): dataAwsCallerIdentity.DataAwsCallerIdentity =>
     prov.provisions.account,
 })
@@ -33,7 +35,8 @@ const getKmsKeyRequirement = (): AwsProviderAssociations['kmsKey'] => ({
   with: SERVICE_TYPE.PROVIDER,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
-    config.provider === linked.provider && config.region === linked.region,
+    config.provider === linked.provider &&
+    ((config.region && config.region === linked.region) || !config.region),
   handler: (prov: AwsProviderProvisionable): kmsKey.KmsKey => prov.provisions.kmsKey,
 })
 
