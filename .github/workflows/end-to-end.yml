@@ -38,7 +38,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::827160314823:role/StackmateEngineTestsRunner
+          role-to-assume: arn:aws:iam::827160314823:role/WebIdentityGitHub
           role-session-name: SessionInGitHubActions
           aws-region: eu-central-1
 
