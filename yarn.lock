@@ -415,13 +415,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-aws@npm:18.0.5":
-  version: 18.0.5
-  resolution: "@cdktf/provider-aws@npm:18.0.5"
+"@cdktf/provider-aws@npm:18.0.6":
+  version: 18.0.6
+  resolution: "@cdktf/provider-aws@npm:18.0.6"
   peerDependencies:
     cdktf: ^0.19.0
     constructs: ^10.0.0
-  checksum: 2da3fb37f1d57feb04b312d981831cc944ef25f2f81211a815b1d535ecec3531c5d72a8d19c2a0f36bf9694f97d2b457bc92e55918f188e544337800abe1b3e1
+  checksum: b7939482810f44f70a69152b48c204de953b4866fb03e9e4cd9c7fa41d96b4107aa43327fe8c1e2417b82c77852d410ef8e475a5291b0f10e681977c54cb77f0
   languageName: node
   linkType: hard
 
@@ -944,7 +944,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stackmate/engine@workspace:."
   dependencies:
-    "@cdktf/provider-aws": 18.0.5
+    "@cdktf/provider-aws": 18.0.6
     "@cdktf/provider-local": ^9.0.0
     "@faker-js/faker": ^8.2.0
     "@stylistic/eslint-plugin": ^1.1.0
