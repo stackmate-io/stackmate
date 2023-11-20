@@ -10,6 +10,10 @@ jobs:
   tests:
     name: End to end tests
     runs-on: ubuntu-latest
+    # Required by the configure-aws-credentials action and GitHub OIDC Token endpoint
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
