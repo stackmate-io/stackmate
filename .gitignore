@@ -6,14 +6,17 @@ dist/*
 !dist/.keep
 artifacts/*
 !artifacts/.keep
-package-lock.json
 tmp
 node_modules
 
 # Terraform specific
 cdktf.out
+stackmate.out
+stacks
 .terraform
+terraform.log
 *.tf.json
+*.lock.hcl
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
@@ -21,16 +24,6 @@ cdktf.out
 
 # Jest
 .jestcache
-
-### yarn ###
-# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
-
-.yarn/*
-!.yarn/releases
-!.yarn/patches
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
 
 # if you are NOT using Zero-installs, then:
 # comment the following lines

@@ -39,3 +39,4 @@ export const DEFAULT_RESOURCE_COMMENT = 'Deployed by Stackmate'
 export const DEFAULT_PROFILE_NAME = 'default' as const
 export const DEFAULT_SERVICE_STORAGE = 30 as const
 export const DEFAULT_PASSWORD_LENGTH = 16 as const
+export const isTestMode = process.env.NODE_ENV === 'test'

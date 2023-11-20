@@ -38,12 +38,11 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.2.0",
-    "@stylistic/eslint-plugin": "^1.1.0",
+    "@faker-js/faker": "^8.3.1",
     "@types/jest": "^29.5.8",
     "@types/lodash": "^4.14.201",
     "@types/node": "^20.9.2",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "dpdm": "^3.14.0",
     "eslint": "^8.54.0",
@@ -71,7 +70,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "yarn clean && yarn build:project && yarn build:aliases",
+    "build": "npm run clean && npm run build:project && npm run build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
     "check:build": "tsc -p ./tsconfig.build.json --noEmit",
     "check:all": "tsc -p ./tsconfig.json --noEmit",
@@ -80,10 +79,10 @@
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "jest": "jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1",
-    "test": "yarn jest",
-    "test:all": "yarn jest **/__tests__/**/*.test.ts",
-    "test:e2e": "yarn jest e2e/**/*.test.ts",
-    "test:watch": "yarn test --watchAll"
+    "test": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
+    "test:unit": "npm run test -- --testRegex=src/.*.test.ts",
+    "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
+    "test:e2e:local": "AWS_PROFILE=engine-tests-local npm run test:e2e",
+    "test:watch": "npm run test --watchAll"
   }
 }

@@ -32,7 +32,7 @@ export class Stack {
   constructor(name: string, variables: Dictionary<string | undefined> = {}) {
     this.#variables = variables
     this.name = kebabCase(name.replace('([^a-zA-Z0-9s-_]+)', '').toLowerCase())
-    this.app = new TerraformApp()
+    this.app = new TerraformApp({ outdir: '.' })
     this.context = new TerraformStack(this.app, this.name)
   }
 

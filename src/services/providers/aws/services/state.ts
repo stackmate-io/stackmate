@@ -1,18 +1,21 @@
 import pipe from 'lodash/fp/pipe'
 import { S3Backend } from 'cdktf'
-import { SERVICE_TYPE } from '@src/constants'
+import { SERVICE_TYPE, PROVIDER } from '@src/constants'
 import { REGIONS } from '@aws/constants'
-import { getAwsService } from '@aws/utils/getAwsService'
 import { withRegions, withHandler, withSchema, withAssociations } from '@services/behaviors'
-import type { PROVIDER } from '@src/constants'
+import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
+import { getBaseService } from '@src/services/utils'
 import type { RegionalAttributes } from '@services/behaviors'
 import type { Stack } from '@lib/stack'
 import type { JsonSchema } from '@lib/schema'
 import type { Provisionable, BaseServiceAttributes, Service } from '@services/types'
 import type { AwsProviderAssociations } from '@aws/types'
-import { getProviderAssociations } from '../utils/getProviderAssociations'
 
-type AdditionalAttrs = { bucket: string }
+type AdditionalAttrs = {
+  bucket: string
+  statePath: string
+  lockTable: string
+}
 
 export type AwsStateAttributes = BaseServiceAttributes &
   RegionalAttributes &
@@ -26,18 +29,15 @@ export type AwsStateResources = { backend: S3Backend }
 export type AwsStateProvisionable = Provisionable<AwsStateService, AwsStateResources>
 
 const resourceHandler = (provisionable: AwsStateProvisionable, stack: Stack): AwsStateResources => {
-  const {
-    config,
-    requirements: { kmsKey },
-  } = provisionable
+  const { config } = provisionable
 
   const backend = new S3Backend(stack.context, {
     acl: 'private',
     bucket: config.bucket,
     encrypt: true,
-    key: `${stack.name}/terraform.tfstate`,
-    kmsKeyId: kmsKey.id,
     region: config.region,
+    key: config.statePath || `${stack.name}/stackmate.tfstate`,
+    dynamodbTable: config.lockTable || 'stackmate-terraform-state-lock',
   })
 
   return { backend }
@@ -57,6 +57,18 @@ const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
       maxLength: 63,
       pattern: '(?!(^xn--|.+-s3alias$))^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$',
     },
+    statePath: {
+      type: 'string',
+      minLength: 2,
+      maxLength: 255,
+      default: 'stackmate.tfstate',
+    },
+    lockTable: {
+      type: 'string',
+      minLength: 2,
+      maxLength: 255,
+      default: 'stackmate-terraform-state-lock',
+    },
   },
 })
 
@@ -69,6 +81,6 @@ export const getStateService = (): AwsStateService =>
     withHandler(resourceHandler),
     withSchema<AwsStateAttributes, AdditionalAttrs>(getAdditionalPropertiesSchema()),
     withAssociations(getProviderAssociations()),
-  )(getAwsService(SERVICE_TYPE.STATE))
+  )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.STATE))
 
 export const AwsState = getStateService()

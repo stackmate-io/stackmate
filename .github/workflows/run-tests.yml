@@ -23,11 +23,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            .yarn/cache
             **/node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-modules-
+            ${{ runner.os }}-npm-modules-
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -35,18 +34,18 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Lint the project
-        run: yarn lint
+        run: npm run lint
 
       - name: Check for TypeScript errors
-        run: yarn check:all
+        run: npm run check:all
 
       - name: Check for circular imports
-        run: yarn check:circular
+        run: npm run check:circular
 
-      - name: Run the tests
+      - name: Run the unit tests
         env:
           NODE_OPTIONS: '--max_old_space_size=4096'
-        run: yarn test:all
+        run: npm run test:unit

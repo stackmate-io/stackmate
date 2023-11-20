@@ -5,6 +5,7 @@ import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getAwsProvisionable } from '@tests/mocks'
 import { Registry } from '@src/services/registry'
+import { faker } from '@faker-js/faker'
 import type { AwsStateProvisionable } from '@src/services/providers/aws/services/state'
 import type { BaseProvisionable } from 'src/services/types/provisionable'
 
@@ -59,6 +60,8 @@ describe('AWS state', () => {
           type: SERVICE_TYPE.STATE,
           region: 'eu-central-1',
           bucket: 'some-bucket-name',
+          statePath: `${faker.system.directoryPath()}/state.tfstate`,
+          lockTable: faker.internet.domainWord(),
         },
         stack,
       )
