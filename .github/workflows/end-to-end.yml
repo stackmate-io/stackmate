@@ -1,10 +1,8 @@
 name: End to End tests
 
 on:
-  push:
-    branches:
-      - main
-      - falexandrou/end-to-end-tests # temporary
+  release:
+    types: [published]
 
 jobs:
   tests:
@@ -38,9 +36,9 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::827160314823:role/WebIdentityGitHub
+          role-to-assume: arn:aws:iam::827160314823:role/StackmateEngineTestsRunner
           role-session-name: SessionInGitHubActions
           aws-region: eu-central-1
 
-      - name: Run tests
+      - name: Run end to end tests
         run: npm run test:e2e
