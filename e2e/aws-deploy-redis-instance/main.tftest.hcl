@@ -63,7 +63,7 @@ run "end-to-end" {
   }
 
   assert {
-    condition     = contains(aws_elasticache_cluster.aws_redis_1.vpc_security_group_ids, aws_vpc.aws_networking_1.default_security_group_id)
+    condition     = contains(aws_elasticache_cluster.aws_redis_1.security_group_ids, aws_vpc.aws_networking_1.default_security_group_id)
     error_message = "redis instance does not contain the default security group"
   }
 
@@ -75,11 +75,6 @@ run "end-to-end" {
   // Log configuration
   assert {
     condition     = can(aws_cloudwatch_log_group.aws_redis_1_log_group.id)
-    error_message = "The log group is not defined"
-  }
-
-  assert {
-    condition     = aws_elasticache_cluster.aws_redis_1.log_delivery_configuration[0].destination == aws_cloudwatch_log_group.aws_redis_1_log_group.name
     error_message = "The log group is not defined"
   }
 

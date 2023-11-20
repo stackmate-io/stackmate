@@ -22,7 +22,7 @@ const execute = async (
 
     child.stdout.setEncoding('utf8')
     child.stdout.on('data', (data) => {
-      fs.writeFileSync(logOutput, data.string(), { flag: 'a' })
+      fs.writeFileSync(logOutput, data.toString(), { flag: 'a' })
     })
 
     const errors: string[] = []
