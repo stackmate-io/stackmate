@@ -34,7 +34,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm run install
+        run: npm install
 
       - name: Lint the project
         run: npm run lint
