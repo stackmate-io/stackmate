@@ -79,10 +79,10 @@
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "jest": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
-    "test:unit": "npm run jest -- --testRegex=src/.*.test.ts",
-    "test:e2e": "npm run jest -- --testRegex=e2e/.*.test.ts",
+    "test": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
+    "test:unit": "npm run test -- --testRegex=src/.*.test.ts",
+    "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
     "test:e2e:local": "AWS_PROFILE=engine-tests-local npm run test:e2e",
-    "test:watch": "npm run jest --watchAll"
+    "test:watch": "npm run test --watchAll"
   }
 }
