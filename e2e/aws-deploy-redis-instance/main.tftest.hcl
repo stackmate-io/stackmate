@@ -56,31 +56,42 @@ run "end-to-end" {
     error_message = "Subnet #2 is not assigned to the right VPC"
   }
 
-  // DB Instance
+  // Pnstance
   assert {
-    condition     = can(aws_db_instance.aws_mysql_1.id)
-    error_message = "Database instance not defined"
+    condition     = can(aws_elasticache_cluster.aws_redis_1.id)
+    error_message = "redis instance not defined"
   }
 
   assert {
-    condition     = contains(aws_db_instance.aws_mysql_1.vpc_security_group_ids, aws_vpc.aws_networking_1.default_security_group_id)
-    error_message = "Database instance does not contain the default security group"
+    condition     = contains(aws_elasticache_cluster.aws_redis_1.vpc_security_group_ids, aws_vpc.aws_networking_1.default_security_group_id)
+    error_message = "redis instance does not contain the default security group"
   }
 
   assert {
-    condition     = aws_db_instance.aws_mysql_1.engine == "mysql"
-    error_message = "The database engine is other than mysql"
+    condition     = aws_elasticache_cluster.aws_redis_1.engine == "redis"
+    error_message = "The cache engine is other than redis"
   }
 
-  // DB param group
+  // Log configuration
   assert {
-    condition     = can(regex("^mysql[0-9.]", aws_db_parameter_group.aws_mysql_1_params.family))
-    error_message = "The database parameter group is invalid"
+    condition     = can(aws_cloudwatch_log_group.aws_redis_1_log_group.id)
+    error_message = "The log group is not defined"
   }
 
-  // DB subnet
   assert {
-    condition     = can(aws_db_subnet_group.aws_mysql_1_subnet_group.id)
-    error_message = "The db subnet group is not defined"
+    condition     = aws_elasticache_cluster.aws_redis_1.log_delivery_configuration[0].destination == aws_cloudwatch_log_group.aws_redis_1_log_group.name
+    error_message = "The log group is not defined"
+  }
+
+  // Param group
+  assert {
+    condition     = can(regex("^redis[0-9.]", aws_elasticache_parameter_group.aws_redis_1_params.family))
+    error_message = "The redis parameter group is invalid"
+  }
+
+  // Pubnet
+  assert {
+    condition     = can(aws_elasticache_subnet_group.aws_redis_1_subnet_group.id)
+    error_message = "The redis subnet group is not defined"
   }
 }

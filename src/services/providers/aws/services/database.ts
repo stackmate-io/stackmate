@@ -106,7 +106,7 @@ const deployDatabases =
 
     const subnetGroup = new dbSubnetGroup.DbSubnetGroup(
       stack.context,
-      `${resourceId}-subnetGroup`,
+      `${resourceId}_subnet_group`,
       {
         subnetIds: subnets.map((subnet) => subnet.id),
         namePrefix: dbInstanceName,
