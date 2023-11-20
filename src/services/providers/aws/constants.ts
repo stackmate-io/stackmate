@@ -93,6 +93,8 @@ export const ELASTICACHE_INSTANCE_FAMILY_MAPPING = [
 ] as const
 
 export const ELASTICACHE_CLUSTER_PARAM_FAMILY_MAPPING = [
+  ['redis', '7.1', 'default.redis7'],
+  ['redis', '7.1', 'default.redis7.cluster.on'],
   ['redis', '7.0', 'default.redis7'],
   ['redis', '7.0', 'default.redis7.cluster.on'],
   ['redis', '6.2', 'default.redis6.x'],
