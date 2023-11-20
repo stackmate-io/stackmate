@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - falexandrou/end-to-end-tests # temporary
 
 jobs:
   tests:
@@ -30,6 +31,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.6.3"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::827160314823:role/StackmateEngineTestsRunner
+          aws-region: eu-central-1
 
       - name: Run tests
         run: npm run test:e2e
