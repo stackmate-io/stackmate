@@ -73,7 +73,7 @@ const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
 })
 
 /**
- * @returns {AwsSecretsVaultService} the secrets vault service
+ * @returns {AwsStateService} the secrets vault service
  */
 export const getStateService = (): AwsStateService =>
   pipe(

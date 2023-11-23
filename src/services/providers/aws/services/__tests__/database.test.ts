@@ -110,9 +110,7 @@ describe('AWS PostgreSQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config = getAwsDbConfigMock('postgresql', 'postgres')
-    const provisionable = getAwsProvisionable(config, stack, {
-      withRootCredentials: true,
-    })
+    const provisionable = getAwsProvisionable(config, stack)
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -152,9 +150,7 @@ describe('AWS MySQL', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config = getAwsDbConfigMock('mysql', 'mysql')
-    const provisionable = getAwsProvisionable(config, stack, {
-      withRootCredentials: true,
-    })
+    const provisionable = getAwsProvisionable(config, stack)
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -194,9 +190,7 @@ describe('AWS MariaDB', () => {
   it('registers the resources on deployment', () => {
     const stack = new Stack('stack-name')
     const config = getAwsDbConfigMock('mariadb', 'mariadb')
-    const provisionable = getAwsProvisionable(config, stack, {
-      withRootCredentials: true,
-    })
+    const provisionable = getAwsProvisionable(config, stack)
 
     const resources = service.handler(provisionable, stack)
     expect(typeof resources === 'object').toBe(true)
@@ -212,9 +206,7 @@ describe('Database service monitoring', () => {
     const stack = new Stack('stack-name')
     const config = getAwsDbConfigMock('mariadb', 'mariadb')
 
-    const provisionable = getAwsProvisionable(config, stack, {
-      withRootCredentials: true,
-    })
+    const provisionable = getAwsProvisionable(config, stack)
 
     service.handler(provisionable, stack)
     const synthesized = Testing.synth(stack.context)
