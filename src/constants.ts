@@ -22,7 +22,6 @@ export const SERVICE_TYPE = {
   REDIS: 'redis',
   SSL: 'ssl',
   STATE: 'state',
-  SECRETS: 'secrets',
   VOLUME: 'volume',
 } as const
 

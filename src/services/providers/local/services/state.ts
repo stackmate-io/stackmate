@@ -35,7 +35,7 @@ export const resourceHandler = (
 }
 
 /**
- * @returns {AwsSecretsVaultService} the secrets vault service
+ * @returns {LocalStateService} the secrets vault service
  */
 export const getStateService = (): LocalStateService =>
   pipe(
