@@ -4,7 +4,7 @@ import {
   secretsmanagerSecret,
   secretsmanagerSecretVersion,
 } from '@cdktf/provider-aws'
-import { Fn, TerraformLocal } from 'cdktf'
+import { Fn, TerraformLocal, Token } from 'cdktf'
 import { isNumber, isString, merge, uniq } from 'lodash'
 import { DEFAULT_PASSWORD_LENGTH, isTestMode } from '@src/constants'
 import type { kmsKey } from '@cdktf/provider-aws'
@@ -69,7 +69,7 @@ export const getSecret = (
     `${resourceId}_secret_version`,
     {
       secretId: secret.id,
-      secretString: Fn.jsonencode(value.toString()),
+      secretString: Fn.jsonencode(Token.asString(value)),
       lifecycle: {
         ignoreChanges: ['secret_string'],
       },
