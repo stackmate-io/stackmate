@@ -10,13 +10,17 @@ import { DEFAULT_PASSWORD_LENGTH, isTestMode } from '@src/constants'
 import type { kmsKey } from '@cdktf/provider-aws'
 import type { Stack } from '@src/lib/stack'
 import type { OneOfType } from '@src/lib/util'
-import type { CredentialsHandlerOptions } from '@src/services/behaviors'
+
+type SecretGenerationOptions = {
+  length?: number
+  exclude?: string[]
+}
 
 export const getSecret = (
   secretName: string,
   stack: Stack,
   kmsKey?: kmsKey.KmsKey,
-  opts?: OneOfType<[{ value: string }, CredentialsHandlerOptions]>,
+  opts?: OneOfType<[{ value: string }, SecretGenerationOptions]>,
 ): {
   secret: secretsmanagerSecret.SecretsmanagerSecret
   version: secretsmanagerSecretVersion.SecretsmanagerSecretVersion
