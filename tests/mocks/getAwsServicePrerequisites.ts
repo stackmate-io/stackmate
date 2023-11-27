@@ -1,7 +1,7 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { resourceHandler as providerDeployHandler } from '@aws/services/provider'
 import { resourceHandler as networkingDeployHandler } from '@aws/services/networking'
-import { ProvisionablesMap } from '@src/operations/utils/provisionables'
+import { ProvisionablesMap } from '@src/operation/utils/provisionables'
 import type { Stack } from '@lib/stack'
 import type {
   AwsNetworkingProvisionable,

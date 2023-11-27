@@ -1,4 +1,4 @@
-import { Operation } from '@src/operations'
+import { Operation } from '@src/operation'
 import type { ServiceConfiguration } from '@services/registry'
 import { createJsonFile } from './createJsonFile'
 

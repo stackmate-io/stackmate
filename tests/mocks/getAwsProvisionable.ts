@@ -1,5 +1,5 @@
-import { ProvisionablesMap } from '@src/operations/utils/provisionables'
-import { assertRequirementsSatisfied } from '@src/operations/utils/assertRequirementsSatisfied'
+import { ProvisionablesMap } from '@src/operation/utils/provisionables'
+import { assertRequirementsSatisfied } from '@src/operation/utils/assertRequirementsSatisfied'
 import type { Stack } from '@lib/stack'
 import type { BaseProvisionable } from '@services/types/provisionable'
 import { getAwsServicePrerequisites } from './getAwsServicePrerequisites'

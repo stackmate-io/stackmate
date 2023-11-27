@@ -1,4 +1,4 @@
-import { ProvisionablesMap } from '@src/operations/utils/provisionables'
+import { ProvisionablesMap } from '@src/operation/utils/provisionables'
 import type { ServiceConfiguration } from '@services/registry'
 
 export const getProvisionable = (config: ServiceConfiguration) => {

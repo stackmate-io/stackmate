@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { EnvironmentValidationError } from '@lib/errors'
-import { assertEnvironmentValid } from '@src/operations/utils/assertEnvironmentValid'
+import { assertEnvironmentValid } from '@src/operation/utils/assertEnvironmentValid'
 import { fromPairs } from 'lodash'
 import type { ServiceEnvironment } from '@services/types'
 
