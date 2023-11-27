@@ -6,8 +6,7 @@ export type TestConfig = {
 }
 
 /**
- * WARNING: we should make sure that the values here, are aligned with the "create-e2e-tests-setup"
- *          module, in the operations repository.
+ * WARNING: The bucket and lock table should already be available when running the end to end tests
  *
  * The reasoning for this is that if we use `terraform test` to create the bucket,
  * we would need to wait for a few seconds until the bucket becomes available, so we're going
