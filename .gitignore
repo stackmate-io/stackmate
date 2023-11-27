@@ -14,7 +14,7 @@ cdktf.out
 stackmate.out
 stacks
 .terraform
-terraform.log
+*terraform.log
 *.tf.json
 *.lock.hcl
 
