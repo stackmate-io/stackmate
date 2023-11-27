@@ -1,11 +1,11 @@
 import { merge } from 'lodash'
 import { getAwsDbConfigMock } from '@tests/mocks'
-import { getSchema, getValidData } from '@src/validation'
+import { getServicesSchema, getValidData } from '@src/validation'
 import { ValidationError } from '@lib/errors'
 
 describe('isIpOrCidr', () => {
   const db = getAwsDbConfigMock()
-  const schema = getSchema()
+  const schema = getServicesSchema()
   const config = [db]
 
   it('raises an error when an invalid IP is used', () => {

@@ -1,13 +1,13 @@
 import { Registry } from '@src/services/registry'
 import { getAjv } from '@src/validation/utils/getAjv'
-import { getSchema } from '@src/validation/utils/getSchema'
+import { getServicesSchema } from '@src/validation/utils/getServicesSchema'
 import type { ServiceAttributes } from '@src/services/registry'
 import type { JsonSchema } from '@src/lib/schema'
 
 describe('getSchema', () => {
   let schema: JsonSchema<ServiceAttributes[]>
   beforeAll(() => {
-    schema = getSchema()
+    schema = getServicesSchema()
   })
 
   it('returns a valid schema', () => {

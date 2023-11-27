@@ -1,8 +1,8 @@
-import { getSchema, getValidData } from '@src/validation'
+import { getServicesSchema, getValidData } from '@src/validation'
 import type { ServiceConfiguration } from '@services/registry'
 
 describe('getValidData', () => {
-  const schema = getSchema()
+  const schema = getServicesSchema()
   let config: ServiceConfiguration[]
 
   beforeEach(() => {

@@ -3,7 +3,7 @@ import { Registry, type ServiceAttributes } from '@services/registry'
 import type { BaseServiceAttributes } from '@services/types'
 import type { Dictionary } from 'lodash'
 import type { JsonSchema } from '@lib/schema'
-import { getNameSchema } from './getNameSchema'
+import { getServiceNameSchema } from './getServiceNameSchema'
 
 /**
  * Populates the project schema
@@ -11,7 +11,7 @@ import { getNameSchema } from './getNameSchema'
  * @returns {JsonSchema<ServiceAttributes[]>}
  */
 
-export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
+export const getServicesSchema = (): JsonSchema<ServiceAttributes[]> => {
   const services = Registry.all()
 
   const allOf = services.map((service) => ({
@@ -44,7 +44,7 @@ export const getSchema = (): JsonSchema<ServiceAttributes[]> => {
       additionalProperties: true,
       required: ['name', 'type', 'provider'],
       properties: {
-        name: getNameSchema(),
+        name: getServiceNameSchema(),
         type: {
           type: 'string',
           enum: Registry.types(),

@@ -1,13 +1,13 @@
 import fs from 'node:fs'
 import { getAwsDbConfigMock } from '@tests/mocks'
 import { ValidationError } from '@lib/errors'
-import { getSchema, getValidData } from '@src/validation'
+import { getServicesSchema, getValidData } from '@src/validation'
 import type { ValidationErrorDescriptor } from '@lib/errors'
 
 describe('serviceProfile', () => {
   const db = getAwsDbConfigMock()
   const config = [db]
-  const schema = getSchema()
+  const schema = getServicesSchema()
 
   it('raises an error when the service profile is invalid', () => {
     const existMock = jest.spyOn(fs, 'existsSync').mockReturnValue(false)

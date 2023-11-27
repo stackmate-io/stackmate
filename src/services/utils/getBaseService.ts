@@ -1,4 +1,4 @@
-import { getNameSchema } from '@src/validation/utils/getNameSchema'
+import { getServiceNameSchema } from '@src/validation/utils/getServiceNameSchema'
 import type { JsonSchema } from '@lib/schema'
 import type {
   ProviderChoice,
@@ -28,7 +28,7 @@ export const getBaseService = (
       provider: { const: provider },
       type: { const: type },
       region: { type: 'string' },
-      name: getNameSchema(),
+      name: getServiceNameSchema(),
     },
   }
 

@@ -1,6 +1,6 @@
 import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
-import { getValidData, getSchema } from '@src/validation'
+import { getValidData, getServicesSchema } from '@src/validation'
 import { type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
 import type {
   BaseProvisionable,
@@ -105,7 +105,7 @@ export class Operation {
   protected init(configs: ServiceConfiguration[]) {
     this.#attributes = getValidData<ServiceConfiguration[], ServiceAttributes[]>(
       configs,
-      getSchema(),
+      getServicesSchema(),
     )
 
     this.#attributes.forEach((config) => {

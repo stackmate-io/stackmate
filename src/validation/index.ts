@@ -1,2 +1,2 @@
-export * from './utils/getSchema'
+export * from './utils/getServicesSchema'
 export * from './utils/getValidData'

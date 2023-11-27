@@ -4,7 +4,7 @@ import type { BaseServiceAttributes } from '@services/types'
 /**
  * @returns {JsonSchema} the service's name schema
  */
-export const getNameSchema = (): JsonSchema<BaseServiceAttributes['name']> => ({
+export const getServiceNameSchema = (): JsonSchema<BaseServiceAttributes['name']> => ({
   type: 'string',
   pattern: '^([a-zA-Z0-9_-]+)$',
   minLength: 2,
