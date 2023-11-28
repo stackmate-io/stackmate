@@ -2,6 +2,7 @@ import { fromPairs } from 'lodash'
 import { Stack } from '@lib/stack'
 import { getValidData, getServicesSchema } from '@src/validation'
 import { type ServiceConfiguration, type ServiceAttributes } from '@services/registry'
+import type { SynthesizedStack } from '@cdktf/cli-core'
 import type {
   BaseProvisionable,
   Provisions,
@@ -87,9 +88,9 @@ export class Operation {
   /**
    * Processes an operation and returns the Terraform configuration as an object
    *
-   * @returns {Object} the terraform configuration object
+   * @returns {SynthesizedStack} the terraform synthesized stack object
    */
-  process(): object {
+  process(): SynthesizedStack {
     const allEnvs = Array.from(this.provisionables.values()).map((p) => p.service.environment)
     assertEnvironmentValid(allEnvs, this.#variables)
 

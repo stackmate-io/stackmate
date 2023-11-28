@@ -1,5 +1,6 @@
 import { kebabCase, snakeCase } from 'lodash'
 import { TerraformStack, App as TerraformApp, TerraformLocal } from 'cdktf'
+import type { SynthesizedStack } from '@cdktf/cli-core'
 import type { Dictionary } from 'lodash'
 
 export class Stack {
@@ -58,7 +59,7 @@ export class Stack {
   /**
    * @returns {Object} the stack exported as terraform json object
    */
-  toObject(): object {
+  toObject(): SynthesizedStack {
     return this.context.toTerraform()
   }
 }

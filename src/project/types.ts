@@ -4,15 +4,15 @@ import type { ServiceConfiguration } from '@src/services/registry'
 import type { ProviderChoice } from '@src/services/types'
 import type { OptionalKeys } from '..'
 
-export type Environment = Record<
+export type EnvironmentConfiguration = Record<
   string,
   Record<string, OptionalKeys<ServiceConfiguration, 'provider' | 'name'>>
 >
 
-export type Project = {
+export type ProjectConfiguration = {
   provider?: ProviderChoice
   region?: string
   state: AwsStateAttributes | LocalStateAttributes
   domains: Record<string, string[]>
-  environments: Environment
+  environments: EnvironmentConfiguration
 }

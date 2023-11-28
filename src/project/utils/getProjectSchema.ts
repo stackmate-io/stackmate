@@ -3,10 +3,10 @@ import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
 import { fromPairs, merge, omit, without } from 'lodash'
 import { JSON_SCHEMA_DRAFT } from '@src/validation/constants'
 import { getServicesSchema } from '@src/validation/utils/getServicesSchema'
-import type { Project } from '@src/project/types'
+import type { ProjectConfiguration } from '@src/project/types'
 import type { JsonSchema } from '@src/lib/schema'
 
-export const getProjectSchema = (): JsonSchema<Project> => {
+export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   const { $defs: serviceDefs = {} } = getServicesSchema()
   const providers = without(Object.values(PROVIDER), PROVIDER.LOCAL)
 

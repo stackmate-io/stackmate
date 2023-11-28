@@ -5,10 +5,10 @@ import { getProjectSchema } from '@src/project/utils/getProjectSchema'
 import { SERVICE_TYPE } from '@src/constants'
 import { Registry, type ServiceConfiguration } from '@src/services/registry'
 import type { ProviderChoice, ServiceTypeChoice } from '@src/services/types'
-import type { Project } from '@src/project/types'
+import type { ProjectConfiguration } from '@src/project/types'
 
 export const getProjectServices = (
-  project: Project,
+  project: ProjectConfiguration,
   environment: string,
 ): ServiceConfiguration[] => {
   const defaultProvider = project.provider || DEFAULT_PROVIDER
