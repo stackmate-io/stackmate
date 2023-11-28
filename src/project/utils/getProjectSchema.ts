@@ -36,11 +36,11 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
 
   const serviceDefinitionReferences = Object.keys(serviceDefinitions)
     .filter((schemaId) => !schemaId.endsWith('/state') && !schemaId.endsWith('/provider'))
-    .map((schemaId) => ({ $ref: `/${schemaId}` }))
+    .map((schemaId) => ({ $ref: schemaId }))
 
   const stateServiceDefinitionReferences = Object.keys(serviceDefinitions)
     .filter((schemaId) => schemaId.endsWith('/state'))
-    .map((schemaId) => ({ $ref: `/${schemaId}` }))
+    .map((schemaId) => ({ $ref: schemaId }))
 
   return {
     $id: 'stackmate/project',

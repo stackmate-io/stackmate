@@ -4,7 +4,7 @@ import { ENVIRONMENT } from '@src/project/constants'
 import { getProject } from '@src/project'
 import type { ArgumentsCamelCase } from 'yargs'
 
-const cli = yargs
+export const cli = yargs
 
 type Options = ArgumentsCamelCase<{
   configuration: string
@@ -72,13 +72,13 @@ addOperationCommand('deploy')
 addOperationCommand('destroy')
 addOperationCommand('preview')
 
+const usage = `Example usage:
+$0 deploy <environment> [options]
+$0 destroy <environment> [options]
+$0 preview <environment> [options]`
+
 cli
   .scriptName('stackname')
-  .usage(
-    `Example usage:
-  $0 deploy <environment> [options]
-  $0 destroy <environment> [options]
-  $0 preview <environment> [options]`,
-  )
+  .usage(usage)
   .demandCommand(1, 'You need to provide a command to run')
   .showHelpOnFail(false).argv

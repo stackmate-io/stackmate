@@ -42,7 +42,7 @@ export const getProjectServices = (
     }
 
     // Add the provider and networking services (if available)
-    const baseServices = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.NETWORKING]
+    const coreServices = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.NETWORKING]
       .filter((st) => availableTypes.includes(st))
       .map((type) => ({
         name: `${provider}-${type}-service`,
@@ -50,7 +50,7 @@ export const getProjectServices = (
         region,
       })) as ServiceConfiguration[]
 
-    services.push(...baseServices, {
+    services.push(...coreServices, {
       ...config,
       name,
       provider,
