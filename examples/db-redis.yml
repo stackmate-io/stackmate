@@ -9,9 +9,10 @@ state:
   provider: aws
   bucket: some-unique-bucket-name
 
-domains:
-  production:
-    - domain.com
+# TODO:
+# domains:
+#   production:
+#     - domain.com
 
 environments:
   production:
@@ -24,8 +25,10 @@ environments:
       name: my-cache
 
   staging:
-    copy: production
-    without: redis-kv
-    overrides:
-      mysql-database:
-        size: db.t2.medium
+    mysql-database:
+      type: mysql
+      database: mysuperdatabase
+      size: db.t2.micro
+    redis-kv:
+      type: redis
+      name: my-cache
