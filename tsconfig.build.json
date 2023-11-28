@@ -10,7 +10,6 @@
     "jest.config.e2e.ts",
     "dist",
     "node_modules",
-    "bin",
     "**/__tests__/**/*",
     "tests",
     "e2e"

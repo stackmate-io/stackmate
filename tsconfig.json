@@ -29,6 +29,9 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
+      "@bin/*": [
+        "bin/*"
+      ],
       "@src/*": [
         "src/*"
       ],

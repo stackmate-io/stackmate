@@ -24,8 +24,9 @@
   "bugs": {
     "url": "https://github.com/stackmate-io/engine/issues"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "bin": "dist/bin/cli.js",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "dependencies": {
     "@cdktf/provider-aws": "18.0.6",
     "@cdktf/provider-local": "^9.0.0",
@@ -72,11 +73,11 @@
   "scripts": {
     "build": "npm run clean && npm run build:project && npm run build:aliases",
     "build:aliases": "tsc-alias -p tsconfig.build.json",
+    "build:project": "tsc -p ./tsconfig.build.json",
     "check:build": "tsc -p ./tsconfig.build.json --noEmit",
     "check:all": "tsc -p ./tsconfig.json --noEmit",
     "check:circular": "dpdm -T --no-warning --no-tree ./src/**/* ./tests/**/*",
-    "build:project": "tsc -p ./tsconfig.build.json",
-    "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
+    "clean": "rimraf dist/*",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
@@ -84,6 +85,6 @@
     "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
     "test:e2e:local": "AWS_PROFILE=engine-tests-local npm run test:e2e",
     "test:watch": "npm run test --watchAll",
-    "schema:export": "ts-node -r tsconfig-paths/register bin/exportSchema.ts"
+    "schema:export": "ts-node -r tsconfig-paths/register bin/schema.ts"
   }
 }
