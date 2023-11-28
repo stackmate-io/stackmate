@@ -1,0 +1,31 @@
+---
+# Optional - by default provider is set to AWS
+# provider: aws
+
+# Optional - by default we're deploying to eu-central-1
+# region: eu-central-1
+
+state:
+  provider: aws
+  bucket: some-unique-bucket-name
+
+domains:
+  production:
+    - domain.com
+
+environments:
+  production:
+    mysql-database:
+      type: mysql
+      database: mysuperdatabase
+      size: db.t2.xlarge
+    redis-kv:
+      type: redis
+      name: my-cache
+
+  staging:
+    copy: production
+    without: redis-kv
+    overrides:
+      mysql-database:
+        size: db.t2.medium

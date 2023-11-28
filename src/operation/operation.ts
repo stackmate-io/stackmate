@@ -9,7 +9,7 @@ import type {
   AssociationReturnType,
 } from '@services/types'
 import type { Dictionary } from 'lodash'
-import { ProvisionablesMap } from './utils/provisionables'
+import { ProvisionablesMap } from './provisionables'
 import { assertRequirementsSatisfied } from './utils/assertRequirementsSatisfied'
 import { assertEnvironmentValid } from './utils/assertEnvironmentValid'
 

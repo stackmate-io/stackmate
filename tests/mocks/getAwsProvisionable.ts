@@ -1,4 +1,4 @@
-import { ProvisionablesMap } from '@src/operation/utils/provisionables'
+import { ProvisionablesMap } from '@src/operation/provisionables'
 import { assertRequirementsSatisfied } from '@src/operation/utils/assertRequirementsSatisfied'
 import type { Stack } from '@lib/stack'
 import type { BaseProvisionable } from '@services/types/provisionable'

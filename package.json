@@ -83,6 +83,7 @@
     "test:unit": "npm run test -- --testRegex=src/.*.test.ts",
     "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
     "test:e2e:local": "AWS_PROFILE=engine-tests-local npm run test:e2e",
-    "test:watch": "npm run test --watchAll"
+    "test:watch": "npm run test --watchAll",
+    "schema:export": "ts-node -r tsconfig-paths/register bin/exportSchema.ts"
   }
 }

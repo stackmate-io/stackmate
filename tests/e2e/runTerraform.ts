@@ -14,10 +14,11 @@ const TEST_ENV = {
 const execute = async (
   command: string[],
   cwd: string,
+  env = TEST_ENV,
 ): Promise<{ code: number; errors?: string[] }> =>
   new Promise((resolve, reject) => {
     const [executable, ...args] = command
-    const child = spawn(executable, args, { cwd, env: TEST_ENV })
+    const child = spawn(executable, args, { cwd, env })
     const logOutput = path.join(cwd, TF_LOG)
 
     child.stdout.setEncoding('utf8')
@@ -41,6 +42,6 @@ const execute = async (
   })
 
 export const runTerraformTest = async (directory: string, terraformPath: string = TF_PATH) => {
-  await execute([terraformPath, 'init', '-migrate-state'], directory)
+  await execute([terraformPath, 'init', '-migrate-state', '-upgrade'], directory)
   await execute([terraformPath, 'test', '-verbose'], directory)
 }

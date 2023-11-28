@@ -89,7 +89,7 @@ export type JsonSchema<T = undefined> = {
   $defs?: T extends ArrayLike<any>
     ? JsonSchema<T[number]>
     : T extends Obj
-      ? { [K in keyof T]?: JsonSchema<T[K]> }
+      ? { [K in keyof T]?: JsonSchema<T[K]> } | { [K: string]: JsonSchema<any> } | JsonSchema<any>
       : never
 
   definitions?: T extends ArrayLike<any>

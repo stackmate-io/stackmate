@@ -10,3 +10,5 @@ export const AJV_DEFAULTS: AjvOptions = {
   strict: false,
   $data: true,
 } as const
+
+export const JSON_SCHEMA_DRAFT = 'http://json-schema.org/draft-07/schema'

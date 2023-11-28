@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { createTerraformStack } from '@tests/e2e/createTerraformStack'
 import { runTerraformTest } from '@tests/e2e/runTerraform'
-import { getAwsTestsConfig } from '@tests/e2e/getAwsTestsConfig'
+import { getAwsTestsConfig } from '@tests/mocks/getAwsTestsConfig'
 import { faker } from '@faker-js/faker'
 import type { ServiceConfiguration } from '@services/registry'
 

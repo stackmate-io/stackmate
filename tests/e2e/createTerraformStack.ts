@@ -1,6 +1,6 @@
-import { Operation } from '@src/operation'
+import { Operation } from '@src/operation/operation'
+import { createJsonFile } from '@lib/file'
 import type { ServiceConfiguration } from '@services/registry'
-import { createJsonFile } from './createJsonFile'
 
 export const createTerraformStack = (
   config: ServiceConfiguration[],
