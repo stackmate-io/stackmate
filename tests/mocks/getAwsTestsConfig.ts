@@ -18,6 +18,6 @@ export type TestConfig = {
 export const getAwsTestsConfig = (testCase: string): TestConfig => ({
   region: 'eu-central-1',
   bucket: 'stackmate-e2e-tests',
-  lock: 'stackmate-state-lock',
-  key: `stackmate-e2e-${testCase}/state-${Date.now()}.tfstate`,
+  lock: 'stackmate-terraform-state-lock',
+  key: `${testCase}/state-${Date.now()}.tfstate`,
 })

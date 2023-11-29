@@ -1,35 +1,68 @@
 import { DEFAULT_PROVIDER, DEFAULT_REGION } from '@src/project/constants'
-import { get, merge } from 'lodash'
+import { cloneDeep, defaultsDeep, fromPairs, get } from 'lodash'
 import { getValidData } from '@src/validation'
 import { getProjectSchema } from '@src/project/utils/getProjectSchema'
-import { SERVICE_TYPE } from '@src/constants'
+import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
 import { Registry, type ServiceConfiguration } from '@src/services/registry'
 import type { ProviderChoice, ServiceTypeChoice } from '@src/services/types'
 import type { ProjectConfiguration } from '@src/project/types'
 
+const normalizeProject = (project: ProjectConfiguration): ProjectConfiguration => {
+  const projectProvider = project.provider || DEFAULT_PROVIDER
+  const projectRegion = project.region || DEFAULT_REGION[projectProvider]
+  const cloned = cloneDeep(project)
+
+  defaultsDeep(cloned, {
+    provider: projectProvider,
+    state: {
+      type: SERVICE_TYPE.STATE,
+      provider: projectProvider,
+      name: 'project-state',
+      region: projectRegion,
+    },
+    environments: {
+      ...fromPairs(
+        Object.entries(project.environments).map(([environment, services]) => [
+          environment,
+          fromPairs(
+            Object.entries(services).map(([serviceName]) => [
+              serviceName,
+              {
+                provider: projectProvider,
+                region: projectRegion,
+                name: serviceName,
+                profile: DEFAULT_PROFILE_NAME,
+                overrides: {},
+              },
+            ]),
+          ),
+        ]),
+      ),
+    },
+  })
+
+  return cloned
+}
+
 export const getProjectServices = (
-  project: ProjectConfiguration,
+  raw: ProjectConfiguration,
   environment: string,
 ): ServiceConfiguration[] => {
-  const defaultProvider = project.provider || DEFAULT_PROVIDER
-  const defaultRegion = project.region || DEFAULT_REGION[defaultProvider]
+  const projectProvider = raw.provider || DEFAULT_PROVIDER
+  const projectRegion = raw.region || DEFAULT_REGION[projectProvider]
 
-  const validProjectData = getValidData(project, getProjectSchema(), { useDefaults: true })
-  const environmentServices = get(validProjectData, `environments.${environment}`, {})
+  const project = getValidData(normalizeProject(raw), getProjectSchema(), {
+    useDefaults: true,
+  })
 
-  const services: ServiceConfiguration[] = [
-    // State service is required
-    merge({}, validProjectData.state, {
-      type: SERVICE_TYPE.STATE,
-      provider: validProjectData.state.provider || defaultProvider,
-    }),
-  ]
+  const environmentServices = get(project, `environments.${environment}`, {})
+  const services: ServiceConfiguration[] = [project.state]
 
   const providerServiceTypes: Map<ProviderChoice, ServiceTypeChoice[]> = new Map()
   const providerEnabledRegions: Map<ProviderChoice, string> = new Map()
 
   for (const [name, config] of Object.entries(environmentServices)) {
-    const { type, provider = defaultProvider, region = defaultRegion } = config
+    const { type, provider = projectProvider, region = projectRegion } = config
     const availableTypes = providerServiceTypes.get(provider) || Registry.types(provider)
     const hasProviderForRegion = Boolean(providerEnabledRegions.get(provider))
 
@@ -48,6 +81,7 @@ export const getProjectServices = (
         name: `${provider}-${type}-service`,
         provider,
         region,
+        type,
       })) as ServiceConfiguration[]
 
     services.push(...coreServices, {

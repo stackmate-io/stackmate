@@ -3,6 +3,7 @@ import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
 import { fromPairs, merge, omit, without } from 'lodash'
 import { JSON_SCHEMA_DRAFT } from '@src/validation/constants'
 import { getServicesSchema } from '@src/validation/utils/getServicesSchema'
+import type { BaseServiceAttributes } from '@src/services/types'
 import type { ProjectConfiguration } from '@src/project/types'
 import type { JsonSchema } from '@src/lib/schema'
 
@@ -34,13 +35,25 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
     }),
   )
 
-  const serviceDefinitionReferences = Object.keys(serviceDefinitions)
-    .filter((schemaId) => !schemaId.endsWith('/state') && !schemaId.endsWith('/provider'))
-    .map((schemaId) => ({ $ref: schemaId }))
+  const getServiceDiscrimination = (schema: JsonSchema<BaseServiceAttributes>) => ({
+    if: {
+      properties: {
+        provider: { const: schema.properties?.provider?.const },
+        type: { const: schema.properties?.type?.const },
+      },
+    },
+    then: {
+      $ref: schema.$id,
+    },
+  })
 
-  const stateServiceDefinitionReferences = Object.keys(serviceDefinitions)
-    .filter((schemaId) => schemaId.endsWith('/state'))
-    .map((schemaId) => ({ $ref: schemaId }))
+  const serviceDefinitionReferences = Object.values(serviceDefinitions)
+    .filter((schema) => !schema.$id.endsWith('/state') && !schema.$id.endsWith('/provider'))
+    .map((schema) => getServiceDiscrimination(schema))
+
+  const stateServiceDefinitionReferences = Object.values(serviceDefinitions)
+    .filter((schema) => schema.$id.endsWith('/state'))
+    .map((schema) => getServiceDiscrimination(schema))
 
   return {
     $id: 'stackmate/project',
@@ -70,7 +83,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         },
       },
       state: {
-        oneOf: stateServiceDefinitionReferences,
+        anyOf: stateServiceDefinitionReferences,
       },
       environments: {
         required: [ENVIRONMENT.PRODUCTION],

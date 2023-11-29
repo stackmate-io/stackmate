@@ -6,8 +6,8 @@
 # region: eu-central-1
 
 state:
-  provider: aws
-  bucket: some-unique-bucket-name
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
 
 # TODO:
 # domains:
@@ -18,8 +18,7 @@ environments:
   production:
     mysql-database:
       type: mysql
-      database: mysuperdatabase
-      size: db.t2.xlarge
+      size: db.t2.micro
     redis-kv:
       type: redis
       name: my-cache

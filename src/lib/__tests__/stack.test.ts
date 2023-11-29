@@ -36,7 +36,7 @@ describe('Stack', () => {
   })
 
   it('exports the stack as a terraform object', () => {
-    const output = subject.toObject()
+    const output = subject.toSynthesized()
     expect(output).toMatchObject({
       '//': {
         metadata: { stackName },

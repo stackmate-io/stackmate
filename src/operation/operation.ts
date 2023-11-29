@@ -56,10 +56,11 @@ export class Operation {
   constructor(
     serviceConfigs: ServiceConfiguration[],
     envName: string,
+    workingDirectory: string = process.cwd(),
     variables: Dictionary<string | undefined> = process.env,
   ) {
     this.#variables = variables
-    this.stack = new Stack(envName, this.#variables)
+    this.stack = new Stack(envName, workingDirectory, this.#variables)
     this.init(serviceConfigs)
   }
 
@@ -95,7 +96,7 @@ export class Operation {
     assertEnvironmentValid(allEnvs, this.#variables)
 
     this.provisionables.forEach((provisionable) => this.register(provisionable))
-    return this.stack.toObject()
+    return this.stack.toSynthesized()
   }
 
   /**

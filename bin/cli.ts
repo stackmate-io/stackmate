@@ -1,7 +1,10 @@
 #!/usr/bin/env node
+import path from 'node:path'
 import yargs from 'yargs'
 import { ENVIRONMENT } from '@src/project/constants'
 import { getProject } from '@src/project'
+import { readJsonFile, readYamlFile } from '@src/lib/file'
+import type { ProjectConfiguration } from '@src/project'
 import type { ArgumentsCamelCase } from 'yargs'
 
 export const cli = yargs
@@ -34,14 +37,14 @@ const addOperationCommand = (command: 'deploy' | 'destroy' | 'preview') => {
         alias: 'd',
         description: 'the working directory to use',
         type: 'string',
-        default: process.cwd(),
+        default: '',
       })
 
       cmd.option('auto-approve', {
         alias: 'y',
         description: 'whether to atuomatically approve the changes introduced',
         type: 'boolean',
-        default: false,
+        default: true,
       })
 
       return cmd
@@ -49,17 +52,30 @@ const addOperationCommand = (command: 'deploy' | 'destroy' | 'preview') => {
     handler: async (options: Options) => {
       const { configuration, directory, autoApprove, environment } = options
 
-      const project = getProject(configuration, environment, directory)
+      const contents =
+        configuration.endsWith('.yml') || configuration.endsWith('.yaml')
+          ? readYamlFile(configuration)
+          : readJsonFile(configuration)
+
+      const project = getProject(contents as ProjectConfiguration, environment, {
+        workingDirectory: directory || path.dirname(configuration),
+        onLog(log) {
+          console.log({ ...log, action: 'log' })
+        },
+        onUpdate(update) {
+          console.log({ ...update, action: 'update' })
+        },
+      })
 
       switch (command) {
         case 'deploy':
-          await project.deploy({ autoApprove, stackNames: [environment] })
+          await project.deploy({ autoApprove })
           break
         case 'destroy':
-          await project.destroy({ autoApprove, stackNames: [environment] })
+          await project.destroy({ autoApprove })
           break
         case 'preview':
-          await project.diff({ noColor: true, stackName: environment })
+          await project.diff({ noColor: true })
           break
         default:
           throw new Error(`Unknown command ${command}`)

@@ -1,33 +1,25 @@
-import path from 'path'
-import { readJsonFile, readYamlFile } from '@src/lib/file'
 import { getProjectServices } from '@src/project/utils/getProjectServices'
 import { Operation } from '@src/operation'
 import { Project } from '@src/project'
 import { ENVIRONMENT } from '@src/project/constants'
+import type { CdktfProjectOptions } from '@cdktf/cli-core/src/lib/cdktf-project'
 import type { ProjectConfiguration } from '@src/project/types'
 
 export * from './project'
 export * from './types'
 
+type GetProjectOpts = Partial<Pick<CdktfProjectOptions, 'workingDirectory' | 'onUpdate' | 'onLog'>>
+
 export const getProject = (
-  file: string,
+  configuration: ProjectConfiguration,
   environment: string = ENVIRONMENT.PRODUCTION,
-  workingDirectory?: string,
+  { workingDirectory, onUpdate, onLog }: GetProjectOpts = {},
 ): Project => {
-  if (!file) {
-    throw new Error('No filename provided')
-  }
-
-  const contents = (
-    file.endsWith('.yml') || file.endsWith('.yaml') ? readYamlFile(file) : readJsonFile(file)
-  ) as ProjectConfiguration
-
-  const services = getProjectServices(contents, environment)
-  const operation = new Operation(services, environment, process.env)
+  const services = getProjectServices(configuration, environment)
+  const operation = new Operation(services, environment, workingDirectory || process.cwd())
 
   return new Project(operation.process(), {
-    workingDirectory: workingDirectory || path.dirname(file),
-    onUpdate: (update) => console.log('update:', update),
-    onLog: (log) => console.log('log:', log),
+    onUpdate: onUpdate || (() => {}),
+    onLog: onLog || (() => {}),
   })
 }
