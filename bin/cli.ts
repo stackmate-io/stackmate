@@ -14,4 +14,6 @@ yargs
   .command(getOperationalCommand('preview'))
   .usage(usage)
   .demandCommand(1, 'You need to provide a command to run')
-  .showHelpOnFail(false).argv
+  .showHelpOnFail(false)
+
+yargs.argv

@@ -86,6 +86,12 @@ export const getOperationalCommand = (
       onUpdate: handleTerraformOutput,
     })
 
+    const quitTerraform = () => project.hardAbort()
+
+    process.on('SIGINT', quitTerraform)
+    process.on('SIGTERM', quitTerraform)
+    process.on('SIGQUIT', quitTerraform)
+
     switch (command) {
       case 'deploy':
         await project.deploy(operationOptions)
