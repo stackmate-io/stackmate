@@ -59,39 +59,41 @@ export const getProjectServices = (
   const services: ServiceConfiguration[] = [project.state]
 
   const providerServiceTypes: Map<ProviderChoice, ServiceTypeChoice[]> = new Map()
-  const providerEnabledRegions: Map<ProviderChoice, string> = new Map()
+  const coreServicesPerRegion: Map<ProviderChoice, string> = new Map()
 
   for (const [name, config] of Object.entries(environmentServices)) {
     const { type, provider = projectProvider, region = projectRegion } = config
     const availableTypes = providerServiceTypes.get(provider) || Registry.types(provider)
-    const hasProviderForRegion = Boolean(providerEnabledRegions.get(provider))
-
-    if (hasProviderForRegion) {
-      continue
-    }
+    const hasCoreServicesForRegion = Boolean(coreServicesPerRegion.get(provider))
 
     if (!availableTypes.includes) {
       throw new Error(`Service type "${type}" is not available for the "${provider}" provider`)
     }
 
     // Add the provider and networking services (if available)
-    const coreServices = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.NETWORKING]
-      .filter((st) => availableTypes.includes(st))
-      .map((type) => ({
-        name: `${provider}-${type}-service`,
-        provider,
-        region,
-        type,
-      })) as ServiceConfiguration[]
+    if (!hasCoreServicesForRegion) {
+      const coreServices = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.NETWORKING].filter((st) =>
+        availableTypes.includes(st),
+      )
 
-    services.push(...coreServices, {
+      for (const type of coreServices) {
+        services.push({
+          name: `${provider}-${type}-service`,
+          provider,
+          region,
+          type,
+        } as ServiceConfiguration)
+      }
+    }
+
+    services.push({
       ...config,
       name,
       provider,
       region,
     } as ServiceConfiguration)
 
-    providerEnabledRegions.set(provider, region)
+    coreServicesPerRegion.set(provider, region)
   }
 
   return services
