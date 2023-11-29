@@ -1,19 +1,24 @@
 import path from 'node:path'
 import { ENVIRONMENT } from '@src/project/constants'
 import { readJsonFile, readYamlFile } from '@src/lib/file'
-import type { ProjectConfiguration } from '@src/project'
 import type { CommandModule, ArgumentsCamelCase } from 'yargs'
+import type { DiffOptions, MutationOptions } from '@cdktf/cli-core/src/lib/cdktf-project'
+import type { ProjectConfiguration } from '@src/project'
 import { getProject } from './getProject'
 
 type Options = ArgumentsCamelCase<{
   configuration: string
   directory: string
-  autoApprove: boolean
   environment: string
 }>
 
 export const getOperationalCommand = (
   command: 'deploy' | 'destroy' | 'preview',
+  operationDefaults: DiffOptions | MutationOptions = {
+    autoApprove: true,
+    migrateState: true,
+    noColor: true,
+  },
 ): CommandModule => ({
   command,
   builder: (cmd) => {
@@ -37,17 +42,10 @@ export const getOperationalCommand = (
       default: '',
     })
 
-    cmd.option('auto-approve', {
-      alias: 'y',
-      description: 'whether to atuomatically approve the changes introduced',
-      type: 'boolean',
-      default: true,
-    })
-
     return cmd
   },
   handler: async (options: Options) => {
-    const { configuration, directory, autoApprove, environment } = options
+    const { configuration, directory, environment } = options
 
     const contents =
       configuration.endsWith('.yml') || configuration.endsWith('.yaml')
@@ -66,13 +64,13 @@ export const getOperationalCommand = (
 
     switch (command) {
       case 'deploy':
-        await project.deploy({ autoApprove })
+        await project.deploy(operationDefaults)
         break
       case 'destroy':
-        await project.destroy({ autoApprove })
+        await project.destroy(operationDefaults)
         break
       case 'preview':
-        await project.diff({ noColor: true })
+        await project.diff(operationDefaults)
         break
       default:
         throw new Error(`Unknown command ${command}`)
