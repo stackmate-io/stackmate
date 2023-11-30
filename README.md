@@ -20,12 +20,16 @@
   </a>
 </p>
 
+## What is Stackmate?
+[Stackmate](https://stackmate.io) is a free, opinionated, open source tool that helps busy professionals deploy their cloud infrastructure without doing much. It abstracts and simplifies resource creation, modification and destruction in an intuitive way.
+The reasoning behind Stackmate is that most of the times, all developers want is to simply deploy their database, cache or object storage services, without having to read the manual or go through complex DevOps processes.
 
-## What is Stackmate.io
-[Stackmate.io](https://stackmate.io) aims to make infrastructure as code easy and accessible to everyone.
+## Who is Stackmate for?
+Stackmate was built with the busy developer in mind. It's for people who want to deploy an average traffic website, that depends on a database and a few complementary services, without spending a lifetime in complex consoles or developer tools.
 
-## Why Stackmate.io
-Stackmate is the perfect solution for the busy professional; by using what you already know, you can deploy your AWS services using sane defaults. It's built on top of [CDK for Terraform](https://www.terraform.io/cdktf) and provides solutions for commonly used cloud services.
+## How it works
+Stackmate uses an extremely simple configuration file either in JSON or YAML format (yes, we hear ya). After that's done, you can use `stackmate deploy <environment` to deploy your infrastructure on the provider of your choice.
+Alternatively, you can use our [Cloud](https://stackmate.io/cloud/) version that abstracts even more details away from you.
 
 ## Get support
 - 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/3)
@@ -33,5 +37,4 @@ Stackmate is the perfect solution for the busy professional; by using what you a
 - 📖 Our documentation can be found at [docs.stackmate.io](https://docs.stackmate.io)
 - ❤️ Follow us on Twitter at [@stackmate](https://twitter.com/stackmate) and [@falexandrou](https://twitter.com/falexandrou)
 
-### Disclaimer
-This is work in progress. An outdated Python / Ansible version lives in [this repository](https://github.com/falexandrou/python-ansible-deployer)
+**Note**: If you're looking for the outdated Python / Ansible version, you can find it in [this repository](https://github.com/falexandrou/python-ansible-deployer)
