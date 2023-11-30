@@ -1,0 +1,16 @@
+---
+state:
+  # The following should already be provisioned in our tests account.
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
+
+environments:
+  production:
+    mysql-database:
+      type: mysql
+    redis-kv:
+      type: redis
+    object-store:
+      type: objectstore
+      buckets:
+        - name: stackmate-tests-e2e-bucket-1

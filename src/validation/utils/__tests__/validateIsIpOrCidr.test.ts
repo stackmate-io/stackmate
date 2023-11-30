@@ -1,5 +1,5 @@
 import { merge } from 'lodash'
-import { getAwsDbConfigMock } from '@tests/mocks'
+import { getAwsDbConfigMock } from '@tests/mocks/aws'
 import { getServicesSchema, getValidData } from '@src/validation'
 import { ValidationError } from '@lib/errors'
 

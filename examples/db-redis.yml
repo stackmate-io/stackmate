@@ -1,0 +1,33 @@
+---
+# Optional - by default provider is set to AWS
+# provider: aws
+
+# Optional - by default we're deploying to eu-central-1
+# region: eu-central-1
+
+state:
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
+
+# TODO:
+# domains:
+#   production:
+#     - domain.com
+
+environments:
+  production:
+    mysql-database:
+      type: mysql
+      size: db.t2.micro
+    redis-kv:
+      type: redis
+      name: my-cache
+
+  staging:
+    mysql-database:
+      type: mysql
+      database: mysuperdatabase
+      size: db.t2.micro
+    redis-kv:
+      type: redis
+      name: my-cache

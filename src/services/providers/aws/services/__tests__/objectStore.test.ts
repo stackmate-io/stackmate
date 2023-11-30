@@ -1,5 +1,5 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/mocks'
+import { getAwsProvisionable } from '@tests/helpers'
 import { Stack } from '@src/lib/stack'
 
 import { AwsObjectStore } from '@aws/services/objectStore'
@@ -7,6 +7,7 @@ import { faker } from '@faker-js/faker'
 import { iamPolicy, iamUserPolicyAttachment, s3Bucket } from '@cdktf/provider-aws'
 import { TerraformOutput } from 'cdktf'
 import { Registry } from '@src/services/registry'
+import { getValidData } from '@src/validation'
 import type { AwsObjectStoreAttributes, AwsObjectStoreResources } from '@aws/services/objectStore'
 
 describe('AWS Object store', () => {
@@ -43,6 +44,16 @@ describe('AWS Object store', () => {
         },
       },
     })
+  })
+
+  it('raises a validation error for missing configuration', () => {
+    const config: Partial<AwsObjectStoreAttributes> = {
+      name: faker.lorem.word(),
+      provider: PROVIDER.AWS,
+      type: SERVICE_TYPE.OBJECT_STORAGE,
+    }
+
+    expect(() => getValidData(config, service.schema)).toThrow()
   })
 
   it('registers the resources on deployment', () => {

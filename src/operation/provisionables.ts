@@ -60,7 +60,7 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    * @returns {BaseProvisionable} the provisionable to use in operations
    */
   protected getProvisionable<C extends BaseServiceAttributes>(config: C): BaseProvisionable<C> {
-    const { type, provider } = config
+    const { type, provider, region } = config
 
     return {
       id: hashObject(config),
@@ -70,7 +70,7 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
       provisions: {},
       sideEffects: {},
       registered: false,
-      resourceId: this.getResourceId(provider, type),
+      resourceId: this.getResourceId(provider, type, region),
       variables: {},
     }
   }
@@ -86,8 +86,12 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    * @param {ServiceTypeChoice} type the resource's type
    * @returns {String} the resource id
    */
-  protected getResourceId(provider: ProviderChoice, type: ServiceTypeChoice): string {
-    const serviceGroup = `${provider}-${type}`
+  protected getResourceId(
+    provider: ProviderChoice,
+    type: ServiceTypeChoice,
+    region?: string,
+  ): string {
+    const serviceGroup = `${provider}-${type}${region ? `-${region}` : ''}`
     const index = (this.#serviceCounts.get(serviceGroup) || 0) + 1
     this.#serviceCounts.set(serviceGroup, index)
 

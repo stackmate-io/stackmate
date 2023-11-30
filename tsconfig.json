@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "skipLibCheck": true,
-    "target": "ES2020",
+    "target": "ESNext",
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -29,6 +29,9 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
+      "@bin/*": [
+        "bin/*"
+      ],
       "@src/*": [
         "src/*"
       ],
@@ -56,6 +59,7 @@
     }
   },
   "include": [
+    "bin/**/*",
     "src/**/*",
     "tests/**/*",
     "e2e/**/*",
@@ -70,6 +74,7 @@
     "**/dist"
   ],
   "ts-node": {
+    "transpileOnly": true,
     "require": [
       "tsconfig-paths/register"
     ]

@@ -6,7 +6,8 @@ import {
   REGIONS,
 } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsCacheConfigMock, getAwsProvisionable } from '@tests/mocks'
+import { getAwsProvisionable } from '@tests/helpers'
+import { getAwsCacheConfigMock } from '@tests/mocks/aws'
 import { Stack } from '@src/lib/stack'
 import {
   cloudwatchLogGroup,

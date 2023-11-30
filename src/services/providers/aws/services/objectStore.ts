@@ -208,6 +208,7 @@ const getObjectStoreService = (): AwsObjectStoreService =>
     withAssociations(getProviderAssociations()),
     withSchema({
       type: 'object',
+      required: ['buckets'],
       properties: {
         buckets: {
           type: 'array',

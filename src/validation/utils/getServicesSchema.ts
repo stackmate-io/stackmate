@@ -4,12 +4,7 @@ import type { BaseServiceAttributes } from '@services/types'
 import type { Dictionary } from 'lodash'
 import type { JsonSchema } from '@lib/schema'
 import { getServiceNameSchema } from './getServiceNameSchema'
-
-/**
- * Populates the project schema
- *
- * @returns {JsonSchema<ServiceAttributes[]>}
- */
+import { JSON_SCHEMA_DRAFT } from '../constants'
 
 export const getServicesSchema = (): JsonSchema<ServiceAttributes[]> => {
   const services = Registry.all()
@@ -31,8 +26,8 @@ export const getServicesSchema = (): JsonSchema<ServiceAttributes[]> => {
   )
 
   return {
-    $id: 'stackmate-services-configuration',
-    $schema: 'http://json-schema.org/draft-07/schema',
+    $id: 'stackmate/services',
+    $schema: JSON_SCHEMA_DRAFT,
     type: 'array',
     minItems: 1,
     uniqueItems: true,
