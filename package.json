@@ -81,13 +81,14 @@
     "check:all": "tsc -p ./tsconfig.json --noEmit",
     "check:circular": "dpdm -T --no-warning --no-tree ./src/**/* ./tests/**/*",
     "cli:dev": "ts-node -r tsconfig-paths/register bin/cli.ts",
+    "cli:test": "NODE_ENV=test npm run cli:dev",
     "clean": "rimraf dist/*",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
     "test:unit": "npm run test -- --testRegex=src/.*.test.ts",
     "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
-    "test:e2e:local": "AWS_PROFILE=engine-tests-local npm run test:e2e",
+    "test:local": "AWS_PROFILE=engine-tests-local npm run test --",
     "test:watch": "npm run test --watchAll",
     "schema:export": "ts-node -r tsconfig-paths/register bin/schema.ts"
   }

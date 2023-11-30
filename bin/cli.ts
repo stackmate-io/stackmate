@@ -7,7 +7,7 @@ $0 deploy <environment> [options]
 $0 destroy <environment> [options]
 $0 preview <environment> [options]`
 
-yargs
+export const cli = yargs
   .scriptName('stackname')
   .command(getOperationalCommand('deploy'))
   .command(getOperationalCommand('destroy'))

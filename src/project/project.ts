@@ -1,6 +1,6 @@
-import { CdktfProject } from '@cdktf/cli-core'
 import { writeJsonFile } from '@src/lib/file'
-import type { SynthesizedStack } from '@cdktf/cli-core'
+import { CdktfProject } from '@cdktf/cli-core/src/lib/cdktf-project'
+import type { SynthesizedStack } from '@cdktf/cli-core/src/lib/synth-stack'
 import type {
   CdktfProjectOptions,
   DiffOptions,

@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "skipLibCheck": true,
-    "target": "ES2020",
+    "target": "ESNext",
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -74,8 +74,10 @@
     "**/dist"
   ],
   "ts-node": {
+    "transpileOnly": true,
     "require": [
       "tsconfig-paths/register"
-    ]
+    ],
+    "esm": true
   }
 }

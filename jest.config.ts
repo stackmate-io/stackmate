@@ -16,7 +16,12 @@ const opts: JestConfigWithTsJest = {
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
-      { tsconfig: '<rootDir>/tsconfig.json', diagnostics: true, isolatedModules: true },
+      {
+        tsconfig: '<rootDir>/tsconfig.json',
+        diagnostics: true,
+        isolatedModules: true,
+        useESM: true,
+      },
     ],
   },
   modulePaths: ['<rootDir>'],
