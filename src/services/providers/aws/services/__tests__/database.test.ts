@@ -10,7 +10,8 @@ import {
   snsTopicPolicy,
 } from '@cdktf/provider-aws'
 import { Stack } from '@lib/stack'
-import { getAwsDbConfigMock, getAwsProvisionable } from '@tests/mocks'
+import { getAwsProvisionable } from '@tests/helpers'
+import { getAwsDbConfigMock } from '@tests/mocks/aws'
 import {
   PROVIDER,
   SERVICE_TYPE,

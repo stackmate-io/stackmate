@@ -1,7 +1,7 @@
 import { merge } from 'lodash'
 import { ValidationError } from '@lib/errors'
 import { getServicesSchema, getValidData } from '@src/validation'
-import { getAwsDbConfigMock } from '@tests/mocks'
+import { getAwsDbConfigMock } from '@tests/mocks/aws'
 import type { ServiceAttributes } from '@services/registry'
 import type { AwsMariaDBAttributes, AwsPostgreSQLAttributes } from '@aws/services/database'
 

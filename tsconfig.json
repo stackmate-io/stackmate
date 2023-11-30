@@ -77,7 +77,6 @@
     "transpileOnly": true,
     "require": [
       "tsconfig-paths/register"
-    ],
-    "esm": true
+    ]
   }
 }

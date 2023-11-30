@@ -6,7 +6,7 @@ import {
 import { AwsProvider } from '@aws/services/provider'
 import { REGIONS } from '@aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getProvisionable } from '@tests/mocks/getProvisionable'
+import { getProvisionable } from '@tests/helpers/getProvisionable'
 import { Stack } from '@lib/stack'
 import { faker } from '@faker-js/faker'
 import { TerraformOutput } from 'cdktf'

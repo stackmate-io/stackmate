@@ -24,7 +24,7 @@ describe('getSchema', () => {
 
   it('requires that the schema is an array of objects', () => {
     expect(schema).toMatchObject({
-      $id: 'stackmate-services-configuration',
+      $id: 'stackmate/services',
       type: 'array',
       minItems: 1,
       items: expect.objectContaining({
