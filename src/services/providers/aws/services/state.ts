@@ -62,6 +62,7 @@ const getAdditionalPropertiesSchema = (): JsonSchema<AdditionalAttrs> => ({
       minLength: 2,
       maxLength: 255,
       default: 'stackmate.tfstate',
+      pattern: '.*.tfstate$',
     },
     lockTable: {
       type: 'string',

@@ -12,3 +12,5 @@ environments:
       type: redis
     object-store:
       type: objectstore
+      buckets:
+        - name: stackmate-tests-e2e-bucket-1
