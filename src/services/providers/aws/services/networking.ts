@@ -1,11 +1,17 @@
-import { TerraformOutput } from 'cdktf'
+import { ImportableResource, TerraformOutput } from 'cdktf'
 import { internetGateway, subnet, vpc as awsVpc } from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@src/lib/networking'
 import { getBaseService, getProfile } from '@src/services/utils'
 import { DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { pipe } from 'lodash/fp'
-import { profileable, withRegions, withHandler, withAssociations } from '@src/services/behaviors'
+import {
+  profileable,
+  withRegions,
+  withHandler,
+  withAssociations,
+  withSchema,
+} from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import type { Stack } from '@src/lib/stack'
 import type {
@@ -18,7 +24,12 @@ export const resourceHandler = (
   provisionable: AwsNetworkingProvisionable,
   stack: Stack,
 ): AwsNetworkingResources => {
-  const { config, resourceId } = provisionable
+  const {
+    config,
+    resourceId,
+    requirements: { providerInstance },
+  } = provisionable
+
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
   const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
 
@@ -26,6 +37,16 @@ export const resourceHandler = (
     ...vpcConfig,
     cidrBlock: vpcCidr,
   })
+
+  if (config.vpcId) {
+    const imp = new ImportableResource(stack.context, `${resourceId}_imported_default_vpc`, {
+      importId: config.vpcId,
+      provider: providerInstance,
+      terraformResourceType: awsVpc.Vpc.tfResourceType,
+    })
+
+    vpc.importFrom(imp.friendlyUniqueId, providerInstance)
+  }
 
   if (subnetCidrs.length > 3) {
     throw new Error('It is advised to use up to 3 subnets')
@@ -72,6 +93,18 @@ const getNetworkingService = (): AwsNetworkingService =>
     withRegions(REGIONS),
     withHandler(resourceHandler),
     withAssociations(getProviderAssociations()),
+    withSchema({
+      type: 'object',
+      properties: {
+        vpcId: {
+          type: 'string',
+        },
+        rootIp: {
+          type: 'string',
+          default: DEFAULT_VPC_IP,
+        },
+      },
+    }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.NETWORKING))
 
 export const AwsNetworking = getNetworkingService()

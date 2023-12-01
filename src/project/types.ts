@@ -13,6 +13,5 @@ export type ProjectConfiguration = {
   provider?: ProviderChoice
   region?: string
   state: AwsStateAttributes | LocalStateAttributes
-  domains: Record<string, string[]>
   environments: EnvironmentConfiguration
 }
