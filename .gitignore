@@ -10,13 +10,13 @@ tmp
 node_modules
 
 # Terraform specific
-cdktf.out
-stackmate.out
-stacks
+stacks/
+*.tfstate
+.terraform.lock.hcl
 .terraform
-terraform.log
+
+# CDKTF generated stacks
 *.tf.json
-*.lock.hcl
 
 # TypeScript incremental compilation cache
 *.tsbuildinfo
