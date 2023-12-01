@@ -25,7 +25,7 @@ jobs:
         run: echo "pkg_version=$(jq -r .version < ${{ github.workspace }}/package.json)" >> $GITHUB_ENV
 
       # Publish the package on NPM
-      - run: npm publish --access=public --tag=${{ env.pkg_version }}
+      - run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
