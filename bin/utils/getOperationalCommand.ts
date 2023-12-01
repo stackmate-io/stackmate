@@ -3,7 +3,7 @@ import { ENVIRONMENT } from '@src/project/constants'
 import { readJsonFile, readYamlFile } from '@src/lib/file'
 import type { CommandModule, ArgumentsCamelCase } from 'yargs'
 import type { DiffOptions, MutationOptions } from '@cdktf/cli-core/src/lib/cdktf-project'
-import type { ProjectConfiguration } from '@src/project'
+import type { EnvironmentChoice, ProjectConfiguration } from '@src/project'
 import { getProject } from './getProject'
 import { handleTerraformOutput } from './handleTerraformOutput'
 
@@ -12,7 +12,7 @@ export type CliCommandChoice = 'deploy' | 'destroy' | 'preview'
 export type CliOptions = ArgumentsCamelCase<{
   configuration: string
   directory: string
-  environment: string
+  environment: EnvironmentChoice
   colors: boolean
 }>
 

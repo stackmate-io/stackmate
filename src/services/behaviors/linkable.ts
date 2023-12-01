@@ -97,7 +97,7 @@ export const linkable =
           sideEffect: true,
           handler: onServiceLinked,
           where: (config: C & LinkableAttributes, linkedConfig: BaseServiceAttributes): boolean => {
-            if (!config.links.includes(linkedConfig.name)) {
+            if (!(config.links || []).includes(linkedConfig.name)) {
               return false
             }
 
