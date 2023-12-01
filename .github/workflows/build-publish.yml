@@ -21,9 +21,6 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Setting the package version
-        run: echo "pkg_version=$(jq -r .version < ${{ github.workspace }}/package.json)" >> $GITHUB_ENV
-
       # Publish the package on NPM
       - run: npm publish --access=public
         env:
@@ -40,4 +37,4 @@ jobs:
         run: npm run schema:export
 
       - name: Publishing to S3
-        run: aws s3 cp ${{ github.workspace }}/dist/schema.json s3://stackmate-public-assets/${{ env.pkg_version }}/schema.json
+        run: aws s3 cp ${{ github.workspace }}/dist/schema.json s3://stackmate-public-assets/json-schema.json
