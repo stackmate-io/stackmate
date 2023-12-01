@@ -1,3 +1,4 @@
+import type { OneOfType } from '@src/lib/util'
 import type {
   ServiceRequirement,
   Service,
@@ -66,13 +67,22 @@ export type AwsProviderService = Service<AwsProviderAttributes>
 
 export type AwsProviderProvisionable = Provisionable<AwsProviderService, AwsProviderResources>
 
-export type AwsNetworkingAttributes = BaseServiceAttributes &
+type NetworkingBaseAttributes = BaseServiceAttributes &
   ProfilableAttributes &
   RegionalAttributes & {
     provider: typeof PROVIDER.AWS
     type: typeof SERVICE_TYPE.NETWORKING
-    rootIp?: string
   }
+
+export type AwsNetworkingAttributes = OneOfType<
+  [
+    NetworkingBaseAttributes,
+    NetworkingBaseAttributes & {
+      vpcId: string
+      rootIp: string
+    },
+  ]
+>
 
 export type AwsNetworkingService = Service<AwsNetworkingAttributes, AwsProviderAssociations>
 
