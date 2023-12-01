@@ -31,6 +31,9 @@ Stackmate was built with the busy developer in mind. It's for people who want to
 Stackmate uses an extremely simple configuration file either in JSON or YAML format (yes, we hear ya). After that's done, you can use `stackmate deploy <environment` to deploy your infrastructure on the provider of your choice.
 Alternatively, you can use our [Cloud](https://stackmate.io/cloud/) version that abstracts even more details away from you.
 
+## Geting started
+Follow [this](https://docs.stackmate.io/guides/quick-start) simple and comprehensive guide to deploy yout first project with Stackmate
+
 ## Get support
 - 🧭 Follow our [public roadmap](https://github.com/orgs/stackmate-io/projects/3)
 - 🐞 For bug reports, issues, questions feature requests, [create a GitHub issue in this repository](/issues/new)
