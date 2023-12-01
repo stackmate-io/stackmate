@@ -11,7 +11,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "strictFunctionTypes": false,
-    "importHelpers": true,
+    "importHelpers": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "module": "commonjs",

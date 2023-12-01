@@ -13,7 +13,7 @@ export const cli = yargs
   .command(getOperationalCommand('destroy'))
   .command(getOperationalCommand('preview'))
   .usage(usage)
-  .demandCommand(1, 'You need to provide a command to run')
+  .demandCommand(1, 'You need to provide a command to run, see usage by adding --help')
   .showHelpOnFail(false)
 
 yargs.argv
