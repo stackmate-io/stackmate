@@ -1,99 +1,91 @@
 import { DEFAULT_PROVIDER, DEFAULT_REGION } from '@src/project/constants'
-import { cloneDeep, defaultsDeep, fromPairs, get } from 'lodash'
+import { cloneDeep, defaultsDeep, get, isEmpty } from 'lodash'
 import { getValidData } from '@src/validation'
 import { getProjectSchema } from '@src/project/utils/getProjectSchema'
-import { DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
+import { SERVICE_TYPE } from '@src/constants'
 import { Registry, type ServiceConfiguration } from '@src/services/registry'
-import type { ProviderChoice, ServiceTypeChoice } from '@src/services/types'
-import type { ProjectConfiguration } from '@src/project/types'
+import type { EnvironmentChoice, ProjectConfiguration } from '@src/project/types'
 
-const normalizeProject = (project: ProjectConfiguration): ProjectConfiguration => {
+export const getProjectServices = (
+  raw: ProjectConfiguration,
+  environment: EnvironmentChoice,
+): ServiceConfiguration[] => {
+  const project = getValidData(raw, getProjectSchema(), {
+    useDefaults: true,
+  })
+
   const projectProvider = project.provider || DEFAULT_PROVIDER
   const projectRegion = project.region || DEFAULT_REGION[projectProvider]
-  const cloned = cloneDeep(project)
+  const environmentConfig = get(project, `environments.${environment}`, {})
 
-  defaultsDeep(cloned, {
-    provider: projectProvider,
-    state: {
+  if (isEmpty(environmentConfig)) {
+    throw new Error(
+      `There are no services registered for the "${environment}" environment, or it does not exist in the configuration`,
+    )
+  }
+
+  // Normalize project services
+  const serviceConfigurations = Object.entries(environmentConfig).map(([serviceName, config]) => ({
+    ...config,
+    name: serviceName,
+    provider: config.provider || projectProvider,
+    region: config.region || projectRegion,
+  }))
+
+  // Populate the service list, starting with the state service (which is required)
+  const services: ServiceConfiguration[] = [
+    defaultsDeep(cloneDeep(project.state), {
       type: SERVICE_TYPE.STATE,
       provider: projectProvider,
       name: 'project-state',
       region: projectRegion,
-    },
-    environments: {
-      ...fromPairs(
-        Object.entries(project.environments).map(([environment, services]) => [
-          environment,
-          fromPairs(
-            Object.entries(services).map(([serviceName]) => [
-              serviceName,
-              {
-                provider: projectProvider,
-                region: projectRegion,
-                name: serviceName,
-                profile: DEFAULT_PROFILE_NAME,
-                overrides: {},
-              },
-            ]),
-          ),
-        ]),
-      ),
-    },
-  })
+    }),
+  ]
 
-  return cloned
-}
+  // Register services that are not listed in the project configuration
+  // but are associated with the listed ones
+  for (const serviceConfig of serviceConfigurations) {
+    const service = Registry.get(serviceConfig.provider || projectProvider, serviceConfig.type)
 
-export const getProjectServices = (
-  raw: ProjectConfiguration,
-  environment: string,
-): ServiceConfiguration[] => {
-  const projectProvider = raw.provider || DEFAULT_PROVIDER
-  const projectRegion = raw.region || DEFAULT_REGION[projectProvider]
+    Object.values(service.associations).forEach((association) => {
+      const { with: requiredServiceType, where: isAssociated } = association
 
-  const project = getValidData(normalizeProject(raw), getProjectSchema(), {
-    useDefaults: true,
-  })
-
-  const environmentServices = get(project, `environments.${environment}`, {})
-  const services: ServiceConfiguration[] = [project.state]
-
-  const providerServiceTypes: Map<ProviderChoice, ServiceTypeChoice[]> = new Map()
-  const coreServicesPerRegion: Map<ProviderChoice, string> = new Map()
-
-  for (const [name, config] of Object.entries(environmentServices)) {
-    const { type, provider = projectProvider, region = projectRegion } = config
-    const availableTypes = providerServiceTypes.get(provider) || Registry.types(provider)
-    const hasCoreServicesForRegion = Boolean(coreServicesPerRegion.get(provider))
-
-    if (!availableTypes.includes) {
-      throw new Error(`Service type "${type}" is not available for the "${provider}" provider`)
-    }
-
-    // Add the provider and networking services (if available)
-    if (!hasCoreServicesForRegion) {
-      const coreServices = [SERVICE_TYPE.PROVIDER, SERVICE_TYPE.NETWORKING].filter((st) =>
-        availableTypes.includes(st),
-      )
-
-      for (const type of coreServices) {
-        services.push({
-          name: `${provider}-${type}-service`,
-          provider,
-          region,
-          type,
-        } as ServiceConfiguration)
+      // The association does not refer to a specific service type,
+      // it's too generic and we don't know what service to register
+      if (!requiredServiceType) {
+        return
       }
-    }
 
-    services.push({
-      ...config,
-      name,
-      provider,
-      region,
-    } as ServiceConfiguration)
+      // if the service associated is already added to the list of services, there's nothing to do
+      if (
+        services.some(
+          (srv) => srv.type === requiredServiceType && srv.region === serviceConfig.region,
+        )
+      ) {
+        return
+      }
 
-    coreServicesPerRegion.set(provider, region)
+      // If the associated service exists in the config, the service will be registered anyway
+      if (
+        serviceConfigurations.some(
+          (link) => link.type === requiredServiceType && isAssociated(serviceConfig, link),
+        )
+      ) {
+        return
+      }
+
+      const requiredServiceProvider = serviceConfig.provider || projectProvider
+      const requiredServiceName = `${requiredServiceProvider}-${requiredServiceType}-service`
+
+      services.push({
+        name: requiredServiceName,
+        provider: requiredServiceProvider,
+        type: requiredServiceType,
+        region: serviceConfig.region,
+      })
+    })
+
+    services.push(serviceConfig as ServiceConfiguration)
   }
 
   return services
