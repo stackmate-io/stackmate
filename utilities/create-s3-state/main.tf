@@ -6,6 +6,10 @@ provider "aws" {
   region = var.infrastructure_region
 }
 
+terraform {
+  backend "local" {}
+}
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = var.aws_s3_bucket_name
 

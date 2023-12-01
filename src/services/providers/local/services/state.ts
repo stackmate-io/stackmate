@@ -1,4 +1,5 @@
-import { join as joinPaths } from 'node:path'
+import path from 'node:path'
+import { homedir } from 'node:os'
 import pipe from 'lodash/fp/pipe'
 import { LocalBackend } from 'cdktf'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
@@ -27,8 +28,15 @@ export const resourceHandler = (
   stack: Stack,
 ): LocalStateResources => {
   const { config } = provisionable
-  const fileName = config.fileName || `${stack.name}-initial.tfstate`
-  const workspaceDir = config.directory || joinPaths(__dirname, stack.name.toLocaleLowerCase())
+  const fileName = config.fileName || `${stack.name}.tfstate`
+  const workspaceDir =
+    config.directory ||
+    path.join(
+      homedir(),
+      'stackmate-states',
+      path.basename(process.cwd()),
+      stack.name.toLocaleLowerCase(),
+    )
 
   const backend = new LocalBackend(stack.context, { path: fileName, workspaceDir })
   return { backend }
