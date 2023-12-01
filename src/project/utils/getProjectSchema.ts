@@ -70,18 +70,6 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         type: 'string',
         default: DEFAULT_REGION[PROVIDER.AWS],
       },
-      domains: {
-        type: 'object',
-        patternProperties: {
-          [`^${Object.values(ENVIRONMENT).join('|')}$`]: {
-            type: 'array',
-            items: {
-              type: 'string',
-              minItems: 1,
-            },
-          },
-        },
-      },
       state: {
         anyOf: stateServiceDefinitionReferences,
       },

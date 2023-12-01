@@ -9,11 +9,6 @@ state:
   bucket: stackmate-e2e-tests
   lockTable: stackmate-terraform-state-lock
 
-# TODO:
-# domains:
-#   production:
-#     - domain.com
-
 environments:
   production:
     mysql-database:
