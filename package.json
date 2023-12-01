@@ -1,7 +1,7 @@
 {
-  "name": "@stackmate/engine",
-  "version": "0.1.4",
-  "description": "Engine library for Stackmate",
+  "name": "@stackmate/stackmate",
+  "version": "0.2.1",
+  "description": "Stackmate - Infrastructure for busy developers",
   "homepage": "https://stackmate.io",
   "keywords": [
     "stackmate",
@@ -15,14 +15,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stackmate-io/engine"
+    "url": "https://github.com/stackmate-io/stackmate"
   },
   "author": {
     "name": "Fotis Alexandrou (@falexandrou)",
     "url": "https://www.falexandrou.com"
   },
   "bugs": {
-    "url": "https://github.com/stackmate-io/engine/issues"
+    "url": "https://github.com/stackmate-io/stackmate/issues"
   },
   "bin": "dist/bin/cli.js",
   "main": "dist/src/index.js",

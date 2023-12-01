@@ -1,0 +1,43 @@
+name: Build, publish package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Required by the configure-aws-credentials action and GitHub OIDC Token endpoint
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Setting the package version
+        run: echo "pkg_version=$(jq -r .version < ${{ github.workspace }}/package.json)" >> $GITHUB_ENV
+
+      # Publish the package on NPM
+      - run: npm publish --access=public --tag=${{ env.pkg_version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Publish the schema on S3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::827160314823:role/StackmateEngineTestsRunner
+          role-session-name: SessionInGitHubActionsForAssetsPublishing
+          aws-region: eu-central-1
+
+      - name: Generating the schema
+        run: npm run schema:export
+
+      - name: Publishing to S3
+        run: aws s3 cp ${{ github.workspace }}/dist/schema.json s3://stackmate-public-assets/${{ env.pkg_version }}/schema.json
