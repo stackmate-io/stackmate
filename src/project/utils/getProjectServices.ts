@@ -2,7 +2,7 @@ import { DEFAULT_PROVIDER, DEFAULT_REGION } from '@src/project/constants'
 import { cloneDeep, defaultsDeep, get, isEmpty } from 'lodash'
 import { getValidData } from '@src/validation'
 import { getProjectSchema } from '@src/project/utils/getProjectSchema'
-import { SERVICE_TYPE } from '@src/constants'
+import { SERVICE_TYPE, isDebugMode } from '@src/constants'
 import { Registry, type ServiceConfiguration } from '@src/services/registry'
 import type { EnvironmentChoice, ProjectConfiguration } from '@src/project/types'
 
@@ -86,6 +86,11 @@ export const getProjectServices = (
     })
 
     services.push(serviceConfig as ServiceConfiguration)
+
+    if (isDebugMode) {
+      console.debug('full list of services:') // eslint-disable-line no-console
+      console.debug(services) // eslint-disable-line no-console
+    }
   }
 
   return services

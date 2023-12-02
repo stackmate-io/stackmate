@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 import { ValidationError } from '@lib/errors'
+import { isDebugMode } from '@src/constants'
 import { groupBy } from 'lodash'
-
-const isDebugMode = Boolean(process.env.DEBUG)
 
 const print = (message: string, indentation = 0) => {
   const spacing = Array(indentation).fill(' ').join('')
