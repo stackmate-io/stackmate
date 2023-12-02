@@ -1,5 +1,5 @@
 import { DEFAULT_PROVIDER, DEFAULT_REGION } from '@src/project/constants'
-import { cloneDeep, defaultsDeep, get, isEmpty, isFunction } from 'lodash'
+import { cloneDeep, defaultsDeep, get, isEmpty } from 'lodash'
 import { getValidData } from '@src/validation'
 import { getProjectSchema } from '@src/project/utils/getProjectSchema'
 import { SERVICE_TYPE, isDebugMode } from '@src/constants'
@@ -48,11 +48,7 @@ export const getProjectServices = (
     const service = Registry.get(serviceConfig.provider || projectProvider, serviceConfig.type)
 
     Object.values(service.associations).forEach((association) => {
-      const {
-        with: requiredServiceType,
-        where: associationLookup,
-        imports: attributesImporter,
-      } = association
+      const { with: requiredServiceType, where: isAssociated } = association
 
       // The association does not refer to a specific service type,
       // it's too generic and we don't know what service to register
@@ -72,9 +68,7 @@ export const getProjectServices = (
       // If the associated service exists in the config, the service will be registered anyway
       if (
         serviceConfigurations.some(
-          (link) =>
-            link.type === requiredServiceType &&
-            (!isFunction(associationLookup) || associationLookup(serviceConfig, link)),
+          (link) => link.type === requiredServiceType && isAssociated(serviceConfig, link),
         )
       ) {
         return
@@ -82,15 +76,13 @@ export const getProjectServices = (
 
       const requiredServiceProvider = serviceConfig.provider || projectProvider
       const requiredServiceName = `${requiredServiceProvider}-${requiredServiceType}-service`
-      const importedAttrs = isFunction(attributesImporter) ? attributesImporter(serviceConfig) : {}
 
       services.push({
         name: requiredServiceName,
         provider: requiredServiceProvider,
         type: requiredServiceType,
         region: serviceConfig.region,
-        ...importedAttrs,
-      } as ServiceConfiguration)
+      })
     })
 
     services.push(serviceConfig as ServiceConfiguration)
