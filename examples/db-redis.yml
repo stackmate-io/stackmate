@@ -25,4 +25,3 @@ environments:
       size: db.t2.micro
     redis-kv:
       type: redis
-      name: my-cache

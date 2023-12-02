@@ -1,7 +1,10 @@
 /* eslint-disable max-classes-per-file */
 export type ValidationErrorDescriptor = {
+  key: string
+  value: string
   path: string
   message: string
+  parent: any
 }
 
 export class ValidationError extends Error {

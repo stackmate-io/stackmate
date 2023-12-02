@@ -1,6 +1,7 @@
 import type { ServiceTypeChoice } from '@services/types'
 
 export const isTestMode = process.env.NODE_ENV === 'test'
+export const isDebugMode = Boolean(process.env.DEBUG)
 
 export const PROVIDER = {
   AWS: 'aws',

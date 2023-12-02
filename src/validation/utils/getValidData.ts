@@ -1,20 +1,10 @@
-import { ValidationError } from '@src/lib/errors'
 import { defaults, cloneDeep, isFunction } from 'lodash'
-import type { JsonSchema } from '@src/lib/schema'
+import { ValidationError } from '@src/lib/errors'
+import { AJV_DEFAULTS } from '@src/validation/constants'
 import type { Options as AjvOptions } from 'ajv'
+import type { JsonSchema } from '@src/lib/schema'
 import { getAjv } from './getAjv'
 import { parseErrors } from './parseErrors'
-import { AJV_DEFAULTS } from '../constants'
-
-/**
- * Returns the validated data according to a given schema
- *
- * @param {object} rawData the raw data to validate
- * @param {JsonSchema} schema the schema to use for validation
- * @param {AjvOptions} options the ajv options to use
- * @returns {object} the validated data, mutated by ajv
- * @throws {ValidationError}
- */
 
 export const getValidData = <R, T>(
   rawData: R,
@@ -43,7 +33,7 @@ export const getValidData = <R, T>(
   }
 
   if (!validateData(data)) {
-    const errors = parseErrors(validateData.errors || [])
+    const errors = parseErrors(validateData.errors || [], data)
     throw new ValidationError(`Error while validating schema ${schemaId}`, errors)
   }
 
