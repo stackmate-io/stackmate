@@ -13,6 +13,9 @@ describe('ValidationError', () => {
       {
         message: faker.lorem.sentence(),
         path: faker.system.directoryPath(),
+        key: faker.lorem.word(),
+        value: faker.lorem.word(),
+        parent: {},
       },
     ]
 
