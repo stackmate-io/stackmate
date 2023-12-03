@@ -9,6 +9,7 @@ export const PROVIDER = {
 } as const
 
 export const SERVICE_TYPE = {
+  APP: 'application',
   CDN: 'cdn',
   DNS: 'dns',
   OBJECT_STORAGE: 'objectstore',
