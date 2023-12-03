@@ -1,0 +1,12 @@
+---
+state:
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
+
+environments:
+  production:
+    nodejs-app:
+      type: application
+      image: stackmate/sample-nodejs-app:latest
+      environment:
+        PORT: 5000

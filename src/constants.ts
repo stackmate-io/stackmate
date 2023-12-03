@@ -19,7 +19,6 @@ export const SERVICE_TYPE = {
   MEMCACHED: 'memcached',
   MAILER: 'mailer',
   MARIADB: 'mariadb',
-  MONITORING: 'monitoring',
   MYSQL: 'mysql',
   NETWORKING: 'networking',
   POSTGRESQL: 'postgresql',

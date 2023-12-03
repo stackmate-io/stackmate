@@ -17,7 +17,7 @@ export type ConnectableAttributes = { port: number }
  * @returns {Function<Service>}
  */
 export const connectable = <C extends BaseServiceAttributes>(
-  defaultPort: number,
+  defaultPort?: number,
   { min = 1, max = 65535 }: MinMax = {},
 ) =>
   withSchema<C, { port: number }>({
