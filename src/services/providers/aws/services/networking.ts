@@ -4,7 +4,6 @@ import {
   subnet,
   vpc as awsVpc,
   routeTable,
-  routeTable,
   routeTableAssociation,
 } from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@src/lib/networking'
