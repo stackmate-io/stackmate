@@ -37,4 +37,4 @@ jobs:
         run: npm run schema:export
 
       - name: Publishing to S3
-        run: aws s3 cp ${{ github.workspace }}/dist/schema.json s3://stackmate-public-assets/json-schema.json
+        run: aws s3 cp ${{ github.workspace }}/dist/schema.json s3://stackmate-public-assets/json-schema.json --acl public-read

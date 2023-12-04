@@ -12,8 +12,6 @@ export type AssociationLookup = (
   linkedConfig: BaseServiceAttributes,
 ) => boolean
 
-export type AttributesImporter = (config: BaseServiceAttributes) => BaseServiceAttributes
-
 export type AssociationHandler<
   Ret extends AssociationReturnType,
   Prov extends BaseProvisionable = BaseProvisionable,
@@ -22,7 +20,6 @@ export type AssociationHandler<
 
 export type Association<Ret extends AssociationReturnType = AssociationReturnType> = {
   handler: AssociationHandler<Ret>
-  imports?: AttributesImporter
   where?: AssociationLookup
   with?: ServiceTypeChoice
   requirement?: boolean
