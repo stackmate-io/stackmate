@@ -5,16 +5,10 @@ import { getBaseService } from '@src/services/utils'
 import * as behaviors from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import type { ecsCluster } from '@cdktf/provider-aws'
 import type { Stack } from '@src/lib/stack'
-import type {
-  BaseServiceAttributes,
-  Provisionable,
-  Service,
-  ServiceRequirement,
-} from '@src/services/types'
+import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
-import type { AwsClusterProvisionable, AwsClusterResources } from './cluster'
+import { getClusterAssociations, type AwsClusterAssociations } from './cluster'
 
 type TasksBreakdown = {
   tasks: {
@@ -32,10 +26,6 @@ type AppAttributes = BaseServiceAttributes &
     environment?: Record<string, string>
     repository?: string
   }
-
-type AwsClusterAssociations = {
-  cluster: ServiceRequirement<AwsClusterResources['cluster'], typeof SERVICE_TYPE.CLUSTER>
-}
 
 export type AwsApplicationAttributes =
   | (AppAttributes & {
@@ -62,15 +52,6 @@ export type AwsApplicationProvisionable = Provisionable<
   AwsApplicationResources
 >
 
-const clusterAssociations: AwsClusterAssociations = {
-  cluster: {
-    with: SERVICE_TYPE.CLUSTER,
-    requirement: true,
-    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
-      config.provider === linked.provider && config.region === linked.region,
-    handler: (prov: AwsClusterProvisionable): ecsCluster.EcsCluster => prov.provisions.cluster,
-  },
-}
 export const resourceHandler = (
   provisionable: AwsApplicationProvisionable,
   stack: Stack,
@@ -110,7 +91,7 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.withHandler(resourceHandler),
     behaviors.withAssociations(getProviderAssociations()),
     behaviors.withAssociations(getNetworkingAssociations()),
-    behaviors.withAssociations(clusterAssociations),
+    behaviors.withAssociations(getClusterAssociations()),
     behaviors.multiNode(),
     behaviors.withSchema({
       type: 'object',
@@ -123,10 +104,10 @@ const getApplicationService = (): AwsApplicationService =>
         },
         ports: {
           type: 'array',
+          default: [],
           items: {
             type: 'number',
           },
-          default: [80, 443],
         },
         environment: {
           type: 'array',

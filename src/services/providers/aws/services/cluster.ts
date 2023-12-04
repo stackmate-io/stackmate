@@ -11,7 +11,12 @@ import { REGIONS } from '@aws/constants'
 import { ecsCluster, cloudwatchLogGroup } from '@cdktf/provider-aws'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import type { Stack } from '@src/lib/stack'
-import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
+import type {
+  BaseServiceAttributes,
+  Provisionable,
+  Service,
+  ServiceRequirement,
+} from '@src/services/types'
 import type { AwsProviderAssociations } from '@aws/types'
 
 export type AwsClusterAttributes = BaseServiceAttributes &
@@ -28,6 +33,20 @@ export type AwsClusterResources = {
 export type AwsClusterService = Service<AwsClusterAttributes, AwsProviderAssociations>
 
 export type AwsClusterProvisionable = Provisionable<AwsClusterService, AwsClusterResources>
+
+export type AwsClusterAssociations = {
+  cluster: ServiceRequirement<AwsClusterResources['cluster'], typeof SERVICE_TYPE.CLUSTER>
+}
+
+export const getClusterAssociations = (): AwsClusterAssociations => ({
+  cluster: {
+    with: SERVICE_TYPE.CLUSTER,
+    requirement: true,
+    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+      config.provider === linked.provider && config.region === linked.region,
+    handler: (prov: AwsClusterProvisionable): ecsCluster.EcsCluster => prov.provisions.cluster,
+  },
+})
 
 export const resourceHandler = (
   provisionable: AwsClusterProvisionable,
