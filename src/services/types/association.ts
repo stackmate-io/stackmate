@@ -8,8 +8,8 @@ import type { ProvisionResources } from './resources'
 export type AssociationReturnType = ProvisionResources | void
 
 export type AssociationLookup = (
-  config: BaseServiceAttributes,
-  linkedConfig: BaseServiceAttributes,
+  source: BaseServiceAttributes,
+  target: BaseServiceAttributes,
 ) => boolean
 
 export type AssociationHandler<
