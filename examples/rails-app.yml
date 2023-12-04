@@ -43,6 +43,7 @@ environments:
       #
       #
       # TODO:
+      #  autoScaling: TBD
       #  domain: app.stackmate.io # association with dns service
       #  https: true # association with ssl service
       #  cdn: true # association with cdn service
