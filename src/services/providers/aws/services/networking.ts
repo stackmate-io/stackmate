@@ -1,5 +1,11 @@
 import { ImportableResource, TerraformOutput } from 'cdktf'
-import { internetGateway, subnet, vpc as awsVpc } from '@cdktf/provider-aws'
+import {
+  internetGateway,
+  subnet,
+  vpc as awsVpc,
+  routeTable,
+  routeTableAssociation,
+} from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@src/lib/networking'
 import { getBaseService, getProfile } from '@src/services/utils'
 import { DEFAULT_VPC_IP, REGIONS } from '@aws/constants'
@@ -31,7 +37,7 @@ export const resourceHandler = (
   } = provisionable
 
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
-  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 2, 24)
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 4, 24)
 
   const vpc = new awsVpc.Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -48,25 +54,49 @@ export const resourceHandler = (
     vpc.importFrom(imp.friendlyUniqueId, providerInstance)
   }
 
-  if (subnetCidrs.length > 3) {
-    throw new Error('It is advised to use up to 3 subnets')
-  }
-
   const availabilityZones = 'abcd'.split('').map((suffix) => `${config.region}${suffix}`)
-  const subnets = subnetCidrs.map(
-    (cidrBlock, idx) =>
-      new subnet.Subnet(stack.context, `${resourceId}_subnet${idx + 1}`, {
-        ...subnetConfig,
-        vpcId: vpc.id,
-        cidrBlock,
-        availabilityZone: availabilityZones[idx],
-      }),
-  )
+
+  const createSubnets = (cidrs: string[], name: string) =>
+    cidrs.map(
+      (cidrBlock, idx) =>
+        new subnet.Subnet(stack.context, `${resourceId}_${name}${idx + 1}`, {
+          ...subnetConfig,
+          vpcId: vpc.id,
+          cidrBlock,
+          availabilityZone: availabilityZones[idx],
+        }),
+    )
+
+  const subnets = createSubnets(subnetCidrs.splice(2), 'subnet')
+  const publicSubnets = createSubnets(subnetCidrs.splice(2), 'public_subnet')
 
   const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,
     vpcId: vpc.id,
   })
+
+  // Assign route table for public subnets
+  const routes = new routeTable.RouteTable(stack.context, `${resourceId}_route_table`, {
+    vpcId: vpc.id,
+    route: [
+      {
+        cidrBlock: '0.0.0.0/0',
+        gatewayId: gateway.id,
+      },
+    ],
+  })
+
+  publicSubnets.forEach(
+    (subnet, idx) =>
+      new routeTableAssociation.RouteTableAssociation(
+        stack.context,
+        `${resourceId}_association${idx}`,
+        {
+          subnetId: subnet.id,
+          routeTableId: routes.id,
+        },
+      ),
+  )
 
   const outputs: TerraformOutput[] = [
     new TerraformOutput(stack.context, `${resourceId}_vpc_id`, {
@@ -77,6 +107,20 @@ export const resourceHandler = (
       description: 'VPC CIDR block',
       value: vpc.cidrBlock,
     }),
+    ...subnets.map(
+      (subnet, idx) =>
+        new TerraformOutput(stack.context, `${resourceId}_subnet_output_${idx}`, {
+          description: `Private Subnet CIDR #${idx}`,
+          value: subnet.cidrBlock,
+        }),
+    ),
+    ...publicSubnets.map(
+      (subnet, idx) =>
+        new TerraformOutput(stack.context, `${resourceId}_public_subnet_output_${idx}`, {
+          description: `Public Subnet CIDR #${idx}`,
+          value: subnet.cidrBlock,
+        }),
+    ),
   ]
 
   return {
@@ -84,6 +128,7 @@ export const resourceHandler = (
     subnets,
     gateway,
     outputs,
+    publicSubnets,
   }
 }
 
