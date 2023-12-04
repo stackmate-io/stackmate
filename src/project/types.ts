@@ -18,6 +18,7 @@ export type EnvironmentConfiguration = Partial<
 >
 
 export type ProjectConfiguration = {
+  name?: string
   provider?: ProviderChoice
   region?: string
   state: DistributiveOptionalKeys<
