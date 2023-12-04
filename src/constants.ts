@@ -12,7 +12,7 @@ export const SERVICE_TYPE = {
   APP: 'application',
   CDN: 'cdn',
   DNS: 'dns',
-  OBJECT_STORAGE: 'objectstore',
+  OBJECT_STORAGE: 'object-store',
   INSTANCE: 'instance',
   LOAD_BALANCER: 'loadbalancer',
   MEMCACHED: 'memcached',

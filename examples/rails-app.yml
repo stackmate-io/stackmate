@@ -15,16 +15,14 @@ environments:
 
       # Optional configuration:
       #
+      # repository: using the service's name by default
+      #
       # This is the same as preset: rails
       # tasks:
       #   deployment:
       #     - rails bundle
       #     - rails assets:publish
       #     - rails db:migrate
-      #
-      # volumes:
-      #   - /mnt/some-mount-path
-      #   - /mnt/another-mount-path
       #
       # cpu: 1
       # memory: 2048
@@ -42,3 +40,6 @@ environments:
       #  domain: app.stackmate.io # association with dns service
       #  https: true # association with ssl service
       #  cdn: true # association with cdn service
+      #  volumes:
+      #    - /mnt/some-mount-path
+      #    - /mnt/another-mount-path
