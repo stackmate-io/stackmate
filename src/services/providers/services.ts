@@ -5,6 +5,7 @@ export { AwsDns } from './aws/services/dns'
 export { AwsPostgreSQL, AwsMySQL, AwsMariaDB } from './aws/services/database'
 export { AwsNetworking } from './aws/services/networking'
 export { AwsRedis, AwsMemcached } from './aws/services/cache'
+export { AwsSSL } from './aws/services/ssl'
 export { AwsObjectStore } from './aws/services/objectStore'
 export { AwsLoadBalancer } from './aws/services/loadbalancer'
 
