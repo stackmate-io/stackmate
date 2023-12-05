@@ -4,6 +4,7 @@ import { pipe } from 'lodash/fp'
 import { getBaseService } from '@src/services/utils'
 import { withAssociations, withHandler, withSchema } from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
+import { getDomainMatcher } from '@src/lib/domain'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsProviderAssociations } from '@aws/types'
@@ -52,11 +53,10 @@ const getDnsService = (): AwsDnsService =>
       properties: {
         domain: {
           type: 'string',
-          pattern:
-            '^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}.(xn--)?([a-z0-9-]{1,61}|[a-z0-9-]{1,30}.[a-z]{2,})$',
+          pattern: String(getDomainMatcher()),
         },
       },
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.DNS))
 
-export const AwsDnsService = getDnsService()
+export const AwsDns = getDnsService()

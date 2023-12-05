@@ -4,12 +4,11 @@ import { Stack } from '@src/lib/stack'
 import { faker } from '@faker-js/faker'
 import { route53Zone } from '@cdktf/provider-aws'
 import { Registry } from '@src/services/registry'
-import { AwsDnsService } from '@aws/services/dns'
 import { getValidData } from '@src/validation'
-import type { AwsDnsAttributes, AwsDnsResources } from '@aws/services/dns'
+import { AwsDns, type AwsDnsAttributes, type AwsDnsResources } from '@aws/services/dns'
 
 describe('AWS DNS', () => {
-  const service = AwsDnsService
+  const service = AwsDns
 
   it('is a valid AWS DNS service', () => {
     expect(service.provider).toEqual(PROVIDER.AWS)
@@ -32,6 +31,17 @@ describe('AWS DNS', () => {
       name: faker.lorem.word(),
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.DNS,
+    }
+
+    expect(() => getValidData(config, service.schema)).toThrow()
+  })
+
+  it('raises an error for an invalid domain', () => {
+    const config: Partial<AwsDnsAttributes> = {
+      name: faker.lorem.word(),
+      provider: PROVIDER.AWS,
+      type: SERVICE_TYPE.DNS,
+      domain: 'abcdefg',
     }
 
     expect(() => getValidData(config, service.schema)).toThrow()
