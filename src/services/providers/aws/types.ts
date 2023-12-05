@@ -33,6 +33,7 @@ export type AwsNetworkingResources = {
   outputs: TerraformOutput[]
   gateway: internetGateway.InternetGateway
   subnets: subnet.Subnet[]
+  publicSubnets: subnet.Subnet[]
   vpc: vpc.Vpc
 }
 

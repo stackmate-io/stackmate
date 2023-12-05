@@ -72,12 +72,14 @@ describe('AWS Networking', () => {
 
       expect(resources).toBeInstanceOf(Object)
       expect(Object.keys(resources)).toEqual(
-        expect.arrayContaining(['vpc', 'subnets', 'gateway', 'outputs']),
+        expect.arrayContaining(['vpc', 'subnets', 'gateway', 'outputs', 'publicSubnets']),
       )
       expect(resources.vpc).toBeInstanceOf(vpc.Vpc)
       expect(resources.gateway).toBeInstanceOf(internetGateway.InternetGateway)
       expect(Array.isArray(resources.subnets)).toBe(true)
       expect(resources.subnets.every((s) => s instanceof subnet.Subnet)).toBe(true)
+      expect(Array.isArray(resources.publicSubnets)).toBe(true)
+      expect(resources.publicSubnets.every((s) => s instanceof subnet.Subnet)).toBe(true)
       expect(Array.isArray(resources.outputs)).toBe(true)
       expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
     })

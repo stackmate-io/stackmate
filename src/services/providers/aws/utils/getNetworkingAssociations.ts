@@ -11,12 +11,13 @@ const getVpcRequirement = (): AwsNetworkingAssociations['vpc'] => ({
   handler: (prov: AwsNetworkingProvisionable): vpc.Vpc => prov.provisions.vpc,
 })
 
-const getSubnetsRequirement = (): AwsNetworkingAssociations['subnets'] => ({
+const getSubnetsRequirement = (publicSubnets: boolean): AwsNetworkingAssociations['subnets'] => ({
   with: SERVICE_TYPE.NETWORKING,
   requirement: true,
   where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
     config.provider === linked.provider && config.region === linked.region,
-  handler: (prov: AwsNetworkingProvisionable): subnet.Subnet[] => prov.provisions.subnets,
+  handler: (prov: AwsNetworkingProvisionable): subnet.Subnet[] =>
+    publicSubnets ? prov.provisions.publicSubnets : prov.provisions.subnets,
 })
 
 const getGatewayRequirement = (): AwsNetworkingAssociations['gateway'] => ({
@@ -30,6 +31,7 @@ const getGatewayRequirement = (): AwsNetworkingAssociations['gateway'] => ({
 
 export const getNetworkingAssociations = (): AwsNetworkingAssociations => ({
   vpc: getVpcRequirement(),
-  subnets: getSubnetsRequirement(),
+  subnets: getSubnetsRequirement(false),
   gateway: getGatewayRequirement(),
+  publicSubnets: getSubnetsRequirement(true),
 })
