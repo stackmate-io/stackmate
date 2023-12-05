@@ -1,7 +1,8 @@
 import path from 'node:path'
 import { SERVICE_TYPE } from '@src/constants'
-import { isFunction, kebabCase } from 'lodash'
+import { isFunction, isString, kebabCase } from 'lodash'
 import { DEFAULT_PROVIDER } from '@src/project/constants'
+import { getTopLevelDomain } from '@src/lib/domain'
 import type { ServiceConfiguration } from '@src/services/registry'
 import type { BaseServiceAttributes, ServiceTypeChoice } from '@src/services/types'
 import type { ProjectConfiguration } from '@src/project/types'
@@ -28,7 +29,12 @@ const ATTRIBUTE_GENERATOR: Partial<Record<ServiceTypeChoice, AttributesGenerator
     ),
   }),
   [SERVICE_TYPE.DNS]: (project, environment, associated) => {
-    if (!associated || !('domain' in associated) || !associated.domain) {
+    if (
+      !associated ||
+      !('domain' in associated) ||
+      !isString(associated.domain) ||
+      !associated.domain
+    ) {
       return null
     }
 
@@ -36,7 +42,7 @@ const ATTRIBUTE_GENERATOR: Partial<Record<ServiceTypeChoice, AttributesGenerator
       type: SERVICE_TYPE.DNS,
       provider: associated.provider || project.provider || DEFAULT_PROVIDER,
       region: associated.region || project.region,
-      domain: associated.domain,
+      domain: getTopLevelDomain(associated.domain),
       name: kebabCase(
         `${project.name || path.basename(process.cwd()) || 'stackmate-app'}-${environment}`,
       ),
