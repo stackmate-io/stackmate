@@ -67,6 +67,7 @@ export const resourceHandler = (
     subjectAlternativeNames: config.wildCard ? [`*.${config.domain}`] : undefined,
     validationMethod: config.validation.toUpperCase(),
     provider: providerInstance,
+    earlyRenewalDuration: 'P90D',
     validationOption: [
       {
         domainName: config.domain,
@@ -89,6 +90,7 @@ export const resourceHandler = (
       records: [optionsIterator.value.record],
       type: optionsIterator.value.type,
       zoneId: dnsZone.id,
+      provider: providerInstance,
     })
   }
 
