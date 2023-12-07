@@ -56,7 +56,7 @@ export const resourceHandler = (
 
   const availabilityZones = 'abcd'.split('').map((suffix) => `${config.region}${suffix}`)
 
-  const createSubnets = (cidrs: string[], name: string) =>
+  const createSubnets = (cidrs: string[], name: string, isPublic: boolean) =>
     cidrs.map(
       (cidrBlock, idx) =>
         new subnet.Subnet(stack.context, `${resourceId}_${name}${idx + 1}`, {
@@ -64,11 +64,12 @@ export const resourceHandler = (
           vpcId: vpc.id,
           cidrBlock,
           availabilityZone: availabilityZones[idx],
+          mapPublicIpOnLaunch: isPublic,
         }),
     )
 
-  const subnets = createSubnets(subnetCidrs.splice(2), 'subnet')
-  const publicSubnets = createSubnets(subnetCidrs.splice(2), 'public_subnet')
+  const subnets = createSubnets(subnetCidrs.splice(2), 'subnet', false)
+  const publicSubnets = createSubnets(subnetCidrs.splice(2), 'public_subnet', true)
 
   const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,

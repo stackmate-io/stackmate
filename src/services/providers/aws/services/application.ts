@@ -1,12 +1,28 @@
 import { pipe } from 'lodash/fp'
-import { ecrRepository, ecsService, ecsTaskDefinition } from '@cdktf/provider-aws'
+import {
+  albListener,
+  cloudwatchLogGroup,
+  ecsService,
+  ecsTaskDefinition,
+  route53Record,
+} from '@cdktf/provider-aws'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getBaseService } from '@src/services/utils'
 import * as behaviors from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import { getTopLevelDomain } from '@src/lib/domain'
-import type { alb, ecsCluster, route53Zone } from '@cdktf/provider-aws'
+import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
+import { Fn } from 'cdktf'
+import type { TerraformOutput } from 'cdktf'
+import type {
+  ecsCluster,
+  iamRole,
+  route53Zone,
+  ecrRepository,
+  acmCertificate,
+  albTargetGroup,
+  alb,
+} from '@cdktf/provider-aws'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -22,6 +38,7 @@ import type {
   AwsLoadBalancerResources,
 } from './loadbalancer'
 import type { AwsDnsAttributes, AwsDnsProvisionable, AwsDnsResources } from './dns'
+import type { AwsSSLAttributes, AwsSSLProvisionable, AwsSSLResources } from './ssl'
 
 type TasksBreakdown = {
   tasks: {
@@ -36,9 +53,10 @@ type AppAttributes = BaseServiceAttributes &
     type: typeof SERVICE_TYPE.APP
     cpu: number
     memory: number
-    domain: string
+    domain?: string
     environment?: Record<string, string>
-    repository?: string
+    web: boolean
+    www: boolean
   }
 
 export type AwsApplicationAttributes =
@@ -48,10 +66,20 @@ export type AwsApplicationAttributes =
   | (AppAttributes & { tasks: TasksBreakdown })
 
 export type AwsApplicationRequirements = {
-  cluster: ServiceRequirement<AwsClusterResources['cluster'], typeof SERVICE_TYPE.CLUSTER>
   dnsZone: ServiceRequirement<AwsDnsResources['zone'], typeof SERVICE_TYPE.DNS>
+  cluster: ServiceRequirement<AwsClusterResources['cluster'], typeof SERVICE_TYPE.CLUSTER>
+  repository: ServiceRequirement<AwsClusterResources['repository'], typeof SERVICE_TYPE.CLUSTER>
+  certificate: ServiceRequirement<AwsSSLResources['certificate'], typeof SERVICE_TYPE.SSL>
+  taskExecutionRole: ServiceRequirement<
+    AwsClusterResources['taskExecutionRole'],
+    typeof SERVICE_TYPE.CLUSTER
+  >
   loadBalancer: ServiceRequirement<
     AwsLoadBalancerResources['loadBalancer'],
+    typeof SERVICE_TYPE.LOAD_BALANCER
+  >
+  targetGroup: ServiceRequirement<
+    AwsLoadBalancerResources['targetGroup'],
     typeof SERVICE_TYPE.LOAD_BALANCER
   >
 }
@@ -64,20 +92,56 @@ export const getApplicationRequirements = (): AwsApplicationRequirements => ({
       config.provider === linked.provider && config.region === linked.region,
     handler: (prov: AwsClusterProvisionable): ecsCluster.EcsCluster => prov.provisions.cluster,
   },
+  repository: {
+    with: SERVICE_TYPE.CLUSTER,
+    requirement: true,
+    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+      config.provider === linked.provider && config.region === linked.region,
+    handler: (prov: AwsClusterProvisionable): ecrRepository.EcrRepository =>
+      prov.provisions.repository,
+  },
+  taskExecutionRole: {
+    with: SERVICE_TYPE.CLUSTER,
+    requirement: true,
+    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+      config.provider === linked.provider && config.region === linked.region,
+    handler: (prov: AwsClusterProvisionable): iamRole.IamRole => prov.provisions.taskExecutionRole,
+  },
   dnsZone: {
     with: SERVICE_TYPE.DNS,
     requirement: true,
     where: (source: AwsApplicationAttributes, linked: AwsDnsAttributes) =>
       source.provider === linked.provider &&
-      getTopLevelDomain(source.domain) === getTopLevelDomain(linked.domain),
+      Boolean(source.domain) &&
+      getTopLevelDomain(source.domain as string) === getTopLevelDomain(linked.domain),
     handler: (prov: AwsDnsProvisionable): route53Zone.Route53Zone => prov.provisions.zone,
   },
   loadBalancer: {
     with: SERVICE_TYPE.LOAD_BALANCER,
     requirement: true,
     where: (source: AwsApplicationAttributes, linked: AwsLoadBalancerAttributes) =>
-      source.provider === linked.provider && source.region === linked.region,
+      Boolean(source.port) &&
+      source.provider === linked.provider &&
+      source.region === linked.region,
     handler: (prov: AwsLoadBalancerProvisionable): alb.Alb => prov.provisions.loadBalancer,
+  },
+  targetGroup: {
+    with: SERVICE_TYPE.LOAD_BALANCER,
+    requirement: true,
+    where: (source: AwsApplicationAttributes, linked: AwsLoadBalancerAttributes) =>
+      Boolean(source.port) &&
+      source.provider === linked.provider &&
+      source.region === linked.region,
+    handler: (prov: AwsLoadBalancerProvisionable): albTargetGroup.AlbTargetGroup =>
+      prov.provisions.targetGroup,
+  },
+  certificate: {
+    with: SERVICE_TYPE.SSL,
+    requirement: true,
+    where: (source: AwsApplicationAttributes, linked: AwsSSLAttributes) =>
+      source.provider === linked.provider && source.domain === linked.domain,
+    handler: (prov: AwsSSLProvisionable): acmCertificate.AcmCertificate =>
+      prov.provisions.certificate,
   },
 })
 
@@ -87,10 +151,11 @@ export type AwsApplicationService = Service<
 >
 
 export type AwsApplicationResources = {
-  repository: ecrRepository.EcrRepository
   service: ecsService.EcsService
-  taskDefinition: any
-  autoScaling: any
+  taskDefinition: ecsTaskDefinition.EcsTaskDefinition
+  listeners: albListener.AlbListener[]
+  dnsRecords: route53Record.Route53Record[]
+  outputs: TerraformOutput[]
 }
 
 export type AwsApplicationProvisionable = Provisionable<
@@ -105,27 +170,62 @@ export const resourceHandler = (
   const {
     config,
     resourceId,
-    requirements: { providerInstance, cluster, subnets, loadBalancer },
+    requirements: {
+      dnsZone,
+      repository,
+      cluster,
+      subnets,
+      targetGroup,
+      taskExecutionRole,
+      loadBalancer,
+      certificate,
+      providerInstance,
+    },
   } = provisionable
 
-  const repository = new ecrRepository.EcrRepository(stack.context, `${resourceId}_repository`, {
-    name: config.repository || config.name,
-    imageTagMutability: 'IMMUTABLE',
-    provider: providerInstance,
-    lifecycle: {
-      createBeforeDestroy: true,
+  const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(
+    stack.context,
+    `${resourceId}_log_group`,
+    {
+      name: config.name,
+      provider: providerInstance,
     },
-  })
+  )
+
+  const containerDefinition = {
+    name: config.name,
+    // TODO
+    image: `${repository.repositoryUrl}/${config.image}`,
+    cpu: config.cpu,
+    memory: config.memory,
+    essential: true,
+    privileged: false,
+    networkMode: 'awsvpc',
+    readonlyRootFilesystem: false,
+    logConfiguration: {
+      logDriver: 'awslogs',
+      options: {
+        'awslogs-group': logGroup.name,
+        'awslogs-region': config.region,
+        'awslogs-stream-prefix': config.name,
+      },
+    },
+    ...(config.port ? { portMappings: [{ containerPort: config.port }] } : null),
+  }
 
   const taskDefinition = new ecsTaskDefinition.EcsTaskDefinition(
     stack.context,
     `${resourceId}_task_definition`,
     {
       networkMode: 'awsvpc',
+      provider: providerInstance,
       family: `${config.name}-service`,
       requiresCompatibilities: ['FARGATE'],
       cpu: String(config.cpu),
       memory: String(config.memory),
+      executionRoleArn: taskExecutionRole.arn,
+      // TODO
+      // task_role_arn            = var.roleArn
       placementConstraints: [
         {
           type: 'memberOf',
@@ -134,28 +234,28 @@ export const resourceHandler = (
             .join(', ')}]`,
         },
       ],
-      containerDefinitions: [],
-      // execution_role_arn       = var.roleExecArn
-      // task_role_arn            = var.roleArn
+      containerDefinitions: Fn.jsonencode([containerDefinition]),
     },
   )
 
   const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
     name: config.name,
     cluster: cluster.id,
+    provider: providerInstance,
     taskDefinition: taskDefinition.arn,
     schedulingStrategy: 'REPLICA',
     desiredCount: config.nodes,
     forceNewDeployment: true,
-    dependsOn: [loadBalancer],
+    dependsOn: [targetGroup],
     networkConfiguration: {
+      // security_groups: TODO
       subnets: subnets.map((subnet) => subnet.id),
       assignPublicIp: false,
     },
-    loadBalancer: config.port
+    loadBalancer: config.web
       ? [
           {
-            targetGroupArn: loadBalancer.arn,
+            targetGroupArn: targetGroup.arn,
             containerName: config.name,
             containerPort: config.port,
           },
@@ -166,11 +266,89 @@ export const resourceHandler = (
     },
   })
 
+  const listeners: albListener.AlbListener[] = []
+  const dnsRecords: route53Record.Route53Record[] = []
+
+  if (config.web) {
+    const opts = {
+      loadBalancerArn: loadBalancer.arn,
+      protocol: 'TCP',
+      provider: providerInstance,
+      dependsOn: [targetGroup],
+      lifecycle: {
+        ignoreChanges: ['default_action'],
+      },
+    }
+
+    listeners.push(
+      new albListener.AlbListener(stack.context, `${resourceId}_listener_http`, {
+        ...opts,
+        port: 80,
+        defaultAction: [
+          {
+            type: 'redirect',
+            redirect: { port: '443', protocol: 'HTTPS', statusCode: 'HTTP_301' },
+          },
+        ],
+      }),
+      new albListener.AlbListener(stack.context, `${resourceId}_listener_https`, {
+        ...opts,
+        port: 443,
+        certificateArn: certificate.arn,
+        defaultAction: [
+          {
+            targetGroupArn: targetGroup.arn,
+            type: 'forward',
+          },
+        ],
+      }),
+    )
+
+    if (config.domain) {
+      const domain = config.domain.replace(/^www\.(.*)$/i, '$1')
+      const isTld = domain === getTopLevelDomain(domain)
+      dnsRecords.push(
+        new route53Record.Route53Record(stack.context, `${resourceId}_dns_record`, {
+          name: domain,
+          zoneId: dnsZone.id,
+          provider: providerInstance,
+          ...(isTld
+            ? {
+                type: 'A',
+                alias: {
+                  name: loadBalancer.dnsName,
+                  zoneId: dnsZone.id,
+                  evaluateTargetHealth: true,
+                },
+              }
+            : { type: 'CNAME', records: [loadBalancer.dnsName] }),
+        }),
+      )
+
+      if (config.www) {
+        dnsRecords.push(
+          new route53Record.Route53Record(stack.context, `${resourceId}_dns_record_www`, {
+            name: `www.${domain}`,
+            zoneId: dnsZone.id,
+            type: 'CNAME',
+            records: [loadBalancer.dnsName],
+            provider: providerInstance,
+          }),
+        )
+      }
+    }
+  }
+
+  // TODO:
+  // Task Role
+  const outputs: TerraformOutput[] = []
+
   return {
-    repository,
     service,
-    taskDefinition: null,
-    autoScaling: null,
+    listeners,
+    dnsRecords,
+    taskDefinition,
+    outputs,
   }
 }
 
@@ -197,8 +375,17 @@ const getApplicationService = (): AwsApplicationService =>
             type: 'string',
           },
         },
-        repository: {
+        domain: {
           type: 'string',
+          pattern: String(getDomainMatcher()),
+        },
+        web: {
+          type: 'boolean',
+          default: true,
+        },
+        www: {
+          type: 'boolean',
+          default: true,
         },
       },
     }),

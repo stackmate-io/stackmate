@@ -10,7 +10,7 @@ import {
 import { REGIONS } from '@aws/constants'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import { alb, securityGroup } from '@cdktf/provider-aws'
+import { alb, albTargetGroup, securityGroup } from '@cdktf/provider-aws'
 import { TerraformOutput } from 'cdktf'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
@@ -24,6 +24,7 @@ export type AwsLoadBalancerAttributes = BaseServiceAttributes &
 
 export type AwsLoadBalancerResources = {
   loadBalancer: alb.Alb
+  targetGroup: albTargetGroup.AlbTargetGroup
   securityGroup: securityGroup.SecurityGroup
   outputs: TerraformOutput[]
 }
@@ -53,6 +54,20 @@ export const resourceHandler = (
     vpcId: vpc.id,
     egress: [
       {
+        fromPort: 80,
+        toPort: 80,
+        protocol: 'tcp',
+        cidrBlocks: ['0.0.0.0/0'],
+        ipv6CidrBlocks: ['::/0'],
+      },
+      {
+        fromPort: 443,
+        toPort: 443,
+        protocol: 'tcp',
+        cidrBlocks: ['0.0.0.0/0'],
+        ipv6CidrBlocks: ['::/0'],
+      },
+      {
         fromPort: 0,
         toPort: 0,
         protocol: '-1',
@@ -75,6 +90,20 @@ export const resourceHandler = (
     },
   })
 
+  const targetGroup = new albTargetGroup.AlbTargetGroup(
+    stack.context,
+    `${resourceId}_target_group`,
+    {
+      name: config.name,
+      port: 80,
+      protocol: 'HTTP',
+      targetType: 'ip',
+      vpcId: vpc.id,
+      provider: providerInstance,
+      targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
+    },
+  )
+
   const outputs = [
     new TerraformOutput(stack.context, `${resourceId}_loadbalancer_url`, {
       description: 'The URL for the load balancer',
@@ -84,6 +113,7 @@ export const resourceHandler = (
 
   return {
     loadBalancer,
+    targetGroup,
     securityGroup: sg,
     outputs,
   }

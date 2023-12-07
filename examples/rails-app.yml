@@ -6,18 +6,16 @@ state:
 environments:
   production:
     rails-app:
-      type: container
+      type: application
       preset: rails
+      port: 3000
+      domain: app.stackmate.io
       build:
         source: Dockerfile
       environment:
         REDIS_URL: redis://${redis-kv.host}:${redis-kv:port}/0
         DB_URL: mysql://${mysql-db.user}:${mysql-db.password}@${mysql-db.host}/${mysql-db.db}:${mysql-db.port}
         S3_BUCKET: s3://${storage.stackmate-rails-app-storage.name}
-
-    nginx:
-      type: container
-      image: nginx/nginx:latest
 
       # Optional configuration:
       #
