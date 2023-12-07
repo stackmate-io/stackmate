@@ -5,6 +5,7 @@ import {
   ecsService,
   ecsTaskDefinition,
   route53Record,
+  securityGroup,
 } from '@cdktf/provider-aws'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getBaseService } from '@src/services/utils'
@@ -13,7 +14,6 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
 import { Fn } from 'cdktf'
-import type { TerraformOutput } from 'cdktf'
 import type {
   ecsCluster,
   iamRole,
@@ -23,6 +23,7 @@ import type {
   albTargetGroup,
   alb,
 } from '@cdktf/provider-aws'
+import type { TerraformOutput } from 'cdktf'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -76,6 +77,10 @@ export type AwsApplicationRequirements = {
   >
   loadBalancer: ServiceRequirement<
     AwsLoadBalancerResources['loadBalancer'],
+    typeof SERVICE_TYPE.LOAD_BALANCER
+  >
+  loadBalancerSecurityGroup: ServiceRequirement<
+    AwsLoadBalancerResources['securityGroup'],
     typeof SERVICE_TYPE.LOAD_BALANCER
   >
   targetGroup: ServiceRequirement<
@@ -135,6 +140,16 @@ export const getApplicationRequirements = (): AwsApplicationRequirements => ({
     handler: (prov: AwsLoadBalancerProvisionable): albTargetGroup.AlbTargetGroup =>
       prov.provisions.targetGroup,
   },
+  loadBalancerSecurityGroup: {
+    with: SERVICE_TYPE.LOAD_BALANCER,
+    requirement: true,
+    where: (source: AwsApplicationAttributes, linked: AwsLoadBalancerAttributes) =>
+      Boolean(source.port) &&
+      source.provider === linked.provider &&
+      source.region === linked.region,
+    handler: (prov: AwsLoadBalancerProvisionable): securityGroup.SecurityGroup =>
+      prov.provisions.securityGroup,
+  },
   certificate: {
     with: SERVICE_TYPE.SSL,
     requirement: true,
@@ -171,6 +186,7 @@ export const resourceHandler = (
     config,
     resourceId,
     requirements: {
+      vpc,
       dnsZone,
       repository,
       cluster,
@@ -180,6 +196,7 @@ export const resourceHandler = (
       loadBalancer,
       certificate,
       providerInstance,
+      loadBalancerSecurityGroup,
     },
   } = provisionable
 
@@ -238,6 +255,17 @@ export const resourceHandler = (
     },
   )
 
+  let sg: securityGroup.SecurityGroup | undefined
+
+  if (config.web) {
+    sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
+      name: `${config.name}-security-group`,
+      description: `Security group for the ${config.name} service`,
+      vpcId: vpc.id,
+      provider: providerInstance,
+    })
+  }
+
   const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
     name: config.name,
     cluster: cluster.id,
@@ -248,7 +276,7 @@ export const resourceHandler = (
     forceNewDeployment: true,
     dependsOn: [targetGroup],
     networkConfiguration: {
-      // security_groups: TODO
+      securityGroups: config.web && sg ? [loadBalancerSecurityGroup.id, sg.id] : [],
       subnets: subnets.map((subnet) => subnet.id),
       assignPublicIp: false,
     },
