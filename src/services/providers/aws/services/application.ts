@@ -279,6 +279,7 @@ export const resourceHandler = (
         port: 443,
         protocol: 'HTTPS',
         certificateArn: certificate.arn,
+        dependsOn: [certificate],
         defaultAction: [
           {
             targetGroupArn: targetGroup.arn,
@@ -331,7 +332,7 @@ export const resourceHandler = (
     provider: providerInstance,
     taskDefinition: taskDefinition.arn,
     schedulingStrategy: 'REPLICA',
-    desiredCount: config.nodes,
+    desiredCount: 0, // config.nodes,
     dependsOn: [targetGroup, ...listeners],
     networkConfiguration: {
       securityGroups: config.web && sg ? [loadBalancerSecurityGroup.id, sg.id] : [],
@@ -347,9 +348,6 @@ export const resourceHandler = (
           },
         ]
       : undefined,
-    lifecycle: {
-      ignoreChanges: ['desired_count'],
-    },
   })
 
   const outputs: TerraformOutput[] = [
