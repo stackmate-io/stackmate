@@ -53,7 +53,7 @@ const getDnsService = (): AwsDnsService =>
       properties: {
         domain: {
           type: 'string',
-          pattern: String(getDomainMatcher()),
+          pattern: getDomainMatcher(),
         },
       },
     }),

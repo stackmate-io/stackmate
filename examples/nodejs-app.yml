@@ -7,6 +7,6 @@ environments:
   production:
     nodejs-app:
       type: application
+      domain: app.stackmate.io
+      port: 5000
       image: stackmate/sample-nodejs-app:latest
-      environment:
-        PORT: 5000

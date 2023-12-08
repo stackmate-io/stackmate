@@ -18,6 +18,7 @@ import {
 } from '@cdktf/provider-aws'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { camelCase, kebabCase } from 'lodash'
+import { TerraformOutput } from 'cdktf'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsProviderAssociations } from '@aws/types'
@@ -34,6 +35,7 @@ export type AwsClusterResources = {
   logGroup: cloudwatchLogGroup.CloudwatchLogGroup
   taskExecutionRole: iamRole.IamRole
   repository: ecrRepository.EcrRepository
+  outputs: TerraformOutput[]
 }
 
 export type AwsClusterService = Service<AwsClusterAttributes, AwsProviderAssociations>
@@ -155,11 +157,27 @@ export const resourceHandler = (
     },
   )
 
+  const outputs = [
+    new TerraformOutput(stack.context, `${resourceId}_ecr_repository_url`, {
+      value: repository.repositoryUrl,
+    }),
+    new TerraformOutput(stack.context, `${resourceId}_task_executionRole_arn`, {
+      value: taskExecutionRole.arn,
+    }),
+    new TerraformOutput(stack.context, `${resourceId}_cluster_log_group_arn`, {
+      value: logGroup.arn,
+    }),
+    new TerraformOutput(stack.context, `${resourceId}_cluster_arn`, {
+      value: cluster.arn,
+    }),
+  ]
+
   return {
     logGroup,
     cluster,
     repository,
     taskExecutionRole,
+    outputs,
   }
 }
 

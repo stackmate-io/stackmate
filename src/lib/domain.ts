@@ -3,10 +3,8 @@ import { isEmpty, uniq } from 'lodash'
 /**
  * @returns {String} the regular expression that matches domains
  */
-export const getDomainMatcher = (): RegExp =>
-  new RegExp(
-    '^(([a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?.)+|)?([a-zA-Z0-9]{1,2}([-a-zA-Z0-9]{0,252}[a-zA-Z0-9])?).([a-zA-Z]{2,63})$',
-  )
+export const getDomainMatcher = (): string =>
+  '^(([a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?.)+|)?([a-zA-Z0-9]{1,2}([-a-zA-Z0-9]{0,252}[a-zA-Z0-9])?).([a-zA-Z]{2,63})$'
 
 /**
  * Extracts the TLD part from a domain string
@@ -30,7 +28,7 @@ export const getTopLevelDomain = (domain: string): string => {
  * @param {String[]} domains the domains to order
  */
 export const getDomainsOrder = (domains: string[]): { primary: string; secondary: string[] } => {
-  const regExp = getDomainMatcher()
+  const regExp = new RegExp(getDomainMatcher())
   const validDomains = domains.filter((domain) => regExp.test(domain))
 
   if (isEmpty(validDomains)) {

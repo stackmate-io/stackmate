@@ -53,7 +53,7 @@ describe('AWS DNS', () => {
       name: faker.lorem.word(),
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.DNS,
-      domain: faker.internet.domainName(),
+      domain: 'app.stackmate.io',
     }
 
     const provisionable = getAwsProvisionable(config, stack)

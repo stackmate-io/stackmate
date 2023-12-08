@@ -1,7 +1,6 @@
 import { pipe } from 'lodash/fp'
 import {
   albListener,
-  cloudwatchLogGroup,
   ecsService,
   ecsTaskDefinition,
   route53Record,
@@ -13,7 +12,7 @@ import * as behaviors from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
-import { Fn } from 'cdktf'
+import { Fn, TerraformOutput } from 'cdktf'
 import type { Distribute, OneOfType } from '@src/lib/util'
 import type {
   ecsCluster,
@@ -23,8 +22,8 @@ import type {
   acmCertificate,
   albTargetGroup,
   alb,
+  cloudwatchLogGroup,
 } from '@cdktf/provider-aws'
-import type { TerraformOutput } from 'cdktf'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -66,6 +65,7 @@ export type AwsApplicationRequirements = {
   cluster: ServiceRequirement<AwsClusterResources['cluster'], typeof SERVICE_TYPE.CLUSTER>
   repository: ServiceRequirement<AwsClusterResources['repository'], typeof SERVICE_TYPE.CLUSTER>
   certificate: ServiceRequirement<AwsSSLResources['certificate'], typeof SERVICE_TYPE.SSL>
+  logGroup: ServiceRequirement<AwsClusterResources['logGroup'], typeof SERVICE_TYPE.CLUSTER>
   taskExecutionRole: ServiceRequirement<
     AwsClusterResources['taskExecutionRole'],
     typeof SERVICE_TYPE.CLUSTER
@@ -91,6 +91,14 @@ export const getApplicationRequirements = (): AwsApplicationRequirements => ({
     where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
       config.provider === linked.provider && config.region === linked.region,
     handler: (prov: AwsClusterProvisionable): ecsCluster.EcsCluster => prov.provisions.cluster,
+  },
+  logGroup: {
+    with: SERVICE_TYPE.CLUSTER,
+    requirement: true,
+    where: (config: BaseServiceAttributes, linked: BaseServiceAttributes) =>
+      config.provider === linked.provider && config.region === linked.region,
+    handler: (prov: AwsClusterProvisionable): cloudwatchLogGroup.CloudwatchLogGroup =>
+      prov.provisions.logGroup,
   },
   repository: {
     with: SERVICE_TYPE.CLUSTER,
@@ -187,6 +195,7 @@ export const resourceHandler = (
       cluster,
       subnets,
       targetGroup,
+      logGroup,
       taskExecutionRole,
       loadBalancer,
       certificate,
@@ -194,16 +203,6 @@ export const resourceHandler = (
       loadBalancerSecurityGroup,
     },
   } = provisionable
-
-  const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(
-    stack.context,
-    `${resourceId}_log_group`,
-    {
-      name: config.name,
-      provider: providerInstance,
-    },
-  )
-
   const containerDefinition = {
     name: config.name,
     image: config.image ? config.image : `${repository.repositoryUrl}/${config.name}:latest`,
@@ -359,7 +358,27 @@ export const resourceHandler = (
     }
   }
 
-  const outputs: TerraformOutput[] = []
+  const outputs: TerraformOutput[] = [
+    new TerraformOutput(stack.context, `${resourceId}_task_definition_arn`, {
+      value: taskDefinition.arn,
+    }),
+  ]
+
+  listeners.forEach((listener, idx) =>
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_listener_arn_${idx}`, {
+        value: listener.arn,
+      }),
+    ),
+  )
+
+  dnsRecords.forEach((record, idx) =>
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_service_dns_record_${idx}`, {
+        value: record.name,
+      }),
+    ),
+  )
 
   return {
     service,
@@ -380,6 +399,7 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.connectable(),
     behaviors.withSchema({
       type: 'object',
+      required: ['port'],
       properties: {
         cpu: {
           type: 'number',
@@ -388,14 +408,16 @@ const getApplicationService = (): AwsApplicationService =>
           type: 'number',
         },
         environment: {
-          type: 'array',
-          items: {
-            type: 'string',
+          type: 'object',
+          patternProperties: {
+            '^[a-zA-Z0-9_]+$': {
+              type: 'string',
+            },
           },
         },
         domain: {
           type: 'string',
-          pattern: String(getDomainMatcher()),
+          pattern: getDomainMatcher(),
         },
         web: {
           type: 'boolean',

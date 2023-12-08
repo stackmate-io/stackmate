@@ -67,7 +67,6 @@ export const resourceHandler = (
     subjectAlternativeNames: config.wildCard ? [`*.${config.domain}`] : undefined,
     validationMethod: config.validation.toUpperCase(),
     provider: providerInstance,
-    earlyRenewalDuration: 'P90D',
     validationOption: [
       {
         domainName: config.domain,
@@ -98,11 +97,16 @@ export const resourceHandler = (
     new TerraformOutput(stack.context, `${resourceId}_verification_method`, {
       value: `${config.domain} will be verified via ${config.validation}`,
     }),
-    new TerraformOutput(stack.context, `${resourceId}_verification_records`, {
-      value: certificate.domainValidationOptions,
-      description: 'The SSL validation DNS records',
-    }),
   ]
+
+  if (config.validation === 'dns') {
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_verification_records`, {
+        value: certificate.domainValidationOptions,
+        description: 'The SSL validation DNS records',
+      }),
+    )
+  }
 
   return {
     certificate,
@@ -127,7 +131,7 @@ const getSSLService = (): AwsSSLService =>
         },
         domain: {
           type: 'string',
-          pattern: String(getDomainMatcher()),
+          pattern: getDomainMatcher(),
         },
         wildCard: {
           type: 'boolean',
