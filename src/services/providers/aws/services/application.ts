@@ -14,6 +14,7 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
 import { Fn } from 'cdktf'
+import type { Distribute, OneOfType } from '@src/lib/util'
 import type {
   ecsCluster,
   iamRole,
@@ -41,11 +42,9 @@ import type {
 import type { AwsDnsAttributes, AwsDnsProvisionable, AwsDnsResources } from './dns'
 import type { AwsSSLAttributes, AwsSSLProvisionable, AwsSSLResources } from './ssl'
 
-type TasksBreakdown = {
-  tasks: {
-    deployment: string[]
-  }
-}
+type WithDocker<Atts extends BaseServiceAttributes> = OneOfType<
+  [Atts & { image: string }, Atts & { build: { source: string; args?: string[] } }]
+>
 
 type AppAttributes = BaseServiceAttributes &
   behaviors.MultiNodeAttributes &
@@ -60,11 +59,7 @@ type AppAttributes = BaseServiceAttributes &
     www: boolean
   }
 
-export type AwsApplicationAttributes =
-  | (AppAttributes & {
-      preset: string
-    })
-  | (AppAttributes & { tasks: TasksBreakdown })
+export type AwsApplicationAttributes = Distribute<WithDocker<AppAttributes>>
 
 export type AwsApplicationRequirements = {
   dnsZone: ServiceRequirement<AwsDnsResources['zone'], typeof SERVICE_TYPE.DNS>
@@ -211,8 +206,7 @@ export const resourceHandler = (
 
   const containerDefinition = {
     name: config.name,
-    // TODO
-    image: `${repository.repositoryUrl}/${config.image}`,
+    image: config.image ? config.image : `${repository.repositoryUrl}/${config.name}:latest`,
     cpu: config.cpu,
     memory: config.memory,
     essential: true,
@@ -241,8 +235,6 @@ export const resourceHandler = (
       cpu: String(config.cpu),
       memory: String(config.memory),
       executionRoleArn: taskExecutionRole.arn,
-      // TODO
-      // task_role_arn            = var.roleArn
       placementConstraints: [
         {
           type: 'memberOf',
@@ -367,8 +359,6 @@ export const resourceHandler = (
     }
   }
 
-  // TODO:
-  // Task Role
   const outputs: TerraformOutput[] = []
 
   return {
@@ -415,7 +405,27 @@ const getApplicationService = (): AwsApplicationService =>
           type: 'boolean',
           default: true,
         },
+        image: {
+          type: 'string',
+        },
+        build: {
+          type: 'object',
+          properties: {
+            source: { type: 'string', default: 'Dockerfile' },
+            args: { type: 'array', items: { type: 'string' } },
+          },
+        },
       },
+      oneOf: [
+        {
+          required: ['image'],
+          not: { required: ['build'] },
+        },
+        {
+          required: ['build'],
+          not: { required: ['image'] },
+        },
+      ],
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.APP))
 
