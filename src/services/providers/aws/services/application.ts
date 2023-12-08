@@ -231,7 +231,7 @@ export const resourceHandler = (
       provider: providerInstance,
       family: `${config.name}-service`,
       requiresCompatibilities: ['FARGATE'],
-      cpu: String(config.cpu),
+      cpu: String(config.cpu * 1024),
       memory: String(config.memory),
       executionRoleArn: taskExecutionRole.arn,
       placementConstraints: [
@@ -403,9 +403,11 @@ const getApplicationService = (): AwsApplicationService =>
       properties: {
         cpu: {
           type: 'number',
+          default: 1,
         },
         memory: {
           type: 'number',
+          default: 1,
         },
         environment: {
           type: 'object',

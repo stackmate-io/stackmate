@@ -67,7 +67,7 @@ export const resourceHandler = (
     configuration: {
       executeCommandConfiguration: {
         kmsKeyId: kmsKey.id,
-        logging: 'override',
+        logging: 'OVERRIDE',
         logConfiguration: {
           cloudWatchEncryptionEnabled: true,
           cloudWatchLogGroupName: logGroup.name,

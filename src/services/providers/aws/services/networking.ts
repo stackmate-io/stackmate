@@ -37,7 +37,7 @@ export const resourceHandler = (
   } = provisionable
 
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
-  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 4, 24)
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 8, 24)
 
   const vpc = new awsVpc.Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -54,7 +54,7 @@ export const resourceHandler = (
     vpc.importFrom(imp.friendlyUniqueId, providerInstance)
   }
 
-  const availabilityZones = 'abcd'.split('').map((suffix) => `${config.region}${suffix}`)
+  const availabilityZones = 'aabbccdd'.split('').map((suffix) => `${config.region}${suffix}`)
 
   const createSubnets = (cidrs: string[], name: string, isPublic: boolean) =>
     cidrs.map(
@@ -68,8 +68,8 @@ export const resourceHandler = (
         }),
     )
 
-  const subnets = createSubnets(subnetCidrs.splice(2), 'subnet', false)
-  const publicSubnets = createSubnets(subnetCidrs.splice(2), 'public_subnet', true)
+  const subnets = createSubnets(subnetCidrs.splice(4), 'subnet', false)
+  const publicSubnets = createSubnets(subnetCidrs.splice(4), 'public_subnet', true)
 
   const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,
