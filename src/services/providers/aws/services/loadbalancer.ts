@@ -12,6 +12,7 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { alb, albTargetGroup, securityGroup } from '@cdktf/provider-aws'
 import { TerraformOutput } from 'cdktf'
+import { hashString } from '@src/lib/hash'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
@@ -94,13 +95,14 @@ export const resourceHandler = (
     stack.context,
     `${resourceId}_target_group`,
     {
-      name: config.name,
+      name: `alb-tg-${hashString(config.name).slice(0, 12)}`,
       port: 80,
       protocol: 'HTTP',
       targetType: 'ip',
       vpcId: vpc.id,
       provider: providerInstance,
       targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
+      dependsOn: [loadBalancer],
     },
   )
 

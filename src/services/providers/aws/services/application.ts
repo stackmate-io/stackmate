@@ -13,17 +13,17 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
 import { Fn, TerraformOutput } from 'cdktf'
-import type { Distribute, OneOfType } from '@src/lib/util'
 import type {
   ecsCluster,
   iamRole,
   route53Zone,
   ecrRepository,
-  acmCertificate,
   albTargetGroup,
   alb,
   cloudwatchLogGroup,
+  acmCertificate,
 } from '@cdktf/provider-aws'
+import type { Distribute, OneOfType } from '@src/lib/util'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -229,19 +229,11 @@ export const resourceHandler = (
     {
       networkMode: 'awsvpc',
       provider: providerInstance,
-      family: `${config.name}-service`,
+      family: config.name,
       requiresCompatibilities: ['FARGATE'],
-      cpu: String(config.cpu * 1024),
+      cpu: String(config.cpu),
       memory: String(config.memory),
       executionRoleArn: taskExecutionRole.arn,
-      placementConstraints: [
-        {
-          type: 'memberOf',
-          expression: `attribute:ecs.availability-zone in [${subnets
-            .map((subnet) => subnet.availabilityZone)
-            .join(', ')}]`,
-        },
-      ],
       containerDefinitions: Fn.jsonencode([containerDefinition]),
     },
   )
@@ -257,41 +249,12 @@ export const resourceHandler = (
     })
   }
 
-  const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
-    name: config.name,
-    cluster: cluster.id,
-    provider: providerInstance,
-    taskDefinition: taskDefinition.arn,
-    schedulingStrategy: 'REPLICA',
-    desiredCount: config.nodes,
-    forceNewDeployment: true,
-    dependsOn: [targetGroup],
-    networkConfiguration: {
-      securityGroups: config.web && sg ? [loadBalancerSecurityGroup.id, sg.id] : [],
-      subnets: subnets.map((subnet) => subnet.id),
-      assignPublicIp: false,
-    },
-    loadBalancer: config.web
-      ? [
-          {
-            targetGroupArn: targetGroup.arn,
-            containerName: config.name,
-            containerPort: config.port,
-          },
-        ]
-      : undefined,
-    lifecycle: {
-      ignoreChanges: ['task_definition', 'load_balancer', 'desired_count'],
-    },
-  })
-
   const listeners: albListener.AlbListener[] = []
   const dnsRecords: route53Record.Route53Record[] = []
 
   if (config.web) {
     const opts = {
       loadBalancerArn: loadBalancer.arn,
-      protocol: 'TCP',
       provider: providerInstance,
       dependsOn: [targetGroup],
       lifecycle: {
@@ -303,6 +266,7 @@ export const resourceHandler = (
       new albListener.AlbListener(stack.context, `${resourceId}_listener_http`, {
         ...opts,
         port: 80,
+        protocol: 'HTTP',
         defaultAction: [
           {
             type: 'redirect',
@@ -313,6 +277,7 @@ export const resourceHandler = (
       new albListener.AlbListener(stack.context, `${resourceId}_listener_https`, {
         ...opts,
         port: 443,
+        protocol: 'HTTPS',
         certificateArn: certificate.arn,
         defaultAction: [
           {
@@ -331,6 +296,7 @@ export const resourceHandler = (
           name: domain,
           zoneId: dnsZone.id,
           provider: providerInstance,
+          allowOverwrite: true,
           ...(isTld
             ? {
                 type: 'A',
@@ -340,7 +306,7 @@ export const resourceHandler = (
                   evaluateTargetHealth: true,
                 },
               }
-            : { type: 'CNAME', records: [loadBalancer.dnsName] }),
+            : { type: 'CNAME', ttl: 3600, records: [loadBalancer.dnsName] }),
         }),
       )
 
@@ -350,6 +316,7 @@ export const resourceHandler = (
             name: `www.${domain}`,
             zoneId: dnsZone.id,
             type: 'CNAME',
+            ttl: 3600,
             records: [loadBalancer.dnsName],
             provider: providerInstance,
           }),
@@ -357,6 +324,33 @@ export const resourceHandler = (
       }
     }
   }
+
+  const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
+    name: config.name,
+    cluster: cluster.id,
+    provider: providerInstance,
+    taskDefinition: taskDefinition.arn,
+    schedulingStrategy: 'REPLICA',
+    desiredCount: config.nodes,
+    dependsOn: [targetGroup, ...listeners],
+    networkConfiguration: {
+      securityGroups: config.web && sg ? [loadBalancerSecurityGroup.id, sg.id] : [],
+      subnets: subnets.map((subnet) => subnet.id),
+      assignPublicIp: false,
+    },
+    loadBalancer: config.web
+      ? [
+          {
+            targetGroupArn: targetGroup.arn,
+            containerName: config.name,
+            containerPort: config.port,
+          },
+        ]
+      : undefined,
+    lifecycle: {
+      ignoreChanges: ['desired_count'],
+    },
+  })
 
   const outputs: TerraformOutput[] = [
     new TerraformOutput(stack.context, `${resourceId}_task_definition_arn`, {

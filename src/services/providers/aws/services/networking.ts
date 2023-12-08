@@ -1,10 +1,10 @@
 import { ImportableResource, TerraformOutput } from 'cdktf'
 import {
   internetGateway,
-  subnet,
   vpc as awsVpc,
   routeTable,
   routeTableAssociation,
+  subnet,
 } from '@cdktf/provider-aws'
 import { getCidrBlocks } from '@src/lib/networking'
 import { getBaseService, getProfile } from '@src/services/utils'
@@ -37,7 +37,7 @@ export const resourceHandler = (
   } = provisionable
 
   const { vpc: vpcConfig, subnet: subnetConfig, gateway: gatewayConfig } = getProfile(config)
-  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 8, 24)
+  const [vpcCidr, ...subnetCidrs] = getCidrBlocks(config.rootIp || DEFAULT_VPC_IP, 16, 4, 24)
 
   const vpc = new awsVpc.Vpc(stack.context, resourceId, {
     ...vpcConfig,
@@ -54,22 +54,32 @@ export const resourceHandler = (
     vpc.importFrom(imp.friendlyUniqueId, providerInstance)
   }
 
-  const availabilityZones = 'aabbccdd'.split('').map((suffix) => `${config.region}${suffix}`)
+  const availabilityZones = 'abc'.split('').map((suffix) => `${config.region}${suffix}`)
 
-  const createSubnets = (cidrs: string[], name: string, isPublic: boolean) =>
-    cidrs.map(
-      (cidrBlock, idx) =>
-        new subnet.Subnet(stack.context, `${resourceId}_${name}${idx + 1}`, {
+  const createSubnets = (cidrs: string[], name: string, isPublic: boolean) => {
+    let azIndex = 0
+    const subs: subnet.Subnet[] = []
+
+    for (let i = 0; i < cidrs.length; i++) {
+      const cidrBlock = cidrs[i]
+      subs.push(
+        new subnet.Subnet(stack.context, `${resourceId}_${name}${i + 1}`, {
           ...subnetConfig,
           vpcId: vpc.id,
           cidrBlock,
-          availabilityZone: availabilityZones[idx],
+          availabilityZone: availabilityZones[azIndex],
           mapPublicIpOnLaunch: isPublic,
         }),
-    )
+      )
 
-  const subnets = createSubnets(subnetCidrs.splice(4), 'subnet', false)
-  const publicSubnets = createSubnets(subnetCidrs.splice(4), 'public_subnet', true)
+      azIndex = azIndex + 1 === availabilityZones.length ? 0 : azIndex + 1
+    }
+
+    return subs
+  }
+
+  const subnets = createSubnets(subnetCidrs.splice(0, 2), 'subnet', false)
+  const publicSubnets = createSubnets(subnetCidrs.splice(0, 2), 'public_subnet', true)
 
   const gateway = new internetGateway.InternetGateway(stack.context, `${resourceId}_gateway`, {
     ...gatewayConfig,
