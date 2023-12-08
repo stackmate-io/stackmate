@@ -5,6 +5,7 @@ import {
   ecsTaskDefinition,
   route53Record,
   securityGroup,
+  albTargetGroup,
 } from '@cdktf/provider-aws'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getBaseService } from '@src/services/utils'
@@ -13,12 +14,12 @@ import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
 import { Fn, TerraformOutput } from 'cdktf'
+import { hashString } from '@src/lib/hash'
 import type {
   ecsCluster,
   iamRole,
   route53Zone,
   ecrRepository,
-  albTargetGroup,
   alb,
   cloudwatchLogGroup,
   acmCertificate,
@@ -78,10 +79,6 @@ export type AwsApplicationRequirements = {
     AwsLoadBalancerResources['securityGroup'],
     typeof SERVICE_TYPE.LOAD_BALANCER
   >
-  targetGroup: ServiceRequirement<
-    AwsLoadBalancerResources['targetGroup'],
-    typeof SERVICE_TYPE.LOAD_BALANCER
-  >
 }
 
 export const getApplicationRequirements = (): AwsApplicationRequirements => ({
@@ -133,16 +130,6 @@ export const getApplicationRequirements = (): AwsApplicationRequirements => ({
       source.region === linked.region,
     handler: (prov: AwsLoadBalancerProvisionable): alb.Alb => prov.provisions.loadBalancer,
   },
-  targetGroup: {
-    with: SERVICE_TYPE.LOAD_BALANCER,
-    requirement: true,
-    where: (source: AwsApplicationAttributes, linked: AwsLoadBalancerAttributes) =>
-      Boolean(source.port) &&
-      source.provider === linked.provider &&
-      source.region === linked.region,
-    handler: (prov: AwsLoadBalancerProvisionable): albTargetGroup.AlbTargetGroup =>
-      prov.provisions.targetGroup,
-  },
   loadBalancerSecurityGroup: {
     with: SERVICE_TYPE.LOAD_BALANCER,
     requirement: true,
@@ -193,8 +180,7 @@ export const resourceHandler = (
       dnsZone,
       repository,
       cluster,
-      subnets,
-      targetGroup,
+      publicSubnets,
       logGroup,
       taskExecutionRole,
       loadBalancer,
@@ -203,6 +189,7 @@ export const resourceHandler = (
       loadBalancerSecurityGroup,
     },
   } = provisionable
+
   const containerDefinition = {
     name: config.name,
     image: config.image ? config.image : `${repository.repositoryUrl}/${config.name}:latest`,
@@ -238,33 +225,33 @@ export const resourceHandler = (
     },
   )
 
-  let sg: securityGroup.SecurityGroup | undefined
-
   if (config.web) {
-    sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
-      name: `${config.name}-security-group`,
-      description: `Security group for the ${config.name} service`,
-      vpcId: vpc.id,
-      provider: providerInstance,
-    })
   }
 
   const listeners: albListener.AlbListener[] = []
   const dnsRecords: route53Record.Route53Record[] = []
 
-  if (config.web) {
-    const opts = {
-      loadBalancerArn: loadBalancer.arn,
+  const targetGroup = new albTargetGroup.AlbTargetGroup(
+    stack.context,
+    `${resourceId}_target_group`,
+    {
+      name: `alb-tg-${hashString(config.name).slice(0, 12)}`,
+      port: config.port,
+      protocol: 'HTTP',
+      targetType: 'ip',
+      vpcId: vpc.id,
       provider: providerInstance,
-      dependsOn: [targetGroup],
-      lifecycle: {
-        ignoreChanges: ['default_action'],
-      },
-    }
+      targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
+      dependsOn: [loadBalancer],
+    },
+  )
 
+  if (config.web) {
     listeners.push(
       new albListener.AlbListener(stack.context, `${resourceId}_listener_http`, {
-        ...opts,
+        loadBalancerArn: loadBalancer.arn,
+        provider: providerInstance,
+        dependsOn: [targetGroup],
         port: 80,
         protocol: 'HTTP',
         defaultAction: [
@@ -275,11 +262,12 @@ export const resourceHandler = (
         ],
       }),
       new albListener.AlbListener(stack.context, `${resourceId}_listener_https`, {
-        ...opts,
+        loadBalancerArn: loadBalancer.arn,
+        provider: providerInstance,
         port: 443,
         protocol: 'HTTPS',
         certificateArn: certificate.arn,
-        dependsOn: [certificate],
+        dependsOn: [targetGroup, certificate],
         defaultAction: [
           {
             targetGroupArn: targetGroup.arn,
@@ -326,18 +314,49 @@ export const resourceHandler = (
     }
   }
 
+  const sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
+    name: `${config.name}-security-group`,
+    description: `Security group for the ${config.name} service`,
+    vpcId: vpc.id,
+    provider: providerInstance,
+    ingress: [
+      {
+        fromPort: config.port,
+        toPort: config.port,
+        protocol: 'tcp',
+        securityGroups: [vpc.defaultSecurityGroupId],
+      },
+    ],
+    egress: [
+      {
+        fromPort: 0,
+        toPort: 0,
+        protocol: '-1',
+        cidrBlocks: ['0.0.0.0/0'],
+        ipv6CidrBlocks: ['::/0'],
+      },
+    ],
+  })
+
+  const securityGroups: string[] = [vpc.defaultSecurityGroupId, sg.id]
+
+  if (config.web) {
+    securityGroups.push(loadBalancerSecurityGroup.id)
+  }
+
   const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
     name: config.name,
     cluster: cluster.id,
     provider: providerInstance,
     taskDefinition: taskDefinition.arn,
+    launchType: 'FARGATE',
     schedulingStrategy: 'REPLICA',
-    desiredCount: 0, // config.nodes,
+    desiredCount: config.nodes,
     dependsOn: [targetGroup, ...listeners],
     networkConfiguration: {
-      securityGroups: config.web && sg ? [loadBalancerSecurityGroup.id, sg.id] : [],
-      subnets: subnets.map((subnet) => subnet.id),
-      assignPublicIp: false,
+      securityGroups,
+      subnets: publicSubnets.map((subnet) => subnet.id),
+      assignPublicIp: true,
     },
     loadBalancer: config.web
       ? [

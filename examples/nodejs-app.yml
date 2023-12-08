@@ -10,5 +10,5 @@ environments:
       domain: app.stackmate.io
       cpu: 256
       memory: 512
-      port: 5000
+      port: 3000
       image: stackmate/sample-nodejs-app:latest

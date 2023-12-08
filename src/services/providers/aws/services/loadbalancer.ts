@@ -10,9 +10,8 @@ import {
 import { REGIONS } from '@aws/constants'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import { alb, albTargetGroup, securityGroup } from '@cdktf/provider-aws'
+import { alb, securityGroup } from '@cdktf/provider-aws'
 import { TerraformOutput } from 'cdktf'
-import { hashString } from '@src/lib/hash'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
@@ -25,7 +24,6 @@ export type AwsLoadBalancerAttributes = BaseServiceAttributes &
 
 export type AwsLoadBalancerResources = {
   loadBalancer: alb.Alb
-  targetGroup: albTargetGroup.AlbTargetGroup
   securityGroup: securityGroup.SecurityGroup
   outputs: TerraformOutput[]
 }
@@ -53,7 +51,7 @@ export const resourceHandler = (
   const sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
     provider: providerInstance,
     vpcId: vpc.id,
-    egress: [
+    ingress: [
       {
         fromPort: 80,
         toPort: 80,
@@ -68,6 +66,8 @@ export const resourceHandler = (
         cidrBlocks: ['0.0.0.0/0'],
         ipv6CidrBlocks: ['::/0'],
       },
+    ],
+    egress: [
       {
         fromPort: 0,
         toPort: 0,
@@ -85,26 +85,11 @@ export const resourceHandler = (
     enableHttp2: true,
     provider: providerInstance,
     subnets: publicSubnets.map((subnet) => subnet.id),
-    securityGroups: [sg.id],
+    securityGroups: [sg.id, vpc.defaultSecurityGroupId],
     lifecycle: {
       createBeforeDestroy: true,
     },
   })
-
-  const targetGroup = new albTargetGroup.AlbTargetGroup(
-    stack.context,
-    `${resourceId}_target_group`,
-    {
-      name: `alb-tg-${hashString(config.name).slice(0, 12)}`,
-      port: 80,
-      protocol: 'HTTP',
-      targetType: 'ip',
-      vpcId: vpc.id,
-      provider: providerInstance,
-      targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
-      dependsOn: [loadBalancer],
-    },
-  )
 
   const outputs = [
     new TerraformOutput(stack.context, `${resourceId}_loadbalancer_url`, {
@@ -115,7 +100,6 @@ export const resourceHandler = (
 
   return {
     loadBalancer,
-    targetGroup,
     securityGroup: sg,
     outputs,
   }
