@@ -23,6 +23,14 @@ export const getTopLevelDomain = (domain: string): string => {
 }
 
 /**
+ * Checks whether a domain is a TLD
+ *
+ * @param {String} domain the domain to check
+ * @returns {Boolean}
+ */
+export const isTopLevelDomain = (domain: string): boolean => domain === getTopLevelDomain(domain)
+
+/**
  * Separate primary and secondary domains from a list of domains
  *
  * @param {String[]} domains the domains to order

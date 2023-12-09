@@ -1,4 +1,4 @@
-import { getDomainMatcher, getDomainsOrder, getTopLevelDomain } from '@lib/domain'
+import { getDomainMatcher, getDomainsOrder, getTopLevelDomain, isTopLevelDomain } from '@lib/domain'
 
 describe('getDomainMatcher', () => {
   const regExp = new RegExp(getDomainMatcher())
@@ -35,6 +35,13 @@ describe('getTopLevelDomain', () => {
     expect(() => getTopLevelDomain('wrong!')).toThrow()
     expect(() => getTopLevelDomain('123456')).toThrow()
     expect(() => getTopLevelDomain('')).toThrow()
+  })
+})
+
+describe('isTopLevelDomain', () => {
+  it('checks whether a domain is a tld', () => {
+    expect(isTopLevelDomain('stackmate.io')).toBe(true)
+    expect(isTopLevelDomain('app.stackmate.io')).toBe(false)
   })
 })
 

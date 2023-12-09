@@ -12,7 +12,7 @@ import { getBaseService } from '@src/services/utils'
 import * as behaviors from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
+import { getDomainMatcher, getTopLevelDomain, isTopLevelDomain } from '@src/lib/domain'
 import { Fn, TerraformOutput } from 'cdktf'
 import { hashString } from '@src/lib/hash'
 import type {
@@ -235,8 +235,16 @@ export const resourceHandler = (
       targetType: 'ip',
       vpcId: vpc.id,
       provider: providerInstance,
-      targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
       dependsOn: [loadBalancer],
+      healthCheck: {
+        enabled: true,
+        healthyThreshold: 5,
+        interval: 30,
+        timeout: 10,
+        path: '/',
+        protocol: 'HTTP',
+        unhealthyThreshold: 3,
+      },
     })
 
     listeners.push(
@@ -293,7 +301,7 @@ export const resourceHandler = (
         }),
       )
 
-      if (config.www) {
+      if (config.www && isTopLevelDomain(domain)) {
         dnsRecords.push(
           new route53Record.Route53Record(stack.context, `${resourceId}_dns_record_www`, {
             name: `www.${domain}`,
@@ -425,7 +433,7 @@ const getApplicationService = (): AwsApplicationService =>
         },
         www: {
           type: 'boolean',
-          default: false,
+          default: true,
         },
         image: {
           type: 'string',
