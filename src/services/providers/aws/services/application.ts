@@ -24,7 +24,7 @@ import type {
   cloudwatchLogGroup,
   acmCertificate,
 } from '@cdktf/provider-aws'
-import type { Distribute, OneOfType, OptionalKeys } from '@src/lib/util'
+import type { OptionalKeys } from '@src/lib/util'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -42,11 +42,7 @@ import type {
 import type { AwsDnsAttributes, AwsDnsProvisionable, AwsDnsResources } from './dns'
 import type { AwsSSLAttributes, AwsSSLProvisionable, AwsSSLResources } from './ssl'
 
-type WithDocker<Atts extends BaseServiceAttributes> = OneOfType<
-  [Atts & { image: string }, Atts & { build: { source: string; args?: string[] } }]
->
-
-type AppAttributes = BaseServiceAttributes &
+export type AwsApplicationAttributes = BaseServiceAttributes &
   behaviors.MultiNodeAttributes &
   OptionalKeys<behaviors.ConnectableAttributes, 'port'> & {
     provider: typeof PROVIDER.AWS
@@ -58,8 +54,6 @@ type AppAttributes = BaseServiceAttributes &
     web: boolean
     www: boolean
   }
-
-export type AwsApplicationAttributes = Distribute<WithDocker<AppAttributes>>
 
 export type AwsApplicationRequirements = {
   dnsZone: ServiceRequirement<AwsDnsResources['zone'], typeof SERVICE_TYPE.DNS>
@@ -436,24 +430,7 @@ const getApplicationService = (): AwsApplicationService =>
         image: {
           type: 'string',
         },
-        build: {
-          type: 'object',
-          properties: {
-            source: { type: 'string', default: 'Dockerfile' },
-            args: { type: 'array', items: { type: 'string' } },
-          },
-        },
       },
-      oneOf: [
-        {
-          required: ['image'],
-          not: { required: ['build'] },
-        },
-        {
-          required: ['build'],
-          not: { required: ['image'] },
-        },
-      ],
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.APP))
 
