@@ -425,7 +425,7 @@ const getApplicationService = (): AwsApplicationService =>
         },
         www: {
           type: 'boolean',
-          default: true,
+          default: false,
         },
         image: {
           type: 'string',
