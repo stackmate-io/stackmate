@@ -24,7 +24,7 @@ import type {
   cloudwatchLogGroup,
   acmCertificate,
 } from '@cdktf/provider-aws'
-import type { Distribute, OneOfType } from '@src/lib/util'
+import type { Distribute, OneOfType, OptionalKeys } from '@src/lib/util'
 import type { Stack } from '@src/lib/stack'
 import type {
   BaseServiceAttributes,
@@ -48,7 +48,7 @@ type WithDocker<Atts extends BaseServiceAttributes> = OneOfType<
 
 type AppAttributes = BaseServiceAttributes &
   behaviors.MultiNodeAttributes &
-  behaviors.ConnectableAttributes & {
+  OptionalKeys<behaviors.ConnectableAttributes, 'port'> & {
     provider: typeof PROVIDER.AWS
     type: typeof SERVICE_TYPE.APP
     cpu: number
@@ -225,16 +225,16 @@ export const resourceHandler = (
     },
   )
 
-  if (config.web) {
-  }
-
+  const serviceDependencies = []
   const listeners: albListener.AlbListener[] = []
   const dnsRecords: route53Record.Route53Record[] = []
+  const securityGroups: string[] = [vpc.defaultSecurityGroupId]
+  let targetGroup: albTargetGroup.AlbTargetGroup | undefined
 
-  const targetGroup = new albTargetGroup.AlbTargetGroup(
-    stack.context,
-    `${resourceId}_target_group`,
-    {
+  if (config.port) {
+    securityGroups.push(loadBalancerSecurityGroup.id)
+
+    targetGroup = new albTargetGroup.AlbTargetGroup(stack.context, `${resourceId}_target_group`, {
       name: `alb-tg-${hashString(config.name).slice(0, 12)}`,
       port: config.port,
       protocol: 'HTTP',
@@ -243,10 +243,8 @@ export const resourceHandler = (
       provider: providerInstance,
       targetHealthState: [{ enableUnhealthyConnectionTermination: false }],
       dependsOn: [loadBalancer],
-    },
-  )
+    })
 
-  if (config.web) {
     listeners.push(
       new albListener.AlbListener(stack.context, `${resourceId}_listener_http`, {
         loadBalancerArn: loadBalancer.arn,
@@ -276,6 +274,8 @@ export const resourceHandler = (
         ],
       }),
     )
+
+    serviceDependencies.push(targetGroup, ...listeners)
 
     if (config.domain) {
       const domain = config.domain.replace(/^www\.(.*)$/i, '$1')
@@ -312,36 +312,32 @@ export const resourceHandler = (
         )
       }
     }
-  }
 
-  const sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
-    name: `${config.name}-security-group`,
-    description: `Security group for the ${config.name} service`,
-    vpcId: vpc.id,
-    provider: providerInstance,
-    ingress: [
-      {
-        fromPort: config.port,
-        toPort: config.port,
-        protocol: 'tcp',
-        securityGroups: [vpc.defaultSecurityGroupId],
-      },
-    ],
-    egress: [
-      {
-        fromPort: 0,
-        toPort: 0,
-        protocol: '-1',
-        cidrBlocks: ['0.0.0.0/0'],
-        ipv6CidrBlocks: ['::/0'],
-      },
-    ],
-  })
+    const sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
+      name: `${config.name}-security-group`,
+      description: `Security group for the ${config.name} service`,
+      vpcId: vpc.id,
+      provider: providerInstance,
+      ingress: [
+        {
+          fromPort: config.port,
+          toPort: config.port,
+          protocol: 'tcp',
+          securityGroups: [vpc.defaultSecurityGroupId],
+        },
+      ],
+      egress: [
+        {
+          fromPort: 0,
+          toPort: 0,
+          protocol: '-1',
+          cidrBlocks: ['0.0.0.0/0'],
+          ipv6CidrBlocks: ['::/0'],
+        },
+      ],
+    })
 
-  const securityGroups: string[] = [vpc.defaultSecurityGroupId, sg.id]
-
-  if (config.web) {
-    securityGroups.push(loadBalancerSecurityGroup.id)
+    securityGroups.push(sg.id)
   }
 
   const service = new ecsService.EcsService(stack.context, `${resourceId}_service`, {
@@ -352,21 +348,22 @@ export const resourceHandler = (
     launchType: 'FARGATE',
     schedulingStrategy: 'REPLICA',
     desiredCount: config.nodes,
-    dependsOn: [targetGroup, ...listeners],
+    dependsOn: serviceDependencies,
     networkConfiguration: {
       securityGroups,
       subnets: publicSubnets.map((subnet) => subnet.id),
       assignPublicIp: true,
     },
-    loadBalancer: config.web
-      ? [
-          {
-            targetGroupArn: targetGroup.arn,
-            containerName: config.name,
-            containerPort: config.port,
-          },
-        ]
-      : undefined,
+    loadBalancer:
+      targetGroup && config.port
+        ? [
+            {
+              targetGroupArn: targetGroup.arn,
+              containerName: config.name,
+              containerPort: config.port,
+            },
+          ]
+        : undefined,
   })
 
   const outputs: TerraformOutput[] = [
@@ -431,10 +428,6 @@ const getApplicationService = (): AwsApplicationService =>
         domain: {
           type: 'string',
           pattern: getDomainMatcher(),
-        },
-        web: {
-          type: 'boolean',
-          default: true,
         },
         www: {
           type: 'boolean',

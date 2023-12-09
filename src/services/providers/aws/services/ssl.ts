@@ -125,7 +125,7 @@ export const resourceHandler = (
 
   const outputs = [
     new TerraformOutput(stack.context, `${resourceId}_verification_method`, {
-      value: `${config.domain} will be verified via ${config.validation}`,
+      value: `${config.domain} verification method is set to "${config.validation}"`,
     }),
   ]
 
