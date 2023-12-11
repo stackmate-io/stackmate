@@ -8,6 +8,7 @@ import type { Options as AjvOptions } from 'ajv'
 import { validateServiceLinks } from './validateServiceLinks'
 import { validateServiceProfile } from './validateServiceProfile'
 import { validateServiceProfileOverrides } from './validateServiceProfileOverrides'
+import { validateUniqueAppDomains } from './validateUniqueAppDomains'
 
 let ajv: Ajv
 /**
@@ -38,6 +39,14 @@ export const getAjv = (opts: AjvOptions = {}): Ajv => {
     errors: true,
     error: { message: 'Invalid links provided for the service' },
     compile: () => validateServiceLinks,
+  })
+
+  ajv.addKeyword({
+    keyword: 'uniqueAppDomains',
+    async: false,
+    errors: true,
+    error: { message: 'The same domain name is configured to more than one application services' },
+    compile: () => validateUniqueAppDomains,
   })
 
   ajv.addKeyword({
