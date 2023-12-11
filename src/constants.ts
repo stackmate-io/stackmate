@@ -11,7 +11,7 @@ export const PROVIDER = {
 export const SERVICE_TYPE = {
   APP: 'application',
   CDN: 'cdn',
-  CLUSTER: 'cluster',
+  CLUSTER: 'application-cluster',
   DNS: 'dns',
   OBJECT_STORAGE: 'object-store',
   INSTANCE: 'instance',

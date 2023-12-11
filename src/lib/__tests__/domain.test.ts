@@ -16,6 +16,7 @@ describe('getDomainMatcher', () => {
   it('does not match invalid domain names', () => {
     expect(regExp.test('')).toBe(false)
     expect(regExp.test('abc')).toBe(false)
+    expect(regExp.test('abcdefg')).toBe(false)
     expect(regExp.test('1234')).toBe(false)
     expect(regExp.test('[object]')).toBe(false)
     expect(regExp.test('hello().world.com')).toBe(false)

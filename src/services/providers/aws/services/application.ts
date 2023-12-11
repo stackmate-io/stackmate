@@ -15,6 +15,8 @@ import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { getDomainMatcher, getTopLevelDomain, isTopLevelDomain } from '@src/lib/domain'
 import { Fn, TerraformOutput } from 'cdktf'
 import { hashString } from '@src/lib/hash'
+import { awsApplicationServiceAlarms } from '@aws/alerts/application'
+import { withAwsAlerts } from '@aws/utils/withAlerts'
 import type {
   ecsCluster,
   iamRole,
@@ -33,7 +35,7 @@ import type {
   ServiceRequirement,
 } from '@src/services/types'
 import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
-import type { AwsClusterProvisionable, AwsClusterResources } from './cluster'
+import type { AwsClusterProvisionable, AwsClusterResources } from './applicationCluster'
 import type {
   AwsLoadBalancerAttributes,
   AwsLoadBalancerProvisionable,
@@ -44,10 +46,12 @@ import type { AwsSSLAttributes, AwsSSLProvisionable, AwsSSLResources } from './s
 
 export type AwsApplicationAttributes = BaseServiceAttributes &
   behaviors.MultiNodeAttributes &
+  behaviors.MonitoringAttributes &
   OptionalKeys<behaviors.ConnectableAttributes, 'port'> & {
     provider: typeof PROVIDER.AWS
     type: typeof SERVICE_TYPE.APP
     cpu: number
+    image: string
     memory: number
     domain?: string
     environment?: Record<string, string>
@@ -162,7 +166,7 @@ export type AwsApplicationProvisionable = Provisionable<
   AwsApplicationResources
 >
 
-export const resourceHandler = (
+const deployApplication = (
   provisionable: AwsApplicationProvisionable,
   stack: Stack,
 ): AwsApplicationResources => {
@@ -399,6 +403,15 @@ export const resourceHandler = (
   }
 }
 
+export const resourceHandler = (
+  provisionable: AwsApplicationProvisionable,
+  stack: Stack,
+): AwsApplicationResources =>
+  pipe(
+    () => deployApplication(provisionable, stack),
+    withAwsAlerts<AwsApplicationProvisionable>(provisionable, stack, awsApplicationServiceAlarms),
+  )()
+
 const getApplicationService = (): AwsApplicationService =>
   pipe(
     behaviors.withHandler(resourceHandler),
@@ -406,6 +419,7 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.withAssociations(getNetworkingAssociations()),
     behaviors.withAssociations(getApplicationRequirements()),
     behaviors.multiNode(),
+    behaviors.monitored(),
     behaviors.connectable(),
     behaviors.withSchema({
       type: 'object',

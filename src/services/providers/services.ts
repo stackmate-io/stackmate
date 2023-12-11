@@ -2,7 +2,7 @@
 export { AwsProvider } from './aws/services/provider'
 export { AwsState } from './aws/services/state'
 export { AwsDns } from './aws/services/dns'
-export { AwsCluster } from './aws/services/cluster'
+export { AwsCluster } from './aws/services/applicationCluster'
 export { AwsPostgreSQL, AwsMySQL, AwsMariaDB } from './aws/services/database'
 export { AwsNetworking } from './aws/services/networking'
 export { AwsRedis, AwsMemcached } from './aws/services/cache'

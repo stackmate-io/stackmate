@@ -92,20 +92,16 @@ export const resourceHandler = (
     // After several attempts with TerraformIterator.fromComplexList()
     // This is the only way to properly iterate the dynamic list
     // https://github.com/hashicorp/terraform-cdk/issues/430#issuecomment-831511019
-    const record = new route53Record.Route53Record(
-      stack.context,
-      `${resourceId}_validation_record`,
-      {
-        name: '${each.value.name}',
-        type: '${each.value.type}',
-        records: ['${each.value.record}'],
-        zoneId: dnsZone.zoneId,
-        ttl: 60,
-        allowOverwrite: true,
-      },
-    )
+    dnsRecord = new route53Record.Route53Record(stack.context, `${resourceId}_validation_record`, {
+      name: '${each.value.name}',
+      type: '${each.value.type}',
+      records: ['${each.value.record}'],
+      zoneId: dnsZone.zoneId,
+      ttl: 60,
+      allowOverwrite: true,
+    })
 
-    record.addOverride(
+    dnsRecord.addOverride(
       'for_each',
       `\${{
         for dvo in ${certificate.fqn}.domain_validation_options : dvo.domain_name => {
@@ -119,7 +115,7 @@ export const resourceHandler = (
 
     certValidation.addOverride(
       'validation_record_fqdns',
-      `\${[for record in ${record.fqn} : record.fqdn]}`,
+      `\${[for record in ${dnsRecord.fqn} : record.fqdn]}`,
     )
   }
 
