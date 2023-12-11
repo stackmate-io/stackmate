@@ -17,6 +17,7 @@ import { Fn, TerraformOutput } from 'cdktf'
 import { hashString } from '@src/lib/hash'
 import { awsApplicationServiceAlarms } from '@aws/alerts/application'
 import { withAwsAlerts } from '@aws/utils/withAlerts'
+import { REGIONS } from '@aws/constants'
 import type {
   ecsCluster,
   iamRole,
@@ -191,8 +192,8 @@ const deployApplication = (
   const containerDefinition = {
     name: config.name,
     image: config.image ? config.image : `${repository.repositoryUrl}/${config.name}:latest`,
-    cpu: config.cpu,
-    memory: config.memory,
+    cpu: config.cpu * 1024,
+    memory: config.memory * 1024,
     essential: true,
     privileged: false,
     networkMode: 'awsvpc',
@@ -216,8 +217,8 @@ const deployApplication = (
       provider: providerInstance,
       family: config.name,
       requiresCompatibilities: ['FARGATE'],
-      cpu: String(config.cpu),
-      memory: String(config.memory),
+      cpu: String(config.cpu * 1024),
+      memory: String(config.memory * 1024),
       executionRoleArn: taskExecutionRole.arn,
       containerDefinitions: Fn.jsonencode([containerDefinition]),
     },
@@ -418,6 +419,7 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.withAssociations(getProviderAssociations()),
     behaviors.withAssociations(getNetworkingAssociations()),
     behaviors.withAssociations(getApplicationRequirements()),
+    behaviors.withRegions(REGIONS),
     behaviors.multiNode(),
     behaviors.monitored(),
     behaviors.connectable(),
@@ -428,6 +430,7 @@ const getApplicationService = (): AwsApplicationService =>
         cpu: {
           type: 'number',
           default: 1,
+          enum: [0.25, 0.5, 1, 2, 4, 8, 16],
         },
         memory: {
           type: 'number',
@@ -453,6 +456,43 @@ const getApplicationService = (): AwsApplicationService =>
           type: 'string',
         },
       },
+      allOf: [
+        {
+          if: { properties: { cpu: { enum: [0.25] } } },
+          then: { properties: { memory: { enum: [0.5, 1, 2] } } },
+          errorMessage: 'Memory for 0.25 vCPU should be either 0.5, 1 or 2 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [0.5] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 1, maximum: 4 } } },
+          errorMessage: 'Memory for 0.5 vCPU should be between 1 and 4 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [1] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 2, maximum: 8 } } },
+          errorMessage: 'Memory for 1 vCPU should be between 2 and 8 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [2] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 4, maximum: 16 } } },
+          errorMessage: 'Memory for 2 vCPUs should be between 4 and 16 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [4] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 8, maximum: 30 } } },
+          errorMessage: 'Memory for 4 vCPUs should be between 8 and 30 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [8] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 16, maximum: 60 } } },
+          errorMessage: 'Memory for 8 vCPUs should be between 16 and 60 GB',
+        },
+        {
+          if: { properties: { cpu: { enum: [16] } } },
+          then: { properties: { memory: { type: 'integer', minimum: 32, maximum: 120 } } },
+          errorMessage: 'Memory for 16 vCPUs should be between 32 and 120 GB',
+        },
+      ],
     }),
   )(getBaseService(PROVIDER.AWS, SERVICE_TYPE.APP))
 

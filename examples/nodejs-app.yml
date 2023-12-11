@@ -8,7 +8,7 @@ environments:
     nodejs-app:
       type: application
       domain: app.stackmate.io
-      cpu: 256
-      memory: 512
+      cpu: 0.25
+      memory: 1
       port: 3000
       image: stackmate/sample-nodejs-app:latest
