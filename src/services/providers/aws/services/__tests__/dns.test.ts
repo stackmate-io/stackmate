@@ -1,11 +1,10 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/helpers'
-import { Stack } from '@src/lib/stack'
 import { faker } from '@faker-js/faker'
 import { route53Zone } from '@cdktf/provider-aws'
 import { Registry } from '@src/services/registry'
 import { getValidData } from '@src/validation'
-import { AwsDns, type AwsDnsAttributes, type AwsDnsResources } from '@aws/services/dns'
+import { AwsDns, type AwsDnsAttributes } from '@aws/services/dns'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
 
 describe('AWS DNS', () => {
   const service = AwsDns
@@ -48,7 +47,6 @@ describe('AWS DNS', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
     const config: AwsDnsAttributes = {
       name: faker.lorem.word(),
       provider: PROVIDER.AWS,
@@ -56,9 +54,7 @@ describe('AWS DNS', () => {
       domain: 'app.stackmate.io',
     }
 
-    const provisionable = getAwsProvisionable(config, stack)
-
-    const resources = service.handler(provisionable, stack) as AwsDnsResources
-    expect(resources.zone instanceof route53Zone.Route53Zone).toBe(true)
+    const stack = getSynthesizedStack([config])
+    expect(stack).toHaveResource(route53Zone.Route53Zone)
   })
 })

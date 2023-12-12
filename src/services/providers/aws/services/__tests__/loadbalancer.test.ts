@@ -1,15 +1,10 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/helpers'
-import { Stack } from '@src/lib/stack'
 import { faker } from '@faker-js/faker'
 import { alb, securityGroup } from '@cdktf/provider-aws'
-import { TerraformOutput } from 'cdktf'
 import { Registry } from '@src/services/registry'
 import { AwsLoadBalancer } from '@aws/services/loadbalancer'
-import type {
-  AwsLoadBalancerAttributes,
-  AwsLoadBalancerResources,
-} from '@aws/services/loadbalancer'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import type { AwsLoadBalancerAttributes } from '@aws/services/loadbalancer'
 
 describe('AWS Load balancer', () => {
   const service = AwsLoadBalancer
@@ -29,7 +24,6 @@ describe('AWS Load balancer', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
     const config: AwsLoadBalancerAttributes = {
       name: faker.lorem.word(),
       provider: PROVIDER.AWS,
@@ -37,12 +31,9 @@ describe('AWS Load balancer', () => {
       region: 'eu-central-1',
     }
 
-    const provisionable = getAwsProvisionable(config, stack)
+    const stack = getSynthesizedStack([config])
 
-    const resources = service.handler(provisionable, stack) as AwsLoadBalancerResources
-    expect(resources.loadBalancer instanceof alb.Alb).toBe(true)
-    expect(resources.securityGroup instanceof securityGroup.SecurityGroup).toBe(true)
-    expect(Array.isArray(resources.outputs)).toBe(true)
-    expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
+    expect(stack).toHaveResource(alb.Alb)
+    expect(stack).toHaveResource(securityGroup.SecurityGroup)
   })
 })

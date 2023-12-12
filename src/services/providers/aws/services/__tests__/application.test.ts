@@ -5,7 +5,7 @@ import { REGIONS } from '@aws/constants'
 import { faker } from '@faker-js/faker'
 import { getValidData } from '@src/validation'
 import { getAwsAppConfigMock } from '@tests/mocks/aws'
-import { getSynthesizedStack } from '@tests/helpers/getProvisionResources'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
 import {
   albListener,
   cloudwatchMetricAlarm,
@@ -86,7 +86,7 @@ describe('Application Service', () => {
   describe('provision resources', () => {
     it('registers the resources - web service', () => {
       const config = { ...getAwsAppConfigMock(), port: faker.internet.port() }
-      const stack = getSynthesizedStack(config)
+      const stack = getSynthesizedStack([config])
 
       expect(stack).toHaveResourceWithProperties(ecsService.EcsService, {
         desired_count: config.nodes,
@@ -150,7 +150,7 @@ describe('Application Service', () => {
 
     it('registers the resources - service without a port defined', () => {
       const config = { ...getAwsAppConfigMock(), port: undefined }
-      const stack = getSynthesizedStack(config)
+      const stack = getSynthesizedStack([config])
 
       expect(stack).toHaveResourceWithProperties(ecsService.EcsService, {
         desired_count: config.nodes,
