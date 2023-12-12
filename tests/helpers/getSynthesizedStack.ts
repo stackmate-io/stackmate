@@ -10,7 +10,7 @@ export const getSynthesizedStack = (
   configs: ServiceConfiguration[],
   environment: EnvironmentChoice = ENVIRONMENT.PRODUCTION,
 ) => {
-  const project = getProjectMock(configs)
+  const project = getProjectMock(configs, environment)
   const services = getProjectServices(project, environment)
 
   const operation = new Operation(services, environment, os.tmpdir())

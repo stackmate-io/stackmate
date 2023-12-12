@@ -28,7 +28,6 @@ const ATTRIBUTE_GENERATOR: Partial<Record<ServiceTypeChoice, AttributesGenerator
     return {
       type: SERVICE_TYPE.DNS,
       provider: associated.provider || project.provider || DEFAULT_PROVIDER,
-      region: associated.region || project.region,
       domain: tld,
       name: kebabCase(`${tld}-dns`),
     }
@@ -58,7 +57,7 @@ const ATTRIBUTE_GENERATOR: Partial<Record<ServiceTypeChoice, AttributesGenerator
   },
   [SERVICE_TYPE.CLUSTER]: (project, environment, associated) => {
     const provider = associated?.provider || project.provider || DEFAULT_PROVIDER
-    const region = associated?.region || project.region
+    const region = associated?.region || project.region || DEFAULT_REGION[provider]
     return {
       name: kebabCase(`app-${provider}-${region ? `${region}-` : ''}cluster`),
       type: SERVICE_TYPE.CLUSTER,

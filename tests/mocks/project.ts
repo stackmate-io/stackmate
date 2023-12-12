@@ -1,49 +1,38 @@
-import path from 'node:path'
 import { faker } from '@faker-js/faker/locale/af_ZA'
-import { PROVIDER } from '@src/constants'
+import { SERVICE_TYPE } from '@src/constants'
 import { ENVIRONMENT } from '@src/project/constants'
 import { fromPairs, kebabCase } from 'lodash'
 import type { ServiceConfiguration } from '@src/services/registry'
-import type { ProjectConfiguration } from '@src/project'
+import type { EnvironmentChoice, ProjectConfiguration } from '@src/project'
 
-export const getProjectMock = (services: ServiceConfiguration[]): ProjectConfiguration => ({
+export const getProjectMock = (
+  services: Partial<ServiceConfiguration>[],
+  environment: EnvironmentChoice = ENVIRONMENT.PRODUCTION,
+): ProjectConfiguration => ({
+  name: faker.internet.domainWord(),
   state: {
     bucket: kebabCase(faker.lorem.words()),
     lockTable: kebabCase(faker.lorem.words()),
-    statePath: 'stackmate.tfstate',
+    statePath: `${faker.internet.domainWord()}.tfstate`,
   },
   environments: {
-    [ENVIRONMENT.PRODUCTION]: fromPairs(services.map((config) => [config.name, config])),
+    [environment]: fromPairs(services.map((config) => [config.name, config])),
   },
 })
 
-export const getAwsDatabaseProjectMock = (): ProjectConfiguration => ({
-  name: faker.internet.domainWord(),
-  state: {
-    provider: PROVIDER.AWS,
-    bucket: faker.internet.domainWord(),
-    lockTable: faker.internet.domainWord(),
-    statePath: path.join(faker.system.directoryPath(), `${faker.internet.domainWord()}.tfstate`),
-  },
-  environments: {
-    [ENVIRONMENT.PRODUCTION]: {
-      mysqlDb: {
-        type: 'mysql',
-      },
-    },
-  },
-})
+export const getAwsDatabaseProjectMock = (): ProjectConfiguration =>
+  getProjectMock([{ type: SERVICE_TYPE.MYSQL, name: 'mysqlDb' }])
 
-// TODO
-export const getFullStackProject = (): ProjectConfiguration => {
-  const project = getAwsDatabaseProjectMock()
-
-  return {
-    ...project,
-    environments: {
-      [ENVIRONMENT.PRODUCTION]: {
-        ...project.environments.production,
-      },
+export const getFullStackProjectMock = (): ProjectConfiguration =>
+  getProjectMock([
+    { type: SERVICE_TYPE.MYSQL, name: 'mysqlDb' },
+    {
+      type: SERVICE_TYPE.APP,
+      name: 'app',
+      image: 'stackmate/sample-nodejs-app:latest',
+      cpu: 0.25,
+      memory: 1,
+      port: 3000,
+      domain: 'test.stackmate.io',
     },
-  }
-}
+  ])
