@@ -93,78 +93,71 @@ export const getParamGroupFamily = (config: DatabaseAttributes): string => {
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-const deployDatabases =
-  (provisionable: AwsDatabaseProvisionable, stack: Stack): (() => AwsDatabaseResources) =>
-  (): AwsDatabaseResources => {
-    const {
-      config,
-      requirements: { providerInstance, vpc, subnets, kmsKey },
-      resourceId,
-    } = provisionable
-    const { instance, params } = getProfile(config)
-    const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
+const deployDatabases = (
+  provisionable: AwsDatabaseProvisionable,
+  stack: Stack,
+): AwsDatabaseResources => {
+  const {
+    config,
+    requirements: { providerInstance, vpc, subnets, kmsKey },
+    resourceId,
+  } = provisionable
+  const { instance, params } = getProfile(config)
+  const dbInstanceName = kebabCase(`${config.name}-${stack.name}`)
 
-    const subnetGroup = new dbSubnetGroup.DbSubnetGroup(
-      stack.context,
-      `${resourceId}_subnet_group`,
-      {
-        subnetIds: subnets.map((subnet) => subnet.id),
-        namePrefix: dbInstanceName,
-        provider: providerInstance,
-        description: DEFAULT_RESOURCE_COMMENT,
-      },
-    )
+  const subnetGroup = new dbSubnetGroup.DbSubnetGroup(stack.context, `${resourceId}_subnet_group`, {
+    subnetIds: subnets.map((subnet) => subnet.id),
+    namePrefix: dbInstanceName,
+    provider: providerInstance,
+    description: DEFAULT_RESOURCE_COMMENT,
+  })
 
-    const paramGroup = new dbParameterGroup.DbParameterGroup(
-      stack.context,
-      `${resourceId}_params`,
-      {
-        ...params,
-        family: getParamGroupFamily(config),
-        description: DEFAULT_RESOURCE_COMMENT,
-        namePrefix: kebabCase(`stackmate-${dbInstanceName}`),
-      },
-    )
+  const paramGroup = new dbParameterGroup.DbParameterGroup(stack.context, `${resourceId}_params`, {
+    ...params,
+    family: getParamGroupFamily(config),
+    description: DEFAULT_RESOURCE_COMMENT,
+    namePrefix: kebabCase(`stackmate-${dbInstanceName}`),
+  })
 
-    const dbInstance = new rdsDbInstance.DbInstance(stack.context, resourceId, {
-      ...instance,
-      allocatedStorage: config.storage,
-      applyImmediately: true,
-      enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[
-        config.engine
-      ] as unknown as string[],
-      engine: config.engine,
-      engineVersion: config.version,
-      identifier: dbInstanceName,
-      instanceClass: config.size,
-      dbName: config.database,
-      parameterGroupName: paramGroup.name,
-      port: config.port,
-      provider: providerInstance,
-      dbSubnetGroupName: subnetGroup.name,
-      manageMasterUserPassword: true,
-      masterUserSecretKmsKeyId: kmsKey.id,
-      username: camelCase(`stackmate-${config.name}-root`),
-      vpcSecurityGroupIds: [vpc.defaultSecurityGroupId],
-      lifecycle: {
-        createBeforeDestroy: true,
-      },
-    })
+  const dbInstance = new rdsDbInstance.DbInstance(stack.context, resourceId, {
+    ...instance,
+    allocatedStorage: config.storage,
+    applyImmediately: true,
+    enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[
+      config.engine
+    ] as unknown as string[],
+    engine: config.engine,
+    engineVersion: config.version,
+    identifier: dbInstanceName,
+    instanceClass: config.size,
+    dbName: config.database,
+    parameterGroupName: paramGroup.name,
+    port: config.port,
+    provider: providerInstance,
+    dbSubnetGroupName: subnetGroup.name,
+    manageMasterUserPassword: true,
+    masterUserSecretKmsKeyId: kmsKey.id,
+    username: camelCase(`stackmate-${config.name}-root`),
+    vpcSecurityGroupIds: [vpc.defaultSecurityGroupId],
+    lifecycle: {
+      createBeforeDestroy: true,
+    },
+  })
 
-    const outputs: TerraformOutput[] = [
-      new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
-        description: `Connection endpoint for "${config.name}" RDS service`,
-        value: dbInstance.endpoint,
-      }),
-      new TerraformOutput(stack.context, `${resourceId}_secret`, {
-        description: 'Database master password in secrets manager',
-        sensitive: true,
-        value: dbInstance.masterUserSecret.get(0).fqn,
-      }),
-    ]
+  const outputs: TerraformOutput[] = [
+    new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
+      description: `Connection endpoint for "${config.name}" RDS service`,
+      value: dbInstance.endpoint,
+    }),
+    new TerraformOutput(stack.context, `${resourceId}_secret`, {
+      description: 'Database master password in secrets manager',
+      sensitive: true,
+      value: dbInstance.masterUserSecret.get(0).fqn,
+    }),
+  ]
 
-    return { dbInstance, paramGroup, subnetGroup, outputs }
-  }
+  return { dbInstance, paramGroup, subnetGroup, outputs }
+}
 
 /**
  * Provisions the database resources along with monitoring resources
@@ -178,7 +171,7 @@ export const resourceHandler = (
   stack: Stack,
 ): AwsDatabaseResources =>
   pipe(
-    deployDatabases(provisionable, stack),
+    () => deployDatabases(provisionable, stack),
     withAwsAlerts<AwsDatabaseProvisionable>(provisionable, stack, awsDatabaseAlarms),
   )()
 

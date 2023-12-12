@@ -1,0 +1,48 @@
+---
+state:
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
+
+environments:
+  production:
+    rails-app:
+      type: application
+      preset: rails
+      port: 3000
+      domain: app.stackmate.io
+      build:
+        source: Dockerfile
+      environment:
+        REDIS_URL: redis://${redis-kv.host}:${redis-kv:port}/0
+        DB_URL: mysql://${mysql-db.user}:${mysql-db.password}@${mysql-db.host}/${mysql-db.db}:${mysql-db.port}
+        S3_BUCKET: s3://${storage.stackmate-rails-app-storage.name}
+
+      # Optional configuration:
+      #
+      # repository: using the service's name by default
+      #
+      # This is the same as preset: rails
+      # tasks:
+      #   deployment:
+      #     - rails bundle
+      #     - rails assets:publish
+      #     - rails db:migrate
+      #
+      # nodes: 1
+      # cpu: 1
+      # memory: 2048
+      # the links should be auto-generated from the environment associations
+      # links:
+      #   - mysql-db
+      #   - redis-kv
+      #
+      # port: 8080
+      #
+      # TODO:
+      #  autoScaling: TBD
+      #  domain: app.stackmate.io # association with dns service
+      #  https: true # association with ssl service
+      #  cdn: true # association with cdn service
+      #  volumes:
+      #    - /mnt/some-mount-path
+      #    - /mnt/another-mount-path

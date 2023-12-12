@@ -1,6 +1,5 @@
 import type { TerraformLocal } from 'cdktf'
 import type { Dictionary } from 'lodash'
-import type { Obj } from '@lib/util'
 import type { Stack } from '@lib/stack'
 import type { BaseService, ExtractAttrs } from './service'
 import type { BaseServiceAttributes } from './util'
@@ -36,13 +35,11 @@ export type ProvisionHandler = (
 export type Provisionable<
   Srv extends BaseService,
   Provs extends Provisions,
-  Context extends Obj = Obj,
   Attrs extends BaseServiceAttributes = ExtractAttrs<Srv>,
 > = BaseProvisionable<Attrs> & {
   service: Srv
   config: Attrs
   provisions: Provs
-  context: Context
   requirements: ExtractServiceRequirements<Srv['associations']>
   variables: { [K in keyof Srv['environment']]: TerraformLocal }
 }

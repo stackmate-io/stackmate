@@ -5,6 +5,7 @@ import { getBaseService } from '@src/services/utils'
 import { withAssociations, withHandler, withSchema } from '@src/services/behaviors'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getDomainMatcher } from '@src/lib/domain'
+import { TerraformOutput } from 'cdktf'
 import type { Stack } from '@src/lib/stack'
 import type { BaseServiceAttributes, Provisionable, Service } from '@src/services/types'
 import type { AwsProviderAssociations } from '@aws/types'
@@ -19,6 +20,7 @@ export type AwsDnsService = Service<AwsDnsAttributes, AwsProviderAssociations>
 
 export type AwsDnsResources = {
   zone: route53Zone.Route53Zone
+  outputs: TerraformOutput[]
 }
 
 export type AwsDnsProvisionable = Provisionable<AwsDnsService, AwsDnsResources>
@@ -38,8 +40,15 @@ export const resourceHandler = (
     provider: providerInstance,
   })
 
+  const outputs = [
+    new TerraformOutput(stack.context, `${resourceId}_name_servers`, {
+      value: zone.nameServers,
+    }),
+  ]
+
   return {
     zone,
+    outputs,
   }
 }
 
@@ -53,7 +62,7 @@ const getDnsService = (): AwsDnsService =>
       properties: {
         domain: {
           type: 'string',
-          pattern: String(getDomainMatcher()),
+          pattern: getDomainMatcher(),
         },
       },
     }),

@@ -1,6 +1,6 @@
-import { acmCertificate, route53Record } from '@cdktf/provider-aws'
+import { acmCertificate, acmCertificateValidation, route53Record } from '@cdktf/provider-aws'
 import { getDomainMatcher, getTopLevelDomain } from '@src/lib/domain'
-import { TerraformIterator, TerraformOutput } from 'cdktf'
+import { TerraformOutput } from 'cdktf'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { pipe } from 'lodash/fp'
 import { getBaseService } from '@src/services/utils'
@@ -78,25 +78,61 @@ export const resourceHandler = (
     },
   })
 
-  if (config.validation === 'dns') {
-    const optionsIterator = TerraformIterator.fromList(certificate.domainValidationOptions)
+  const certValidation = new acmCertificateValidation.AcmCertificateValidation(
+    stack.context,
+    `${resourceId}_certificate_validation`,
+    {
+      certificateArn: certificate.arn,
+      provider: providerInstance,
+      timeouts: { create: config.validation === 'dns' ? '1m' : '5m' },
+    },
+  )
 
-    dnsRecord = new route53Record.Route53Record(stack.context, `${resourceId}_verification`, {
+  if (config.validation === 'dns') {
+    // After several attempts with TerraformIterator.fromComplexList()
+    // This is the only way to properly iterate the dynamic list
+    // https://github.com/hashicorp/terraform-cdk/issues/430#issuecomment-831511019
+    dnsRecord = new route53Record.Route53Record(stack.context, `${resourceId}_validation_record`, {
+      name: '${each.value.name}',
+      type: '${each.value.type}',
+      records: ['${each.value.record}'],
+      zoneId: dnsZone.zoneId,
       ttl: 60,
       allowOverwrite: true,
-      forEach: optionsIterator,
-      name: optionsIterator.value.name,
-      records: [optionsIterator.value.record],
-      type: optionsIterator.value.type,
-      zoneId: dnsZone.id,
     })
+
+    dnsRecord.addOverride(
+      'for_each',
+      `\${{
+        for dvo in ${certificate.fqn}.domain_validation_options : dvo.domain_name => {
+          name   = dvo.resource_record_name
+          record = dvo.resource_record_value
+          type   = dvo.resource_record_type
+        }
+      }
+    }`,
+    )
+
+    certValidation.addOverride(
+      'validation_record_fqdns',
+      `\${[for record in ${dnsRecord.fqn} : record.fqdn]}`,
+    )
   }
 
   const outputs = [
     new TerraformOutput(stack.context, `${resourceId}_verification_method`, {
-      value: `${config.domain} will be verified via ${config.validation}`,
+      value: `${config.domain} verification method is set to "${config.validation}"`,
     }),
   ]
+
+  if (config.validation === 'dns') {
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_verification_records`, {
+        value: certificate.domainValidationOptions,
+        description: 'The SSL validation DNS records',
+      }),
+    )
+  }
 
   return {
     certificate,
@@ -121,7 +157,7 @@ const getSSLService = (): AwsSSLService =>
         },
         domain: {
           type: 'string',
-          pattern: String(getDomainMatcher()),
+          pattern: getDomainMatcher(),
         },
         wildCard: {
           type: 'boolean',

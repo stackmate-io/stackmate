@@ -11,7 +11,7 @@ export const PROVIDER = {
 export const SERVICE_TYPE = {
   APP: 'application',
   CDN: 'cdn',
-  CLUSTER: 'cluster',
+  CLUSTER: 'application-cluster',
   DNS: 'dns',
   OBJECT_STORAGE: 'object-store',
   INSTANCE: 'instance',
@@ -19,7 +19,6 @@ export const SERVICE_TYPE = {
   MEMCACHED: 'memcached',
   MAILER: 'mailer',
   MARIADB: 'mariadb',
-  MONITORING: 'monitoring',
   MYSQL: 'mysql',
   NETWORKING: 'networking',
   POSTGRESQL: 'postgresql',

@@ -6,13 +6,11 @@ import {
 import { AwsProvider } from '@aws/services/provider'
 import { REGIONS } from '@aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getProvisionable } from '@tests/helpers/getProvisionable'
-import { Stack } from '@lib/stack'
 import { faker } from '@faker-js/faker'
-import { TerraformOutput } from 'cdktf'
 import { Registry } from '@src/services/registry'
-import type { BaseProvisionable } from '@src/services/types'
-import type { AwsProviderResources } from '@aws/types'
+import { kebabCase } from 'lodash'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import type { AwsProviderAttributes } from '@aws/types'
 
 describe('AWS Provider', () => {
   const service = AwsProvider
@@ -46,31 +44,23 @@ describe('AWS Provider', () => {
   })
 
   describe('provision handler', () => {
-    let stack: Stack
-    let provisionable: BaseProvisionable
+    let config: AwsProviderAttributes
 
     beforeEach(() => {
-      stack = new Stack(faker.lorem.word())
-      provisionable = getProvisionable({
+      config = {
         provider: PROVIDER.AWS,
         type: SERVICE_TYPE.PROVIDER,
-        name: 'aws-provider',
+        name: kebabCase(faker.lorem.words()),
         region: 'eu-central-1',
-      })
+      }
     })
 
     it('registers the service into the stack and creates the resources', () => {
-      const resources = service.handler(provisionable, stack) as AwsProviderResources
+      const stack = getSynthesizedStack([config])
 
-      expect(resources).toBeInstanceOf(Object)
-      expect(Object.keys(resources)).toEqual(
-        expect.arrayContaining(['account', 'kmsKey', 'providerInstance', 'outputs']),
-      )
-      expect(resources.kmsKey).toBeInstanceOf(kmsKey.KmsKey)
-      expect(resources.account).toBeInstanceOf(dataAwsCallerIdentity.DataAwsCallerIdentity)
-      expect(resources.providerInstance).toBeInstanceOf(terraformAwsProvider.AwsProvider)
-      expect(Array.isArray(resources.outputs)).toBe(true)
-      expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
+      expect(stack).toHaveProvider(terraformAwsProvider.AwsProvider)
+      expect(stack).toHaveResource(kmsKey.KmsKey)
+      expect(stack).toHaveDataSource(dataAwsCallerIdentity.DataAwsCallerIdentity)
     })
   })
 })

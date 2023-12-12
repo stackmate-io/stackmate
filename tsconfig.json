@@ -65,6 +65,7 @@
     "e2e/**/*",
     "**/__tests__/**/*",
     "tsconfig.json",
+    "jest.d.ts",
     "jest.setup.ts",
     "jest.config.e2e.ts",
     "jest.config.ts",

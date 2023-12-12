@@ -125,119 +125,117 @@ export const getClusterSetup = (nodes: number): { nodeGroups: number; replicas: 
  * @param {Stack} stack the stack to deploy
  * @returns {Provisions} the provisions generated
  */
-const deployCaches =
-  (provisionable: AwsCacheProvisionable, stack: Stack): (() => AwsCacheResources) =>
-  (): AwsCacheResources => {
-    const {
-      config,
-      requirements: { providerInstance, subnets, vpc },
-      resourceId,
-    } = provisionable
+const deployCaches = (provisionable: AwsCacheProvisionable, stack: Stack): AwsCacheResources => {
+  const {
+    config,
+    requirements: { providerInstance, subnets, vpc },
+    resourceId,
+  } = provisionable
 
-    const { cluster: clusterOptions, instance: instanceOptions, params } = getProfile(config)
+  const { cluster: clusterOptions, instance: instanceOptions, params } = getProfile(config)
 
-    const clusterName = kebabCase(`${config.name}-${stack.name}`)
+  const clusterName = kebabCase(`${config.name}-${stack.name}`)
 
-    const subnetGroup = new elasticacheSubnetGroup.ElasticacheSubnetGroup(
-      stack.context,
-      `${resourceId}_subnet_group`,
-      {
-        subnetIds: subnets.map((subnet) => subnet.id),
-        name: `${clusterName}-subnet-group`,
-        provider: providerInstance,
-      },
-    )
+  const subnetGroup = new elasticacheSubnetGroup.ElasticacheSubnetGroup(
+    stack.context,
+    `${resourceId}_subnet_group`,
+    {
+      subnetIds: subnets.map((subnet) => subnet.id),
+      name: `${clusterName}-subnet-group`,
+      provider: providerInstance,
+    },
+  )
 
-    const paramGroup = new elasticacheParameterGroup.ElasticacheParameterGroup(
-      stack.context,
-      `${resourceId}_params`,
-      {
-        ...params,
-        family: getParamGroupFamily(config),
-        name: kebabCase(`stackmate-${clusterName}`),
-      },
-    )
+  const paramGroup = new elasticacheParameterGroup.ElasticacheParameterGroup(
+    stack.context,
+    `${resourceId}_params`,
+    {
+      ...params,
+      family: getParamGroupFamily(config),
+      name: kebabCase(`stackmate-${clusterName}`),
+    },
+  )
 
-    const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(
-      stack.context,
-      `${resourceId}_log_group`,
-      {
-        name: `${resourceId}-log-group`,
-      },
-    )
+  const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(
+    stack.context,
+    `${resourceId}_log_group`,
+    {
+      name: `${resourceId}-log-group`,
+    },
+  )
 
-    const logDeliveryConfiguration = elasticacheClusterLogDeliveryConfigurationToTerraform({
-      destination: logGroup.name,
-      destinationType: 'cloudwatch-logs',
-      logFormat: 'text',
-      logType: 'slow-log',
+  const logDeliveryConfiguration = elasticacheClusterLogDeliveryConfigurationToTerraform({
+    destination: logGroup.name,
+    destinationType: 'cloudwatch-logs',
+    logFormat: 'text',
+    logType: 'slow-log',
+  })
+
+  let instance: elasticacheCluster.ElasticacheCluster | undefined
+  let cluster: elasticacheReplicationGroup.ElasticacheReplicationGroup | undefined
+  const outputs: TerraformOutput[] = []
+
+  if (config.type === SERVICE_TYPE.MEMCACHED || (config.nodes === 1 && !config.cluster)) {
+    instance = new elasticacheCluster.ElasticacheCluster(stack.context, resourceId, {
+      ...instanceOptions,
+      applyImmediately: true,
+      clusterId: clusterName,
+      engine: config.engine,
+      engineVersion: config.version,
+      logDeliveryConfiguration,
+      nodeType: config.size,
+      numCacheNodes: config.nodes,
+      port: config.port,
+      provider: providerInstance,
+      parameterGroupName: paramGroup.name,
+      securityGroupIds: [vpc.defaultSecurityGroupId],
+      subnetGroupName: subnetGroup.name,
     })
 
-    let instance: elasticacheCluster.ElasticacheCluster | undefined
-    let cluster: elasticacheReplicationGroup.ElasticacheReplicationGroup | undefined
-    const outputs: TerraformOutput[] = []
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
+        description: `Connection endpoint for "${config.name}" Elasticache service`,
+        value:
+          config.type === 'memcached'
+            ? instance.configurationEndpoint
+            : instance.cacheNodes.get(0).address,
+      }),
+    )
+  } else {
+    const { nodeGroups, replicas } = getClusterSetup(config.nodes)
 
-    if (config.type === SERVICE_TYPE.MEMCACHED || (config.nodes === 1 && !config.cluster)) {
-      instance = new elasticacheCluster.ElasticacheCluster(stack.context, resourceId, {
-        ...instanceOptions,
+    cluster = new elasticacheReplicationGroup.ElasticacheReplicationGroup(
+      stack.context,
+      resourceId,
+      {
+        ...clusterOptions,
         applyImmediately: true,
-        clusterId: clusterName,
         engine: config.engine,
         engineVersion: config.version,
         logDeliveryConfiguration,
         nodeType: config.size,
-        numCacheNodes: config.nodes,
+        numCacheClusters: 1,
+        numNodeGroups: nodeGroups,
         port: config.port,
         provider: providerInstance,
         parameterGroupName: paramGroup.name,
+        replicasPerNodeGroup: replicas,
+        replicationGroupId: clusterName,
         securityGroupIds: [vpc.defaultSecurityGroupId],
         subnetGroupName: subnetGroup.name,
-      })
+      },
+    )
 
-      outputs.push(
-        new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
-          description: `Connection endpoint for "${config.name}" Elasticache service`,
-          value:
-            config.type === 'memcached'
-              ? instance.configurationEndpoint
-              : instance.cacheNodes.get(0).address,
-        }),
-      )
-    } else {
-      const { nodeGroups, replicas } = getClusterSetup(config.nodes)
-
-      cluster = new elasticacheReplicationGroup.ElasticacheReplicationGroup(
-        stack.context,
-        resourceId,
-        {
-          ...clusterOptions,
-          applyImmediately: true,
-          engine: config.engine,
-          engineVersion: config.version,
-          logDeliveryConfiguration,
-          nodeType: config.size,
-          numCacheClusters: 1,
-          numNodeGroups: nodeGroups,
-          port: config.port,
-          provider: providerInstance,
-          parameterGroupName: paramGroup.name,
-          replicasPerNodeGroup: replicas,
-          replicationGroupId: clusterName,
-          securityGroupIds: [vpc.defaultSecurityGroupId],
-          subnetGroupName: subnetGroup.name,
-        },
-      )
-
-      outputs.push(
-        new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
-          description: `Connection endpoint for "${config.name}" Elasticache service`,
-          value: cluster.primaryEndpointAddress,
-        }),
-      )
-    }
-
-    return { instance, cluster, logGroup, paramGroup, subnetGroup, outputs }
+    outputs.push(
+      new TerraformOutput(stack.context, `${resourceId}_endpoint`, {
+        description: `Connection endpoint for "${config.name}" Elasticache service`,
+        value: cluster.primaryEndpointAddress,
+      }),
+    )
   }
+
+  return { instance, cluster, logGroup, paramGroup, subnetGroup, outputs }
+}
 
 /**
  * Provisions the database resources along with monitoring resources
@@ -251,7 +249,7 @@ export const resourceHandler = (
   stack: Stack,
 ): AwsCacheResources =>
   pipe(
-    deployCaches(provisionable, stack),
+    () => deployCaches(provisionable, stack),
     withAwsAlerts<AwsCacheProvisionable>(provisionable, stack, awsCacheAlarms),
   )()
 

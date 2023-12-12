@@ -1,5 +1,4 @@
 import { snakeCase } from 'lodash'
-import { Testing } from 'cdktf'
 import {
   cloudwatchMetricAlarm,
   dataAwsIamPolicyDocument,
@@ -9,8 +8,6 @@ import {
   snsTopic,
   snsTopicPolicy,
 } from '@cdktf/provider-aws'
-import { Stack } from '@lib/stack'
-import { getAwsProvisionable } from '@tests/helpers'
 import { getAwsDbConfigMock } from '@tests/mocks/aws'
 import {
   PROVIDER,
@@ -26,6 +23,13 @@ import {
   RDS_DEFAULT_VERSIONS_PER_ENGINE,
 } from '@aws/constants'
 import { Registry } from '@src/services/registry'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import { ENVIRONMENT } from '@src/project/constants'
+import type {
+  AwsMariaDBAttributes,
+  AwsMySQLAttributes,
+  AwsPostgreSQLAttributes,
+} from '@aws/services/database'
 import type { AwsDbServiceType, RdsEngine } from '@aws/constants'
 
 const getDatabaseSchemaExpectation = (
@@ -109,14 +113,11 @@ describe('AWS PostgreSQL', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
-    const config = getAwsDbConfigMock('postgresql', 'postgres')
-    const provisionable = getAwsProvisionable(config, stack)
+    const config = getAwsDbConfigMock('postgresql', 'postgres') as AwsPostgreSQLAttributes
+    const stack = getSynthesizedStack([config])
 
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
-    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
+    expect(stack).toHaveResource(awsDbInstance.DbInstance)
+    expect(stack).toHaveResource(awsDbParameterGroup.DbParameterGroup)
   })
 })
 
@@ -149,14 +150,10 @@ describe('AWS MySQL', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
-    const config = getAwsDbConfigMock('mysql', 'mysql')
-    const provisionable = getAwsProvisionable(config, stack)
-
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
-    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
+    const config = getAwsDbConfigMock('mysql', 'mysql') as AwsMySQLAttributes
+    const stack = getSynthesizedStack([config])
+    expect(stack).toHaveResource(awsDbInstance.DbInstance)
+    expect(stack).toHaveResource(awsDbParameterGroup.DbParameterGroup)
   })
 })
 
@@ -189,42 +186,34 @@ describe('AWS MariaDB', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
-    const config = getAwsDbConfigMock('mariadb', 'mariadb')
-    const provisionable = getAwsProvisionable(config, stack)
+    const config = getAwsDbConfigMock('mariadb', 'mariadb') as AwsMariaDBAttributes
+    const stack = getSynthesizedStack([config])
 
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.dbInstance).toBeInstanceOf(awsDbInstance.DbInstance)
-    expect(resources.paramGroup).toBeInstanceOf(awsDbParameterGroup.DbParameterGroup)
+    expect(stack).toHaveResource(awsDbInstance.DbInstance)
+    expect(stack).toHaveResource(awsDbParameterGroup.DbParameterGroup)
   })
 })
 
 describe('Database service monitoring', () => {
-  const service = AwsMariaDB
+  const environment = ENVIRONMENT.PRODUCTION
 
   it('provides monitoring for the database service', () => {
-    const stack = new Stack('stack-name')
-    const config = getAwsDbConfigMock('mariadb', 'mariadb')
+    const config = getAwsDbConfigMock('mariadb', 'mariadb') as AwsMariaDBAttributes
+    const stack = getSynthesizedStack([config], environment)
 
-    const provisionable = getAwsProvisionable(config, stack)
-
-    service.handler(provisionable, stack)
-    const synthesized = Testing.synth(stack.context)
-
-    const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)
-    expect(synthesized).toHaveResourceWithProperties(snsTopic.SnsTopic, {
+    const alarmPrefix = snakeCase(`${config.name}_${environment}`)
+    expect(stack).toHaveResourceWithProperties(snsTopic.SnsTopic, {
       name: expect.stringContaining(snakeCase(config.name)),
     })
 
-    expect(synthesized).toHaveResourceWithProperties(snsTopicPolicy.SnsTopicPolicy, {})
+    expect(stack).toHaveResourceWithProperties(snsTopicPolicy.SnsTopicPolicy, {})
 
-    expect(synthesized).toHaveDataSourceWithProperties(
+    expect(stack).toHaveDataSourceWithProperties(
       dataAwsIamPolicyDocument.DataAwsIamPolicyDocument,
       {},
     )
 
-    expect(synthesized).toHaveResourceWithProperties(dbEventSubscription.DbEventSubscription, {
+    expect(stack).toHaveResourceWithProperties(dbEventSubscription.DbEventSubscription, {
       name: expect.stringContaining(`${alarmPrefix}_event_subscription`),
       source_type: 'db-instance',
       event_categories: [
@@ -237,37 +226,37 @@ describe('Database service monitoring', () => {
       ],
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_burst_balance`),
       metric_name: 'BurstBalance',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_cpu_utilization`),
       metric_name: 'CPUUtilization',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_cpu_credit_balance`),
       metric_name: 'CPUCreditBalance',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_disk_depth`),
       metric_name: 'DiskQueueDepth',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_freeable_memory`),
       metric_name: 'FreeableMemory',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_free_storage`),
       metric_name: 'FreeStorageSpace',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_swap_usage`),
       metric_name: 'SwapUsage',
     })

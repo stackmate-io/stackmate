@@ -5,6 +5,10 @@ export type ProvisionResources =
   | TerraformElement
   | TerraformElement[]
   | Dictionary<TerraformElement>
+  | TerraformOutput
+  | TerraformOutput[]
+  | Dictionary<TerraformOutput>
+  | Dictionary<TerraformOutput[]>
 
 export type Provisions = Record<string, ProvisionResources> & {
   // The service's IP address to allow linking with services with

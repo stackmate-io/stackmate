@@ -52,11 +52,9 @@ export const options: RdsAlertOptions = {
   period: 300,
 }
 
-export type DatabasebAlertResources =
-  | AwsServiceAlertResources
-  | {
-      eventSubscription: dbEventSubscription.DbEventSubscription
-    }
+export type DatabasebAlertResources = AwsServiceAlertResources & {
+  eventSubscription: dbEventSubscription.DbEventSubscription
+}
 
 export const awsDatabaseAlarms: AwsServiceAlertsGenerator = (
   provisionable: AwsDatabaseProvisionable,

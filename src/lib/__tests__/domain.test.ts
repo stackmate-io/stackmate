@@ -1,9 +1,11 @@
-import { getDomainMatcher, getDomainsOrder, getTopLevelDomain } from '@lib/domain'
+import { getDomainMatcher, getDomainsOrder, getTopLevelDomain, isTopLevelDomain } from '@lib/domain'
 
 describe('getDomainMatcher', () => {
-  const regExp = getDomainMatcher()
+  const regExp = new RegExp(getDomainMatcher())
 
   it('matches valid domain names', () => {
+    expect(regExp.test('stackmate.io')).toBe(true)
+    expect(regExp.test('app.stackmate.io')).toBe(true)
     expect(regExp.test('something.com')).toBe(true)
     expect(regExp.test('test.something.com')).toBe(true)
     expect(regExp.test('abc-test.s0meth1ng.com')).toBe(true)
@@ -14,6 +16,7 @@ describe('getDomainMatcher', () => {
   it('does not match invalid domain names', () => {
     expect(regExp.test('')).toBe(false)
     expect(regExp.test('abc')).toBe(false)
+    expect(regExp.test('abcdefg')).toBe(false)
     expect(regExp.test('1234')).toBe(false)
     expect(regExp.test('[object]')).toBe(false)
     expect(regExp.test('hello().world.com')).toBe(false)
@@ -22,6 +25,8 @@ describe('getDomainMatcher', () => {
 
 describe('getTopLevelDomain', () => {
   it('returns the tlds for valid domain names', () => {
+    expect(getTopLevelDomain('stackmate.io')).toEqual('stackmate.io')
+    expect(getTopLevelDomain('app.stackmate.io')).toEqual('stackmate.io')
     expect(getTopLevelDomain('something.com')).toEqual('something.com')
     expect(getTopLevelDomain('test.something.com')).toEqual('something.com')
     expect(getTopLevelDomain('abc-12345.something.com')).toEqual('something.com')
@@ -31,6 +36,13 @@ describe('getTopLevelDomain', () => {
     expect(() => getTopLevelDomain('wrong!')).toThrow()
     expect(() => getTopLevelDomain('123456')).toThrow()
     expect(() => getTopLevelDomain('')).toThrow()
+  })
+})
+
+describe('isTopLevelDomain', () => {
+  it('checks whether a domain is a tld', () => {
+    expect(isTopLevelDomain('stackmate.io')).toBe(true)
+    expect(isTopLevelDomain('app.stackmate.io')).toBe(false)
   })
 })
 
@@ -46,6 +58,13 @@ describe('getDomainsOrder', () => {
   })
 
   it('returns the primary and secondary domain names', () => {
+    expect(getDomainsOrder(['stackmate.io', 'app.stackmate.io'])).toEqual(
+      expect.objectContaining({
+        primary: 'stackmate.io',
+        secondary: ['app.stackmate.io'],
+      }),
+    )
+
     expect(getDomainsOrder(['something.com', 'test.something.com', 'dev.something.com'])).toEqual(
       expect.objectContaining({
         primary: 'something.com',

@@ -6,9 +6,7 @@ import {
   REGIONS,
 } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/helpers'
 import { getAwsCacheConfigMock } from '@tests/mocks/aws'
-import { Stack } from '@src/lib/stack'
 import {
   cloudwatchLogGroup,
   cloudwatchMetricAlarm,
@@ -18,11 +16,12 @@ import {
   elasticacheSubnetGroup,
   snsTopic,
 } from '@cdktf/provider-aws'
-import { Testing } from 'cdktf'
 import { snakeCase } from 'lodash'
 import { Registry } from '@src/services/registry'
-import type { BaseServiceAttributes } from '@src/services/types'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import { ENVIRONMENT } from '@src/project/constants'
 import type { AwsCacheServiceType, ElasticacheEngine } from '@aws/constants'
+import type { ServiceConfiguration } from '@src/services/registry'
 
 const getCacheSchemaExpectation = (
   type: AwsCacheServiceType,
@@ -96,35 +95,24 @@ describe('Redis cache', () => {
   })
 
   it('registers the resources on deployment - single instance', () => {
-    const stack = new Stack('stack-name')
     const config = getAwsCacheConfigMock('redis', 'redis', false)
-    const provisionable = getAwsProvisionable(config, stack)
-
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.cluster).toBeUndefined()
-    expect(resources.instance).toBeInstanceOf(elasticacheCluster.ElasticacheCluster)
-    expect(resources.paramGroup).toBeInstanceOf(elasticacheParameterGroup.ElasticacheParameterGroup)
-    expect(resources.logGroup).toBeInstanceOf(cloudwatchLogGroup.CloudwatchLogGroup)
-    expect(resources.subnetGroup).toBeInstanceOf(elasticacheSubnetGroup.ElasticacheSubnetGroup)
-    expect(Array.isArray(resources.outputs)).toBe(true)
+    const stack = getSynthesizedStack([config])
+    expect(stack).toHaveResource(elasticacheCluster.ElasticacheCluster)
+    expect(stack).not.toHaveResource(elasticacheReplicationGroup.ElasticacheReplicationGroup)
+    expect(stack).toHaveResource(elasticacheParameterGroup.ElasticacheParameterGroup)
+    expect(stack).toHaveResource(cloudwatchLogGroup.CloudwatchLogGroup)
+    expect(stack).toHaveResource(elasticacheSubnetGroup.ElasticacheSubnetGroup)
   })
 
   it('registers the resources on deployment - cluster', () => {
-    const stack = new Stack('stack-name')
     const config = getAwsCacheConfigMock('redis', 'redis', true)
-    const provisionable = getAwsProvisionable(config, stack)
+    const stack = getSynthesizedStack([config])
 
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.instance).toBeUndefined()
-    expect(resources.cluster).toBeInstanceOf(
-      elasticacheReplicationGroup.ElasticacheReplicationGroup,
-    )
-    expect(resources.paramGroup).toBeInstanceOf(elasticacheParameterGroup.ElasticacheParameterGroup)
-    expect(resources.logGroup).toBeInstanceOf(cloudwatchLogGroup.CloudwatchLogGroup)
-    expect(resources.subnetGroup).toBeInstanceOf(elasticacheSubnetGroup.ElasticacheSubnetGroup)
-    expect(Array.isArray(resources.outputs)).toBe(true)
+    expect(stack).not.toHaveResource(elasticacheCluster.ElasticacheCluster)
+    expect(stack).toHaveResource(elasticacheReplicationGroup.ElasticacheReplicationGroup)
+    expect(stack).toHaveResource(elasticacheParameterGroup.ElasticacheParameterGroup)
+    expect(stack).toHaveResource(cloudwatchLogGroup.CloudwatchLogGroup)
+    expect(stack).toHaveResource(elasticacheSubnetGroup.ElasticacheSubnetGroup)
   })
 })
 
@@ -157,41 +145,34 @@ describe('Memcached cache', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
     const config = getAwsCacheConfigMock('memcached', 'memcached', true)
-    const provisionable = getAwsProvisionable(config, stack)
+    const stack = getSynthesizedStack([config])
 
-    const resources = service.handler(provisionable, stack)
-    expect(typeof resources === 'object').toBe(true)
-    expect(resources.cluster).toBeUndefined()
-    expect(resources.instance).toBeInstanceOf(elasticacheCluster.ElasticacheCluster)
-    expect(resources.paramGroup).toBeInstanceOf(elasticacheParameterGroup.ElasticacheParameterGroup)
-    expect(resources.logGroup).toBeInstanceOf(cloudwatchLogGroup.CloudwatchLogGroup)
-    expect(resources.subnetGroup).toBeInstanceOf(elasticacheSubnetGroup.ElasticacheSubnetGroup)
-    expect(Array.isArray(resources.outputs)).toBe(true)
+    expect(stack).toHaveResource(elasticacheCluster.ElasticacheCluster)
+    expect(stack).not.toHaveResource(elasticacheReplicationGroup.ElasticacheReplicationGroup)
+    expect(stack).toHaveResource(elasticacheParameterGroup.ElasticacheParameterGroup)
+    expect(stack).toHaveResource(cloudwatchLogGroup.CloudwatchLogGroup)
+    expect(stack).toHaveResource(elasticacheSubnetGroup.ElasticacheSubnetGroup)
   })
 })
 
 describe('Cache service monitoring', () => {
-  const service = AwsRedis
+  const environment = ENVIRONMENT.PRODUCTION
 
-  const runExpectations = (config: BaseServiceAttributes) => {
-    const stack = new Stack('stack-name')
-    const provisionable = getAwsProvisionable(config, stack)
-    service.handler(provisionable, stack)
+  const runExpectations = (config: ServiceConfiguration) => {
+    const stack = getSynthesizedStack([config], environment)
 
-    const synthesized = Testing.synth(stack.context)
-    const alarmPrefix = snakeCase(`${config.name}_${stack.name}`)
-    expect(synthesized).toHaveResourceWithProperties(snsTopic.SnsTopic, {
+    const alarmPrefix = snakeCase(`${config.name}_${environment}`)
+    expect(stack).toHaveResourceWithProperties(snsTopic.SnsTopic, {
       name: expect.stringContaining(snakeCase(config.name)),
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_cpu_utilization`),
       metric_name: 'CPUUtilization',
     })
 
-    expect(synthesized).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+    expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
       alarm_name: expect.stringContaining(`${alarmPrefix}_freeable_memory`),
       metric_name: 'FreeableMemory',
     })

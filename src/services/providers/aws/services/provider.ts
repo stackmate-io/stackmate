@@ -1,5 +1,5 @@
 import pipe from 'lodash/fp/pipe'
-import { kebabCase } from 'lodash'
+import { kebabCase, snakeCase } from 'lodash'
 import { TerraformOutput } from 'cdktf'
 import {
   kmsKey as awsKmsKey,
@@ -22,18 +22,22 @@ export const resourceHandler = (
     resourceId,
   } = provisionable
 
-  const providerInstance = new awsProvider.AwsProvider(stack.context, PROVIDER.AWS, {
-    region,
-    alias: `aws-${kebabCase(region)}-provider`,
-    defaultTags: [
-      {
-        tags: {
-          Environment: stack.name,
-          Description: DEFAULT_RESOURCE_COMMENT,
+  const providerInstance = new awsProvider.AwsProvider(
+    stack.context,
+    `${PROVIDER.AWS}_${snakeCase(region)}`,
+    {
+      region,
+      alias: `aws-${kebabCase(region)}-provider`,
+      defaultTags: [
+        {
+          tags: {
+            Environment: stack.name,
+            Description: DEFAULT_RESOURCE_COMMENT,
+          },
         },
-      },
-    ],
-  })
+      ],
+    },
+  )
 
   const kmsKey = new awsKmsKey.KmsKey(stack.context, `${resourceId}_key`, {
     customerMasterKeySpec: 'SYMMETRIC_DEFAULT',

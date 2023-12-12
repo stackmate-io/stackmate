@@ -6,6 +6,7 @@ import {
   RDS_ENGINE_PER_SERVICE_TYPE,
 } from '@src/services/providers/aws/constants'
 import { kebabCase, snakeCase } from 'lodash'
+import type { AwsApplicationAttributes } from '@src/services/providers/aws/services/application'
 import type { AwsDatabaseAttributes } from '@src/services/providers/aws/services/database'
 import type {
   AwsCacheServiceType,
@@ -73,6 +74,23 @@ export const getAwsDbConfigMock = (
   port: faker.internet.port(),
   profile: DEFAULT_PROFILE_NAME,
   overrides: {},
+  monitoring: {
+    emails: [faker.internet.email()],
+    urls: [faker.internet.url()],
+  },
+})
+
+export const getAwsAppConfigMock = (): AwsApplicationAttributes => ({
+  name: kebabCase(faker.lorem.words()),
+  provider: PROVIDER.AWS,
+  type: SERVICE_TYPE.APP,
+  region: 'eu-central-1',
+  cpu: faker.helpers.arrayElement([0.25, 0.5, 1]),
+  memory: 2, // 2 is within the required range for given cpu configurations
+  image: `${faker.lorem.word()}/${faker.lorem.word()}:latest`,
+  nodes: 1,
+  www: true,
+  domain: faker.internet.domainName(),
   monitoring: {
     emails: [faker.internet.email()],
     urls: [faker.internet.url()],

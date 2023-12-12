@@ -1,0 +1,14 @@
+---
+state:
+  bucket: stackmate-e2e-tests
+  lockTable: stackmate-terraform-state-lock
+
+environments:
+  production:
+    nodejs-app:
+      type: application
+      domain: app.stackmate.io
+      cpu: 0.25
+      memory: 1
+      port: 3000
+      image: stackmate/sample-nodejs-app:latest

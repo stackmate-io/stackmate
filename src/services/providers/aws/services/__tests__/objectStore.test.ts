@@ -1,14 +1,12 @@
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/helpers'
-import { Stack } from '@src/lib/stack'
 
 import { AwsObjectStore } from '@aws/services/objectStore'
 import { faker } from '@faker-js/faker'
 import { iamPolicy, iamUserPolicyAttachment, s3Bucket } from '@cdktf/provider-aws'
-import { TerraformOutput } from 'cdktf'
 import { Registry } from '@src/services/registry'
 import { getValidData } from '@src/validation'
-import type { AwsObjectStoreAttributes, AwsObjectStoreResources } from '@aws/services/objectStore'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import type { AwsObjectStoreAttributes } from '@aws/services/objectStore'
 
 describe('AWS Object store', () => {
   const service = AwsObjectStore
@@ -57,31 +55,28 @@ describe('AWS Object store', () => {
   })
 
   it('registers the resources on deployment', () => {
-    const stack = new Stack('stack-name')
+    const bucket = {
+      name: faker.lorem.word(),
+      encrypted: faker.datatype.boolean(),
+      publicRead: faker.datatype.boolean(),
+      versioning: faker.datatype.boolean(),
+    }
+
     const config: AwsObjectStoreAttributes = {
       name: faker.lorem.word(),
       provider: PROVIDER.AWS,
       type: SERVICE_TYPE.OBJECT_STORAGE,
       links: [],
-      buckets: [
-        {
-          name: faker.lorem.word(),
-          encrypted: faker.datatype.boolean(),
-          publicRead: faker.datatype.boolean(),
-          versioning: faker.datatype.boolean(),
-        },
-      ],
+      buckets: [bucket],
     }
-    const provisionable = getAwsProvisionable(config, stack)
 
-    const resources = service.handler(provisionable, stack) as AwsObjectStoreResources
-    expect(typeof resources === 'object').toBe(true)
-    expect(Array.isArray(resources.buckets)).toBe(true)
-    expect(resources.buckets).toHaveLength(1)
-    expect(resources.buckets.every((b) => b instanceof s3Bucket.S3Bucket)).toBe(true)
-    expect(resources.policy).toBeInstanceOf(iamPolicy.IamPolicy)
-    expect(resources.attachment).toBeInstanceOf(iamUserPolicyAttachment.IamUserPolicyAttachment)
-    expect(Array.isArray(resources.outputs)).toBe(true)
-    expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
+    const stack = getSynthesizedStack([config])
+    expect(stack).toHaveResourceWithProperties(s3Bucket.S3Bucket, {
+      bucket: bucket.name,
+    })
+
+    expect(stack).toHaveResource(s3Bucket.S3Bucket)
+    expect(stack).toHaveResource(iamPolicy.IamPolicy)
+    expect(stack).toHaveResource(iamUserPolicyAttachment.IamUserPolicyAttachment)
   })
 })

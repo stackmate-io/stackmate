@@ -78,6 +78,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         patternProperties: {
           [`^${Object.values(ENVIRONMENT).join('|')}$`]: {
             type: 'object',
+            uniqueAppDomains: true,
             patternProperties: {
               '^[a-zA-Z0-9_-]+$': {
                 anyOf: serviceDefinitionReferences,

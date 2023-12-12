@@ -51,6 +51,22 @@ export const resourceHandler = (
   const sg = new securityGroup.SecurityGroup(stack.context, `${resourceId}_security_group`, {
     provider: providerInstance,
     vpcId: vpc.id,
+    ingress: [
+      {
+        fromPort: 80,
+        toPort: 80,
+        protocol: 'tcp',
+        cidrBlocks: ['0.0.0.0/0'],
+        ipv6CidrBlocks: ['::/0'],
+      },
+      {
+        fromPort: 443,
+        toPort: 443,
+        protocol: 'tcp',
+        cidrBlocks: ['0.0.0.0/0'],
+        ipv6CidrBlocks: ['::/0'],
+      },
+    ],
     egress: [
       {
         fromPort: 0,
@@ -69,7 +85,7 @@ export const resourceHandler = (
     enableHttp2: true,
     provider: providerInstance,
     subnets: publicSubnets.map((subnet) => subnet.id),
-    securityGroups: [sg.id],
+    securityGroups: [sg.id, vpc.defaultSecurityGroupId],
     lifecycle: {
       createBeforeDestroy: true,
     },

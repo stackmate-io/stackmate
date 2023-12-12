@@ -1,13 +1,12 @@
-import { S3Backend } from 'cdktf'
-import { Stack } from '@lib/stack'
+import os from 'node:os'
 import { AwsState } from '@src/services/providers/aws/services/state'
 import { REGIONS } from '@src/services/providers/aws/constants'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { getAwsProvisionable } from '@tests/helpers'
 import { Registry } from '@src/services/registry'
 import { faker } from '@faker-js/faker'
-import type { AwsStateProvisionable } from '@src/services/providers/aws/services/state'
-import type { BaseProvisionable } from 'src/services/types/provisionable'
+import { Operation } from '@src/operation'
+import { ENVIRONMENT } from '@src/project/constants'
+import type { AwsStateAttributes } from '@src/services/providers/aws/services/state'
 
 describe('AWS state', () => {
   const service = AwsState
@@ -48,31 +47,31 @@ describe('AWS state', () => {
   })
 
   describe('provision handlers', () => {
-    let stack: Stack
-    let provisionable: BaseProvisionable
+    let state: AwsStateAttributes
 
     beforeEach(() => {
-      stack = new Stack('mystack')
-      provisionable = getAwsProvisionable<AwsStateProvisionable>(
-        {
-          name: 'aws-state-service',
-          provider: PROVIDER.AWS,
-          type: SERVICE_TYPE.STATE,
-          region: 'eu-central-1',
-          bucket: 'some-bucket-name',
-          statePath: `${faker.system.directoryPath()}/state.tfstate`,
-          lockTable: faker.internet.domainWord(),
-        },
-        stack,
-      )
+      state = {
+        name: 'aws-state-service',
+        provider: PROVIDER.AWS,
+        type: SERVICE_TYPE.STATE,
+        region: 'eu-central-1',
+        bucket: 'some-bucket-name',
+        statePath: `${faker.system.directoryPath()}/state.tfstate`,
+        lockTable: faker.internet.domainWord(),
+      }
     })
 
     it('registers the backend', () => {
-      const resources = service.handler(provisionable, stack)
-      expect(Object.keys(resources)).toEqual(['backend'])
+      const operation = new Operation([state], ENVIRONMENT.PRODUCTION, os.tmpdir())
+      const { content: stack } = operation.process()
 
-      const { backend } = resources
-      expect(backend).toBeInstanceOf(S3Backend)
+      const parsed = JSON.parse(stack)
+      expect(parsed.terraform.backend.s3).toMatchObject({
+        bucket: state.bucket,
+        key: state.statePath,
+        dynamodb_table: state.lockTable,
+        region: state.region,
+      })
     })
   })
 })

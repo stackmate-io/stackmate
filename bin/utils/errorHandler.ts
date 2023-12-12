@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { inspect } from 'util'
 import { ValidationError } from '@lib/errors'
 import { isDebugMode } from '@src/constants'
 import { groupBy } from 'lodash'
@@ -19,20 +20,25 @@ export const errorHandler = (msg: string, err: Error) => {
     Object.entries(groupBy(err.errors, (err) => err.parent.name)).forEach(
       ([serviceName, errors]) => {
         print(`Service "${serviceName} contains the following errors:"`, 2)
-        errors.forEach((error) =>
-          print(
-            `• Property "${error.key}" contains invalid value "${error.value.toString()}": it ${
-              error.message
-            }`,
-            4,
-          ),
-        )
+        errors.forEach((error) => {
+          const prefix = error.key.match(/[a-zA-Z]/)
+            ? `Property "${error.key}" contains invalid value ${inspect(error.value)}: it`
+            : 'It'
+          print(`• ${prefix} ${error.message}`, 4)
+        })
       },
     )
+
+    process.exit(1)
   }
 
   if (isDebugMode) {
     throw err
+  }
+
+  print(`❌ Stackmate wasn't able to proceed, there was an unexpected error`)
+  if (err instanceof Error) {
+    print(err.message, 2)
   }
 
   process.exit(1)

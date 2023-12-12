@@ -1,13 +1,11 @@
 import { internetGateway, subnet, vpc } from '@cdktf/provider-aws'
 import { REGIONS } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { Stack } from '@lib/stack'
-import { faker } from '@faker-js/faker'
-import { TerraformOutput } from 'cdktf'
 import { AwsNetworking } from '@aws/services/networking'
 import { Registry } from '@src/services/registry'
-import { getProvisionable } from '@tests/helpers'
-import type { AwsNetworkingAttributes, AwsNetworkingResources } from '@aws/types'
+import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
+import { getCidrBlocks } from '@src/lib/networking'
+import type { AwsNetworkingAttributes } from '@aws/types'
 
 describe('AWS Networking', () => {
   const service = AwsNetworking
@@ -51,11 +49,9 @@ describe('AWS Networking', () => {
   })
 
   describe('provision handler', () => {
-    let stack: Stack
     let config: AwsNetworkingAttributes
 
     beforeEach(() => {
-      stack = new Stack(faker.lorem.word())
       config = {
         provider: PROVIDER.AWS,
         type: SERVICE_TYPE.NETWORKING,
@@ -67,21 +63,10 @@ describe('AWS Networking', () => {
     })
 
     it('registers the service into the stack and creates the resources', () => {
-      const provisionable = getProvisionable(config)
-      const resources = service.handler(provisionable, stack) as AwsNetworkingResources
-
-      expect(resources).toBeInstanceOf(Object)
-      expect(Object.keys(resources)).toEqual(
-        expect.arrayContaining(['vpc', 'subnets', 'gateway', 'outputs', 'publicSubnets']),
-      )
-      expect(resources.vpc).toBeInstanceOf(vpc.Vpc)
-      expect(resources.gateway).toBeInstanceOf(internetGateway.InternetGateway)
-      expect(Array.isArray(resources.subnets)).toBe(true)
-      expect(resources.subnets.every((s) => s instanceof subnet.Subnet)).toBe(true)
-      expect(Array.isArray(resources.publicSubnets)).toBe(true)
-      expect(resources.publicSubnets.every((s) => s instanceof subnet.Subnet)).toBe(true)
-      expect(Array.isArray(resources.outputs)).toBe(true)
-      expect(resources.outputs.every((o) => o instanceof TerraformOutput)).toBe(true)
+      const stack = getSynthesizedStack([config])
+      expect(stack).toHaveResource(vpc.Vpc)
+      expect(stack).toHaveResource(internetGateway.InternetGateway)
+      expect(stack).toHaveResource(subnet.Subnet)
     })
 
     it('imports the default vpc when specified', () => {
@@ -91,18 +76,13 @@ describe('AWS Networking', () => {
         rootIp: '19.1.1.1',
       }
 
-      const provisionable = getProvisionable(configWithImportedVpc)
-      const resources = service.handler(provisionable, stack) as AwsNetworkingResources
-      expect(resources.vpc).toBeInstanceOf(vpc.Vpc)
+      const stack = getSynthesizedStack([configWithImportedVpc])
+      const [cidrBlock] = getCidrBlocks(configWithImportedVpc.rootIp, 16, 1, 16)
 
-      const {
-        import: [importStatement],
-      } = resources.vpc.toTerraform()
-
-      expect(importStatement.id).toEqual(`${resources.vpc.friendlyUniqueId}_imported_default_vpc`)
-      expect(importStatement.to).toEqual(
-        `${vpc.Vpc.tfResourceType}.${resources.vpc.friendlyUniqueId}`,
-      )
+      expect(stack).toHaveResource(vpc.Vpc)
+      expect(stack).toHaveResourceWithProperties(vpc.Vpc, {
+        cidr_block: cidrBlock,
+      })
     })
   })
 })
