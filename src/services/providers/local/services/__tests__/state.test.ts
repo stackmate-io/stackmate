@@ -1,8 +1,10 @@
-import { LocalBackend } from 'cdktf'
+import os from 'node:os'
 import { LocalState } from '@src/services/providers/local/services/state'
 import { PROVIDER, SERVICE_TYPE } from '@src/constants'
-import { Stack } from '@lib/stack'
-import { getProvisionable } from '@tests/helpers/getProvisionable'
+import { kebabCase } from 'lodash'
+import { faker } from '@faker-js/faker'
+import { Operation } from '@src/operation'
+import { ENVIRONMENT } from '@src/project/constants'
 import type { LocalStateAttributes } from '@local/services/state'
 
 describe('Local state', () => {
@@ -27,20 +29,27 @@ describe('Local state', () => {
   })
 
   describe('provision handler', () => {
-    const stack = new Stack('stack-name')
-    const config: LocalStateAttributes = {
-      name: 'local-state',
-      provider: 'local',
-      type: 'state',
-    }
+    let config: LocalStateAttributes
 
-    const provisionable = getProvisionable(config)
+    beforeEach(() => {
+      config = {
+        provider: PROVIDER.LOCAL,
+        type: SERVICE_TYPE.STATE,
+        name: kebabCase(faker.lorem.words()),
+        directory: faker.system.directoryPath(),
+        fileName: 'stackmate.tfstate',
+      }
+    })
 
     it('registers the local state backend', () => {
-      const resources = service.handler(provisionable, stack)
-      expect(resources).toBeInstanceOf(Object)
-      expect(Object.keys(resources)).toEqual(['backend'])
-      expect(resources.backend).toBeInstanceOf(LocalBackend)
+      const operation = new Operation([config], ENVIRONMENT.PRODUCTION, os.tmpdir())
+      const { content: stack } = operation.process()
+
+      const parsed = JSON.parse(stack)
+      expect(parsed.terraform.backend.local).toMatchObject({
+        path: config.fileName,
+        workspace_dir: config.directory,
+      })
     })
   })
 })

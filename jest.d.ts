@@ -1,9 +1,9 @@
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toThrowValidationError(expected: string | { key: string; message: string }): R
+      toThrowValidationError(expected: string | { path: string; message: string }): R
     }
   }
 }
 
-export {};
+export {}

@@ -6,7 +6,7 @@ export const setupJest = () => {
   expect.extend({
     toThrowValidationError: (
       validationFunction: () => any,
-      expected: string | { key: string; message: string },
+      expected: string | { path: string; message: string },
     ) => {
       if (!isFunction(validationFunction)) {
         throw new Error('You should provide a function that validates data')
@@ -38,13 +38,13 @@ export const setupJest = () => {
       const pass = isString(expected)
         ? errors.some((error) => error.message.includes(expected))
         : errors.some(
-            (error) => expected.key === error.key && error.message?.includes(expected.message),
+            (error) => expected.path === error.path && error.message?.includes(expected.message),
           )
 
       return {
         pass,
         message: () =>
-          `Expected ${errors.map((err) => `${err.message}`)} to include "${
+          `Expected ${errors.map((err) => `${err.message}`).join(', ')} to include "${
             isString(expected) ? expected : expected.message
           }"`,
       }
