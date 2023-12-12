@@ -147,5 +147,21 @@ describe('Application Service', () => {
         threshold: 20,
       })
     })
+
+    it('registers the resources - service without a port defined', () => {
+      const config = { ...getAwsAppConfigMock(), port: undefined }
+      const stack = getSynthesizedStack(config)
+
+      expect(stack).toHaveResourceWithProperties(ecsService.EcsService, {
+        desired_count: config.nodes,
+      })
+
+      expect(stack).toHaveResourceWithProperties(ecsTaskDefinition.EcsTaskDefinition, {
+        requires_compatibilities: ['FARGATE'],
+      })
+
+      expect(stack).not.toHaveResource(albListener.AlbListener)
+      expect(stack).not.toHaveResource(route53Record.Route53Record)
+    })
   })
 })

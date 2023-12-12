@@ -11,7 +11,6 @@ import type {
 } from '@services/types'
 import type { Dictionary } from 'lodash'
 import { ProvisionablesMap } from './provisionables'
-import { assertRequirementsSatisfied } from './utils/assertRequirementsSatisfied'
 import { assertEnvironmentValid } from './utils/assertEnvironmentValid'
 
 type AssociatedProvisionablesMap = Map<BaseProvisionable['id'], AssociatedProvisionable[]>
@@ -139,8 +138,6 @@ export class Operation {
         this.#requirements.get(provisionable.id),
       ),
     })
-
-    assertRequirementsSatisfied(provisionable)
 
     Object.assign(provisionable, {
       provisions: resourceHandler(provisionable, this.stack),

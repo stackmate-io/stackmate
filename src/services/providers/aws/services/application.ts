@@ -425,7 +425,6 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.connectable(),
     behaviors.withSchema({
       type: 'object',
-      required: ['port'],
       properties: {
         cpu: {
           type: 'number',
