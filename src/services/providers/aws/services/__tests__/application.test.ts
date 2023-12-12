@@ -4,6 +4,15 @@ import { Registry } from '@src/services/registry'
 import { REGIONS } from '@aws/constants'
 import { faker } from '@faker-js/faker'
 import { getValidData } from '@src/validation'
+import { getAwsAppConfigMock } from '@tests/mocks/aws'
+import { getSynthesizedStack } from '@tests/helpers/getProvisionResources'
+import {
+  albListener,
+  cloudwatchMetricAlarm,
+  ecsService,
+  ecsTaskDefinition,
+  route53Record,
+} from '@cdktf/provider-aws'
 import type { AwsApplicationAttributes } from '@aws/services/application'
 
 describe('Application Service', () => {
@@ -71,6 +80,72 @@ describe('Application Service', () => {
       expect(() =>
         getValidData({ ...baseConfig, cpu: 16, memory: 130 }, service.schema),
       ).toThrowValidationError('Memory for 16 vCPUs should be between 32 and 120 GB')
+    })
+  })
+
+  describe('provision resources', () => {
+    it('registers the resources - web service', () => {
+      const config = { ...getAwsAppConfigMock(), port: faker.internet.port() }
+      const stack = getSynthesizedStack(config)
+
+      expect(stack).toHaveResourceWithProperties(ecsService.EcsService, {
+        desired_count: config.nodes,
+      })
+
+      expect(stack).toHaveResourceWithProperties(ecsTaskDefinition.EcsTaskDefinition, {
+        requires_compatibilities: ['FARGATE'],
+      })
+
+      expect(stack).toHaveResourceWithProperties(albListener.AlbListener, {
+        port: 80,
+      })
+
+      expect(stack).toHaveResourceWithProperties(albListener.AlbListener, {
+        port: 443,
+      })
+
+      expect(stack).toHaveResourceWithProperties(route53Record.Route53Record, {
+        name: config.domain,
+      })
+
+      expect(stack).toHaveResourceWithProperties(route53Record.Route53Record, {
+        name: `www.${config.domain}`,
+      })
+
+      const alarmProps = {
+        namespace: 'AWS/ECS',
+        statistic: 'Average',
+        evaluation_periods: 1,
+        period: 300,
+      }
+
+      expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+        ...alarmProps,
+        comparison_operator: 'LessThanThreshold',
+        metric_name: 'CPUUtilization',
+        threshold: 20,
+      })
+
+      expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+        ...alarmProps,
+        comparison_operator: 'GreaterThanThreshold',
+        metric_name: 'CPUUtilization',
+        threshold: 80,
+      })
+
+      expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+        ...alarmProps,
+        comparison_operator: 'GreaterThanThreshold',
+        metric_name: 'MemoryUtilization',
+        threshold: 80,
+      })
+
+      expect(stack).toHaveResourceWithProperties(cloudwatchMetricAlarm.CloudwatchMetricAlarm, {
+        ...alarmProps,
+        comparison_operator: 'LessThanThreshold',
+        metric_name: 'MemoryUtilization',
+        threshold: 20,
+      })
     })
   })
 })

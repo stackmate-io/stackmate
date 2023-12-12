@@ -1,7 +1,6 @@
 import { isEqual, snakeCase } from 'lodash'
 import { hashObject } from '@lib/hash'
 import { Registry } from '@services/registry'
-import type { ServiceConfiguration } from '@services/registry'
 import type {
   BaseProvisionable,
   BaseServiceAttributes,
@@ -42,16 +41,16 @@ export class ProvisionablesMap extends Map<string, BaseProvisionable> {
    * @returns {BaseProvisionable}
    * @throws {Error} if the provisionable is not found
    */
-  find<C extends ServiceConfiguration = ServiceConfiguration>(
+  find<C extends BaseServiceAttributes = BaseServiceAttributes>(
     config: Partial<C>,
-  ): BaseProvisionable {
+  ): BaseProvisionable | null {
     for (const prov of this.values()) {
       if (isEqual(prov.config, config)) {
         return prov
       }
     }
 
-    throw new Error('Provisionable was not found in the list')
+    return null
   }
 
   /**

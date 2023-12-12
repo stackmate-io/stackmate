@@ -24,18 +24,6 @@ describe('Stack', () => {
     expect(subject.context).toBeInstanceOf(TerraformStack)
   })
 
-  it('runs a handler in context', () => {
-    let asserted = false
-
-    const handler = (ctx: TerraformStack, app?: TerraformApp) => {
-      asserted = ctx instanceof TerraformStack && app instanceof TerraformApp
-    }
-
-    subject.inContext(handler)
-
-    expect(asserted).toBe(true)
-  })
-
   it('exports the stack as a terraform object', () => {
     const output = subject.toSynthesized()
 

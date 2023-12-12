@@ -51,6 +51,7 @@ export const resourceHandler = (
     requirements: { providerInstance, kmsKey },
     resourceId,
   } = provisionable
+
   const logGroup = new cloudwatchLogGroup.CloudwatchLogGroup(stack.context, `${resourceId}_logs`, {
     name: `${clusterName}-logs`,
   })

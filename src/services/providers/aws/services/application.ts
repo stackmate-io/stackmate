@@ -48,6 +48,7 @@ import type { AwsSSLAttributes, AwsSSLProvisionable, AwsSSLResources } from './s
 export type AwsApplicationAttributes = BaseServiceAttributes &
   behaviors.MultiNodeAttributes &
   behaviors.MonitoringAttributes &
+  behaviors.RegionalAttributes &
   OptionalKeys<behaviors.ConnectableAttributes, 'port'> & {
     provider: typeof PROVIDER.AWS
     type: typeof SERVICE_TYPE.APP
@@ -56,7 +57,6 @@ export type AwsApplicationAttributes = BaseServiceAttributes &
     memory: number
     domain?: string
     environment?: Record<string, string>
-    web: boolean
     www: boolean
   }
 

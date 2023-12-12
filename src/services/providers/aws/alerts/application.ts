@@ -108,7 +108,7 @@ export const awsApplicationServiceAlarms: AwsServiceAlertsGenerator = (
     },
   )
 
-  const memoryUtilizationHighId = `${serviceName}-cpu-utilization-high`
+  const memoryUtilizationHighId = `${serviceName}-memory-utilization-high`
   const memoryUtilizationHigh = new cloudwatchMetricAlarm.CloudwatchMetricAlarm(
     stack.context,
     memoryUtilizationHighId,
