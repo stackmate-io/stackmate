@@ -425,6 +425,7 @@ const getApplicationService = (): AwsApplicationService =>
     behaviors.connectable(),
     behaviors.withSchema({
       type: 'object',
+      required: ['image'],
       properties: {
         cpu: {
           type: 'number',
