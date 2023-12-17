@@ -91,5 +91,8 @@
     "test:local": "AWS_PROFILE=engine-tests-local npm run test --",
     "test:watch": "npm run test --watchAll",
     "schema:export": "ts-node -r tsconfig-paths/register bin/schema.ts"
+  },
+  "volta": {
+    "node": "21.4.0"
   }
 }
