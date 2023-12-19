@@ -11,6 +11,8 @@ import type { JsonSchema } from '@src/lib/schema'
 const isSchemaOf = (schema: JsonSchema<any>, ...types: ServiceTypeChoice[]): boolean =>
   types.includes(schema.properties?.type?.const)
 
+const EXCLUDED_FROM_ENV_SERVICES = [SERVICE_TYPE.STATE, SERVICE_TYPE.CLUSTER]
+
 export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   const { $defs: serviceDefs = {} } = getServicesSchema()
   const providers = without(Object.values(PROVIDER), PROVIDER.LOCAL)
@@ -40,7 +42,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   )
 
   const stateServices = Object.values(serviceDefinitions).filter((schema) =>
-    isSchemaOf(schema, SERVICE_TYPE.STATE),
+    isSchemaOf(schema, ...EXCLUDED_FROM_ENV_SERVICES),
   )
 
   const stateDiscriminations = stateServices.map((stateSchema) => ({
@@ -96,20 +98,27 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         },
       },
       environments: {
+        type: 'object',
         required: [ENVIRONMENT.PRODUCTION],
+        properties: {
+          ...fromPairs(
+            Object.values(ENVIRONMENT).map((env) => [env, { $ref: '#/$defs/environment' }]),
+          ),
+        },
+      },
+    },
+    $defs: {
+      ...serviceDefinitions,
+      environment: {
+        type: 'object',
+        uniqueAppDomains: true,
+        minProperties: 1,
         patternProperties: {
-          [`^${Object.values(ENVIRONMENT).join('|')}$`]: {
-            type: 'object',
-            uniqueAppDomains: true,
-            patternProperties: {
-              '^[a-zA-Z0-9_-]+$': {
-                allOf: serviceDiscriminations,
-              },
-            },
+          '^[a-zA-Z0-9_-]+$': {
+            allOf: serviceDiscriminations,
           },
         },
       },
     },
-    $defs: serviceDefinitions,
   }
 }
