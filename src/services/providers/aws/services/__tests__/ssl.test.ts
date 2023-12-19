@@ -20,7 +20,7 @@ describe('AWS ACM SSL', () => {
   })
 
   it('provides a valid schema', () => {
-    expect(service.schema.$id).toEqual(`services/aws/${SERVICE_TYPE.SSL}`)
+    expect(service.schema.$id).toEqual(`services-aws-${SERVICE_TYPE.SSL}`)
     expect(service.schema.required).toEqual(
       expect.arrayContaining(['provider', 'name', 'type', 'domain']),
     )

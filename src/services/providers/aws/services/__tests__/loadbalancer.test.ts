@@ -19,7 +19,7 @@ describe('AWS Load balancer', () => {
   })
 
   it('provides a valid schema', () => {
-    expect(service.schema.$id).toEqual(`services/aws/${SERVICE_TYPE.LOAD_BALANCER}`)
+    expect(service.schema.$id).toEqual(`services-aws-${SERVICE_TYPE.LOAD_BALANCER}`)
     expect(service.schema.required).toEqual(expect.arrayContaining(['provider', 'name', 'type']))
   })
 

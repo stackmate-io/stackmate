@@ -19,7 +19,7 @@ describe('AWS DNS', () => {
   })
 
   it('provides a valid schema', () => {
-    expect(service.schema.$id).toEqual(`services/aws/${SERVICE_TYPE.DNS}`)
+    expect(service.schema.$id).toEqual(`services-aws-${SERVICE_TYPE.DNS}`)
     expect(service.schema.required).toEqual(
       expect.arrayContaining(['provider', 'name', 'type', 'domain']),
     )

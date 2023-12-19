@@ -26,7 +26,7 @@ describe('AWS state', () => {
 
   it('contains a valid schema', () => {
     expect(service.schema).toMatchObject({
-      $id: 'services/aws/state',
+      $id: 'services-aws-state',
       type: 'object',
       required: expect.arrayContaining(['provider', 'name', 'type', 'region', 'bucket']),
       additionalProperties: false,

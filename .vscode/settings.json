@@ -4,6 +4,9 @@
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "never"
   },
+  "yaml.schemas": {
+    "dist/schema.json": "examples/*.yml",
+  },
   "files.restoreUndoStack": true,
   "editor.rulers": [100],
   "eslint.validate": [

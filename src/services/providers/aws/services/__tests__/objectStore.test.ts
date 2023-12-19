@@ -22,7 +22,7 @@ describe('AWS Object store', () => {
   })
 
   it('provides a valid schema', () => {
-    expect(service.schema.$id).toEqual(`services/aws/${SERVICE_TYPE.OBJECT_STORAGE}`)
+    expect(service.schema.$id).toEqual(`services-aws-${SERVICE_TYPE.OBJECT_STORAGE}`)
     expect(service.schema.required).toEqual(expect.arrayContaining(['provider', 'name', 'type']))
     expect(service.schema.properties?.buckets).toMatchObject({
       type: 'array',

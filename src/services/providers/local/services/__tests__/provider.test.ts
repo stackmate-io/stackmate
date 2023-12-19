@@ -14,7 +14,7 @@ describe('Local Provider', () => {
 
   it('provides the right schema', () => {
     expect(service.schema).toMatchObject({
-      $id: 'services/local/provider',
+      $id: 'services-local-provider',
       type: 'object',
       required: expect.arrayContaining(['name', 'type', 'provider']),
       additionalProperties: false,
@@ -28,7 +28,7 @@ describe('Local Provider', () => {
     })
   })
 
-  describe('onPrepare provision handler', () => {
+  describe('resource handler', () => {
     const config: LocalProviderAttributes = {
       name: 'local-provider',
       provider: 'local',

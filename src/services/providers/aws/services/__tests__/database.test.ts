@@ -38,7 +38,7 @@ const getDatabaseSchemaExpectation = (
   versions: readonly string[],
   defaultVersion: string,
 ) => ({
-  $id: `services/aws/${type}`,
+  $id: `services-aws-${type}`,
   type: 'object',
   required: expect.arrayContaining(['provider', 'name', 'type']),
   additionalProperties: false,
