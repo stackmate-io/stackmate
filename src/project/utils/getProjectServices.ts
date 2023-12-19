@@ -1,5 +1,5 @@
 import { DEFAULT_PROVIDER, DEFAULT_REGION } from '@src/project/constants'
-import { get, isEmpty, isFunction, merge } from 'lodash'
+import { cloneDeep, defaultsDeep, fromPairs, get, isEmpty, isFunction, merge } from 'lodash'
 import { getValidData } from '@src/validation'
 import { getProjectSchema } from '@src/project/utils/getProjectSchema'
 import { SERVICE_TYPE, isDebugMode } from '@src/constants'
@@ -13,11 +13,31 @@ export type AttributesGenerator = (
   associated?: BaseServiceAttributes,
 ) => ServiceConfiguration
 
+const normalizeProject = (project: ProjectConfiguration): ProjectConfiguration =>
+  defaultsDeep(cloneDeep(project), {
+    provider: DEFAULT_PROVIDER,
+    state: { type: SERVICE_TYPE.STATE, provider: project.provider || DEFAULT_PROVIDER },
+    environments: fromPairs(
+      Object.entries(project.environments).map(([env, services]) => [
+        env,
+        fromPairs(
+          Object.entries(services || {}).map(([name, service]) => [
+            name,
+            defaultsDeep(cloneDeep(service), {
+              provider: project.provider || DEFAULT_PROVIDER,
+              region: project.region || DEFAULT_REGION[project.provider || DEFAULT_PROVIDER],
+            }) as ServiceConfiguration,
+          ]),
+        ),
+      ]),
+    ),
+  })
+
 export const getProjectServices = (
   raw: ProjectConfiguration,
   environment: EnvironmentChoice,
 ): ServiceConfiguration[] => {
-  const project = getValidData(raw, getProjectSchema(), {
+  const project = getValidData(normalizeProject(raw), getProjectSchema(), {
     useDefaults: true,
   })
 

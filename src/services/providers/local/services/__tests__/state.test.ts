@@ -17,7 +17,7 @@ describe('Local state', () => {
 
   it('provides the right schema', () => {
     expect(service.schema).toMatchObject({
-      $id: 'services/local/state',
+      $id: 'services-local-state',
       type: 'object',
       required: expect.arrayContaining(['name', 'type', 'provider']),
       additionalProperties: false,

@@ -7,15 +7,11 @@ environments:
   production:
     rails-app:
       type: application
-      preset: rails
+      image: stackmate/sample-nodejs-app:latest
       port: 3000
+      cpu: 0.25
+      memory: 1
       domain: app.stackmate.io
-      build:
-        source: Dockerfile
-      environment:
-        REDIS_URL: redis://${redis-kv.host}:${redis-kv:port}/0
-        DB_URL: mysql://${mysql-db.user}:${mysql-db.password}@${mysql-db.host}/${mysql-db.db}:${mysql-db.port}
-        S3_BUCKET: s3://${storage.stackmate-rails-app-storage.name}
 
       # Optional configuration:
       #

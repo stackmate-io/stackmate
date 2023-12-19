@@ -10,20 +10,8 @@ import { validateServiceProfile } from './validateServiceProfile'
 import { validateServiceProfileOverrides } from './validateServiceProfileOverrides'
 import { validateUniqueAppDomains } from './validateUniqueAppDomains'
 
-let ajv: Ajv
-/**
- * Returns or creates an Ajv instance
- *
- * @param {AjvOptions} opts the options to use with Ajv
- * @returns {Ajv} the Ajv instance
- */
-
 export const getAjv = (opts: AjvOptions = {}): Ajv => {
-  if (ajv) {
-    return ajv
-  }
-
-  ajv = new Ajv(defaults({ ...opts }, AJV_DEFAULTS))
+  const ajv = new Ajv(defaults({ ...opts }, AJV_DEFAULTS))
 
   addFormats(ajv)
 

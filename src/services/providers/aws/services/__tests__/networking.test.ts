@@ -25,7 +25,7 @@ describe('AWS Networking', () => {
 
   it('contains a valid schema', () => {
     expect(service.schema).toMatchObject({
-      $id: 'services/aws/networking',
+      $id: 'services-aws-networking',
       required: expect.arrayContaining(['name', 'provider', 'type', 'region']),
       properties: {
         provider: expect.objectContaining({ const: PROVIDER.AWS }),

@@ -3,7 +3,7 @@ import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
 import { fromPairs, merge, omit, without } from 'lodash'
 import { JSON_SCHEMA_DRAFT } from '@src/validation/constants'
 import { getServicesSchema } from '@src/validation/utils/getServicesSchema'
-import type { BaseServiceAttributes, ServiceTypeChoice } from '@src/services/types'
+import type { ServiceTypeChoice } from '@src/services/types'
 import type { ProjectConfiguration } from '@src/project/types'
 import type { JsonSchema } from '@src/lib/schema'
 
@@ -17,20 +17,17 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   // The provider, region and service name are implied in this version of the schema
   const serviceDefinitions = fromPairs(
     Object.entries(serviceDefs).map(([serviceRef, definition]) => {
-      const extras: JsonSchema<any> = {}
       const impliedKeys = ['provider', 'region', 'name']
 
       // The type is also implied for the state service
       if (isSchemaOf(definition, SERVICE_TYPE.STATE, SERVICE_TYPE.PROVIDER)) {
         impliedKeys.push('type')
-        Object.assign(extras, { not: { required: ['type'] } })
       }
 
       return [
         serviceRef,
         merge({}, omit(definition, 'required'), {
           ...definition,
-          ...extras,
           required: without(definition.required || [], ...impliedKeys),
           properties: {
             provider: { default: definition.properties.provider.const },
@@ -41,27 +38,13 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
     }),
   )
 
-  const getServiceDiscrimination = (schema: JsonSchema<BaseServiceAttributes>) => ({
-    if: {
-      properties: {
-        provider: {
-          const: schema.properties?.provider?.const,
-        },
-        type: { const: schema.properties?.type?.const },
-      },
-    },
-    then: {
-      $ref: `#/$defs/${schema.$id}`,
-    },
-  })
-
   const serviceDefinitionReferences = Object.values(serviceDefinitions)
     .filter((schema) => !isSchemaOf(schema, SERVICE_TYPE.STATE, SERVICE_TYPE.PROVIDER))
-    .map((schema) => getServiceDiscrimination(schema))
+    .map((schema) => ({ $ref: `#/$defs/${schema.$id}` }))
 
   const stateServiceDefinitionReferences = Object.values(serviceDefinitions)
     .filter((schema) => isSchemaOf(schema, SERVICE_TYPE.STATE))
-    .map((schema) => getServiceDiscrimination(schema))
+    .map((schema) => ({ $ref: `#/$defs/${schema.$id}` }))
 
   return {
     $id: 'stackmate',
@@ -79,9 +62,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         default: DEFAULT_REGION[PROVIDER.AWS],
       },
       state: {
-        type: 'object',
-        not: { required: ['type'] },
-        oneOf: stateServiceDefinitionReferences,
+        anyOf: stateServiceDefinitionReferences,
       },
       environments: {
         required: [ENVIRONMENT.PRODUCTION],
@@ -91,7 +72,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
             uniqueAppDomains: true,
             patternProperties: {
               '^[a-zA-Z0-9_-]+$': {
-                allOf: serviceDefinitionReferences,
+                anyOf: serviceDefinitionReferences,
               },
             },
           },
