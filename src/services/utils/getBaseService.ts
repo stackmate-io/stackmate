@@ -1,4 +1,5 @@
 import { getServiceNameSchema } from '@src/validation/utils/getServiceNameSchema'
+import { kebabCase } from 'lodash'
 import type { JsonSchema } from '@lib/schema'
 import type {
   ProviderChoice,
@@ -18,7 +19,7 @@ export const getBaseService = (
   provider: ProviderChoice,
   type: ServiceTypeChoice,
 ): Service<BaseServiceAttributes & { provider: typeof provider; type: typeof type }> => {
-  const schemaId = `services/${provider}/${type}`
+  const schemaId = kebabCase(`services_${provider}_${type}`)
   const schema: JsonSchema<BaseServiceAttributes> = {
     $id: schemaId,
     type: 'object',
