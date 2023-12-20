@@ -13,7 +13,7 @@ import type {
   AwsDbServiceType,
   ElasticacheEngine,
   RdsEngine,
-} from '@src/services/providers/aws/constants'
+} from '@src/services/providers/aws/types'
 import type { AwsCacheAttributes } from '@src/services/providers/aws/services/cache'
 
 export const getAwsCacheConfigMock = <T extends AwsCacheServiceType, E extends ElasticacheEngine>(

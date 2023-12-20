@@ -1,14 +1,15 @@
+import path from 'node:path'
 import { SERVICE_TYPE } from '@src/constants'
-import type { ServiceTypeChoice } from '@services/types'
+import { readJsonFile } from '@src/lib/file'
+import type { AwsDbServiceType, RdsEngine, ElasticacheEngine, AwsServiceConstraints } from './types'
 
 export const DEFAULT_VPC_IP = '10.0.0.0' as const
-export const REGIONS = ['eu-central-1'] as const
-
-/* RDS options */
-export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
 export const DEFAULT_RDS_INSTANCE_SIZE = 'db.t3.micro' as const
 export const DEFAULT_RDS_ENGINE = 'mysql' as const
-export type AwsDbServiceType = Extract<ServiceTypeChoice, 'mysql' | 'mariadb' | 'postgresql'>
+export const REGIONS = readJsonFile<string[]>(path.join(__dirname, 'regions.json'))
+export const CONSTRAINTS = readJsonFile<AwsServiceConstraints>(
+  path.join(__dirname, 'constraints.json'),
+)
 
 export const RDS_ENGINE_PER_SERVICE_TYPE: Record<AwsDbServiceType, RdsEngine> = {
   [SERVICE_TYPE.MYSQL]: 'mysql',
@@ -50,8 +51,6 @@ export const RDS_DEFAULT_VERSIONS_PER_ENGINE: Record<RdsEngine, string> = {
 } as const
 
 /* Elasticache options */
-export type ElasticacheEngine = 'redis' | 'memcached'
-export type AwsCacheServiceType = Extract<ServiceTypeChoice, 'redis' | 'memcached'>
 export const DEFAULT_ELASTICACHE_INSTANCE_SIZE = 'cache.t3.micro' as const
 export const ELASTICACHE_VERSIONS_PER_ENGINE: Record<ElasticacheEngine, readonly string[]> = {
   redis: ['7.1', '7.0', '6.2', '6.0', '5.0.6', '4.0.10'],

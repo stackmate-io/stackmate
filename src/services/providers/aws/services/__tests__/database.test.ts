@@ -30,7 +30,7 @@ import type {
   AwsMySQLAttributes,
   AwsPostgreSQLAttributes,
 } from '@aws/services/database'
-import type { AwsDbServiceType, RdsEngine } from '@aws/constants'
+import type { AwsDbServiceType, RdsEngine } from '../../types'
 
 const getDatabaseSchemaExpectation = (
   type: AwsDbServiceType,

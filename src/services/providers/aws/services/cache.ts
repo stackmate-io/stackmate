@@ -20,7 +20,7 @@ import { elasticacheClusterLogDeliveryConfigurationToTerraform } from '@cdktf/pr
 import { REGIONS } from '@aws/constants'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import type { ElasticacheEngine } from '@aws/constants'
+import type { ElasticacheEngine } from '../types'
 import type { Stack } from '@lib/stack'
 import type { OneOfType } from '@lib/util'
 import type {

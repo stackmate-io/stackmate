@@ -2,14 +2,19 @@
 import { inspect } from 'util'
 import { ValidationError } from '@lib/errors'
 import { isDebugMode } from '@src/constants'
-import { groupBy } from 'lodash'
+import { groupBy, isEmpty } from 'lodash'
+import type yargs from 'yargs'
 
 const print = (message: string, indentation = 0) => {
   const spacing = Array(indentation).fill(' ').join('')
   console.error(`${spacing}${message}`)
 }
 
-export const errorHandler = (msg: string, err: Error) => {
+export const errorHandler = (msg: string, err: Error, yargs: yargs.Argv) => {
+  if (isEmpty(process.argv.slice(2))) {
+    return yargs.showHelp()
+  }
+
   if (msg) {
     print(msg)
   }

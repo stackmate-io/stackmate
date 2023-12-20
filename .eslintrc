@@ -37,8 +37,7 @@
     "@typescript-eslint",
     "unused-imports",
     "import",
-    "prettier",
-    "jsdoc"
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {

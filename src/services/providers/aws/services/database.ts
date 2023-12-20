@@ -13,7 +13,7 @@ import { withAwsAlerts } from '@aws/utils/withAlerts'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
 import { REGIONS } from '@aws/constants'
-import type { RdsEngine } from '@aws/constants'
+import type { RdsEngine } from '../types'
 import type { Stack } from '@lib/stack'
 import type { OneOfType } from '@lib/util'
 import type {

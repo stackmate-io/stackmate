@@ -53,12 +53,12 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^27.6.0",
-    "eslint-plugin-jsdoc": "^46.9.1",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-unused-imports": "^3.0.0",
     "jest": "^29.7.0",
     "prettier": "^3.1.1",
     "rimraf": "^5.0.5",
+    "semver": "^7.5.4",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "ts-transform-paths": "^3.0.0",
@@ -85,12 +85,15 @@
     "clean": "rimraf dist/*",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
+    "postinstall": "npm run cloud:data",
+    "prepublish": "npm run cloud:data",
     "test": "NODE_ENV=test jest --verbose --useStderr --detectOpenHandles --silent=false --maxWorkers=1 --testTimeout=60000000",
     "test:unit": "npm run test -- --testRegex=src/.*.test.ts",
     "test:e2e": "npm run test -- --testRegex=e2e/.*.test.ts",
     "test:local": "AWS_PROFILE=engine-tests-local npm run test --",
     "test:watch": "npm run test --watchAll",
-    "schema:export": "ts-node -r tsconfig-paths/register bin/schema.ts"
+    "cloud:constraints": "AWS_PROFILE=engine-tests-local ts-node -r tsconfig-paths/register utilities/clouds/index.ts",
+    "schema:export": "ts-node -r tsconfig-paths/register utilities/schema/index.ts"
   },
   "volta": {
     "node": "21.4.0"

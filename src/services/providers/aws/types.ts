@@ -4,6 +4,7 @@ import type {
   Service,
   BaseServiceAttributes,
   Provisionable,
+  ServiceTypeChoice,
 } from '@services/types'
 import type { TerraformOutput, TerraformResource } from 'cdktf'
 import type { PROVIDER, SERVICE_TYPE } from '@src/constants'
@@ -100,3 +101,18 @@ export type AwsAlertPrerequisites = {
   document: dataAwsIamPolicyDocument.DataAwsIamPolicyDocument
   subscriptions: snsTopicSubscription.SnsTopicSubscription[]
 }
+
+export type AwsServiceConstraints = {
+  [service: string]: {
+    regions: string[]
+    sizes: string[]
+    familyMapping: [string, string, string][]
+    versions: string[]
+    defaultVersion: string
+  }
+}
+
+export type RdsEngine = 'mariadb' | 'mysql' | 'postgres'
+export type ElasticacheEngine = 'redis' | 'memcached'
+export type AwsDbServiceType = Extract<ServiceTypeChoice, 'mysql' | 'mariadb' | 'postgresql'>
+export type AwsCacheServiceType = Extract<ServiceTypeChoice, 'redis' | 'memcached'>

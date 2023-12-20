@@ -20,7 +20,7 @@ import { snakeCase } from 'lodash'
 import { Registry } from '@src/services/registry'
 import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
 import { ENVIRONMENT } from '@src/project/constants'
-import type { AwsCacheServiceType, ElasticacheEngine } from '@aws/constants'
+import type { AwsCacheServiceType, ElasticacheEngine } from '../../types'
 import type { ServiceConfiguration } from '@src/services/registry'
 
 const getCacheSchemaExpectation = (
