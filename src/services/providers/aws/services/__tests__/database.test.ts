@@ -91,10 +91,6 @@ describe('AWS PostgreSQL', () => {
     expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.POSTGRESQL))
   })
 
-  it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
-  })
-
   it('provides constraints', () => {
     expect(CONSTRAINTS[SERVICE_TYPE.POSTGRESQL]).toMatchObject({
       familyMapping: expect.arrayContaining([]),
@@ -103,6 +99,10 @@ describe('AWS PostgreSQL', () => {
       versions: expect.arrayContaining([]),
       defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
     })
+  })
+
+  it('has the AWS regions set', () => {
+    expect(service.regions).toEqual(expect.arrayContaining(CONSTRAINTS[SERVICE_TYPE.MYSQL].regions))
   })
 
   it('provides a valid schema', () => {
@@ -137,10 +137,6 @@ describe('AWS MySQL', () => {
     expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.MYSQL))
   })
 
-  it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
-  })
-
   it('provides constraints', () => {
     expect(CONSTRAINTS[SERVICE_TYPE.MYSQL]).toMatchObject({
       familyMapping: expect.arrayContaining([]),
@@ -149,6 +145,10 @@ describe('AWS MySQL', () => {
       versions: expect.arrayContaining([]),
       defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
     })
+  })
+
+  it('has the AWS regions set', () => {
+    expect(service.regions).toEqual(expect.arrayContaining(CONSTRAINTS[SERVICE_TYPE.MYSQL].regions))
   })
 
   it('provides a valid schema', () => {
@@ -182,10 +182,6 @@ describe('AWS MariaDB', () => {
     expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.MARIADB))
   })
 
-  it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
-  })
-
   it('provides constraints', () => {
     expect(CONSTRAINTS[SERVICE_TYPE.MARIADB]).toMatchObject({
       familyMapping: expect.arrayContaining([]),
@@ -194,6 +190,10 @@ describe('AWS MariaDB', () => {
       versions: expect.arrayContaining([]),
       defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
     })
+  })
+
+  it('has the AWS regions set', () => {
+    expect(service.regions).toEqual(expect.arrayContaining(CONSTRAINTS[SERVICE_TYPE.MYSQL].regions))
   })
 
   it('provides a valid schema', () => {

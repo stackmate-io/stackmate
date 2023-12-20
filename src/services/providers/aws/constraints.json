@@ -1011,7 +1011,7 @@
       "15.5",
       "16.1"
     ],
-    "defaultVersion": "0.0.0"
+    "defaultVersion": "16.1"
   },
   "memcached": {
     "regions": [
@@ -1253,68 +1253,68 @@
     ],
     "familyMapping": [
       [
-        "memcached",
-        "1.4.14",
-        "memcached1.4"
+        "redis",
+        "4.0.10",
+        "redis4.0"
       ],
       [
-        "memcached",
-        "1.4.24",
-        "memcached1.4"
+        "redis",
+        "5.0.0",
+        "redis5.0"
       ],
       [
-        "memcached",
-        "1.4.33",
-        "memcached1.4"
+        "redis",
+        "5.0.3",
+        "redis5.0"
       ],
       [
-        "memcached",
-        "1.4.34",
-        "memcached1.4"
+        "redis",
+        "5.0.4",
+        "redis5.0"
       ],
       [
-        "memcached",
-        "1.4.5",
-        "memcached1.4"
+        "redis",
+        "5.0.5",
+        "redis5.0"
       ],
       [
-        "memcached",
-        "1.5.10",
-        "memcached1.5"
+        "redis",
+        "5.0.6",
+        "redis5.0"
       ],
       [
-        "memcached",
-        "1.5.16",
-        "memcached1.5"
+        "redis",
+        "6.0",
+        "redis6.x"
       ],
       [
-        "memcached",
-        "1.6.12",
-        "memcached1.6"
+        "redis",
+        "6.2",
+        "redis6.x"
       ],
       [
-        "memcached",
-        "1.6.17",
-        "memcached1.6"
+        "redis",
+        "7.0",
+        "redis7"
       ],
       [
-        "memcached",
-        "1.6.6",
-        "memcached1.6"
+        "redis",
+        "7.1",
+        "redis7"
       ]
     ],
     "versions": [
-      "1.4.14",
-      "1.4.24",
-      "1.4.33",
-      "1.4.34",
-      "1.4.5",
-      "1.5.10",
-      "1.5.16",
-      "1.6.12",
-      "1.6.17",
-      "1.6.6"
+      "4.0.10",
+      "5.0.0",
+      "5.0.3",
+      "5.0.4",
+      "5.0.5",
+      "5.0.6",
+      "6.0",
+      "6.2",
+      "7.0",
+      "7.1"
     ],
-    "defaultVersion": "1.6.17"
+    "defaultVersion": "7.1"
   }
 }

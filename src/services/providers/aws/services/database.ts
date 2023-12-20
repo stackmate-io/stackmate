@@ -12,7 +12,12 @@ import { onExternalLink } from '@aws/utils/onExternalLink'
 import { withAwsAlerts } from '@aws/utils/withAlerts'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import type { RdsEngine } from '@aws/constants'
+import type {
+  RdsEngine,
+  AwsDbServiceType,
+  AwsNetworkingAssociations,
+  AwsProviderAssociations,
+} from '@aws/types'
 import type { Stack } from '@lib/stack'
 import type { OneOfType } from '@lib/util'
 import type {
@@ -21,11 +26,6 @@ import type {
   Service,
   ServiceTypeChoice,
 } from '@services/types'
-import type {
-  AwsDbServiceType,
-  AwsNetworkingAssociations,
-  AwsProviderAssociations,
-} from '@aws/types'
 
 type DatabaseAttributes = BaseServiceAttributes &
   behavior.SizeableAttributes &
@@ -126,9 +126,7 @@ const deployDatabases = (
     ...instance,
     allocatedStorage: config.storage,
     applyImmediately: true,
-    enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[
-      config.engine
-    ] as unknown as string[],
+    enabledCloudwatchLogsExports: AWS.RDS_LOG_EXPORTS_PER_ENGINE[config.engine],
     engine: config.engine,
     engineVersion: config.version,
     identifier: dbInstanceName,

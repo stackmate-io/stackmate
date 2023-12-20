@@ -1,10 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { PROVIDER, DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
-import {
-  CONSTRAINTS,
-  ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE,
-  RDS_ENGINE_PER_SERVICE_TYPE,
-} from '@src/services/providers/aws/constants'
+import { CONSTRAINTS, RDS_ENGINE_PER_SERVICE_TYPE } from '@src/services/providers/aws/constants'
 import { kebabCase, snakeCase } from 'lodash'
 import type { AwsApplicationAttributes } from '@src/services/providers/aws/services/application'
 import type { AwsDatabaseAttributes } from '@src/services/providers/aws/services/database'
@@ -25,14 +21,8 @@ export const getAwsCacheConfigMock = <T extends AwsCacheServiceType, E extends E
   provider: PROVIDER.AWS,
   type,
   region: 'eu-central-1',
-  size: faker.helpers.arrayElement([
-    'cache.t4g.medium',
-    'cache.t3.micro',
-    'cache.m7g.large',
-    'cache.m6g.2xlarge',
-    'cache.m5.xlarge',
-  ]),
-  version: ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine],
+  size: faker.helpers.arrayElement(CONSTRAINTS[type].sizes),
+  version: faker.helpers.arrayElement(CONSTRAINTS[type].versions),
   engine,
   links: [],
   externalLinks: [],

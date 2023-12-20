@@ -23,9 +23,9 @@ const getContents = (file: string): any => {
 
 const getDefaultVersion = (versions: string[]): string => {
   const defaultVersion = versions.reduce((prev, curr) => {
-    const previous = semver.clean(prev)
-    const current = semver.clean(curr)
-    return previous && current && semver.gte(current, previous) ? current : previous
+    const previous = semver.coerce(prev, { loose: true })
+    const current = semver.coerce(curr, { loose: true })
+    return previous && current && semver.gte(current, previous, { loose: true }) ? curr : prev
   }, '0.0.0')
 
   return defaultVersion || head(versions) || '0.0.0'
@@ -110,7 +110,7 @@ export const exportServiceConstraints = async () => {
     [SERVICE_TYPE.REDIS]: {
       regions,
       sizes: uniq(getContents('elasticache-node-types.json')),
-      ...getElasticacheVersionData('memcached'),
+      ...getElasticacheVersionData('redis'),
     },
   }
 
