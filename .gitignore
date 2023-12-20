@@ -31,3 +31,7 @@ stacks/
 
 # and uncomment the following lines
 .pnp.*
+
+# cloud providers data
+utilities/clouds/**/data/*
+!utilities/clouds/**/data/.keep

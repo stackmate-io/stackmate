@@ -166,6 +166,7 @@ export type JsonSchema<T = undefined> = {
   serviceLinks?: boolean
   serviceProfile?: boolean
   serviceProfileOverrides?: boolean
+  uniqueAppDomains?: boolean
 
   // AJV-error specific
   errorMessage?:

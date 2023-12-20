@@ -3,6 +3,7 @@ import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
 import { fromPairs, groupBy, merge, omit, toPairs, without } from 'lodash'
 import { JSON_SCHEMA_DRAFT } from '@src/validation/constants'
 import { getServicesSchema } from '@src/validation/utils/getServicesSchema'
+import { REGIONS } from '@aws/constants'
 import type { ServiceConfiguration } from '@src/services/registry'
 import type { ServiceTypeChoice } from '@src/services/types'
 import type { ProjectConfiguration } from '@src/project/types'
@@ -82,6 +83,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
       },
       region: {
         type: 'string',
+        enum: REGIONS,
         default: DEFAULT_REGION[PROVIDER.AWS],
       },
       state: {
@@ -96,20 +98,27 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         },
       },
       environments: {
+        type: 'object',
         required: [ENVIRONMENT.PRODUCTION],
+        properties: {
+          ...fromPairs(
+            Object.values(ENVIRONMENT).map((env) => [env, { $ref: '#/$defs/environment' }]),
+          ),
+        },
+      },
+    },
+    $defs: {
+      ...serviceDefinitions,
+      environment: {
+        type: 'object',
+        uniqueAppDomains: true,
+        minProperties: 1,
         patternProperties: {
-          [`^${Object.values(ENVIRONMENT).join('|')}$`]: {
-            type: 'object',
-            uniqueAppDomains: true,
-            patternProperties: {
-              '^[a-zA-Z0-9_-]+$': {
-                allOf: serviceDiscriminations,
-              },
-            },
+          '^[a-zA-Z0-9_-]+$': {
+            allOf: serviceDiscriminations,
           },
         },
       },
     },
-    $defs: serviceDefinitions,
   }
 }

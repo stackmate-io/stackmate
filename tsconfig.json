@@ -14,7 +14,8 @@
     "importHelpers": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "skipLibCheck": true,
     "target": "ESNext",
     "sourceMap": true,
@@ -26,7 +27,6 @@
     "removeComments": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
       "@bin/*": [
@@ -69,7 +69,8 @@
     "jest.setup.ts",
     "jest.config.e2e.ts",
     "jest.config.ts",
-    "node_modules/cdktf/lib/testing/adapters/jest.d.ts"
+    "node_modules/cdktf/lib/testing/adapters/jest.d.ts",
+    "utilities/**/*.ts"
   ],
   "exclude": [
     "**/dist"

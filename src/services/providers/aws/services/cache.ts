@@ -20,7 +20,7 @@ import { elasticacheClusterLogDeliveryConfigurationToTerraform } from '@cdktf/pr
 import { REGIONS } from '@aws/constants'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import type { ElasticacheEngine } from '@aws/constants'
+import type { ElasticacheEngine } from '../types'
 import type { Stack } from '@lib/stack'
 import type { OneOfType } from '@lib/util'
 import type {
@@ -81,9 +81,22 @@ export type AwsCacheProvisionable = Provisionable<AwsCache, AwsCacheResources>
  * @returns {String} the parameter group family to use when provisioning the database
  */
 export const getParamGroupFamily = (config: CacheAttributes): string => {
-  const source = config.cluster
-    ? AWS.ELASTICACHE_CLUSTER_PARAM_FAMILY_MAPPING
-    : AWS.ELASTICACHE_INSTANCE_FAMILY_MAPPING
+  let source = AWS.CONSTRAINTS[config.type].familyMapping
+
+  if (config.cluster) {
+    source = [
+      ...AWS.CONSTRAINTS[config.type].familyMapping.map(([engine, version, family]) => [
+        engine,
+        version,
+        `default.${family}`,
+      ]),
+      ...AWS.CONSTRAINTS[config.type].familyMapping.map(([engine, version, family]) => [
+        engine,
+        version,
+        `default.${family}.cluster.on`,
+      ]),
+    ] as [string, string, string][]
+  }
 
   const triad = source.find(
     ([engine, version]) => engine === config.engine && config.version.startsWith(version),
@@ -267,17 +280,19 @@ const getCacheService = <T extends ServiceTypeChoice, E extends ElasticacheEngin
     throw new Error(`There is no default port set for service ${type}`)
   }
 
+  const constraints = AWS.CONSTRAINTS[type]
+  if (!constraints) {
+    throw new Error(`Constraints for service type ${type} not available`)
+  }
+
   return pipe(
     behavior.clustered(),
     behavior.withHandler(resourceHandler),
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),
     behavior.monitored(),
-    behavior.sizeable('^cache\\.[a-z0-9]+\\.[a-z0-9]+$', AWS.DEFAULT_ELASTICACHE_INSTANCE_SIZE),
-    behavior.versioned(
-      AWS.ELASTICACHE_VERSIONS_PER_ENGINE[engine],
-      AWS.ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine],
-    ),
+    behavior.sizeable(constraints.sizes, AWS.DEFAULT_ELASTICACHE_INSTANCE_SIZE),
+    behavior.versioned(constraints.versions, constraints.defaultVersion),
     behavior.connectable(defaultPort),
     behavior.withEngine<typeof engine>(engine),
     behavior.multiNode(),

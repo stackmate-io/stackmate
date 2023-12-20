@@ -1,10 +1,5 @@
 import { AwsMemcached, AwsRedis } from '@aws/services/cache'
-import {
-  DEFAULT_ELASTICACHE_INSTANCE_SIZE,
-  ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE,
-  ELASTICACHE_VERSIONS_PER_ENGINE,
-  REGIONS,
-} from '@aws/constants'
+import { CONSTRAINTS, DEFAULT_ELASTICACHE_INSTANCE_SIZE, REGIONS } from '@aws/constants'
 import { DEFAULT_PROFILE_NAME, PROVIDER, SERVICE_TYPE } from '@src/constants'
 import { getAwsCacheConfigMock } from '@tests/mocks/aws'
 import {
@@ -19,8 +14,8 @@ import {
 import { snakeCase } from 'lodash'
 import { Registry } from '@src/services/registry'
 import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
-import { ENVIRONMENT } from '@src/project/constants'
-import type { AwsCacheServiceType, ElasticacheEngine } from '@aws/constants'
+import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
+import type { AwsCacheServiceType, ElasticacheEngine } from '@aws/types'
 import type { ServiceConfiguration } from '@src/services/registry'
 
 const getCacheSchemaExpectation = (
@@ -60,7 +55,7 @@ const getCacheSchemaExpectation = (
     }),
     size: expect.objectContaining({
       type: 'string',
-      pattern: expect.stringContaining('^cache\\.[a-z0-9]+\\.[a-z0-9]+$'),
+      enum: expect.arrayContaining([DEFAULT_ELASTICACHE_INSTANCE_SIZE]),
       default: DEFAULT_ELASTICACHE_INSTANCE_SIZE,
     }),
   },
@@ -78,19 +73,28 @@ describe('Redis cache', () => {
     expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.REDIS))
   })
 
+  it('provides constraints', () => {
+    expect(CONSTRAINTS[SERVICE_TYPE.REDIS]).toMatchObject({
+      familyMapping: expect.arrayContaining([]),
+      regions: expect.arrayContaining([DEFAULT_REGION.aws]),
+      sizes: expect.arrayContaining([DEFAULT_ELASTICACHE_INSTANCE_SIZE]),
+      versions: expect.arrayContaining([]),
+      defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
+    })
+  })
+
   it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
+    expect(service.regions).toEqual(expect.arrayContaining(CONSTRAINTS[SERVICE_TYPE.REDIS].regions))
   })
 
   it('provides a valid schema', () => {
-    const engine: ElasticacheEngine = 'redis'
-    const versions = ELASTICACHE_VERSIONS_PER_ENGINE[engine]
-    const defaultVersion = ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine]
+    const versions = CONSTRAINTS[SERVICE_TYPE.REDIS].versions
+    const defaultVersion = CONSTRAINTS[SERVICE_TYPE.REDIS].defaultVersion
     expect(Array.isArray(versions)).toBe(true)
     expect(versions.length).toBeGreaterThan(0)
     expect(typeof defaultVersion === 'string').toBe(true)
     expect(service.schema).toMatchObject(
-      getCacheSchemaExpectation(SERVICE_TYPE.REDIS, engine, versions, defaultVersion),
+      getCacheSchemaExpectation(SERVICE_TYPE.REDIS, 'redis', versions, defaultVersion),
     )
   })
 
@@ -128,19 +132,30 @@ describe('Memcached cache', () => {
     expect(Registry.get(PROVIDER.AWS, SERVICE_TYPE.REDIS))
   })
 
+  it('provides constraints', () => {
+    expect(CONSTRAINTS[SERVICE_TYPE.MEMCACHED]).toMatchObject({
+      familyMapping: expect.arrayContaining([]),
+      regions: expect.arrayContaining([DEFAULT_REGION.aws]),
+      sizes: expect.arrayContaining([DEFAULT_ELASTICACHE_INSTANCE_SIZE]),
+      versions: expect.arrayContaining([]),
+      defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
+    })
+  })
+
   it('has the AWS regions set', () => {
-    expect(new Set(service.regions)).toEqual(new Set(REGIONS))
+    expect(service.regions).toEqual(
+      expect.arrayContaining(CONSTRAINTS[SERVICE_TYPE.MEMCACHED].regions),
+    )
   })
 
   it('provides a valid schema', () => {
-    const engine: ElasticacheEngine = 'memcached'
-    const versions = ELASTICACHE_VERSIONS_PER_ENGINE[engine]
-    const defaultVersion = ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine]
+    const versions = CONSTRAINTS[SERVICE_TYPE.MEMCACHED].versions
+    const defaultVersion = CONSTRAINTS[SERVICE_TYPE.MEMCACHED].defaultVersion
     expect(Array.isArray(versions)).toBe(true)
     expect(versions.length).toBeGreaterThan(0)
     expect(typeof defaultVersion === 'string').toBe(true)
     expect(service.schema).toMatchObject(
-      getCacheSchemaExpectation(SERVICE_TYPE.MEMCACHED, engine, versions, defaultVersion),
+      getCacheSchemaExpectation(SERVICE_TYPE.MEMCACHED, 'memcached', versions, defaultVersion),
     )
   })
 

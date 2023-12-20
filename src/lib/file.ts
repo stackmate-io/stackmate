@@ -27,7 +27,7 @@ export const writeJsonFile = (contents: object | string, filename: string) => {
   writeFile(data, filename)
 }
 
-export const readJsonFile = (path: string): object => {
+export const readJsonFile = <T = object>(path: string): T => {
   const contents = readFile(path)
 
   try {
@@ -38,7 +38,7 @@ export const readJsonFile = (path: string): object => {
   }
 }
 
-export const readYamlFile = (path: string): object => {
+export const readYamlFile = <T = object>(path: string): T => {
   const contents = readFile(path)
 
   try {
