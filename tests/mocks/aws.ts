@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { PROVIDER, DEFAULT_PROFILE_NAME, SERVICE_TYPE } from '@src/constants'
 import {
+  CONSTRAINTS,
   ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE,
-  RDS_DEFAULT_VERSIONS_PER_ENGINE,
   RDS_ENGINE_PER_SERVICE_TYPE,
 } from '@src/services/providers/aws/constants'
 import { kebabCase, snakeCase } from 'lodash'
@@ -58,14 +58,8 @@ export const getAwsDbConfigMock = (
   provider: PROVIDER.AWS,
   type,
   region: 'eu-central-1',
-  size: faker.helpers.arrayElement([
-    'db.t2.xlarge',
-    'db.t2.2xlarge',
-    'db.m4.large',
-    'db.m4.xlarge',
-    'db.m5.24xlarge',
-  ]),
-  version: RDS_DEFAULT_VERSIONS_PER_ENGINE[engine],
+  size: faker.helpers.arrayElement(CONSTRAINTS[type].sizes),
+  version: faker.helpers.arrayElement(CONSTRAINTS[type].versions),
   database: snakeCase(faker.lorem.word()),
   engine,
   links: [],

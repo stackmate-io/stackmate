@@ -14,7 +14,8 @@
     "importHelpers": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "module": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "skipLibCheck": true,
     "target": "ESNext",
     "sourceMap": true,
@@ -24,10 +25,8 @@
     "noEmitOnError": true,
     "noErrorTruncation": true,
     "removeComments": true,
-    "resolvePackageJsonImports": true,
     "strictPropertyInitialization": false,
     "noUnusedLocals": true,
-    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "paths": {
       "@bin/*": [

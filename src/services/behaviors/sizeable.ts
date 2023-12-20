@@ -9,18 +9,17 @@ export type SizeableAttributes = { size: string }
 /**
  * Adds size support to a service (eg. the database instance size)
  *
- * @param {String} pattern the regular expression to match
+ * @param {String[]} sizes the instance sizes
  * @param {String} defaultSize the default size for the service
  * @returns {Function<Service>}
  */
-
-export const sizeable = <C extends BaseServiceAttributes>(pattern: string, defaultSize: string) =>
+export const sizeable = <C extends BaseServiceAttributes>(sizes: string[], defaultSize: string) =>
   withSchema<C, SizeableAttributes>({
     type: 'object',
     properties: {
       size: {
         type: 'string',
-        pattern,
+        enum: sizes,
         default: defaultSize,
       },
     },

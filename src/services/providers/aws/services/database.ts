@@ -12,8 +12,7 @@ import { onExternalLink } from '@aws/utils/onExternalLink'
 import { withAwsAlerts } from '@aws/utils/withAlerts'
 import { getProviderAssociations } from '@aws/utils/getProviderAssociations'
 import { getNetworkingAssociations } from '@aws/utils/getNetworkingAssociations'
-import { REGIONS } from '@aws/constants'
-import type { RdsEngine } from '../types'
+import type { RdsEngine } from '@aws/constants'
 import type { Stack } from '@lib/stack'
 import type { OneOfType } from '@lib/util'
 import type {
@@ -22,7 +21,11 @@ import type {
   Service,
   ServiceTypeChoice,
 } from '@services/types'
-import type { AwsNetworkingAssociations, AwsProviderAssociations } from '@aws/types'
+import type {
+  AwsDbServiceType,
+  AwsNetworkingAssociations,
+  AwsProviderAssociations,
+} from '@aws/types'
 
 type DatabaseAttributes = BaseServiceAttributes &
   behavior.SizeableAttributes &
@@ -73,7 +76,7 @@ export type AwsDatabaseProvisionable = Provisionable<AwsDb, AwsDatabaseResources
  * @returns {String} the parameter group family to use when provisioning the database
  */
 export const getParamGroupFamily = (config: DatabaseAttributes): string => {
-  const triad = AWS.RDS_PARAM_FAMILY_MAPPING.find(
+  const triad = (AWS.CONSTRAINTS[config.type].familyMapping || []).find(
     ([engine, version]) => engine === config.engine && config.version.startsWith(version),
   )
 
@@ -180,7 +183,7 @@ export const resourceHandler = (
  * @param {RdsEngine} engine the RDS engine to use
  * @returns {AwsDatabaseService<DatabaseAttributes>} the database service
  */
-const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>(
+const getDatabaseService = <T extends AwsDbServiceType, E extends RdsEngine>(
   type: T,
   engine: E,
 ): AwsDbService<AwsDatabaseAttributes<T, E>> => {
@@ -189,22 +192,24 @@ const getDatabaseService = <T extends AWS.AwsDbServiceType, E extends RdsEngine>
     throw new Error(`There is no default port set for service ${type}`)
   }
 
+  const constraints = AWS.CONSTRAINTS[type]
+  if (!constraints) {
+    throw new Error(`Constraints for service type ${type} not available`)
+  }
+
   return pipe(
     behavior.withHandler(resourceHandler),
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),
     behavior.monitored(),
-    behavior.sizeable('^db\\.[a-z0-9]+\\.[a-z0-9]+$', AWS.DEFAULT_RDS_INSTANCE_SIZE),
-    behavior.versioned(
-      AWS.RDS_MAJOR_VERSIONS_PER_ENGINE[engine],
-      AWS.RDS_DEFAULT_VERSIONS_PER_ENGINE[engine],
-    ),
+    behavior.sizeable(constraints.sizes, AWS.DEFAULT_RDS_INSTANCE_SIZE),
+    behavior.versioned(constraints.versions, constraints.defaultVersion),
+    behavior.withRegions(constraints.regions),
     behavior.connectable(defaultPort),
     behavior.storable(),
     behavior.withEngine<typeof engine>(engine),
     behavior.profileable(),
     behavior.withDatabase(),
-    behavior.withRegions(REGIONS),
     behavior.withAssociations({
       ...getProviderAssociations(),
       ...getNetworkingAssociations(),

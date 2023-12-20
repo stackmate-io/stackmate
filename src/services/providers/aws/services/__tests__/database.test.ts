@@ -16,15 +16,10 @@ import {
   DEFAULT_SERVICE_STORAGE,
 } from '@src/constants'
 import { AwsMariaDB, AwsMySQL, AwsPostgreSQL } from '@aws/services/database'
-import {
-  DEFAULT_RDS_INSTANCE_SIZE,
-  REGIONS,
-  RDS_MAJOR_VERSIONS_PER_ENGINE,
-  RDS_DEFAULT_VERSIONS_PER_ENGINE,
-} from '@aws/constants'
+import { DEFAULT_RDS_INSTANCE_SIZE, CONSTRAINTS, REGIONS } from '@aws/constants'
 import { Registry } from '@src/services/registry'
 import { getSynthesizedStack } from '@tests/helpers/getSynthesizedStack'
-import { ENVIRONMENT } from '@src/project/constants'
+import { DEFAULT_REGION, ENVIRONMENT } from '@src/project/constants'
 import type {
   AwsMariaDBAttributes,
   AwsMySQLAttributes,
@@ -78,7 +73,7 @@ const getDatabaseSchemaExpectation = (
     }),
     size: expect.objectContaining({
       type: 'string',
-      pattern: expect.stringContaining('^db\\.[a-z0-9]+\\.[a-z0-9]+$'),
+      enum: expect.arrayContaining([DEFAULT_RDS_INSTANCE_SIZE]),
       default: DEFAULT_RDS_INSTANCE_SIZE,
     }),
   },
@@ -100,15 +95,24 @@ describe('AWS PostgreSQL', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
+  it('provides constraints', () => {
+    expect(CONSTRAINTS[SERVICE_TYPE.POSTGRESQL]).toMatchObject({
+      familyMapping: expect.arrayContaining([]),
+      regions: expect.arrayContaining([DEFAULT_REGION.aws]),
+      sizes: expect.arrayContaining([DEFAULT_RDS_INSTANCE_SIZE]),
+      versions: expect.arrayContaining([]),
+      defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
+    })
+  })
+
   it('provides a valid schema', () => {
-    const engine: RdsEngine = 'postgres'
-    const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
-    const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]
+    const versions = CONSTRAINTS[SERVICE_TYPE.POSTGRESQL].versions
+    const defaultVersion = CONSTRAINTS[SERVICE_TYPE.POSTGRESQL].defaultVersion
     expect(Array.isArray(versions)).toBe(true)
     expect(versions.length).toBeGreaterThan(0)
     expect(typeof defaultVersion === 'string').toBe(true)
     expect(service.schema).toMatchObject(
-      getDatabaseSchemaExpectation(SERVICE_TYPE.POSTGRESQL, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.POSTGRESQL, 'postgres', versions, defaultVersion),
     )
   })
 
@@ -137,15 +141,24 @@ describe('AWS MySQL', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
+  it('provides constraints', () => {
+    expect(CONSTRAINTS[SERVICE_TYPE.MYSQL]).toMatchObject({
+      familyMapping: expect.arrayContaining([]),
+      regions: expect.arrayContaining([DEFAULT_REGION.aws]),
+      sizes: expect.arrayContaining([DEFAULT_RDS_INSTANCE_SIZE]),
+      versions: expect.arrayContaining([]),
+      defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
+    })
+  })
+
   it('provides a valid schema', () => {
-    const engine: RdsEngine = 'mysql'
-    const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
-    const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]
+    const versions = CONSTRAINTS[SERVICE_TYPE.MYSQL].versions
+    const defaultVersion = CONSTRAINTS[SERVICE_TYPE.MYSQL].defaultVersion
     expect(Array.isArray(versions)).toBe(true)
     expect(versions.length).toBeGreaterThan(0)
     expect(typeof defaultVersion === 'string').toBe(true)
     expect(service.schema).toMatchObject(
-      getDatabaseSchemaExpectation(SERVICE_TYPE.MYSQL, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.MYSQL, 'mysql', versions, defaultVersion),
     )
   })
 
@@ -173,15 +186,24 @@ describe('AWS MariaDB', () => {
     expect(new Set(service.regions)).toEqual(new Set(REGIONS))
   })
 
+  it('provides constraints', () => {
+    expect(CONSTRAINTS[SERVICE_TYPE.MARIADB]).toMatchObject({
+      familyMapping: expect.arrayContaining([]),
+      regions: expect.arrayContaining([DEFAULT_REGION.aws]),
+      sizes: expect.arrayContaining([DEFAULT_RDS_INSTANCE_SIZE]),
+      versions: expect.arrayContaining([]),
+      defaultVersion: expect.stringMatching(/\d+\.\d+(\.\d+)?/),
+    })
+  })
+
   it('provides a valid schema', () => {
-    const engine: RdsEngine = 'mariadb'
-    const versions = RDS_MAJOR_VERSIONS_PER_ENGINE[engine]
-    const defaultVersion = RDS_DEFAULT_VERSIONS_PER_ENGINE[engine]
+    const versions = CONSTRAINTS[SERVICE_TYPE.MARIADB].versions
+    const defaultVersion = CONSTRAINTS[SERVICE_TYPE.MARIADB].defaultVersion
     expect(Array.isArray(versions)).toBe(true)
     expect(versions.length).toBeGreaterThan(0)
     expect(typeof defaultVersion === 'string').toBe(true)
     expect(service.schema).toMatchObject(
-      getDatabaseSchemaExpectation(SERVICE_TYPE.MARIADB, engine, versions, defaultVersion),
+      getDatabaseSchemaExpectation(SERVICE_TYPE.MARIADB, 'mariadb', versions, defaultVersion),
     )
   })
 

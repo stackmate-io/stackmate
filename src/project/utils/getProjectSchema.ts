@@ -11,8 +11,6 @@ import type { JsonSchema } from '@src/lib/schema'
 const isSchemaOf = (schema: JsonSchema<any>, ...types: ServiceTypeChoice[]): boolean =>
   types.includes(schema.properties?.type?.const)
 
-const EXCLUDED_FROM_ENV_SERVICES = [SERVICE_TYPE.STATE, SERVICE_TYPE.CLUSTER]
-
 export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   const { $defs: serviceDefs = {} } = getServicesSchema()
   const providers = without(Object.values(PROVIDER), PROVIDER.LOCAL)
@@ -42,7 +40,7 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
   )
 
   const stateServices = Object.values(serviceDefinitions).filter((schema) =>
-    isSchemaOf(schema, ...EXCLUDED_FROM_ENV_SERVICES),
+    isSchemaOf(schema, SERVICE_TYPE.STATE),
   )
 
   const stateDiscriminations = stateServices.map((stateSchema) => ({

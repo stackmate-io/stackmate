@@ -273,7 +273,7 @@ const getCacheService = <T extends ServiceTypeChoice, E extends ElasticacheEngin
     behavior.linkable(onServiceLinked),
     behavior.externallyLinkable(onExternalLink),
     behavior.monitored(),
-    behavior.sizeable('^cache\\.[a-z0-9]+\\.[a-z0-9]+$', AWS.DEFAULT_ELASTICACHE_INSTANCE_SIZE),
+    behavior.sizeable(['abc'], AWS.DEFAULT_ELASTICACHE_INSTANCE_SIZE),
     behavior.versioned(
       AWS.ELASTICACHE_VERSIONS_PER_ENGINE[engine],
       AWS.ELASTICACHE_DEFAULT_VERSIONS_PER_ENGINE[engine],

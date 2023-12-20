@@ -1,6 +1,7 @@
 import { defaults, cloneDeep, isFunction } from 'lodash'
 import { ValidationError } from '@src/lib/errors'
 import { AJV_DEFAULTS } from '@src/validation/constants'
+import { isTestMode } from '@src/constants'
 import type { Options as AjvOptions } from 'ajv'
 import type { JsonSchema } from '@src/lib/schema'
 import { getAjv } from './getAjv'
@@ -34,6 +35,10 @@ export const getValidData = <R, T>(
 
   if (!validateData(data)) {
     const errors = parseErrors(validateData.errors || [], data)
+    if (isTestMode) {
+      console.log('ajv errors', validateData.errors) // eslint-disable-line no-console
+      console.log('data', data) // eslint-disable-line no-console
+    }
     throw new ValidationError(`Error while validating schema ${schemaId}`, errors)
   }
 

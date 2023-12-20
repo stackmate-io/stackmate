@@ -1,9 +1,10 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import semver from 'semver'
-import { execute } from '@lib/shell'
 import { readJsonFile, writeJsonFile } from '@src/lib/file'
 import { SERVICE_TYPE } from '@src/constants'
-import { head } from 'lodash'
+import { head, isEmpty, uniq } from 'lodash'
+import { execute } from '@src/lib/shell'
 import type {
   AwsServiceConstraints,
   ElasticacheEngine,
@@ -73,35 +74,42 @@ const getElasticacheVersionData = (engine: ElasticacheEngine): EngineConstraints
 }
 
 export const exportServiceConstraints = async () => {
-  // download data using the AWS CLI
-  await execute(['/bin/bash', path.join(__dirname, 'aws.sh')])
+  const shouldFetchFromAWS = isEmpty(
+    fs.readdirSync(path.join(__dirname, 'data')).filter((file) => file.endsWith('.json')),
+  )
+
+  if (shouldFetchFromAWS) {
+    // download data using the AWS CLI
+    await execute(['/bin/bash', path.join(__dirname, 'aws.sh')])
+  }
+
   const regions = getContents('regions.json')
   const dirPath = path.join(process.cwd(), 'src', 'services', 'providers', 'aws')
 
   const constraints: AwsServiceConstraints = {
     [SERVICE_TYPE.MYSQL]: {
       regions,
-      sizes: getContents('rds-instances-mysql.json'),
+      sizes: uniq(getContents('rds-instances-mysql.json')),
       ...getRdsVersionData('mysql'),
     },
     [SERVICE_TYPE.MARIADB]: {
       regions,
-      sizes: getContents('rds-instances-mariadb.json'),
+      sizes: uniq(getContents('rds-instances-mariadb.json')),
       ...getRdsVersionData('mariadb'),
     },
     [SERVICE_TYPE.POSTGRESQL]: {
       regions,
-      sizes: getContents('rds-instances-postgres.json'),
+      sizes: uniq(getContents('rds-instances-postgres.json')),
       ...getRdsVersionData('postgres'),
     },
     [SERVICE_TYPE.MEMCACHED]: {
       regions,
-      sizes: getContents('elasticache-node-types.json'),
+      sizes: uniq(getContents('elasticache-node-types.json')),
       ...getElasticacheVersionData('memcached'),
     },
     [SERVICE_TYPE.REDIS]: {
       regions,
-      sizes: getContents('elasticache-node-types.json'),
+      sizes: uniq(getContents('elasticache-node-types.json')),
       ...getElasticacheVersionData('memcached'),
     },
   }
