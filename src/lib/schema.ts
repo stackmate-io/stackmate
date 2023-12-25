@@ -33,6 +33,10 @@ export type JsonSchema<T = undefined> = {
    */
   description?: string
   /**
+   * Documentation url
+   */
+  documentation?: string
+  /**
    * Default json for the object represented by this schema
    */
   default?: any

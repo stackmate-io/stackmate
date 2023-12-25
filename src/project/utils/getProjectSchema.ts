@@ -80,13 +80,22 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         type: 'string',
         enum: providers,
         default: PROVIDER.AWS,
+        description:
+          'This is the default provider to be used throughout the project. By default all services will use this provider',
+        documentation: 'https://docs.stackmate.io/configuration/configuration-file/provider',
       },
       region: {
         type: 'string',
         enum: REGIONS,
         default: DEFAULT_REGION[PROVIDER.AWS],
+        description:
+          'The region attribute will specify the physical region that the services will be deployed in. Unless specified per-service, all services will use this region',
+        documentation: 'https://docs.stackmate.io/configuration/configuration-file/region',
       },
       state: {
+        description:
+          'This is the setup for the project‘s state. Terraform will use this to store the state file',
+        documentation: 'https://docs.stackmate.io/configuration/configuration-file/state',
         if: {
           required: ['provider'],
         },
@@ -100,6 +109,9 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
       environments: {
         type: 'object',
         required: [ENVIRONMENT.PRODUCTION],
+        description:
+          'The environments property, lists the services that will be deployed, groupped per environment',
+        documentation: 'https://docs.stackmate.io/configuration/configuration-file/environments',
         properties: {
           ...fromPairs(
             Object.values(ENVIRONMENT).map((env) => [env, { $ref: '#/$defs/environment' }]),
@@ -115,6 +127,8 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         minProperties: 1,
         patternProperties: {
           '^[a-zA-Z0-9_-]+$': {
+            description: 'This is the list of services to be deployed for this environment',
+            documentation: 'https://docs.stackmate.io/configuration/application-services',
             allOf: serviceDiscriminations,
           },
         },
