@@ -13,13 +13,14 @@ export type OneOfType<T extends unknown[]> = T extends [infer P1, infer P2]
   : T extends [infer Only, ...infer Rest]
     ? Either<Only, OneOfType<Rest>>
     : never
-export type ChoiceOf<T extends ReadonlyArray<unknown> | Obj> = T extends ReadonlyArray<infer Choice>
-  ? Choice
-  : T extends Array<infer ArrayChoice>
-    ? ArrayChoice
-    : T extends Obj
-      ? T[keyof T]
-      : never
+export type ChoiceOf<T extends ReadonlyArray<unknown> | Obj> =
+  T extends ReadonlyArray<infer Choice>
+    ? Choice
+    : T extends Array<infer ArrayChoice>
+      ? ArrayChoice
+      : T extends Obj
+        ? T[keyof T]
+        : never
 
 // Distributive versions of utility types
 export type Distribute<T> = T extends any ? T : never

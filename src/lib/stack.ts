@@ -64,6 +64,7 @@ export class Stack {
       workingDirectory,
       annotations: [],
       constructPath: workingDirectory,
+      stackMetadataPath: 'metadata.json',
       synthesizedStackPath: path.join(workingDirectory, 'main.tf.json'),
       dependencies: [], // stacks in stackmate are independent
     }
