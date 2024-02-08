@@ -125,10 +125,10 @@ export const getProjectSchema = (): JsonSchema<ProjectConfiguration> => {
         type: 'object',
         uniqueAppDomains: true,
         minProperties: 1,
+        description: 'This is the list of services to be deployed for this environment',
+        documentation: 'https://docs.stackmate.io/configuration/application-services',
         patternProperties: {
           '^[a-zA-Z0-9_-]+$': {
-            description: 'This is the list of services to be deployed for this environment',
-            documentation: 'https://docs.stackmate.io/configuration/application-services',
             allOf: serviceDiscriminations,
           },
         },

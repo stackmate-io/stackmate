@@ -427,10 +427,14 @@ const getApplicationService = (): AwsApplicationService =>
       type: 'object',
       required: ['image'],
       properties: {
+        type: {
+          description: 'Defines an application service',
+        },
         cpu: {
           type: 'number',
           default: 1,
           enum: [0.25, 0.5, 1, 2, 4, 8, 16],
+          description: 'The CPU setting for the application',
         },
         memory: {
           type: 'number',
